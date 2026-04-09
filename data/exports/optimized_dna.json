@@ -1,0 +1,36 @@
+{
+  "strategy_dna": {
+    "active": {
+      "TrendFollowing": {
+        "strategy": "TF_EMA_RSI_v1",
+        "ema_fast": 8,
+        "ema_slow": 21,
+        "rsi_period": 14,
+        "rsi_ob": 72.0,
+        "rsi_os": 28.0,
+        "atr_period": 14,
+        "atr_sl": 2.5,
+        "atr_tp": 4.5
+      },
+      "MeanReversion": {
+        "strategy": "MR_BB_RSI_v1",
+        "bb_period": 20,
+        "bb_std": 2.2,
+        "rsi_period": 14,
+        "rsi_ob": 75.0,
+        "rsi_os": 25.0,
+        "atr_period": 14,
+        "atr_sl": 2.5,
+        "atr_tp": 2.5
+      },
+      "VolatilityExpansion": {
+        "strategy": "VE_BREAKOUT_ATR_v1",
+        "lookback": 20,
+        "atr_period": 14,
+        "atr_sl": 3.0,
+        "atr_tp": 5.0,
+        "vol_filter": 1.4
+      }
+    }
+  }
+}

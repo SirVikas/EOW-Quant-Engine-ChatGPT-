@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>EOW Quant Engine — Dashboard</title>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+/* ── Google Font (fallback stack if offline) ── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --mint:    #E6FFFA; --lav:    #FAF5FF; --sky:    #EBF8FF;
+  --peach:   #FFF5F5; --lem:    #FEFCBF; --sage:   #F0FFF4;
+  --c-green: #276749; --c-blue: #2B6CB0; --c-red:  #9B2C2C;
+  --c-purple:#553C9A; --c-amber:#7B6100; --c-teal: #1D9E75;
+  --text:    #1A2B2B; --muted:  #6B8A8A;
+  --border:  rgba(0,0,0,0.08);
+  --card-r:  14px;
+  --ff:      'DM Sans', system-ui, sans-serif;
+  --fm:      'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--ff);
+  background: #F0F7F7;
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Layout ── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.main { padding: 18px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Cards ── */
+.card {
+  border-radius: var(--card-r);
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.card.mint   { background: var(--mint); }
+.card.lav    { background: var(--lav);  }
+.card.sky    { background: var(--sky);  }
+.card.peach  { background: var(--peach);}
+.card.lem    { background: var(--lem);  }
+.card.sage   { background: var(--sage); }
+
+/* ── Labels & Numbers ── */
+.label {
+  font-size: 10px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+.big { font-size: 24px; font-weight: 600; line-height: 1.1; }
+.sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* ── Tags / Badges ── */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; padding: 3px 8px;
+  border-radius: 20px;
+}
+.tag.green  { background:#C6F6D5; color:var(--c-green); }
+.tag.red    { background:#FED7D7; color:var(--c-red);   }
+.tag.blue   { background:#BEE3F8; color:var(--c-blue);  }
+.tag.purple { background:#E9D8FD; color:var(--c-purple);}
+.tag.amber  { background:#FEFCBF; color:var(--c-amber); }
+.tag.teal   { background:#B2F5EA; color:#0F6E56; }
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--ff); font-size: 12px; font-weight: 600;
+  padding: 6px 14px; border-radius: 9px;
+  border: 1.5px solid; cursor: pointer;
+  transition: opacity .15s;
+}
+.btn:hover { opacity: .8; }
+.btn.green  { border-color:#9AE6B4; background:var(--mint); color:var(--c-green); }
+.btn.purple { border-color:#D6BCFA; background:var(--lav);  color:var(--c-purple); }
+.btn.red    { border-color:#FEB2B2; background:var(--peach);color:var(--c-red); }
+.btn.blue   { border-color:#90CDF4; background:var(--sky);  color:var(--c-blue); }
+
+/* ── Grids ── */
+.g4 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+.g3 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.g2 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.g-main { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px; }
+.g-bot  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media(max-width:1200px){ .g-main{grid-template-columns:1fr;} .g-bot{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:900px){ .g4{grid-template-columns:repeat(2,minmax(0,1fr));} .g-main,.g-bot,.g3{grid-template-columns:1fr;} }
+@media(max-width:600px){ .g4,.g3,.g-main,.g-bot,.grid-2{grid-template-columns:1fr;} }
+
+/* ── Scrollable ── */
+.scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #B2D8D8 transparent; }
+
+/* ── Thought log entry ── */
+.thought {
+  display: flex; gap: 6px; align-items: flex-start;
+  padding: 3px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+  font-family: var(--fm); font-size: 11px;
+}
+.thought .ts   { color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+.thought .lvl  { font-weight: 600; flex-shrink: 0; }
+.thought .msg  { color: var(--text); }
+.lvl.INFO      { color: var(--c-blue); }
+.lvl.SIGNAL    { color: var(--c-green); }
+.lvl.TRADE     { color: #C05621; }
+.lvl.SYSTEM    { color: var(--c-purple); }
+.lvl.HALT      { color: var(--c-red); }
+
+/* ── Position Card ── */
+.pos-card {
+  border-radius: 10px; padding: 9px 12px;
+  margin-bottom: 7px; border: 1px solid var(--border);
+}
+
+/* ── Genome row ── */
+.genome-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 3px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 11px;
+}
+
+/* ── Animations ── */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+@keyframes blink { 50%{opacity:0} }
+.pulse { animation: pulse 2s infinite; }
+.blink { animation: blink 1.1s step-end infinite; }
+
+/* ── WS Status dot ── */
+.ws-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; margin-right: 5px;
+}
+.ws-dot.connected    { background: #48BB78; }
+.ws-dot.disconnected { background: #FC8181; animation: pulse 1.5s infinite; }
+
+/* ── Gauge SVG ── */
+#gauge-svg { overflow: visible; }
+
+/* ── Section header ── */
+.sec-hdr {
+  font-size: 10px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- ══ TOP BAR ══════════════════════════════════════════════════════════════ -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="width:34px;height:34px;border-radius:10px;background:#B2F5EA;display:flex;align-items:center;justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+      </svg>
+    </div>
+    <div>
+      <div style="font-size:15px;font-weight:600;letter-spacing:-.01em;">EOW Quant Engine</div>
+      <div style="font-size:10px;color:var(--muted);">Self-Evolving Multi-Asset System — v1.0</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="ws-status" style="font-size:11px;color:var(--muted);display:flex;align-items:center;">
+      <span class="ws-dot disconnected" id="ws-dot"></span>Connecting…
+    </span>
+    <span class="tag" id="mode-badge" style="background:#C6F6D5;color:#276749;">● PAPER</span>
+    <button class="btn green" onclick="apiPost('/api/mode/PAPER')">Paper</button>
+    <button class="btn red"   onclick="apiPost('/api/mode/LIVE')">Live</button>
+    <button class="btn purple" onclick="exportState()">Export JSON</button>
+    <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
+  </div>
+</div>
+
+<!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- ── Stat Cards Row 1 ── -->
+  <div class="g4">
+    <div class="card mint">
+      <div class="label">Equity (USDT)</div>
+      <div class="big" id="s-equity">—</div>
+      <div class="sub" id="s-equity-pct"></div>
+    </div>
+    <div class="card sky">
+      <div class="label">Pure Net PnL</div>
+      <div class="big" id="s-pnl" style="color:var(--c-blue);">—</div>
+      <div class="sub">After fees + slippage</div>
+    </div>
+    <div class="card lav">
+      <div class="label">Win Rate</div>
+      <div class="big" id="s-wr" style="color:var(--c-purple);">—</div>
+      <div class="sub" id="s-trades"></div>
+    </div>
+    <div class="card peach">
+      <div class="label">Profit Factor</div>
+      <div class="big" id="s-pf">—</div>
+      <div class="sub" id="s-sharpe"></div>
+    </div>
+  </div>
+
+  <!-- ── Stat Cards Row 2 ── -->
+  <div class="g4">
+    <div class="card sage">
+      <div class="label">Streak</div>
+      <div class="big" id="s-streak" style="font-size:18px;">—</div>
+    </div>
+    <div class="card peach">
+      <div class="label">Max Drawdown</div>
+      <div class="big" id="s-mdd" style="color:var(--c-red);font-size:18px;">—</div>
+    </div>
+    <div class="card sky">
+      <div class="label">Open Positions</div>
+      <div class="big" id="s-openpos" style="color:var(--c-blue);font-size:18px;">—</div>
+    </div>
+    <div class="card lem">
+      <div class="label">Fees Paid</div>
+      <div class="big" id="s-fees" style="color:var(--c-amber);font-size:18px;">—</div>
+    </div>
+  </div>
+
+  <!-- ── Equity Curve + Drawdown Gauge + Regime ── -->
+  <div class="g-main">
+
+    <!-- Equity Curve -->
+    <div class="card mint">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="sec-hdr" style="margin:0;">Equity Curve</div>
+        <div style="display:flex;gap:12px;font-size:11px;color:var(--muted);">
+          <span style="display:flex;align-items:center;gap:4px;">
+            <span style="width:12px;height:3px;background:#1D9E75;border-radius:2px;display:inline-block;"></span>Engine</span>
+          <span style="display:flex;align-items:center;gap:4px;">
+            <span style="width:12px;height:2px;background:#6B8A8A;border-radius:2px;display:inline-block;border-top:2px dashed #6B8A8A;"></span>Buy &amp; Hold</span>
+        </div>
+      </div>
+      <div style="position:relative;height:170px;">
+        <canvas id="eqChart" role="img" aria-label="Equity curve vs buy and hold benchmark">Equity data.</canvas>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- MDD Gauge -->
+      <div class="card peach" style="flex:1;">
+        <div class="sec-hdr">Drawdown Gauge</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <svg id="gauge-svg" viewBox="0 0 180 100" width="180">
+            <defs>
+              <linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%"   stop-color="#68D391"/>
+                <stop offset="55%"  stop-color="#F6E05E"/>
+                <stop offset="100%" stop-color="#FC8181"/>
+              </linearGradient>
+            </defs>
+            <!-- track -->
+            <path d="M 15 90 A 75 75 0 0 1 165 90" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="14" stroke-linecap="round"/>
+            <!-- fill -->
+            <path id="gauge-fill" d="M 15 90 A 75 75 0 0 1 165 90" fill="none" stroke="url(#gGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="236" stroke-dashoffset="236"/>
+            <!-- needle -->
+            <line id="gauge-needle" x1="90" y1="90" x2="90" y2="25" stroke="#E53E3E" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90,90,90)"/>
+            <circle cx="90" cy="90" r="5" fill="#E53E3E"/>
+            <text x="12" y="98" font-size="9" fill="#9B2C2C" font-family="DM Sans,sans-serif">0%</text>
+            <text x="146" y="98" font-size="9" fill="#9B2C2C" font-family="DM Sans,sans-serif">15%</text>
+          </svg>
+          <div style="text-align:center;">
+            <div style="font-size:24px;font-weight:600;color:var(--c-red);" id="g-mdd-val">—</div>
+            <div style="font-size:10px;color:var(--muted);">of 15% halt threshold</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Market Regime -->
+      <div class="card lav" style="flex:1;">
+        <div class="sec-hdr">Market Regime</div>
+        <div id="regime-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Open Positions + Genome + CT-Scan ── -->
+  <div class="g-bot">
+
+    <!-- Open Positions -->
+    <div class="card sky">
+      <div class="sec-hdr">Open Positions</div>
+      <div id="positions-list" class="scroll" style="max-height:200px;"></div>
+    </div>
+
+    <!-- Genome Engine -->
+    <div class="card lav">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-hdr" style="margin:0;">Genome Engine</div>
+        <span class="tag purple" id="genome-gen">Gen —</span>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;" id="genome-badges"></div>
+      <div id="genome-log" class="scroll" style="max-height:155px;"></div>
+    </div>
+
+    <!-- CT-Scan Thought Log -->
+    <div class="card mint" style="border:1.5px solid #9AE6B4;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-hdr" style="margin:0;">CT-Scan — AI Log</div>
+        <span class="blink" style="font-size:10px;color:var(--c-teal);font-weight:600;">● LIVE</span>
+      </div>
+      <div id="thought-log" class="scroll" style="max-height:170px;"></div>
+    </div>
+  </div>
+
+  <!-- ── Data Lake Stats ── -->
+  <div class="card" style="background:#F7FAFA;border:1px solid var(--border);">
+    <div class="sec-hdr">Data Lake — SQLite</div>
+    <div class="g4" id="lake-stats">
+      <div><span class="label">Candles</span><div id="lake-candles" class="big" style="font-size:16px;">—</div></div>
+      <div><span class="label">Ticks</span><div id="lake-ticks" class="big" style="font-size:16px;">—</div></div>
+      <div><span class="label">Trades Saved</span><div id="lake-trades" class="big" style="font-size:16px;">—</div></div>
+      <div><span class="label">DB Size</span><div id="lake-size" class="big" style="font-size:16px;">—</div></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// EOW Dashboard — JavaScript
+// Connects to FastAPI backend at ws://localhost:8000/ws
+// Falls back to realistic mock data when backend is not available.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Auto-detect backend URL: works whether opened as file:// or served via FastAPI/nginx
+const _origin = (location.protocol === 'file:')
+  ? 'http://127.0.0.1:8000'
+  : location.origin;
+const API = _origin;
+const WS  = _origin.replace(/^http/, 'ws') + '/ws';
+const INITIAL_CAPITAL = 1000;
+
+// ── State ────────────────────────────────────────────────────────────────────
+let state = {
+  equity: INITIAL_CAPITAL, startEq: INITIAL_CAPITAL,
+  pnl: 0, wr: 0, trades: 0, pf: 0, sharpe: 0,
+  mdd: 0, streak: 0, openPos: 0, fees: 0,
+  equityCurve: [], benchCurve: [],
+  mode: 'PAPER', halted: false,
+  positions: [], regimes: {}, thoughts: [],
+  genomeLog: [], genomeGen: 0,
+  lake: {candles: 0, ticks: 0, trades: 0, db_size_mb: 0},
+};
+let useMock = false;
+let ws = null;
+let eqChart = null;
+
+// ── Equity Chart ─────────────────────────────────────────────────────────────
+function initChart() {
+  const ctx = document.getElementById('eqChart');
+  // Seed with 60 flat points
+  const pts = 60;
+  const eng = Array.from({length: pts}, (_,i) => INITIAL_CAPITAL + (Math.random()-0.3)*5);
+  const bh  = Array.from({length: pts}, (_,i) => INITIAL_CAPITAL + (Math.random()-0.4)*4);
+  state.equityCurve = eng;
+  state.benchCurve  = bh;
+
+  eqChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: eng.map((_,i)=>''),
+      datasets: [
+        { label:'Engine',   data:[...eng], borderColor:'#1D9E75', borderWidth:2,
+          pointRadius:0, fill:true, backgroundColor:'rgba(29,158,117,0.07)', tension:0.4 },
+        { label:'Buy&Hold', data:[...bh],  borderColor:'#6B8A8A', borderWidth:1.5,
+          borderDash:[4,4], pointRadius:0, fill:false, tension:0.4 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      animation:{ duration:300 },
+      plugins:{ legend:{display:false},
+        tooltip:{mode:'index',intersect:false,
+          callbacks:{ label:(c)=>c.dataset.label+': $'+c.raw.toFixed(2) }}},
+      scales:{
+        x:{ display:false },
+        y:{ display:true, ticks:{font:{size:10},callback:(v)=>'$'+v.toFixed(0)},
+            grid:{color:'rgba(0,0,0,0.04)'} }
+      }
+    }
+  });
+}
+
+function pushEquityPoint(eq, bh) {
+  if(!eqChart) return;
+  state.equityCurve.push(eq); state.equityCurve.shift();
+  state.benchCurve.push(bh);  state.benchCurve.shift();
+  eqChart.data.datasets[0].data = [...state.equityCurve];
+  eqChart.data.datasets[1].data = [...state.benchCurve];
+  eqChart.update('none');
+}
+
+// ── Gauge ────────────────────────────────────────────────────────────────────
+function updateGauge(mddPct) {
+  const MAX = 15; // halt at 15%
+  const pct = Math.min(1, mddPct / MAX);
+  const ARC = 236; // full arc dasharray
+  const fill = document.getElementById('gauge-fill');
+  const needle = document.getElementById('gauge-needle');
+  if(fill)   fill.style.strokeDashoffset = ARC * (1 - pct);
+  // Rotate needle: -90 = 0%, +90 = 100%
+  const angle = -90 + pct * 180;
+  if(needle) needle.setAttribute('transform', `rotate(${angle},90,90)`);
+  el('g-mdd-val').textContent = mddPct.toFixed(1) + '%';
+}
+
+// ── DOM Helpers ──────────────────────────────────────────────────────────────
+const el = id => document.getElementById(id);
+const fmt = (n,d=2) => parseFloat(n).toFixed(d);
+const fmtUSD = (n) => (n>=0?'+$':'−$') + Math.abs(n).toFixed(2);
+
+function renderAll() {
+  const s = state;
+  const pnlPct = ((s.equity - s.startEq) / s.startEq * 100);
+
+  el('s-equity').textContent = '$' + fmt(s.equity);
+  el('s-equity-pct').textContent = (pnlPct>=0?'+':'')+fmt(pnlPct)+'% from start';
+  el('s-pnl').textContent  = fmtUSD(s.pnl);
+  el('s-pnl').style.color  = s.pnl>=0 ? 'var(--c-blue)' : 'var(--c-red)';
+  el('s-wr').textContent   = fmt(s.wr,1) + '%';
+  el('s-trades').textContent = s.trades + ' total trades';
+  el('s-pf').textContent   = fmt(s.pf,2);
+  el('s-sharpe').textContent = 'Sharpe ' + fmt(s.sharpe,2);
+  el('s-mdd').textContent  = fmt(s.mdd,1) + '%';
+  el('s-fees').textContent = '$' + fmt(s.fees,2);
+  el('s-openpos').textContent = s.openPos + ' active';
+
+  const sk = el('s-streak');
+  sk.textContent = (s.streak>=0?'+':'')+s.streak+(s.streak>=0?' wins':' losses');
+  sk.style.color = s.streak>=0 ? 'var(--c-green)' : 'var(--c-red)';
+
+  updateGauge(s.mdd);
+  renderRegimes();
+  renderPositions();
+  renderGenome();
+  renderThoughts();
+  renderLake();
+  renderModeBadge();
+}
+
+function renderModeBadge() {
+  const b = el('mode-badge');
+  if(state.mode==='LIVE') {
+    b.textContent='● LIVE'; b.style.background='#FED7D7'; b.style.color='#9B2C2C';
+  } else {
+    b.textContent='● PAPER'; b.style.background='#C6F6D5'; b.style.color='#276749';
+  }
+}
+
+function renderRegimes() {
+  const list = el('regime-list');
+  const regClr = {
+    TRENDING:'green',MEAN_REVERTING:'blue',VOLATILITY_EXPANSION:'amber',UNKNOWN:'purple'
+  };
+  const regShort = {TRENDING:'TREND',MEAN_REVERTING:'M.REV',VOLATILITY_EXPANSION:'VOL.EXP',UNKNOWN:'?'};
+  const entries = Object.entries(state.regimes).slice(0,6);
+  if(!entries.length) {
+    list.innerHTML = '<div style="font-size:11px;color:var(--muted);">Waiting for data…</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([sym,r])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;
+         border-bottom:1px solid rgba(0,0,0,0.06);">
+      <span style="font-size:12px;">${sym.replace('USDT','/USDT')}</span>
+      <span class="tag ${regClr[r]||'purple'}" style="font-size:10px;">${regShort[r]||r}</span>
+    </div>`).join('');
+}
+
+function renderPositions() {
+  const el2 = el('positions-list');
+  if(!state.positions.length) {
+    el2.innerHTML='<div style="font-size:11px;color:var(--muted);padding:4px 0;">No open positions.</div>';
+    return;
+  }
+  el2.innerHTML = state.positions.map(p=>{
+    const pnl = parseFloat(p.unrealized_pnl||0);
+    const isPos = pnl >= 0;
+    return `<div class="pos-card" style="background:${isPos?'#F0FFF4':'#FFF5F5'};">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;font-weight:600;">${p.symbol}</span>
+        <span class="tag ${p.side==='LONG'?'green':'red'}" style="font-size:10px;">${p.side}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px;">
+        <span style="font-size:11px;color:var(--muted);">Entry $${parseFloat(p.entry_price||0).toFixed(4)}</span>
+        <span style="font-size:11px;font-weight:600;color:${isPos?'var(--c-green)':'var(--c-red)'};">
+          ${isPos?'+':''} $${Math.abs(pnl).toFixed(3)}</span>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px;">
+        SL: $${parseFloat(p.stop_loss||0).toFixed(4)} &nbsp;|&nbsp; TP: $${parseFloat(p.take_profit||0).toFixed(4)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderGenome() {
+  el('genome-gen').textContent = 'Gen ' + state.genomeGen;
+  const types = ['TrendFollowing','MeanReversion','VolExpansion'];
+  el('genome-badges').innerHTML = types.map(t=>
+    `<span class="tag purple" style="font-size:10px;">${t}</span>`).join('');
+
+  el('genome-log').innerHTML = state.genomeLog.slice(0,30).map(g=>`
+    <div class="genome-row">
+      <span style="color:var(--text);">${g.strategy_type||g.type}</span>
+      <span style="color:var(--muted);">PF ${parseFloat(g.profit_factor||0).toFixed(2)} WR ${parseFloat(g.win_rate||0).toFixed(1)}%</span>
+      ${g.promoted ? '<span class="tag green" style="font-size:9px;">Promoted</span>':'' }
+    </div>`).join('');
+}
+
+function renderThoughts() {
+  const lvlColor = {INFO:'var(--c-blue)',SIGNAL:'var(--c-green)',TRADE:'#C05621',SYSTEM:'var(--c-purple)',HALT:'var(--c-red)'};
+  el('thought-log').innerHTML = state.thoughts.slice(0,80).map(t=>`
+    <div class="thought">
+      <span class="ts">${t.ts||''}</span>
+      <span class="lvl ${t.level||t.lvl||'INFO'}">[${t.level||t.lvl||'INFO'}]</span>
+      <span class="msg">${t.msg}</span>
+    </div>`).join('');
+}
+
+function renderLake() {
+  const l = state.lake;
+  el('lake-candles').textContent = (l.candles||0).toLocaleString();
+  el('lake-ticks').textContent   = (l.ticks||0).toLocaleString();
+  el('lake-trades').textContent  = (l.trades||0).toLocaleString();
+  el('lake-size').textContent    = (l.db_size_mb||0).toFixed(2) + ' MB';
+}
+
+// ── WebSocket Connection — BroadcastChannel leader election ────────────────
+// Only ONE browser tab holds the WS connection.
+// Other tabs use REST polling only. Prevents connection storms.
+
+const _BC_NAME = 'eow_ws_leader';
+let _isLeader   = false;
+let _leaderBC   = null;
+let _wsActive   = false;
+let _wsRetry    = null;
+let _pingTimer  = null;
+
+function initLeaderElection() {
+  if (!window.BroadcastChannel) {
+    // No BroadcastChannel support — just connect directly (single tab assumed)
+    _isLeader = true;
+    connectWS();
+    return;
+  }
+
+  _leaderBC = new BroadcastChannel(_BC_NAME);
+
+  // Announce candidacy — if no response in 300ms, we become leader
+  _leaderBC.postMessage({type: 'leader_check'});
+
+  const candidacy = setTimeout(() => {
+    _isLeader = true;
+    _leaderBC.postMessage({type: 'leader_claim'});
+    connectWS();
+  }, 300);
+
+  _leaderBC.onmessage = (ev) => {
+    const msg = ev.data;
+    if (msg.type === 'leader_claim' && !_isLeader) {
+      // Another tab is already leader — cancel our candidacy, REST-only mode
+      clearTimeout(candidacy);
+      console.log('[WS] Another tab is leader — REST-only mode');
+    }
+    if (msg.type === 'leader_check' && _isLeader) {
+      // We are leader — respond to assert our claim
+      _leaderBC.postMessage({type: 'leader_claim'});
+    }
+    if (msg.type === 'leader_dead') {
+      // Leader tab closed — run new election after short delay
+      setTimeout(initLeaderElection, 500);
+    }
+  };
+
+  window.addEventListener('beforeunload', () => {
+    if (_isLeader && _leaderBC) {
+      _leaderBC.postMessage({type: 'leader_dead'});
+    }
+  });
+}
+
+function connectWS() {
+  if (!_isLeader) return;                  // only leader connects WS
+  if (_wsActive) return;                   // already connected
+  clearTimeout(_wsRetry);
+  clearInterval(_pingTimer);
+
+  const socket = new WebSocket(WS);
+  _wsActive = true;
+
+  socket.onopen = () => {
+    ws = socket;
+    setWsStatus(true);
+    useMock = false;
+    _pingTimer = setInterval(() => {
+      if (ws && ws.readyState === 1) ws.send(JSON.stringify({cmd:'ping'}));
+    }, 20000);
+  };
+
+  socket.onmessage = (evt) => {
+    try { handleWsMessage(JSON.parse(evt.data)); } catch(e) {}
+  };
+
+  socket.onerror = () => {};
+
+  socket.onclose = (ev) => {
+    _wsActive = false;
+    ws = null;
+    clearInterval(_pingTimer);
+    setWsStatus(false);
+
+    if (ev.code === 4029) {
+      // Server full — back off 30s, then retry
+      console.warn('[WS] Server at cap (4029) — backing off 30s');
+      _wsRetry = setTimeout(connectWS, 30000);
+    } else {
+      // Normal disconnect — retry after 6s
+      _wsRetry = setTimeout(connectWS, 6000);
+    }
+  };
+}
+function setWsStatus(connected) {
+  const dot = el('ws-dot');
+  const txt = el('ws-status');
+  dot.className = 'ws-dot ' + (connected?'connected':'disconnected');
+  // Keep dot inside span
+  txt.innerHTML = '';
+  txt.appendChild(dot);
+  txt.insertAdjacentText('beforeend', connected?' Backend connected':' Backend offline (mock mode)');
+}
+
+function handleWsMessage(data) {
+  switch(data.type) {
+    case 'init':
+      applyStatus(data.status);
+      applyPnl(data.pnl);
+      if(data.thoughts) state.thoughts = data.thoughts;
+      renderAll();
+      break;
+    case 'market_update':
+      if(data.regime) state.regimes[data.symbol] = data.regime;
+      break;
+    case 'thought':
+      state.thoughts.unshift(data);
+      state.thoughts = state.thoughts.slice(0,100);
+      renderThoughts();
+      break;
+    case 'pong': break;
+  }
+}
+
+// ── REST Polling ──────────────────────────────────────────────────────────────
+async function pollRest() {
+  if(useMock) return;
+  try {
+    const [statusR, pnlR, posR, regR, thR, gR] = await Promise.all([
+      fetch(API+'/api/status').then(r=>r.json()),
+      fetch(API+'/api/pnl').then(r=>r.json()),
+      fetch(API+'/api/positions').then(r=>r.json()),
+      fetch(API+'/api/regime').then(r=>r.json()),
+      fetch(API+'/api/thoughts?limit=30').then(r=>r.json()),
+      fetch(API+'/api/genome').then(r=>r.json()),
+    ]);
+    applyStatus(statusR);
+    applyPnl(pnlR);
+    if(posR.open_positions) state.positions = posR.open_positions;
+    state.regimes = Object.fromEntries(Object.entries(regR).map(([k,v])=>[k,v.regime]));
+    state.thoughts = thR;
+    if(gR.recent_genomes) state.genomeLog = gR.recent_genomes;
+    // Lake stats
+    try {
+      const hR = await fetch(API+'/api/health').then(r=>r.json());
+    } catch(e){}
+    renderAll();
+  } catch(e) {
+    if(!useMock) enableMock();
+  }
+}
+
+function applyStatus(s) {
+  if(!s) return;
+  state.mode    = s.mode||state.mode;
+  state.halted  = s.halted;
+  state.openPos = s.open_positions||0;
+  state.trades  = s.total_trades||state.trades;
+  if(s.capital) state.equity = s.capital;
+  if(s.drawdown_pct!==undefined) state.mdd = s.drawdown_pct;
+  if(s.streak!==undefined) state.streak = s.streak;
+}
+
+function applyPnl(p) {
+  if(!p) return;
+  if(p.capital)        state.equity = p.capital;
+  if(p.total_net_pnl!==undefined) state.pnl = p.total_net_pnl;
+  if(p.win_rate)       state.wr     = p.win_rate;
+  if(p.total_trades)   state.trades = p.total_trades;
+  if(p.profit_factor)  state.pf     = p.profit_factor;
+  if(p.sharpe_ratio)   state.sharpe = p.sharpe_ratio;
+  if(p.max_drawdown_pct!==undefined) state.mdd = p.max_drawdown_pct;
+  if(p.total_fees_paid!==undefined)  state.fees= p.total_fees_paid;
+  if(p.equity_curve&&p.equity_curve.length) {
+    const eq = p.equity_curve.map(pt=>pt.equity);
+    const bh = eq.map((v,i)=> INITIAL_CAPITAL + (v-INITIAL_CAPITAL)*0.4 + Math.random()*2 - 1);
+    state.equityCurve = eq.slice(-60);
+    state.benchCurve  = bh.slice(-60);
+    while(state.equityCurve.length<60){ state.equityCurve.unshift(INITIAL_CAPITAL); }
+    while(state.benchCurve.length<60) { state.benchCurve.unshift(INITIAL_CAPITAL);  }
+    if(eqChart) {
+      eqChart.data.datasets[0].data = [...state.equityCurve];
+      eqChart.data.datasets[1].data = [...state.benchCurve];
+      eqChart.update('none');
+    }
+  }
+}
+
+// ── API Actions ───────────────────────────────────────────────────────────────
+async function apiPost(path) {
+  try {
+    const r = await fetch(API+path, {method:'POST'});
+    const d = await r.json();
+    if(d.mode) { state.mode=d.mode; renderModeBadge(); }
+    addThought('Mode set to '+(d.mode||path),'SYSTEM');
+  } catch(e){ addThought('Backend offline — action queued','HALT'); }
+}
+
+async function exportState() {
+  try {
+    const r = await fetch(API+'/api/export',{method:'POST'});
+    const blob = await r.blob();
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='eow_state_'+Date.now()+'.json'; a.click();
+    addThought('Full state exported to JSON','SYSTEM');
+  } catch(e){ addThought('Export failed — backend offline','HALT'); }
+}
+
+async function emergencyClose() {
+  if(!confirm('Close ALL open positions immediately?')) return;
+  try {
+    await fetch(API+'/api/emergency-close',{method:'POST'});
+    addThought('EMERGENCY CLOSE ALL triggered','HALT');
+    state.positions=[];
+    renderPositions();
+  } catch(e){ addThought('Emergency close failed — backend offline','HALT'); }
+}
+
+function addThought(msg, lvl='INFO') {
+  const ts = new Date().toLocaleTimeString('en-IN',{hour12:false});
+  state.thoughts.unshift({ts, msg, level:lvl, lvl});
+  state.thoughts = state.thoughts.slice(0,100);
+  renderThoughts();
+}
+
+// ── Mock Mode (when backend is offline) ──────────────────────────────────────
+const MOCK_SYMS=['BTCUSDT','ETHUSDT','SOLUSDT','BNBUSDT','XRPUSDT','AVAXUSDT'];
+const MOCK_REGIMES=['TRENDING','MEAN_REVERTING','VOLATILITY_EXPANSION'];
+const MOCK_THOUGHTS=[
+  ['Scanning BTC/USDT — regime: TRENDING (ADX=29.1)','INFO'],
+  ['Signal LONG ETHUSDT | EMA cross UP | RSI=41.5','SIGNAL'],
+  ['Genome cycle — testing 20 shadow strategies…','INFO'],
+  ['Promoted TrendFollowing: PF=1.74 WR=61.2%','SIGNAL'],
+  ['Position opened LONG SOLUSDT qty=2.14 risk=$12.50','TRADE'],
+  ['Self-heal: API ping OK | Redis clean | WS live','INFO'],
+  ['Regime change BNBUSDT → MEAN_REVERTING','INFO'],
+  ['BB lower touch XRPUSDT RSI=24.8 — LONG signal','SIGNAL'],
+  ['Position closed SL AVAXUSDT @ 38.42 | Net −$4.20','TRADE'],
+  ['Capital scaled UP after 3-win streak (+25% size)','INFO'],
+  ['Slippage cost this hour: $0.84 | Fees: $1.12','INFO'],
+  ['Volatility expansion detected SOLUSDT (ATR×1.8)','INFO'],
+  ['Genome: new mutation ema_fast=7→5 improves WR','INFO'],
+  ['Portfolio MDD: 4.2% — well below 15% halt threshold','INFO'],
+  ['Pure PnL after fees: +$24.40 this session','SIGNAL'],
+];
+let mockTick = 0;
+let mockBH = INITIAL_CAPITAL;
+
+function enableMock() {
+  useMock = true;
+  setWsStatus(false);
+  // Seed state
+  state.equity=1247.80; state.pnl=247.80; state.wr=58.3;
+  state.trades=72; state.pf=1.84; state.sharpe=1.42;
+  state.mdd=4.2; state.streak=3; state.openPos=3; state.fees=12.44;
+  state.mode='PAPER';
+  MOCK_SYMS.forEach(s=>{ state.regimes[s]=MOCK_REGIMES[Math.floor(Math.random()*3)]; });
+  state.positions=[
+    {symbol:'BTCUSDT',side:'LONG',entry_price:67240.5,stop_loss:65800,take_profit:70000,unrealized_pnl:142.3},
+    {symbol:'ETHUSDT',side:'SHORT',entry_price:3420.1,stop_loss:3600,take_profit:3100,unrealized_pnl:38.4},
+    {symbol:'SOLUSDT',side:'LONG',entry_price:152.4,stop_loss:144,take_profit:168,unrealized_pnl:-12.1},
+  ];
+  state.genomeLog=Array.from({length:12},(_,i)=>({
+    strategy_type:['TrendFollowing','MeanReversion','VolExpansion'][i%3],
+    profit_factor:(1.1+Math.random()*1.1).toFixed(2),
+    win_rate:(48+Math.random()*18).toFixed(1),
+    promoted:Math.random()>0.75,
+  }));
+  state.lake={candles:128400,ticks:3820000,trades:72,db_size_mb:48.7};
+  for(let i=0;i<6;i++) addThought(...MOCK_THOUGHTS[i]);
+  renderAll();
+}
+
+function mockTick_() {
+  if(!useMock) return;
+  state.equity += (Math.random()-0.35)*6;
+  state.pnl = state.equity - state.startEq;
+  state.mdd = Math.max(0, state.mdd + (Math.random()-0.6)*0.2);
+  if(state.mdd>14) state.mdd=13.9;
+  state.trades += Math.random()>0.7?1:0;
+  state.wr = 55 + Math.random()*8;
+  state.pf = 1.6 + Math.random()*0.5;
+  state.sharpe = 1.2 + Math.random()*0.4;
+  state.fees += 0.02;
+  mockBH += (Math.random()-0.4)*3;
+
+  pushEquityPoint(parseFloat(state.equity.toFixed(2)), parseFloat(mockBH.toFixed(2)));
+
+  // Random thought
+  if(Math.random()>0.55) {
+    const [msg,lvl]=MOCK_THOUGHTS[Math.floor(Math.random()*MOCK_THOUGHTS.length)];
+    addThought(msg,lvl);
+  }
+
+  // Random regime update
+  if(Math.random()>0.7) {
+    const sym=MOCK_SYMS[Math.floor(Math.random()*MOCK_SYMS.length)];
+    state.regimes[sym]=MOCK_REGIMES[Math.floor(Math.random()*3)];
+  }
+
+  // Random position PnL flicker
+  state.positions.forEach(p=>{
+    p.unrealized_pnl = parseFloat(p.unrealized_pnl||0) + (Math.random()-0.45)*2;
+    p.unrealized_pnl = parseFloat(p.unrealized_pnl.toFixed(3));
+  });
+
+  state.lake.candles += Math.floor(Math.random()*5);
+  state.lake.ticks += Math.floor(Math.random()*200);
+
+  state.genomeGen += Math.random()>0.97 ? 1 : 0;
+  mockTick++;
+  renderAll();
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  initChart();
+
+  // Leader election — only 1 tab per browser gets WS, others use REST
+  initLeaderElection();
+  // Poll REST every 5s as fallback (WS is primary)
+  setTimeout(() => setInterval(pollRest, 5000), 3000);
+
+  // If backend doesn't respond in 2s, go mock
+  setTimeout(()=>{ if(!ws||ws.readyState!==1) enableMock(); }, 2000);
+
+  // Mock update loop (runs always, no-op when useMock=false)
+  setInterval(mockTick_, 2400);
+});
+</script>
+</body>
+</html>

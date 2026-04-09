@@ -1,0 +1,88 @@
+version: "3.9"
+
+# ── EOW Quant Engine — Docker Compose ─────────────────────────────────────────
+# Usage:
+#   docker-compose up --build          # starts everything
+#   docker-compose up --build engine   # backend only (no DB)
+#   docker-compose down -v             # stop and remove volumes
+
+services:
+
+  # ── Redis (Signal Cache) ────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: eow_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── TimescaleDB (Time-Series Store) ─────────────────────────────────────────
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: eow_tsdb
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: quant
+      POSTGRES_PASSWORD: quant
+      POSTGRES_DB: eow_quant
+    volumes:
+      - tsdb_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quant -d eow_quant"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── FastAPI Backend ──────────────────────────────────────────────────────────
+  engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eow_engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env.template    # rename to .env and fill in real keys
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DB_URL=postgresql+asyncpg://quant:quant@timescaledb:5432/eow_quant
+    volumes:
+      - ./data:/app/data   # persist SQLite lake and exports
+    command: >
+      uvicorn main:app
+        --host 0.0.0.0
+        --port 8000
+        --workers 1
+        --loop asyncio
+        --log-level info
+
+  # ── Nginx (serves dashboard.html + proxies /api and /ws) ────────────────────
+  dashboard:
+    image: nginx:alpine
+    container_name: eow_dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - ./dashboard.html:/usr/share/nginx/html/index.html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - engine
+
+volumes:
+  redis_data:
+  tsdb_data:
