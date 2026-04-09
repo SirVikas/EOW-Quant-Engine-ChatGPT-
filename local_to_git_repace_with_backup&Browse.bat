@@ -17,7 +17,6 @@ set "PS_CMD=Powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 
 for /f "usebackq delims=" %%I in (`%PS_CMD%`) do set "SOURCE_PATH=%%I"
 
-:: Check if user cancelled
 if "%SOURCE_PATH%"=="" (
     echo.
     echo ERROR: No folder selected. Operation cancelled.
@@ -30,7 +29,7 @@ cd /d "%SOURCE_PATH%"
 
 echo.
 echo ======================================================
-echo STEP 2: CREATING LOCAL BACKUP (ZIP)
+echo STEP 2: CREATING LOCAL BACKUP (EXCLUDING VENV)
 echo ======================================================
 if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
 set "t=%date%_%time%"
@@ -38,15 +37,20 @@ set "t=%t:/=-%"
 set "t=%t::=-%"
 set "t=%t: =_%
 
-:: Create zip, excluding venv to save time/space
+:: [UPDATED] Create zip, strictly excluding venv and .git
 echo Zipping files to %BACKUP_DIR%...
 tar -a -c -f "%BACKUP_DIR%\EOW_Backup_%t%.zip" --exclude=venv --exclude=.git .
 echo Backup Complete.
 
 echo.
 echo ======================================================
-echo STEP 3: REPLACING GITHUB REPOSITORY
+echo STEP 3: PREPARING GITHUB (FILTERING VENV)
 echo ======================================================
+
+:: [NEW] Create or Update .gitignore to ensure venv is NEVER uploaded
+echo venv/ > .gitignore
+echo .git/ >> .gitignore
+echo [INFO] .gitignore updated to filter VENV folder.
 
 :: Force Initialize if .git is missing or wrong
 if not exist ".git" (
@@ -54,7 +58,6 @@ if not exist ".git" (
     git init
     git remote add origin %REPO_URL%
 ) else (
-    :: Ensure the remote URL is correct even if folder changed
     git remote set-url origin %REPO_URL%
 )
 
@@ -63,11 +66,12 @@ git branch -M main
 echo Cleaning local Git index...
 git rm -r --cached . >nul 2>&1
 
-echo Staging all files from selected folder...
+echo Staging files (VENV will be ignored)...
+:: [INFO] 'git add .' will now respect the .gitignore file we created
 git add .
 
 echo Creating replacement commit...
-git commit -m "Complete Replacement from Browse: %date% %time%"
+git commit -m "Complete Replacement (VENV Filtered): %date% %time%"
 
 echo.
 echo Pushing to GitHub (Overwriting Online Files)...
@@ -75,6 +79,6 @@ git push origin main --force
 
 echo.
 echo ======================================================
-echo SUCCESS: GitHub matches your local folder exactly.
+echo SUCCESS: GitHub updated. VENV folder was filtered out.
 echo ======================================================
 pause
