@@ -32,7 +32,7 @@ class EngineConfig(BaseSettings):
 
     # ── Risk / Capital ───────────────────────────────────────────────────────
     INITIAL_CAPITAL: float = 1000.0        # USDT starting bankroll (paper)
-    MAX_RISK_PER_TRADE: float = 0.01       # 1% of equity per trade
+    MAX_RISK_PER_TRADE: float = 0.015      # 1.5% of equity per trade (larger size → lower fee drag)
     MAX_DRAWDOWN_HALT: float = 0.15        # Halt engine at 15% MDD
     KELLY_FRACTION: float = 0.25           # Conservative quarter-Kelly
     WIN_STREAK_SCALE_UP: int = 3           # Consecutive wins → scale up
@@ -41,34 +41,35 @@ class EngineConfig(BaseSettings):
     # ── Binance Fee Schedule ─────────────────────────────────────────────────
     MAKER_FEE: float = 0.0002             # 0.02%
     TAKER_FEE: float = 0.0004             # 0.04%
-    SLIPPAGE_EST: float = 0.0003          # Conservative slippage estimate
+    SLIPPAGE_EST: float = 0.0012          # Realistic slippage (was 0.03%, observed ~0.15%)
 
     # ── Genome Engine ────────────────────────────────────────────────────────
     GENOME_CYCLE_MINUTES: int = 60         # Mutation cycle interval
     GENOME_POPULATION: int = 20            # Shadow strategies per cycle
     GENOME_LOOKBACK_HOURS: int = 24        # Backtest window (fresh data)
-    GENOME_PROMOTE_WIN_RATE: float = 0.52  # Min win-rate to promote
-    GENOME_PROMOTE_PF: float = 1.3         # Min profit-factor to promote
+    GENOME_PROMOTE_WIN_RATE: float = 0.55  # Min win-rate to promote (raised: 52%→55%)
+    GENOME_PROMOTE_PF: float = 1.5         # Min profit-factor to promote (raised: 1.3→1.5)
 
     # ── Self-Healing ─────────────────────────────────────────────────────────
     HEAL_INTERVAL_SECONDS: int = 60
     MAX_RECONNECT_ATTEMPTS: int = 10
 
     # ── Regime Detection ─────────────────────────────────────────────────────
-    REGIME_ADX_THRESHOLD: float = 25.0    # ADX > 25 → Trending
+    REGIME_ADX_THRESHOLD: float = 20.0    # ADX > 20 → Trending (lowered for earlier detection)
     REGIME_ATR_MULT: float = 1.5          # ATR spike → Volatility Expansion
 
     # ── Strategy Defaults (DNA) ──────────────────────────────────────────────
     RSI_PERIOD: int = 14
-    RSI_OVERSOLD: float = 28.0
-    RSI_OVERBOUGHT: float = 72.0
-    EMA_FAST: int = 8
-    EMA_SLOW: int = 21
+    RSI_OVERSOLD: float = 35.0            # Raised 28→35: require more bearish momentum for SHORT
+    RSI_OVERBOUGHT: float = 65.0          # Lowered 72→65: require less overbought for LONG entry
+    EMA_FAST: int = 12                    # Raised 8→12: reduce whipsaw noise
+    EMA_SLOW: int = 50                    # Raised 21→50: stronger trend confirmation
+    EMA_TREND: int = 100                  # NEW: macro trend direction filter (price vs EMA100)
     ATR_PERIOD: int = 14
-    ATR_MULT_SL: float = 2.5              # Stop-Loss = ATR * mult
-    ATR_MULT_TP: float = 4.5              # Take-Profit = ATR * mult
+    ATR_MULT_SL: float = 2.0              # Tightened 2.5→2.0: smaller loss per loser
+    ATR_MULT_TP: float = 3.0              # Lowered 4.5→3.0: more achievable targets
     BB_PERIOD: int = 20
-    BB_STD: float = 2.2
+    BB_STD: float = 2.5                   # Widened 2.2→2.5: only trade extreme BB deviations
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

@@ -78,39 +78,47 @@ def _atr(highs: List[float], lows: List[float], closes: List[float], n: int) -> 
 
 class TrendFollowingStrategy:
     """
-    EMA crossover + RSI confirmation.
-    LONG when fast EMA crosses above slow EMA and RSI is not overbought.
-    SHORT when fast crosses below slow and RSI is not oversold.
+    EMA crossover + RSI momentum confirmation + macro trend direction filter.
+    LONG  when fast EMA crosses above slow, price > EMA(trend), RSI in bullish zone.
+    SHORT when fast EMA crosses below slow, price < EMA(trend), RSI in bearish zone.
+    The EMA(trend) filter prevents counter-trend entries — the #1 source of losses.
     SL/TP set via ATR multiplier.
     """
     ID = "TF_EMA_RSI_v1"
 
+    # RSI zones: only enter when momentum supports the direction
+    RSI_LONG_MIN  = 45   # RSI must be building upward momentum for LONG
+    RSI_SHORT_MAX = 55   # RSI must be fading for SHORT (not already oversold)
+
     def __init__(self, dna: dict = None):
         d = dna or {}
-        self.ema_fast  = int(d.get("ema_fast",  cfg.EMA_FAST))
-        self.ema_slow  = int(d.get("ema_slow",  cfg.EMA_SLOW))
-        self.rsi_period= int(d.get("rsi_period",cfg.RSI_PERIOD))
-        self.rsi_ob    = float(d.get("rsi_ob",  cfg.RSI_OVERBOUGHT))
-        self.rsi_os    = float(d.get("rsi_os",  cfg.RSI_OVERSOLD))
-        self.atr_period= int(d.get("atr_period",cfg.ATR_PERIOD))
-        self.atr_sl    = float(d.get("atr_sl",  cfg.ATR_MULT_SL))
-        self.atr_tp    = float(d.get("atr_tp",  cfg.ATR_MULT_TP))
+        self.ema_fast   = int(d.get("ema_fast",   cfg.EMA_FAST))
+        self.ema_slow   = int(d.get("ema_slow",   cfg.EMA_SLOW))
+        self.ema_trend  = int(d.get("ema_trend",  cfg.EMA_TREND))   # macro filter
+        self.rsi_period = int(d.get("rsi_period", cfg.RSI_PERIOD))
+        self.rsi_ob     = float(d.get("rsi_ob",   cfg.RSI_OVERBOUGHT))
+        self.rsi_os     = float(d.get("rsi_os",   cfg.RSI_OVERSOLD))
+        self.atr_period = int(d.get("atr_period", cfg.ATR_PERIOD))
+        self.atr_sl     = float(d.get("atr_sl",   cfg.ATR_MULT_SL))
+        self.atr_tp     = float(d.get("atr_tp",   cfg.ATR_MULT_TP))
 
     def generate_signal(
         self, symbol: str, closes: List[float],
         highs: List[float], lows: List[float],
     ) -> Optional[TradeSignal]:
-        min_len = max(self.ema_slow + 2, self.rsi_period + 2, self.atr_period + 2)
+        min_len = max(self.ema_trend + 2, self.ema_slow + 2,
+                      self.rsi_period + 2, self.atr_period + 2)
         if len(closes) < min_len:
             return None
 
-        fast_now  = _ema(closes, self.ema_fast)
-        fast_prev = _ema(closes[:-1], self.ema_fast)
-        slow_now  = _ema(closes, self.ema_slow)
-        slow_prev = _ema(closes[:-1], self.ema_slow)
-        rsi       = _rsi(closes, self.rsi_period)
-        atr       = _atr(highs, lows, closes, self.atr_period)
-        price     = closes[-1]
+        fast_now   = _ema(closes, self.ema_fast)
+        fast_prev  = _ema(closes[:-1], self.ema_fast)
+        slow_now   = _ema(closes, self.ema_slow)
+        slow_prev  = _ema(closes[:-1], self.ema_slow)
+        trend_ema  = _ema(closes, self.ema_trend)   # macro trend anchor
+        rsi        = _rsi(closes, self.rsi_period)
+        atr        = _atr(highs, lows, closes, self.atr_period)
+        price      = closes[-1]
 
         # ── Data quality guards ────────────────────────────────────────────
         atr_pct = (atr / price * 100) if price else 0
@@ -124,23 +132,30 @@ class TrendFollowingStrategy:
         bullish_cross = fast_prev < slow_prev and fast_now > slow_now
         bearish_cross = fast_prev > slow_prev and fast_now < slow_now
 
-        if bullish_cross and rsi < self.rsi_ob:
+        # LONG: crossover upward AND in macro uptrend AND RSI building momentum
+        if (bullish_cross
+                and price > trend_ema                      # macro uptrend filter
+                and self.RSI_LONG_MIN <= rsi <= self.rsi_ob):  # momentum zone
             return TradeSignal(
                 symbol=symbol, signal=Signal.LONG, entry_price=price,
                 stop_loss=price - atr * self.atr_sl,
                 take_profit=price + atr * self.atr_tp,
                 confidence=min(0.9, rsi / 100 + 0.3),
                 strategy_id=self.ID,
-                reason=f"EMA cross UP | RSI={rsi:.1f} | ATR={atr:.4f}",
+                reason=f"EMA cross UP | trend↑ | RSI={rsi:.1f} | ATR={atr:.4f}",
             )
-        if bearish_cross and rsi > self.rsi_os:
+
+        # SHORT: crossover downward AND in macro downtrend AND RSI fading
+        if (bearish_cross
+                and price < trend_ema                       # macro downtrend filter
+                and self.rsi_os <= rsi <= self.RSI_SHORT_MAX):  # fading zone
             return TradeSignal(
                 symbol=symbol, signal=Signal.SHORT, entry_price=price,
                 stop_loss=price + atr * self.atr_sl,
                 take_profit=price - atr * self.atr_tp,
                 confidence=min(0.9, (100 - rsi) / 100 + 0.3),
                 strategy_id=self.ID,
-                reason=f"EMA cross DOWN | RSI={rsi:.1f} | ATR={atr:.4f}",
+                reason=f"EMA cross DOWN | trend↓ | RSI={rsi:.1f} | ATR={atr:.4f}",
             )
         return None
 
@@ -148,6 +163,7 @@ class TrendFollowingStrategy:
         return {
             "strategy": self.ID,
             "ema_fast": self.ema_fast, "ema_slow": self.ema_slow,
+            "ema_trend": self.ema_trend,
             "rsi_period": self.rsi_period, "rsi_ob": self.rsi_ob,
             "rsi_os": self.rsi_os, "atr_period": self.atr_period,
             "atr_sl": self.atr_sl, "atr_tp": self.atr_tp,
@@ -198,8 +214,8 @@ class MeanReversionStrategy:
 
         if price <= lower and rsi < self.rsi_os:
             tp = mean
-            # Skip if TP too close to entry — fees will eat all profit
-            if (tp - price) / price < 0.001:  # less than 0.1% movement to TP
+            # Skip if TP too close to entry — fees require at least 0.2% gross move
+            if (tp - price) / price < 0.002:
                 return None
             return TradeSignal(
                 symbol=symbol, signal=Signal.LONG, entry_price=price,
@@ -211,8 +227,8 @@ class MeanReversionStrategy:
             )
         if price >= upper and rsi > self.rsi_ob:
             tp = mean
-            # Skip if TP too close to entry
-            if (price - tp) / price < 0.001:  # less than 0.1% movement to TP
+            # Skip if TP too close to entry — fees require at least 0.2% gross move
+            if (price - tp) / price < 0.002:
                 return None
             return TradeSignal(
                 symbol=symbol, signal=Signal.SHORT, entry_price=price,
