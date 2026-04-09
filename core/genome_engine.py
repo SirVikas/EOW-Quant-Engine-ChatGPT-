@@ -26,18 +26,19 @@ from strategies.strategy_modules import (
 
 GENE_BOUNDS: Dict[str, tuple] = {
     # TrendFollowing
-    "ema_fast":   (3, 20),
-    "ema_slow":   (15, 100),
+    "ema_fast":   (5, 25),
+    "ema_slow":   (20, 100),
+    "ema_trend":  (50, 200),    # macro trend direction EMA
     "rsi_period": (7, 21),
-    "rsi_ob":     (60.0, 85.0),
-    "rsi_os":     (15.0, 40.0),
+    "rsi_ob":     (55.0, 80.0), # tighter: only long when RSI in momentum zone
+    "rsi_os":     (20.0, 45.0), # tighter: only short when RSI fading
     # Shared
     "atr_period": (7, 21),
-    "atr_sl":     (1.0, 4.0),
-    "atr_tp":     (1.5, 6.0),
+    "atr_sl":     (1.0, 3.5),
+    "atr_tp":     (1.5, 5.0),
     # MeanReversion
     "bb_period":  (10, 30),
-    "bb_std":     (1.5, 3.0),
+    "bb_std":     (2.0, 3.5),   # wider: only trade extreme deviations
     # Volatility
     "lookback":   (10, 40),
     "vol_filter": (1.0, 2.0),
@@ -156,7 +157,7 @@ class GenomeEngine:
     def _mutate(self, dna: dict, strategy_type: str) -> dict:
         """Apply random mutations within GENE_BOUNDS."""
         keys_for_type = {
-            "TrendFollowing":      ["ema_fast","ema_slow","rsi_period","rsi_ob","rsi_os","atr_period","atr_sl","atr_tp"],
+            "TrendFollowing":      ["ema_fast","ema_slow","ema_trend","rsi_period","rsi_ob","rsi_os","atr_period","atr_sl","atr_tp"],
             "MeanReversion":       ["bb_period","bb_std","rsi_period","rsi_ob","rsi_os","atr_period","atr_sl","atr_tp"],
             "VolatilityExpansion": ["lookback","vol_filter","atr_period","atr_sl","atr_tp"],
         }
@@ -175,10 +176,14 @@ class GenomeEngine:
                 val = round(max(lo, min(hi, val)), 3)
             dna[key] = val
 
-        # Constraint: ema_fast < ema_slow
+        # Constraints: ema_fast < ema_slow < ema_trend
         if "ema_fast" in dna and "ema_slow" in dna:
             if dna["ema_fast"] >= dna["ema_slow"]:
-                dna["ema_fast"] = max(3, dna["ema_slow"] - 3)
+                dna["ema_fast"] = max(5, dna["ema_slow"] - 5)
+        if "ema_slow" in dna and "ema_trend" in dna:
+            if dna["ema_slow"] >= dna["ema_trend"]:
+                dna["ema_slow"] = max(dna["ema_fast"] + 5 if "ema_fast" in dna else 20,
+                                      dna["ema_trend"] - 10)
 
         return dna
 
@@ -194,6 +199,8 @@ class GenomeEngine:
         await asyncio.sleep(0)   # yield to event loop
 
         trades, wins, gross_pnl = 0, 0, 0.0
+        # Round-trip fee rate: 2× taker fee + slippage (entry + exit)
+        round_trip_rate = cfg.TAKER_FEE * 2 + cfg.SLIPPAGE_EST
 
         for symbol in symbols:
             candles = self._candle_store.get(symbol, [])
@@ -226,23 +233,32 @@ class GenomeEngine:
                         tp        = sig.take_profit
                         direction = sig.signal
                 else:
+                    fee_cost = entry_p * round_trip_rate   # USDT cost per unit
                     if direction == Signal.LONG:
                         if price <= sl:
-                            pnl      = (price - entry_p) * 1.0
-                            gross_pnl += pnl; trades += 1
+                            net_pnl   = (price - entry_p) - fee_cost
+                            gross_pnl += net_pnl; trades += 1
+                            if net_pnl > 0:
+                                wins += 1
                             in_trade  = False
                         elif price >= tp:
-                            pnl      = (price - entry_p) * 1.0
-                            gross_pnl += pnl; trades += 1; wins += 1
+                            net_pnl   = (price - entry_p) - fee_cost
+                            gross_pnl += net_pnl; trades += 1
+                            if net_pnl > 0:
+                                wins += 1
                             in_trade  = False
                     else:
                         if price >= sl:
-                            pnl      = (entry_p - price) * 1.0
-                            gross_pnl += pnl; trades += 1
+                            net_pnl   = (entry_p - price) - fee_cost
+                            gross_pnl += net_pnl; trades += 1
+                            if net_pnl > 0:
+                                wins += 1
                             in_trade  = False
                         elif price <= tp:
-                            pnl      = (entry_p - price) * 1.0
-                            gross_pnl += pnl; trades += 1; wins += 1
+                            net_pnl   = (entry_p - price) - fee_cost
+                            gross_pnl += net_pnl; trades += 1
+                            if net_pnl > 0:
+                                wins += 1
                             in_trade  = False
 
         win_rate      = (wins / trades * 100) if trades else 0
