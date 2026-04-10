@@ -95,50 +95,15 @@ async def _safe_send(ws: WebSocket, data: dict):
         _ws_clients.discard(ws)
 
 
-def _has_positive_expected_edge(sig, qty: float) -> tuple[bool, dict]:
-    """
-    Reject trades where expected TP move cannot clear costs.
-    This avoids "correct direction but net loss" trades.
-    """
-    if qty <= 0:
-        return False, {"reason": "invalid_qty"}
-
-    entry = sig.entry_price
-    tp = sig.take_profit
-    sl = sig.stop_loss
-
-    notional_entry = entry * qty
-    notional_exit_tp = tp * qty
-
-    gross_tp = abs(tp - entry) * qty
-    risk_usdt = abs(entry - sl) * qty
-    rr = (gross_tp / risk_usdt) if risk_usdt > 0 else 0.0
-
-    maker_cost = (notional_entry + notional_exit_tp) * cfg.MAKER_FEE
-    taker_cost = (notional_entry + notional_exit_tp) * cfg.TAKER_FEE
-    taker_slippage = (notional_entry + notional_exit_tp) * cfg.SLIPPAGE_EST
-
-    # Be conservative even when limit mode is ON:
-    # some entries are price-chased and behave closer to market fills.
-    if cfg.USE_LIMIT_ORDERS:
-        fee_cost = max(maker_cost, taker_cost)
-        slippage_cost = taker_slippage
-    else:
-        fee_cost = taker_cost
-        slippage_cost = taker_slippage
-
-    net_if_tp = gross_tp - fee_cost - slippage_cost
-    rr_after_cost = (net_if_tp / risk_usdt) if risk_usdt > 0 else 0.0
-
-    # Only take trades with meaningful post-cost edge.
-    ok = (net_if_tp > 0) and (rr_after_cost >= 1.2)
-    return ok, {
-        "gross_tp": gross_tp,
-        "cost": fee_cost + slippage_cost,
-        "net_if_tp": net_if_tp,
-        "rr": rr,
-        "rr_after_cost": rr_after_cost,
-    }
+def _estimate_atr_pct(closes: list[float]) -> float:
+    """Lightweight ATR% proxy from close-to-close absolute moves."""
+    if len(closes) < 3:
+        return 0.0
+    lookback = closes[-15:]
+    moves = [abs(lookback[i] - lookback[i - 1]) for i in range(1, len(lookback))]
+    avg_move = sum(moves) / max(len(moves), 1)
+    last = max(lookback[-1], 1e-9)
+    return (avg_move / last) * 100.0
 
 
 # ── Signal Processing Callback ────────────────────────────────────────────────
@@ -212,12 +177,21 @@ async def on_tick(tick: Tick):
             sizing = scaler.compute(sym, sig.entry_price, sig.stop_loss)
             if sizing.qty <= 0:
                 return
-            edge_ok, edge = _has_positive_expected_edge(sig, sizing.qty)
+            atr_pct = _estimate_atr_pct(closes)
+            edge_ok, edge = risk_ctrl.get_trade_decision(
+                side=sig.signal.value,
+                entry=sig.entry_price,
+                take_profit=sig.take_profit,
+                stop_loss=sig.stop_loss,
+                qty=sizing.qty,
+                current_volatility=atr_pct,
+            )
             if not edge_ok:
                 _thought(
                     f"⛔ Skip {sym}: weak edge gross={edge.get('gross_tp', 0):.3f} "
                     f"cost={edge.get('cost', 0):.3f} net={edge.get('net_if_tp', 0):.3f} "
-                    f"RR={edge.get('rr', 0):.2f} RR_net={edge.get('rr_after_cost', 0):.2f}",
+                    f"RR={edge.get('rr', 0):.2f} RR_net={edge.get('rr_after_cost', 0):.2f} "
+                    f"RR_req={edge.get('required_r', 0):.2f} ATR%={edge.get('current_volatility', 0):.2f}",
                     "FILTER",
                 )
                 return
