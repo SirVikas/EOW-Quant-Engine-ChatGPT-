@@ -114,17 +114,24 @@ def _has_positive_expected_edge(sig, qty: float) -> tuple[bool, dict]:
     risk_usdt = abs(entry - sl) * qty
     rr = (gross_tp / risk_usdt) if risk_usdt > 0 else 0.0
 
+    maker_cost = (notional_entry + notional_exit_tp) * cfg.MAKER_FEE
+    taker_cost = (notional_entry + notional_exit_tp) * cfg.TAKER_FEE
+    taker_slippage = (notional_entry + notional_exit_tp) * cfg.SLIPPAGE_EST
+
+    # Be conservative even when limit mode is ON:
+    # some entries are price-chased and behave closer to market fills.
     if cfg.USE_LIMIT_ORDERS:
-        fee_cost = (notional_entry + notional_exit_tp) * cfg.MAKER_FEE
-        slippage_cost = 0.0
+        fee_cost = max(maker_cost, taker_cost)
+        slippage_cost = taker_slippage
     else:
-        fee_cost = (notional_entry + notional_exit_tp) * cfg.TAKER_FEE
-        slippage_cost = (notional_entry + notional_exit_tp) * cfg.SLIPPAGE_EST
+        fee_cost = taker_cost
+        slippage_cost = taker_slippage
 
     net_if_tp = gross_tp - fee_cost - slippage_cost
     rr_after_cost = (net_if_tp / risk_usdt) if risk_usdt > 0 else 0.0
 
-    ok = (net_if_tp > 0) and (rr_after_cost >= 1.0)
+    # Only take trades with meaningful post-cost edge.
+    ok = (net_if_tp > 0) and (rr_after_cost >= 1.2)
     return ok, {
         "gross_tp": gross_tp,
         "cost": fee_cost + slippage_cost,

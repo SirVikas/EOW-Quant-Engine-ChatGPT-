@@ -219,16 +219,16 @@ class RiskController:
                 action = "TP"
 
         if action:
-            self._close_position(symbol, price, action)
+            action = self._close_position(symbol, price, action)
 
         # Portfolio MDD check
         self._check_mdd_halt()
         return action
 
-    def _close_position(self, symbol: str, exit_price: float, reason: str):
+    def _close_position(self, symbol: str, exit_price: float, reason: str) -> str:
         pos = self.positions.pop(symbol, None)
         if not pos:
-            return
+            return reason
 
         order_type = getattr(pos, "order_type", "MARKET")
         record = TradeRecord(
@@ -249,12 +249,17 @@ class RiskController:
         result = self.pnl_calc.calculate(record, initial_risk_usdt=pos.initial_risk)
         self.scaler.record_trade(result.net_pnl)
 
+        close_tag = reason
+        if reason == "SL" and result.net_pnl > 0:
+            close_tag = "TSL+"
+
         self._emit(
             "INFO", symbol,
-            f"CLOSE {reason} [{order_type}] @ {exit_price} | "
+            f"CLOSE {close_tag} [{order_type}] @ {exit_price} | "
             f"Net={result.net_pnl:+.4f} USDT | "
             f"Slip={result.slippage_cost:.4f} Fee={result.fee_entry+result.fee_exit:.4f}"
         )
+        return close_tag
 
     # ── MDD Halt ────────────────────────────────────────────────────────────
 
