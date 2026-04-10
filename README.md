@@ -52,7 +52,8 @@ eow_quant_engine/
 ├── core/
 │   ├── market_data.py      ← Step 1: WebSocket multi-currency streams
 │   ├── pnl_calculator.py   ← Step 2: Pure PnL (gross - fees - slippage - borrow)
-│   ├── genome_engine.py    ← Step 3: Strategy mutation + backtest + promotion
+│   ├── genome_engine.py    ← Step 3: Strategy mutation + promotion loop
+│   ├── backtest_engine.py  ← Deterministic replay backtest (profitability core)
 │   ├── regime_detector.py  ← Market regime: TRENDING / MEAN_REVERTING / VOL_EXP
 │   ├── risk_controller.py  ← Step 5: SL/TP enforcement + MDD halt
 │   ├── self_healing.py     ← Auto-reconnect + ghost order clear + balance sync

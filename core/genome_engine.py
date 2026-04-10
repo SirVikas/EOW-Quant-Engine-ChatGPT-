@@ -18,8 +18,9 @@ from loguru import logger
 from config import cfg
 from strategies.strategy_modules import (
     TrendFollowingStrategy, MeanReversionStrategy,
-    VolatilityExpansionStrategy, Signal,
+    VolatilityExpansionStrategy,
 )
+from core.backtest_engine import DeterministicBacktestEngine, FillModelConfig
 
 
 # ── Genome DNA ────────────────────────────────────────────────────────────────
@@ -79,6 +80,15 @@ class GenomeEngine:
         self._candle_store:  Dict[str, List[dict]]   = {}   # symbol → candles
         self._running = False
         self._lock    = asyncio.Lock()
+        self._backtester = DeterministicBacktestEngine(
+            fill=FillModelConfig(
+                taker_fee=cfg.TAKER_FEE,
+                slippage_est=cfg.SLIPPAGE_EST,
+                latency_bars=1,
+                volatility_slippage_mult=cfg.ATR_SLIPPAGE_MULT,
+            ),
+            warmup_bars=50,
+        )
 
     # ── Candle Ingestion ────────────────────────────────────────────────────
 
@@ -195,86 +205,23 @@ class GenomeEngine:
         strategy_type: str,
         symbols: List[str],
     ) -> GenomeResult:
-        """Vectorised backtest on multi-symbol candle data."""
-        await asyncio.sleep(0)   # yield to event loop
+        """Deterministic backtest on sampled multi-symbol candle data."""
+        await asyncio.sleep(0)
 
-        trades, wins, gross_pnl = 0, 0, 0.0
-        # Round-trip fee rate: 2× taker fee + slippage (entry + exit)
-        round_trip_rate = cfg.TAKER_FEE * 2 + cfg.SLIPPAGE_EST
-
-        for symbol in symbols:
-            candles = self._candle_store.get(symbol, [])
-            if len(candles) < 50:
-                continue
-
-            closes = [c["close"] for c in candles]
-            highs  = [c["high"]  for c in candles]
-            lows   = [c["low"]   for c in candles]
-
-            strategy = self._build_strategy(strategy_type, dna)
-            in_trade  = False
-            entry_p   = 0.0
-            sl        = 0.0
-            tp        = 0.0
-            direction = Signal.NONE
-
-            for i in range(50, len(candles)):
-                cl = closes[:i]
-                hi = highs[:i]
-                lo = lows[:i]
-                price = closes[i]
-
-                if not in_trade:
-                    sig = strategy.generate_signal(symbol, cl, hi, lo)
-                    if sig and sig.signal in (Signal.LONG, Signal.SHORT):
-                        in_trade  = True
-                        entry_p   = price
-                        sl        = sig.stop_loss
-                        tp        = sig.take_profit
-                        direction = sig.signal
-                else:
-                    fee_cost = entry_p * round_trip_rate   # USDT cost per unit
-                    if direction == Signal.LONG:
-                        if price <= sl:
-                            net_pnl   = (price - entry_p) - fee_cost
-                            gross_pnl += net_pnl; trades += 1
-                            if net_pnl > 0:
-                                wins += 1
-                            in_trade  = False
-                        elif price >= tp:
-                            net_pnl   = (price - entry_p) - fee_cost
-                            gross_pnl += net_pnl; trades += 1
-                            if net_pnl > 0:
-                                wins += 1
-                            in_trade  = False
-                    else:
-                        if price >= sl:
-                            net_pnl   = (entry_p - price) - fee_cost
-                            gross_pnl += net_pnl; trades += 1
-                            if net_pnl > 0:
-                                wins += 1
-                            in_trade  = False
-                        elif price <= tp:
-                            net_pnl   = (entry_p - price) - fee_cost
-                            gross_pnl += net_pnl; trades += 1
-                            if net_pnl > 0:
-                                wins += 1
-                            in_trade  = False
-
-        win_rate      = (wins / trades * 100) if trades else 0
-        gross_wins    = gross_pnl if gross_pnl > 0 else 0
-        gross_losses  = abs(gross_pnl) if gross_pnl < 0 else 0
-        profit_factor = (gross_wins / gross_losses) if gross_losses else 2.0
+        report = self._backtester.run(
+            candles_by_symbol={symbol: self._candle_store.get(symbol, []) for symbol in symbols},
+            strategy_factory=lambda: self._build_strategy(strategy_type, dna),
+        )
 
         return GenomeResult(
             genome_id=str(uuid.uuid4())[:8],
             strategy_type=strategy_type,
             dna=copy.deepcopy(dna),
-            trades=trades,
-            win_rate=round(win_rate, 2),
-            profit_factor=round(profit_factor, 3),
-            net_pnl=round(gross_pnl, 4),
-            sharpe=0.0,   # simplified for speed
+            trades=report.trades,
+            win_rate=report.win_rate,
+            profit_factor=report.profit_factor,
+            net_pnl=report.net_pnl,
+            sharpe=report.sharpe,
         )
 
     def _build_strategy(self, strategy_type: str, dna: dict):
