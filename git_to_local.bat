@@ -1,38 +1,32 @@
 @echo off
-TITLE GitHub to Local Sync - VENV Protector
-
-:: Step 1: Switch to the correct drive
+TITLE EOW QUANT ENGINE - SELECTIVE UPDATE PROTECTOR
 D:
-
-:: Step 2: Navigate to your specific local directory
 cd "D:\EOW Quant Engine V14.0\eow_quant_engine_FINAL_v2.2\eow_quant_engine"
 
 echo ======================================================
-echo    SAFE UPDATE FROM GITHUB (Protecting Local VENV)
+echo    STEP 1: STASHING ONLY SESSION DATA (NOT SCRIPTS)
 echo ======================================================
+:: Hum sirf 'data' folder aur '.env' ko temporarily save kar rahe hain
+:: Developer ke setup scripts (.bat) ko hum stash nahi karenge taaki wo update ho sakein
+git stash push data/ .env reports_for_analyzation/ -m "TradeDataOnly"
 
-:: [VENV PROTECTION CHECK]
-:: This step confirms the VENV folder exists before doing any Git operation
-if exist "venv" (
-    echo [SAFEGUARD] Local 'venv' folder detected. 
-    echo [SAFEGUARD] Git will not touch this folder as it is ignored.
-) else (
-    echo [WARNING] No 'venv' found. You may need to recreate it later.
-)
-
-:: Step 3: Fetch updates
 echo.
-echo Fetching latest code...
+echo ======================================================
+echo    STEP 2: SYNCING ALL LOGIC & SETUP FILES...
+echo ======================================================
 git fetch origin main
-
-:: Step 4: Pull changes
-:: 'git pull' only updates files that are tracked in the repository.
-:: Since 'venv' is in .gitignore, it remains untouched on your hard drive. [cite: 8]
 git pull origin main
 
 echo.
 echo ======================================================
-echo    SUCCESS: Your code is updated!
-echo    Your local 'venv' folder was NOT deleted or modified.
+echo    STEP 3: RE-APPLYING YOUR TRADE DATA...
+echo ======================================================
+:: Aapka $9000 ka balance aur history wapas aa jayegi
+:: Lekin 'install_and_run.bat' developer wala naya version hi rahega
+git stash pop
+
+echo.
+echo ======================================================
+echo    SUCCESS: Logic & Setup Updated. Trade Data Preserved.
 echo ======================================================
 pause
