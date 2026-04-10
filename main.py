@@ -9,6 +9,7 @@ import json
 import time
 import uuid
 from contextlib import asynccontextmanager
+from dataclasses import asdict
 from typing import AsyncGenerator
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
@@ -92,7 +93,8 @@ async def _safe_send(ws: WebSocket, data: dict):
     try:
         await ws.send_text(json.dumps(data, default=str))
     except Exception:
-        _ws_clients.discard(ws)
+        if ws in _ws_clients:
+            _ws_clients.remove(ws)
 
 
 def _estimate_atr_pct(closes: list[float]) -> float:
@@ -117,6 +119,8 @@ async def on_tick(tick: Tick):
     action = risk_ctrl.on_price_update(sym, price)
     if action:
         _thought(f"Position closed [{action}] {sym} @ {price}", "TRADE")
+        if pnl_calc.trades:
+            data_lake.save_trade(asdict(pnl_calc.trades[-1]))
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # 2. Get candle data for strategy
@@ -265,6 +269,9 @@ async def on_tick(tick: Tick):
     data_lake.ingest_tick(
         sym, tick.price, tick.bid, tick.ask, tick.qty, tick.ts
     )
+    if sym in mdp.funding:
+        f = mdp.funding[sym]
+        data_lake.ingest_funding(sym, f.rate, f.next_funding)
 
     # 10. Broadcast market update to dashboard
     await _broadcast_market_update(sym, tick, regime.value)
