@@ -1,0 +1,468 @@
+{
+  "meta": {
+    "export_ts": 1775794755398,
+    "label": "full_state",
+    "trade_mode": "PAPER",
+    "engine_ver": "EOW_QUANT_ENGINE_v1.0"
+  },
+  "strategy_dna": {
+    "active": {
+      "TrendFollowing": {
+        "strategy": "TF_EMA_RSI_v1",
+        "ema_fast": 8,
+        "ema_slow": 21,
+        "rsi_period": 14,
+        "rsi_ob": 72.0,
+        "rsi_os": 28.0,
+        "atr_period": 14,
+        "atr_sl": 2.5,
+        "atr_tp": 4.5
+      },
+      "MeanReversion": {
+        "strategy": "MR_BB_RSI_v1",
+        "bb_period": 20,
+        "bb_std": 2.2,
+        "rsi_period": 14,
+        "rsi_ob": 75.0,
+        "rsi_os": 25.0,
+        "atr_period": 14,
+        "atr_sl": 2.5,
+        "atr_tp": 2.5
+      },
+      "VolatilityExpansion": {
+        "strategy": "VE_BREAKOUT_ATR_v1",
+        "lookback": 20,
+        "atr_period": 14,
+        "atr_sl": 3.0,
+        "atr_tp": 5.0,
+        "vol_filter": 1.4
+      }
+    },
+    "active_metrics": {}
+  },
+  "trade_history": [
+    {
+      "trade_id": "e0618e6b",
+      "symbol": "TNSRUSDT",
+      "side": "SHORT",
+      "entry_price": 0.047,
+      "exit_price": 0.0473,
+      "qty": 45793.536569,
+      "entry_ts": 1775793840552,
+      "exit_ts": 1775793901173,
+      "is_short": true,
+      "margin_rate": 0.0,
+      "strategy_id": "TF_EMA_RSI_v1",
+      "regime": "UNKNOWN",
+      "mode": "PAPER",
+      "gross_pnl": -13.738060970700078,
+      "fee_entry": 0.8609184874972001,
+      "fee_exit": 0.8664137118854802,
+      "slippage_cost": 1.29549914953701,
+      "borrow_cost": 0.0,
+      "net_pnl": -16.760892319619767,
+      "net_pnl_pct": -0.7787446808510673,
+      "r_multiple": -1.3408713855695813,
+      "ts_human": "2026-04-10T04:05:01.173000+00:00"
+    },
+    {
+      "trade_id": "c398c6b7",
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "entry_price": 275.9,
+      "exit_price": 275.9,
+      "qty": 8.909379,
+      "entry_ts": 1775794020645,
+      "exit_ts": 1775794020649,
+      "is_short": true,
+      "margin_rate": 0.0,
+      "strategy_id": "MR_BB_RSI_v1",
+      "regime": "UNKNOWN",
+      "mode": "PAPER",
+      "gross_pnl": 0.0,
+      "fee_entry": 0.9832390664399998,
+      "fee_exit": 0.9832390664399998,
+      "slippage_cost": 1.4748585996599997,
+      "borrow_cost": 0.0,
+      "net_pnl": -3.441336732539999,
+      "net_pnl_pct": -0.13999999999999999,
+      "r_multiple": -0.2799997341475122,
+      "ts_human": "2026-04-10T04:07:00.649000+00:00"
+    },
+    {
+      "trade_id": "b29d3322",
+      "symbol": "ZECUSDT",
+      "side": "LONG",
+      "entry_price": 366.64,
+      "exit_price": 366.87,
+      "qty": 6.705449,
+      "entry_ts": 1775794020547,
+      "exit_ts": 1775794039341,
+      "is_short": false,
+      "margin_rate": 0.0,
+      "strategy_id": "TF_EMA_RSI_v1",
+      "regime": "UNKNOWN",
+      "mode": "PAPER",
+      "gross_pnl": 1.542253270000122,
+      "fee_entry": 0.9833943285440001,
+      "fee_exit": 0.9840112298520001,
+      "slippage_cost": 1.4755541687969997,
+      "borrow_cost": 0.0,
+      "net_pnl": -1.9007064571928782,
+      "net_pnl_pct": -0.07731207724197628,
+      "r_multiple": -0.15464842416442603,
+      "ts_human": "2026-04-10T04:07:19.341000+00:00"
+    },
+    {
+      "trade_id": "63be90e6",
+      "symbol": "PARTIUSDT",
+      "side": "SHORT",
+      "entry_price": 0.0493,
+      "exit_price": 0.0489,
+      "qty": 10155.59826,
+      "entry_ts": 1775794142187,
+      "exit_ts": 1775794262450,
+      "is_short": true,
+      "margin_rate": 0.0,
+      "strategy_id": "TF_EMA_RSI_v1",
+      "regime": "UNKNOWN",
+      "mode": "PAPER",
+      "gross_pnl": 4.062239303999975,
+      "fee_entry": 0.2002683976872,
+      "fee_exit": 0.19864350196560002,
+      "slippage_cost": 0.2991839247396,
+      "borrow_cost": 0.0,
+      "net_pnl": 3.3641434796075753,
+      "net_pnl_pct": 0.6719269776876219,
+      "r_multiple": 1.100868313625307,
+      "ts_human": "2026-04-10T04:11:02.450000+00:00"
+    },
+    {
+      "trade_id": "d86da1d8",
+      "symbol": "ENJUSDT",
+      "side": "SHORT",
+      "entry_price": 0.03033,
+      "exit_price": 0.03034,
+      "qty": 80849.6958,
+      "entry_ts": 1775794320930,
+      "exit_ts": 1775794474987,
+      "is_short": true,
+      "margin_rate": 0.0,
+      "strategy_id": "TF_EMA_RSI_v1",
+      "regime": "UNKNOWN",
+      "mode": "PAPER",
+      "gross_pnl": -0.8084969579999671,
+      "fee_entry": 0.9808685094456,
+      "fee_exit": 0.9811919082288,
+      "slippage_cost": 1.4715453132557996,
+      "borrow_cost": 0.0,
+      "net_pnl": -4.242102688930167,
+      "net_pnl_pct": -0.17299373557533662,
+      "r_multiple": -0.345848023686198,
+      "ts_human": "2026-04-10T04:14:34.987000+00:00"
+    },
+    {
+      "trade_id": "a2a0de3c",
+      "symbol": "ADAUSDT",
+      "side": "LONG",
+      "entry_price": 0.2518,
+      "exit_price": 0.252,
+      "qty": 2428.161785,
+      "entry_ts": 1775794081948,
+      "exit_ts": 1775794619374,
+      "is_short": false,
+      "margin_rate": 0.0,
+      "strategy_id": "TF_EMA_RSI_v1",
+      "regime": "UNKNOWN",
+      "mode": "PAPER",
+      "gross_pnl": 0.48563235699994645,
+      "fee_entry": 0.24456445498520002,
+      "fee_exit": 0.24475870792799997,
+      "slippage_cost": 0.3669923721849,
+      "borrow_cost": 0.0,
+      "net_pnl": -0.37068317809815354,
+      "net_pnl_pct": -0.060627482128682304,
+      "r_multiple": -0.12130082073960324,
+      "ts_human": "2026-04-10T04:16:59.374000+00:00"
+    },
+    {
+      "trade_id": "448e054c",
+      "symbol": "XAUTUSDT",
+      "side": "LONG",
+      "entry_price": 4738.97,
+      "exit_price": 4741.25,
+      "qty": 0.12897,
+      "entry_ts": 1775794141576,
+      "exit_ts": 1775794652094,
+      "is_short": false,
+      "margin_rate": 0.0,
+      "strategy_id": "TF_EMA_RSI_v1",
+      "regime": "UNKNOWN",
+      "mode": "PAPER",
+      "gross_pnl": 0.29405159999996716,
+      "fee_entry": 0.24447398436000004,
+      "fee_exit": 0.244591605,
+      "slippage_cost": 0.36679919202,
+      "borrow_cost": 0.0,
+      "net_pnl": -0.5618131813800329,
+      "net_pnl_pct": -0.09192195772499624,
+      "r_multiple": -0.1838454076965977,
+      "ts_human": "2026-04-10T04:17:32.094000+00:00"
+    }
+  ],
+  "session_stats": {
+    "capital": 976.0866,
+    "total_net_pnl": -23.9134,
+    "total_trades": 7,
+    "win_rate": 14.29,
+    "profit_factor": 0.123,
+    "avg_win_usdt": 3.3641,
+    "avg_loss_usdt": -4.5463,
+    "max_drawdown_pct": 2.39,
+    "sharpe_ratio": -8.496,
+    "total_fees_paid": 9.0006,
+    "total_slippage": 6.7504,
+    "equity_curve": [
+      {
+        "ts": 1775793732884,
+        "equity": 1000.0,
+        "label": "START"
+      },
+      {
+        "ts": 1775793901173,
+        "equity": 983.2391,
+        "label": "TRADE:e0618e6b"
+      },
+      {
+        "ts": 1775794020649,
+        "equity": 979.7978,
+        "label": "TRADE:c398c6b7"
+      },
+      {
+        "ts": 1775794039341,
+        "equity": 977.8971,
+        "label": "TRADE:b29d3322"
+      },
+      {
+        "ts": 1775794262450,
+        "equity": 981.2612,
+        "label": "TRADE:63be90e6"
+      },
+      {
+        "ts": 1775794474987,
+        "equity": 977.0191,
+        "label": "TRADE:d86da1d8"
+      },
+      {
+        "ts": 1775794619374,
+        "equity": 976.6484,
+        "label": "TRADE:a2a0de3c"
+      },
+      {
+        "ts": 1775794652094,
+        "equity": 976.0866,
+        "label": "TRADE:448e054c"
+      }
+    ]
+  },
+  "portfolio_ratios": {
+    "alpha": 0.0,
+    "beta": 0.0,
+    "sharpe_ratio": -8.496,
+    "max_drawdown": 2.39,
+    "profit_factor": 0.123
+  },
+  "risk_snapshot": {
+    "halted": false,
+    "open_positions": [
+      {
+        "position_id": "8bab673d",
+        "symbol": "TRXUSDT",
+        "side": "SHORT",
+        "entry_price": 0.3203,
+        "qty": 7657.215348,
+        "stop_loss": 0.32190185714285696,
+        "take_profit": 0.3174166571428574,
+        "entry_ts": 1775794380322,
+        "strategy_id": "TF_EMA_RSI_v1",
+        "trailing_sl": true,
+        "peak_price": 0.3203,
+        "initial_risk": 12.2658
+      },
+      {
+        "position_id": "f0609732",
+        "symbol": "SOLUSDT",
+        "side": "LONG",
+        "entry_price": 83.01,
+        "qty": 29.553009,
+        "stop_loss": 82.87495714285714,
+        "take_profit": 83.7570771428571,
+        "entry_ts": 1775794382414,
+        "strategy_id": "TF_EMA_RSI_v1",
+        "trailing_sl": true,
+        "peak_price": 83.08,
+        "initial_risk": 12.2658
+      },
+      {
+        "position_id": "faca4fc0",
+        "symbol": "PEPEUSDT",
+        "side": "SHORT",
+        "entry_price": 3.5e-06,
+        "qty": 421167972.027222,
+        "stop_loss": 3.5291232142857135e-06,
+        "take_profit": 3.447578214285716e-06,
+        "entry_ts": 1775794441538,
+        "strategy_id": "TF_EMA_RSI_v1",
+        "trailing_sl": true,
+        "peak_price": 3.5e-06,
+        "initial_risk": 12.2658
+      },
+      {
+        "position_id": "a1ba379d",
+        "symbol": "SUIUSDT",
+        "side": "SHORT",
+        "entry_price": 0.93,
+        "qty": 419.892913,
+        "stop_loss": 0.9318518928571422,
+        "take_profit": 0.9216265928571432,
+        "entry_ts": 1775794620367,
+        "strategy_id": "TF_EMA_RSI_v1",
+        "trailing_sl": true,
+        "peak_price": 0.9293,
+        "initial_risk": 1.9533
+      }
+    ],
+    "drawdown_pct": 2.39,
+    "equity": 976.0866,
+    "streak": -3,
+    "recent_events": [
+      {
+        "event_id": "ed659d89",
+        "ts": 1775793840552,
+        "event_type": "INFO",
+        "symbol": "TNSRUSDT",
+        "detail": "OPEN SHORT @ 0.047 SL=0.04727296428571427 TP=0.04650866428571432"
+      },
+      {
+        "event_id": "bedabd07",
+        "ts": 1775793901174,
+        "event_type": "INFO",
+        "symbol": "TNSRUSDT",
+        "detail": "CLOSE SL @ 0.0473 | Net=-16.7609 USDT"
+      },
+      {
+        "event_id": "eee4cc61",
+        "ts": 1775794020547,
+        "event_type": "INFO",
+        "symbol": "ZECUSDT",
+        "detail": "OPEN LONG @ 366.64 SL=364.80708928571437 TP=369.9392392857141"
+      },
+      {
+        "event_id": "c95d48bb",
+        "ts": 1775794020645,
+        "event_type": "INFO",
+        "symbol": "TAOUSDT",
+        "detail": "OPEN SHORT @ 275.9 SL=277.27949999999987 TP=275.9"
+      },
+      {
+        "event_id": "993aaf09",
+        "ts": 1775794020651,
+        "event_type": "INFO",
+        "symbol": "TAOUSDT",
+        "detail": "CLOSE TP @ 275.9 | Net=-3.4413 USDT"
+      },
+      {
+        "event_id": "506dadd2",
+        "ts": 1775794039343,
+        "event_type": "INFO",
+        "symbol": "ZECUSDT",
+        "detail": "CLOSE SL @ 366.87 | Net=-1.9007 USDT"
+      },
+      {
+        "event_id": "a453938a",
+        "ts": 1775794081948,
+        "event_type": "INFO",
+        "symbol": "ADAUSDT",
+        "detail": "OPEN LONG @ 0.2518 SL=0.25054146428571433 TP=0.25406536428571425"
+      },
+      {
+        "event_id": "ad6c5d78",
+        "ts": 1775794141576,
+        "event_type": "INFO",
+        "symbol": "XAUTUSDT",
+        "detail": "OPEN LONG @ 4738.97 SL=4715.27517857143 TP=4781.620678571427"
+      },
+      {
+        "event_id": "301c9a56",
+        "ts": 1775794142187,
+        "event_type": "INFO",
+        "symbol": "PARTIUSDT",
+        "detail": "OPEN SHORT @ 0.0493 SL=0.049600910714285705 TP=0.04875836071428572"
+      },
+      {
+        "event_id": "5a31a259",
+        "ts": 1775794262452,
+        "event_type": "INFO",
+        "symbol": "PARTIUSDT",
+        "detail": "CLOSE SL @ 0.0489 | Net=+3.3641 USDT"
+      },
+      {
+        "event_id": "2760b745",
+        "ts": 1775794320930,
+        "event_type": "INFO",
+        "symbol": "ENJUSDT",
+        "detail": "OPEN SHORT @ 0.03033 SL=0.030481710714285702 TP=0.030056920714285736"
+      },
+      {
+        "event_id": "94966433",
+        "ts": 1775794380322,
+        "event_type": "INFO",
+        "symbol": "TRXUSDT",
+        "detail": "OPEN SHORT @ 0.3203 SL=0.32190185714285696 TP=0.3174166571428574"
+      },
+      {
+        "event_id": "040b1414",
+        "ts": 1775794382414,
+        "event_type": "INFO",
+        "symbol": "SOLUSDT",
+        "detail": "OPEN LONG @ 83.01 SL=82.59495714285718 TP=83.7570771428571"
+      },
+      {
+        "event_id": "45645e7a",
+        "ts": 1775794441538,
+        "event_type": "INFO",
+        "symbol": "PEPEUSDT",
+        "detail": "OPEN SHORT @ 3.5e-06 SL=3.5291232142857135e-06 TP=3.447578214285716e-06"
+      },
+      {
+        "event_id": "7deac761",
+        "ts": 1775794474993,
+        "event_type": "INFO",
+        "symbol": "ENJUSDT",
+        "detail": "CLOSE SL @ 0.03034 | Net=-4.2421 USDT"
+      },
+      {
+        "event_id": "81bd8da5",
+        "ts": 1775794619377,
+        "event_type": "INFO",
+        "symbol": "ADAUSDT",
+        "detail": "CLOSE SL @ 0.252 | Net=-0.3707 USDT"
+      },
+      {
+        "event_id": "51a2e6e8",
+        "ts": 1775794620367,
+        "event_type": "INFO",
+        "symbol": "SUIUSDT",
+        "detail": "OPEN SHORT @ 0.93 SL=0.9346518928571427 TP=0.9216265928571432"
+      },
+      {
+        "event_id": "4fc0bf83",
+        "ts": 1775794652097,
+        "event_type": "INFO",
+        "symbol": "XAUTUSDT",
+        "detail": "CLOSE SL @ 4741.25 | Net=-0.5618 USDT"
+      }
+    ]
+  },
+  "genome_log": []
+}
