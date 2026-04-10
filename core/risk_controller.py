@@ -47,8 +47,12 @@ class OpenPosition:
     trailing_sl:  bool  = True
     peak_price:   float = 0.0    # used for trailing stop
     initial_risk: float = 0.0    # USDT at risk at entry
+    initial_stop_loss: float = 0.0  # immutable entry SL (for R-multiple tracking)
     regime:       str   = "UNKNOWN"  # market regime at entry
     order_type:   str   = "MARKET"   # "MARKET" | "LIMIT" — passed to PnL calc
+    breakeven_armed: bool = False
+    peak_r:       float = 0.0
+    ticks_since_peak: int = 0
 
 
 @dataclass
@@ -89,12 +93,71 @@ class RiskController:
             self._emit("WARNING", pos.symbol, "Duplicate position attempt — rejected.")
             return False
         pos.peak_price  = pos.entry_price
+        if pos.initial_stop_loss == 0.0:
+            pos.initial_stop_loss = pos.stop_loss
         pos.order_type  = order_type   # stored for PnL calc downstream
         self.positions[pos.symbol] = pos
         self._emit("INFO", pos.symbol,
                    f"OPEN {pos.side} [{order_type}] @ {pos.entry_price} "
                    f"SL={pos.stop_loss} TP={pos.take_profit}")
         return True
+
+    def calculate_dynamic_edge(self, base_r: float, current_volatility: float) -> float:
+        """
+        Dynamic min-R threshold:
+        Required_R = Base_R + Volatility_Premium
+        where premium increases when ATR% rises above baseline.
+        """
+        baseline = max(cfg.VOL_BASELINE_ATR_PCT, 1e-6)
+        volatility_premium = max(0.0, (current_volatility - baseline) / baseline) * cfg.VOL_PREMIUM_MULT
+        return base_r + volatility_premium
+
+    def get_trade_decision(
+        self,
+        *,
+        side: str,
+        entry: float,
+        take_profit: float,
+        stop_loss: float,
+        qty: float,
+        current_volatility: float,
+    ) -> tuple[bool, dict]:
+        """
+        Evaluate whether a trade has enough post-cost edge to justify entry.
+        Uses conservative taker fees + slippage + ATR-based slippage premium.
+        """
+        if qty <= 0:
+            return False, {"reason": "invalid_qty"}
+
+        notional_entry = entry * qty
+        notional_exit_tp = take_profit * qty
+        gross_tp = abs(take_profit - entry) * qty
+        risk_usdt = abs(entry - stop_loss) * qty
+        rr = (gross_tp / risk_usdt) if risk_usdt > 0 else 0.0
+
+        # Worst-case fill realism for entry filtering.
+        fee_cost = (notional_entry + notional_exit_tp) * cfg.TAKER_FEE
+        base_slippage_cost = (notional_entry + notional_exit_tp) * cfg.SLIPPAGE_EST
+        atr_slippage_cost = current_volatility / 100.0 * cfg.ATR_SLIPPAGE_MULT * (entry * qty)
+        total_cost = fee_cost + base_slippage_cost + atr_slippage_cost
+
+        net_if_tp = gross_tp - total_cost
+        rr_after_cost = (net_if_tp / risk_usdt) if risk_usdt > 0 else 0.0
+        required_r = self.calculate_dynamic_edge(cfg.BASE_MIN_R, current_volatility)
+        ok = (net_if_tp > 0) and (rr_after_cost >= required_r)
+
+        return ok, {
+            "side": side,
+            "gross_tp": gross_tp,
+            "cost": total_cost,
+            "fee_cost": fee_cost,
+            "slippage_cost": base_slippage_cost + atr_slippage_cost,
+            "net_if_tp": net_if_tp,
+            "rr": rr,
+            "rr_after_cost": rr_after_cost,
+            "required_r": required_r,
+            "current_volatility": current_volatility,
+        }
 
     def submit_limit_order(
         self,
@@ -194,11 +257,27 @@ class RiskController:
             # Trailing stop update
             if pos.trailing_sl and price > pos.peak_price:
                 pos.peak_price = price
+                pos.ticks_since_peak = 0
                 # Trail SL up: maintain same distance from peak
                 trail_dist     = pos.entry_price - pos.stop_loss
                 new_sl         = pos.peak_price - trail_dist
                 if new_sl > pos.stop_loss:
                     pos.stop_loss = new_sl
+            else:
+                pos.ticks_since_peak += 1
+
+            # Peak profit tracking in R and BE jump
+            entry_risk = max(pos.entry_price - pos.initial_stop_loss, 1e-9)
+            pos.peak_r = max(pos.peak_r, (pos.peak_price - pos.entry_price) / entry_risk)
+            if (not pos.breakeven_armed) and pos.peak_r >= cfg.BREAKEVEN_TRIGGER_R:
+                cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
+                be_sl = pos.entry_price + cost_per_unit
+                if be_sl > pos.stop_loss:
+                    pos.stop_loss = be_sl
+                pos.breakeven_armed = True
+
+            if pos.peak_r >= cfg.SPEED_EXIT_TRIGGER_R and pos.ticks_since_peak >= cfg.SPEED_EXIT_STALL_TICKS:
+                action = "SPEED"
 
             if price <= pos.stop_loss:
                 action = "SL"
@@ -208,10 +287,25 @@ class RiskController:
         else:  # SHORT
             if pos.trailing_sl and price < pos.peak_price:
                 pos.peak_price = price
+                pos.ticks_since_peak = 0
                 trail_dist     = pos.stop_loss - pos.entry_price
                 new_sl         = pos.peak_price + trail_dist
                 if new_sl < pos.stop_loss:
                     pos.stop_loss = new_sl
+            else:
+                pos.ticks_since_peak += 1
+
+            entry_risk = max(pos.initial_stop_loss - pos.entry_price, 1e-9)
+            pos.peak_r = max(pos.peak_r, (pos.entry_price - pos.peak_price) / entry_risk)
+            if (not pos.breakeven_armed) and pos.peak_r >= cfg.BREAKEVEN_TRIGGER_R:
+                cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
+                be_sl = pos.entry_price - cost_per_unit
+                if be_sl < pos.stop_loss:
+                    pos.stop_loss = be_sl
+                pos.breakeven_armed = True
+
+            if pos.peak_r >= cfg.SPEED_EXIT_TRIGGER_R and pos.ticks_since_peak >= cfg.SPEED_EXIT_STALL_TICKS:
+                action = "SPEED"
 
             if price >= pos.stop_loss:
                 action = "SL"
@@ -250,8 +344,13 @@ class RiskController:
         self.scaler.record_trade(result.net_pnl)
 
         close_tag = reason
-        if reason == "SL" and result.net_pnl > 0:
-            close_tag = "TSL+"
+        if reason in ("SL", "SPEED"):
+            if abs(result.net_pnl) <= cfg.BREAKEVEN_EPSILON_USDT:
+                close_tag = "BE"
+            elif result.net_pnl > 0:
+                close_tag = "TSL+"
+            else:
+                close_tag = "SL"
 
         self._emit(
             "INFO", symbol,

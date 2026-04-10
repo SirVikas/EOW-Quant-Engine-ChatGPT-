@@ -42,11 +42,19 @@ class EngineConfig(BaseSettings):
     MAKER_FEE: float = 0.0002             # 0.02%
     TAKER_FEE: float = 0.0004             # 0.04%
     SLIPPAGE_EST: float = 0.0012          # Realistic slippage (was 0.03%, observed ~0.15%)
+    VOL_BASELINE_ATR_PCT: float = 0.20    # Baseline ATR% for dynamic edge premium
+    VOL_PREMIUM_MULT: float = 1.5         # How aggressively volatility raises min-R
+    BASE_MIN_R: float = 1.2               # Base post-cost R threshold
+    ATR_SLIPPAGE_MULT: float = 0.20       # Extra slippage buffer as % of ATR
 
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
+    BREAKEVEN_TRIGGER_R: float = 0.5      # Move SL to BE+cost after this profit milestone
+    SPEED_EXIT_TRIGGER_R: float = 1.0     # Enable speed-exit checks after this R
+    SPEED_EXIT_STALL_TICKS: int = 8       # Exit if no new peak/trough in N ticks after >1R
+    BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
 
     # ── Genome Engine ────────────────────────────────────────────────────────
     GENOME_CYCLE_MINUTES: int = 60         # Mutation cycle interval
