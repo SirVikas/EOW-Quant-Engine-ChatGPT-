@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from dataclasses import asdict
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -20,7 +20,7 @@ from pathlib import Path
 from loguru import logger
 import orjson
 
-from config import cfg
+from config import cfg, parse_allowed_origins
 from core.market_data    import MarketDataProvider, Tick
 from core.pnl_calculator import PurePnLCalculator, TradeRecord
 from core.genome_engine  import GenomeEngine
@@ -28,6 +28,7 @@ from core.regime_detector import RegimeDetector
 from core.risk_controller import RiskController, OpenPosition
 from core.self_healing    import SelfHealingProtocol
 from core.data_lake       import DataLake
+from core.security        import ensure_auth_ready_for_mode, require_roles
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from strategies.strategy_modules import get_strategy, Signal
@@ -293,6 +294,7 @@ async def _broadcast_market_update(sym: str, tick: Tick, regime: str):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
+    ensure_auth_ready_for_mode()
     mdp.register_callback(on_tick)
     _thought("🚀 EOW Quant Engine booting…", "SYSTEM")
     _thought(f"Mode: {cfg.TRADE_MODE} | Capital: {cfg.INITIAL_CAPITAL} USDT", "SYSTEM")
@@ -326,7 +328,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=parse_allowed_origins(cfg.ALLOWED_ORIGINS),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -412,7 +414,7 @@ async def get_candles(symbol: str, limit: int = 500):
 # ── Mode Toggle ───────────────────────────────────────────────────────────────
 
 @app.post("/api/mode/{mode}")
-async def set_mode(mode: str):
+async def set_mode(mode: str, _auth=Depends(require_roles("operator", "admin"))):
     if mode.upper() not in ("PAPER", "LIVE"):
         raise HTTPException(400, "Mode must be PAPER or LIVE")
     cfg.TRADE_MODE = mode.upper()
@@ -429,7 +431,7 @@ async def export_state(label: str = ""):
 
 
 @app.post("/api/import-dna")
-async def import_dna_endpoint(body: dict):
+async def import_dna_endpoint(body: dict, _auth=Depends(require_roles("operator", "admin"))):
     path = body.get("path", "")
     if not path:
         raise HTTPException(400, "path required")
@@ -445,7 +447,7 @@ async def import_dna_endpoint(body: dict):
 # ── Emergency Controls ────────────────────────────────────────────────────────
 
 @app.post("/api/emergency-close")
-async def emergency_close():
+async def emergency_close(_auth=Depends(require_roles("admin"))):
     prices = {sym: tick.price for sym, tick in mdp.ticks.items()}
     risk_ctrl.emergency_close_all(prices)
     _thought("🚨 EMERGENCY CLOSE ALL triggered", "HALT")
@@ -453,7 +455,7 @@ async def emergency_close():
 
 
 @app.post("/api/resume")
-async def resume_engine():
+async def resume_engine(_auth=Depends(require_roles("operator", "admin"))):
     risk_ctrl.halted = False
     _thought("✅ Engine manually resumed", "SYSTEM")
     return {"halted": False}
