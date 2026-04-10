@@ -167,29 +167,57 @@ async def on_tick(tick: Tick):
             if sizing.qty <= 0:
                 return
 
-            # 7. Open position
-            pos = OpenPosition(
-                position_id=str(uuid.uuid4())[:8],
-                symbol=sym,
-                side=sig.signal.value,
-                entry_price=sig.entry_price,
-                qty=sizing.qty,
-                stop_loss=sig.stop_loss,
-                take_profit=sig.take_profit,
-                entry_ts=int(time.time() * 1000),
-                strategy_id=sig.strategy_id,
-                initial_risk=sizing.usdt_risk,
-                regime=regime.value,
-            )
-            if risk_ctrl.open_position(pos):
-                _trades_this_hour.append(now_ms)         # record for hourly cap
-                _last_trade_ts[sym] = now_ms             # start cooldown
-                _thought(
-                    f"✅ Opened {sig.signal.value} {sym} "
-                    f"qty={sizing.qty:.6f} risk={sizing.usdt_risk:.2f}U "
-                    f"[{strategy_type} | {regime.value}]",
-                    "TRADE",
+            # 7. Open position — use Limit Order when enabled (saves fees + slippage)
+            if cfg.USE_LIMIT_ORDERS:
+                offset = sig.entry_price * (cfg.LIMIT_ENTRY_OFFSET_BPS / 10_000)
+                if sig.signal.value == "LONG":
+                    limit_px = sig.entry_price - offset   # buy slightly below signal price
+                else:
+                    limit_px = sig.entry_price + offset   # sell slightly above signal price
+
+                submitted = risk_ctrl.submit_limit_order(
+                    symbol=sym,
+                    side=sig.signal.value,
+                    limit_price=limit_px,
+                    qty=sizing.qty,
+                    stop_loss=sig.stop_loss,
+                    take_profit=sig.take_profit,
+                    strategy_id=sig.strategy_id,
+                    initial_risk=sizing.usdt_risk,
+                    regime=regime.value,
                 )
+                if submitted:
+                    _trades_this_hour.append(now_ms)
+                    _last_trade_ts[sym] = now_ms
+                    _thought(
+                        f"📋 Limit {sig.signal.value} {sym} @ {limit_px:.4f} "
+                        f"qty={sizing.qty:.6f} risk={sizing.usdt_risk:.2f}U "
+                        f"[{strategy_type} | {regime.value}]",
+                        "TRADE",
+                    )
+            else:
+                pos = OpenPosition(
+                    position_id=str(uuid.uuid4())[:8],
+                    symbol=sym,
+                    side=sig.signal.value,
+                    entry_price=sig.entry_price,
+                    qty=sizing.qty,
+                    stop_loss=sig.stop_loss,
+                    take_profit=sig.take_profit,
+                    entry_ts=int(time.time() * 1000),
+                    strategy_id=sig.strategy_id,
+                    initial_risk=sizing.usdt_risk,
+                    regime=regime.value,
+                )
+                if risk_ctrl.open_position(pos, order_type="MARKET"):
+                    _trades_this_hour.append(now_ms)
+                    _last_trade_ts[sym] = now_ms
+                    _thought(
+                        f"✅ Opened {sig.signal.value} {sym} "
+                        f"qty={sizing.qty:.6f} risk={sizing.usdt_risk:.2f}U "
+                        f"[{strategy_type} | {regime.value}]",
+                        "TRADE",
+                    )
 
     # 8. Ingest candle into genome engine + persist to data lake
     candle_dict = {
