@@ -25,6 +25,11 @@ class EngineConfig(BaseSettings):
 
     # ── Trading Mode ─────────────────────────────────────────────────────────
     TRADE_MODE: Literal["PAPER", "LIVE"] = Field(default="PAPER", env="TRADE_MODE")
+    AUTH_ENABLED: bool = Field(default=False, env="AUTH_ENABLED")
+    # Comma-separated origins, e.g. "http://localhost:8000,https://ops.example.com"
+    ALLOWED_ORIGINS: str = Field(default="http://localhost:8000", env="ALLOWED_ORIGINS")
+    # Comma-separated token:role pairs, e.g. "op_token:operator,admin_token:admin"
+    CONTROL_API_KEYS: str = Field(default="", env="CONTROL_API_KEYS")
 
     # ── Universe ─────────────────────────────────────────────────────────────
     TOP_N_PAIRS: int = 30                  # How many USDT pairs to watch
@@ -89,6 +94,25 @@ class EngineConfig(BaseSettings):
 
 # ── Singleton ────────────────────────────────────────────────────────────────
 cfg = EngineConfig()
+
+
+def parse_allowed_origins(raw: str) -> list[str]:
+    origins = [o.strip() for o in (raw or "").split(",") if o.strip()]
+    return origins or ["http://localhost:8000"]
+
+
+def parse_control_api_keys(raw: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for part in (raw or "").split(","):
+        item = part.strip()
+        if not item or ":" not in item:
+            continue
+        token, role = item.split(":", 1)
+        token = token.strip()
+        role = role.strip().lower()
+        if token and role:
+            out[token] = role
+    return out
 
 
 # ── Pastel UI Color Palette ──────────────────────────────────────────────────

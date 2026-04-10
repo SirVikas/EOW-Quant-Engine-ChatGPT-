@@ -129,6 +129,9 @@ FastAPI (port 8000)
 | Parameter              | Default    | Description                          |
 |------------------------|------------|--------------------------------------|
 | `TRADE_MODE`           | PAPER      | PAPER or LIVE                        |
+| `AUTH_ENABLED`         | false      | Enable bearer-token control-plane auth |
+| `ALLOWED_ORIGINS`      | localhost  | Comma-separated CORS allow-list      |
+| `CONTROL_API_KEYS`     | empty      | `token:role` pairs (operator/admin)  |
 | `INITIAL_CAPITAL`      | 1000 USDT  | Starting bankroll                    |
 | `TOP_N_PAIRS`          | 30         | USDT pairs to monitor                |
 | `MAX_RISK_PER_TRADE`   | 1%         | Risk per trade as % of equity        |
@@ -160,6 +163,8 @@ FastAPI (port 8000)
 | POST   | /api/emergency-close | Close all open positions           |
 | POST   | /api/resume          | Resume after halt                  |
 | WS     | /ws                  | Real-time dashboard WebSocket feed |
+
+> Privileged endpoints (`/api/mode/*`, `/api/import-dna`, `/api/emergency-close`, `/api/resume`) require `Authorization: Bearer <token>` when `AUTH_ENABLED=true`.
 
 ---
 
