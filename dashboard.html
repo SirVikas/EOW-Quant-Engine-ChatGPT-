@@ -162,6 +162,25 @@ body {
   font-size: 10px; font-weight: 600; color: var(--muted);
   text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
 }
+
+/* ── Halt Banner ── */
+#halt-banner {
+  display: none;
+  background: #FFF5F5;
+  border-bottom: 2px solid #FC8181;
+  padding: 10px 24px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9B2C2C;
+  letter-spacing: .03em;
+  animation: pulse 1.8s infinite;
+  z-index: 99;
+}
+#halt-banner.show { display: flex; }
+#halt-banner .halt-icon { font-size: 18px; }
 </style>
 </head>
 
@@ -192,6 +211,13 @@ body {
     <button class="btn purple" onclick="exportState()">Export JSON</button>
     <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
   </div>
+</div>
+
+<!-- ══ HALT BANNER (shown when engine is halted / liquidating) ══════════════ -->
+<div id="halt-banner">
+  <span class="halt-icon">🛑</span>
+  <span id="halt-banner-msg">ENGINE HALTED — Max drawdown reached. No new trades. Positions being liquidated.</span>
+  <span class="halt-icon">🛑</span>
 </div>
 
 <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════════ -->
@@ -464,14 +490,31 @@ function renderAll() {
   renderThoughts();
   renderLake();
   renderModeBadge();
+  renderHaltBanner();
 }
 
 function renderModeBadge() {
   const b = el('mode-badge');
-  if(state.mode==='LIVE') {
+  if(state.halted) {
+    b.textContent='⛔ HALTED'; b.style.background='#FED7D7'; b.style.color='#9B2C2C';
+  } else if(state.mode==='LIVE') {
     b.textContent='● LIVE'; b.style.background='#FED7D7'; b.style.color='#9B2C2C';
   } else {
     b.textContent='● PAPER'; b.style.background='#C6F6D5'; b.style.color='#276749';
+  }
+}
+
+function renderHaltBanner() {
+  const banner = el('halt-banner');
+  if(state.halted) {
+    banner.classList.add('show');
+    const openPos = state.openPos > 0
+      ? ` Liquidating ${state.openPos} open position(s)…`
+      : ' All positions closed.';
+    el('halt-banner-msg').textContent =
+      'ENGINE HALTED — Max drawdown breached. No new trades.' + openPos;
+  } else {
+    banner.classList.remove('show');
   }
 }
 
@@ -765,9 +808,12 @@ async function emergencyClose() {
   if(!confirm('Close ALL open positions immediately?')) return;
   try {
     await fetch(API+'/api/emergency-close',{method:'POST'});
-    addThought('EMERGENCY CLOSE ALL triggered','HALT');
+    addThought('EMERGENCY CLOSE ALL triggered — engine entering HALTED state','HALT');
     state.positions=[];
+    state.halted=true;
     renderPositions();
+    renderHaltBanner();
+    renderModeBadge();
   } catch(e){ addThought('Emergency close failed — backend offline','HALT'); }
 }
 

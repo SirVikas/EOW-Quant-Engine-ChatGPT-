@@ -43,6 +43,11 @@ class EngineConfig(BaseSettings):
     TAKER_FEE: float = 0.0004             # 0.04%
     SLIPPAGE_EST: float = 0.0012          # Realistic slippage (was 0.03%, observed ~0.15%)
 
+    # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
+    USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
+    LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
+    PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
+
     # ── Genome Engine ────────────────────────────────────────────────────────
     GENOME_CYCLE_MINUTES: int = 60         # Mutation cycle interval
     GENOME_POPULATION: int = 20            # Shadow strategies per cycle

@@ -30,6 +30,8 @@ class TradeRecord:
     regime:         str = "UNKNOWN"
     mode:           str = "PAPER"
 
+    order_type:     str   = "MARKET"  # "MARKET" | "LIMIT" — affects fees & slippage
+
     # Computed fields (filled by calculator)
     gross_pnl:      float = 0.0
     fee_entry:      float = 0.0
@@ -81,13 +83,22 @@ class PurePnLCalculator:
             trade.gross_pnl = (trade.exit_price - trade.entry_price) * trade.qty
 
         # ── Binance Fees ───────────────────────────────────────────────────
-        entry_rate = cfg.MAKER_FEE if entry_fee_type == "maker" else cfg.TAKER_FEE
-        exit_rate  = cfg.MAKER_FEE if exit_fee_type  == "maker" else cfg.TAKER_FEE
+        # Limit orders (maker) pay half the fee vs market orders (taker)
+        if trade.order_type == "LIMIT":
+            entry_rate = cfg.MAKER_FEE
+            exit_rate  = cfg.MAKER_FEE
+        else:
+            entry_rate = cfg.MAKER_FEE if entry_fee_type == "maker" else cfg.TAKER_FEE
+            exit_rate  = cfg.MAKER_FEE if exit_fee_type  == "maker" else cfg.TAKER_FEE
         trade.fee_entry = notional_entry * entry_rate
         trade.fee_exit  = notional_exit  * exit_rate
 
         # ── Slippage ───────────────────────────────────────────────────────
-        trade.slippage_cost = (notional_entry + notional_exit) * cfg.SLIPPAGE_EST
+        # Limit orders post at a known price — no market impact slippage
+        if trade.order_type == "LIMIT":
+            trade.slippage_cost = 0.0
+        else:
+            trade.slippage_cost = (notional_entry + notional_exit) * cfg.SLIPPAGE_EST
 
         # ── Borrowing Interest (short margin) ──────────────────────────────
         if trade.is_short and trade.margin_rate > 0:

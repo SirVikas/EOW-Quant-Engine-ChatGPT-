@@ -17,6 +17,23 @@ from utils.capital_scaler import CapitalScaler
 
 
 @dataclass
+class PendingLimitOrder:
+    """A limit order waiting to be filled on the next tick(s)."""
+    order_id:    str
+    symbol:      str
+    side:        str           # "LONG" | "SHORT"
+    limit_price: float         # price at which we want to fill
+    qty:         float
+    stop_loss:   float
+    take_profit: float
+    strategy_id: str
+    initial_risk: float
+    regime:      str
+    created_ts:  int
+    ticks_open:  int = 0       # how many ticks this order has been waiting
+
+
+@dataclass
 class OpenPosition:
     position_id:  str
     symbol:       str
@@ -31,6 +48,7 @@ class OpenPosition:
     peak_price:   float = 0.0    # used for trailing stop
     initial_risk: float = 0.0    # USDT at risk at entry
     regime:       str   = "UNKNOWN"  # market regime at entry
+    order_type:   str   = "MARKET"   # "MARKET" | "LIMIT" — passed to PnL calc
 
 
 @dataclass
@@ -53,33 +71,119 @@ class RiskController:
     """
 
     def __init__(self, pnl_calc: PurePnLCalculator, scaler: CapitalScaler):
-        self.pnl_calc   = pnl_calc
-        self.scaler     = scaler
-        self.positions: Dict[str, OpenPosition] = {}
-        self.events:    List[RiskEvent]         = []
-        self.halted:    bool                    = False
-        self._running   = False
+        self.pnl_calc        = pnl_calc
+        self.scaler          = scaler
+        self.positions:      Dict[str, OpenPosition]     = {}
+        self.pending_orders: Dict[str, PendingLimitOrder] = {}
+        self.events:         List[RiskEvent]             = []
+        self.halted:         bool                        = False
+        self._running        = False
 
     # ── Position Lifecycle ──────────────────────────────────────────────────
 
-    def open_position(self, pos: OpenPosition) -> bool:
+    def open_position(self, pos: OpenPosition, order_type: str = "MARKET") -> bool:
         if self.halted:
             self._emit("WARNING", pos.symbol, "Engine halted — position rejected.")
             return False
         if pos.symbol in self.positions:
             self._emit("WARNING", pos.symbol, "Duplicate position attempt — rejected.")
             return False
-        pos.peak_price = pos.entry_price
+        pos.peak_price  = pos.entry_price
+        pos.order_type  = order_type   # stored for PnL calc downstream
         self.positions[pos.symbol] = pos
         self._emit("INFO", pos.symbol,
-                   f"OPEN {pos.side} @ {pos.entry_price} SL={pos.stop_loss} TP={pos.take_profit}")
+                   f"OPEN {pos.side} [{order_type}] @ {pos.entry_price} "
+                   f"SL={pos.stop_loss} TP={pos.take_profit}")
+        return True
+
+    def submit_limit_order(
+        self,
+        symbol: str,
+        side: str,
+        limit_price: float,
+        qty: float,
+        stop_loss: float,
+        take_profit: float,
+        strategy_id: str,
+        initial_risk: float,
+        regime: str,
+    ) -> bool:
+        """
+        Queue a limit order.  It will fill (or chase) on the next tick(s).
+        Returns False if the engine is halted or a position/order already exists.
+        """
+        if self.halted:
+            self._emit("WARNING", symbol, "Engine halted — limit order rejected.")
+            return False
+        if symbol in self.positions or symbol in self.pending_orders:
+            return False
+        order = PendingLimitOrder(
+            order_id=str(uuid.uuid4())[:8],
+            symbol=symbol,
+            side=side,
+            limit_price=limit_price,
+            qty=qty,
+            stop_loss=stop_loss,
+            take_profit=take_profit,
+            strategy_id=strategy_id,
+            initial_risk=initial_risk,
+            regime=regime,
+            created_ts=int(time.time() * 1000),
+        )
+        self.pending_orders[symbol] = order
+        offset_bps = cfg.LIMIT_ENTRY_OFFSET_BPS / 10_000
+        self._emit(
+            "INFO", symbol,
+            f"LIMIT ORDER {side} qty={qty:.6f} @ {limit_price:.4f} "
+            f"(offset={cfg.LIMIT_ENTRY_OFFSET_BPS:.1f}bps | "
+            f"chase after {cfg.PRICE_CHASE_TICKS} ticks)"
+        )
         return True
 
     def on_price_update(self, symbol: str, price: float) -> Optional[str]:
         """
         Call this on every tick for a symbol.
-        Returns action string if position should be closed: "SL" | "TP" | None.
+        1. Check pending limit orders: fill if price reached, else price-chase.
+        2. Check open positions: trailing SL / TP.
+        Returns action string if position was closed: "SL" | "TP" | None.
         """
+        # ── Limit order fill / price-chase ──────────────────────────────────
+        pending = self.pending_orders.get(symbol)
+        if pending:
+            pending.ticks_open += 1
+            filled = False
+            if pending.side == "LONG" and price <= pending.limit_price:
+                filled = True
+            elif pending.side == "SHORT" and price >= pending.limit_price:
+                filled = True
+
+            if filled:
+                pos = OpenPosition(
+                    position_id=pending.order_id,
+                    symbol=pending.symbol,
+                    side=pending.side,
+                    entry_price=pending.limit_price,   # filled at our price
+                    qty=pending.qty,
+                    stop_loss=pending.stop_loss,
+                    take_profit=pending.take_profit,
+                    entry_ts=pending.created_ts,
+                    strategy_id=pending.strategy_id,
+                    initial_risk=pending.initial_risk,
+                    regime=pending.regime,
+                )
+                del self.pending_orders[symbol]
+                self.open_position(pos, order_type="LIMIT")
+            elif pending.ticks_open >= cfg.PRICE_CHASE_TICKS:
+                # Price hasn't come to us — chase: move limit to current market
+                old_lp = pending.limit_price
+                pending.limit_price = price
+                pending.ticks_open  = 0
+                self._emit(
+                    "INFO", symbol,
+                    f"PRICE CHASE {pending.side}: limit {old_lp:.4f} → {price:.4f} (market)"
+                )
+                # On next tick this will fill as market order (slippage applies)
+
         pos = self.positions.get(symbol)
         if not pos:
             return None
@@ -126,6 +230,7 @@ class RiskController:
         if not pos:
             return
 
+        order_type = getattr(pos, "order_type", "MARKET")
         record = TradeRecord(
             trade_id=pos.position_id,
             symbol=pos.symbol,
@@ -139,13 +244,16 @@ class RiskController:
             strategy_id=pos.strategy_id,
             regime=pos.regime,
             mode=cfg.TRADE_MODE,
+            order_type=order_type,
         )
         result = self.pnl_calc.calculate(record, initial_risk_usdt=pos.initial_risk)
         self.scaler.record_trade(result.net_pnl)
 
         self._emit(
             "INFO", symbol,
-            f"CLOSE {reason} @ {exit_price} | Net={result.net_pnl:+.4f} USDT"
+            f"CLOSE {reason} [{order_type}] @ {exit_price} | "
+            f"Net={result.net_pnl:+.4f} USDT | "
+            f"Slip={result.slippage_cost:.4f} Fee={result.fee_entry+result.fee_exit:.4f}"
         )
 
     # ── MDD Halt ────────────────────────────────────────────────────────────
@@ -183,10 +291,11 @@ class RiskController:
 
     def snapshot(self) -> dict:
         return {
-            "halted":        self.halted,
-            "open_positions": [asdict(p) for p in self.positions.values()],
-            "drawdown_pct":  round(self.scaler.drawdown_pct, 2),
-            "equity":        round(self.scaler.equity, 4),
-            "streak":        self.scaler.streak,
-            "recent_events": [asdict(e) for e in self.events[-20:]],
+            "halted":          self.halted,
+            "open_positions":  [asdict(p) for p in self.positions.values()],
+            "pending_orders":  len(self.pending_orders),
+            "drawdown_pct":    round(self.scaler.drawdown_pct, 2),
+            "equity":          round(self.scaler.equity, 4),
+            "streak":          self.scaler.streak,
+            "recent_events":   [asdict(e) for e in self.events[-20:]],
         }
