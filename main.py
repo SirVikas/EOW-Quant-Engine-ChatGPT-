@@ -30,6 +30,7 @@ from core.self_healing    import SelfHealingProtocol
 from core.data_lake       import DataLake
 from core.security        import ensure_auth_ready_for_mode, require_roles
 from core.scorecard       import compute_scorecard
+from core.analytics       import compute_full_analytics
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from strategies.strategy_modules import get_strategy, Signal
@@ -446,6 +447,220 @@ async def get_scorecard():
       3. Execution parity: post-cost avg R-multiple ≥ configured floor.
     """
     return compute_scorecard(genome, cfg).to_dict()
+
+
+# ── DBO Analytics ────────────────────────────────────────────────────────────
+
+@app.get("/api/analytics")
+async def get_analytics():
+    """
+    Full DBO analytics payload:
+      • Sortino + Sharpe ratios
+      • Risk-of-Ruin probability
+      • Geometric vs Linear growth chart data
+      • Deployability Index (0-100)
+      • Benchmark comparison vs S&P 500 / hedge funds
+    """
+    # Determine Redis availability from self-healing snapshot
+    heal = healer.snapshot()
+    recent = heal.get("recent_events", [])
+    redis_ok = any(
+        e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
+        for e in recent
+    )
+
+    trade_dicts = [
+        {
+            "net_pnl":    t.net_pnl,
+            "r_multiple": t.r_multiple,
+        }
+        for t in pnl_calc.trades
+    ]
+
+    return _sanitize(compute_full_analytics(
+        pnl_trades=trade_dicts,
+        initial_capital=pnl_calc._initial_capital,
+        session_stats=pnl_calc.session_stats,
+        healer_snapshot=heal,
+        lake_stats=data_lake.db_stats(),
+        genome_state=genome.export_state(),
+        redis_ok=redis_ok,
+    ))
+
+
+@app.get("/api/mode-info")
+async def get_mode_info():
+    """
+    Returns the human-readable trading mode label and persistence status.
+    Used by the dashboard mode identifier strip.
+    """
+    heal = healer.snapshot()
+    recent = heal.get("recent_events", [])
+
+    # Determine Redis health from recent heal events
+    redis_ok = any(
+        e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
+        for e in recent
+    )
+    # Determine SQLite health from data lake
+    try:
+        stats    = data_lake.db_stats()
+        sqlite_ok = stats.get("trade_count", -1) >= 0
+    except Exception:
+        sqlite_ok = False
+
+    persistence_ok = redis_ok or sqlite_ok
+
+    label_map = {
+        "PAPER": "LIVE PAPER",
+        "LIVE":  "REAL LIVE",
+    }
+    label = label_map.get(cfg.TRADE_MODE, cfg.TRADE_MODE)
+
+    return {
+        "mode":           cfg.TRADE_MODE,
+        "label":          label,
+        "redis_ok":       redis_ok,
+        "sqlite_ok":      sqlite_ok,
+        "persistence_ok": persistence_ok,
+        "persistence_warning": (
+            "PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)"
+            if not persistence_ok else ""
+        ),
+        "ts": int(time.time() * 1000),
+    }
+
+
+@app.get("/api/report", response_class=HTMLResponse)
+async def get_report():
+    """
+    Unified HTML report — open in browser and use Print → Save as PDF.
+    Sections:
+      1. Executive Summary (plain English)
+      2. Performance Audit (PnL / Fees / Slippage breakdown)
+      3. Signal Audit (every SKIP / TRADE decision from CT-Scan log)
+    """
+    stats  = pnl_calc.session_stats
+    mode_r = await get_mode_info()
+    now_str = time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())
+
+    # ── Signal Audit rows ──────────────────────────────────────────────────────
+    audit_rows = ""
+    for t in _thought_log:
+        level = t.get("level", "INFO")
+        msg   = t.get("msg", "").replace("<", "&lt;").replace(">", "&gt;")
+        colour = {"TRADE": "#27ae60", "FILTER": "#e67e22", "SIGNAL": "#2980b9",
+                  "HALT": "#e74c3c", "SYSTEM": "#8e44ad"}.get(level, "#555")
+        ts_s = time.strftime("%H:%M:%S", time.gmtime(t.get("ts", 0) / 1000))
+        audit_rows += (
+            f'<tr><td style="color:#888">{ts_s}</td>'
+            f'<td><span style="color:{colour};font-weight:600">{level}</span></td>'
+            f'<td>{msg}</td></tr>\n'
+        )
+
+    # ── Executive summary text ─────────────────────────────────────────────────
+    total_net   = stats.get("total_net_pnl", 0.0)
+    win_rate    = stats.get("win_rate", 0.0)
+    pf          = stats.get("profit_factor", 0.0)
+    sharpe      = stats.get("sharpe_ratio", 0.0)
+    mdd         = stats.get("max_drawdown_pct", 0.0)
+    total_trades= stats.get("total_trades", 0)
+    fees        = stats.get("total_fees_paid", 0.0)
+    slippage    = stats.get("total_slippage", 0.0)
+    capital     = stats.get("capital", pnl_calc._initial_capital)
+
+    direction = "profit" if total_net >= 0 else "loss"
+    verdict   = (
+        "The engine is operating within normal risk parameters."
+        if mdd < 10 else
+        "Drawdown elevated — consider reducing position size."
+    )
+
+    persist_warn = mode_r.get("persistence_warning", "")
+    persist_html = (
+        f'<p style="background:#fff3cd;border-left:4px solid #f0ad4e;padding:8px 12px;'
+        f'border-radius:4px;margin:12px 0">'
+        f'<strong>⚠ {persist_warn}</strong></p>'
+    ) if persist_warn else ""
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EOW Quant Engine — Performance Report</title>
+<style>
+  body {{ font-family: 'Segoe UI', Arial, sans-serif; max-width: 960px; margin: 40px auto;
+          color: #2c3e50; line-height: 1.6; }}
+  h1   {{ color: #1a252f; border-bottom: 3px solid #3498db; padding-bottom: 8px; }}
+  h2   {{ color: #2980b9; margin-top: 36px; }}
+  .meta {{ color: #888; font-size: 13px; margin-bottom: 20px; }}
+  .badge {{ display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px;
+            font-weight:700; color:#fff; background:#3498db; margin-left:8px; }}
+  .badge.live {{ background:#e74c3c; }}
+  table  {{ width:100%; border-collapse:collapse; margin-top:12px; }}
+  th     {{ background:#ecf0f1; text-align:left; padding:8px 12px; font-size:13px; }}
+  td     {{ padding:8px 12px; border-bottom:1px solid #ecf0f1; font-size:13px; }}
+  tr:hover td {{ background:#fafafa; }}
+  .pos  {{ color:#27ae60; font-weight:600; }}
+  .neg  {{ color:#e74c3c; font-weight:600; }}
+  .kv   {{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:16px 0; }}
+  .card {{ background:#f8f9fa; border-radius:8px; padding:16px; text-align:center; }}
+  .card .val {{ font-size:26px; font-weight:700; color:#2c3e50; }}
+  .card .lbl {{ font-size:12px; color:#888; margin-top:4px; }}
+  @media print {{ body {{ margin: 20px; }} }}
+</style>
+</head>
+<body>
+<h1>EOW Quant Engine
+  <span class="badge {'live' if cfg.TRADE_MODE == 'LIVE' else ''}">{mode_r['label']}</span>
+</h1>
+<p class="meta">Generated: {now_str} &nbsp;|&nbsp; Session Capital: {capital:,.2f} USDT</p>
+{persist_html}
+
+<h2>1. Executive Summary</h2>
+<p>
+  The engine closed <strong>{total_trades} trades</strong> with a net {direction} of
+  <strong class="{'pos' if total_net >= 0 else 'neg'}">{total_net:+,.2f} USDT</strong>.
+  Win rate: <strong>{win_rate:.1f}%</strong> &nbsp;|&nbsp;
+  Profit factor: <strong>{pf:.2f}</strong> &nbsp;|&nbsp;
+  Sharpe: <strong>{sharpe:.3f}</strong> &nbsp;|&nbsp;
+  Max drawdown: <strong>{mdd:.2f}%</strong>.
+</p>
+<p>{verdict}</p>
+
+<div class="kv">
+  <div class="card"><div class="val {'pos' if total_net >= 0 else 'neg'}">{total_net:+,.2f}</div><div class="lbl">Net PnL (USDT)</div></div>
+  <div class="card"><div class="val">{win_rate:.1f}%</div><div class="lbl">Win Rate</div></div>
+  <div class="card"><div class="val">{pf:.2f}</div><div class="lbl">Profit Factor</div></div>
+  <div class="card"><div class="val">{sharpe:.3f}</div><div class="lbl">Sharpe Ratio</div></div>
+  <div class="card"><div class="val">{mdd:.2f}%</div><div class="lbl">Max Drawdown</div></div>
+  <div class="card"><div class="val">{capital:,.0f}</div><div class="lbl">Capital (USDT)</div></div>
+</div>
+
+<h2>2. Performance Audit</h2>
+<table>
+  <tr><th>Metric</th><th>Value</th></tr>
+  <tr><td>Total Trades</td><td>{total_trades}</td></tr>
+  <tr><td>Net PnL</td><td class="{'pos' if total_net >= 0 else 'neg'}">{total_net:+,.4f} USDT</td></tr>
+  <tr><td>Avg Win</td><td class="pos">{stats.get('avg_win_usdt', 0.0):+,.4f} USDT</td></tr>
+  <tr><td>Avg Loss</td><td class="neg">{stats.get('avg_loss_usdt', 0.0):+,.4f} USDT</td></tr>
+  <tr><td>Total Fees Paid</td><td class="neg">-{fees:,.4f} USDT</td></tr>
+  <tr><td>Total Slippage Cost</td><td class="neg">-{slippage:,.4f} USDT</td></tr>
+  <tr><td>Combined Cost Drag</td><td class="neg">-{fees + slippage:,.4f} USDT ({(fees + slippage) / max(abs(total_net) + fees + slippage, 1e-9) * 100:.1f}% of gross)</td></tr>
+  <tr><td>Profit Factor</td><td>{pf:.3f}</td></tr>
+  <tr><td>Sharpe Ratio</td><td>{sharpe:.3f}</td></tr>
+  <tr><td>Max Drawdown</td><td>{mdd:.2f}%</td></tr>
+</table>
+
+<h2>3. Signal Audit</h2>
+<p style="color:#888;font-size:13px">Full CT-Scan reasoning log — every signal, filter decision, and trade action.</p>
+<table>
+  <tr><th>Time</th><th>Level</th><th>Message</th></tr>
+  {audit_rows if audit_rows else '<tr><td colspan="3" style="color:#aaa;text-align:center">No events recorded yet.</td></tr>'}
+</table>
+</body>
+</html>"""
+    return HTMLResponse(html)
 
 
 # ── Mode Toggle ───────────────────────────────────────────────────────────────

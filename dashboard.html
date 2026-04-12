@@ -181,6 +181,67 @@ body {
 }
 #halt-banner.show { display: flex; }
 #halt-banner .halt-icon { font-size: 18px; }
+
+/* ── Mode Strip ── */
+#mode-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 24px; font-size: 12px; font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  transition: background .3s;
+}
+#mode-strip.paper { background:#C6F6D5; color:var(--c-green); }
+#mode-strip.live  { background:#FED7D7; color:var(--c-red);  }
+#mode-strip.demo  { background:#EBF8FF; color:var(--c-blue); }
+#persist-warn {
+  display:none; background:#FFF3CD; color:#7B4800;
+  border-left: 3px solid #F6AD55; padding:2px 12px;
+  border-radius:4px; font-size:11px; font-weight:600;
+}
+#persist-warn.show { display:block; }
+
+/* ── Tab Navigation ── */
+.tab-nav {
+  display: flex; gap: 0; border-bottom: 2px solid var(--border);
+  background: #fff; padding: 0 24px; position: sticky; top: 57px; z-index: 90;
+}
+.tab-btn {
+  font-family: var(--ff); font-size: 12px; font-weight: 600;
+  padding: 10px 18px; border: none; background: transparent;
+  cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: color .15s, border-color .15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--c-blue); border-bottom-color: var(--c-blue); }
+
+/* ── Tab Panels ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── DBO Analytics specific ── */
+.dbo-gauge {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; padding: 12px 0;
+}
+.score-ring {
+  position: relative; width: 110px; height: 110px;
+}
+.score-ring svg { transform: rotate(-90deg); }
+.score-ring .val {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 22px; font-weight: 700; color: var(--text);
+}
+.score-ring .tier {
+  position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  white-space: nowrap; letter-spacing: .05em;
+}
+.bm-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+.bm-table th { background: var(--mint); padding: 7px 10px; text-align: left;
+                font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.bm-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+.bm-table .engine-row td { background: #F0FFF4; font-weight: 600; }
+.ror-bar { height: 8px; border-radius: 4px; background: #EBF8FF; overflow: hidden; margin-top: 4px; }
+.ror-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #68D391, #F6E05E, #FC8181); transition: width .5s; }
 </style>
 </head>
 
@@ -213,6 +274,12 @@ body {
   </div>
 </div>
 
+<!-- ══ MODE STRIP (trading mode identifier + persistence warning) ══════════ -->
+<div id="mode-strip" class="demo">
+  <span id="mode-strip-label">● DEMO — Backend Offline</span>
+  <span id="persist-warn">⚠ PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)</span>
+</div>
+
 <!-- ══ HALT BANNER (shown when engine is halted / liquidating) ══════════════ -->
 <div id="halt-banner">
   <span class="halt-icon">🛑</span>
@@ -220,6 +287,15 @@ body {
   <span class="halt-icon">🛑</span>
 </div>
 
+<!-- ══ TAB NAVIGATION ════════════════════════════════════════════════════════ -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview')" id="tab-btn-overview">Overview</button>
+  <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">DBO Analytics</button>
+  <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">Report</button>
+</nav>
+
+<!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
+<div id="tab-overview" class="tab-panel active">
 <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════════ -->
 <div class="main">
 
@@ -367,6 +443,123 @@ body {
   </div>
 
 </div><!-- /main -->
+</div><!-- /tab-overview -->
+
+<!-- ══ TAB: DBO ANALYTICS ════════════════════════════════════════════════════ -->
+<div id="tab-dbo" class="tab-panel">
+<div class="main">
+
+  <!-- Row 1: Sortino + Sharpe + RoR + Deployability -->
+  <div class="g4">
+    <!-- Sortino -->
+    <div class="card mint">
+      <div class="label">Sortino Ratio</div>
+      <div class="big" id="dbo-sortino" style="color:var(--c-teal);">—</div>
+      <div class="sub">Downside-risk adjusted</div>
+    </div>
+    <!-- Sharpe -->
+    <div class="card sky">
+      <div class="label">Sharpe Ratio</div>
+      <div class="big" id="dbo-sharpe" style="color:var(--c-blue);">—</div>
+      <div class="sub">Annualised (252-day)</div>
+    </div>
+    <!-- Risk of Ruin -->
+    <div class="card peach">
+      <div class="label">Risk of Ruin</div>
+      <div class="big" id="dbo-ror" style="color:var(--c-red);">—</div>
+      <div class="sub">Bankruptcy probability</div>
+      <div class="ror-bar"><div class="ror-bar-fill" id="dbo-ror-bar" style="width:0%"></div></div>
+    </div>
+    <!-- Deployability -->
+    <div class="card lav">
+      <div class="label">Deployability Index</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="score-ring">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="10"/>
+            <circle cx="55" cy="55" r="46" fill="none" stroke="#9AE6B4" stroke-width="10"
+                    stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"
+                    id="deploy-ring" style="transform-origin:50% 50%;transform:rotate(-90deg)"/>
+          </svg>
+          <div class="val" id="deploy-score">—</div>
+          <div class="tier" id="deploy-tier" style="color:var(--c-green);">—</div>
+        </div>
+        <div style="flex:1;font-size:11px;color:var(--muted);" id="deploy-breakdown">
+          <div>Network: —/30</div>
+          <div>Database: —/30</div>
+          <div>RR Edge: —/40</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Geometric vs Linear Growth Chart -->
+  <div class="card mint">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">Geometric vs Linear Growth</div>
+      <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);">
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span style="width:12px;height:3px;background:#1D9E75;display:inline-block;border-radius:2px;"></span>Geometric (Compounding)</span>
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span style="width:12px;height:2px;background:#6B8A8A;display:inline-block;border-top:2px dashed #6B8A8A;"></span>Linear (Fixed Risk)</span>
+      </div>
+    </div>
+    <div style="position:relative;height:180px;">
+      <canvas id="growthChart" role="img" aria-label="Geometric vs linear growth comparison"></canvas>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center;">
+      Geometric compounds 1% of running capital per trade. Linear risks the same fixed amount each trade.
+    </div>
+  </div>
+
+  <!-- Row 3: Benchmark Comparison -->
+  <div class="card sky">
+    <div class="sec-hdr">Empirical Benchmark Comparison</div>
+    <table class="bm-table" id="bm-table">
+      <thead>
+        <tr>
+          <th>Fund / Index</th>
+          <th>Annual Return</th>
+          <th>Sharpe</th>
+          <th>Sortino</th>
+          <th>Max DD</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="bm-tbody">
+        <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:16px;">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /main dbo -->
+</div><!-- /tab-dbo -->
+
+<!-- ══ TAB: REPORT ═══════════════════════════════════════════════════════════ -->
+<div id="tab-report" class="tab-panel">
+<div class="main">
+
+  <div class="card" style="background:#F7FAFA;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;">Unified Performance Report</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+          Opens as full HTML in a new tab — use browser Print → Save as PDF
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn blue" onclick="openReport()">Open Report</button>
+        <button class="btn green" onclick="refreshReport()">Refresh Preview</button>
+      </div>
+    </div>
+    <iframe id="report-frame" src="about:blank"
+            style="width:100%;height:640px;border:1px solid var(--border);border-radius:8px;background:#fff;"
+            title="Performance report preview"></iframe>
+  </div>
+
+</div><!-- /main report -->
+</div><!-- /tab-report -->
+
 </div><!-- /app -->
 
 <script>
@@ -394,10 +587,20 @@ let state = {
   positions: [], regimes: {}, thoughts: [],
   genomeLog: [], genomeGen: 0,
   lake: {candles: 0, ticks: 0, trades: 0, db_size_mb: 0},
+  // DBO Analytics
+  analytics: {
+    sharpe_ratio: 0, sortino_ratio: 0, risk_of_ruin_pct: 0,
+    growth_chart: {geometric:[], linear:[], labels:[]},
+    deployability: {score:0, tier:'NOT READY', breakdown:{}},
+    benchmark: {engine:{}, benchmarks:[]},
+  },
+  modeInfo: {label:'DEMO', persistence_ok:true, persistence_warning:''},
 };
 let useMock = false;
 let ws = null;
 let eqChart = null;
+let growthChart = null;
+let _activeTab = 'overview';
 
 // ── Equity Chart ─────────────────────────────────────────────────────────────
 function initChart() {
@@ -433,6 +636,185 @@ function initChart() {
       }
     }
   });
+}
+
+function initGrowthChart() {
+  const ctx = document.getElementById('growthChart');
+  if (!ctx || growthChart) return;
+  growthChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Start'],
+      datasets: [
+        { label:'Geometric', data:[INITIAL_CAPITAL], borderColor:'#1D9E75', borderWidth:2,
+          pointRadius:0, fill:true, backgroundColor:'rgba(29,158,117,0.07)', tension:0.4 },
+        { label:'Linear',    data:[INITIAL_CAPITAL], borderColor:'#6B8A8A', borderWidth:1.5,
+          borderDash:[4,4], pointRadius:0, fill:false, tension:0.4 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:{duration:400},
+      plugins:{ legend:{display:false},
+        tooltip:{mode:'index',intersect:false,
+          callbacks:{ label:(c)=>c.dataset.label+': $'+parseFloat(c.raw).toFixed(2) }}},
+      scales:{
+        x:{ display:true, ticks:{font:{size:9},maxTicksLimit:10}, grid:{display:false} },
+        y:{ display:true, ticks:{font:{size:10},callback:(v)=>'$'+parseFloat(v).toFixed(0)},
+            grid:{color:'rgba(0,0,0,0.04)'} }
+      }
+    }
+  });
+}
+
+// ── Tab Switching ────────────────────────────────────────────────────────────
+function switchTab(name) {
+  _activeTab = name;
+  ['overview','dbo','report'].forEach(t => {
+    const panel = document.getElementById('tab-'+t);
+    const btn   = document.getElementById('tab-btn-'+t);
+    if (panel) panel.classList.toggle('active', t === name);
+    if (btn)   btn.classList.toggle('active',   t === name);
+  });
+  if (name === 'dbo') {
+    initGrowthChart();
+    renderDBO();
+  }
+  if (name === 'report') {
+    refreshReport();
+  }
+}
+
+// ── Mode Strip ───────────────────────────────────────────────────────────────
+function renderModeStrip() {
+  const strip = document.getElementById('mode-strip');
+  const label = document.getElementById('mode-strip-label');
+  const warn  = document.getElementById('persist-warn');
+  const mi = state.modeInfo;
+
+  strip.className = 'demo';
+  if (!useMock && mi.label) {
+    if (mi.label === 'REAL LIVE')  strip.className = 'live';
+    else if (mi.label === 'LIVE PAPER') strip.className = 'paper';
+    else strip.className = 'demo';
+    label.textContent = '● ' + mi.label;
+  } else {
+    label.textContent = '● DEMO — Backend Offline';
+  }
+
+  const showWarn = !useMock && mi.persistence_warning;
+  warn.classList.toggle('show', !!showWarn);
+  if (showWarn) warn.textContent = '⚠ ' + mi.persistence_warning;
+}
+
+// ── DBO Analytics Rendering ──────────────────────────────────────────────────
+function renderDBO() {
+  const a = state.analytics;
+  if (!a) return;
+
+  // Sortino + Sharpe
+  const sortEl = document.getElementById('dbo-sortino');
+  const shrpEl = document.getElementById('dbo-sharpe');
+  if (sortEl) sortEl.textContent = parseFloat(a.sortino_ratio||0).toFixed(3);
+  if (shrpEl) shrpEl.textContent = parseFloat(a.sharpe_ratio||0).toFixed(3);
+
+  // Risk of Ruin
+  const rorPct = parseFloat(a.risk_of_ruin_pct||0);
+  const rorEl  = document.getElementById('dbo-ror');
+  const rorBar = document.getElementById('dbo-ror-bar');
+  if (rorEl)  { rorEl.textContent = rorPct.toFixed(2)+'%';
+                rorEl.style.color = rorPct < 1 ? 'var(--c-green)' : rorPct < 10 ? 'var(--c-amber)' : 'var(--c-red)'; }
+  if (rorBar) rorBar.style.width = Math.min(rorPct, 100) + '%';
+
+  // Deployability Index
+  const dep   = a.deployability || {};
+  const score = dep.score || 0;
+  const tier  = dep.tier  || '—';
+  const MAX_CIRC = 289; // 2*PI*46
+  const ringEl = document.getElementById('deploy-ring');
+  const scoreEl= document.getElementById('deploy-score');
+  const tierEl = document.getElementById('deploy-tier');
+  if (ringEl)  ringEl.style.strokeDashoffset = MAX_CIRC * (1 - score/100);
+  if (ringEl)  ringEl.style.stroke = score>=75?'#68D391':score>=50?'#F6AD55':'#FC8181';
+  if (scoreEl) scoreEl.textContent = score;
+  if (tierEl)  { tierEl.textContent=tier;
+                 tierEl.style.color=score>=75?'var(--c-green)':score>=50?'var(--c-amber)':'var(--c-red)'; }
+  const brkEl = document.getElementById('deploy-breakdown');
+  if (brkEl && dep.breakdown) {
+    const b = dep.breakdown;
+    brkEl.innerHTML = [
+      `<div>Network: <strong>${(b.network||{}).score||0}/30</strong></div>`,
+      `<div>Database: <strong>${(b.database||{}).score||0}/30</strong></div>`,
+      `<div>RR Edge: <strong>${(b.rr_edge||{}).score||0}/40</strong></div>`,
+    ].join('');
+  }
+
+  // Growth Chart
+  const gc = a.growth_chart || {};
+  if (growthChart && gc.geometric && gc.geometric.length > 1) {
+    growthChart.data.labels = gc.labels || gc.geometric.map((_,i)=>'T'+i);
+    growthChart.data.datasets[0].data = gc.geometric;
+    growthChart.data.datasets[1].data = gc.linear;
+    growthChart.update('none');
+  }
+
+  // Benchmark Table
+  renderBenchmarks(a.benchmark);
+}
+
+function renderBenchmarks(bm) {
+  if (!bm) return;
+  const tbody = document.getElementById('bm-tbody');
+  if (!tbody) return;
+
+  const eng  = bm.engine || {};
+  const rows = bm.benchmarks || [];
+
+  const fmtR = v => (v!==undefined ? (parseFloat(v)>=0?'+':'')+parseFloat(v).toFixed(1)+'%' : '—');
+  const fmtN = (v,d=2) => v!==undefined ? parseFloat(v).toFixed(d) : '—';
+  const fmtD = v => v!==undefined ? parseFloat(v).toFixed(1)+'%' : '—';
+
+  let html = `<tr class="engine-row">
+    <td><strong>EOW Engine</strong><br><span style="font-size:10px;color:var(--muted);">${eng.description||''}</span></td>
+    <td style="color:${parseFloat(eng.annual_return_pct||0)>=0?'var(--c-green)':'var(--c-red)'}"><strong>${fmtR(eng.annual_return_pct)}</strong></td>
+    <td>${fmtN(eng.sharpe)}</td>
+    <td>${fmtN(eng.sortino)}</td>
+    <td style="color:var(--c-red)">${fmtD(eng.max_dd_pct)}</td>
+    <td style="font-size:10px;color:var(--muted);">${eng.total_trades||0} trades this session</td>
+  </tr>`;
+
+  html += rows.map(r => `<tr>
+    <td>${r.name}<br><span style="font-size:10px;color:var(--muted);">${r.description}</span></td>
+    <td>${fmtR(r.annual_return_pct)}</td>
+    <td>${fmtN(r.sharpe)}</td>
+    <td>${fmtN(r.sortino)}</td>
+    <td style="color:var(--c-red)">${fmtD(r.max_dd_pct)}</td>
+    <td></td>
+  </tr>`).join('');
+
+  tbody.innerHTML = html;
+}
+
+// ── Report Tab ────────────────────────────────────────────────────────────────
+async function refreshReport() {
+  const frame = document.getElementById('report-frame');
+  if (!frame) return;
+  try {
+    const r = await fetch(API+'/api/report');
+    const html = await r.text();
+    frame.srcdoc = html;
+  } catch(e) {
+    frame.srcdoc = '<p style="padding:20px;color:#888;">Backend offline — report unavailable.</p>';
+  }
+}
+
+async function openReport() {
+  try {
+    const r = await fetch(API+'/api/report');
+    const html = await r.text();
+    const blob = new Blob([html], {type:'text/html'});
+    const url  = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } catch(e) { addThought('Report unavailable — backend offline', 'HALT'); }
 }
 
 function pushEquityPoint(eq, bh) {
@@ -491,6 +873,8 @@ function renderAll() {
   renderLake();
   renderModeBadge();
   renderHaltBanner();
+  renderModeStrip();
+  if (_activeTab === 'dbo') renderDBO();
 }
 
 function renderModeBadge() {
@@ -739,7 +1123,16 @@ async function pollRest() {
     if(gR.recent_genomes) state.genomeLog = gR.recent_genomes;
     // Lake stats
     try {
-      const hR = await fetch(API+'/api/health').then(r=>r.json());
+      const lR = await fetch(API+'/api/lake').then(r=>r.json());
+      if (lR) state.lake = {
+        candles: lR.candle_count||0, ticks: lR.tick_count||0,
+        trades: lR.trade_count||0, db_size_mb: lR.db_size_mb||0,
+      };
+    } catch(e){}
+    // Mode info (fast, non-blocking)
+    try {
+      const miR = await fetch(API+'/api/mode-info').then(r=>r.json());
+      if (miR) state.modeInfo = miR;
     } catch(e){}
     renderAll();
   } catch(e) {
@@ -868,6 +1261,36 @@ function enableMock() {
     promoted:Math.random()>0.75,
   }));
   state.lake={candles:128400,ticks:3820000,trades:72,db_size_mb:48.7};
+
+  // Seed mock DBO analytics
+  const mockGeo = [1000];  const mockLin = [1000];
+  let gCap=1000, lCap=1000;
+  const mockRs = Array.from({length:50}, ()=> (Math.random()>0.38 ? 1 : -1) * (0.3+Math.random()*1.2));
+  mockRs.forEach(r=>{ gCap=Math.max(0,gCap+gCap*0.01*r); lCap=Math.max(0,lCap+10*r); mockGeo.push(+gCap.toFixed(2)); mockLin.push(+lCap.toFixed(2)); });
+  state.analytics = {
+    sharpe_ratio: 1.32, sortino_ratio: 1.87, risk_of_ruin_pct: 0.82,
+    growth_chart: {
+      geometric: mockGeo, linear: mockLin,
+      labels: ['Start'].concat(mockRs.map((_,i)=>'T'+(i+1))),
+    },
+    deployability: {
+      score: 68, tier: 'CONDITIONAL',
+      breakdown: { network:{score:20}, database:{score:18}, rr_edge:{score:30} },
+    },
+    benchmark: {
+      engine: { annual_return_pct:24.4, sharpe:1.32, sortino:1.87, max_dd_pct:4.2,
+                total_trades:72, description:'EOW Quant Engine (mock session)' },
+      benchmarks: [
+        { name:"S&P 500 (Buy & Hold)",   annual_return_pct:10.5, sharpe:0.60, sortino:0.85, max_dd_pct:33.9, description:"Passive index" },
+        { name:"Avg Hedge Fund (HFRX)",  annual_return_pct:4.8,  sharpe:0.42, sortino:0.55, max_dd_pct:12.5, description:"Industry avg net of 2-and-20" },
+        { name:"Renaissance Medallion",  annual_return_pct:66.0, sharpe:3.20, sortino:5.10, max_dd_pct:5.0,  description:"Best-known quant fund" },
+        { name:"Top-Tier CTAs (SG CTA)", annual_return_pct:8.2,  sharpe:0.72, sortino:1.05, max_dd_pct:18.0, description:"Systematic trend-following" },
+      ],
+    },
+  };
+  state.modeInfo = { label:'DEMO', persistence_ok:false,
+    persistence_warning:'PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)' };
+
   for(let i=0;i<6;i++) addThought(...MOCK_THOUGHTS[i]);
   renderAll();
 }
@@ -913,6 +1336,17 @@ function mockTick_() {
   renderAll();
 }
 
+// ── Analytics Polling (every 15s) ────────────────────────────────────────────
+async function pollAnalytics() {
+  if (useMock) return;
+  try {
+    const r = await fetch(API+'/api/analytics');
+    const d = await r.json();
+    state.analytics = d;
+    if (_activeTab === 'dbo') renderDBO();
+  } catch(e) {}
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   initChart();
@@ -921,6 +1355,8 @@ window.addEventListener('DOMContentLoaded', () => {
   initLeaderElection();
   // Poll REST every 5s as fallback (WS is primary)
   setTimeout(() => setInterval(pollRest, 5000), 3000);
+  // Poll analytics every 15s (heavier computation)
+  setTimeout(() => { pollAnalytics(); setInterval(pollAnalytics, 15000); }, 5000);
 
   // If backend doesn't respond in 2s, go mock
   setTimeout(()=>{ if(!ws||ws.readyState!==1) enableMock(); }, 2000);
