@@ -3,10 +3,16 @@ Deterministic backtest engine with explicit fill and cost modeling.
 
 This module is designed for genome evaluation where reproducibility matters
 more than microstructure-perfect simulation.
+
+Phase 3 additions:
+- ClosedTrade now tracks stop_loss and net r_multiple per trade.
+- ClosedTrade separately records slippage_cost (vs. fees) for cost-drag analysis.
+- BacktestReport exposes total_fees, total_slippage, avg_r_multiple, cost_drag_pct
+  so the GenomeEngine can gate promotions on execution-adjusted metrics.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import sqrt
 from typing import Callable, Dict, List, Optional
 
@@ -31,9 +37,11 @@ class ClosedTrade:
     exit_price: float
     gross_pnl: float
     fees: float
-    slippage_cost: float
+    slippage_cost: float        # separately tracked (not baked into gross)
     net_pnl: float
     bars_held: int
+    stop_loss: float = 0.0      # signal SL price — used to compute initial risk
+    r_multiple: float = 0.0     # net_pnl / abs(entry - stop_loss)
 
 
 @dataclass
@@ -42,10 +50,15 @@ class BacktestReport:
     wins: int
     losses: int
     win_rate: float
-    profit_factor: float
+    profit_factor: float        # net-based (post-fee, post-slippage)
     net_pnl: float
     expectancy: float
     sharpe: float
+    # Phase 3: execution-cost breakdown
+    total_fees: float = 0.0
+    total_slippage: float = 0.0
+    avg_r_multiple: float = 0.0  # average net R per closed trade
+    cost_drag_pct: float = 0.0   # (fees + slippage) / |gross| as a percentage
 
 
 class DeterministicBacktestEngine:
@@ -55,6 +68,7 @@ class DeterministicBacktestEngine:
     - Deterministic candle ordering.
     - Explicit entry/exit execution costs.
     - Deterministic same-candle SL/TP tie break (stop-loss first).
+    - Phase 3: tracks raw (pre-slippage) prices to isolate slippage drag.
     """
 
     def __init__(self, fill: FillModelConfig, warmup_bars: int = 50):
@@ -93,51 +107,55 @@ class DeterministicBacktestEngine:
                         entry_i = i + self.fill.latency_bars
                         if entry_i >= len(candles):
                             break
+                        raw_entry = opens[entry_i]   # pre-slippage fill price
                         entry_price = self._apply_slippage(
                             side=signal.signal,
-                            base_price=opens[entry_i],
+                            base_price=raw_entry,
                             candle_high=highs[entry_i],
                             candle_low=lows[entry_i],
                         )
                         position = {
-                            "symbol": symbol,
-                            "side": signal.signal,
-                            "entry": entry_price,
-                            "sl": float(signal.stop_loss),
-                            "tp": float(signal.take_profit),
-                            "entry_i": entry_i,
+                            "symbol":      symbol,
+                            "side":        signal.signal,
+                            "entry":       entry_price,  # slippage-adjusted
+                            "base_entry":  raw_entry,    # raw open price
+                            "sl":          float(signal.stop_loss),
+                            "tp":          float(signal.take_profit),
+                            "entry_i":     entry_i,
                         }
                     continue
 
-                # If entry happened in future bar, wait until we reach it.
+                # Wait until we reach the deferred entry bar.
                 if i < position["entry_i"]:
                     continue
 
                 bar_high = highs[i]
                 bar_low = lows[i]
-                exit_price = None
+                raw_exit: Optional[float] = None  # pre-slippage exit level
 
                 if position["side"] == Signal.LONG:
-                    stop_hit = bar_low <= position["sl"]
+                    stop_hit   = bar_low  <= position["sl"]
                     target_hit = bar_high >= position["tp"]
                     if stop_hit:
-                        exit_price = position["sl"]
+                        raw_exit = position["sl"]
                     elif target_hit:
-                        exit_price = position["tp"]
+                        raw_exit = position["tp"]
                 else:
-                    stop_hit = bar_high >= position["sl"]
-                    target_hit = bar_low <= position["tp"]
+                    stop_hit   = bar_high >= position["sl"]
+                    target_hit = bar_low  <= position["tp"]
                     if stop_hit:
-                        exit_price = position["sl"]
+                        raw_exit = position["sl"]
                     elif target_hit:
-                        exit_price = position["tp"]
+                        raw_exit = position["tp"]
 
-                if exit_price is None:
+                if raw_exit is None:
                     continue
 
+                # Apply adverse slippage to the exit fill.
+                exit_side = Signal.SHORT if position["side"] == Signal.LONG else Signal.LONG
                 executed_exit = self._apply_slippage(
-                    side=Signal.SHORT if position["side"] == Signal.LONG else Signal.LONG,
-                    base_price=exit_price,
+                    side=exit_side,
+                    base_price=raw_exit,
                     candle_high=bar_high,
                     candle_low=bar_low,
                 )
@@ -146,7 +164,10 @@ class DeterministicBacktestEngine:
                         symbol=symbol,
                         side=position["side"],
                         entry=position["entry"],
+                        base_entry=position["base_entry"],
                         exit_price=executed_exit,
+                        base_exit=raw_exit,
+                        stop_loss=position["sl"],
                         bars_held=i - position["entry_i"] + 1,
                     )
                 )
@@ -154,22 +175,46 @@ class DeterministicBacktestEngine:
 
         return self._summarize(trades)
 
-    def _apply_slippage(self, side: Signal, base_price: float, candle_high: float, candle_low: float) -> float:
-        volatility = max(0.0, (candle_high - candle_low) / base_price) if base_price > 0 else 0.0
+    # ── Fill Helpers ─────────────────────────────────────────────────────────
+
+    def _apply_slippage(
+        self, side: Signal, base_price: float,
+        candle_high: float, candle_low: float,
+    ) -> float:
+        volatility = (
+            max(0.0, (candle_high - candle_low) / base_price)
+            if base_price > 0 else 0.0
+        )
         slip_rate = self.fill.slippage_est + (volatility * self.fill.volatility_slippage_mult)
         if side == Signal.LONG:
             return base_price * (1 + slip_rate)
         return base_price * (1 - slip_rate)
 
-    def _close_trade(self, symbol: str, side: Signal, entry: float, exit_price: float, bars_held: int) -> ClosedTrade:
+    def _close_trade(
+        self,
+        symbol: str,
+        side: Signal,
+        entry: float,
+        base_entry: float,
+        exit_price: float,
+        base_exit: float,
+        stop_loss: float,
+        bars_held: int,
+    ) -> ClosedTrade:
         if side == Signal.LONG:
-            gross = exit_price - entry
+            gross     = exit_price - entry
+            raw_gross = base_exit  - base_entry
         else:
-            gross = entry - exit_price
+            gross     = entry      - exit_price
+            raw_gross = base_entry - base_exit
 
-        fees = (entry + exit_price) * self.fill.taker_fee
-        slippage_cost = 0.0
-        net = gross - fees
+        fees          = (entry + exit_price) * self.fill.taker_fee
+        slippage_cost = abs(raw_gross - gross)   # always non-negative drag
+        net           = gross - fees
+
+        # R-multiple: net gain expressed as a multiple of the initial stop distance.
+        initial_risk = abs(entry - stop_loss)
+        r_multiple   = (net / initial_risk) if initial_risk > 1e-8 else 0.0
 
         return ClosedTrade(
             symbol=symbol,
@@ -181,6 +226,8 @@ class DeterministicBacktestEngine:
             slippage_cost=slippage_cost,
             net_pnl=net,
             bars_held=bars_held,
+            stop_loss=stop_loss,
+            r_multiple=r_multiple,
         )
 
     def _summarize(self, trades: List[ClosedTrade]) -> BacktestReport:
@@ -188,21 +235,34 @@ class DeterministicBacktestEngine:
             return BacktestReport(0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
         net_results = [t.net_pnl for t in trades]
-        wins = [x for x in net_results if x > 0]
+        wins   = [x for x in net_results if x > 0]
         losses = [x for x in net_results if x < 0]
 
-        total = len(trades)
-        win_rate = len(wins) / total * 100
-        gross_win = sum(wins)
-        gross_loss = abs(sum(losses))
-        profit_factor = (gross_win / gross_loss) if gross_loss > 0 else (999.0 if gross_win > 0 else 0.0)
-        net_pnl = sum(net_results)
+        total         = len(trades)
+        win_rate      = len(wins) / total * 100
+        gross_win     = sum(wins)
+        gross_loss    = abs(sum(losses))
+        profit_factor = (
+            (gross_win / gross_loss) if gross_loss > 0
+            else (999.0 if gross_win > 0 else 0.0)
+        )
+        net_pnl    = sum(net_results)
         expectancy = net_pnl / total
 
-        mean = expectancy
+        mean     = expectancy
         variance = sum((x - mean) ** 2 for x in net_results) / total
-        std = sqrt(variance)
-        sharpe = (mean / std * sqrt(total)) if std > 0 else 0.0
+        std      = sqrt(variance)
+        sharpe   = (mean / std * sqrt(total)) if std > 0 else 0.0
+
+        # Phase 3: execution cost breakdown
+        total_fees      = round(sum(t.fees          for t in trades), 4)
+        total_slippage  = round(sum(t.slippage_cost for t in trades), 4)
+        avg_r_multiple  = round(sum(t.r_multiple    for t in trades) / total, 4)
+        abs_gross       = sum(abs(t.gross_pnl)      for t in trades)
+        cost_drag_pct   = (
+            round((total_fees + total_slippage) / abs_gross * 100, 2)
+            if abs_gross > 0 else 0.0
+        )
 
         return BacktestReport(
             trades=total,
@@ -213,4 +273,8 @@ class DeterministicBacktestEngine:
             net_pnl=round(net_pnl, 4),
             expectancy=round(expectancy, 6),
             sharpe=round(sharpe, 4),
+            total_fees=total_fees,
+            total_slippage=total_slippage,
+            avg_r_multiple=avg_r_multiple,
+            cost_drag_pct=cost_drag_pct,
         )

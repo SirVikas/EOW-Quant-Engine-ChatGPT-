@@ -29,6 +29,7 @@ from core.risk_controller import RiskController, OpenPosition
 from core.self_healing    import SelfHealingProtocol
 from core.data_lake       import DataLake
 from core.security        import ensure_auth_ready_for_mode, require_roles
+from core.scorecard       import compute_scorecard
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from strategies.strategy_modules import get_strategy, Signal
@@ -409,6 +410,19 @@ async def get_trades(symbol: str = "", limit: int = 200):
 async def get_candles(symbol: str, limit: int = 500):
     """Recent closed candles for a symbol (from data lake)."""
     return data_lake.get_candles(symbol.upper(), limit=limit)
+
+
+@app.get("/api/scorecard")
+async def get_scorecard():
+    """
+    Go-Live Scorecard — automated Phase 3 readiness checklist.
+
+    Evaluates all three pillars before PAPER → LIVE promotion:
+      1. Security: AUTH_ENABLED + CONTROL_API_KEYS configured.
+      2. Expectancy: OOS PF ≥ 1.0 and overfitting ratio within bounds.
+      3. Execution parity: post-cost avg R-multiple ≥ configured floor.
+    """
+    return compute_scorecard(genome, cfg).to_dict()
 
 
 # ── Mode Toggle ───────────────────────────────────────────────────────────────

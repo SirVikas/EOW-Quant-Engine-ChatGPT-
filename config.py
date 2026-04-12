@@ -67,6 +67,11 @@ class EngineConfig(BaseSettings):
     GENOME_LOOKBACK_HOURS: int = 24        # Backtest window (fresh data)
     GENOME_PROMOTE_WIN_RATE: float = 0.55  # Min win-rate to promote (raised: 52%→55%)
     GENOME_PROMOTE_PF: float = 1.5         # Min profit-factor to promote (raised: 1.3→1.5)
+    # Phase 3 — OOS Validation & Execution-Cost Gating
+    GENOME_OOS_SPLIT_RATIO: float = 0.70       # 70% candles for training, 30% held-out OOS test
+    GENOME_OOS_MIN_PF: float = 1.0             # OOS profit-factor floor — must exceed 1.0 on unseen data
+    GENOME_OVERFITTING_MAX_RATIO: float = 2.0  # Reject if train_pf / oos_pf exceeds this (curve-fitting signal)
+    GENOME_MIN_AVG_R: float = 0.50             # Min net average R-multiple per trade post-fee/slippage
 
     # ── Self-Healing ─────────────────────────────────────────────────────────
     HEAL_INTERVAL_SECONDS: int = 60
