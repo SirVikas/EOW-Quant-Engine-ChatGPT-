@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "export_ts": 1776002841636,
+    "label": "full_state",
+    "trade_mode": "PAPER",
+    "engine_ver": "EOW_QUANT_ENGINE_v1.0"
+  },
+  "strategy_dna": {
+    "active": {
+      "TrendFollowing": {
+        "strategy": "TF_EMA_RSI_v1",
+        "ema_fast": 8,
+        "ema_slow": 21,
+        "rsi_period": 14,
+        "rsi_ob": 72.0,
+        "rsi_os": 28.0,
+        "atr_period": 14,
+        "atr_sl": 2.5,
+        "atr_tp": 4.5
+      },
+      "MeanReversion": {
+        "strategy": "MR_BB_RSI_v1",
+        "bb_period": 20,
+        "bb_std": 2.2,
+        "rsi_period": 14,
+        "rsi_ob": 75.0,
+        "rsi_os": 25.0,
+        "atr_period": 14,
+        "atr_sl": 2.5,
+        "atr_tp": 2.5
+      },
+      "VolatilityExpansion": {
+        "strategy": "VE_BREAKOUT_ATR_v1",
+        "lookback": 20,
+        "atr_period": 14,
+        "atr_sl": 3.0,
+        "atr_tp": 5.0,
+        "vol_filter": 1.4
+      }
+    },
+    "active_metrics": {}
+  },
+  "trade_history": [],
+  "session_stats": {
+    "capital": 1000.0,
+    "total_net_pnl": 0.0,
+    "total_trades": 0,
+    "win_rate": 0.0,
+    "profit_factor": 0.0,
+    "avg_win_usdt": 0.0,
+    "avg_loss_usdt": 0.0,
+    "max_drawdown_pct": 0.0,
+    "sharpe_ratio": 0.0,
+    "total_fees_paid": 0.0,
+    "total_slippage": 0.0,
+    "equity_curve": [
+      {
+        "ts": 1775999863149,
+        "equity": 1000.0,
+        "label": "START"
+      }
+    ]
+  },
+  "portfolio_ratios": {
+    "alpha": 0.0,
+    "beta": 0.0,
+    "sharpe_ratio": 0.0,
+    "max_drawdown": 0.0,
+    "profit_factor": 0.0
+  },
+  "risk_snapshot": {
+    "halted": false,
+    "open_positions": [],
+    "pending_orders": 0,
+    "drawdown_pct": 0.0,
+    "equity": 1000.0,
+    "streak": 0,
+    "recent_events": []
+  },
+  "genome_log": []
+}

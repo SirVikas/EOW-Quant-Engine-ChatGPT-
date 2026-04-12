@@ -1,0 +1,32 @@
+### FORMAL TECHNICAL DOCUMENT: EOW QUANT ENGINE DIAGNOSTIC REPORT
+------------------------------------------------------------------
+DATE: 2026-04-12
+SYSTEM STATUS: Active - Paper Trading Mode
+ENGINE VERSION: v1.0 [cite: 1987]
+RECOVERY STATUS: In-Memory Only (Non-Persistent) [cite: 6]
+
+1. CRITICAL: PERSISTENCE LAYER & DATA LOSS
+- Issue: Redis server not found; system defaulting to in-memory cache[cite: 6, 22].
+- Impact: Session-wide data loss on application restart. Starting capital resets to $1000.00[cite: 8]. 
+- Evidence: Previous session recorded +$1192.11 USDT profit (Total Equity: $2192.11) with 357 trades[cite: 1987]. Current state export shows 0 trades and $0.00 PnL after restart[cite: 1713, 1726].
+- Required Action: Implement persistent storage via Redis to retain trade history, equity curves, and mutated DNA across reboots.
+
+2. NETWORK & SOCKET INSTABILITY
+- Error [WinError 10054]: Connection forcibly closed by remote host[cite: 1085].
+- Error [Errno 11001]: API_PING FAILED - getaddrinfo failed[cite: 1788].
+- Impact: WebSocket streams are interrupted, causing the self-healing protocol to trigger reconnections[cite: 1827]. This creates execution gaps during market volatility.
+- Required Action: Optimize 'core.market_data' reconnection logic and verify local DNS/proxy settings for stable Binance API pings.
+
+3. EXECUTION LOGIC - RISK/REWARD FILTERING
+- Observation: AI [CT-SCAN] is generating signals but skipping execution[cite: 105, 149].
+- Logic Conflict: Multiple signals (TRX, XRP, WLD) rejected due to "weak edge"[cite: 105, 411, 483, 1739].
+- Metric: System calculates RR_net of ~1.16, while RR_req is hardcoded to 1.20[cite: 105, 1443, 1795].
+- Required Action: Review 'utils.capital_scaler' to evaluate if RR thresholds should be adaptive based on market regimes (Trending vs Mean Reverting).
+
+4. GENOME ENGINE PERFORMANCE
+- Current Session Stats (Pre-Reset): 55.3% Win Rate | 1.96 Profit Factor | 1.32 Sharpe Ratio[cite: 1987].
+- Active Mutations: MeanReversion DNA recently promoted with 1.96 PF[cite: 1990].
+- Action: Ensure mutated parameters in 'optimized_dna.json' are being written to disk properly despite Redis failure[cite: 20].
+
+------------------------------------------------------------------
+END OF REPORT
