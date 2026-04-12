@@ -112,6 +112,22 @@ class RiskController:
         volatility_premium = max(0.0, (current_volatility - baseline) / baseline) * cfg.VOL_PREMIUM_MULT
         return base_r + volatility_premium
 
+    # Regime → base minimum-R lookup (Fix B)
+    # Mean-reversion compensates lower R with higher win-rate; accept a tighter bar.
+    _REGIME_BASE_R = {
+        "TRENDING":             None,   # resolved from cfg at call time
+        "MEAN_REVERTING":       None,
+        "VOLATILITY_EXPANSION": None,
+    }
+
+    def _regime_base_r(self, regime: str) -> float:
+        """Return the per-regime base minimum R, falling back to cfg.BASE_MIN_R."""
+        return {
+            "TRENDING":             cfg.REGIME_MIN_R_TRENDING,
+            "MEAN_REVERTING":       cfg.REGIME_MIN_R_MEAN_REVERTING,
+            "VOLATILITY_EXPANSION": cfg.REGIME_MIN_R_VOLATILE,
+        }.get(regime, cfg.BASE_MIN_R)
+
     def get_trade_decision(
         self,
         *,
@@ -121,10 +137,17 @@ class RiskController:
         stop_loss: float,
         qty: float,
         current_volatility: float,
+        regime: str = "UNKNOWN",   # Fix B: receive live regime from on_tick
     ) -> tuple[bool, dict]:
         """
         Evaluate whether a trade has enough post-cost edge to justify entry.
         Uses conservative taker fees + slippage + ATR-based slippage premium.
+
+        Fix B: required_r is now regime-aware:
+          TRENDING             → 1.20  (trends deliver large R, keep bar high)
+          MEAN_REVERTING       → 1.05  (high WR compensates smaller R per trade)
+          VOLATILITY_EXPANSION → 1.15  (breakouts fast, moderate bar)
+          UNKNOWN / fallback   → 1.20  (conservative default)
         """
         if qty <= 0:
             return False, {"reason": "invalid_qty"}
@@ -143,11 +166,13 @@ class RiskController:
 
         net_if_tp = gross_tp - total_cost
         rr_after_cost = (net_if_tp / risk_usdt) if risk_usdt > 0 else 0.0
-        required_r = self.calculate_dynamic_edge(cfg.BASE_MIN_R, current_volatility)
+        base_r = self._regime_base_r(regime)
+        required_r = self.calculate_dynamic_edge(base_r, current_volatility)
         ok = (net_if_tp > 0) and (rr_after_cost >= required_r)
 
         return ok, {
             "side": side,
+            "regime": regime,
             "gross_tp": gross_tp,
             "cost": total_cost,
             "fee_cost": fee_cost,
@@ -156,6 +181,7 @@ class RiskController:
             "rr": rr,
             "rr_after_cost": rr_after_cost,
             "required_r": required_r,
+            "base_r_used": base_r,
             "current_volatility": current_volatility,
         }
 

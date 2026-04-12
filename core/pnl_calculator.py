@@ -55,7 +55,8 @@ class PurePnLCalculator:
     """
 
     def __init__(self, starting_capital: float = None):
-        self.capital       = starting_capital or cfg.INITIAL_CAPITAL
+        self._initial_capital = starting_capital or cfg.INITIAL_CAPITAL
+        self.capital       = self._initial_capital
         self.peak_equity   = self.capital
         self.trades:       List[TradeRecord] = []
         self._equity_curve: List[dict]       = []
@@ -199,6 +200,52 @@ class PurePnLCalculator:
         # Update peak
         if self.capital > self.peak_equity:
             self.peak_equity = self.capital
+
+    def replay_from_history(self, trade_dicts: list) -> int:
+        """
+        Fix D: Restore a previous session's trade history from DataLake records.
+
+        Resets capital to _initial_capital then replays all trades in
+        chronological order, rebuilding the equity curve and peak_equity so
+        session stats survive an engine restart.
+
+        Returns the number of trades successfully restored.
+        """
+        if not trade_dicts:
+            return 0
+
+        valid_fields = TradeRecord.__dataclass_fields__.keys()
+
+        # Reset to a clean slate before replaying.
+        self.capital       = self._initial_capital
+        self._equity_curve = []
+        self.trades        = []
+        self._log_equity(label="RESTORED_START")
+
+        restored = 0
+        for d in sorted(trade_dicts, key=lambda x: x.get("entry_ts", 0)):
+            try:
+                kwargs = {k: v for k, v in d.items() if k in valid_fields}
+                trade  = TradeRecord(**kwargs)
+                self.capital += trade.net_pnl
+                self.trades.append(trade)
+                self._log_equity(label=f"R:{trade.trade_id}")
+                restored += 1
+            except Exception as exc:
+                logger.warning(
+                    f"[PNL] Could not restore trade "
+                    f"{d.get('trade_id', '?')}: {exc}"
+                )
+
+        if self._equity_curve:
+            self.peak_equity = max(pt["equity"] for pt in self._equity_curve)
+
+        logger.success(
+            f"[PNL] Session restored: {restored} trades | "
+            f"Capital: {self.capital:.2f} USDT "
+            f"(was {self._initial_capital:.2f} USDT at start)"
+        )
+        return restored
 
     def _empty_stats(self) -> dict:
         return {

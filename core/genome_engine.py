@@ -30,6 +30,8 @@ from __future__ import annotations
 
 import asyncio
 import copy
+import json
+import os
 import random
 import time
 import uuid
@@ -67,6 +69,10 @@ GENE_BOUNDS: Dict[str, tuple] = {
     "lookback":   (10, 40),
     "vol_filter": (1.0, 2.0),
 }
+
+# Path for automatic DNA persistence across restarts (Fix A)
+_DNA_PERSIST_PATH = os.path.join("data", "exports", "optimized_dna.json")
+
 
 # Each strategy type targets a specific market regime for calibration.
 _STRATEGY_TARGET_REGIME: Dict[str, str] = {
@@ -505,6 +511,54 @@ class GenomeEngine:
             )
         )
         self.promotion_log = self.promotion_log[-500:]
+        # Auto-save winning DNA to disk immediately (Fix A — survives Redis loss)
+        if decision == "PROMOTED":
+            self._persist_dna()
+
+    # ── DNA Persistence (Fix A) ───────────────────────────────────────────────
+
+    def _persist_dna(self):
+        """
+        Write active_dna + per_regime_dna to disk immediately after every
+        successful promotion.  This survives engine restarts and Redis loss.
+        """
+        try:
+            os.makedirs(os.path.dirname(_DNA_PERSIST_PATH), exist_ok=True)
+            payload = {
+                "saved_at":      int(time.time() * 1000),
+                "active_dna":    self.active_dna,
+                "per_regime_dna": self.per_regime_dna,
+            }
+            with open(_DNA_PERSIST_PATH, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh, indent=2)
+            logger.info(f"[GENOME] DNA persisted → {_DNA_PERSIST_PATH}")
+        except Exception as exc:
+            logger.warning(f"[GENOME] DNA persist failed: {exc}")
+
+    def load_persisted_dna(self):
+        """
+        Called once at startup.  Loads previously promoted DNA from disk so the
+        engine continues with tuned parameters instead of factory defaults.
+        """
+        if not os.path.exists(_DNA_PERSIST_PATH):
+            logger.info("[GENOME] No persisted DNA found — using strategy defaults.")
+            return
+        try:
+            with open(_DNA_PERSIST_PATH, "r", encoding="utf-8") as fh:
+                payload = json.load(fh)
+            loaded = payload.get("active_dna", {})
+            for st, dna in loaded.items():
+                if st in self.active_dna and isinstance(dna, dict):
+                    self.active_dna[st] = dna
+            self.per_regime_dna = payload.get("per_regime_dna", {})
+            age_s = (int(time.time() * 1000) - payload.get("saved_at", 0)) / 1000
+            logger.success(
+                f"[GENOME] DNA restored from disk "
+                f"(saved {age_s / 60:.1f} min ago). "
+                f"Strategies: {list(loaded.keys())}"
+            )
+        except Exception as exc:
+            logger.warning(f"[GENOME] DNA load failed: {exc} — using defaults.")
 
     # ── State Export ──────────────────────────────────────────────────────────
 
