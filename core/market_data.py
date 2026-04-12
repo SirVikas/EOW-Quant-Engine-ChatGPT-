@@ -5,6 +5,7 @@ Publishes tick data to Redis pub/sub for all consumers.
 """
 import asyncio
 import json
+import random
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field, asdict
@@ -230,16 +231,36 @@ class MarketDataProvider:
             try:
                 async with websockets.connect(url, ping_interval=20) as ws:
                     self._ws = ws
-                    backoff = 1
+                    backoff = 1   # reset on successful connect
                     logger.info("[MDP] WebSocket connected.")
                     async for raw in ws:
                         if not self._running:
                             break
                         await self._dispatch(json.loads(raw))
             except Exception as exc:
-                logger.warning(f"[MDP] WS error: {exc}. Reconnecting in {backoff}s…")
-                await asyncio.sleep(backoff)
+                # Fix C: exponential backoff with ±30% jitter prevents
+                # thundering-herd reconnects after a mass-disconnect event.
+                jitter = random.uniform(0, backoff * 0.3)
+                delay  = backoff + jitter
+                logger.warning(
+                    f"[MDP] WS error: {exc}. "
+                    f"Reconnecting in {delay:.1f}s (backoff={backoff}s)…"
+                )
+                await asyncio.sleep(delay)
                 backoff = min(backoff * 2, 60)
+
+    async def reconnect(self):
+        """
+        Fix C: Force-close the active WebSocket so _stream_loop reconnects.
+        Called by SelfHealingProtocol when ticks become stale.
+        """
+        ws = getattr(self, "_ws", None)
+        if ws is not None:
+            try:
+                await ws.close()
+                logger.info("[MDP] Forced reconnect triggered by self-healing.")
+            except Exception:
+                pass   # already closed — ignore
 
     async def _dispatch(self, msg: dict):
         stream = msg.get("stream", "")

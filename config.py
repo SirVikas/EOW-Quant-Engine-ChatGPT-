@@ -49,8 +49,13 @@ class EngineConfig(BaseSettings):
     SLIPPAGE_EST: float = 0.0012          # Realistic slippage (was 0.03%, observed ~0.15%)
     VOL_BASELINE_ATR_PCT: float = 0.20    # Baseline ATR% for dynamic edge premium
     VOL_PREMIUM_MULT: float = 1.5         # How aggressively volatility raises min-R
-    BASE_MIN_R: float = 1.2               # Base post-cost R threshold
+    BASE_MIN_R: float = 1.2               # Fallback post-cost R threshold (regime-agnostic)
     ATR_SLIPPAGE_MULT: float = 0.20       # Extra slippage buffer as % of ATR
+    # Per-regime minimum R thresholds (Diagnostic Fix B)
+    # Mean-reversion wins via high WR, not large individual R → lower bar is rational
+    REGIME_MIN_R_TRENDING: float = 1.20
+    REGIME_MIN_R_MEAN_REVERTING: float = 1.05
+    REGIME_MIN_R_VOLATILE: float = 1.15
 
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage

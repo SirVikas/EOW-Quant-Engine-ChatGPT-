@@ -191,6 +191,7 @@ async def on_tick(tick: Tick):
                 stop_loss=sig.stop_loss,
                 qty=sizing.qty,
                 current_volatility=atr_pct,
+                regime=regime.value,   # Fix B: regime-specific RR threshold
             )
             if not edge_ok:
                 _thought(
@@ -300,12 +301,34 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     _thought("🚀 EOW Quant Engine booting…", "SYSTEM")
     _thought(f"Mode: {cfg.TRADE_MODE} | Capital: {cfg.INITIAL_CAPITAL} USDT", "SYSTEM")
 
+    # ── Fix A: Reload promoted DNA so genome doesn't reset on restart ─────────
+    genome.load_persisted_dna()
+
+    # ── Start all subsystems ──────────────────────────────────────────────────
     tasks = [
         asyncio.create_task(mdp.start()),
         asyncio.create_task(genome.start()),
         asyncio.create_task(healer.start()),
         asyncio.create_task(data_lake.start()),
     ]
+
+    # ── Fix D: Restore previous session's trade history from DataLake ─────────
+    # Give the data_lake task a moment to open the SQLite connection.
+    await asyncio.sleep(0.5)
+    try:
+        historical_trades = data_lake.get_trades(limit=5000)
+        if historical_trades:
+            n = pnl_calc.replay_from_history(historical_trades)
+            _thought(
+                f"📂 Session restored: {n} trades replayed from DataLake. "
+                f"Equity: {pnl_calc.capital:.2f} USDT",
+                "SYSTEM",
+            )
+        else:
+            _thought("📂 No prior trade history found — starting fresh.", "SYSTEM")
+    except Exception as exc:
+        _thought(f"⚠️ Session restore failed: {exc} — starting fresh.", "SYSTEM")
+
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
     yield
 
