@@ -4,3 +4,9 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Redis persistence dump
+dump.rdb
+
+# Data files (runtime-generated)
+data/
