@@ -1,0 +1,352 @@
+# 📦 FTD-REF-MASTER-001 — Institutional Trading Intelligence + Execution Upgrade
+
+---
+
+# 🧠 1. CONTEXT
+
+Current System Status:
+
+| Layer                 | Status    |
+| --------------------- | --------- |
+| Infrastructure        | ✅ Stable  |
+| Data Flow             | ✅ Live    |
+| Security (Vault)      | 🔐 Strong |
+| Strategy Intelligence | ❌ Weak    |
+| Risk Control          | ❌ Poor    |
+| Deployability         | ❌ < 60    |
+
+---
+
+# 🎯 2. OBJECTIVE (COMBINED)
+
+System must evolve into:
+
+✅ Institutional-grade decision engine
+✅ Multi-mode execution (Testnet + API Paper + Live)
+✅ Risk-controlled (Ruin < 5%)
+✅ Deployability ≥ 85
+
+---
+
+# 🏛️ 3. DESIGN FRAMEWORK (DBO APPLIED)
+
+### 🌍 Global Institutional Standards
+
+* Multi-factor regime detection
+* Low-frequency, high-quality trades
+
+### 📚 Empirical Research
+
+* Trend + Volatility + Momentum combined
+
+### 📈 Geometric Growth
+
+* Max DD < 15%
+* Controlled compounding
+
+### 🛡 Risk-of-Ruin
+
+* < 5% target
+* Dynamic position sizing
+
+### ⚙️ Deployability
+
+* Stable, explainable, testable
+
+---
+
+# 🛠️ 4. CORE MODULES (FULL SYSTEM)
+
+---
+
+## 🔧 A. INDICATOR RELIABILITY (ADX FIX)
+
+📁 core/indicator_guard.py (UPGRADE)
+
+### RULES:
+
+```python
+if len(data) < 2*n:
+    return None   # NOT ZERO
+```
+
+### VALIDATION:
+
+```python
+if adx is None:
+    BLOCK
+
+if adx < 10:
+    mark = "WEAK"
+
+if adx > 60:
+    clamp = 60
+```
+
+---
+
+## 🧠 B. REGIME AI (MULTI-FACTOR ENGINE)
+
+📁 core/regime_ai.py (NEW)
+
+### INPUTS:
+
+* ADX
+* ATR%
+* BB Width
+* RSI slope
+
+---
+
+### LOGIC:
+
+```python
+if ATR% > threshold and BB_width high:
+    VOLATILITY_EXPANSION
+
+elif ADX > 20 and RSI trending:
+    TRENDING
+
+elif ADX < 15:
+    MEAN_REVERTING
+
+else:
+    UNKNOWN
+```
+
+---
+
+### CONFIDENCE:
+
+```python
+confidence = weighted_score(features)
+```
+
+---
+
+## 🎯 C. SIGNAL QUALITY ENGINE
+
+📁 core/signal_filter.py (NEW)
+
+---
+
+### ALLOW TRADE ONLY IF:
+
+```python
+RR >= 1.8
+ATR% >= 0.2
+confidence >= 0.6
+cost < 30% of TP
+```
+
+---
+
+### LOSS PROTECTION:
+
+```python
+if 3 losses in row:
+    pause trading
+```
+
+---
+
+## 🛡 D. RISK ENGINE (ANTI-RUIN)
+
+📁 core/risk_engine.py (NEW)
+
+---
+
+### LIMITS:
+
+```python
+risk_per_trade = 0.5% – 1%
+
+max_daily_loss = 3%
+max_drawdown = 15%
+max_trades = 6/day
+```
+
+---
+
+### DYNAMIC CONTROL:
+
+```python
+if drawdown > 10%:
+    reduce size by 50%
+```
+
+---
+
+## ⚙️ E. EXECUTION MODE UPGRADE
+
+📁 dashboard/components/api_settings_tab.py
+
+---
+
+### RADIO OPTIONS:
+
+```
+( ) Testnet (Sandbox)
+( ) Paper (API-Based Simulation)
+( ) Live (Real Trading)
+```
+
+---
+
+### APPLY BUTTON:
+
+```
+[ Apply Mode ]
+```
+
+---
+
+### MODE LOGIC:
+
+```python
+if mode == "TESTNET":
+    use_testnet()
+
+elif mode == "PAPER_API":
+    use_real_data()
+    virtual_execution()
+
+elif mode == "LIVE":
+    real_orders()
+```
+
+---
+
+## 🔐 SAFETY
+
+* Default = PAPER_API
+* LIVE requires:
+
+  * Master password
+  * Warning confirmation
+
+---
+
+## 📊 F. DEPLOYABILITY ENGINE
+
+📁 core/deployability.py
+
+---
+
+### SCORE:
+
+```python
+score = (
+    0.30 * sharpe +
+    0.25 * sortino +
+    0.20 * win_rate +
+    0.15 * risk_control +
+    0.10 * drawdown_inverse
+)
+```
+
+---
+
+### BLOCK CONDITIONS:
+
+```python
+if sharpe < 1.0: BLOCK
+if drawdown > 20%: BLOCK
+if ruin > 10%: BLOCK
+```
+
+---
+
+### AUTO FILTER:
+
+```python
+if trades < 50:
+    return "INSUFFICIENT_DATA"
+```
+
+---
+
+### STATUS:
+
+```
+85+ → READY
+60–85 → IMPROVING
+<60 → NOT READY
+```
+
+---
+
+# 🧪 5. TESTING (MANDATORY)
+
+📁 tests/test_strategy_intelligence.py
+
+---
+
+### TEST:
+
+* ADX validation
+* Regime classification
+* Signal filtering
+* Risk enforcement
+* Deployability scoring
+
+---
+
+# 📊 6. TARGET METRICS
+
+| Metric        | Target |
+| ------------- | ------ |
+| Sharpe        | > 1.2  |
+| Sortino       | > 1.5  |
+| Drawdown      | < 15%  |
+| Risk of Ruin  | < 5%   |
+| RR            | > 1.8  |
+| Deployability | ≥ 85   |
+
+---
+
+# 🚀 7. BOOT LOG (FINAL)
+
+```
+Redis              : CONNECTED ✅
+WebSocket          : STABLE ✅
+Indicators         : VALIDATED ✅
+Strategy Engine    : ACTIVE ✅
+Risk Engine        : ACTIVE ✅
+Execution Mode     : PAPER_API / TESTNET / LIVE
+Deployability      : READY / IMPROVING / NOT READY
+```
+
+---
+
+# 📄 8. DELIVERY REQUIREMENTS
+
+Developer MUST:
+
+1. Full standalone modules
+2. Fully integrated system
+3. Boot-time confirmation
+4. Test suite
+5. Performance report (before vs after)
+6. No unstable indicators
+7. No log spam
+
+---
+
+# 🧠 FINAL TRANSFORMATION
+
+### BEFORE:
+
+❌ Random trading bot
+❌ High risk (100% ruin)
+
+### AFTER:
+
+✅ Institutional-grade engine
+✅ Controlled risk
+✅ Smart trade selection
+✅ Deployable system
+
+---
+
+# 🏁 END OF MASTER FTD
