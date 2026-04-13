@@ -499,7 +499,7 @@ async def get_mode_info():
     Returns the human-readable trading mode label and persistence status.
     Used by the dashboard mode identifier strip.
     """
-    heal = healer.snapshot()
+    heal   = healer.snapshot()
     recent = heal.get("recent_events", [])
 
     # Determine Redis health from recent heal events
@@ -507,38 +507,41 @@ async def get_mode_info():
         e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
         for e in recent
     )
-    # Determine SQLite health from data lake
+
+    # Determine SQLite health:
+    #   • connection is live  → healthy
+    #   • OR db file already exists on disk (previous session data present)
+    #   • db_stats() returns {} when conn not yet open (race on cold boot)
+    import os as _os
+    db_file_exists = _os.path.exists(data_lake.DB_PATH)
+    conn_live      = data_lake._conn is not None
     try:
         stats     = data_lake.db_stats()
-        # db_stats() returns keys: "ticks", "candles", "funding", "trades", "db_size_mb"
-        sqlite_ok = stats.get("trades", -1) >= 0   # >= 0 even when empty (0 trades is OK)
+        stats_ok  = stats.get("trades", -1) >= 0
     except Exception:
-        sqlite_ok = False
+        stats_ok  = False
+    sqlite_ok = conn_live or db_file_exists or stats_ok
 
     persistence_ok = redis_ok or sqlite_ok
 
-    # TIER system — matches V4.0 spec
+    # TIER system
     if not persistence_ok:
-        tier   = 1
-        label  = "TIER 1: DEMO — BOGUS DATA"
-        colour = "demo"
+        tier, label, colour = 1, "TIER 1: DEMO — BOGUS DATA", "demo"
     elif cfg.TRADE_MODE == "LIVE":
-        tier   = 3
-        label  = "TIER 3: REAL LIVE — ORIGINAL CAPITAL"
-        colour = "live"
+        tier, label, colour = 3, "TIER 3: REAL LIVE — ORIGINAL CAPITAL", "live"
     else:
-        tier   = 2
-        label  = "TIER 2: LIVE PAPER — VIRTUAL CAPITAL"
-        colour = "paper"
+        tier, label, colour = 2, "TIER 2: LIVE PAPER — VIRTUAL CAPITAL", "paper"
 
     return {
-        "mode":           cfg.TRADE_MODE,
-        "tier":           tier,
-        "label":          label,
-        "colour":         colour,
-        "redis_ok":       redis_ok,
-        "sqlite_ok":      sqlite_ok,
-        "persistence_ok": persistence_ok,
+        "mode":               cfg.TRADE_MODE,
+        "tier":               tier,
+        "label":              label,
+        "colour":             colour,
+        "redis_ok":           redis_ok,
+        "sqlite_ok":          sqlite_ok,
+        "db_file_exists":     db_file_exists,
+        "conn_live":          conn_live,
+        "persistence_ok":     persistence_ok,
         "persistence_warning": (
             "" if persistence_ok else
             "PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)"
@@ -789,6 +792,63 @@ async def resume_engine(_auth=Depends(require_roles("operator", "admin"))):
     risk_ctrl.halted = False
     _thought("✅ Engine manually resumed", "SYSTEM")
     return {"halted": False}
+
+
+@app.post("/api/engine/reset")
+async def reset_engine(_auth=Depends(require_roles("admin"))):
+    """
+    ADMIN: Full engine reset after a halt.
+    Clears halted + graceful_stop, cancels pending limit orders,
+    and logs an audit entry.  Does NOT close open positions.
+    """
+    prev_halted        = risk_ctrl.halted
+    prev_graceful      = risk_ctrl.graceful_stop
+    risk_ctrl.halted       = False
+    risk_ctrl.graceful_stop = False
+    risk_ctrl.pending_orders.clear()
+    msg = (
+        f"🔄 ENGINE RESET by admin — "
+        f"halted={prev_halted} graceful_stop={prev_graceful} cleared. "
+        f"Signal scanning resumed. {len(risk_ctrl.positions)} position(s) still open."
+    )
+    _thought(msg, "SYSTEM")
+    return {
+        "reset":              True,
+        "previously_halted":  prev_halted,
+        "open_positions":     len(risk_ctrl.positions),
+        "ts":                 int(time.time() * 1000),
+    }
+
+
+@app.get("/api/halt-audit")
+async def get_halt_audit():
+    """
+    Returns the auto-liquidation audit log:
+    all HALT and CLOSE_POSITION risk events + current halted state.
+    """
+    halt_events = [
+        {
+            "ts":         e.ts,
+            "event_type": e.event_type,
+            "symbol":     e.symbol,
+            "detail":     e.detail,
+        }
+        for e in risk_ctrl.events
+        if e.event_type in ("HALT", "CLOSE_POSITION", "EMERGENCY")
+    ]
+    # Grab FILTER-level thoughts for SKIP audit
+    skip_log = [
+        t for t in _thought_log
+        if t.get("level") == "FILTER"
+    ][-50:]
+
+    return {
+        "halted":        risk_ctrl.halted,
+        "graceful_stop": risk_ctrl.graceful_stop,
+        "halt_events":   halt_events[-100:],
+        "skip_log":      skip_log,
+        "ts":            int(time.time() * 1000),
+    }
 
 
 # ── Engine Command & Control ──────────────────────────────────────────────────

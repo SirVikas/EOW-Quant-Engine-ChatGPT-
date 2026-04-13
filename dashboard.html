@@ -561,6 +561,31 @@ body {
     </table>
   </div>
 
+  <!-- Row 4: Halt Audit & Engine Reset (Admin) -->
+  <div class="card peach" id="halt-audit-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;">Halt Audit &amp; Recovery</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+          Auto-liquidation log — all HALT and EMERGENCY events. Admin-only reset.
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn green" onclick="resetEngine()" style="font-size:13px;padding:8px 18px;"
+          title="Admin: clear halt + graceful_stop, resume scanning">
+          🔄 RESET ENGINE
+        </button>
+        <button class="btn purple" onclick="loadHaltAudit()">Refresh Log</button>
+      </div>
+    </div>
+    <div id="halt-audit-log" style="max-height:200px;overflow-y:auto;"
+         class="scroll">
+      <div style="font-size:11px;color:var(--muted);text-align:center;padding:12px;">
+        Click "Refresh Log" to load halt and skip events.
+      </div>
+    </div>
+  </div>
+
 </div><!-- /main dbo -->
 </div><!-- /tab-dbo -->
 
@@ -709,6 +734,7 @@ function switchTab(name) {
   if (name === 'dbo') {
     initGrowthChart();
     renderDBO();
+    loadHaltAudit();
   }
   if (name === 'report') {
     refreshReport();
@@ -945,6 +971,8 @@ function renderAll() {
   renderModeStrip();
   renderEnginePanel();
   if (_activeTab === 'dbo') renderDBO();
+  // Auto-refresh halt audit when halted
+  if (state.halted && _activeTab === 'dbo') loadHaltAudit();
 }
 
 function renderModeBadge() {
@@ -1174,44 +1202,63 @@ function handleWsMessage(data) {
 }
 
 // ── REST Polling ──────────────────────────────────────────────────────────────
+// Runs every 5s regardless of mock state.
+// If backend responds while in mock mode → exits mock, applies live data.
 async function pollRest() {
-  if(useMock) return;
   try {
     const [statusR, pnlR, posR, regR, thR, gR] = await Promise.all([
-      fetch(API+'/api/status').then(r=>r.json()),
-      fetch(API+'/api/pnl').then(r=>r.json()),
-      fetch(API+'/api/positions').then(r=>r.json()),
-      fetch(API+'/api/regime').then(r=>r.json()),
-      fetch(API+'/api/thoughts?limit=30').then(r=>r.json()),
-      fetch(API+'/api/genome').then(r=>r.json()),
+      fetch(API+'/api/status',             {signal: AbortSignal.timeout(4000)}).then(r=>r.json()),
+      fetch(API+'/api/pnl',               {signal: AbortSignal.timeout(4000)}).then(r=>r.json()),
+      fetch(API+'/api/positions',          {signal: AbortSignal.timeout(4000)}).then(r=>r.json()),
+      fetch(API+'/api/regime',             {signal: AbortSignal.timeout(4000)}).then(r=>r.json()),
+      fetch(API+'/api/thoughts?limit=30',  {signal: AbortSignal.timeout(4000)}).then(r=>r.json()),
+      fetch(API+'/api/genome',             {signal: AbortSignal.timeout(4000)}).then(r=>r.json()),
     ]);
+
+    // ── Backend is alive: exit mock mode if we were in it ─────────────────────
+    if (useMock) {
+      useMock = false;
+      setWsStatus(!!(ws && ws.readyState === 1));
+      addThought('✅ Backend reconnected — exiting mock mode, loading live data', 'SYSTEM');
+      // Re-trigger analytics fetch immediately on reconnect
+      pollAnalytics();
+    }
+
     applyStatus(statusR);
     applyPnl(pnlR);
     if(posR.open_positions) state.positions = posR.open_positions;
     state.regimes = Object.fromEntries(Object.entries(regR).map(([k,v])=>[k,v.regime]));
     state.thoughts = thR;
     if(gR.recent_genomes) state.genomeLog = gR.recent_genomes;
-    // Lake stats
+
+    // Lake stats — db_stats() keys: "ticks", "candles", "funding", "trades", "db_size_mb"
     try {
-      const lR = await fetch(API+'/api/lake').then(r=>r.json());
+      const lR = await fetch(API+'/api/lake', {signal: AbortSignal.timeout(3000)}).then(r=>r.json());
       if (lR) state.lake = {
-        candles: lR.candle_count||0, ticks: lR.tick_count||0,
-        trades: lR.trade_count||0, db_size_mb: lR.db_size_mb||0,
+        candles:    lR.candles    || 0,
+        ticks:      lR.ticks      || 0,
+        trades:     lR.trades     || 0,
+        db_size_mb: lR.db_size_mb || 0,
       };
     } catch(e){}
-    // Mode info (fast, non-blocking)
+
+    // Mode info
     try {
-      const miR = await fetch(API+'/api/mode-info').then(r=>r.json());
+      const miR = await fetch(API+'/api/mode-info', {signal: AbortSignal.timeout(3000)}).then(r=>r.json());
       if (miR) state.modeInfo = miR;
     } catch(e){}
+
     // Engine state
     try {
-      const engR = await fetch(API+'/api/engine/status').then(r=>r.json());
+      const engR = await fetch(API+'/api/engine/status', {signal: AbortSignal.timeout(3000)}).then(r=>r.json());
       if (engR) state.engineState = engR;
     } catch(e){}
+
     renderAll();
+
   } catch(e) {
-    if(!useMock) enableMock();
+    // Backend unreachable — enable mock only if not already in it
+    if (!useMock) enableMock();
   }
 }
 
@@ -1364,8 +1411,12 @@ function enableMock() {
       ],
     },
   };
-  state.modeInfo = { label:'DEMO', persistence_ok:false,
-    persistence_warning:'PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)' };
+  state.modeInfo = {
+    tier: 1, label: 'TIER 1: DEMO — BOGUS DATA', colour: 'demo',
+    persistence_ok: false,
+    persistence_warning: 'PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)',
+    persistence_status: '⚠ PERSISTENCE FAILED',
+  };
 
   for(let i=0;i<6;i++) addThought(...MOCK_THOUGHTS[i]);
   renderAll();
@@ -1469,7 +1520,84 @@ async function engineEmergency() {
     renderEnginePanel();
     renderHaltBanner();
     addThought('🛑 EMERGENCY STOP — all positions closed at market', 'HALT');
+    // Load halt audit automatically after emergency close
+    setTimeout(loadHaltAudit, 800);
   } catch(e) { addThought('Emergency stop failed — backend offline', 'HALT'); }
+}
+
+async function resetEngine() {
+  if (!confirm(
+    'RESET ENGINE?\n\n' +
+    'This will:\n' +
+    '  • Clear the HALTED flag\n' +
+    '  • Clear any Graceful Stop\n' +
+    '  • Cancel all pending limit orders\n' +
+    '  • Resume full signal scanning\n\n' +
+    'Open positions will NOT be closed. Proceed?'
+  )) return;
+  try {
+    const r = await fetch(API+'/api/engine/reset', {method:'POST'});
+    const d = await r.json();
+    state.engineState.state       = 'ACTIVE';
+    state.engineState.halted      = false;
+    state.engineState.graceful_stop = false;
+    state.halted = false;
+    renderEnginePanel();
+    renderHaltBanner();
+    addThought(`🔄 ENGINE RESET — scanning resumed. ${d.open_positions||0} position(s) still open.`, 'SYSTEM');
+    loadHaltAudit();
+  } catch(e) { addThought('Engine reset failed — backend offline or insufficient role', 'HALT'); }
+}
+
+async function loadHaltAudit() {
+  const panel = document.getElementById('halt-audit-log');
+  if (!panel) return;
+  try {
+    const d = await fetch(API+'/api/halt-audit').then(r=>r.json());
+    const events  = d.halt_events  || [];
+    const skips   = d.skip_log     || [];
+
+    const lvlColour = {
+      'HALT':           '#FED7D7',
+      'CLOSE_POSITION': '#FEFCBF',
+      'EMERGENCY':      '#FEB2B2',
+    };
+
+    let html = '';
+
+    if (events.length === 0 && skips.length === 0) {
+      html = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:12px;">No halt or skip events recorded this session.</div>';
+    } else {
+      if (events.length) {
+        html += '<div style="font-size:10px;font-weight:600;color:var(--muted);padding:4px 0;text-transform:uppercase;letter-spacing:.05em;">Liquidation Events</div>';
+        html += events.slice().reverse().map(e => {
+          const ts = new Date(e.ts).toLocaleTimeString('en-GB',{hour12:false});
+          const bg = lvlColour[e.event_type] || '#EBF8FF';
+          return `<div style="display:flex;gap:8px;align-items:flex-start;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:11px;">
+            <span style="color:#888;flex-shrink:0;font-family:monospace">${ts}</span>
+            <span style="background:${bg};color:#333;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;flex-shrink:0">${e.event_type}</span>
+            <span style="color:#444">${e.symbol ? '['+e.symbol+'] ' : ''}${e.detail}</span>
+          </div>`;
+        }).join('');
+      }
+
+      if (skips.length) {
+        html += '<div style="font-size:10px;font-weight:600;color:var(--muted);padding:6px 0 4px;text-transform:uppercase;letter-spacing:.05em;margin-top:4px;">Signal Skip Audit (last 50)</div>';
+        html += skips.slice().reverse().map(t => {
+          const ts = new Date(t.ts||0).toLocaleTimeString('en-GB',{hour12:false});
+          const msg = (t.msg||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          return `<div style="display:flex;gap:8px;align-items:flex-start;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:11px;">
+            <span style="color:#888;flex-shrink:0;font-family:monospace">${ts}</span>
+            <span style="background:#FEFCBF;color:#7B6100;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;flex-shrink:0">SKIP</span>
+            <span style="color:#555">${msg}</span>
+          </div>`;
+        }).join('');
+      }
+    }
+    panel.innerHTML = html;
+  } catch(e) {
+    panel.innerHTML = '<div style="font-size:11px;color:#aaa;padding:8px;">Backend offline — audit unavailable.</div>';
+  }
 }
 
 // ── Analytics Polling (every 15s) ────────────────────────────────────────────
@@ -1489,13 +1617,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Leader election — only 1 tab per browser gets WS, others use REST
   initLeaderElection();
-  // Poll REST every 5s as fallback (WS is primary)
-  setTimeout(() => setInterval(pollRest, 5000), 3000);
-  // Poll analytics every 15s (heavier computation)
-  setTimeout(() => { pollAnalytics(); setInterval(pollAnalytics, 15000); }, 5000);
 
-  // If backend doesn't respond in 2s, go mock
-  setTimeout(()=>{ if(!ws||ws.readyState!==1) enableMock(); }, 2000);
+  // Poll REST every 5s — works in both live and mock mode.
+  // In mock mode it attempts a real fetch; success exits mock mode automatically.
+  setTimeout(() => setInterval(pollRest, 5000), 3000);
+
+  // Poll analytics every 15s (heavier computation)
+  setTimeout(() => { pollAnalytics(); setInterval(pollAnalytics, 15000); }, 8000);
+
+  // Give backend 7s to accept the WebSocket (server may still be starting up).
+  // Previously 2s — too aggressive, caused permanent mock-lock when served from FastAPI.
+  setTimeout(() => { if (!ws || ws.readyState !== 1) enableMock(); }, 7000);
 
   // Mock update loop (runs always, no-op when useMock=false)
   setInterval(mockTick_, 2400);
