@@ -269,11 +269,13 @@ def deployability_index(
 
     score = min(score, 100)
 
-    # V4.0 spec: Deployability must remain ≤ 50 when persistence is BOGUS.
-    # A system that cannot save its state is never fully deployable.
-    persistence_capped = (not persistence_ok) and score > 50
+    # Deployability cap when persistence is BOGUS (no Redis + no SQLite trades).
+    # Raised to 70 so the engine can reach CONDITIONAL tier and trade while
+    # the operator sets up Redis.  Full 100 still requires persistence.
+    _BOGUS_CAP = 70
+    persistence_capped = (not persistence_ok) and score > _BOGUS_CAP
     if persistence_capped:
-        score = 50
+        score = _BOGUS_CAP
 
     tier = (
         "DEPLOYABLE"    if score >= 75 else

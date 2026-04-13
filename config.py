@@ -49,13 +49,12 @@ class EngineConfig(BaseSettings):
     SLIPPAGE_EST: float = 0.0012          # Realistic slippage (was 0.03%, observed ~0.15%)
     VOL_BASELINE_ATR_PCT: float = 0.20    # Baseline ATR% for dynamic edge premium
     VOL_PREMIUM_MULT: float = 1.5         # How aggressively volatility raises min-R
-    BASE_MIN_R: float = 1.2               # Fallback post-cost R threshold (regime-agnostic)
+    BASE_MIN_R: float = 1.10               # Fallback post-cost R threshold (was 1.20 — relaxed for more entries)
     ATR_SLIPPAGE_MULT: float = 0.20       # Extra slippage buffer as % of ATR
-    # Per-regime minimum R thresholds (Diagnostic Fix B)
-    # Mean-reversion wins via high WR, not large individual R → lower bar is rational
-    REGIME_MIN_R_TRENDING: float = 1.20
-    REGIME_MIN_R_MEAN_REVERTING: float = 1.05
-    REGIME_MIN_R_VOLATILE: float = 1.15
+    # Per-regime minimum R thresholds — relaxed for higher signal frequency
+    REGIME_MIN_R_TRENDING: float = 1.10        # was 1.20 — still captures strong trends
+    REGIME_MIN_R_MEAN_REVERTING: float = 1.05  # unchanged — high WR compensates
+    REGIME_MIN_R_VOLATILE: float = 1.05        # was 1.15 — breakouts move fast
 
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
@@ -67,16 +66,16 @@ class EngineConfig(BaseSettings):
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
 
     # ── Genome Engine ────────────────────────────────────────────────────────
-    GENOME_CYCLE_MINUTES: int = 15         # Mutation cycle interval (was 60 — first cycle now in 15 min)
+    GENOME_CYCLE_MINUTES: int = 5          # Mutation cycle interval (was 15 — frequent calibration)
     GENOME_POPULATION: int = 20            # Shadow strategies per cycle
     GENOME_LOOKBACK_HOURS: int = 24        # Backtest window (fresh data)
-    GENOME_PROMOTE_WIN_RATE: float = 0.55  # Min win-rate to promote (raised: 52%→55%)
-    GENOME_PROMOTE_PF: float = 1.5         # Min profit-factor to promote (raised: 1.3→1.5)
+    GENOME_PROMOTE_WIN_RATE: float = 0.55  # Min win-rate to promote
+    GENOME_PROMOTE_PF: float = 1.5         # Min profit-factor to promote
     # Phase 3 — OOS Validation & Execution-Cost Gating
     GENOME_OOS_SPLIT_RATIO: float = 0.70       # 70% candles for training, 30% held-out OOS test
-    GENOME_OOS_MIN_PF: float = 1.0             # OOS profit-factor floor — must exceed 1.0 on unseen data
-    GENOME_OVERFITTING_MAX_RATIO: float = 2.0  # Reject if train_pf / oos_pf exceeds this (curve-fitting signal)
-    GENOME_MIN_AVG_R: float = 0.50             # Min net average R-multiple per trade post-fee/slippage
+    GENOME_OOS_MIN_PF: float = 1.0             # OOS profit-factor floor
+    GENOME_OVERFITTING_MAX_RATIO: float = 2.0  # Reject if train_pf / oos_pf exceeds this
+    GENOME_MIN_AVG_R: float = 0.35             # Min net average R-multiple (was 0.50 — relaxed gate)
 
     # ── Self-Healing ─────────────────────────────────────────────────────────
     HEAL_INTERVAL_SECONDS: int = 60

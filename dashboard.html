@@ -398,6 +398,23 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     </div>
   </div>
 
+  <!-- ── Skip Reason Live Indicator ── -->
+  <div id="skip-reason-bar" style="display:none;padding:8px 14px;border-radius:10px;border:1.5px solid #FEB2B2;background:#FFF5F5;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:12px;font-weight:700;color:#9B2C2C;">⛔ Last Skip</span>
+      <span id="skip-symbol" style="font-size:12px;font-weight:600;color:#333;font-family:monospace;background:#FED7D7;padding:1px 7px;border-radius:6px;">—</span>
+      <span id="skip-reason-label" style="font-size:11px;color:#9B2C2C;font-weight:600;">—</span>
+      <span style="font-size:11px;color:#555;">RR achieved: <strong id="skip-rr-net" style="color:#9B2C2C;">—</strong></span>
+      <span style="font-size:11px;color:#555;">Required: <strong id="skip-rr-req" style="color:#276749;">—</strong></span>
+      <span id="skip-gap-badge" style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:#FED7D7;color:#9B2C2C;">Gap: —</span>
+      <span id="skip-regime-badge" style="font-size:10px;padding:1px 6px;border-radius:6px;background:#EBF8FF;color:#2B6CB0;">—</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="skip-total-count" style="font-size:10px;color:var(--muted);">0 skips this session</span>
+      <button class="btn" onclick="switchTab('report')" style="font-size:10px;padding:3px 9px;border-color:#FC8181;color:#9B2C2C;">View Skip Log</button>
+    </div>
+  </div>
+
   <!-- ── Stat Cards Row 1 ── -->
   <div class="g4">
     <div class="card mint">
@@ -720,7 +737,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
       </div>
       <span id="guardian-safe-badge" class="tag green">● SAFE</span>
     </div>
-    <div class="g3">
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
       <div style="text-align:center;">
         <div class="label">Guardian State</div>
         <div style="font-size:14px;font-weight:700;margin-top:4px;" id="guardian-status-text">Monitoring</div>
@@ -728,6 +745,11 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
       <div style="text-align:center;">
         <div class="label">Veto Count (Session)</div>
         <div class="big" id="guardian-veto-count" style="font-size:22px;color:var(--c-amber);">0</div>
+      </div>
+      <div style="text-align:center;">
+        <div class="label">Grace Window</div>
+        <div style="font-size:14px;font-weight:700;margin-top:4px;" id="guardian-grace-display" style="color:var(--c-green);">—</div>
+        <div style="font-size:10px;color:var(--muted);">30 min after manual change</div>
       </div>
       <div style="text-align:center;">
         <div class="label">Last Guardian Action</div>
@@ -1571,6 +1593,9 @@ async function pollRest() {
       }
     } catch(e){}
 
+    // Skip Reason live indicator (every poll cycle)
+    loadSkipReason();
+
     renderAll();
 
   } catch(e) {
@@ -2076,6 +2101,41 @@ function renderAggression() {
   }
 }
 
+// ── Skip Reason Live Indicator ────────────────────────────────────────────────
+async function loadSkipReason() {
+  try {
+    const d = await fetch(API+'/api/last-skip', {signal:AbortSignal.timeout(3000)}).then(r=>r.json());
+    const bar   = document.getElementById('skip-reason-bar');
+    const sk    = d.last_skip || {};
+    const total = d.skip_total || 0;
+
+    if (!sk.ts) { if (bar) bar.style.display = 'none'; return; }
+
+    // Show the bar
+    if (bar) bar.style.display = 'flex';
+
+    const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    const ago = Math.round((Date.now() - sk.ts) / 1000);
+    const agoStr = ago < 60 ? `${ago}s ago` : `${Math.round(ago/60)}m ago`;
+
+    set('skip-symbol',      sk.symbol || '—');
+    set('skip-reason-label', `${sk.reason || 'WEAK_EDGE'} [${sk.strategy || '—'} | ${sk.regime || '—'}] · ${agoStr}`);
+    set('skip-rr-net',      sk.rr_net != null ? sk.rr_net.toFixed(3) : '—');
+    set('skip-rr-req',      sk.rr_req != null ? sk.rr_req.toFixed(3) : '—');
+    set('skip-gap-badge',   sk.gap    != null ? `Gap: ${sk.gap.toFixed(3)}` : 'Gap: —');
+    set('skip-regime-badge', sk.regime || '—');
+    set('skip-total-count', `${total} skip${total !== 1 ? 's' : ''} this session`);
+
+    // Colour the gap badge by severity
+    const gapEl = document.getElementById('skip-gap-badge');
+    if (gapEl && sk.gap != null) {
+      if (sk.gap < 0.05)      { gapEl.style.background = '#FED7D7'; gapEl.style.color = '#9B2C2C'; }
+      else if (sk.gap < 0.15) { gapEl.style.background = '#FEFCBF'; gapEl.style.color = '#7B6100'; }
+      else                    { gapEl.style.background = '#FEB2B2'; gapEl.style.color = '#742A2A'; }
+    }
+  } catch(e) {}
+}
+
 function renderGuardianPanel() {
   const safeBadge = document.getElementById('guardian-safe-badge');
   const statusTxt = document.getElementById('guardian-status-text');
@@ -2093,6 +2153,21 @@ function renderGuardianPanel() {
   if (statusTxt) statusTxt.textContent = guardianState.safe_mode ? 'Safe-Mode Active' : 'Monitoring';
   if (vetoCnt)   vetoCnt.textContent   = guardianState.veto_count || 0;
   if (lastAct)   lastAct.textContent   = guardianState.last_message || 'No actions yet';
+
+  // Grace window display
+  const graceEl = document.getElementById('guardian-grace-display');
+  if (graceEl) {
+    const gs = guardianState.grace_remaining_s || 0;
+    if (gs > 0) {
+      const gMin = Math.ceil(gs / 60);
+      graceEl.textContent  = `${gMin} min left`;
+      graceEl.style.color  = '#276749';
+      graceEl.title        = 'Reactive auto-downgrade suppressed during grace window';
+    } else {
+      graceEl.textContent = 'Inactive';
+      graceEl.style.color = 'var(--muted)';
+    }
+  }
 
   if (guardMsg) {
     if (guardianState.safe_mode && guardianState.last_message) {
