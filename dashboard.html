@@ -276,6 +276,38 @@ body {
 .vault-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
 .vault-err { color: var(--c-red); font-size: 12px; font-weight: 600; min-height: 18px; margin-top: 8px; }
 
+/* ── ⓘ Hindi Clarity Module ── */
+.info-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: rgba(0,0,0,0.07); color: var(--muted);
+  font-size: 9px; font-weight: 800; cursor: pointer;
+  margin-left: 5px; vertical-align: middle;
+  border: 1px solid rgba(0,0,0,0.10); transition: all .15s;
+  user-select: none; flex-shrink: 0; line-height: 1;
+}
+.info-btn:hover { background: #BEE3F8; color: var(--c-blue); border-color: #90CDF4; }
+#info-tip-global {
+  display: none; position: fixed; z-index: 10000;
+  max-width: 290px; padding: 12px 16px;
+  background: #1A202C; color: #E2E8F0; border-radius: 12px;
+  font-size: 12px; line-height: 1.65; pointer-events: none;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.38);
+}
+#info-tip-global.show { display: block; }
+#info-tip-global .tip-title {
+  font-weight: 700; font-size: 10px; color: #68D391;
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 5px;
+}
+
+/* ── Aggression level cards ── */
+.agg-card {
+  padding: 14px 10px; border-radius: 12px; cursor: pointer; text-align: center;
+  transition: all .18s; border: 1.5px solid rgba(0,0,0,0.08); background: #f7f7f7;
+}
+.agg-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.10); }
+.agg-card.active { border-width: 2px; }
+
 /* ── REAL LIVE — High-Alert Red Theme ── */
 body.real-live-mode { background: #FFF5F5; }
 body.real-live-mode .topbar {
@@ -338,9 +370,10 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 <!-- ══ TAB NAVIGATION ════════════════════════════════════════════════════════ -->
 <nav class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('overview')" id="tab-btn-overview">Overview</button>
-  <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">DBO Analytics</button>
-  <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">Report</button>
+  <button class="tab-btn active" onclick="switchTab('overview')" id="tab-btn-overview">⚔ Battle Overview</button>
+  <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">🧠 Strategic Truth</button>
+  <button class="tab-btn"        onclick="switchTab('combat')"   id="tab-btn-combat">🎮 Combat Controls</button>
+  <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
 </nav>
 
 <!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
@@ -348,20 +381,19 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════════ -->
 <div class="main">
 
-  <!-- ── Engine Command & Control Panel ── -->
-  <div class="card" id="ctrl-panel" style="background:#F7FAFA;border:1.5px solid var(--border);">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="display:flex;align-items:center;gap:7px;">
-          <span id="engine-dot" class="ws-dot disconnected" style="width:11px;height:11px;"></span>
-          <span style="font-size:13px;font-weight:600;" id="engine-state-label">STANDBY</span>
-        </div>
+  <!-- ── Engine Status Bar (compact HUD) ── -->
+  <div class="card" id="ctrl-panel" style="background:#F7FAFA;border:1.5px solid var(--border);padding:10px 18px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="engine-dot" class="ws-dot disconnected" style="width:11px;height:11px;"></span>
+        <span style="font-size:13px;font-weight:600;" id="engine-state-label">STANDBY</span>
         <span class="tag" id="engine-state-tag" style="background:#EBF8FF;color:#2B6CB0;">STANDBY</span>
+        <span id="agg-hud-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#FEFCBF;color:#7B6100;">⚖ Balanced</span>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn green" onclick="engineStart()" title="Clear halt + graceful-stop and resume full signal scanning">▶ START</button>
-        <button class="btn blue"  onclick="engineGraceful()" title="Block new entries — let open positions run to TP/SL">⏸ Graceful Stop</button>
-        <button class="btn red"   onclick="engineEmergency()" title="Immediately close ALL open positions at market price">🛑 Emergency Stop</button>
+      <div style="display:flex;gap:7px;align-items:center;">
+        <span style="font-size:11px;color:var(--muted);">Full controls →</span>
+        <button class="btn blue" onclick="switchTab('combat')" style="font-size:11px;padding:4px 11px;">🎮 Combat Controls</button>
+        <button class="btn red"  onclick="engineEmergency()" title="Emergency: close all positions now" style="font-size:11px;padding:4px 11px;">🛑 Emergency</button>
       </div>
     </div>
   </div>
@@ -520,32 +552,32 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;">
     <!-- Sortino -->
     <div class="card mint">
-      <div class="label">Sortino Ratio</div>
+      <div class="label">Sortino Ratio <span class="info-btn" onclick="showInfo('sortino',event)">ⓘ</span></div>
       <div class="big" id="dbo-sortino" style="color:var(--c-teal);">—</div>
       <div class="sub">Downside-risk adjusted</div>
     </div>
     <!-- Sharpe -->
     <div class="card sky">
-      <div class="label">Sharpe Ratio</div>
+      <div class="label">Sharpe Ratio <span class="info-btn" onclick="showInfo('sharpe',event)">ⓘ</span></div>
       <div class="big" id="dbo-sharpe" style="color:var(--c-blue);">—</div>
       <div class="sub">Annualised (252-day)</div>
     </div>
     <!-- Calmar -->
     <div class="card sage">
-      <div class="label">Calmar Ratio</div>
+      <div class="label">Calmar Ratio <span class="info-btn" onclick="showInfo('calmar',event)">ⓘ</span></div>
       <div class="big" id="dbo-calmar" style="color:var(--c-green);">—</div>
       <div class="sub">Annual return / Max DD</div>
     </div>
     <!-- Risk of Ruin -->
     <div class="card peach">
-      <div class="label">Risk of Ruin</div>
+      <div class="label">Risk of Ruin <span class="info-btn" onclick="showInfo('ror',event)">ⓘ</span></div>
       <div class="big" id="dbo-ror" style="color:var(--c-red);">—</div>
       <div class="sub">Bankruptcy probability</div>
       <div class="ror-bar"><div class="ror-bar-fill" id="dbo-ror-bar" style="width:0%"></div></div>
     </div>
     <!-- Deployability -->
     <div class="card lav">
-      <div class="label">Deployability Index</div>
+      <div class="label">Deployability Index <span class="info-btn" onclick="showInfo('deployability',event)">ⓘ</span></div>
       <div style="display:flex;align-items:center;gap:12px;">
         <div class="score-ring">
           <svg width="110" height="110" viewBox="0 0 110 110">
@@ -569,7 +601,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <!-- Row 2: Geometric vs Linear Growth Chart -->
   <div class="card mint">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="sec-hdr" style="margin:0;">Geometric vs Linear Growth</div>
+      <div class="sec-hdr" style="margin:0;">Geometric vs Linear Growth <span class="info-btn" onclick="showInfo('growth_chart',event)">ⓘ</span></div>
       <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);">
         <span style="display:flex;align-items:center;gap:4px;">
           <span style="width:12px;height:3px;background:#1D9E75;display:inline-block;border-radius:2px;"></span>Geometric (Compounding)</span>
@@ -587,7 +619,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
   <!-- Row 3: Benchmark Comparison -->
   <div class="card sky">
-    <div class="sec-hdr">Empirical Benchmark Comparison</div>
+    <div class="sec-hdr">Empirical Benchmark Comparison <span class="info-btn" onclick="showInfo('benchmark',event)">ⓘ</span></div>
     <table class="bm-table" id="bm-table">
       <thead>
         <tr>
@@ -632,6 +664,109 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 </div><!-- /main dbo -->
 </div><!-- /tab-dbo -->
+
+<!-- ══ TAB: COMBAT CONTROLS ══════════════════════════════════════════════════ -->
+<div id="tab-combat" class="tab-panel">
+<div class="main">
+
+  <!-- Engine Command Center (full controls) -->
+  <div class="card" style="background:#F7FAFA;border:1.5px solid var(--border);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;">Engine Command Center</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Ignition, halt, graceful wind-down, and admin reset.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="combat-engine-dot" class="ws-dot disconnected" style="width:11px;height:11px;"></span>
+        <span style="font-size:13px;font-weight:600;" id="combat-engine-label">STANDBY</span>
+        <span class="tag" id="combat-engine-tag" style="background:#EBF8FF;color:#2B6CB0;">STANDBY</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn green"  onclick="engineStart()"     title="Resume full signal scanning">▶ START</button>
+      <button class="btn blue"   onclick="engineGraceful()"  title="Block new entries — let positions run to TP/SL">⏸ Graceful Stop</button>
+      <button class="btn red"    onclick="engineEmergency()" title="Close ALL positions at market immediately">🛑 Emergency Stop</button>
+      <button class="btn green"  onclick="resetEngine()"     title="Admin: clear HALTED state and resume" style="border-color:#9AE6B4;">🔄 Reset Halt</button>
+    </div>
+  </div>
+
+  <!-- Aggression Level Selector -->
+  <div class="card sky">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+      <div class="sec-hdr" style="margin:0;">Aggression Level — Fighter Ki Raftaar</div>
+      <span class="info-btn" onclick="showInfo('aggression',event)">ⓘ</span>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+      Guardian Logic validates every change. Levels that push Risk-of-Ruin &gt; 1% are automatically blocked.
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;" id="aggression-grid">
+      <!-- Rendered by renderAggression() -->
+      <div style="padding:14px;border-radius:12px;background:#f7f7f7;text-align:center;color:#aaa;">Loading…</div>
+    </div>
+    <div id="guardian-msg" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.5;"></div>
+  </div>
+
+  <!-- Guardian Logic Status Panel -->
+  <div class="card peach">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="sec-hdr" style="margin:0;">Guardian Logic — Autonomous Safety Veto</div>
+          <span class="info-btn" onclick="showInfo('guardian',event)">ⓘ</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+          Monitors Risk-of-Ruin &amp; Drawdown. Vetoes unsafe settings. Auto-downgrades on danger signals.
+        </div>
+      </div>
+      <span id="guardian-safe-badge" class="tag green">● SAFE</span>
+    </div>
+    <div class="g3">
+      <div style="text-align:center;">
+        <div class="label">Guardian State</div>
+        <div style="font-size:14px;font-weight:700;margin-top:4px;" id="guardian-status-text">Monitoring</div>
+      </div>
+      <div style="text-align:center;">
+        <div class="label">Veto Count (Session)</div>
+        <div class="big" id="guardian-veto-count" style="font-size:22px;color:var(--c-amber);">0</div>
+      </div>
+      <div style="text-align:center;">
+        <div class="label">Last Guardian Action</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;word-break:break-word;line-height:1.5;" id="guardian-last-action">No actions yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vault / API Mode Quick Panel -->
+  <div class="card lav">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="sec-hdr" style="margin:0;">API Vault — Hot-Swap Mode Control</div>
+          <span class="info-btn" onclick="showInfo('vault_mode',event)">ⓘ</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+          Switch between Testnet (Paper) and Production (Real Live) without engine restart.
+          Credentials are AES-encrypted at rest — master password required to switch.
+        </div>
+      </div>
+      <button class="btn" id="combat-vault-btn" onclick="openVaultModal()" style="border-color:#D6BCFA;background:#FAF5FF;color:#553C9A;">🔐 Open Vault</button>
+    </div>
+    <div class="g2">
+      <div style="padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);background:#fff;">
+        <div class="label">Current Execution Mode</div>
+        <div style="font-size:18px;font-weight:700;margin-top:4px;" id="combat-vault-mode">PAPER</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;" id="combat-vault-endpoint">testnet.binance.vision</div>
+      </div>
+      <div style="padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);background:#fff;">
+        <div class="label">Vault Configured</div>
+        <div style="font-size:18px;font-weight:700;margin-top:4px;" id="combat-vault-configured">—</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;">PBKDF2-HMAC encrypted at rest</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main combat -->
+</div><!-- /tab-combat -->
 
 <!-- ══ TAB: REPORT ═══════════════════════════════════════════════════════════ -->
 <div id="tab-report" class="tab-panel">
@@ -841,7 +976,7 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['overview','dbo','report'].forEach(t => {
+  ['overview','dbo','combat','report'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
@@ -851,6 +986,9 @@ function switchTab(name) {
     initGrowthChart();
     renderDBO();
     loadHaltAudit();
+  }
+  if (name === 'combat') {
+    loadGuardianStatus();
   }
   if (name === 'report') {
     refreshReport();
@@ -1376,6 +1514,16 @@ async function pollRest() {
       if (vR) { vaultState = vR; applyVaultTheme(vR.is_live); }
     } catch(e){}
 
+    // Guardian status (update combat tab + overview HUD badge)
+    try {
+      const gR = await fetch(API+'/api/guardian/status', {signal: AbortSignal.timeout(3000)}).then(r=>r.json());
+      if (gR) {
+        guardianState = gR;
+        renderAggression();
+        renderGuardianPanel();
+      }
+    } catch(e){}
+
     renderAll();
 
   } catch(e) {
@@ -1605,6 +1753,14 @@ function renderEnginePanel() {
   tag.textContent = s.text;
   tag.style.background = s.colour;
   tag.style.color      = s.fg;
+
+  // Sync combat tab engine state elements
+  const combatDot = el('combat-engine-dot');
+  const combatLbl = el('combat-engine-label');
+  const combatTag = el('combat-engine-tag');
+  if (combatDot) combatDot.className = 'ws-dot ' + s.cls;
+  if (combatLbl) combatLbl.textContent = s.text;
+  if (combatTag) { combatTag.textContent = s.text; combatTag.style.background = s.colour; combatTag.style.color = s.fg; }
 }
 
 async function engineStart() {
@@ -1731,6 +1887,213 @@ async function pollAnalytics() {
     state.analytics = d;
     if (_activeTab === 'dbo') renderDBO();
   } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// V15.0 — DHURANDHAR WAR-ROOM SUITE
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── ⓘ Hindi Clarity Module ───────────────────────────────────────────────────
+const INFO_HINTS = {
+  sortino: {
+    title: 'SORTINO RATIO',
+    text:  'Yeh meter batata hai ki robot kitne khatre (risk) ke badle kitna munafa kama raha hai — sirf neeche ke nuksaan ko ginke. 1.0 se upar ka matlab hai behtar suraksha.\n\n(Profit per unit of downside-only risk. Above 1.0 is institutional grade.)',
+  },
+  sharpe: {
+    title: 'SHARPE RATIO',
+    text:  'Yeh batata hai ki robot kitne khatre ke badle kitna munafa kama raha hai — dono taraf ke utaar-chadhav ke saath. 1.0 se upar behtar hai.\n\n(Risk-adjusted return including all volatility. Higher = better.)',
+  },
+  calmar: {
+    title: 'CALMAR RATIO',
+    text:  'Salana munafa aur sabse bade nuksaan (Max Drawdown) ka anupat. 1.0 se upar matlab hai ki robot apne worst loss se zyada per year kamaata hai.\n\n(Annual return ÷ Max Drawdown. Above 1.0 is excellent.)',
+  },
+  ror: {
+    title: 'RISK OF RUIN — Suraksha Chakra',
+    text:  'Aapka "Suraksha Chakra". Yeh batata hai ki account zero hone ka kitna % chance hai. Ise HAMESHA 0% ke paas rakhein. 1% se upar hone par Guardian Logic automatically aggression ghatata hai.\n\n(Probability of going bankrupt. Always keep near 0%. Guardian auto-downgrades if this exceeds 1%.)',
+  },
+  deployability: {
+    title: 'DEPLOYABILITY INDEX — Health Score',
+    text:  'Robot ka "Health Score". 85+ hone par hi asli paise (Real API) se trading shuru karein. Teen pillars hain: Network Stability (30 pts), Database Health (30 pts), RR Edge (40 pts).\n\n(System readiness for live deployment. Need 85+ before activating Real Live mode.)',
+  },
+  growth_chart: {
+    title: 'GEOMETRIC vs LINEAR GROWTH',
+    text:  'Yeh compounding ki taqat dikhata hai. Geometric line batati hai ki running capital ka 1% risk karne par capital tezi se kaise badhti hai vs. ek fixed amount risk karna.\n\n(Shows why compounding is far more powerful than fixed-size trading over time.)',
+  },
+  benchmark: {
+    title: 'EMPIRICAL BENCHMARK COMPARISON',
+    text:  'EOW Engine ki performance ko S&P 500, Hedge Funds, Top CTAs aur Renaissance Medallion se compare karta hai. Isse pata chalta hai ki aap institutional grade par hain ya nahi.\n\n(Your engine vs. world-class benchmarks — the ultimate performance audit.)',
+  },
+  bogus_storage: {
+    title: 'BOGUS STORAGE — Memory Alert',
+    text:  'Memory Fail! Munafa permanent save nahi ho raha. Restart hone par data kho jayega. Turant SQLite ya Redis connection check karein.\n\n(Session data is not being persisted. Check database connection immediately.)',
+  },
+  aggression: {
+    title: 'AGGRESSION LEVEL — Fighter Ki Raftaar',
+    text:  '"Dhurandhar" mode mein robot bade trades lega lekin risk bhi badh jayega. Guardian Logic automatically un settings ko BLOCK karta hai jo Risk-of-Ruin > 1% push karti hain. Conservative se shuru karein aur proven edge ke baad hi badhayein.\n\n(Sets trading position size. Guardian blocks levels unsafe for your current win-rate.)',
+  },
+  guardian: {
+    title: 'GUARDIAN LOGIC — Autonomous Veto System',
+    text:  'Ek autonomous safety brain. Jab bhi aap aise settings lagaate hain jo Risk-of-Ruin > 1% ya Drawdown > 12% push karen, Guardian automatically us decision ko BLOCK karta hai aur safe mode activate karta hai. Yeh aapka "Capital Protector" hai.\n\n(Autonomous veto that blocks and reverts unsafe aggression changes in real-time.)',
+  },
+  vault_mode: {
+    title: 'API VAULT — Hot-Swap Mode Control',
+    text:  'Paper (Testnet) aur Real Live (Production) Binance API keys yahan PBKDF2-encrypted store hain. Switch karne ke liye master password chahiye. Real Live mode mein poora UI red ho jaata hai — real paise ka reminder.\n\n(Encrypted credential store. Password-protected switch between paper and real money.)',
+  },
+};
+
+function showInfo(key, evt) {
+  evt.stopPropagation();
+  const hint = INFO_HINTS[key];
+  if (!hint) return;
+
+  let tip = document.getElementById('info-tip-global');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'info-tip-global';
+    document.body.appendChild(tip);
+    document.addEventListener('click', () => tip.classList.remove('show'), {passive:true});
+  }
+
+  // Render — convert \n\n to visual separator
+  const parts = hint.text.split('\n\n');
+  tip.innerHTML = `<div class="tip-title">${hint.title}</div>` +
+    parts.map((p, i) =>
+      `<div style="${i > 0 ? 'margin-top:8px;font-size:11px;opacity:.75;font-style:italic;' : ''}">${p.replace(/\n/g,'<br>')}</div>`
+    ).join('');
+
+  const rect = evt.target.getBoundingClientRect();
+  const W    = 290;
+  let left   = rect.left + window.scrollX;
+  let top    = rect.bottom + window.scrollY + 8;
+  if (left + W > window.innerWidth - 16) left = window.innerWidth - W - 16;
+  if (top + 180 > window.innerHeight + window.scrollY) top = rect.top + window.scrollY - 195;
+  tip.style.left = Math.max(8, left) + 'px';
+  tip.style.top  = top + 'px';
+  tip.classList.add('show');
+}
+
+// ── Guardian / Aggression ─────────────────────────────────────────────────────
+let guardianState = {
+  level: 2, profile_name: 'Balanced', profile_emoji: '⚖',
+  safe_mode: false, last_message: '', veto_count: 0,
+  all_profiles: {}, last_veto: null,
+};
+
+const AGG_PALETTE = {
+  1: { bg:'#C6F6D5', fg:'#276749', bdr:'#9AE6B4' },
+  2: { bg:'#BEE3F8', fg:'#2B6CB0', bdr:'#90CDF4' },
+  3: { bg:'#FEFCBF', fg:'#7B6100', bdr:'#FAF089' },
+  4: { bg:'#FED7D7', fg:'#9B2C2C', bdr:'#FC8181' },
+};
+
+async function loadGuardianStatus() {
+  try {
+    const d = await fetch(API+'/api/guardian/status', {signal:AbortSignal.timeout(3000)}).then(r=>r.json());
+    guardianState = d;
+    renderAggression();
+    renderGuardianPanel();
+  } catch(e) {}
+}
+
+function renderAggression() {
+  const grid = document.getElementById('aggression-grid');
+  if (!grid) return;
+  const profiles = guardianState.all_profiles || {};
+  if (!Object.keys(profiles).length) return;
+
+  grid.innerHTML = Object.entries(profiles).map(([lvl, p]) => {
+    const l      = parseInt(lvl);
+    const active = l === guardianState.level;
+    const pal    = AGG_PALETTE[l] || AGG_PALETTE[2];
+    return `<div class="agg-card ${active ? 'active' : ''}"
+      onclick="setAggression(${l})"
+      style="${active
+        ? `background:${pal.bg};border-color:${pal.bdr};border-width:2px;`
+        : 'background:#f7f7f7;border-color:rgba(0,0,0,0.08);'}">
+      <div style="font-size:22px;margin-bottom:5px;">${p.emoji}</div>
+      <div style="font-size:12px;font-weight:700;color:${active ? pal.fg : '#444'};margin-bottom:3px;">${p.name}</div>
+      <div style="font-size:10px;color:${active ? pal.fg : '#888'};">Risk: ${(p.max_risk_per_trade*100).toFixed(1)}%</div>
+      <div style="font-size:10px;color:${active ? pal.fg : '#888'};">Kelly: ${(p.kelly_fraction*100).toFixed(0)}%</div>
+      <div style="font-size:10px;color:${active ? pal.fg : '#888'};">SL: ${p.atr_mult_sl}× ATR</div>
+      ${active ? `<div style="margin-top:7px;"><span style="background:${pal.fg};color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.04em;">ACTIVE</span></div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Sync Overview HUD aggression badge
+  const hud = document.getElementById('agg-hud-badge');
+  if (hud) {
+    const pal = AGG_PALETTE[guardianState.level] || AGG_PALETTE[2];
+    hud.style.background = pal.bg;
+    hud.style.color      = pal.fg;
+    hud.textContent      = `${guardianState.profile_emoji} ${guardianState.profile_name}`;
+  }
+}
+
+function renderGuardianPanel() {
+  const safeBadge = document.getElementById('guardian-safe-badge');
+  const statusTxt = document.getElementById('guardian-status-text');
+  const vetoCnt   = document.getElementById('guardian-veto-count');
+  const lastAct   = document.getElementById('guardian-last-action');
+  const guardMsg  = document.getElementById('guardian-msg');
+
+  if (safeBadge) {
+    if (guardianState.safe_mode) {
+      safeBadge.textContent = '⚠ SAFE MODE'; safeBadge.className = 'tag amber';
+    } else {
+      safeBadge.textContent = '● SAFE';       safeBadge.className = 'tag green';
+    }
+  }
+  if (statusTxt) statusTxt.textContent = guardianState.safe_mode ? 'Safe-Mode Active' : 'Monitoring';
+  if (vetoCnt)   vetoCnt.textContent   = guardianState.veto_count || 0;
+  if (lastAct)   lastAct.textContent   = guardianState.last_message || 'No actions yet';
+
+  if (guardMsg) {
+    if (guardianState.safe_mode && guardianState.last_message) {
+      guardMsg.style.cssText = 'display:block;background:#FFF3CD;color:#7B4800;border-left:3px solid #F6AD55;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.5;';
+      guardMsg.textContent   = '🛡 ' + guardianState.last_message;
+    } else {
+      guardMsg.style.display = 'none';
+    }
+  }
+
+  // Update combat vault quick panel
+  const vaultMode = document.getElementById('combat-vault-mode');
+  const vaultConf = document.getElementById('combat-vault-configured');
+  const vaultEnd  = document.getElementById('combat-vault-endpoint');
+  if (vaultMode) { vaultMode.textContent = vaultState.is_live ? '⚡ REAL LIVE' : '📋 PAPER'; vaultMode.style.color = vaultState.is_live ? '#9B2C2C' : '#276749'; }
+  if (vaultConf) { vaultConf.textContent = vaultState.configured ? 'Yes ✓' : 'Not yet'; vaultConf.style.color = vaultState.configured ? 'var(--c-green)' : 'var(--c-red)'; }
+  if (vaultEnd)  vaultEnd.textContent = vaultState.is_live ? 'api.binance.com (Production)' : 'testnet.binance.vision';
+}
+
+async function setAggression(level) {
+  const guardMsg = document.getElementById('guardian-msg');
+  try {
+    const r = await fetch(API+'/api/engine/aggression', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({level}),
+    });
+    const d = await r.json();
+
+    if (!r.ok) {
+      // Guardian veto
+      if (guardMsg) {
+        guardMsg.style.cssText = 'display:block;background:#FFF5F5;color:#9B2C2C;border-left:3px solid #FC8181;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;line-height:1.5;';
+        guardMsg.textContent   = '🛡 ' + (d.detail || 'Guardian vetoed this change.');
+      }
+      addThought('🛡 Guardian Veto: ' + (d.detail || 'Blocked.'), 'HALT');
+      setTimeout(loadGuardianStatus, 300);
+      return;
+    }
+
+    guardianState = d;
+    if (guardMsg) guardMsg.style.display = 'none';
+    renderAggression();
+    renderGuardianPanel();
+    addThought(`⚡ Aggression → ${d.profile_emoji} ${d.profile_name} | Risk/trade: ${(d.all_profiles?.[d.level]?.max_risk_per_trade*100||0).toFixed(1)}%`, 'SYSTEM');
+  } catch(e) {
+    addThought('Aggression change failed — backend offline', 'HALT');
+  }
 }
 
 // ── Vault Management ─────────────────────────────────────────────────────────
@@ -1875,6 +2238,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Load vault status on boot (applies red theme if LIVE was active before refresh)
   loadVaultStatus();
+
+  // Load guardian/aggression state on boot
+  loadGuardianStatus();
 });
 </script>
 </body>
