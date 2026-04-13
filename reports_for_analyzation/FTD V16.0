@@ -1,0 +1,32 @@
+### 📄 FORMAL TECHNICAL DOCUMENT: THE DHURANDHAR EXECUTION UNLEASHED (V15.5 / V16.0)
+------------------------------------------------------------------
+DATE: April 13, 2026 | PRIORITY: 🚨 SUPREME COMMAND (FIX)
+SUBJECT: RESOLVING "NO TRADE" STASIS & RR_EDGE CALIBRATION
+------------------------------------------------------------------
+
+1. DIAGNOSIS: WHY NO TRADES ARE HAPPENING?
+- WEAK EDGE FILTER: System signals generate ho rahe hain, lekin filters itne strict hain ki 1.15 RR wale trades bhi skip ho rahe hain[cite: 242].
+- DEPLOYABILITY CAP: Persistence (Redis) na hone ki wajah se score 50 par locked hai, jo aggressive trading ko block karta hai[cite: 550].
+- GUARDIAN VETO: Guardian logic baar-baar aggression ko downgrade kar raha hai kyunki current metrics (0/40 RR Edge) "Dhurandhar" mode ko allow nahi kar rahe[cite: 430, 481].
+
+2. MANDATORY CONFIG UPDATES (config.py)
+Developer ko ye values update karni hain:
+- GENOME_MIN_AVG_R: 0.50 -> 0.35 (Threshold ko relax karein taaki trades execute hon)[cite: 564, 565].
+- GENOME_CYCLE_MINUTES: 15 -> 5 (Engine ko har 5 min mein seekhne par majboor karein)[cite: 588].
+- RR_req_global: 1.20 -> 1.10 (Filters ko thoda flexible karein)[cite: 242].
+
+3. GUARDIAN LOGIC CALIBRATION (core/guardian.py)
+- PROACTIVE RELAXATION: Agar manual aggression set ki jaye, toh Guardian ko 30-min window dena chahiye system ko prove karne ke liye[cite: 429].
+- PERSISTENCE FLEX: Persistence cap ko 50 se badha kar 70 karein taaki Redis ke bina bhi system active rahe[cite: 433].
+
+4. OPERATIONAL "FORCE START" PROTOCOL
+- Step A: Combat Controls tab mein "Run Evolution Now" button 3 baar dabayein.
+- Step B: BTC/ETH ke alawa 20+ symbols add karein taaki signal frequency badhe[cite: 24].
+- Step C: Redis Server start karein taaki "Persistence: BOGUS" error khatam ho[cite: 427, 450].
+
+5. UI ADDITION: EXECUTION FEEDBACK
+- Dashboard par "Skip Reason" indicator lagayein taaki user ko pata chale ki trade "Weak Edge" ki wajah se ruka ya "Veto" ki wajah se[cite: 436, 497].
+
+------------------------------------------------------------------
+AUTHORIZED BY: MASTER COMMANDER | STATUS: READY FOR EXECUTION
+------------------------------------------------------------------
