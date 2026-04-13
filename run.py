@@ -145,10 +145,8 @@ def print_api_routes():
 
 def print_boot_status():
     """
-    Fetch the boot diagnostics from the engine and print the FTD-REF-019
-    standard status line.
-    Format:
-      [BOOT] Redis: CONNECTED ✅ | WebSocket: STABLE ✅ | Indicators: VALIDATED ✅ | API: READ-ONLY ✅
+    Fetch boot diagnostics from the engine and print the FTD-REF-MASTER-001
+    standard status block.
     """
     import json as _json
     try:
@@ -156,20 +154,35 @@ def print_boot_status():
             f"http://127.0.0.1:{PORT}/api/boot-status", timeout=3
         ) as r:
             data = _json.loads(r.read())
-        redis  = data.get("redis",      "UNKNOWN")
-        ws     = data.get("websocket",  "UNKNOWN")
-        ind    = data.get("indicators", "UNKNOWN")
-        api    = data.get("api",        "UNKNOWN")
-        r_tick = f"{G}✅{NC}" if redis == "CONNECTED"   else f"{R}❌{NC}"
-        w_tick = f"{G}✅{NC}" if ws    == "STABLE"      else f"{R}❌{NC}"
-        i_tick = f"{G}✅{NC}" if ind   == "VALIDATED"   else f"{R}❌{NC}"
-        a_tick = f"{G}✅{NC}" if data.get("api_ok")     else f"{R}❌{NC}"
+
+        def tk(cond):
+            return f"{G}✅{NC}" if cond else f"{R}❌{NC}"
+
+        redis   = data.get("redis",           "UNKNOWN")
+        ws      = data.get("websocket",       "UNKNOWN")
+        ind     = data.get("indicators",      "UNKNOWN")
+        api     = data.get("api",             "UNKNOWN")
+        strat   = data.get("strategy_engine", "UNKNOWN")
+        risk    = data.get("risk_engine",     "UNKNOWN")
+        mode    = data.get("execution_mode",  "UNKNOWN")
+        deploy  = data.get("deployability",   "UNKNOWN")
+        d_score = data.get("deployability_score", 0)
+
+        print(f"\n{B}  Boot Status:{NC}")
         print(
-            f"\n{B}  Boot Status:{NC}\n"
-            f"    Redis: {C}{redis}{NC} {r_tick}  |  "
-            f"WebSocket: {C}{ws}{NC} {w_tick}  |  "
-            f"Indicators: {C}{ind}{NC} {i_tick}  |  "
-            f"API: {C}{api}{NC} {a_tick}\n"
+            f"    Redis: {C}{redis}{NC} {tk(redis=='CONNECTED')}  |  "
+            f"WebSocket: {C}{ws}{NC} {tk(ws=='CONNECTED' or ws=='STABLE')}  |  "
+            f"Indicators: {C}{ind}{NC} {tk(ind=='VALIDATED')}"
+        )
+        print(
+            f"    Strategy Engine: {C}{strat}{NC} {tk(strat=='ACTIVE')}  |  "
+            f"Risk Engine: {C}{risk}{NC} {tk(risk=='ACTIVE')}  |  "
+            f"Execution Mode: {C}{mode}{NC}"
+        )
+        print(
+            f"    API: {C}{api}{NC} {tk(data.get('api_ok'))}  |  "
+            f"Deployability: {C}{deploy}{NC} "
+            f"({G if d_score>=85 else Y if d_score>=60 else R}{d_score:.0f}/100{NC})\n"
         )
     except Exception:
         pass   # non-critical — engine already started

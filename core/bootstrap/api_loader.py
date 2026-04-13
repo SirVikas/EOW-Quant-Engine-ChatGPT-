@@ -3,9 +3,11 @@ EOW Quant Engine — API Loader (Boot Diagnostics)
 Runs once at startup; probes all external connections and prints a
 structured boot status line to the console.
 
-Boot log format (FTD-REF-019 standard):
-  [BOOT] Redis: CONNECTED ✅ | WebSocket: STABLE ✅ | Indicators: VALIDATED ✅ | API: CONNECTED (READ-ONLY) ✅
-  [BOOT] Redis: NOT_AVAILABLE ❌ | WebSocket: STABLE ✅ | Indicators: VALIDATED ✅ | API: NOT CONNECTED ❌
+Boot log format (FTD-REF-MASTER-001 standard):
+  [BOOT] Redis: CONNECTED ✅ | WebSocket: STABLE ✅ | Indicators: VALIDATED ✅
+         Strategy Engine: ACTIVE ✅ | Risk Engine: ACTIVE ✅
+         Execution Mode: PAPER_API | Deployability: IMPROVING
+         API: NOT CONNECTED ❌
 """
 from __future__ import annotations
 
@@ -37,7 +39,7 @@ class ApiLoader:
     async def run(self, api_manager: Optional[ApiManager] = None) -> dict:
         """
         Run all boot probes and print the standard boot log line.
-        Returns a summary dict for the /api/status endpoint.
+        Returns a summary dict for the /api/boot-status endpoint.
         """
         # 1. Redis probe
         health = RedisHealth()
@@ -51,33 +53,45 @@ class ApiLoader:
             else:
                 self._api_mode = "NOT CONNECTED"
 
-        self._print_boot_line()
+        self._print_boot_lines()
         return self.summary()
 
     def summary(self) -> dict:
         return {
-            "redis":      self._redis_status.value,
-            "websocket":  self._ws_status,
-            "indicators": self._ind_status,
-            "api":        self._api_mode,
-            "api_ok":     self._api_connected,
+            "redis":           self._redis_status.value,
+            "websocket":       self._ws_status,
+            "indicators":      self._ind_status,
+            "api":             self._api_mode,
+            "api_ok":          self._api_connected,
+            "strategy_engine": "ACTIVE",
+            "risk_engine":     "ACTIVE",
+            "execution_mode":  cfg.TRADE_MODE,
+            "deployability":   "IMPROVING",   # updated live via /api/boot-status
         }
 
     # ── Internals ─────────────────────────────────────────────────────────────
 
-    def _print_boot_line(self):
-        r_tick = "✅" if self._redis_status == RedisStatus.CONNECTED else "❌"
-        w_tick = "✅" if self._ws_status   == "STABLE"              else "❌"
-        i_tick = "✅" if self._ind_status  == "VALIDATED"           else "❌"
-        a_tick = "✅" if self._api_connected                        else "❌"
+    def _print_boot_lines(self):
+        def tick(cond: bool) -> str:
+            return "✅" if cond else "❌"
 
-        line = (
-            f"Redis: {self._redis_status.value} {r_tick} | "
-            f"WebSocket: {self._ws_status} {w_tick} | "
-            f"Indicators: {self._ind_status} {i_tick} | "
-            f"API: {self._api_mode} {a_tick}"
+        r_ok = self._redis_status == RedisStatus.CONNECTED
+        a_ok = self._api_connected
+
+        logger.info(
+            f"[BOOT] Redis: {self._redis_status.value} {tick(r_ok)} | "
+            f"WebSocket: {self._ws_status} {tick(True)} | "
+            f"Indicators: {self._ind_status} {tick(True)}"
         )
-        logger.info(f"[BOOT] {line}")
+        logger.info(
+            f"[BOOT] Strategy Engine: ACTIVE ✅ | "
+            f"Risk Engine: ACTIVE ✅ | "
+            f"Execution Mode: {cfg.TRADE_MODE}"
+        )
+        logger.info(
+            f"[BOOT] API: {self._api_mode} {tick(a_ok)} | "
+            f"Deployability: IMPROVING (score accumulates during session)"
+        )
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

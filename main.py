@@ -37,6 +37,10 @@ from core.redis_health    import redis_health
 from core.ws_stabilizer   import WsStabilizer
 from core.regime_debounce import regime_debounce
 from core.indicator_guard import indicator_guard
+from core.regime_ai       import regime_ai
+from core.signal_filter   import signal_filter
+from core.risk_engine     import risk_engine
+from core.deployability   import deployability_engine
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from utils.capital_scaler import CapitalScaler
@@ -144,8 +148,19 @@ async def on_tick(tick: Tick):
     if action:
         _thought(f"Position closed [{action}] {sym} @ {price}", "TRADE")
         if pnl_calc.trades:
-            data_lake.save_trade(asdict(pnl_calc.trades[-1]))
+            last_trade = pnl_calc.trades[-1]
+            data_lake.save_trade(asdict(last_trade))
+            # MASTER-001: update signal filter loss/win tracker
+            if last_trade.net_pnl >= 0:
+                signal_filter.record_win(sym)
+            else:
+                signal_filter.record_loss(sym)
+            # MASTER-001: update risk engine daily PnL + equity
+            risk_engine.record_trade_result(last_trade.net_pnl)
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
+
+    # MASTER-001: keep risk engine equity up to date
+    risk_engine.update_equity(scaler.equity)
 
     # 2. Get candle data for strategy
     candle = mdp.latest_candle(sym)
@@ -205,6 +220,18 @@ async def on_tick(tick: Tick):
         if not guard.ok:
             return   # insufficient candles / unstable ADX / near-zero ATR
 
+        # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
+        risk_allowed, risk_reason = risk_engine.check_new_trade()
+        if not risk_allowed:
+            return   # daily risk limit reached
+
+        # MASTER-001: regime AI confidence layer
+        r_ai = regime_ai.classify(
+            adx=guard.adx, atr_pct=guard.atr_pct,
+            bb_width=getattr(r_state, "bb_width", 0.0),
+            closes=closes,
+        )
+
         sig = strategy.generate_signal(sym, closes, highs, lows)
         if sig and sig.signal != Signal.NONE:
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
@@ -214,6 +241,25 @@ async def on_tick(tick: Tick):
             if sizing.qty <= 0:
                 return
             atr_pct = _estimate_atr_pct(closes)
+
+            # MASTER-001: signal quality filter (RR / ATR / confidence / cost)
+            cost_usdt = (sizing.qty * sig.entry_price) * (cfg.TAKER_FEE * 2 + cfg.SLIPPAGE_EST)
+            sf_result = signal_filter.check(
+                symbol=sym, entry=sig.entry_price,
+                take_profit=sig.take_profit, stop_loss=sig.stop_loss,
+                cost_usdt=cost_usdt, atr_pct=atr_pct,
+                confidence=r_ai.confidence,
+            )
+            if not sf_result.ok:
+                global _last_skip
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": sf_result.reason, "rr": sf_result.rr,
+                    "confidence": r_ai.confidence, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
+
             edge_ok, edge = risk_ctrl.get_trade_decision(
                 side=sig.signal.value,
                 entry=sig.entry_price,
@@ -379,6 +425,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # ── Fix A: Reload promoted DNA so genome doesn't reset on restart ─────────
     genome.load_persisted_dna()
 
+    # ── MASTER-001: Initialise risk engine with current equity ───────────────
+    risk_engine.initialize(cfg.INITIAL_CAPITAL)
+
     # ── FTD-REF-019: Boot diagnostics ────────────────────────────────────────
     global _boot_status
     _boot_status = await api_loader.run(api_manager=api_manager)
@@ -467,13 +516,30 @@ app.add_middleware(
 
 @app.get("/api/boot-status")
 async def get_boot_status():
-    """FTD-REF-019: Boot diagnostics — Redis / WebSocket / Indicators / API."""
+    """FTD-REF-019 / MASTER-001: Boot diagnostics — all subsystem status."""
     live_stab = ws_stab.summary()
+    re_snap   = risk_engine.snapshot()
+    stats     = pnl_calc.session_stats
+    n_trades  = len(pnl_calc.trades)
+    dep_result = deployability_engine.compute(
+        trades       = n_trades,
+        sharpe       = stats.get("sharpe_ratio", 0.0),
+        sortino      = stats.get("sortino_ratio", 0.0),
+        win_rate     = stats.get("win_rate", 0.0),
+        max_drawdown = stats.get("max_drawdown_pct", 0.0) / 100,
+        risk_of_ruin = stats.get("risk_of_ruin", 0.0),
+        avg_r        = stats.get("avg_r_multiple", 0.0),
+    )
     return {
         **_boot_status,
-        "websocket": live_stab["state"],
-        "ws_gap_s":  live_stab["gap_seconds"],
+        "websocket":     live_stab["state"],
+        "ws_gap_s":      live_stab["gap_seconds"],
         "ws_reconnects": live_stab["reconnect_count"],
+        "strategy_engine": "ACTIVE",
+        "risk_engine":     "HALTED" if re_snap["halted"] else "ACTIVE",
+        "execution_mode":  cfg.TRADE_MODE,
+        "deployability":   dep_result.status,
+        "deployability_score": dep_result.score,
     }
 
 
@@ -558,6 +624,38 @@ async def get_thoughts(limit: int = 50):
 @app.get("/api/health")
 async def get_health():
     return healer.snapshot()
+
+
+@app.get("/api/deployability")
+async def get_deployability():
+    """
+    MASTER-001: Standalone deployability score.
+    Score 0–100 with status: READY / IMPROVING / NOT_READY / BLOCKED / INSUFFICIENT_DATA.
+    """
+    stats = pnl_calc.session_stats
+    n_trades = len(pnl_calc.trades)
+    result = deployability_engine.compute(
+        trades       = n_trades,
+        sharpe       = stats.get("sharpe_ratio", 0.0),
+        sortino      = stats.get("sortino_ratio", 0.0),
+        win_rate     = stats.get("win_rate", 0.0),
+        max_drawdown = stats.get("max_drawdown_pct", 0.0) / 100,
+        risk_of_ruin = stats.get("risk_of_ruin", 0.0),
+        avg_r        = stats.get("avg_r_multiple", 0.0),
+    )
+    return _sanitize(deployability_engine.to_dict(result))
+
+
+@app.get("/api/risk-engine")
+async def get_risk_engine():
+    """MASTER-001: Daily risk limits, drawdown state, size multiplier."""
+    return risk_engine.snapshot()
+
+
+@app.get("/api/signal-filter")
+async def get_signal_filter():
+    """MASTER-001: Signal quality gate state — paused symbols, thresholds."""
+    return signal_filter.summary()
 
 
 @app.get("/api/lake")
