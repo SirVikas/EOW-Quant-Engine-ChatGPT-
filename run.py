@@ -56,7 +56,8 @@ def banner():
 
 
 def check_redis():
-    """Try to ping Redis; start it if possible."""
+    """Ping Redis; if not running but redis-server is installed, start it."""
+    # ── Step 1: already running? ─────────────────────────────────────────────
     try:
         result = subprocess.run(
             ["redis-cli", "ping"],
@@ -66,9 +67,32 @@ def check_redis():
             print(f"  {G}●{NC} Redis      : running")
             return
     except FileNotFoundError:
-        pass
+        # redis-cli not installed — truly unavailable
+        print(f"  {Y}●{NC} Redis      : not installed — engine will use in-memory cache")
+        return
 
-    print(f"  {Y}●{NC} Redis      : not found — engine will use in-memory cache")
+    # ── Step 2: installed but not running — start it ─────────────────────────
+    print(f"  {Y}●{NC} Redis      : not running — starting…", end="", flush=True)
+    try:
+        cfg_file = Path("/etc/redis/redis.conf")
+        cmd = ["redis-server", str(cfg_file)] if cfg_file.exists() else ["redis-server", "--daemonize", "yes"]
+        subprocess.run(cmd, capture_output=True, timeout=5)
+        # Give it up to 3 s to bind the port
+        for _ in range(6):
+            time.sleep(0.5)
+            try:
+                r = subprocess.run(
+                    ["redis-cli", "ping"],
+                    capture_output=True, text=True, timeout=2,
+                )
+                if r.stdout.strip() == "PONG":
+                    print(f"\r  {G}●{NC} Redis      : started successfully          ")
+                    return
+            except Exception:
+                pass
+        print(f"\r  {Y}●{NC} Redis      : started but not yet responding — continuing")
+    except Exception as exc:
+        print(f"\r  {Y}●{NC} Redis      : could not start ({exc}) — engine will use in-memory cache")
 
 
 def wait_for_engine() -> bool:
