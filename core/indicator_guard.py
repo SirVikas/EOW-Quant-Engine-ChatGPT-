@@ -1,36 +1,44 @@
 """
-EOW Quant Engine — Indicator Guard
+EOW Quant Engine — Indicator Guard  (FTD-REF-MASTER-001 upgraded)
 Validates indicator quality before a signal is acted upon.
 
-Blocks trades when:
-  - Not enough candles (< MIN_CANDLES) — insufficient history
-  - ADX < ADX_UNSTABLE_BELOW — market is noise, no directional info
-  - ATR% < ATR_PCT_MIN — near-zero volatility / illiquid bar
+Block conditions:
+  - n_candles < MIN_CANDLES           → INSUFFICIENT_CANDLES
+  - adx is None (no data yet)         → ADX_NOT_READY
+  - adx < ADX_UNSTABLE_BELOW (< 5)   → ADX_UNSTABLE (noise / random walk)
+  - atr_pct < ATR_PCT_MIN (< 0.05%)  → ATR_TOO_LOW (illiquid bar)
 
-Silently clamps (does NOT block) when:
-  - ADX > ADX_CLAMP_ABOVE — data artifact or extreme market; capped to 80
+Warn / degrade conditions (trade allowed but flagged):
+  - adx < ADX_WEAK_BELOW (< 10)      → adx_quality = "WEAK"
+
+Clamp (do NOT block, normalise):
+  - adx > ADX_CLAMP_ABOVE (> 60)     → silently clamped to 60
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from loguru import logger
 
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
 MIN_CANDLES        = 30     # minimum history before any signal is valid
-ADX_UNSTABLE_BELOW =  5.0  # ADX < 5 → randomwalk / noise regime
-ADX_CLAMP_ABOVE    = 80.0  # ADX > 80 → clamp to 80 (data artefact)
-ATR_PCT_MIN        =  0.05 # ATR% < 0.05% → effectively zero volatility
+ADX_UNSTABLE_BELOW =  5.0  # hard block — pure noise
+ADX_WEAK_BELOW     = 10.0  # soft warning — low trend confidence
+ADX_CLAMP_ABOVE    = 60.0  # clamp ceiling (was 80 — tightened per MASTER-001)
+ATR_PCT_MIN        =  0.05 # ATR% < 0.05% → near-zero volatility, skip
+
+AdxQuality = Literal["STRONG", "WEAK", "UNSTABLE", "NOT_READY"]
 
 
 @dataclass
 class GuardResult:
-    ok:      bool
-    reason:  str   = ""     # populated only when ok=False
-    adx:     float = 0.0    # possibly clamped ADX
-    atr_pct: float = 0.0
+    ok:          bool
+    reason:      str        = ""      # populated only when ok=False
+    adx:         float      = 0.0     # possibly clamped ADX
+    atr_pct:     float      = 0.0
+    adx_quality: AdxQuality = "STRONG"
 
 
 class IndicatorGuard:
@@ -43,13 +51,13 @@ class IndicatorGuard:
         self,
         symbol:    str,
         n_candles: int,
-        adx:       float,
+        adx:       Optional[float],   # None = ADX not computable yet
         atr_pct:   float,
-        closes:    Optional[List[float]] = None,   # reserved for future checks
+        closes:    Optional[List[float]] = None,
     ) -> GuardResult:
         """
         Returns GuardResult(ok=True) when safe to trade.
-        Returns GuardResult(ok=False, reason=…) when the signal should be dropped.
+        Returns GuardResult(ok=False, reason=…) to drop the signal.
         ADX is silently clamped to ADX_CLAMP_ABOVE if it exceeds that value.
         """
         # 1. Candle count guard
@@ -57,18 +65,26 @@ class IndicatorGuard:
             return GuardResult(
                 ok=False,
                 reason=f"INSUFFICIENT_CANDLES({n_candles}<{MIN_CANDLES})",
-                adx=adx, atr_pct=atr_pct,
+                adx=adx or 0.0, atr_pct=atr_pct, adx_quality="NOT_READY",
             )
 
-        # 2. ADX lower bound (unstable / noisy market)
+        # 2. ADX None guard (insufficient data to compute)
+        if adx is None:
+            return GuardResult(
+                ok=False,
+                reason="ADX_NOT_READY",
+                adx=0.0, atr_pct=atr_pct, adx_quality="NOT_READY",
+            )
+
+        # 3. Hard ADX lower bound (unstable / noisy)
         if 0 < adx < ADX_UNSTABLE_BELOW:
             return GuardResult(
                 ok=False,
                 reason=f"ADX_UNSTABLE({adx:.1f}<{ADX_UNSTABLE_BELOW})",
-                adx=adx, atr_pct=atr_pct,
+                adx=adx, atr_pct=atr_pct, adx_quality="UNSTABLE",
             )
 
-        # 3. ADX upper clamp — normalise, don't block
+        # 4. ADX upper clamp — normalise, never block
         clamped_adx = adx
         if adx > ADX_CLAMP_ABOVE:
             clamped_adx = ADX_CLAMP_ABOVE
@@ -76,24 +92,39 @@ class IndicatorGuard:
                 f"[IND-GUARD] {symbol} ADX={adx:.1f} clamped → {ADX_CLAMP_ABOVE}"
             )
 
-        # 4. ATR% floor — skip illiquid / stalled bars
+        # 5. Soft ADX warning (trade proceeds, quality flagged)
+        adx_quality: AdxQuality = "STRONG"
+        if 0 <= clamped_adx < ADX_WEAK_BELOW:
+            adx_quality = "WEAK"
+            logger.debug(
+                f"[IND-GUARD] {symbol} ADX={clamped_adx:.1f} < {ADX_WEAK_BELOW} → WEAK"
+            )
+
+        # 6. ATR% floor — skip illiquid / stalled bars
         if atr_pct < ATR_PCT_MIN:
             return GuardResult(
                 ok=False,
                 reason=f"ATR_TOO_LOW({atr_pct:.4f}%<{ATR_PCT_MIN}%)",
-                adx=clamped_adx, atr_pct=atr_pct,
+                adx=clamped_adx, atr_pct=atr_pct, adx_quality=adx_quality,
             )
 
-        return GuardResult(ok=True, adx=clamped_adx, atr_pct=atr_pct)
+        return GuardResult(
+            ok=True, adx=clamped_adx, atr_pct=atr_pct, adx_quality=adx_quality
+        )
 
     def validate_from_state(self, symbol: str, n_candles: int, state) -> GuardResult:
         """
         Convenience wrapper that accepts a RegimeState dataclass directly.
+        Passes None for ADX when the state has adx=0 AND n_candles < 2*14
+        (the minimum for Wilder's ADX).
         """
+        raw_adx = getattr(state, "adx", 0.0)
+        # Treat adx=0.0 as None when candles are borderline — avoids false passes
+        adx: Optional[float] = raw_adx if (raw_adx > 0 or n_candles >= 28) else None
         return self.validate(
             symbol    = symbol,
             n_candles = n_candles,
-            adx       = getattr(state, "adx", 0.0),
+            adx       = adx,
             atr_pct   = getattr(state, "atr_pct", 0.0),
         )
 
