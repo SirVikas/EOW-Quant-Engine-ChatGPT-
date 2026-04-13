@@ -237,8 +237,12 @@ class MarketDataProvider:
             try:
                 async with websockets.connect(
                     url,
-                    ping_interval=30,
-                    ping_timeout=15,
+                    # Binance combined-stream server responds to WebSocket protocol
+                    # PINGs with close code 1011 (internal error) instead of PONG,
+                    # triggering spurious reconnects every ~30 s.  Disable the
+                    # websockets library's built-in keepalive; the self-healing
+                    # protocol and Binance's own stream management handle liveness.
+                    ping_interval=None,
                     close_timeout=10,
                 ) as ws:
                     self._ws = ws
