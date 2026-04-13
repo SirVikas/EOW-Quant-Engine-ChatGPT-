@@ -85,10 +85,11 @@ class MarketDataProvider:
         # Rolling 500-tick buffers per symbol (for fast indicators)
         self.tick_buffers: Dict[str, deque] = defaultdict(lambda: deque(maxlen=500))
 
-        self._redis:      Optional[aioredis.Redis] = None
-        self._ws:         Optional[Any]            = None
-        self._running:    bool                     = False
-        self._callbacks:  List[Callable]           = []
+        self._redis:          Optional[aioredis.Redis] = None
+        self._ws:             Optional[Any]            = None
+        self._running:        bool                     = False
+        self._callbacks:      List[Callable]           = []
+        self._last_ws_error:  Optional[str]            = None
 
         # Market data always uses real Binance public endpoints (no API key needed)
         self._ws_url  = self.BASE_WS
@@ -229,17 +230,42 @@ class MarketDataProvider:
         backoff = 1
         while self._running:
             try:
-                async with websockets.connect(url, ping_interval=20) as ws:
+                async with websockets.connect(
+                    url,
+                    ping_interval=30,
+                    ping_timeout=15,
+                    close_timeout=10,
+                ) as ws:
                     self._ws = ws
+                    self._last_ws_error = None
                     backoff = 1   # reset on successful connect
                     logger.info("[MDP] WebSocket connected.")
                     async for raw in ws:
                         if not self._running:
                             break
                         await self._dispatch(json.loads(raw))
+            except (ConnectionResetError, OSError) as exc:
+                # WinError 10054 (Windows WSAECONNRESET) / Errno 104 (Linux ECONNRESET):
+                # Binance dropped the TCP connection — not a local bug, reconnect quietly.
+                win_err = getattr(exc, "winerror", None)
+                err_no  = getattr(exc, "errno", None)
+                if win_err == 10054 or err_no == 104:
+                    self._last_ws_error = f"CONN_RESET (winerror={win_err}, errno={err_no})"
+                    logger.debug(
+                        f"[MDP] Remote host reset connection (WinError {win_err}/Errno {err_no}). "
+                        "Reconnecting — this is a Binance-side or network-level RST, not a local bug."
+                    )
+                else:
+                    self._last_ws_error = str(exc)
+                    logger.warning(f"[MDP] WS OSError: {exc}. Reconnecting…")
+                jitter = random.uniform(0, backoff * 0.3)
+                delay  = backoff + jitter
+                await asyncio.sleep(delay)
+                backoff = min(backoff * 2, 60)
             except Exception as exc:
                 # Fix C: exponential backoff with ±30% jitter prevents
                 # thundering-herd reconnects after a mass-disconnect event.
+                self._last_ws_error = str(exc)
                 jitter = random.uniform(0, backoff * 0.3)
                 delay  = backoff + jitter
                 logger.warning(
