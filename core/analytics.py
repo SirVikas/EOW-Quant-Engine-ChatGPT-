@@ -11,6 +11,31 @@ import time
 from typing import List, Optional
 
 
+# ── Calmar Ratio ─────────────────────────────────────────────────────────────
+
+def calmar_ratio(
+    pnl_list: List[float],
+    initial_capital: float,
+    max_drawdown_pct: float,
+) -> float:
+    """
+    Calmar ratio = Annualised Return % / Max Drawdown %.
+    A ratio > 1.0 means the engine earns more than its worst historical loss per year.
+    Capped at 99.99 when drawdown is zero.
+    """
+    if max_drawdown_pct <= 0:
+        return 99.99
+    if not pnl_list or initial_capital <= 0:
+        return 0.0
+    mean_return = statistics.mean(pnl_list) / initial_capital if pnl_list else 0.0
+    # Annualise (assume ~252 trading periods per year)
+    annualised_pct = mean_return * 252 * 100
+    result = annualised_pct / max_drawdown_pct
+    if math.isnan(result) or math.isinf(result):
+        return 0.0
+    return round(result, 3)
+
+
 # ── Sortino Ratio ─────────────────────────────────────────────────────────────
 
 def sortino_ratio(pnl_list: List[float], risk_free: float = 0.0) -> float:
@@ -150,6 +175,7 @@ def deployability_index(
     lake_stats: dict,
     genome_state: dict,
     redis_ok: bool = False,
+    persistence_ok: bool = True,
 ) -> dict:
     """
     Composite 0-100 score across three pillars:
@@ -189,8 +215,9 @@ def deployability_index(
     if redis_ok:
         db_score += 15
 
-    trade_count  = lake_stats.get("trade_count", 0)
-    candle_count = lake_stats.get("candle_count", 0)
+    # db_stats() returns keys: "trades", "candles", "ticks", "funding", "db_size_mb"
+    trade_count  = lake_stats.get("trades", 0)
+    candle_count = lake_stats.get("candles", 0)
     if trade_count > 0:
         db_score += 10
     if candle_count > 100:
@@ -241,6 +268,13 @@ def deployability_index(
     score += rr_score
 
     score = min(score, 100)
+
+    # V4.0 spec: Deployability must remain ≤ 50 when persistence is BOGUS.
+    # A system that cannot save its state is never fully deployable.
+    persistence_capped = (not persistence_ok) and score > 50
+    if persistence_capped:
+        score = 50
+
     tier = (
         "DEPLOYABLE"    if score >= 75 else
         "CONDITIONAL"   if score >= 50 else
@@ -248,11 +282,12 @@ def deployability_index(
     )
 
     return {
-        "score":      score,
-        "max":        100,
-        "tier":       tier,
-        "breakdown":  breakdown,
-        "ts":         int(time.time() * 1000),
+        "score":             score,
+        "max":               100,
+        "tier":              tier,
+        "persistence_capped": persistence_capped,
+        "breakdown":         breakdown,
+        "ts":                int(time.time() * 1000),
     }
 
 
@@ -354,6 +389,7 @@ def compute_full_analytics(
     lake_stats: dict,
     genome_state: dict,
     redis_ok: bool,
+    persistence_ok: bool = True,
 ) -> dict:
     """
     Assemble the complete DBO analytics payload consumed by /api/analytics.
@@ -366,23 +402,30 @@ def compute_full_analytics(
 
     sharpe  = session_stats.get("sharpe_ratio", 0.0)
     sortino = sortino_ratio(nets)
+    mdd_pct = session_stats.get("max_drawdown_pct", 0.0)
+    calmar  = calmar_ratio(nets, initial_capital, mdd_pct)
 
-    win_rate  = session_stats.get("win_rate", 0.0) / 100.0  # convert % → fraction
-    avg_wins  = [t.get("net_pnl", 0.0) for t in pnl_trades if isinstance(t, dict) and t.get("net_pnl", 0) > 0]
-    avg_losses= [abs(t.get("net_pnl", 0.0)) for t in pnl_trades if isinstance(t, dict) and t.get("net_pnl", 0) <= 0]
+    win_rate   = session_stats.get("win_rate", 0.0) / 100.0  # convert % → fraction
     avg_r_win  = statistics.mean([r for r in valid_r if r > 0]) if [r for r in valid_r if r > 0] else 1.0
     avg_r_loss = statistics.mean([abs(r) for r in valid_r if r < 0]) if [r for r in valid_r if r < 0] else 1.0
 
-    ror   = risk_of_ruin(win_rate, avg_r_win, avg_r_loss, account_units=20)
-    growth = geometric_mean_growth(valid_r[-100:] if len(valid_r) > 100 else valid_r,
-                                    risk_fraction=0.01,
-                                    initial_capital=initial_capital)
-    deploy = deployability_index(healer_snapshot, lake_stats, genome_state, redis_ok)
-    bench  = benchmark_comparison(nets, initial_capital, session_stats.get("max_drawdown_pct", 0.0))
+    ror    = risk_of_ruin(win_rate, avg_r_win, avg_r_loss, account_units=20)
+    growth = geometric_mean_growth(
+        valid_r[-100:] if len(valid_r) > 100 else valid_r,
+        risk_fraction=0.01,
+        initial_capital=initial_capital,
+    )
+    deploy = deployability_index(
+        healer_snapshot, lake_stats, genome_state,
+        redis_ok=redis_ok,
+        persistence_ok=persistence_ok,
+    )
+    bench  = benchmark_comparison(nets, initial_capital, mdd_pct)
 
     return {
         "sharpe_ratio":     sharpe,
         "sortino_ratio":    sortino,
+        "calmar_ratio":     calmar,
         "risk_of_ruin_pct": ror,
         "growth_chart":     growth,
         "deployability":    deploy,

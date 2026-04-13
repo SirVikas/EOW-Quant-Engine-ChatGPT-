@@ -242,6 +242,11 @@ body {
 .bm-table .engine-row td { background: #F0FFF4; font-weight: 600; }
 .ror-bar { height: 8px; border-radius: 4px; background: #EBF8FF; overflow: hidden; margin-top: 4px; }
 .ror-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #68D391, #F6E05E, #FC8181); transition: width .5s; }
+
+/* ── Engine state dot ── */
+.ws-dot.active   { background: #48BB78; animation: pulse 2s infinite; }
+.ws-dot.graceful { background: #F6AD55; animation: pulse 1.5s infinite; }
+.ws-dot.halted   { background: #FC8181; animation: pulse 1s infinite; }
 </style>
 </head>
 
@@ -298,6 +303,24 @@ body {
 <div id="tab-overview" class="tab-panel active">
 <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════════ -->
 <div class="main">
+
+  <!-- ── Engine Command & Control Panel ── -->
+  <div class="card" id="ctrl-panel" style="background:#F7FAFA;border:1.5px solid var(--border);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span id="engine-dot" class="ws-dot disconnected" style="width:11px;height:11px;"></span>
+          <span style="font-size:13px;font-weight:600;" id="engine-state-label">STANDBY</span>
+        </div>
+        <span class="tag" id="engine-state-tag" style="background:#EBF8FF;color:#2B6CB0;">STANDBY</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn green" onclick="engineStart()" title="Clear halt + graceful-stop and resume full signal scanning">▶ START</button>
+        <button class="btn blue"  onclick="engineGraceful()" title="Block new entries — let open positions run to TP/SL">⏸ Graceful Stop</button>
+        <button class="btn red"   onclick="engineEmergency()" title="Immediately close ALL open positions at market price">🛑 Emergency Stop</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ── Stat Cards Row 1 ── -->
   <div class="g4">
@@ -449,8 +472,8 @@ body {
 <div id="tab-dbo" class="tab-panel">
 <div class="main">
 
-  <!-- Row 1: Sortino + Sharpe + RoR + Deployability -->
-  <div class="g4">
+  <!-- Row 1: Sortino + Sharpe + Calmar + RoR + Deployability -->
+  <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;">
     <!-- Sortino -->
     <div class="card mint">
       <div class="label">Sortino Ratio</div>
@@ -462,6 +485,12 @@ body {
       <div class="label">Sharpe Ratio</div>
       <div class="big" id="dbo-sharpe" style="color:var(--c-blue);">—</div>
       <div class="sub">Annualised (252-day)</div>
+    </div>
+    <!-- Calmar -->
+    <div class="card sage">
+      <div class="label">Calmar Ratio</div>
+      <div class="big" id="dbo-calmar" style="color:var(--c-green);">—</div>
+      <div class="sub">Annual return / Max DD</div>
     </div>
     <!-- Risk of Ruin -->
     <div class="card peach">
@@ -548,8 +577,9 @@ body {
         </div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="btn blue" onclick="openReport()">Open Report</button>
-        <button class="btn green" onclick="refreshReport()">Refresh Preview</button>
+        <button class="btn green" onclick="downloadArchive()" title="Download ZIP with XLSX + PDF + Markdown">⬇ Download Report Archive</button>
+        <button class="btn blue"  onclick="openReport()" title="Open full HTML report in new tab (printable to PDF)">Open HTML Report</button>
+        <button class="btn purple" onclick="refreshReport()">Refresh Preview</button>
       </div>
     </div>
     <iframe id="report-frame" src="about:blank"
@@ -589,12 +619,13 @@ let state = {
   lake: {candles: 0, ticks: 0, trades: 0, db_size_mb: 0},
   // DBO Analytics
   analytics: {
-    sharpe_ratio: 0, sortino_ratio: 0, risk_of_ruin_pct: 0,
+    sharpe_ratio: 0, sortino_ratio: 0, calmar_ratio: 0, risk_of_ruin_pct: 0,
     growth_chart: {geometric:[], linear:[], labels:[]},
-    deployability: {score:0, tier:'NOT READY', breakdown:{}},
+    deployability: {score:0, tier:'NOT READY', breakdown:{}, persistence_capped:false},
     benchmark: {engine:{}, benchmarks:[]},
   },
-  modeInfo: {label:'DEMO', persistence_ok:true, persistence_warning:''},
+  modeInfo: {tier:1, label:'TIER 1: DEMO — BOGUS DATA', colour:'demo', persistence_ok:false, persistence_warning:'PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)'},
+  engineState: {state:'STANDBY', halted:false, graceful_stop:false, open_positions:0},
 };
 let useMock = false;
 let ws = null;
@@ -689,21 +720,33 @@ function renderModeStrip() {
   const strip = document.getElementById('mode-strip');
   const label = document.getElementById('mode-strip-label');
   const warn  = document.getElementById('persist-warn');
-  const mi = state.modeInfo;
+  const mi    = state.modeInfo;
 
-  strip.className = 'demo';
+  const tier   = mi.tier || 1;
+  const colour = mi.colour || 'demo';
+  strip.className = colour;
+
   if (!useMock && mi.label) {
-    if (mi.label === 'REAL LIVE')  strip.className = 'live';
-    else if (mi.label === 'LIVE PAPER') strip.className = 'paper';
-    else strip.className = 'demo';
     label.textContent = '● ' + mi.label;
   } else {
-    label.textContent = '● DEMO — Backend Offline';
+    label.textContent = '● TIER 1: DEMO — BOGUS DATA';
   }
 
-  const showWarn = !useMock && mi.persistence_warning;
-  warn.classList.toggle('show', !!showWarn);
+  const showWarn = mi.persistence_warning && mi.persistence_warning.length > 0;
+  warn.classList.toggle('show', showWarn);
   if (showWarn) warn.textContent = '⚠ ' + mi.persistence_warning;
+
+  // Sync topbar mode badge to tier
+  const b = el('mode-badge');
+  if (b) {
+    if (tier === 3) {
+      b.textContent='● TIER 3: LIVE'; b.style.background='#FED7D7'; b.style.color='#9B2C2C';
+    } else if (tier === 2) {
+      b.textContent='● TIER 2: PAPER'; b.style.background='#C6F6D5'; b.style.color='#276749';
+    } else {
+      b.textContent='● TIER 1: DEMO'; b.style.background='#BEE3F8'; b.style.color='#2B6CB0';
+    }
+  }
 }
 
 // ── DBO Analytics Rendering ──────────────────────────────────────────────────
@@ -711,11 +754,17 @@ function renderDBO() {
   const a = state.analytics;
   if (!a) return;
 
-  // Sortino + Sharpe
-  const sortEl = document.getElementById('dbo-sortino');
-  const shrpEl = document.getElementById('dbo-sharpe');
+  // Sortino + Sharpe + Calmar
+  const sortEl  = document.getElementById('dbo-sortino');
+  const shrpEl  = document.getElementById('dbo-sharpe');
+  const calmEl  = document.getElementById('dbo-calmar');
   if (sortEl) sortEl.textContent = parseFloat(a.sortino_ratio||0).toFixed(3);
   if (shrpEl) shrpEl.textContent = parseFloat(a.sharpe_ratio||0).toFixed(3);
+  if (calmEl) {
+    const calmar = parseFloat(a.calmar_ratio||0);
+    calmEl.textContent = calmar.toFixed(3);
+    calmEl.style.color = calmar >= 1 ? 'var(--c-green)' : calmar >= 0.5 ? 'var(--c-amber)' : 'var(--c-red)';
+  }
 
   // Risk of Ruin
   const rorPct = parseFloat(a.risk_of_ruin_pct||0);
@@ -740,11 +789,13 @@ function renderDBO() {
                  tierEl.style.color=score>=75?'var(--c-green)':score>=50?'var(--c-amber)':'var(--c-red)'; }
   const brkEl = document.getElementById('deploy-breakdown');
   if (brkEl && dep.breakdown) {
-    const b = dep.breakdown;
+    const b    = dep.breakdown;
+    const cap  = dep.persistence_capped ? '<div style="color:var(--c-red);font-size:10px;margin-top:4px;">⚠ Capped at 50 (BOGUS STORAGE)</div>' : '';
     brkEl.innerHTML = [
       `<div>Network: <strong>${(b.network||{}).score||0}/30</strong></div>`,
       `<div>Database: <strong>${(b.database||{}).score||0}/30</strong></div>`,
       `<div>RR Edge: <strong>${(b.rr_edge||{}).score||0}/40</strong></div>`,
+      cap,
     ].join('');
   }
 
@@ -817,6 +868,24 @@ async function openReport() {
   } catch(e) { addThought('Report unavailable — backend offline', 'HALT'); }
 }
 
+async function downloadArchive() {
+  addThought('⏳ Building report archive (XLSX + PDF + MD)…', 'SYSTEM');
+  try {
+    const r = await fetch(API+'/api/report/archive');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || ('eow_report_'+Date.now()+'.zip');
+    a.href = url; a.download = fn; a.click();
+    URL.revokeObjectURL(url);
+    addThought('✅ Report archive downloaded: ' + fn, 'SYSTEM');
+  } catch(e) {
+    addThought('Archive download failed — backend offline', 'HALT');
+  }
+}
+
 function pushEquityPoint(eq, bh) {
   if(!eqChart) return;
   state.equityCurve.push(eq); state.equityCurve.shift();
@@ -874,6 +943,7 @@ function renderAll() {
   renderModeBadge();
   renderHaltBanner();
   renderModeStrip();
+  renderEnginePanel();
   if (_activeTab === 'dbo') renderDBO();
 }
 
@@ -1134,6 +1204,11 @@ async function pollRest() {
       const miR = await fetch(API+'/api/mode-info').then(r=>r.json());
       if (miR) state.modeInfo = miR;
     } catch(e){}
+    // Engine state
+    try {
+      const engR = await fetch(API+'/api/engine/status').then(r=>r.json());
+      if (engR) state.engineState = engR;
+    } catch(e){}
     renderAll();
   } catch(e) {
     if(!useMock) enableMock();
@@ -1267,15 +1342,16 @@ function enableMock() {
   let gCap=1000, lCap=1000;
   const mockRs = Array.from({length:50}, ()=> (Math.random()>0.38 ? 1 : -1) * (0.3+Math.random()*1.2));
   mockRs.forEach(r=>{ gCap=Math.max(0,gCap+gCap*0.01*r); lCap=Math.max(0,lCap+10*r); mockGeo.push(+gCap.toFixed(2)); mockLin.push(+lCap.toFixed(2)); });
+  state.engineState = { state: 'ACTIVE', halted: false, graceful_stop: false, open_positions: 3 };
   state.analytics = {
-    sharpe_ratio: 1.32, sortino_ratio: 1.87, risk_of_ruin_pct: 0.82,
+    sharpe_ratio: 1.32, sortino_ratio: 1.87, calmar_ratio: 3.13, risk_of_ruin_pct: 0.82,
     growth_chart: {
       geometric: mockGeo, linear: mockLin,
       labels: ['Start'].concat(mockRs.map((_,i)=>'T'+(i+1))),
     },
     deployability: {
-      score: 68, tier: 'CONDITIONAL',
-      breakdown: { network:{score:20}, database:{score:18}, rr_edge:{score:30} },
+      score: 50, tier: 'CONDITIONAL', persistence_capped: true,
+      breakdown: { network:{score:20}, database:{score:8}, rr_edge:{score:30} },
     },
     benchmark: {
       engine: { annual_return_pct:24.4, sharpe:1.32, sortino:1.87, max_dd_pct:4.2,
@@ -1334,6 +1410,66 @@ function mockTick_() {
   state.genomeGen += Math.random()>0.97 ? 1 : 0;
   mockTick++;
   renderAll();
+}
+
+// ── Engine Control Panel ──────────────────────────────────────────────────────
+function renderEnginePanel() {
+  const es    = state.engineState;
+  const dot   = el('engine-dot');
+  const lbl   = el('engine-state-label');
+  const tag   = el('engine-state-tag');
+  if (!dot) return;
+
+  const STATE_MAP = {
+    'ACTIVE':        {cls:'active',   colour:'#C6F6D5', fg:'#276749', text:'ACTIVE / TRADING'},
+    'GRACEFUL_STOP': {cls:'graceful', colour:'#FEFCBF', fg:'#7B6100', text:'GRACEFUL STOP'},
+    'HALTED':        {cls:'halted',   colour:'#FED7D7', fg:'#9B2C2C', text:'HALTED'},
+    'STANDBY':       {cls:'disconnected', colour:'#EBF8FF', fg:'#2B6CB0', text:'STANDBY'},
+  };
+  const s = STATE_MAP[es.state] || STATE_MAP['STANDBY'];
+  dot.className = 'ws-dot ' + s.cls;
+  lbl.textContent = s.text;
+  tag.textContent = s.text;
+  tag.style.background = s.colour;
+  tag.style.color      = s.fg;
+}
+
+async function engineStart() {
+  try {
+    const r = await fetch(API+'/api/engine/start', {method:'POST'});
+    const d = await r.json();
+    state.engineState.state = d.state || 'ACTIVE';
+    state.engineState.halted = false;
+    state.engineState.graceful_stop = false;
+    renderEnginePanel();
+    addThought('▶ Engine START — full signal scanning resumed', 'SYSTEM');
+  } catch(e) { addThought('Engine start failed — backend offline', 'HALT'); }
+}
+
+async function engineGraceful() {
+  if (!confirm('Enable Graceful Stop?\n\nNew entries will be blocked. Existing positions will run to TP/SL naturally.')) return;
+  try {
+    const r = await fetch(API+'/api/engine/stop/graceful', {method:'POST'});
+    const d = await r.json();
+    state.engineState.state = d.state || 'GRACEFUL_STOP';
+    state.engineState.graceful_stop = true;
+    renderEnginePanel();
+    addThought(`⏸ Graceful Stop active — ${d.open_positions||0} position(s) running to TP/SL`, 'SYSTEM');
+  } catch(e) { addThought('Graceful stop failed — backend offline', 'HALT'); }
+}
+
+async function engineEmergency() {
+  if (!confirm('EMERGENCY STOP: Close ALL open positions immediately at market price?\n\nThis cannot be undone.')) return;
+  try {
+    await fetch(API+'/api/emergency-close', {method:'POST'});
+    state.engineState.state = 'HALTED';
+    state.engineState.halted = true;
+    state.positions = [];
+    state.halted    = true;
+    renderEnginePanel();
+    renderHaltBanner();
+    addThought('🛑 EMERGENCY STOP — all positions closed at market', 'HALT');
+  } catch(e) { addThought('Emergency stop failed — backend offline', 'HALT'); }
 }
 
 // ── Analytics Polling (every 15s) ────────────────────────────────────────────

@@ -81,6 +81,7 @@ class RiskController:
         self.pending_orders: Dict[str, PendingLimitOrder] = {}
         self.events:         List[RiskEvent]             = []
         self.halted:         bool                        = False
+        self.graceful_stop:  bool                        = False  # blocks new entries, lets positions run
         self._running        = False
 
     # ── Position Lifecycle ──────────────────────────────────────────────────
@@ -422,6 +423,7 @@ class RiskController:
     def snapshot(self) -> dict:
         return {
             "halted":          self.halted,
+            "graceful_stop":   self.graceful_stop,
             "open_positions":  [asdict(p) for p in self.positions.values()],
             "pending_orders":  len(self.pending_orders),
             "drawdown_pct":    round(self.scaler.drawdown_pct, 2),
