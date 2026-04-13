@@ -296,8 +296,37 @@ async def _broadcast_market_update(sym: str, tick: Tick, regime: str):
 
 # ── App Lifespan ──────────────────────────────────────────────────────────────
 
+def _asyncio_exception_handler(loop, context):
+    """
+    Custom asyncio exception handler that silently absorbs WinError 10054
+    (WSAECONNRESET) and Errno 104 (ECONNRESET) raised by the internal
+    _ProactorBasePipeTransport callback on Windows.  These are Binance-side
+    TCP RSTs, not bugs in our code — logging at DEBUG keeps the console clean
+    while preserving the audit trail.  All other exceptions fall through to
+    the default asyncio handler.
+    """
+    exc = context.get("exception")
+    if exc is not None:
+        win_err = getattr(exc, "winerror", None)
+        err_no  = getattr(exc, "errno", None)
+        if isinstance(exc, (ConnectionResetError, OSError)) and (
+            win_err == 10054 or err_no == 104
+        ):
+            logger.debug(
+                f"[asyncio] Absorbed _ProactorBasePipeTransport CONN_RESET "
+                f"(WinError {win_err}/Errno {err_no}) — Binance TCP RST, not a local error."
+            )
+            return
+    loop.default_exception_handler(context)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
+    # Install custom asyncio exception handler to absorb WinError 10054
+    # (_ProactorBasePipeTransport WSAECONNRESET) before any tasks start.
+    loop = asyncio.get_event_loop()
+    loop.set_exception_handler(_asyncio_exception_handler)
+
     ensure_auth_ready_for_mode()
     mdp.register_callback(on_tick)
     _thought("🚀 EOW Quant Engine booting…", "SYSTEM")

@@ -66,6 +66,9 @@ class SelfHealingProtocol:
         self._reconnect_backoff:  float = self._RECONNECT_BACKOFF_INIT
         self._last_reconnect_ts:  int   = 0
 
+        # WinError 10054 / ECONNRESET tracking (Socket Stabilization)
+        self._conn_reset_count:   int   = 0
+
     # ── Main Loop ─────────────────────────────────────────────────────────────
 
     async def start(self):
@@ -102,6 +105,21 @@ class SelfHealingProtocol:
                 ok   = resp.status_code == 200
                 self._log_event("API_PING", "OK" if ok else f"HTTP {resp.status_code}", ok)
                 return ok
+        except (ConnectionResetError, OSError) as exc:
+            win_err = getattr(exc, "winerror", None)
+            err_no  = getattr(exc, "errno", None)
+            if win_err == 10054 or err_no == 104:
+                self._conn_reset_count += 1
+                self._log_event(
+                    "API_PING",
+                    f"CONN_RESET #{self._conn_reset_count} "
+                    f"(WinError {win_err}/Errno {err_no}) — "
+                    "check local firewall / router rate-limiting",
+                    False,
+                )
+            else:
+                self._log_event("API_PING", f"FAILED: {exc}", False)
+            return False
         except Exception as exc:
             # WinError 10054 (connection reset) and Errno 11001 (DNS failure)
             # both surface here.  Log clearly so the operator can act.
@@ -234,11 +252,25 @@ class SelfHealingProtocol:
         self._log = v
 
     def snapshot(self) -> dict:
+        network_audit: Optional[str] = None
+        if self._conn_reset_count > 0:
+            network_audit = (
+                f"WinError 10054 / ECONNRESET detected {self._conn_reset_count} time(s). "
+                "Possible causes: local OS firewall dropping idle TCP, router NAT timeout, "
+                "or Binance rate-limiting this IP. Check firewall rules and router keep-alive settings."
+            )
+        last_ws_error = (
+            getattr(self._mdp, "_last_ws_error", None)
+            if self._mdp else None
+        )
         return {
-            "last_heal_ts":       self._last_heal,
-            "balance":            self._balance,
-            "ws_stale_cycles":    self._stale_cycles,
+            "last_heal_ts":        self._last_heal,
+            "balance":             self._balance,
+            "ws_stale_cycles":     self._stale_cycles,
             "reconnect_backoff_s": self._reconnect_backoff,
+            "conn_reset_count":    self._conn_reset_count,
+            "last_ws_error":       last_ws_error,
+            "network_audit":       network_audit,
             "recent_events": [
                 {"ts": e.ts, "action": e.action, "result": e.result, "ok": e.ok}
                 for e in self.events[-10:]
