@@ -29,6 +29,7 @@ from core.risk_controller import RiskController, OpenPosition
 from core.self_healing    import SelfHealingProtocol
 from core.data_lake       import DataLake
 from core.vault           import VaultManager, WrongPassword, VaultNotConfigured
+from core.guardian        import GuardianLogic, AGGRESSION_PROFILES
 from core.security        import ensure_auth_ready_for_mode, require_roles
 from core.scorecard       import compute_scorecard
 from core.analytics       import compute_full_analytics
@@ -68,6 +69,7 @@ healer     = SelfHealingProtocol(mdp)
 exporter   = ExportManager(pnl_calc, genome, risk_ctrl)
 data_lake  = DataLake()
 vault      = VaultManager()
+guardian   = GuardianLogic()
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
@@ -363,6 +365,29 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         _thought(f"⚠️ Session restore failed: {exc} — starting fresh.", "SYSTEM")
 
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
+
+    # ── Guardian periodic reactive check ─────────────────────────────────────
+    async def _guardian_watch():
+        """Every 60 s, check if live risk has drifted into unsafe territory."""
+        while True:
+            await asyncio.sleep(60)
+            try:
+                stats    = pnl_calc.session_stats
+                win_rate = stats.get("win_rate", 0.0)
+                mdd_pct  = stats.get("max_drawdown_pct", 0.0)
+                trades   = pnl_calc.trades
+                valid_r  = [t.r_multiple for t in trades if t.r_multiple != 0.0]
+                pos_r    = [r for r in valid_r if r > 0]
+                neg_r    = [abs(r) for r in valid_r if r < 0]
+                avg_r_win  = (sum(pos_r) / len(pos_r)) if pos_r else 1.0
+                avg_r_loss = (sum(neg_r) / len(neg_r)) if neg_r else 1.0
+                alert = guardian.reactive_check(win_rate, mdd_pct, avg_r_win, avg_r_loss, cfg)
+                if alert:
+                    _thought(f"🛡 {alert}", "HALT")
+            except Exception:
+                pass
+
+    tasks.append(asyncio.create_task(_guardian_watch()))
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -954,6 +979,56 @@ async def vault_switch(body: dict):
         "testnet": creds["testnet"],
         "is_live": creds["mode"] == "LIVE",
     }
+
+
+# ── Guardian Logic & Aggression Control ───────────────────────────────────────
+
+@app.get("/api/guardian/status")
+async def get_guardian_status():
+    """Returns Guardian Logic state: level, safe_mode, veto history, all profiles."""
+    return guardian.snapshot()
+
+
+@app.get("/api/engine/aggression")
+async def get_aggression():
+    """Current aggression level and profile parameters."""
+    return guardian.snapshot()
+
+
+@app.post("/api/engine/aggression")
+async def set_aggression(body: dict, _auth=Depends(require_roles("operator", "admin"))):
+    """
+    Password-free aggression change — Guardian validates automatically.
+    Body: {level: 1|2|3|4}
+    Returns 403 with veto reason if Guardian blocks the change.
+    """
+    try:
+        level = int(body.get("level", 2))
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="level must be an integer 1–4.")
+
+    # Pull live session metrics for Guardian validation
+    stats    = pnl_calc.session_stats
+    win_rate = stats.get("win_rate", 0.0)
+    mdd_pct  = stats.get("max_drawdown_pct", 0.0)
+
+    trades  = pnl_calc.trades
+    valid_r = [t.r_multiple for t in trades if t.r_multiple != 0.0]
+    pos_r   = [r for r in valid_r if r > 0]
+    neg_r   = [abs(r) for r in valid_r if r < 0]
+    avg_r_win  = (sum(pos_r) / len(pos_r)) if pos_r else 1.0
+    avg_r_loss = (sum(neg_r) / len(neg_r)) if neg_r else 1.0
+
+    allowed, msg = guardian.validate_and_apply(
+        level, win_rate, mdd_pct, avg_r_win, avg_r_loss, cfg
+    )
+
+    _thought(msg, "SYSTEM" if allowed else "HALT")
+
+    if not allowed:
+        raise HTTPException(status_code=403, detail=msg)
+
+    return guardian.snapshot()
 
 
 # ── Engine Command & Control ──────────────────────────────────────────────────
