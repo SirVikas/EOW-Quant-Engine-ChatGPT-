@@ -33,6 +33,7 @@ from core.scorecard       import compute_scorecard
 from core.analytics       import compute_full_analytics
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
+from utils.report_generator import build_report_archive
 from strategies.strategy_modules import get_strategy, Signal
 
 
@@ -154,7 +155,7 @@ async def on_tick(tick: Tick):
 
     # 5. Generate signal (only if no open position + throttle checks)
     now_ms = int(time.time() * 1000)
-    if sym not in risk_ctrl.positions and not risk_ctrl.halted:
+    if sym not in risk_ctrl.positions and not risk_ctrl.halted and not risk_ctrl.graceful_stop:
 
         # ── Throttle A: per-symbol cooldown (30 min between trades) ──────────
         last_ts = _last_trade_ts.get(sym, 0)
@@ -455,25 +456,28 @@ async def get_scorecard():
 async def get_analytics():
     """
     Full DBO analytics payload:
-      • Sortino + Sharpe ratios
+      • Sortino + Sharpe + Calmar ratios
       • Risk-of-Ruin probability
       • Geometric vs Linear growth chart data
-      • Deployability Index (0-100)
+      • Deployability Index 0-100 (capped at 50 when persistence is BOGUS)
       • Benchmark comparison vs S&P 500 / hedge funds
     """
-    # Determine Redis availability from self-healing snapshot
-    heal = healer.snapshot()
-    recent = heal.get("recent_events", [])
+    heal    = healer.snapshot()
+    recent  = heal.get("recent_events", [])
     redis_ok = any(
         e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
         for e in recent
     )
+    try:
+        lake_s    = data_lake.db_stats()
+        sqlite_ok = lake_s.get("trades", -1) >= 0
+    except Exception:
+        lake_s    = {}
+        sqlite_ok = False
+    persistence_ok = redis_ok or sqlite_ok
 
     trade_dicts = [
-        {
-            "net_pnl":    t.net_pnl,
-            "r_multiple": t.r_multiple,
-        }
+        {"net_pnl": t.net_pnl, "r_multiple": t.r_multiple}
         for t in pnl_calc.trades
     ]
 
@@ -482,9 +486,10 @@ async def get_analytics():
         initial_capital=pnl_calc._initial_capital,
         session_stats=pnl_calc.session_stats,
         healer_snapshot=heal,
-        lake_stats=data_lake.db_stats(),
+        lake_stats=lake_s,
         genome_state=genome.export_state(),
         redis_ok=redis_ok,
+        persistence_ok=persistence_ok,
     ))
 
 
@@ -504,28 +509,43 @@ async def get_mode_info():
     )
     # Determine SQLite health from data lake
     try:
-        stats    = data_lake.db_stats()
-        sqlite_ok = stats.get("trade_count", -1) >= 0
+        stats     = data_lake.db_stats()
+        # db_stats() returns keys: "ticks", "candles", "funding", "trades", "db_size_mb"
+        sqlite_ok = stats.get("trades", -1) >= 0   # >= 0 even when empty (0 trades is OK)
     except Exception:
         sqlite_ok = False
 
     persistence_ok = redis_ok or sqlite_ok
 
-    label_map = {
-        "PAPER": "LIVE PAPER",
-        "LIVE":  "REAL LIVE",
-    }
-    label = label_map.get(cfg.TRADE_MODE, cfg.TRADE_MODE)
+    # TIER system — matches V4.0 spec
+    if not persistence_ok:
+        tier   = 1
+        label  = "TIER 1: DEMO — BOGUS DATA"
+        colour = "demo"
+    elif cfg.TRADE_MODE == "LIVE":
+        tier   = 3
+        label  = "TIER 3: REAL LIVE — ORIGINAL CAPITAL"
+        colour = "live"
+    else:
+        tier   = 2
+        label  = "TIER 2: LIVE PAPER — VIRTUAL CAPITAL"
+        colour = "paper"
 
     return {
         "mode":           cfg.TRADE_MODE,
+        "tier":           tier,
         "label":          label,
+        "colour":         colour,
         "redis_ok":       redis_ok,
         "sqlite_ok":      sqlite_ok,
         "persistence_ok": persistence_ok,
         "persistence_warning": (
+            "" if persistence_ok else
             "PERSISTENCE FAILED: Session data is non-permanent (BOGUS STORAGE)"
-            if not persistence_ok else ""
+        ),
+        "persistence_status": (
+            "✅ PERSISTENCE ACTIVE" if persistence_ok else
+            "⚠ PERSISTENCE FAILED"
         ),
         "ts": int(time.time() * 1000),
     }
@@ -663,6 +683,64 @@ async def get_report():
     return HTMLResponse(html)
 
 
+# ── Triple-Format Report Archive (XLSX + PDF + MD → ZIP) ─────────────────────
+
+@app.get("/api/report/archive")
+async def get_report_archive():
+    """
+    Download a ZIP archive containing:
+      • eow_trades_<ts>.xlsx  — full trade history + session summary + signal audit
+      • eow_report_<ts>.pdf   — executive summary with all KPIs
+      • eow_report_<ts>.md    — markdown developer log for version control
+    """
+    from fastapi.responses import StreamingResponse
+
+    heal    = healer.snapshot()
+    recent  = heal.get("recent_events", [])
+    redis_ok = any(
+        e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
+        for e in recent
+    )
+    try:
+        lake_s    = data_lake.db_stats()
+        sqlite_ok = lake_s.get("trades", -1) >= 0
+    except Exception:
+        lake_s    = {}
+        sqlite_ok = False
+    persistence_ok = redis_ok or sqlite_ok
+
+    trade_dicts = [
+        {k: getattr(t, k) for k in t.__dataclass_fields__}
+        for t in pnl_calc.trades
+    ]
+    analytics_data = _sanitize(compute_full_analytics(
+        pnl_trades=[{"net_pnl": t.net_pnl, "r_multiple": t.r_multiple} for t in pnl_calc.trades],
+        initial_capital=pnl_calc._initial_capital,
+        session_stats=pnl_calc.session_stats,
+        healer_snapshot=heal,
+        lake_stats=lake_s,
+        genome_state=genome.export_state(),
+        redis_ok=redis_ok,
+        persistence_ok=persistence_ok,
+    ))
+    mode_info = await get_mode_info()
+
+    zip_bytes = build_report_archive(
+        trades=trade_dicts,
+        stats=pnl_calc.session_stats,
+        mode_info=mode_info,
+        analytics=analytics_data,
+        thoughts=_thought_log,
+    )
+
+    filename = f"eow_report_{int(time.time())}.zip"
+    return StreamingResponse(
+        iter([zip_bytes]),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 # ── Mode Toggle ───────────────────────────────────────────────────────────────
 
 @app.post("/api/mode/{mode}")
@@ -711,6 +789,54 @@ async def resume_engine(_auth=Depends(require_roles("operator", "admin"))):
     risk_ctrl.halted = False
     _thought("✅ Engine manually resumed", "SYSTEM")
     return {"halted": False}
+
+
+# ── Engine Command & Control ──────────────────────────────────────────────────
+
+@app.get("/api/engine/status")
+async def get_engine_status():
+    """Live engine operational status: ACTIVE / GRACEFUL_STOP / STANDBY / HALTED."""
+    if risk_ctrl.halted:
+        state = "HALTED"
+    elif risk_ctrl.graceful_stop:
+        state = "GRACEFUL_STOP"
+    elif mdp._running:
+        state = "ACTIVE"
+    else:
+        state = "STANDBY"
+    return {
+        "state":          state,
+        "halted":         risk_ctrl.halted,
+        "graceful_stop":  risk_ctrl.graceful_stop,
+        "ws_running":     mdp._running,
+        "open_positions": len(risk_ctrl.positions),
+        "pending_orders": len(risk_ctrl.pending_orders),
+        "ts":             int(time.time() * 1000),
+    }
+
+
+@app.post("/api/engine/start")
+async def start_engine(_auth=Depends(require_roles("operator", "admin"))):
+    """Clear halt + graceful-stop flags and resume normal signal scanning."""
+    risk_ctrl.halted       = False
+    risk_ctrl.graceful_stop = False
+    _thought("▶ Engine START command received — resuming full signal scanning.", "SYSTEM")
+    return {"state": "ACTIVE"}
+
+
+@app.post("/api/engine/stop/graceful")
+async def graceful_stop_engine(_auth=Depends(require_roles("operator", "admin"))):
+    """
+    Graceful stop: no new entries accepted, existing positions run until TP/SL.
+    Does NOT close open positions immediately.
+    """
+    risk_ctrl.graceful_stop = True
+    _thought(
+        f"⏸ Graceful STOP — new entries blocked. "
+        f"{len(risk_ctrl.positions)} position(s) running to TP/SL naturally.",
+        "SYSTEM",
+    )
+    return {"state": "GRACEFUL_STOP", "open_positions": len(risk_ctrl.positions)}
 
 
 # ── WebSocket (Real-time Dashboard Feed) ──────────────────────────────────────
