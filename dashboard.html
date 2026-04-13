@@ -247,6 +247,50 @@ body {
 .ws-dot.active   { background: #48BB78; animation: pulse 2s infinite; }
 .ws-dot.graceful { background: #F6AD55; animation: pulse 1.5s infinite; }
 .ws-dot.halted   { background: #FC8181; animation: pulse 1s infinite; }
+
+/* ── Vault Modal ── */
+#vault-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.48); z-index: 9999;
+  align-items: center; justify-content: center;
+}
+#vault-overlay.open { display: flex; }
+#vault-modal {
+  background: #fff; border-radius: 16px;
+  padding: 28px 32px; max-width: 490px; width: 95%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+}
+#vault-modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+#vault-modal .vm-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+.vault-field { margin-bottom: 12px; }
+.vault-field label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--muted); display: block; margin-bottom: 4px;
+}
+.vault-field input {
+  width: 100%; padding: 8px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-size: 13px; font-family: var(--fm); outline: none;
+}
+.vault-field input:focus { border-color: #90CDF4; }
+.vault-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.vault-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+.vault-err { color: var(--c-red); font-size: 12px; font-weight: 600; min-height: 18px; margin-top: 8px; }
+
+/* ── REAL LIVE — High-Alert Red Theme ── */
+body.real-live-mode { background: #FFF5F5; }
+body.real-live-mode .topbar {
+  background: linear-gradient(135deg, #742A2A, #9B2C2C) !important;
+  border-color: #C53030 !important;
+}
+body.real-live-mode .topbar,
+body.real-live-mode .topbar span,
+body.real-live-mode .topbar div { color: #fff !important; }
+body.real-live-mode .topbar .btn {
+  border-color: rgba(255,255,255,0.35) !important;
+  background: rgba(255,255,255,0.12) !important;
+  color: #fff !important;
+}
+body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A !important; }
 </style>
 </head>
 
@@ -272,8 +316,8 @@ body {
       <span class="ws-dot disconnected" id="ws-dot"></span>Connecting…
     </span>
     <span class="tag" id="mode-badge" style="background:#C6F6D5;color:#276749;">● PAPER</span>
-    <button class="btn green" onclick="apiPost('/api/mode/PAPER')">Paper</button>
-    <button class="btn red"   onclick="apiPost('/api/mode/LIVE')">Live</button>
+    <span id="vault-live-badge" style="display:none;background:#9B2C2C;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.05em;animation:pulse 1.5s infinite;">⚡ REAL LIVE</span>
+    <button class="btn" id="vault-btn" onclick="openVaultModal()" title="Dual-API Credential Vault — switch between Paper (testnet) and Real Live modes" style="border-color:#D6BCFA;background:#FAF5FF;color:#553C9A;">🔐 Vault</button>
     <button class="btn purple" onclick="exportState()">Export JSON</button>
     <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
   </div>
@@ -616,6 +660,78 @@ body {
 </div><!-- /tab-report -->
 
 </div><!-- /app -->
+
+<!-- ══ VAULT MODAL ════════════════════════════════════════════════════════════ -->
+<div id="vault-overlay" onclick="closeVaultModal(event)">
+  <div id="vault-modal" onclick="event.stopPropagation()">
+    <h2>🔐 API Credential Vault</h2>
+    <div class="vm-sub" id="vm-subtitle">Encrypt and store Binance API credentials for PAPER and LIVE modes</div>
+
+    <!-- SETUP FORM — shown when vault is not yet configured -->
+    <div id="vault-setup-form">
+      <div class="sec-hdr" style="margin-bottom:8px;">PAPER / TESTNET KEYS</div>
+      <div class="vault-field">
+        <label>Testnet API Key</label>
+        <input type="text"     id="v-paper-key"    placeholder="Binance Testnet API Key" autocomplete="off"/>
+      </div>
+      <div class="vault-field">
+        <label>Testnet Secret Key</label>
+        <input type="password" id="v-paper-secret" placeholder="Binance Testnet Secret" autocomplete="off"/>
+      </div>
+      <hr class="vault-divider"/>
+      <div class="sec-hdr" style="margin-bottom:8px;">REAL LIVE / PRODUCTION KEYS</div>
+      <div class="vault-field">
+        <label>Production API Key</label>
+        <input type="text"     id="v-live-key"     placeholder="Binance Production API Key" autocomplete="off"/>
+      </div>
+      <div class="vault-field">
+        <label>Production Secret Key</label>
+        <input type="password" id="v-live-secret"  placeholder="Binance Production Secret" autocomplete="off"/>
+      </div>
+      <hr class="vault-divider"/>
+      <div class="vault-field">
+        <label>Master Password — used to encrypt the vault (never stored)</label>
+        <input type="password" id="v-setup-pw" placeholder="Choose a strong master password" autocomplete="new-password"/>
+      </div>
+      <div class="vault-err" id="v-setup-err"></div>
+      <div class="vault-actions">
+        <button class="btn" onclick="closeVaultModal()" style="border-color:var(--border);background:#f7f7f7;color:var(--muted);">Cancel</button>
+        <button class="btn green" onclick="submitVaultSetup()">🔒 Encrypt &amp; Save Vault</button>
+      </div>
+    </div>
+
+    <!-- SWITCH FORM — shown when vault is already configured -->
+    <div id="vault-switch-form" style="display:none;">
+      <div class="vault-field">
+        <label>Switch Execution Mode</label>
+        <div style="display:flex;gap:18px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:7px;text-transform:none;font-size:13px;font-weight:500;cursor:pointer;">
+            <input type="radio" name="vault-mode" value="PAPER" id="v-mode-paper" checked style="width:auto;accent-color:#276749;"/>
+            📋 Paper (Testnet)
+          </label>
+          <label style="display:flex;align-items:center;gap:7px;text-transform:none;font-size:13px;font-weight:500;cursor:pointer;">
+            <input type="radio" name="vault-mode" value="LIVE"  id="v-mode-live"  style="width:auto;accent-color:#9B2C2C;"/>
+            ⚡ Real Live (Production)
+          </label>
+        </div>
+      </div>
+      <div class="vault-field">
+        <label>Master Password</label>
+        <input type="password" id="v-switch-pw" placeholder="Enter master password to confirm switch" autocomplete="off"/>
+      </div>
+      <div class="vault-err" id="v-switch-err"></div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:6px;padding:8px 10px;background:#FFF5F5;border-radius:8px;border-left:3px solid #FC8181;">
+        ⚠ Switching to <strong>Real Live</strong> routes ALL orders to Binance production.
+        Every trade uses <strong>real money</strong>. The UI will turn red as a continuous reminder.
+      </div>
+      <div class="vault-actions">
+        <button class="btn" onclick="showVaultSetupForm()" style="border-color:var(--border);background:#f7f7f7;color:var(--muted);" title="Re-enter credentials or change master password">Re-configure</button>
+        <button class="btn" onclick="closeVaultModal()" style="border-color:var(--border);background:#f7f7f7;color:var(--muted);">Cancel</button>
+        <button class="btn red" onclick="submitVaultSwitch()">🔐 Switch Mode</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ════════════════════════════════════════════════════════════════════════════
@@ -1254,6 +1370,12 @@ async function pollRest() {
       if (engR) state.engineState = engR;
     } catch(e){}
 
+    // Vault status (applies/removes red theme on reconnect if mode changed server-side)
+    try {
+      const vR = await fetch(API+'/api/vault/status', {signal: AbortSignal.timeout(3000)}).then(r=>r.json());
+      if (vR) { vaultState = vR; applyVaultTheme(vR.is_live); }
+    } catch(e){}
+
     renderAll();
 
   } catch(e) {
@@ -1611,6 +1733,125 @@ async function pollAnalytics() {
   } catch(e) {}
 }
 
+// ── Vault Management ─────────────────────────────────────────────────────────
+let vaultState = { configured: false, current_mode: 'PAPER', is_live: false };
+
+async function loadVaultStatus() {
+  try {
+    const d = await fetch(API + '/api/vault/status', { signal: AbortSignal.timeout(3000) }).then(r => r.json());
+    vaultState = d;
+    applyVaultTheme(d.is_live);
+  } catch(e) {}
+}
+
+function applyVaultTheme(isLive) {
+  document.body.classList.toggle('real-live-mode', !!isLive);
+  const badge = document.getElementById('vault-live-badge');
+  if (badge) badge.style.display = isLive ? 'inline-flex' : 'none';
+  const btn = document.getElementById('vault-btn');
+  if (btn) {
+    if (isLive) {
+      btn.style.cssText = 'border-color:#FC8181;background:#FFF5F5;color:#9B2C2C;font-family:var(--ff);font-size:12px;font-weight:600;padding:6px 14px;border-radius:9px;border:1.5px solid;cursor:pointer;animation:pulse 2s infinite;';
+      btn.textContent = '⚡ LIVE VAULT';
+    } else {
+      btn.style.cssText = 'border-color:#D6BCFA;background:#FAF5FF;color:#553C9A;font-family:var(--ff);font-size:12px;font-weight:600;padding:6px 14px;border-radius:9px;border:1.5px solid;cursor:pointer;';
+      btn.textContent = '🔐 Vault';
+    }
+  }
+}
+
+function openVaultModal() {
+  document.getElementById('vault-overlay').classList.add('open');
+  if (vaultState.configured) {
+    showVaultSwitchForm();
+    // Pre-select current mode radio
+    const radio = document.getElementById(vaultState.current_mode === 'LIVE' ? 'v-mode-live' : 'v-mode-paper');
+    if (radio) radio.checked = true;
+  } else {
+    showVaultSetupForm();
+  }
+}
+
+function closeVaultModal(evt) {
+  if (evt && evt.target !== document.getElementById('vault-overlay')) return;
+  document.getElementById('vault-overlay').classList.remove('open');
+  document.getElementById('v-setup-err').textContent  = '';
+  document.getElementById('v-switch-err').textContent = '';
+}
+
+function showVaultSetupForm() {
+  document.getElementById('vault-setup-form').style.display  = '';
+  document.getElementById('vault-switch-form').style.display = 'none';
+  document.getElementById('vm-subtitle').textContent =
+    'Encrypt and store Binance API credentials for PAPER and LIVE modes';
+}
+
+function showVaultSwitchForm() {
+  document.getElementById('vault-setup-form').style.display  = 'none';
+  document.getElementById('vault-switch-form').style.display = '';
+  document.getElementById('vm-subtitle').textContent =
+    `Active mode: ${vaultState.current_mode}  ·  Enter master password to switch`;
+}
+
+async function submitVaultSetup() {
+  const errEl = document.getElementById('v-setup-err');
+  errEl.textContent = '';
+  const pw = document.getElementById('v-setup-pw').value.trim();
+  if (!pw)        { errEl.textContent = 'Master password is required.'; return; }
+  if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  try {
+    const r = await fetch(API + '/api/vault/setup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password:     pw,
+        paper_key:    document.getElementById('v-paper-key').value.trim(),
+        paper_secret: document.getElementById('v-paper-secret').value.trim(),
+        live_key:     document.getElementById('v-live-key').value.trim(),
+        live_secret:  document.getElementById('v-live-secret').value.trim(),
+      }),
+    });
+    if (!r.ok) { errEl.textContent = (await r.json()).detail || 'Setup failed.'; return; }
+    vaultState = { configured: true, current_mode: 'PAPER', is_live: false };
+    applyVaultTheme(false);
+    addThought('🔐 Vault configured — credentials AES-encrypted at rest.', 'SYSTEM');
+    document.getElementById('vault-overlay').classList.remove('open');
+    document.getElementById('v-setup-pw').value = '';
+  } catch(e) { errEl.textContent = 'Backend offline — try again.'; }
+}
+
+async function submitVaultSwitch() {
+  const errEl = document.getElementById('v-switch-err');
+  errEl.textContent = '';
+  const pw   = document.getElementById('v-switch-pw').value;
+  const mode = document.querySelector('input[name="vault-mode"]:checked')?.value || 'PAPER';
+  if (!pw) { errEl.textContent = 'Password required.'; return; }
+  if (mode === 'LIVE' && !confirm(
+    '⚡ SWITCH TO REAL LIVE MODE?\n\n' +
+    'This will route ALL orders to Binance PRODUCTION.\n' +
+    'Every trade will use REAL money.\n\n' +
+    'Confirm your risk settings before proceeding.\n\nAre you absolutely sure?'
+  )) return;
+  try {
+    const r = await fetch(API + '/api/vault/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, mode }),
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.detail || 'Switch failed.'; return; }
+    vaultState = { configured: true, current_mode: d.mode, is_live: d.is_live };
+    applyVaultTheme(d.is_live);
+    addThought(
+      `🔐 Vault → ${d.mode}${d.is_live ? ' ⚡ REAL PRODUCTION ACTIVE' : ' (Testnet)'}`,
+      d.is_live ? 'HALT' : 'SYSTEM',
+    );
+    document.getElementById('vault-overlay').classList.remove('open');
+    document.getElementById('v-switch-pw').value = '';
+    setTimeout(pollRest, 600);
+  } catch(e) { errEl.textContent = 'Backend offline — try again.'; }
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   initChart();
@@ -1631,6 +1872,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Mock update loop (runs always, no-op when useMock=false)
   setInterval(mockTick_, 2400);
+
+  // Load vault status on boot (applies red theme if LIVE was active before refresh)
+  loadVaultStatus();
 });
 </script>
 </body>

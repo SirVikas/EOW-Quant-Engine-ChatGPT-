@@ -28,6 +28,7 @@ from core.regime_detector import RegimeDetector
 from core.risk_controller import RiskController, OpenPosition
 from core.self_healing    import SelfHealingProtocol
 from core.data_lake       import DataLake
+from core.vault           import VaultManager, WrongPassword, VaultNotConfigured
 from core.security        import ensure_auth_ready_for_mode, require_roles
 from core.scorecard       import compute_scorecard
 from core.analytics       import compute_full_analytics
@@ -66,6 +67,7 @@ risk_ctrl  = RiskController(pnl_calc, scaler)
 healer     = SelfHealingProtocol(mdp)
 exporter   = ExportManager(pnl_calc, genome, risk_ctrl)
 data_lake  = DataLake()
+vault      = VaultManager()
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
@@ -877,6 +879,80 @@ async def get_halt_audit():
         "halt_events":   halt_events[-100:],
         "skip_log":      skip_log,
         "ts":            int(time.time() * 1000),
+    }
+
+
+# ── Dual-API Credential Vault ─────────────────────────────────────────────────
+
+@app.get("/api/vault/status")
+async def get_vault_status():
+    """Non-sensitive vault status: configured, current_mode, is_live."""
+    return vault.status()
+
+
+@app.post("/api/vault/setup")
+async def vault_setup(body: dict, _auth=Depends(require_roles("admin"))):
+    """
+    Encrypt and persist both PAPER and LIVE credential slots under a master password.
+    Requires admin bearer token.  Re-calling overwrites the existing vault.
+    Body: {password, paper_key, paper_secret, live_key, live_secret}
+    """
+    try:
+        vault.setup(
+            password     = body.get("password", ""),
+            paper_key    = body.get("paper_key", ""),
+            paper_secret = body.get("paper_secret", ""),
+            live_key     = body.get("live_key", ""),
+            live_secret  = body.get("live_secret", ""),
+        )
+        _thought("🔐 API Vault configured — PAPER and LIVE credentials encrypted at rest.", "SYSTEM")
+        return {"ok": True, "mode": "PAPER"}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Vault setup failed: {exc}")
+
+
+@app.post("/api/vault/switch")
+async def vault_switch(body: dict):
+    """
+    Password-gated mode switch — the master password IS the authorization.
+    On success, hot-swaps Binance API credentials in the running cfg and mdp
+    WITHOUT requiring an engine restart.
+    Body: {password, mode: "PAPER"|"LIVE"}
+    """
+    try:
+        creds = vault.switch(
+            password    = body.get("password", ""),
+            target_mode = body.get("mode", "PAPER"),
+        )
+    except WrongPassword:
+        raise HTTPException(status_code=401, detail="Wrong master password.")
+    except VaultNotConfigured:
+        raise HTTPException(status_code=409, detail="Vault not configured — run /api/vault/setup first.")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    # ── Hot-swap runtime credentials (no restart needed) ─────────────────────
+    cfg.BINANCE_API_KEY    = creds["key"]
+    cfg.BINANCE_API_SECRET = creds["secret"]
+    cfg.BINANCE_TESTNET    = creds["testnet"]
+    cfg.TRADE_MODE         = creds["mode"]           # type: ignore[assignment]
+    mdp._exec_url          = mdp.EXEC_API_TEST if creds["testnet"] else mdp.EXEC_API_LIVE
+
+    endpoint_label = "testnet.binance.vision" if creds["testnet"] else "api.binance.com (PRODUCTION)"
+    _thought(
+        f"🔐 VAULT SWITCH → {creds['mode']} "
+        f"({'Testnet' if creds['testnet'] else '⚡ REAL PRODUCTION'}) | "
+        f"Execution endpoint: {endpoint_label}",
+        "SYSTEM",
+    )
+
+    return {
+        "ok":      True,
+        "mode":    creds["mode"],
+        "testnet": creds["testnet"],
+        "is_live": creds["mode"] == "LIVE",
     }
 
 
