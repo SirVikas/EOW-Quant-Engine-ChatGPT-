@@ -33,6 +33,12 @@ from core.guardian        import GuardianLogic, AGGRESSION_PROFILES
 from core.security        import ensure_auth_ready_for_mode, require_roles
 from core.scorecard       import compute_scorecard
 from core.analytics       import compute_full_analytics
+from core.redis_health    import redis_health
+from core.ws_stabilizer   import WsStabilizer
+from core.regime_debounce import regime_debounce
+from core.indicator_guard import indicator_guard
+from core.exchange.api_manager  import api_manager
+from core.bootstrap.api_loader  import api_loader
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
@@ -70,6 +76,10 @@ exporter   = ExportManager(pnl_calc, genome, risk_ctrl)
 data_lake  = DataLake()
 vault      = VaultManager()
 guardian   = GuardianLogic()
+ws_stab    = WsStabilizer(mdp)        # FTD-REF-019: tick watchdog
+
+# FTD-REF-019: store boot diagnostics for /api/boot-status
+_boot_status: dict = {}
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
@@ -126,6 +136,9 @@ async def on_tick(tick: Tick):
     sym   = tick.symbol
     price = tick.price
 
+    # FTD-REF-019: record liveness for tick watchdog
+    ws_stab.record_tick()
+
     # 1. Update risk controller (SL/TP checks)
     action = risk_ctrl.on_price_update(sym, price)
     if action:
@@ -146,6 +159,8 @@ async def on_tick(tick: Tick):
     # 3. Detect regime
     regime_det.push(sym, candle.close, candle.high, candle.low, candle.ts)
     regime = regime_det.get(sym)
+    # FTD-REF-019: debounce — only log on genuine regime transitions
+    regime_debounce.push(sym, regime, state=regime_det.state(sym))
 
     # 4. Get appropriate strategy — skip if warmup incomplete
     if regime.value == "UNKNOWN":
@@ -183,6 +198,12 @@ async def on_tick(tick: Tick):
         closes = buf
         highs  = [p * 1.001 for p in buf]
         lows   = [p * 0.999 for p in buf]
+
+        # FTD-REF-019: validate indicator quality before generating signal
+        r_state = regime_det.state(sym)
+        guard   = indicator_guard.validate_from_state(sym, len(buf), r_state)
+        if not guard.ok:
+            return   # insufficient candles / unstable ADX / near-zero ATR
 
         sig = strategy.generate_signal(sym, closes, highs, lows)
         if sig and sig.signal != Signal.NONE:
@@ -358,12 +379,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # ── Fix A: Reload promoted DNA so genome doesn't reset on restart ─────────
     genome.load_persisted_dna()
 
+    # ── FTD-REF-019: Boot diagnostics ────────────────────────────────────────
+    global _boot_status
+    _boot_status = await api_loader.run(api_manager=api_manager)
+
     # ── Start all subsystems ──────────────────────────────────────────────────
     tasks = [
         asyncio.create_task(mdp.start()),
         asyncio.create_task(genome.start()),
         asyncio.create_task(healer.start()),
         asyncio.create_task(data_lake.start()),
+        asyncio.create_task(ws_stab.start()),   # FTD-REF-019: tick watchdog
     ]
 
     # ── Fix D: Restore previous session's trade history from DataLake ─────────
@@ -416,6 +442,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     await genome.stop()
     await healer.stop()
     await data_lake.stop()
+    await ws_stab.stop()
+    await api_manager.close()
 
 
 # ── FastAPI App ───────────────────────────────────────────────────────────────
@@ -436,6 +464,18 @@ app.add_middleware(
 
 
 # ── REST Endpoints ────────────────────────────────────────────────────────────
+
+@app.get("/api/boot-status")
+async def get_boot_status():
+    """FTD-REF-019: Boot diagnostics — Redis / WebSocket / Indicators / API."""
+    live_stab = ws_stab.summary()
+    return {
+        **_boot_status,
+        "websocket": live_stab["state"],
+        "ws_gap_s":  live_stab["gap_seconds"],
+        "ws_reconnects": live_stab["reconnect_count"],
+    }
+
 
 @app.get("/api/status")
 async def get_status():

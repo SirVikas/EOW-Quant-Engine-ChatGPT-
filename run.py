@@ -143,6 +143,38 @@ def print_api_routes():
     print()
 
 
+def print_boot_status():
+    """
+    Fetch the boot diagnostics from the engine and print the FTD-REF-019
+    standard status line.
+    Format:
+      [BOOT] Redis: CONNECTED ✅ | WebSocket: STABLE ✅ | Indicators: VALIDATED ✅ | API: READ-ONLY ✅
+    """
+    import json as _json
+    try:
+        with urllib.request.urlopen(
+            f"http://127.0.0.1:{PORT}/api/boot-status", timeout=3
+        ) as r:
+            data = _json.loads(r.read())
+        redis  = data.get("redis",      "UNKNOWN")
+        ws     = data.get("websocket",  "UNKNOWN")
+        ind    = data.get("indicators", "UNKNOWN")
+        api    = data.get("api",        "UNKNOWN")
+        r_tick = f"{G}✅{NC}" if redis == "CONNECTED"   else f"{R}❌{NC}"
+        w_tick = f"{G}✅{NC}" if ws    == "STABLE"      else f"{R}❌{NC}"
+        i_tick = f"{G}✅{NC}" if ind   == "VALIDATED"   else f"{R}❌{NC}"
+        a_tick = f"{G}✅{NC}" if data.get("api_ok")     else f"{R}❌{NC}"
+        print(
+            f"\n{B}  Boot Status:{NC}\n"
+            f"    Redis: {C}{redis}{NC} {r_tick}  |  "
+            f"WebSocket: {C}{ws}{NC} {w_tick}  |  "
+            f"Indicators: {C}{ind}{NC} {i_tick}  |  "
+            f"API: {C}{api}{NC} {a_tick}\n"
+        )
+    except Exception:
+        pass   # non-critical — engine already started
+
+
 def auto_inject_dna():
     """Silently inject optimized DNA on every startup."""
     import json, urllib.request
@@ -200,6 +232,7 @@ def main():
 
     # ── Wait + open browser ───────────────────────────────────────────────────
     if wait_for_engine():
+        print_boot_status()        # FTD-REF-019 standard boot status line
         print_api_routes()
         auto_inject_dna()          # inject optimized DNA silently
         if OPEN_BROWSER:
