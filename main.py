@@ -85,6 +85,9 @@ _ws_clients: list[WebSocket] = []
 # CT-Scan thought log (AI reasoning log for the UI)
 _thought_log: list[dict] = []
 
+# Last structured skip event — used by the live Skip Reason indicator on dashboard
+_last_skip: dict = {}
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -200,13 +203,29 @@ async def on_tick(tick: Tick):
                 regime=regime.value,   # Fix B: regime-specific RR threshold
             )
             if not edge_ok:
+                rr_net = edge.get('rr_after_cost', 0)
+                rr_req = edge.get('required_r', 0)
                 _thought(
                     f"⛔ Skip {sym}: weak edge gross={edge.get('gross_tp', 0):.3f} "
                     f"cost={edge.get('cost', 0):.3f} net={edge.get('net_if_tp', 0):.3f} "
-                    f"RR={edge.get('rr', 0):.2f} RR_net={edge.get('rr_after_cost', 0):.2f} "
-                    f"RR_req={edge.get('required_r', 0):.2f} ATR%={edge.get('current_volatility', 0):.2f}",
+                    f"RR={edge.get('rr', 0):.2f} RR_net={rr_net:.2f} "
+                    f"RR_req={rr_req:.2f} ATR%={edge.get('current_volatility', 0):.2f}",
                     "FILTER",
                 )
+                # Update live skip tracker for dashboard indicator
+                global _last_skip
+                _last_skip = {
+                    "ts":          int(time.time() * 1000),
+                    "symbol":      sym,
+                    "reason":      "WEAK_EDGE",
+                    "rr_net":      round(rr_net, 3),
+                    "rr_req":      round(rr_req, 3),
+                    "gap":         round(rr_req - rr_net, 3),
+                    "regime":      edge.get("regime", regime.value),
+                    "cost":        round(edge.get("cost", 0), 4),
+                    "net_if_tp":   round(edge.get("net_if_tp", 0), 4),
+                    "strategy":    strategy_type,
+                }
                 return
 
             # 7. Open position — use Limit Order when enabled (saves fees + slippage)
@@ -930,6 +949,21 @@ async def get_halt_audit():
         "halt_events":   halt_events[-100:],
         "skip_log":      skip_log,
         "ts":            int(time.time() * 1000),
+    }
+
+
+@app.get("/api/last-skip")
+async def get_last_skip():
+    """
+    Returns the most recent structured skip event for the live Skip Reason indicator.
+    Also returns skip_total (all-time FILTER count this session) and recent 5 skips.
+    """
+    recent_skips = [t for t in _thought_log if t.get("level") == "FILTER"]
+    return {
+        "last_skip":    _last_skip,
+        "skip_total":   len(recent_skips),
+        "recent_msgs":  [s.get("msg", "") for s in recent_skips[-5:]],
+        "ts":           int(time.time() * 1000),
     }
 
 

@@ -71,6 +71,10 @@ ROR_REACTIVE_MULT    = 2.0    # reactive veto at 2× threshold (2%)
 MDD_VETO_THRESHOLD   = 12.0   # % — block aggression increase if MDD ≥ this
 MDD_EMERGENCY_LEVEL  = 10.0   # % — force downgrade to Conservative if MDD ≥ this
 
+# Grace window: after a MANUAL aggression change, suppress reactive auto-downgrade
+# for this many minutes so the system has time to prove itself.
+MANUAL_GRACE_MINUTES = 30
+
 
 # ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -121,6 +125,9 @@ class GuardianLogic:
         self._safe_mode:          bool         = False
         self._last_msg:           str          = ""
         self._veto_log:           List[VetoEvent] = []
+        # Timestamp (ms) of the last MANUAL aggression change by the user.
+        # Reactive auto-downgrade is suppressed for MANUAL_GRACE_MINUTES after this.
+        self._manual_change_ts:   int          = 0
 
     # ── Properties ────────────────────────────────────────────────────────────
 
@@ -217,8 +224,9 @@ class GuardianLogic:
         # ── Approved — apply the change ───────────────────────────────────────
         old_name    = AGGRESSION_PROFILES[self._level]["name"]
         self._apply_profile(requested_level, cfg_obj)
-        self._level     = requested_level
-        self._safe_mode = False
+        self._level          = requested_level
+        self._safe_mode      = False
+        self._manual_change_ts = int(time.time() * 1000)   # start grace window
         p = AGGRESSION_PROFILES[requested_level]
         msg = (
             f"Guardian approved: {p['emoji']} {p['name']} activated "
@@ -248,6 +256,18 @@ class GuardianLogic:
             return None
 
         live_ror = self._project_ror(self._level, win_rate, avg_r_win, avg_r_loss)
+
+        # Respect the manual grace window: if the user just set an aggression level,
+        # give the system MANUAL_GRACE_MINUTES to prove itself before auto-downgrading.
+        grace_elapsed_s = (int(time.time() * 1000) - self._manual_change_ts) / 1000
+        in_grace = grace_elapsed_s < MANUAL_GRACE_MINUTES * 60
+        if in_grace:
+            remaining_min = (MANUAL_GRACE_MINUTES * 60 - grace_elapsed_s) / 60
+            logger.debug(
+                f"[GUARDIAN] Grace window active — {remaining_min:.1f} min remaining, "
+                "skipping reactive check."
+            )
+            return None
 
         needs_downgrade = (
             (live_ror > ROR_VETO_THRESHOLD * ROR_REACTIVE_MULT and self._level >= 3)
@@ -282,13 +302,16 @@ class GuardianLogic:
         """Full state snapshot for the dashboard API."""
         p = AGGRESSION_PROFILES[self._level]
         vetoes = [v for v in self._veto_log if v.reverted_to != v.requested_level]
+        grace_elapsed_s  = (int(time.time() * 1000) - self._manual_change_ts) / 1000
+        grace_remaining_s = max(0.0, MANUAL_GRACE_MINUTES * 60 - grace_elapsed_s)
         return {
-            "level":         self._level,
-            "profile_name":  p["name"],
-            "profile_emoji": p["emoji"],
-            "safe_mode":     self._safe_mode,
-            "last_message":  self._last_msg,
-            "veto_count":    len(vetoes),
+            "level":             self._level,
+            "profile_name":      p["name"],
+            "profile_emoji":     p["emoji"],
+            "safe_mode":         self._safe_mode,
+            "last_message":      self._last_msg,
+            "veto_count":        len(vetoes),
+            "grace_remaining_s": round(grace_remaining_s, 0),
             "last_veto":     {
                 "ts":          vetoes[-1].ts,
                 "reason":      vetoes[-1].reason,
