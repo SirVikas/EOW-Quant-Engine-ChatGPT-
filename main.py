@@ -137,6 +137,7 @@ def _estimate_atr_pct(closes: list[float]) -> float:
 
 async def on_tick(tick: Tick):
     """Called for every new tick from MarketDataProvider."""
+    global _last_skip   # must be declared before any assignment in this function
     sym   = tick.symbol
     price = tick.price
 
@@ -251,7 +252,6 @@ async def on_tick(tick: Tick):
                 confidence=r_ai.confidence,
             )
             if not sf_result.ok:
-                global _last_skip
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": sf_result.reason, "rr": sf_result.rr,
@@ -280,7 +280,6 @@ async def on_tick(tick: Tick):
                     "FILTER",
                 )
                 # Update live skip tracker for dashboard indicator
-                global _last_skip
                 _last_skip = {
                     "ts":          int(time.time() * 1000),
                     "symbol":      sym,
