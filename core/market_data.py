@@ -105,15 +105,19 @@ class MarketDataProvider:
 
     async def start(self):
         """Discover top-N pairs then open the combined WebSocket stream."""
-        # Redis is optional — engine runs without it (in-memory only)
+        # Redis is optional — engine runs without it (in-memory only).
+        # Log at INFO, not WARNING, because absence of Redis is expected behaviour.
         try:
             self._redis = await aioredis.from_url(
                 cfg.REDIS_URL, decode_responses=True, socket_connect_timeout=2
             )
             await self._redis.ping()
-            logger.info("[MDP] Redis connected.")
+            logger.info("[MDP] Redis connected — pub/sub active.")
         except Exception as e:
-            logger.warning(f"[MDP] Redis unavailable ({e}) — running without pub/sub.")
+            logger.info(
+                f"[MDP] Redis not available ({type(e).__name__}) — "
+                "running in-memory only. Engine will auto-reconnect if Redis starts later."
+            )
             self._redis = None
         self.symbols = await self._discover_symbols()
         logger.info(f"[MDP] Watching {len(self.symbols)} symbols: {self.symbols[:5]}…")
@@ -121,6 +125,7 @@ class MarketDataProvider:
         await asyncio.gather(
             self._stream_loop(),
             self._funding_rate_loop(),
+            self._redis_reconnect_loop(),
         )
 
     async def stop(self):
@@ -274,6 +279,26 @@ class MarketDataProvider:
                 )
                 await asyncio.sleep(delay)
                 backoff = min(backoff * 2, 60)
+
+    async def _redis_reconnect_loop(self):
+        """
+        Background task: silently retry Redis connection every 60 s when not connected.
+        If the operator starts Redis after engine launch, it will be picked up here
+        without any restart — pub/sub activates automatically.
+        """
+        while self._running:
+            await asyncio.sleep(60)
+            if self._redis is not None:
+                continue   # already connected
+            try:
+                r = await aioredis.from_url(
+                    cfg.REDIS_URL, decode_responses=True, socket_connect_timeout=1
+                )
+                await r.ping()
+                self._redis = r
+                logger.info("[MDP] Redis reconnected — pub/sub now active.")
+            except Exception:
+                pass   # still not available — stay silent, retry next cycle
 
     async def reconnect(self):
         """
