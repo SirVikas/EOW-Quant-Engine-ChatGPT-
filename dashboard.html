@@ -765,6 +765,52 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     </div>
   </div>
 
+  <!-- ── Genome Intelligence Panel ─────────────────────────────────────── -->
+  <div class="card" style="background:#F0FFF4;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;color:#276749;">🧬 Genome Evolution Intelligence</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+          Autonomous strategy mutation engine. Runs every 15 min — promote winners to live DNA.
+          RR Edge pillar of Deployability requires genome to produce winning strategies.
+        </div>
+      </div>
+      <button class="btn green" id="genome-trigger-btn" onclick="triggerGenomeCycle()" style="min-width:140px;">
+        ▶ Run Evolution Now
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px;">
+      <div style="padding:12px 14px;border-radius:10px;border:1.5px solid #9AE6B4;background:#fff;">
+        <div class="label">Generations Run</div>
+        <div style="font-size:22px;font-weight:700;color:#276749;margin-top:4px;" id="genome-gen-count">—</div>
+        <div style="font-size:10px;color:var(--muted);">total genomes evaluated</div>
+      </div>
+      <div style="padding:12px 14px;border-radius:10px;border:1.5px solid #9AE6B4;background:#fff;">
+        <div class="label">Promoted Strategies</div>
+        <div style="font-size:22px;font-weight:700;color:#276749;margin-top:4px;" id="genome-promo-count">—</div>
+        <div style="font-size:10px;color:var(--muted);">passed all 4 gates</div>
+      </div>
+      <div style="padding:12px 14px;border-radius:10px;border:1.5px solid #9AE6B4;background:#fff;">
+        <div class="label">Candles in Store</div>
+        <div style="font-size:22px;font-weight:700;color:#276749;margin-top:4px;" id="genome-candle-count">—</div>
+        <div style="font-size:10px;color:var(--muted);">across all symbols</div>
+      </div>
+      <div style="padding:12px 14px;border-radius:10px;border:1.5px solid #9AE6B4;background:#fff;">
+        <div class="label">Best avg R-multiple</div>
+        <div style="font-size:22px;font-weight:700;color:#276749;margin-top:4px;" id="genome-best-r">—</div>
+        <div style="font-size:10px;color:var(--muted);">need ≥ 0.50 for +15 pts</div>
+      </div>
+    </div>
+    <div id="genome-last-promo" style="display:none;background:#ECFDF5;border-left:3px solid #38A169;padding:10px 14px;border-radius:8px;font-size:12px;color:#276749;font-weight:600;line-height:1.6;"></div>
+    <div id="genome-trigger-msg" style="display:none;margin-top:10px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;"></div>
+    <div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:rgba(0,0,0,.03);font-size:11px;color:var(--muted);line-height:1.6;">
+      <strong>Deployability RR Edge pillar (40 pts):</strong>
+      Genome runs ≥ 1 generation → <span style="color:#276749;">+10 pts</span> &nbsp;·&nbsp;
+      Promoted strategy avg R ≥ 0.50 → <span style="color:#276749;">+15 pts</span> &nbsp;·&nbsp;
+      OOS Profit Factor ≥ 1.0 → <span style="color:#276749;">+15 pts</span>
+    </div>
+  </div>
+
 </div><!-- /main combat -->
 </div><!-- /tab-combat -->
 
@@ -989,6 +1035,7 @@ function switchTab(name) {
   }
   if (name === 'combat') {
     loadGuardianStatus();
+    loadGenomeStatus();
   }
   if (name === 'report') {
     refreshReport();
@@ -2096,6 +2143,72 @@ async function setAggression(level) {
   }
 }
 
+// ── Genome Intelligence Panel ─────────────────────────────────────────────────
+async function loadGenomeStatus() {
+  try {
+    const d = await fetch(API+'/api/genome', {signal:AbortSignal.timeout(4000)}).then(r=>r.json());
+    const genCount    = d.generation || 0;
+    const promoLog    = d.promotion_log || [];
+    const promoted    = promoLog.filter(p => p.decision === 'PROMOTED');
+    const candleTotal = Object.values(d.candle_counts || {}).reduce((a, b) => a + b, 0);
+
+    const el = id => document.getElementById(id);
+    if (el('genome-gen-count'))    el('genome-gen-count').textContent    = genCount.toLocaleString();
+    if (el('genome-promo-count'))  el('genome-promo-count').textContent  = promoted.length;
+    if (el('genome-candle-count')) el('genome-candle-count').textContent = candleTotal.toLocaleString();
+
+    // Best avg_r from most recent promoted entry
+    let bestR = 0;
+    if (promoted.length) bestR = promoted[promoted.length - 1].avg_r_multiple || 0;
+    const rEl = el('genome-best-r');
+    if (rEl) {
+      rEl.textContent = bestR > 0 ? bestR.toFixed(3) : '—';
+      rEl.style.color = bestR >= 0.50 ? '#276749' : (bestR > 0 ? '#7B6100' : '#888');
+    }
+
+    // Last promoted detail banner
+    const bannerEl = el('genome-last-promo');
+    if (bannerEl && promoted.length) {
+      const lp = promoted[promoted.length - 1];
+      bannerEl.style.display = 'block';
+      bannerEl.innerHTML =
+        `Last Promotion: <strong>${lp.strategy_type}</strong> (${lp.reason || '—'})`;
+    } else if (bannerEl) {
+      bannerEl.style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+async function triggerGenomeCycle() {
+  const btn     = document.getElementById('genome-trigger-btn');
+  const msgEl   = document.getElementById('genome-trigger-msg');
+  if (btn)   { btn.disabled = true; btn.textContent = '⏳ Evolving…'; }
+  if (msgEl) msgEl.style.display = 'none';
+  try {
+    const r = await fetch(API+'/api/genome/trigger', {method:'POST', signal:AbortSignal.timeout(60000)});
+    const d = await r.json();
+    if (msgEl) {
+      if (d.ok) {
+        msgEl.style.cssText = 'display:block;background:#ECFDF5;color:#276749;border-left:3px solid #38A169;margin-top:10px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;';
+        msgEl.textContent = `Evolution complete — ${d.generation} genomes evaluated, ${d.promoted_count} strategies promoted. RR Edge pillar updated.`;
+      } else {
+        msgEl.style.cssText = 'display:block;background:#FFF5F5;color:#9B2C2C;border-left:3px solid #FC8181;margin-top:10px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;';
+        msgEl.textContent = d.reason || 'Evolution failed — check engine logs.';
+      }
+    }
+    await loadGenomeStatus();
+    await loadGuardianStatus();  // refresh deployability via analytics poll
+    addThought(`🧬 Genome cycle triggered — ${d.generation||0} genomes, ${d.promoted_count||0} promoted`, 'SYSTEM');
+  } catch(e) {
+    if (msgEl) {
+      msgEl.style.cssText = 'display:block;background:#FFF5F5;color:#9B2C2C;border-left:3px solid #FC8181;margin-top:10px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;';
+      msgEl.textContent = 'Request timed out or backend offline — evolution may still be running.';
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Run Evolution Now'; }
+  }
+}
+
 // ── Vault Management ─────────────────────────────────────────────────────────
 let vaultState = { configured: false, current_mode: 'PAPER', is_live: false };
 
@@ -2241,6 +2354,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Load guardian/aggression state on boot
   loadGuardianStatus();
+
+  // Load genome intelligence on boot
+  loadGenomeStatus();
 });
 </script>
 </body>

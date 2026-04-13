@@ -569,4 +569,9 @@ class GenomeEngine:
             "active_metrics":  {k: asdict(v) for k, v in self.active_metrics.items()},
             "recent_genomes":  [asdict(g) for g in self.generation_log[-50:]],
             "promotion_log":   [asdict(p) for p in self.promotion_log[-50:]],
+            # Number of evaluated genomes — used by deployability_index() to determine
+            # whether the genome has run at least one evolution cycle (+10 pts RR Edge).
+            "generation":      len(self.generation_log),
+            # Per-symbol candle counts in the in-memory store (diagnostics).
+            "candle_counts":   {sym: len(c) for sym, c in self._candle_store.items()},
         }

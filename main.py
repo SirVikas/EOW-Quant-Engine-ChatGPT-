@@ -453,6 +453,32 @@ async def get_genome():
     return genome.export_state()
 
 
+@app.post("/api/genome/trigger")
+async def trigger_genome_cycle():
+    """
+    Manually kick off one genome evolution cycle without waiting for the timer.
+    Useful during initial deployment to accelerate Deployability Index build-up.
+    Requires at least one symbol's candle data to have accumulated first.
+    """
+    candle_counts = {sym: len(c) for sym, c in genome._candle_store.items()}
+    if not candle_counts:
+        return {
+            "ok": False,
+            "reason": "No candle data in genome store yet — start the engine and wait for market data to flow.",
+            "candle_counts": {},
+        }
+    await genome._evolution_cycle()
+    state = genome.export_state()
+    promotions = [p for p in state.get("promotion_log", []) if p.get("decision") == "PROMOTED"]
+    return {
+        "ok":             True,
+        "generation":     state["generation"],
+        "candle_counts":  candle_counts,
+        "promoted_count": len(promotions),
+        "last_promotion": promotions[-1] if promotions else None,
+    }
+
+
 @app.get("/api/regime")
 async def get_regime():
     states = regime_det.all_states()

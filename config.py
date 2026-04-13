@@ -67,7 +67,7 @@ class EngineConfig(BaseSettings):
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
 
     # ── Genome Engine ────────────────────────────────────────────────────────
-    GENOME_CYCLE_MINUTES: int = 60         # Mutation cycle interval
+    GENOME_CYCLE_MINUTES: int = 15         # Mutation cycle interval (was 60 — first cycle now in 15 min)
     GENOME_POPULATION: int = 20            # Shadow strategies per cycle
     GENOME_LOOKBACK_HOURS: int = 24        # Backtest window (fresh data)
     GENOME_PROMOTE_WIN_RATE: float = 0.55  # Min win-rate to promote (raised: 52%→55%)

@@ -271,8 +271,11 @@ class SelfHealingProtocol:
             "conn_reset_count":    self._conn_reset_count,
             "last_ws_error":       last_ws_error,
             "network_audit":       network_audit,
+            # Return last 40 events (~10 heal cycles × 4 tasks each) so the
+            # deployability_index() network scorer has enough API_PING samples
+            # to award the full +20 pts rather than being capped at ~6.
             "recent_events": [
                 {"ts": e.ts, "action": e.action, "result": e.result, "ok": e.ok}
-                for e in self.events[-10:]
+                for e in self.events[-40:]
             ],
         }
