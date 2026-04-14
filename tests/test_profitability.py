@@ -18,7 +18,10 @@ import pytest
 
 from core.trade_frequency  import TradeFrequency, RELAX_SHORT, RELAX_LONG, WINDOW_SHORT_SEC
 from core.execution_engine import ExecutionEngine, FEE_RATE, SLIPPAGE_BASE_PCT
-from core.learning_engine  import LearningEngine, WR_HIGH_THRESH, WR_LOW_THRESH, WEIGHT_AT_LOW_WR
+from core.learning_engine  import (
+    LearningEngine, WR_HIGH_THRESH, WR_LOW_THRESH,
+    WR_DRASTIC_THRESH, WEIGHT_AT_LOW_WR, WEIGHT_AT_DRASTIC_WR,
+)
 from core.regime_ai        import RegimeAI, FALLBACK_CONF_PENALTY, ATR_HIGH_THRESH, ATR_LOW_THRESH
 from core.signal_filter    import SignalFilter
 from core.risk_engine      import (
@@ -183,11 +186,11 @@ class TestLearningEngine:
         assert self.le.get_regime_weight("TRENDING") == 1.0
 
     def test_low_win_rate_returns_reduced_weight(self):
-        """WR ≤ 45% → weight = WEIGHT_AT_LOW_WR."""
+        """WR ≤ 40% → weight = WEIGHT_AT_DRASTIC_WR (FTD-REF-024 drastic tier)."""
         for _ in range(10):
             self.le.record("TRENDING", False)  # 0% WR
         w = self.le.get_regime_weight("TRENDING")
-        assert w == WEIGHT_AT_LOW_WR
+        assert w == WEIGHT_AT_DRASTIC_WR
 
     def test_mid_win_rate_interpolates(self):
         """WR between LOW and HIGH → interpolated weight."""
@@ -204,8 +207,10 @@ class TestLearningEngine:
         for _ in range(10):
             self.le.record("TRENDING",       True)
             self.le.record("MEAN_REVERTING", False)
-        assert self.le.get_regime_weight("TRENDING")       == 1.0
-        assert self.le.get_regime_weight("MEAN_REVERTING") == WEIGHT_AT_LOW_WR
+        # TRENDING: 100% WR → full weight
+        assert self.le.get_regime_weight("TRENDING") == 1.0
+        # MEAN_REVERTING: 0% WR → drastic weight (FTD-REF-024)
+        assert self.le.get_regime_weight("MEAN_REVERTING") == WEIGHT_AT_DRASTIC_WR
 
     def test_rolling_window_drops_old_trades(self):
         """Old losses are evicted from window by new wins."""

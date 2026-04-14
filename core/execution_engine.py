@@ -1,6 +1,7 @@
 """
-EOW Quant Engine — Execution Engine  (FTD-REF-023)
+EOW Quant Engine — Execution Engine  (FTD-REF-023 + FTD-REF-024)
 Realistic trade price simulation: slippage, spread, fees.
+FTD-REF-024 adds: fee-aware trade rejection gate.
 
 Applies before recording PnL so that backtested/live metrics reflect
 true costs rather than mid-price fantasy fills.
@@ -19,6 +20,11 @@ Slippage model:
 
 Spread model:
   effective_spread = max(raw_spread, SPREAD_MIN_PCT × mid_price)
+
+Fee-aware gate (FTD-REF-024):
+  should_reject_for_fees(expected_gross_profit, notional) → (reject, reason)
+  Rejects when expected_gross_profit < round-trip fees (i.e. trade cannot
+  even cover its own cost regardless of outcome).
 """
 from __future__ import annotations
 
@@ -150,6 +156,30 @@ class ExecutionEngine:
     def fee_for_notional(self, notional: float) -> float:
         """Single-leg fee estimate (useful for pre-trade cost check)."""
         return notional * FEE_RATE
+
+    def should_reject_for_fees(
+        self,
+        expected_gross_profit: float,
+        notional: float,
+    ) -> tuple[bool, str]:
+        """
+        FTD-REF-024: Fee-aware trade rejection gate.
+        Returns (reject=True, reason) when the expected TP gross profit
+        would not even cover the round-trip trading fees — the trade has
+        no mathematical chance of a net-positive result.
+
+        expected_gross_profit — abs(take_profit - entry) × qty  (USDT)
+        notional              — entry_price × qty                (USDT)
+        """
+        fee_round_trip = notional * FEE_RATE * 2
+        if expected_gross_profit < fee_round_trip:
+            return (
+                True,
+                f"FEE_EXCEEDS_PROFIT("
+                f"profit={expected_gross_profit:.4f}"
+                f"<fees={fee_round_trip:.4f})",
+            )
+        return False, ""
 
     # ── Internals ─────────────────────────────────────────────────────────────
 
