@@ -1,16 +1,19 @@
 """
-EOW Quant Engine — Learning Engine  (FTD-REF-023)
+EOW Quant Engine — Learning Engine  (FTD-REF-023 + FTD-REF-024)
 Tracks per-regime win-rate and dynamically adjusts confidence weights.
 
 How it works:
   - Every closed trade is recorded with its regime and outcome (win/loss).
   - Per-regime win-rate is computed over a rolling window (default 50 trades).
-  - A weight multiplier is derived:
-      win_rate ≥ 0.55  → multiplier = 1.0  (regime performing well)
-      win_rate 0.45–0.55 → linearly interpolated between 0.80 and 1.0
-      win_rate < 0.45  → multiplier = 0.80 (under-performing regime — reduce weight)
+  - A weight multiplier is derived (FTD-REF-024 adds drastic tier at <40%):
+
+      win_rate ≥ 55%      → weight = 1.00  (regime performing well)
+      win_rate 45 – 55%   → interpolated  0.80 → 1.00
+      win_rate 40 – 45%   → interpolated  0.50 → 0.80
+      win_rate < 40%      → weight = 0.50  (drastically reduced — FTD-REF-024)
+
   - The multiplier is applied to confidence before SignalFilter so the engine
-    is more conservative when a regime has been losing.
+    is more conservative when a regime has been consistently losing.
 
 Usage:
   learning_engine.record(regime="TRENDING", won=True)
@@ -27,12 +30,14 @@ from loguru import logger
 
 
 # ── Tuning constants ──────────────────────────────────────────────────────────
-WINDOW_SIZE         = 50     # rolling window of trades per regime
-MIN_SAMPLES         = 5      # need at least this many trades before adjusting weight
-WR_HIGH_THRESH      = 0.55   # ≥ 55% win-rate → full weight (1.0)
-WR_LOW_THRESH       = 0.45   # ≤ 45% win-rate → minimum weight
-WEIGHT_AT_LOW_WR    = 0.80   # multiplier when win-rate is at or below WR_LOW_THRESH
-WEIGHT_AT_HIGH_WR   = 1.00   # multiplier when win-rate is at or above WR_HIGH_THRESH
+WINDOW_SIZE          = 50     # rolling window of trades per regime
+MIN_SAMPLES          = 5      # need at least this many trades before adjusting weight
+WR_HIGH_THRESH       = 0.55   # ≥ 55% win-rate → full weight (1.0)
+WR_LOW_THRESH        = 0.45   # 45–55% win-rate → interpolate 0.80→1.00
+WR_DRASTIC_THRESH    = 0.40   # < 40% win-rate → drastic reduction (FTD-REF-024)
+WEIGHT_AT_HIGH_WR    = 1.00   # multiplier when win-rate is at or above WR_HIGH_THRESH
+WEIGHT_AT_LOW_WR     = 0.80   # multiplier at WR_LOW_THRESH boundary
+WEIGHT_AT_DRASTIC_WR = 0.50   # multiplier when win-rate < WR_DRASTIC_THRESH
 
 
 @dataclass
@@ -139,16 +144,27 @@ class LearningEngine:
     @staticmethod
     def _weight_from_wr(win_rate: float) -> float:
         """
-        Linear interpolation between WEIGHT_AT_LOW_WR and WEIGHT_AT_HIGH_WR
-        over the range [WR_LOW_THRESH, WR_HIGH_THRESH].
+        Three-tier linear interpolation (FTD-REF-024 adds drastic tier):
+          ≥ 55%      → 1.00
+          45–55%     → 0.80 → 1.00 (linear)
+          40–45%     → 0.50 → 0.80 (linear)
+          < 40%      → 0.50 (drastic — significantly under-performing regime)
         """
         if win_rate >= WR_HIGH_THRESH:
             return WEIGHT_AT_HIGH_WR
-        if win_rate <= WR_LOW_THRESH:
-            return WEIGHT_AT_LOW_WR
-        # Linear interpolation
-        ratio = (win_rate - WR_LOW_THRESH) / (WR_HIGH_THRESH - WR_LOW_THRESH)
-        return WEIGHT_AT_LOW_WR + ratio * (WEIGHT_AT_HIGH_WR - WEIGHT_AT_LOW_WR)
+
+        if win_rate >= WR_LOW_THRESH:
+            # Interpolate between 0.80 and 1.00
+            ratio = (win_rate - WR_LOW_THRESH) / (WR_HIGH_THRESH - WR_LOW_THRESH)
+            return WEIGHT_AT_LOW_WR + ratio * (WEIGHT_AT_HIGH_WR - WEIGHT_AT_LOW_WR)
+
+        if win_rate >= WR_DRASTIC_THRESH:
+            # Interpolate between 0.50 and 0.80 (FTD-REF-024)
+            ratio = (win_rate - WR_DRASTIC_THRESH) / (WR_LOW_THRESH - WR_DRASTIC_THRESH)
+            return WEIGHT_AT_DRASTIC_WR + ratio * (WEIGHT_AT_LOW_WR - WEIGHT_AT_DRASTIC_WR)
+
+        # Below 40%: drastic weight reduction
+        return WEIGHT_AT_DRASTIC_WR
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

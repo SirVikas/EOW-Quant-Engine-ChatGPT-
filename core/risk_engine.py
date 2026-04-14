@@ -1,5 +1,5 @@
 """
-EOW Quant Engine — Risk Engine  (FTD-REF-023 upgraded)
+EOW Quant Engine — Risk Engine  (FTD-REF-023 + FTD-REF-024 upgraded)
 Institutional-grade daily and portfolio risk controls.
 
 Enforces:
@@ -11,8 +11,13 @@ Enforces:
 Dynamic controls (FTD-REF-023):
   • win_streak  ≥ 3  → increase position size by 20% (scale up winners)
   • loss_streak ≥ 2  → reduce position size by 30% (protect from losers)
-  • Drawdown ≥ 10%   → reduce position size by 50% (half-Kelly mode)
   • Day rollover:     resets daily counters at UTC midnight
+
+Capital Preservation Mode — tiered DD cuts (FTD-REF-024):
+  •  5% ≤ DD < 10%   → size_multiplier = 0.75 (reduce trading by 25%)
+  • 10% ≤ DD < 15%   → size_multiplier = 0.50 (reduce trading by 50%)
+  •      DD ≥ 15%    → HALT new entries
+  • Recovery < 5% DD → size_multiplier restored to 1.00 automatically
 """
 from __future__ import annotations
 
@@ -30,7 +35,11 @@ RISK_PCT_MAX        = 0.010   # 1.0% maximum risk per trade
 MAX_DAILY_LOSS_PCT  = 0.030   # 3% of equity-at-day-start → halt
 MAX_DRAWDOWN_PCT    = 0.150   # 15% peak-to-trough → halt
 MAX_TRADES_PER_DAY  = 6       # absolute daily trade cap
-SIZE_HALVE_AT_DD    = 0.100   # at 10% DD, cut position size by 50%
+
+# ── Tiered DD size cuts (FTD-REF-024 Capital Preservation Mode) ───────────────
+SIZE_SOFT_CUT_AT    = 0.050   # 5% DD  → reduce to SIZE_SOFT_CUT_TO
+SIZE_SOFT_CUT_TO    = 0.750   # 75% of normal size at 5% DD
+SIZE_HALVE_AT_DD    = 0.100   # 10% DD → reduce to 50%
 
 # ── Streak-based scaling (FTD-REF-023) ───────────────────────────────────────
 WIN_STREAK_BOOST_AT   = 3     # consecutive wins before size increase
@@ -91,19 +100,31 @@ class RiskEngine:
         if current_equity > self._state.peak_equity:
             self._state.peak_equity = current_equity
 
-        # Recompute drawdown and apply dynamic size control
+        # ── Tiered drawdown → size control (FTD-REF-024) ────────────────────
         dd_pct = self._drawdown_pct()
         if dd_pct >= MAX_DRAWDOWN_PCT and not self._state.halted:
             self._halt(f"MAX_DRAWDOWN({dd_pct:.1%}>={MAX_DRAWDOWN_PCT:.0%})")
-        elif dd_pct >= SIZE_HALVE_AT_DD and self._state.size_multiplier > 0.5:
-            self._state.size_multiplier = 0.5
-            logger.warning(
-                f"[RISK-ENG] DD={dd_pct:.1%} ≥ {SIZE_HALVE_AT_DD:.0%} → "
-                "size halved to 50%."
-            )
-        elif dd_pct < SIZE_HALVE_AT_DD and self._state.size_multiplier < 1.0:
-            self._state.size_multiplier = 1.0
-            logger.info("[RISK-ENG] Recovery: size multiplier restored to 100%.")
+        elif dd_pct >= SIZE_HALVE_AT_DD:
+            # Tier 2: ≥10% DD → halve to 50%
+            if self._state.size_multiplier > 0.5:
+                self._state.size_multiplier = 0.5
+                logger.warning(
+                    f"[RISK-ENG] DD={dd_pct:.1%}≥{SIZE_HALVE_AT_DD:.0%}"
+                    " → size halved to 50%."
+                )
+        elif dd_pct >= SIZE_SOFT_CUT_AT:
+            # Tier 1: 5–10% DD → capital preservation mode (75%)
+            if self._state.size_multiplier != SIZE_SOFT_CUT_TO:
+                self._state.size_multiplier = SIZE_SOFT_CUT_TO
+                logger.warning(
+                    f"[RISK-ENG] DD={dd_pct:.1%}≥{SIZE_SOFT_CUT_AT:.0%}"
+                    f" → capital preservation: size={SIZE_SOFT_CUT_TO:.0%}."
+                )
+        else:
+            # Full recovery: DD < 5% → restore to 100%
+            if self._state.size_multiplier < 1.0:
+                self._state.size_multiplier = 1.0
+                logger.info("[RISK-ENG] Recovery: size multiplier restored to 100%.")
 
         # Daily loss check
         daily_loss_pct = self._daily_loss_pct()

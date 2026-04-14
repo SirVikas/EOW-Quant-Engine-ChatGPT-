@@ -1,5 +1,5 @@
 """
-EOW Quant Engine — Signal Quality Filter  (FTD-REF-023 — Adaptive)
+EOW Quant Engine — Signal Quality Filter  (FTD-REF-023 + FTD-REF-024 — Adaptive)
 High-quality trade gate with per-regime adaptive thresholds.
 
 Static thresholds are replaced by regime-aware ones:
@@ -10,6 +10,10 @@ Static thresholds are replaced by regime-aware ones:
 
 A `relaxation_factor` (0.8–1.0) from TradeFrequency can lower effective
 thresholds when the engine has been in a dry spell (no trades).
+
+FTD-REF-024 — Edge gate (applied first):
+  expected_edge < 0 → reject immediately; strategy has negative expectancy
+  for this regime (data-driven kill — bypasses all other checks).
 
 Protective pause:
   3 consecutive losses on any symbol → 60-min pause for that symbol
@@ -72,22 +76,31 @@ class SignalFilter:
 
     def check(
         self,
-        symbol:           str,
-        entry:            float,
-        take_profit:      float,
-        stop_loss:        float,
-        cost_usdt:        float,
-        atr_pct:          float,
-        confidence:       float,
-        regime:           str   = "UNKNOWN",
-        relaxation_factor: float = 1.0,   # from TradeFrequency; < 1.0 = relax
+        symbol:            str,
+        entry:             float,
+        take_profit:       float,
+        stop_loss:         float,
+        cost_usdt:         float,
+        atr_pct:           float,
+        confidence:        float,
+        regime:            str   = "UNKNOWN",
+        relaxation_factor: float = 1.0,    # from TradeFrequency; < 1.0 = relax
+        expected_edge:     float = 0.0,    # from EdgeEngine; < 0 = reject (FTD-REF-024)
     ) -> FilterResult:
         """
         Returns FilterResult(ok=True) when the signal clears all gates.
-        regime  — Regime.value string for adaptive thresholds.
+        regime         — Regime.value string for adaptive thresholds.
         relaxation_factor — multiply thresholds by this (e.g. 0.9 = 10% relaxation).
+        expected_edge  — EdgeEngine expectancy; negative value blocks the trade.
         """
-        # 0. Consecutive-loss pause
+        # 0a. Edge gate (FTD-REF-024) — data-driven kill before anything else
+        if expected_edge < 0:
+            return FilterResult(
+                ok=False,
+                reason=f"NEGATIVE_EDGE({expected_edge:.4f})",
+            )
+
+        # 1. Consecutive-loss pause
         pause_exp = self._pause_until.get(symbol, 0.0)
         if time.time() < pause_exp:
             remaining = (pause_exp - time.time()) / 60
@@ -97,14 +110,14 @@ class SignalFilter:
                        f"{remaining:.0f}min remaining)",
             )
 
-        # 1. Select adaptive thresholds
+        # 2. Select adaptive thresholds
         min_rr   = _REGIME_RR.get(regime,   _REGIME_RR["UNKNOWN"])   * relaxation_factor
         min_conf = _REGIME_CONF.get(regime, _REGIME_CONF["UNKNOWN"]) * relaxation_factor
         # Never relax below absolute floor values
         min_rr   = max(min_rr,   1.0)
         min_conf = max(min_conf, 0.35)
 
-        # 2. RR gate
+        # 3. RR gate
         gross_tp = abs(take_profit - entry)
         gross_sl = abs(entry - stop_loss)
         rr = (gross_tp / gross_sl) if gross_sl > 0 else 0.0
@@ -115,7 +128,7 @@ class SignalFilter:
                 rr=rr, min_rr_used=min_rr, min_conf_used=min_conf,
             )
 
-        # 3. ATR% gate (unchanged — market liquidity floor)
+        # 4. ATR% gate (unchanged — market liquidity floor)
         if atr_pct < MIN_ATR_PCT:
             return FilterResult(
                 ok=False,
@@ -123,7 +136,7 @@ class SignalFilter:
                 rr=rr, min_rr_used=min_rr, min_conf_used=min_conf,
             )
 
-        # 4. Confidence gate
+        # 5. Confidence gate
         if confidence < min_conf:
             return FilterResult(
                 ok=False,
@@ -131,7 +144,7 @@ class SignalFilter:
                 rr=rr, min_rr_used=min_rr, min_conf_used=min_conf,
             )
 
-        # 5. Cost fraction gate
+        # 6. Cost fraction gate
         cost_fraction = (cost_usdt / gross_tp) if gross_tp > 0 else 1.0
         if cost_fraction >= MAX_COST_FRACTION:
             return FilterResult(

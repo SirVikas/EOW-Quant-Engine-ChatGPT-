@@ -41,9 +41,11 @@ from core.regime_ai       import regime_ai
 from core.signal_filter   import signal_filter
 from core.risk_engine     import risk_engine
 from core.deployability   import deployability_engine
-from core.trade_frequency  import trade_frequency    # FTD-REF-023
-from core.execution_engine import execution_engine   # FTD-REF-023
-from core.learning_engine  import learning_engine    # FTD-REF-023
+from core.trade_frequency    import trade_frequency      # FTD-REF-023
+from core.execution_engine  import execution_engine     # FTD-REF-023
+from core.learning_engine   import learning_engine      # FTD-REF-023
+from core.edge_engine        import edge_engine         # FTD-REF-024
+from core.market_structure   import market_structure_detector  # FTD-REF-024
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from utils.capital_scaler import CapitalScaler
@@ -161,9 +163,16 @@ async def on_tick(tick: Tick):
                 signal_filter.record_loss(sym)
             # MASTER-001: update risk engine daily PnL + equity
             risk_engine.record_trade_result(last_trade.net_pnl)
-            # FTD-REF-023: update per-regime learning engine
-            _trade_regime = getattr(last_trade, "regime", "UNKNOWN") or "UNKNOWN"
+            # FTD-REF-023/024: update per-regime learning + edge engines
+            _trade_regime   = getattr(last_trade, "regime",      "UNKNOWN") or "UNKNOWN"
+            _trade_strategy = getattr(last_trade, "strategy_id", "unknown") or "unknown"
+            _initial_risk   = max(getattr(last_trade, "initial_risk", 1.0), 1e-9)
+            _r_mult         = last_trade.net_pnl / _initial_risk
             learning_engine.record(regime=_trade_regime, won=last_trade.net_pnl >= 0)
+            edge_engine.record(
+                regime=_trade_regime, strategy_id=_trade_strategy,
+                net_pnl=last_trade.net_pnl, r_mult=_r_mult,
+            )
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # MASTER-001: keep risk engine equity up to date
@@ -232,6 +241,29 @@ async def on_tick(tick: Tick):
         if not risk_allowed:
             return   # daily risk limit reached
 
+        # FTD-REF-024: market structure gate (LOW_VOL_TRAP / FAKE_BREAKOUT block)
+        _bb_width = getattr(r_state, "bb_width", 0.0)
+        ms_result = market_structure_detector.detect(
+            adx=guard.adx, bb_width=_bb_width, atr_pct=guard.atr_pct,
+        )
+        if not ms_result.tradeable:
+            _last_skip = {
+                "ts": int(time.time() * 1000), "symbol": sym,
+                "reason": ms_result.block_reason, "regime": regime.value,
+                "strategy": strategy_type,
+            }
+            return
+
+        # FTD-REF-024: edge engine kill switch
+        edge_allowed, edge_reason = edge_engine.check_trade(regime.value, strategy_type)
+        if not edge_allowed:
+            _last_skip = {
+                "ts": int(time.time() * 1000), "symbol": sym,
+                "reason": edge_reason, "regime": regime.value,
+                "strategy": strategy_type,
+            }
+            return
+
         # FTD-REF-023: get dry-spell relaxation factor before signal filter
         relax_factor = trade_frequency.get_relaxation_factor()
 
@@ -250,15 +282,35 @@ async def on_tick(tick: Tick):
         if sig and sig.signal != Signal.NONE:
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
 
-            # 6. Size the position
+            # 6. Size the position (FTD-REF-024: apply edge booster multiplier)
             sizing = scaler.compute(sym, sig.entry_price, sig.stop_loss)
             if sizing.qty <= 0:
                 return
-            atr_pct = _estimate_atr_pct(closes)
+            _edge_mult = edge_engine.get_size_multiplier(regime.value, strategy_type)
+            sizing.qty = sizing.qty * _edge_mult   # boost qty on strong positive edge
+            atr_pct    = _estimate_atr_pct(closes)
 
-            # FTD-REF-023: realistic cost via execution_engine (fee-only; slippage captured separately)
-            cost_usdt = execution_engine.fee_for_notional(sizing.qty * sig.entry_price) * 2
-            # MASTER-001 + FTD-REF-023: adaptive signal quality filter
+            # FTD-REF-023: realistic cost via execution_engine
+            notional  = sizing.qty * sig.entry_price
+            cost_usdt = execution_engine.fee_for_notional(notional) * 2
+
+            # FTD-REF-024: fee-aware gate — reject if TP profit can't cover fees
+            _gross_tp = abs(sig.take_profit - sig.entry_price) * sizing.qty
+            _fee_reject, _fee_reason = execution_engine.should_reject_for_fees(
+                expected_gross_profit=_gross_tp, notional=notional,
+            )
+            if _fee_reject:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _fee_reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
+
+            # FTD-REF-024: get current edge for signal filter gate
+            _expected_edge = edge_engine.get_edge(regime.value, strategy_type)
+
+            # MASTER-001 + FTD-REF-023 + FTD-REF-024: adaptive signal quality filter
             sf_result = signal_filter.check(
                 symbol=sym, entry=sig.entry_price,
                 take_profit=sig.take_profit, stop_loss=sig.stop_loss,
@@ -266,6 +318,7 @@ async def on_tick(tick: Tick):
                 confidence=_adjusted_conf,
                 regime=r_ai.regime.value,
                 relaxation_factor=relax_factor,
+                expected_edge=_expected_edge,
             )
             if not sf_result.ok:
                 _last_skip = {
