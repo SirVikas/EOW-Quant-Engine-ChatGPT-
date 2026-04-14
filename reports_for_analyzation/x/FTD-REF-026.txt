@@ -1,0 +1,297 @@
+# 📦 FTD-REF-026 — Truth Completion + Strategy Reality + Error Intelligence
+
+---
+
+# 🧠 1. OBJECTIVE
+
+Fix what FTD-025 MISSED:
+
+❌ UI still fake
+❌ Error spam
+❌ Strategy illusion
+❌ Regime instability
+❌ No profitability awareness
+
+---
+
+# 🧩 2. FIX GROUP A — UI TRUTH FINALIZATION (CRITICAL)
+
+📁 dashboard/api/ws_handler.py
+
+---
+
+## 🔴 ISSUE:
+
+UI still shows DISCONNECTED
+
+---
+
+## ✅ FIX:
+
+Replace ALL direct WS flags with:
+
+```python
+from core.ws_truth_engine import get_ws_state
+
+state = get_ws_state()
+
+return {
+    "ws_status": state.label  # 🟢 LIVE / 🟡 / 🔴
+}
+```
+
+---
+
+## 🚨 RULE:
+
+❌ Never use raw websocket flag
+✅ Only use Truth Engine
+
+---
+
+---
+
+# 🧩 3. FIX GROUP B — ERROR SPAM CONTROL
+
+📁 core/error_registry.py
+
+---
+
+## ADD:
+
+```python
+ERROR_THROTTLE = {
+    "DATA_001": 10,  # max 1 log / 10 sec
+}
+```
+
+---
+
+## IMPLEMENT:
+
+```python
+if error_code in throttle:
+    if last_logged < throttle_time:
+        skip_log()
+```
+
+---
+
+## RESULT:
+
+❌ 100 logs →
+✅ 1 meaningful log
+
+---
+
+---
+
+# 🧩 4. FIX GROUP C — STRATEGY ACTIVATION TRUTH
+
+📁 core/strategy_engine.py
+
+---
+
+## ADD:
+
+```python
+active_strategies = detect_active_strategies(trade_history)
+```
+
+---
+
+## REPORT:
+
+```json
+"strategy_usage": {
+  "TF": 100%,
+  "MR": 0%,
+  "VE": 0%
+}
+```
+
+---
+
+## UI:
+
+Show:
+
+```
+⚠ Only 1 strategy active
+```
+
+---
+
+---
+
+# 🧩 5. FIX GROUP D — REGIME STABILITY ENGINE
+
+📁 core/regime_ai.py
+
+---
+
+## ADD:
+
+```python
+if confidence < 0.5:
+    block_trade = True
+```
+
+---
+
+## ADD:
+
+```python
+min_stability_period = 3 ticks
+```
+
+---
+
+## RESULT:
+
+❌ noisy regime
+✅ stable decisions
+
+---
+
+---
+
+# 🧩 6. FIX GROUP E — PROFITABILITY GUARD (NEW)
+
+📁 core/profit_guard.py
+
+---
+
+## ADD:
+
+```python
+if profit_factor < 1:
+    reduce_trade_frequency()
+```
+
+```python
+if fees > 20%:
+    block_small_trades()
+```
+
+---
+
+## RESULT:
+
+❌ blind trading
+✅ self-protecting system
+
+---
+
+---
+
+# 🧩 7. FIX GROUP F — CT-SCAN FINAL INTEGRATION
+
+📁 core/ct_scan_engine.py
+
+---
+
+## OUTPUT:
+
+```json
+{
+  "system_health": "CRITICAL",
+  "issues": [
+    "High fees",
+    "Low profit factor",
+    "Single strategy usage"
+  ],
+  "action": "Reduce trades + improve RR"
+}
+```
+
+---
+
+---
+
+# 🧩 8. UI ADDITIONS (MANDATORY)
+
+📁 dashboard/intelligence_tab.py
+
+---
+
+## ADD PANELS:
+
+### 1️⃣ Strategy Reality Panel
+
+* Which strategies used
+* Which ignored
+
+### 2️⃣ Error Summary Panel
+
+* grouped errors
+
+### 3️⃣ System Health Score
+
+---
+
+---
+
+# 🧪 9. TEST REQUIREMENTS
+
+📁 tests/test_ftd_026.py
+
+---
+
+### MUST TEST:
+
+* UI truth sync
+* Error throttling
+* Strategy usage detection
+* Profit guard trigger
+
+---
+
+---
+
+# 📊 10. SUCCESS CRITERIA
+
+| Feature      | Expected      |
+| ------------ | ------------- |
+| UI Truth     | 100% accurate |
+| Error Logs   | Clean         |
+| Strategy     | Transparent   |
+| Regime       | Stable        |
+| Profit Guard | Active        |
+
+---
+
+---
+
+# 🚀 FINAL TRANSFORMATION
+
+---
+
+### BEFORE:
+
+❌ Engine runs
+❌ UI lies
+❌ Strategy fake
+❌ Loss continues
+
+---
+
+### AFTER:
+
+✅ System tells truth
+✅ Errors meaningful
+✅ Strategy transparent
+✅ Loss controlled
+
+---
+
+---
+
+# 🧠 FINAL RULE
+
+"System ko sirf chalna nahi hai
+System ko samajhna bhi hai"
+
+---
+
+# 🏁 END — FTD-REF-026
