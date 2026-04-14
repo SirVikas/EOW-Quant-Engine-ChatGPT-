@@ -46,6 +46,8 @@ from core.execution_engine  import execution_engine     # FTD-REF-023
 from core.learning_engine   import learning_engine      # FTD-REF-023
 from core.edge_engine        import edge_engine         # FTD-REF-024
 from core.market_structure   import market_structure_detector  # FTD-REF-024
+from core.ws_truth_engine    import ws_truth_engine     # FTD-REF-025
+from core.error_registry     import error_registry      # FTD-REF-025
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from utils.capital_scaler import CapitalScaler
@@ -146,8 +148,9 @@ async def on_tick(tick: Tick):
     sym   = tick.symbol
     price = tick.price
 
-    # FTD-REF-019: record liveness for tick watchdog
+    # FTD-REF-019/025: record liveness for tick watchdog + truth engine
     ws_stab.record_tick()
+    ws_truth_engine.record_tick()                        # FTD-REF-025
 
     # 1. Update risk controller (SL/TP checks)
     action = risk_ctrl.on_price_update(sym, price)
@@ -185,6 +188,7 @@ async def on_tick(tick: Tick):
 
     buf     = list(mdp.price_buffer(sym))
     if len(buf) < 50:
+        error_registry.log("DATA_001", symbol=sym, extra=f"buf={len(buf)}")  # FTD-REF-025
         return
 
     # 3. Detect regime
@@ -234,6 +238,7 @@ async def on_tick(tick: Tick):
         r_state = regime_det.state(sym)
         guard   = indicator_guard.validate_from_state(sym, len(buf), r_state)
         if not guard.ok:
+            error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
             return   # insufficient candles / unstable ADX / near-zero ATR
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
@@ -257,6 +262,7 @@ async def on_tick(tick: Tick):
         # FTD-REF-024: edge engine kill switch
         edge_allowed, edge_reason = edge_engine.check_trade(regime.value, strategy_type)
         if not edge_allowed:
+            error_registry.log("STRAT_002", symbol=sym, extra=edge_reason)  # FTD-REF-025
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
                 "reason": edge_reason, "regime": regime.value,
@@ -274,6 +280,12 @@ async def on_tick(tick: Tick):
             closes=closes,
             symbol=sym,
         )
+        # FTD-REF-025: log STRAT_001 when AI regime is ambiguous (UNKNOWN)
+        if r_ai.regime.value == "UNKNOWN":
+            error_registry.log(
+                "STRAT_001", symbol=sym,
+                extra=f"adx={guard.adx:.1f} conf={r_ai.confidence:.2f}",
+            )
         # FTD-REF-023: scale confidence by per-regime learning-engine weight
         _regime_weight = learning_engine.get_regime_weight(r_ai.regime.value)
         _adjusted_conf = round(r_ai.confidence * _regime_weight, 3)
@@ -1173,6 +1185,20 @@ async def get_last_skip():
         "recent_msgs":  [s.get("msg", "") for s in recent_skips[-5:]],
         "ts":           int(time.time() * 1000),
     }
+
+
+# ── FTD-REF-025: WebSocket Truth + Error Registry ────────────────────────────
+
+@app.get("/api/ws-truth")
+async def get_ws_truth():
+    """FTD-REF-025: WebSocket truth state for the UI (CONNECTED/RECONNECTING/STALE/DOWN)."""
+    return ws_truth_engine.to_dict()
+
+
+@app.get("/api/errors")
+async def get_errors(n: int = 50):
+    """FTD-REF-025: Structured error registry — recent errors + occurrence counts."""
+    return error_registry.summary()
 
 
 # ── Dual-API Credential Vault ─────────────────────────────────────────────────
