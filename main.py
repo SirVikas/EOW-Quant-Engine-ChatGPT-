@@ -41,6 +41,9 @@ from core.regime_ai       import regime_ai
 from core.signal_filter   import signal_filter
 from core.risk_engine     import risk_engine
 from core.deployability   import deployability_engine
+from core.trade_frequency  import trade_frequency    # FTD-REF-023
+from core.execution_engine import execution_engine   # FTD-REF-023
+from core.learning_engine  import learning_engine    # FTD-REF-023
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from utils.capital_scaler import CapitalScaler
@@ -158,6 +161,9 @@ async def on_tick(tick: Tick):
                 signal_filter.record_loss(sym)
             # MASTER-001: update risk engine daily PnL + equity
             risk_engine.record_trade_result(last_trade.net_pnl)
+            # FTD-REF-023: update per-regime learning engine
+            _trade_regime = getattr(last_trade, "regime", "UNKNOWN") or "UNKNOWN"
+            learning_engine.record(regime=_trade_regime, won=last_trade.net_pnl >= 0)
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # MASTER-001: keep risk engine equity up to date
@@ -226,12 +232,19 @@ async def on_tick(tick: Tick):
         if not risk_allowed:
             return   # daily risk limit reached
 
-        # MASTER-001: regime AI confidence layer
+        # FTD-REF-023: get dry-spell relaxation factor before signal filter
+        relax_factor = trade_frequency.get_relaxation_factor()
+
+        # MASTER-001 + FTD-REF-023: regime AI with per-symbol UNKNOWN fallback
         r_ai = regime_ai.classify(
             adx=guard.adx, atr_pct=guard.atr_pct,
             bb_width=getattr(r_state, "bb_width", 0.0),
             closes=closes,
+            symbol=sym,
         )
+        # FTD-REF-023: scale confidence by per-regime learning-engine weight
+        _regime_weight = learning_engine.get_regime_weight(r_ai.regime.value)
+        _adjusted_conf = round(r_ai.confidence * _regime_weight, 3)
 
         sig = strategy.generate_signal(sym, closes, highs, lows)
         if sig and sig.signal != Signal.NONE:
@@ -243,13 +256,16 @@ async def on_tick(tick: Tick):
                 return
             atr_pct = _estimate_atr_pct(closes)
 
-            # MASTER-001: signal quality filter (RR / ATR / confidence / cost)
-            cost_usdt = (sizing.qty * sig.entry_price) * (cfg.TAKER_FEE * 2 + cfg.SLIPPAGE_EST)
+            # FTD-REF-023: realistic cost via execution_engine (fee-only; slippage captured separately)
+            cost_usdt = execution_engine.fee_for_notional(sizing.qty * sig.entry_price) * 2
+            # MASTER-001 + FTD-REF-023: adaptive signal quality filter
             sf_result = signal_filter.check(
                 symbol=sym, entry=sig.entry_price,
                 take_profit=sig.take_profit, stop_loss=sig.stop_loss,
                 cost_usdt=cost_usdt, atr_pct=atr_pct,
-                confidence=r_ai.confidence,
+                confidence=_adjusted_conf,
+                regime=r_ai.regime.value,
+                relaxation_factor=relax_factor,
             )
             if not sf_result.ok:
                 _last_skip = {
@@ -316,6 +332,7 @@ async def on_tick(tick: Tick):
                 if submitted:
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
+                    trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
                     _thought(
                         f"📋 Limit {sig.signal.value} {sym} @ {limit_px:.4f} "
                         f"qty={sizing.qty:.6f} risk={sizing.usdt_risk:.2f}U "
@@ -339,6 +356,7 @@ async def on_tick(tick: Tick):
                 if risk_ctrl.open_position(pos, order_type="MARKET"):
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
+                    trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
                     _thought(
                         f"✅ Opened {sig.signal.value} {sym} "
                         f"qty={sizing.qty:.6f} risk={sizing.usdt_risk:.2f}U "

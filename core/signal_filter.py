@@ -1,16 +1,18 @@
 """
-EOW Quant Engine — Signal Quality Filter  (FTD-REF-MASTER-001)
-High-quality trade gate. A signal must pass ALL checks before reaching
-the execution layer.
+EOW Quant Engine — Signal Quality Filter  (FTD-REF-023 — Adaptive)
+High-quality trade gate with per-regime adaptive thresholds.
 
-Gate conditions (all must be True):
-  1. RR (reward-to-risk)   ≥ MIN_RR
-  2. ATR%                  ≥ MIN_ATR_PCT
-  3. Regime confidence     ≥ MIN_CONFIDENCE
-  4. Execution cost        < MAX_COST_FRACTION of gross TP
+Static thresholds are replaced by regime-aware ones:
+  TRENDING:             RR ≥ 1.4  confidence ≥ 0.50
+  MEAN_REVERTING:       RR ≥ 1.2  confidence ≥ 0.45
+  VOLATILITY_EXPANSION: RR ≥ 1.6  confidence ≥ 0.55
+  UNKNOWN / default:    RR ≥ 1.8  confidence ≥ 0.60  (conservative)
+
+A `relaxation_factor` (0.8–1.0) from TradeFrequency can lower effective
+thresholds when the engine has been in a dry spell (no trades).
 
 Protective pause:
-  - 3 consecutive losses on any symbol → that symbol pauses for PAUSE_MINUTES
+  3 consecutive losses on any symbol → 60-min pause for that symbol
 """
 from __future__ import annotations
 
@@ -21,51 +23,69 @@ from typing import Dict, Optional
 from loguru import logger
 
 
-# ── Gate thresholds ───────────────────────────────────────────────────────────
-MIN_RR             = 1.8    # minimum reward-to-risk ratio
-MIN_ATR_PCT        = 0.20   # minimum ATR% (liquidity / move size floor)
-MIN_CONFIDENCE     = 0.60   # minimum regime AI confidence
-MAX_COST_FRACTION  = 0.30   # cost must be < 30% of gross TP distance
+# ── Per-regime threshold table ────────────────────────────────────────────────
+# Keys must match Regime.value strings
+_REGIME_RR: Dict[str, float] = {
+    "TRENDING":             1.4,
+    "MEAN_REVERTING":       1.2,
+    "VOLATILITY_EXPANSION": 1.6,
+    "UNKNOWN":              1.8,   # conservative fallback
+}
+_REGIME_CONF: Dict[str, float] = {
+    "TRENDING":             0.50,
+    "MEAN_REVERTING":       0.45,
+    "VOLATILITY_EXPANSION": 0.55,
+    "UNKNOWN":              0.60,
+}
+
+# ── Fixed thresholds (regime-independent) ─────────────────────────────────────
+MIN_ATR_PCT        = 0.20   # minimum ATR% floor
+MAX_COST_FRACTION  = 0.30   # cost < 30% of gross TP
 
 # ── Consecutive-loss protection ───────────────────────────────────────────────
 MAX_CONSECUTIVE_LOSSES = 3
-PAUSE_MINUTES          = 60   # pause new entries after N consecutive losses
+PAUSE_MINUTES          = 60
 
 
 @dataclass
 class FilterResult:
-    ok:     bool
-    reason: str  = ""     # populated when ok=False
-    rr:     float = 0.0
+    ok:            bool
+    reason:        str   = ""
+    rr:            float = 0.0
     cost_fraction: float = 0.0
+    min_rr_used:   float = 0.0   # effective threshold after relaxation
+    min_conf_used: float = 0.0
 
 
 class SignalFilter:
     """
-    Stateful signal quality gate with per-symbol consecutive-loss tracking.
+    Stateful adaptive signal quality gate.
+    Pass regime=… to check() to select the correct thresholds.
+    Pass relaxation_factor<1.0 to lower thresholds during dry spells.
     """
 
     def __init__(self):
-        # symbol → consecutive loss count
         self._consec_losses: Dict[str, int]   = {}
-        # symbol → epoch ms of last loss that triggered pause
         self._pause_until:   Dict[str, float] = {}
 
     # ── Public ────────────────────────────────────────────────────────────────
 
     def check(
         self,
-        symbol:     str,
-        entry:      float,
-        take_profit: float,
-        stop_loss:  float,
-        cost_usdt:  float,      # total round-trip cost in USDT
-        atr_pct:    float,
-        confidence: float,      # from RegimeAI.classify()
+        symbol:           str,
+        entry:            float,
+        take_profit:      float,
+        stop_loss:        float,
+        cost_usdt:        float,
+        atr_pct:          float,
+        confidence:       float,
+        regime:           str   = "UNKNOWN",
+        relaxation_factor: float = 1.0,   # from TradeFrequency; < 1.0 = relax
     ) -> FilterResult:
         """
-        Returns FilterResult(ok=True) if the signal passes all gates.
-        Returns FilterResult(ok=False, reason=…) if any gate fails.
+        Returns FilterResult(ok=True) when the signal clears all gates.
+        regime  — Regime.value string for adaptive thresholds.
+        relaxation_factor — multiply thresholds by this (e.g. 0.9 = 10% relaxation).
         """
         # 0. Consecutive-loss pause
         pause_exp = self._pause_until.get(symbol, 0.0)
@@ -73,62 +93,72 @@ class SignalFilter:
             remaining = (pause_exp - time.time()) / 60
             return FilterResult(
                 ok=False,
-                reason=f"LOSS_PAUSE({self._consec_losses.get(symbol,0)} losses, "
+                reason=f"LOSS_PAUSE({self._consec_losses.get(symbol, 0)} losses, "
                        f"{remaining:.0f}min remaining)",
             )
 
-        # 1. RR gate
+        # 1. Select adaptive thresholds
+        min_rr   = _REGIME_RR.get(regime,   _REGIME_RR["UNKNOWN"])   * relaxation_factor
+        min_conf = _REGIME_CONF.get(regime, _REGIME_CONF["UNKNOWN"]) * relaxation_factor
+        # Never relax below absolute floor values
+        min_rr   = max(min_rr,   1.0)
+        min_conf = max(min_conf, 0.35)
+
+        # 2. RR gate
         gross_tp = abs(take_profit - entry)
         gross_sl = abs(entry - stop_loss)
         rr = (gross_tp / gross_sl) if gross_sl > 0 else 0.0
-        if rr < MIN_RR:
+        if rr < min_rr:
             return FilterResult(
-                ok=False, reason=f"LOW_RR({rr:.2f}<{MIN_RR})", rr=rr
+                ok=False,
+                reason=f"LOW_RR({rr:.2f}<{min_rr:.2f} [{regime}])",
+                rr=rr, min_rr_used=min_rr, min_conf_used=min_conf,
             )
 
-        # 2. ATR% gate
+        # 3. ATR% gate (unchanged — market liquidity floor)
         if atr_pct < MIN_ATR_PCT:
             return FilterResult(
                 ok=False,
                 reason=f"LOW_ATR({atr_pct:.3f}%<{MIN_ATR_PCT}%)",
-                rr=rr,
+                rr=rr, min_rr_used=min_rr, min_conf_used=min_conf,
             )
 
-        # 3. Confidence gate
-        if confidence < MIN_CONFIDENCE:
+        # 4. Confidence gate
+        if confidence < min_conf:
             return FilterResult(
                 ok=False,
-                reason=f"LOW_CONFIDENCE({confidence:.2f}<{MIN_CONFIDENCE})",
-                rr=rr,
+                reason=f"LOW_CONFIDENCE({confidence:.2f}<{min_conf:.2f} [{regime}])",
+                rr=rr, min_rr_used=min_rr, min_conf_used=min_conf,
             )
 
-        # 4. Cost fraction gate
+        # 5. Cost fraction gate
         cost_fraction = (cost_usdt / gross_tp) if gross_tp > 0 else 1.0
         if cost_fraction >= MAX_COST_FRACTION:
             return FilterResult(
                 ok=False,
                 reason=f"COST_HIGH({cost_fraction:.0%}>={MAX_COST_FRACTION:.0%})",
                 rr=rr, cost_fraction=cost_fraction,
+                min_rr_used=min_rr, min_conf_used=min_conf,
             )
 
-        return FilterResult(ok=True, rr=round(rr, 3), cost_fraction=round(cost_fraction, 3))
+        return FilterResult(
+            ok=True, rr=round(rr, 3),
+            cost_fraction=round(cost_fraction, 3),
+            min_rr_used=round(min_rr, 3),
+            min_conf_used=round(min_conf, 3),
+        )
 
     def record_loss(self, symbol: str):
-        """
-        Call after every losing trade on *symbol*.
-        If consecutive losses reach MAX_CONSECUTIVE_LOSSES, pause the symbol.
-        """
         count = self._consec_losses.get(symbol, 0) + 1
         self._consec_losses[symbol] = count
         if count >= MAX_CONSECUTIVE_LOSSES:
             self._pause_until[symbol] = time.time() + PAUSE_MINUTES * 60
             logger.warning(
-                f"[SIG-FILTER] {symbol} paused for {PAUSE_MINUTES}min "
+                f"[SIG-FILTER] {symbol} paused {PAUSE_MINUTES}min "
                 f"after {count} consecutive losses."
             )
 
     def record_win(self, symbol: str):
-        """Reset consecutive loss counter after a win."""
         self._consec_losses[symbol] = 0
 
     def is_paused(self, symbol: str) -> bool:
@@ -147,11 +177,13 @@ class SignalFilter:
         return {
             "consecutive_losses": dict(self._consec_losses),
             "paused_symbols":     paused,
-            "thresholds": {
-                "min_rr":          MIN_RR,
-                "min_atr_pct":     MIN_ATR_PCT,
-                "min_confidence":  MIN_CONFIDENCE,
-                "max_cost_frac":   MAX_COST_FRACTION,
+            "regime_thresholds":  {
+                r: {"min_rr": _REGIME_RR[r], "min_conf": _REGIME_CONF[r]}
+                for r in _REGIME_RR
+            },
+            "fixed_thresholds": {
+                "min_atr_pct":    MIN_ATR_PCT,
+                "max_cost_frac":  MAX_COST_FRACTION,
             },
         }
 
