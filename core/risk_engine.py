@@ -1,5 +1,5 @@
 """
-EOW Quant Engine — Risk Engine  (FTD-REF-MASTER-001)
+EOW Quant Engine — Risk Engine  (FTD-REF-023 upgraded)
 Institutional-grade daily and portfolio risk controls.
 
 Enforces:
@@ -8,9 +8,11 @@ Enforces:
   • Max drawdown:      15% → halt new entries
   • Max trades/day:    6 (prevents over-trading)
 
-Dynamic controls:
-  • Drawdown ≥ 10% → reduce position size by 50% (half-Kelly mode)
-  • Day rollover:    resets daily counters at UTC midnight
+Dynamic controls (FTD-REF-023):
+  • win_streak  ≥ 3  → increase position size by 20% (scale up winners)
+  • loss_streak ≥ 2  → reduce position size by 30% (protect from losers)
+  • Drawdown ≥ 10%   → reduce position size by 50% (half-Kelly mode)
+  • Day rollover:     resets daily counters at UTC midnight
 """
 from __future__ import annotations
 
@@ -30,6 +32,14 @@ MAX_DRAWDOWN_PCT    = 0.150   # 15% peak-to-trough → halt
 MAX_TRADES_PER_DAY  = 6       # absolute daily trade cap
 SIZE_HALVE_AT_DD    = 0.100   # at 10% DD, cut position size by 50%
 
+# ── Streak-based scaling (FTD-REF-023) ───────────────────────────────────────
+WIN_STREAK_BOOST_AT   = 3     # consecutive wins before size increase
+WIN_STREAK_BOOST_PCT  = 0.20  # +20% per qualifying win streak
+LOSS_STREAK_CUT_AT    = 2     # consecutive losses before size reduction
+LOSS_STREAK_CUT_PCT   = 0.30  # −30% on qualifying loss streak
+MAX_STREAK_MULTIPLIER = 1.40  # ceiling for streak-boosted size
+MIN_STREAK_MULTIPLIER = 0.50  # floor (can't go below 50%, combined with DD)
+
 
 @dataclass
 class RiskEngineState:
@@ -40,8 +50,11 @@ class RiskEngineState:
     current_equity:    float = 0.0
     halted:            bool  = False
     halt_reason:       str   = ""
-    size_multiplier:   float = 1.0    # 1.0 normal, 0.5 half-Kelly
-    last_day:          str   = ""     # "YYYY-MM-DD" for rollover detection
+    size_multiplier:   float = 1.0    # base multiplier (DD + streak combined)
+    streak_multiplier: float = 1.0    # streak-only component
+    win_streak:        int   = 0
+    loss_streak:       int   = 0
+    last_day:          str   = ""
 
 
 class RiskEngine:
@@ -118,13 +131,15 @@ class RiskEngine:
 
     def compute_risk_usdt(self, equity: float) -> float:
         """
-        Returns the USDT amount to risk on the next trade,
-        clamped to [RISK_PCT_MIN, RISK_PCT_MAX] × equity,
-        and scaled by the current size multiplier.
+        Returns the USDT amount to risk on the next trade, scaled by
+        both the drawdown multiplier and the streak multiplier.
+        Clamped to [RISK_PCT_MIN, RISK_PCT_MAX × 1.40] × equity.
         """
-        base = equity * RISK_PCT_MAX   # 1% baseline
-        adjusted = base * self._state.size_multiplier
-        minimum = equity * RISK_PCT_MIN
+        combined = self._state.size_multiplier * self._state.streak_multiplier
+        combined = max(MIN_STREAK_MULTIPLIER, min(MAX_STREAK_MULTIPLIER, combined))
+        base     = equity * RISK_PCT_MAX
+        adjusted = base * combined
+        minimum  = equity * RISK_PCT_MIN
         return max(minimum, adjusted)
 
     def record_trade_result(self, net_pnl: float):
@@ -134,6 +149,40 @@ class RiskEngine:
         self._state.current_equity += net_pnl
         if self._state.current_equity > self._state.peak_equity:
             self._state.peak_equity = self._state.current_equity
+        # ── FTD-REF-023: streak-based size scaling ────────────────────────────
+        self._update_streaks(net_pnl)
+
+    def _update_streaks(self, net_pnl: float):
+        """Adjust size_multiplier based on consecutive win / loss streaks."""
+        if net_pnl > 0:
+            self._state.win_streak  += 1
+            self._state.loss_streak  = 0
+        else:
+            self._state.loss_streak += 1
+            self._state.win_streak   = 0
+
+        prev = self._state.streak_multiplier
+
+        if self._state.win_streak >= WIN_STREAK_BOOST_AT:
+            self._state.streak_multiplier = min(
+                MAX_STREAK_MULTIPLIER,
+                self._state.streak_multiplier * (1 + WIN_STREAK_BOOST_PCT),
+            )
+            if self._state.streak_multiplier != prev:
+                logger.info(
+                    f"[RISK-ENG] Win streak={self._state.win_streak} → "
+                    f"size ×{self._state.streak_multiplier:.2f}"
+                )
+        elif self._state.loss_streak >= LOSS_STREAK_CUT_AT:
+            self._state.streak_multiplier = max(
+                MIN_STREAK_MULTIPLIER,
+                self._state.streak_multiplier * (1 - LOSS_STREAK_CUT_PCT),
+            )
+            if self._state.streak_multiplier != prev:
+                logger.warning(
+                    f"[RISK-ENG] Loss streak={self._state.loss_streak} → "
+                    f"size ×{self._state.streak_multiplier:.2f}"
+                )
 
     def resume(self):
         """Manually clear a halt (e.g. start of new trading day)."""
@@ -152,15 +201,20 @@ class RiskEngine:
         return self._state.size_multiplier
 
     def snapshot(self) -> dict:
+        combined = self._state.size_multiplier * self._state.streak_multiplier
         return {
-            "halted":           self._state.halted,
-            "halt_reason":      self._state.halt_reason,
-            "trades_today":     self._state.trades_today,
-            "daily_pnl":        round(self._state.daily_pnl, 4),
-            "daily_loss_pct":   round(self._daily_loss_pct() * 100, 2),
-            "drawdown_pct":     round(self._drawdown_pct() * 100, 2),
-            "size_multiplier":  self._state.size_multiplier,
-            "peak_equity":      round(self._state.peak_equity, 4),
+            "halted":              self._state.halted,
+            "halt_reason":         self._state.halt_reason,
+            "trades_today":        self._state.trades_today,
+            "daily_pnl":           round(self._state.daily_pnl, 4),
+            "daily_loss_pct":      round(self._daily_loss_pct() * 100, 2),
+            "drawdown_pct":        round(self._drawdown_pct() * 100, 2),
+            "size_multiplier":     round(self._state.size_multiplier, 3),
+            "streak_multiplier":   round(self._state.streak_multiplier, 3),
+            "effective_multiplier":round(combined, 3),
+            "win_streak":          self._state.win_streak,
+            "loss_streak":         self._state.loss_streak,
+            "peak_equity":         round(self._state.peak_equity, 4),
             "current_equity":   round(self._state.current_equity, 4),
             "limits": {
                 "max_daily_loss_pct": MAX_DAILY_LOSS_PCT * 100,

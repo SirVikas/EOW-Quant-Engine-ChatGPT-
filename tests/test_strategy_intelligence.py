@@ -15,7 +15,7 @@ import pytest
 
 from core.indicator_guard import IndicatorGuard, ADX_CLAMP_ABOVE, ADX_WEAK_BELOW
 from core.regime_ai       import RegimeAI, MIN_CONFIDENCE
-from core.signal_filter   import SignalFilter, MIN_RR, MIN_ATR_PCT, MIN_CONFIDENCE as SF_CONF
+from core.signal_filter   import SignalFilter, MIN_ATR_PCT, _REGIME_RR, _REGIME_CONF
 from core.risk_engine     import RiskEngine, MAX_TRADES_PER_DAY, MAX_DAILY_LOSS_PCT
 from core.deployability   import DeployabilityEngine, STATUS_READY, STATUS_IMPROVING
 from core.regime_detector import Regime
@@ -85,8 +85,14 @@ class TestRegimeAI:
 
     def setup_method(self):
         self.ai = RegimeAI()
-        # 60 bars of trending-up prices
-        self._trending_closes = [100 + i * 0.5 for i in range(60)]
+        # 60 bars: rising (0-30), falling (30-45), strong recovery (45-59).
+        # The recovery boundary means change[44] is a loss while changes[45:59]
+        # are all gains — this guarantees RSI slope >> RSI_SLOPE_BULLISH (0.5).
+        self._trending_closes = (
+            [100 + i for i in range(31)]             # 100 → 130  (bars 0-30)
+            + [130 - (i + 1) * 2 for i in range(15)]  # 128 → 100  (bars 31-45)
+            + [100 + (i + 1) * 3 for i in range(14)]  # 103 → 142  (bars 46-59)
+        )
         # 60 bars of sideways oscillation
         self._sideways_closes = [100 + (i % 5) * 0.1 for i in range(60)]
 
@@ -223,7 +229,7 @@ class TestSignalFilter:
         s = self.sf.summary()
         assert "consecutive_losses" in s
         assert "paused_symbols" in s
-        assert "thresholds" in s
+        assert "regime_thresholds" in s   # FTD-REF-023: adaptive per-regime thresholds
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -301,13 +307,15 @@ class TestDeployabilityEngine:
         params.update(overrides)
         return self.de.compute(**params)
 
-    def test_insufficient_trades_returns_insuf_data(self):
+    def test_warmup_mode_below_warmup_trades(self):
+        # FTD-REF-023: trades < WARMUP_TRADES → WARMUP status (not INSUFFICIENT_DATA)
         r = self.de.compute(
             trades=10, sharpe=2.0, sortino=2.5, win_rate=0.6,
             max_drawdown=0.05, risk_of_ruin=0.02, avg_r=1.5,
         )
-        assert r.status == "INSUFFICIENT_DATA"
-        assert r.score == 0
+        assert r.status == "WARMUP"
+        assert r.warmup_mode is True
+        assert 0 < r.score <= 60
 
     def test_low_sharpe_returns_blocked(self):
         r = self._compute(sharpe=0.5)
