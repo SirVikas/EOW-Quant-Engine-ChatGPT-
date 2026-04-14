@@ -1,5 +1,5 @@
 """
-EOW Quant Engine — Regime AI  (FTD-REF-023 upgraded)
+EOW Quant Engine — Regime AI  (FTD-REF-023 / FTD-REF-026 upgraded)
 Multi-factor weighted regime classification engine.
 
 Upgrades over MASTER-001:
@@ -9,8 +9,15 @@ Upgrades over MASTER-001:
        high ATR%  → stability is LOW  → confidence boosted  (more decisive)
        low ATR%   → stability is HIGH → confidence reduced  (be cautious)
 
+FTD-REF-026 additions:
+  3. Confidence gate — if final confidence < MIN_CONFIDENCE_TRADE (0.50):
+       block_trade = True — signal filter should reject entry.
+  4. Regime stability period — regime must hold for MIN_STABILITY_TICKS (3)
+       consecutive ticks before block_trade is cleared.
+
 Inputs: ADX, ATR%, BB Width, RSI slope
-Output: RegimeAiResult (regime, confidence, factor scores, stability_factor)
+Output: RegimeAiResult (regime, confidence, factor scores, stability_factor,
+                        block_trade, stability_ticks)
 """
 from __future__ import annotations
 
@@ -45,6 +52,10 @@ ATR_LOW_THRESH        =  0.10  # ATR% below this → low volatility (cautious)
 STAB_BOOST            =  1.15  # confidence multiplier in high-vol environment
 STAB_REDUCE           =  0.85  # confidence multiplier in low-vol environment
 
+# ── FTD-REF-026: trade block gates ───────────────────────────────────────────
+MIN_CONFIDENCE_TRADE  =  0.50  # confidence below this → block_trade = True
+MIN_STABILITY_TICKS   =  3     # regime must hold for ≥ this many ticks
+
 
 @dataclass
 class RegimeAiResult:
@@ -57,6 +68,8 @@ class RegimeAiResult:
     stability_factor: float = 1.0    # applied multiplier
     fallback_used:    bool  = False   # True when last_valid_regime was used
     notes:            str   = ""
+    block_trade:      bool  = False   # FTD-REF-026: True → do not enter trade
+    stability_ticks:  int   = 0       # FTD-REF-026: consecutive ticks same regime
 
 
 class RegimeAI:
@@ -68,6 +81,9 @@ class RegimeAI:
     def __init__(self):
         # symbol → last non-UNKNOWN RegimeAiResult
         self._last_valid: Dict[str, RegimeAiResult] = {}
+        # FTD-REF-026: per-symbol stability tracking
+        self._stability_ticks: Dict[str, int] = {}   # consecutive same-regime ticks
+        self._last_regime_str: Dict[str, str] = {}   # last seen regime value string
 
     def classify(
         self,
@@ -161,6 +177,29 @@ class RegimeAI:
                 f"conf={confidence:.2f}"
             )
 
+        # ── FTD-REF-026: regime stability tracking ────────────────────────────
+        regime_str = regime.value
+        if symbol:
+            if self._last_regime_str.get(symbol) == regime_str:
+                self._stability_ticks[symbol] = (
+                    self._stability_ticks.get(symbol, 0) + 1
+                )
+            else:
+                self._stability_ticks[symbol] = 1
+            self._last_regime_str[symbol] = regime_str
+        stab_ticks = self._stability_ticks.get(symbol, 1) if symbol else 1
+
+        # ── FTD-REF-026: trade block gate ────────────────────────────────────
+        block_trade = (
+            confidence < MIN_CONFIDENCE_TRADE
+            or stab_ticks < MIN_STABILITY_TICKS
+        )
+        if block_trade:
+            notes += (
+                f" | BLOCK(conf={confidence:.2f}<{MIN_CONFIDENCE_TRADE}"
+                f" OR ticks={stab_ticks}<{MIN_STABILITY_TICKS})"
+            )
+
         result = RegimeAiResult(
             regime=regime,
             confidence=round(confidence, 3),
@@ -171,6 +210,8 @@ class RegimeAI:
             stability_factor=round(stability_factor, 3),
             fallback_used=fallback_used,
             notes=notes,
+            block_trade=block_trade,
+            stability_ticks=stab_ticks,
         )
 
         # Cache last valid (non-fallback) result
@@ -179,7 +220,8 @@ class RegimeAI:
 
         logger.debug(
             f"[REGIME-AI] {symbol or '?'} → {regime.value} "
-            f"conf={result.confidence:.2f} stab={stability_factor:.2f} | {notes}"
+            f"conf={result.confidence:.2f} stab={stability_factor:.2f} "
+            f"ticks={stab_ticks} block={block_trade} | {notes}"
         )
         return result
 

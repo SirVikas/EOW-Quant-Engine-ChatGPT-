@@ -38,6 +38,14 @@ SEV_CRITICAL = "CRITICAL"
 
 MAX_HISTORY  = 200   # maximum errors kept in memory
 
+# ── Per-code log throttle (seconds between loguru emits) ─────────────────────
+# Prevents high-frequency events (e.g. DATA_001 on every candle tick) from
+# flooding the loguru output.  Records and counts are always incremented —
+# only the loguru emit is suppressed while within the throttle window.
+ERROR_THROTTLE: Dict[str, float] = {
+    "DATA_001": 10.0,   # max 1 loguru line per 10 s  (FTD-REF-026)
+}
+
 
 # ── Built-in error catalogue ──────────────────────────────────────────────────
 ERROR_CATALOGUE: Dict[str, dict] = {
@@ -121,8 +129,9 @@ class ErrorRegistry:
     """
 
     def __init__(self, max_history: int = MAX_HISTORY):
-        self._records: Deque[ErrorRecord] = deque(maxlen=max_history)
-        self._counts:  Dict[str, int]     = {}
+        self._records:     Deque[ErrorRecord] = deque(maxlen=max_history)
+        self._counts:      Dict[str, int]     = {}
+        self._throttle_ts: Dict[str, float]   = {}  # FTD-REF-026: last loguru emit ts
 
     # ── Public ────────────────────────────────────────────────────────────────
 
@@ -158,6 +167,17 @@ class ErrorRegistry:
         self._records.append(rec)
         self._counts[code] = self._counts.get(code, 0) + 1
 
+        # FTD-REF-026: throttle — skip loguru emit if within throttle window.
+        # Counts and records are always updated so summaries remain accurate.
+        _throttle_sec = ERROR_THROTTLE.get(code)
+        _emit_log = True
+        if _throttle_sec is not None:
+            _last_ts = self._throttle_ts.get(code, 0.0)
+            if rec.ts - _last_ts < _throttle_sec:
+                _emit_log = False
+            else:
+                self._throttle_ts[code] = rec.ts
+
         # Log to loguru at appropriate level
         _logline = (
             f"[ERR-REG] [{rec.code}] {rec.message}"
@@ -165,16 +185,17 @@ class ErrorRegistry:
             + (f" | {extra}"      if extra  else "")
             + (f" → {rec.auto_fix}" if rec.auto_fix else "")
         )
-        if rec.severity == SEV_CRITICAL:
-            logger.critical(_logline)
-        elif rec.severity == SEV_ERROR:
-            logger.error(_logline)
-        elif rec.severity == SEV_WARNING:
-            logger.warning(_logline)
-        elif rec.severity == SEV_INFO:
-            logger.info(_logline)
-        else:
-            logger.debug(_logline)
+        if _emit_log:
+            if rec.severity == SEV_CRITICAL:
+                logger.critical(_logline)
+            elif rec.severity == SEV_ERROR:
+                logger.error(_logline)
+            elif rec.severity == SEV_WARNING:
+                logger.warning(_logline)
+            elif rec.severity == SEV_INFO:
+                logger.info(_logline)
+            else:
+                logger.debug(_logline)
 
         return rec
 

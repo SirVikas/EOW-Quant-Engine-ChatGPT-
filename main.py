@@ -48,6 +48,9 @@ from core.edge_engine        import edge_engine         # FTD-REF-024
 from core.market_structure   import market_structure_detector  # FTD-REF-024
 from core.ws_truth_engine    import ws_truth_engine     # FTD-REF-025
 from core.error_registry     import error_registry      # FTD-REF-025
+from core.strategy_engine    import strategy_engine     # FTD-REF-026
+from core.profit_guard       import profit_guard        # FTD-REF-026
+from core.ct_scan_engine     import ct_scan_engine      # FTD-REF-026
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from utils.capital_scaler import CapitalScaler
@@ -176,6 +179,13 @@ async def on_tick(tick: Tick):
                 regime=_trade_regime, strategy_id=_trade_strategy,
                 net_pnl=last_trade.net_pnl, r_mult=_r_mult,
             )
+            # FTD-REF-026: track strategy usage distribution
+            _closed_strat_type = {
+                "TRENDING":             "TrendFollowing",
+                "MEAN_REVERTING":       "MeanReversion",
+                "VOLATILITY_EXPANSION": "VolatilityExpansion",
+            }.get(_trade_regime, "TrendFollowing")
+            strategy_engine.record_trade(_closed_strat_type)
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # MASTER-001: keep risk engine equity up to date
@@ -286,9 +296,29 @@ async def on_tick(tick: Tick):
                 "STRAT_001", symbol=sym,
                 extra=f"adx={guard.adx:.1f} conf={r_ai.confidence:.2f}",
             )
+
+        # FTD-REF-026: regime stability gate — block if conf <0.50 or <3 stable ticks
+        if r_ai.block_trade:
+            _last_skip = {
+                "ts": int(time.time() * 1000), "symbol": sym,
+                "reason": (
+                    f"REGIME_UNSTABLE("
+                    f"conf={r_ai.confidence:.2f},"
+                    f"ticks={r_ai.stability_ticks})"
+                ),
+                "regime": regime.value, "strategy": strategy_type,
+            }
+            return
+
         # FTD-REF-023: scale confidence by per-regime learning-engine weight
         _regime_weight = learning_engine.get_regime_weight(r_ai.regime.value)
-        _adjusted_conf = round(r_ai.confidence * _regime_weight, 3)
+        # FTD-REF-026: profit guard — reduce effective confidence when PF < 1
+        _pf_stats = pnl_calc.session_stats
+        _pf_mult  = profit_guard.frequency_multiplier(
+            profit_factor=_pf_stats.get("profit_factor", 1.0),
+            n_trades=len(pnl_calc.trades),
+        )
+        _adjusted_conf = round(r_ai.confidence * _regime_weight * _pf_mult, 3)
 
         sig = strategy.generate_signal(sym, closes, highs, lows)
         if sig and sig.signal != Signal.NONE:
@@ -315,6 +345,18 @@ async def on_tick(tick: Tick):
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _fee_reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
+
+            # FTD-REF-026: profit guard fee-ratio check (fees > 20% of gross TP)
+            _pg_block, _pg_reason = profit_guard.check_fee_ratio(
+                gross_tp_profit=_gross_tp, fee_cost=cost_usdt,
+            )
+            if _pg_block:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _pg_reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
                 return
@@ -636,6 +678,7 @@ async def get_status():
         "symbols_watched": len(mdp.symbols),
         "open_positions":  len(risk_ctrl.positions),
         "total_trades":    len(pnl_calc.trades),
+        "ws_status":   ws_truth_engine.get_ui_label(),   # FTD-REF-026: truth-engine label
         "ts":          int(time.time() * 1000),
     }
 
@@ -1201,6 +1244,46 @@ async def get_errors(n: int = 50):
     return error_registry.summary()
 
 
+# ── FTD-REF-026: Strategy / Profitability / CT-Scan endpoints ─────────────────
+
+@app.get("/api/strategy-usage")
+async def get_strategy_usage():
+    """FTD-REF-026: Per-strategy usage distribution across all closed trades."""
+    return strategy_engine.summary()
+
+
+@app.get("/api/profit-guard")
+async def get_profit_guard():
+    """FTD-REF-026: Profit guard state — PF gate and fee-ratio threshold."""
+    stats = pnl_calc.session_stats
+    return profit_guard.summary(
+        profit_factor=stats.get("profit_factor", 0.0),
+        n_trades=len(pnl_calc.trades),
+    )
+
+
+@app.get("/api/ct-scan")
+async def get_ct_scan():
+    """FTD-REF-026: CT-Scan system health report — HEALTHY / WARNING / CRITICAL."""
+    stats    = pnl_calc.session_stats
+    n_trades = len(pnl_calc.trades)
+    total_fees  = stats.get("total_fees_paid",  0.0)
+    total_net   = stats.get("total_net_pnl",    0.0)
+    total_slip  = stats.get("total_slippage",   0.0)
+    # gross ≈ |net| + fees + slippage (approximation without raw gross field)
+    total_gross = abs(total_net) + total_fees + total_slip
+    fee_ratio   = total_fees / max(total_gross, 1e-9)
+    win_rate_pct = stats.get("win_rate", 0.0)   # comes back as 0–100
+    return ct_scan_engine.scan(
+        profit_factor=stats.get("profit_factor", 0.0),
+        fee_ratio=round(fee_ratio, 4),
+        strategy_usage=strategy_engine.usage(),
+        win_rate=win_rate_pct / 100.0,
+        regime_stable=True,
+        n_trades=n_trades,
+    )
+
+
 # ── Dual-API Credential Vault ─────────────────────────────────────────────────
 
 @app.get("/api/vault/status")
@@ -1392,12 +1475,13 @@ async def websocket_endpoint(ws: WebSocket):
     logger.info(f"[WS] Client connected. Total: {len(_ws_clients)}")
 
     try:
-        # Send initial state burst
+        # Send initial state burst — includes truth-engine WS state (FTD-REF-026)
         await ws.send_text(json.dumps({
-            "type":   "init",
-            "status": await get_status(),
-            "pnl":    pnl_calc.session_stats,
+            "type":     "init",
+            "status":   await get_status(),
+            "pnl":      pnl_calc.session_stats,
             "thoughts": _thought_log[-20:],
+            "ws_truth": ws_truth_engine.to_dict(),   # FTD-REF-026
         }, default=str))
 
         while True:
