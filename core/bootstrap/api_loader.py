@@ -17,7 +17,8 @@ from typing import Optional
 from loguru import logger
 
 from config import cfg
-from core.redis_health import RedisHealth, RedisStatus
+from core.redis_health import RedisStatus
+from core.infra_health_manager import InfraHealthManager
 from core.exchange.api_manager import ApiManager
 
 
@@ -29,6 +30,7 @@ class ApiLoader:
 
     def __init__(self):
         self._redis_status:   RedisStatus = RedisStatus.NOT_AVAILABLE
+        self._infra = InfraHealthManager(redis_retries=3)
         self._api_connected:  bool        = False
         self._api_mode:       str         = "NOT CONNECTED"
         self._ws_status:      str         = "STABLE"      # assumed until first gap
@@ -41,17 +43,20 @@ class ApiLoader:
         Run all boot probes and print the standard boot log line.
         Returns a summary dict for the /api/boot-status endpoint.
         """
-        # 1. Redis probe
-        health = RedisHealth()
-        self._redis_status = await health.check(timeout=2.0)
-
-        # 2. Binance API probe (if credentials are set)
+        # 1. Binance API probe (if credentials are set)
         if api_manager is not None:
             self._api_connected = await api_manager.connect()
             if self._api_connected and api_manager.client:
                 self._api_mode = api_manager.client.mode.value.replace("_", "-")
             else:
                 self._api_mode = "NOT CONNECTED"
+
+        infra = await self._infra.refresh(
+            ws_state=self._ws_status,
+            api_mode=self._api_mode,
+            api_ok=self._api_connected,
+        )
+        self._redis_status = RedisStatus(infra["redis"])
 
         self._print_boot_lines()
         return self.summary()
