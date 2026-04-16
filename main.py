@@ -671,6 +671,7 @@ app.add_middleware(
 async def get_boot_status():
     """FTD-REF-019 / MASTER-001: Boot diagnostics — all subsystem status."""
     live_stab = ws_stab.summary()
+    mdp_ws_state = mdp.websocket_state()
     re_snap   = risk_engine.snapshot()
     stats     = pnl_calc.session_stats
     n_trades  = len(pnl_calc.trades)
@@ -684,10 +685,21 @@ async def get_boot_status():
         avg_r        = stats.get("avg_r_multiple", 0.0),
     )
     infra = infra_health.snapshot()
+    redis_state = infra.get("redis", _boot_status.get("redis", "NOT_AVAILABLE"))
+    if mdp.redis_connected():
+        redis_state = "CONNECTED"
+
+    if mdp_ws_state == "CONNECTED":
+        ws_state = "CONNECTED"
+    elif mdp_ws_state in {"CONNECTING", "RECONNECTING"}:
+        ws_state = mdp_ws_state
+    else:
+        ws_state = live_stab["state"]
+
     return {
         **_boot_status,
-        "redis":         infra.get("redis", _boot_status.get("redis", "NOT_AVAILABLE")),
-        "websocket":     live_stab["state"],
+        "redis":         redis_state,
+        "websocket":     ws_state,
         "ws_gap_s":      live_stab["gap_seconds"],
         "ws_reconnects": live_stab["reconnect_count"],
         "strategy_engine": "ACTIVE",

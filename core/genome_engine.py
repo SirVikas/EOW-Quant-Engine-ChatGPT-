@@ -551,12 +551,7 @@ class GenomeEngine:
                 if st in self.active_dna and isinstance(dna, dict):
                     self.active_dna[st] = dna
             self.per_regime_dna = payload.get("per_regime_dna", {})
-            saved_at_raw = payload.get("saved_at", 0)
-            # Backward compatibility: some old files stored seconds, not ms.
-            if saved_at_raw and saved_at_raw < 10_000_000_000:
-                saved_at_ms = int(saved_at_raw * 1000)
-            else:
-                saved_at_ms = int(saved_at_raw)
+            saved_at_ms = self._normalize_saved_at_ms(payload.get("saved_at", 0))
             age_s = max(0.0, (int(time.time() * 1000) - saved_at_ms) / 1000)
             logger.success(
                 f"[GENOME] DNA restored from disk "
@@ -565,6 +560,36 @@ class GenomeEngine:
             )
         except Exception as exc:
             logger.warning(f"[GENOME] DNA load failed: {exc} — using defaults.")
+
+    @staticmethod
+    def _normalize_saved_at_ms(saved_at_raw) -> int:
+        """
+        Normalize persisted timestamp to epoch milliseconds.
+        Supports legacy storage in seconds, milliseconds, microseconds,
+        and minutes-since-epoch (from older bugged exports).
+        """
+        now_ms = int(time.time() * 1000)
+        try:
+            raw = float(saved_at_raw)
+        except (TypeError, ValueError):
+            return now_ms
+        if raw <= 0:
+            return now_ms
+
+        # Heuristic by order of magnitude.
+        if raw > 1e14:  # microseconds
+            candidate_ms = int(raw / 1000)
+        elif raw > 1e11:  # milliseconds
+            candidate_ms = int(raw)
+        elif raw > 1e9:  # seconds
+            candidate_ms = int(raw * 1000)
+        else:  # legacy bug: minutes
+            candidate_ms = int(raw * 60_000)
+
+        # Guard against corrupted future values.
+        if candidate_ms > now_ms + 60_000:
+            return now_ms
+        return candidate_ms
 
     # ── State Export ──────────────────────────────────────────────────────────
 
