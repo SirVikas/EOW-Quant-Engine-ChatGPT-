@@ -1,10 +1,8 @@
-import redis
 import time
+
 import requests
 
-# REDIS CONFIG
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
+from core.redis_client import get_redis
 
 # TELEGRAM CONFIG
 BOT_TOKEN = "8750549333:AAFWfopkDy6Fi5x01ZxoM9Gg0JmkZMk619g"
@@ -20,7 +18,7 @@ def send_alert(message):
     except Exception as e:
         print("Telegram ERROR:", e)
 
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+r = get_redis(timeout=5.0)
 
 was_down = False
 

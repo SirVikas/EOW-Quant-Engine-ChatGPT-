@@ -1,7 +1,8 @@
-import redis
 import time
 
-r = redis.Redis(host='localhost', port=6379)
+from core.redis_client import get_redis
+
+r = get_redis(timeout=5.0)
 
 while True:
     try:
