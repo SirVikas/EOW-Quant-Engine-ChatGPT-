@@ -156,11 +156,25 @@ def print_boot_status():
     standard status block.
     """
     import json as _json
-    try:
+    def _fetch():
         with urllib.request.urlopen(
             f"http://127.0.0.1:{PORT}/api/boot-status", timeout=3
         ) as r:
-            data = _json.loads(r.read())
+            return _json.loads(r.read())
+
+    try:
+        # Boot races are common: engine endpoint responds before Redis/WS settle.
+        # Poll briefly so console status reflects real runtime state instead of a
+        # transient CONNECTING/DISCONNECTED snapshot.
+        data = None
+        for _ in range(8):  # ~8 seconds max warm-up window
+            data = _fetch()
+            ws = data.get("websocket", "UNKNOWN")
+            if ws in {"CONNECTED", "STABLE", "RECONNECTING"}:
+                break
+            time.sleep(1)
+        if data is None:
+            data = _fetch()
 
         def tk(cond):
             return f"{G}✅{NC}" if cond else f"{R}❌{NC}"
