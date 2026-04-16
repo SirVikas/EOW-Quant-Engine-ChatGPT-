@@ -7,6 +7,7 @@ import asyncio
 import json
 import random
 import time
+import re
 from collections import defaultdict, deque
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Callable, Any
@@ -198,9 +199,7 @@ class MarketDataProvider:
 
             usdt = [
                 t for t in tickers
-                if t["symbol"].endswith("USDT")
-                and t["symbol"].isascii()                    # ← block non-ASCII (meme coins)
-                and t["symbol"] not in self.BLOCKED_PAIRS   # ← block stablecoins
+                if self._is_valid_symbol(t.get("symbol", ""))
                 and float(t.get("quoteVolume", 0)) >= cfg.MIN_VOLUME_USDT
             ]
             usdt.sort(key=lambda t: float(t["quoteVolume"]), reverse=True)
@@ -212,7 +211,7 @@ class MarketDataProvider:
                     f"[MDP] Only {len(result)} pairs passed volume filter "
                     f"(>{cfg.MIN_VOLUME_USDT/1e6:.0f}M). Relaxing filter..."
                 )
-                usdt_all = [t for t in tickers if t["symbol"].endswith("USDT")]
+                usdt_all = [t for t in tickers if self._is_valid_symbol(t.get("symbol", ""))]
                 usdt_all.sort(key=lambda t: float(t.get("quoteVolume", 0)), reverse=True)
                 result = [t["symbol"] for t in usdt_all[: cfg.TOP_N_PAIRS]]
 
@@ -226,8 +225,20 @@ class MarketDataProvider:
                 f"[MDP] Symbol discovery failed ({exc}). "
                 f"Using fallback top-{len(self.FALLBACK_PAIRS)} pairs."
             )
-            clean = [p for p in self.FALLBACK_PAIRS if p not in self.BLOCKED_PAIRS]
+            clean = [p for p in self.FALLBACK_PAIRS if self._is_valid_symbol(p)]
             return clean[: cfg.TOP_N_PAIRS]
+
+    @staticmethod
+    def _is_valid_symbol(symbol: str) -> bool:
+        if not symbol or not symbol.endswith("USDT"):
+            return False
+        if not symbol.isascii():
+            return False
+        if not re.fullmatch(r"[A-Z0-9]{5,20}", symbol):
+            return False
+        if symbol in MarketDataProvider.BLOCKED_PAIRS:
+            return False
+        return True
 
     # ── WebSocket Stream ────────────────────────────────────────────────────
 

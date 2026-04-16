@@ -24,6 +24,7 @@ PROFIT_FACTOR_MIN  = 1.0     # below this PF → reduce frequency
 FEE_RATIO_MAX      = 0.20    # fees as fraction of gross TP profit (20%)
 FREQ_REDUCE_MULT   = 0.50    # confidence multiplier when PF < 1 (halves trade rate)
 MIN_TRADES_FOR_PF  = 10      # minimum trades before PF gate activates
+MAX_CONSEC_LOSSES  = 4       # hard-stop threshold after repeated losses
 
 
 class ProfitGuard:
@@ -93,7 +94,37 @@ class ProfitGuard:
             "pf_guard_active":      mult < 1.0,
             "fee_ratio_max":        FEE_RATIO_MAX,
             "min_trades_for_pf":    MIN_TRADES_FOR_PF,
+            "max_consecutive_losses": MAX_CONSEC_LOSSES,
         }
+
+    def hard_stop_required(
+        self,
+        *,
+        profit_factor: float,
+        n_trades: int,
+        consecutive_losses: int,
+    ) -> tuple[bool, str]:
+        """
+        Returns (blocked, reason) for full stop conditions.
+
+        Hard-stop when both are true:
+          • enough trade sample exists, and
+          • strategy remains net-losing (PF < 1), and
+          • consecutive losses exceed threshold.
+        """
+        if (
+            n_trades >= MIN_TRADES_FOR_PF
+            and profit_factor < PROFIT_FACTOR_MIN
+            and consecutive_losses >= MAX_CONSEC_LOSSES
+        ):
+            reason = (
+                f"PROFIT_GUARD_HARD_STOP("
+                f"pf={profit_factor:.2f}<1.0,"
+                f"consecutive_losses={consecutive_losses}>={MAX_CONSEC_LOSSES})"
+            )
+            logger.warning(f"[PROFIT-GUARD] {reason}")
+            return True, reason
+        return False, ""
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

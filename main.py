@@ -106,6 +106,8 @@ MAX_TRADES_PER_HOUR = 12          # absolute cap across all symbols
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens
+_last_symbol_eval_ms: dict = {}   # symbol → last strategy evaluation ts
+SYMBOL_EVAL_DEBOUNCE_MS = 750     # throttle heavy signal path per symbol
 
 # Active WebSocket clients
 _ws_clients: list[WebSocket] = []
@@ -198,12 +200,28 @@ async def on_tick(tick: Tick):
     # 2. Get candle data for strategy
     candle = mdp.latest_candle(sym)
     if not candle or not candle.closed:
+        _last_skip = {
+            "ts": int(time.time() * 1000), "symbol": sym,
+            "reason": "NO_TRADE_ZONE(MISSING_OR_OPEN_CANDLE)",
+        }
         return   # Only act on closed candles
 
     buf     = list(mdp.price_buffer(sym))
     if len(buf) < 50:
         error_registry.log("DATA_001", symbol=sym, extra=f"buf={len(buf)}")  # FTD-REF-025
+        _last_skip = {
+            "ts": int(time.time() * 1000), "symbol": sym,
+            "reason": f"NO_TRADE_ZONE(INSUFFICIENT_BUFFER:{len(buf)})",
+        }
         return
+
+    # 2b. Performance debounce: avoid repeated heavy regime/signal passes
+    # for the same symbol within sub-second windows.
+    prev_eval = _last_symbol_eval_ms.get(sym, 0)
+    now_ms = int(time.time() * 1000)
+    if now_ms - prev_eval < SYMBOL_EVAL_DEBOUNCE_MS:
+        return
+    _last_symbol_eval_ms[sym] = now_ms
 
     # 3. Detect regime
     regime_det.push(sym, candle.close, candle.high, candle.low, candle.ts)
@@ -225,7 +243,6 @@ async def on_tick(tick: Tick):
     strategy = get_strategy(regime, dna)
 
     # 5. Generate signal (only if no open position + throttle checks)
-    now_ms = int(time.time() * 1000)
     if sym not in risk_ctrl.positions and not risk_ctrl.halted and not risk_ctrl.graceful_stop:
 
         # ── Throttle A: per-symbol cooldown (30 min between trades) ──────────
@@ -318,6 +335,25 @@ async def on_tick(tick: Tick):
         _regime_weight = learning_engine.get_regime_weight(r_ai.regime.value)
         # FTD-REF-026: profit guard — reduce effective confidence when PF < 1
         _pf_stats = pnl_calc.session_stats
+        _consecutive_losses = 0
+        for _t in reversed(pnl_calc.trades):
+            if _t.net_pnl < 0:
+                _consecutive_losses += 1
+            else:
+                break
+        _pg_hard_stop, _pg_hard_reason = profit_guard.hard_stop_required(
+            profit_factor=_pf_stats.get("profit_factor", 1.0),
+            n_trades=len(pnl_calc.trades),
+            consecutive_losses=_consecutive_losses,
+        )
+        if _pg_hard_stop:
+            _last_skip = {
+                "ts": int(time.time() * 1000), "symbol": sym,
+                "reason": _pg_hard_reason, "regime": regime.value,
+                "strategy": strategy_type,
+            }
+            return
+
         _pf_mult  = profit_guard.frequency_multiplier(
             profit_factor=_pf_stats.get("profit_factor", 1.0),
             n_trades=len(pnl_calc.trades),
@@ -569,6 +605,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
     # ── Fix A: Reload promoted DNA so genome doesn't reset on restart ─────────
     genome.load_persisted_dna()
+    required_strategies = {"TrendFollowing", "MeanReversion", "VolatilityExpansion"}
+    missing = [s for s in required_strategies if not genome.active_dna.get(s)]
+    if missing:
+        raise RuntimeError(f"DNA validation failed before engine start: missing={missing}")
 
     # ── MASTER-001: Initialise risk engine with current equity ───────────────
     risk_engine.initialize(cfg.INITIAL_CAPITAL)
@@ -696,10 +736,24 @@ async def get_boot_status():
     else:
         ws_state = live_stab["state"]
 
+    # Indicator readiness: only validated when at least one symbol has
+    # enough candles and non-zero ADX/ATR from live regime state.
+    regime_states = regime_det.all_states()
+    indicators_state = "PENDING_RUNTIME_VALIDATION"
+    for _sym, _state in regime_states.items():
+        if (
+            len(mdp.price_buffer(_sym)) >= 30
+            and getattr(_state, "adx", 0.0) > 0
+            and getattr(_state, "atr_pct", 0.0) > 0
+        ):
+            indicators_state = "VALIDATED"
+            break
+
     return {
         **_boot_status,
         "redis":         redis_state,
         "websocket":     ws_state,
+        "indicators":    indicators_state,
         "ws_gap_s":      live_stab["gap_seconds"],
         "ws_reconnects": live_stab["reconnect_count"],
         "strategy_engine": "ACTIVE",
@@ -707,6 +761,15 @@ async def get_boot_status():
         "execution_mode":  cfg.TRADE_MODE,
         "deployability":   dep_result.status,
         "deployability_score": dep_result.score,
+        "deployability_components": {
+            "sharpe_norm": dep_result.sharpe_norm,
+            "sortino_norm": dep_result.sortino_norm,
+            "win_rate_score": dep_result.win_rate_score,
+            "risk_ctrl_score": dep_result.risk_ctrl_score,
+            "dd_inverse": dep_result.dd_inverse,
+            "consistency_bonus": dep_result.consistency_bonus,
+            "warmup_mode": dep_result.warmup_mode,
+        },
     }
 
 
