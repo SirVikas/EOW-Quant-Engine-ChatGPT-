@@ -1,0 +1,37 @@
+
+
+
+✅ 2. Command bhejo:
+/newbot
+
+👉 Follow steps:
+
+Bot name: EOW Redis Monitor
+Username: eow_redis_bot
+
+
+
+
+Done! Congratulations on your new bot. You will find it at t.me/eow_redis_bot. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
+
+Use this token to access the HTTP API:
+8750549333:AAFWfopkDy6Fi5x01ZxoM9Gg0JmkZMk619g
+Keep your token secure and store it safely, it can be used by anyone to control your bot.
+
+For a description of the Bot API, see this page: https://core.telegram.org/bots/api
+
+----------------------------------------------------------------------------------------------------------
+
+@Kakuster
+Id: 6656920393
+First: Vikas Gandhi
+Lang: en
+Registered: Check Date
+
+🧠
+ Explanations and answers
+Free AI → DeepSeek & ChatGPT
+
+🖼
+ Visualize your ideas
+Make Image → NanoBanana

@@ -1,0 +1,206 @@
+# 🔒 EOW REDIS INFRA – BLACKBOX DOCUMENTATION (v1.0)
+
+## 📅 Created On
+
+2026-04-16
+
+---
+
+# 🎯 OBJECTIVE
+
+Production-grade Redis infrastructure setup with:
+
+* Auto start
+* Auto restart
+* Health monitoring
+* Real-time alert system
+* Zero manual dependency
+
+---
+
+# 🧱 SYSTEM ARCHITECTURE
+
+Windows Boot
+→ Redis Service Auto Start
+→ Python Alert Monitor Auto Start
+→ Continuous Health Check
+→ Telegram Alert System
+→ EOW Engine Integration
+
+---
+
+# ⚙️ COMPONENTS
+
+## 1️⃣ Redis (Core Engine)
+
+* Location: `C:\Redis`
+* Service Name: `Redis`
+* Port: `6379`
+
+### Features:
+
+* Auto-start on boot ✅
+* Auto-restart on failure ✅ (5 sec retry, 3 attempts)
+* Persistent config enabled ✅
+
+---
+
+## 2️⃣ Redis Configuration
+
+File: `C:\Redis\redis.windows.conf`
+
+### Critical Settings:
+
+```
+maxmemory 256mb
+maxmemory-policy allkeys-lru
+appendonly yes
+appendfsync everysec
+```
+
+---
+
+## 3️⃣ Python Alert System
+
+File:
+
+```
+D:\EOW Quant Engine V14.0\eow_quant_engine_FINAL_v2.2\eow_quant_engine\utils\redis_alert.py
+```
+
+### Core Function:
+
+* Ping Redis every 5–10 sec
+* Detect DOWN / RECOVERY
+* Send Telegram alerts
+
+---
+
+## 4️⃣ Telegram Integration
+
+* Platform: Telegram Bot API
+* Chat ID: `6656920393`
+
+### Alerts:
+
+* 🚨 Redis DOWN
+* ✅ Redis RECOVERED
+
+### Logic:
+
+* No spam alerts
+* State-based detection (`was_down` flag)
+
+---
+
+## 5️⃣ Auto-Start System
+
+Method: Windows Task Scheduler (XML-based)
+
+### Trigger:
+
+* On Logon
+
+### Execution:
+
+```
+python.exe redis_alert.py
+```
+
+### Mode:
+
+* Hidden execution
+* Highest privileges
+
+---
+
+## 6️⃣ Monitoring Capabilities
+
+### CLI Monitoring:
+
+```
+redis-cli monitor
+redis-cli info
+redis-cli --latency
+```
+
+### Health Check:
+
+```
+redis-cli ping → PONG
+```
+
+---
+
+# 🔐 SAFETY & RESILIENCE
+
+| Feature            | Status |
+| ------------------ | ------ |
+| Auto Restart       | ✅      |
+| Failure Retry      | ✅      |
+| Alert System       | ✅      |
+| Recovery Detection | ✅      |
+| Memory Control     | ✅      |
+| Data Persistence   | ✅      |
+
+---
+
+# ⚠️ KNOWN RULES (MANDATORY)
+
+1. Redis must always run as service (never manual)
+2. Port 6379 must remain exclusive
+3. Alert script must always be active
+4. Bot token must remain secure (never expose)
+5. WSL Redis must remain disabled
+
+---
+
+# 🚨 FAILURE SCENARIOS HANDLED
+
+| Scenario         | Action                       |
+| ---------------- | ---------------------------- |
+| Redis crash      | Auto restart                 |
+| Redis down       | Telegram alert               |
+| Redis recovery   | Telegram alert               |
+| Temporary glitch | Ignored (double-check logic) |
+
+---
+
+# 🧠 VALIDATION STATUS
+
+✔ Redis install & service working
+✔ Port conflict resolved
+✔ Auto restart verified
+✔ Read/write tested (SET/GET/INCR)
+✔ Alert system tested
+✔ Telegram alerts confirmed
+
+---
+
+# 🚀 FUTURE EXTENSIONS
+
+* Multi-service monitoring (Engine + API)
+* Telegram + Email alerts
+* GUI dashboard
+* Latency tracking panel
+* Auto scaling (Mode C integration)
+
+---
+
+# 🏁 FINAL STATE
+
+System Type: **Production-Grade Infra Component**
+
+Status:
+✅ Stable
+✅ Automated
+✅ Observable
+✅ Recoverable
+
+---
+
+# 🔑 CORE PRINCIPLE
+
+“Redis is not a tool — it is a critical infrastructure layer.”
+
+---
