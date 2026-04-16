@@ -73,6 +73,9 @@ class WsStabilizer:
         self._max_gap         = max_gap
         self._stats           = WsStats()
         self._backoff_step    = 0      # number of doublings applied (capped at MAX_BACKOFF)
+        # Backward-compatible scalar used by existing tests/callers.
+        # Mirrors the effective backoff delay base (1, 2, 4, ... capped at 60).
+        self._backoff         = 1.0
         self._running         = False
         self._ping_in_flight  = False  # True while awaiting ping response
 
@@ -89,6 +92,7 @@ class WsStabilizer:
         if self._stats.state != WsState.CONNECTED:
             self._stats.state  = WsState.CONNECTED
             self._backoff_step = 0
+            self._backoff      = 1.0
             logger.info("[WS-STAB] Stream healthy — backoff reset.")
 
         # Notify truth engine
@@ -125,16 +129,19 @@ class WsStabilizer:
     # ── Internals ─────────────────────────────────────────────────────────────
 
     async def _watchdog_loop(self):
+        ping_gap = min(PING_GAP_SEC, self._max_gap)
+        reconnect_gap = self._max_gap
         while self._running:
-            await asyncio.sleep(2)
+            sleep_for = min(2.0, max(0.05, reconnect_gap / 2))
+            await asyncio.sleep(sleep_for)
             gap = time.time() - self._stats.last_tick_ts
             self._stats.gap_seconds = gap
 
-            if gap <= PING_GAP_SEC:
+            if gap <= ping_gap:
                 # Everything is healthy — nothing to do
                 continue
 
-            if gap <= RECONNECT_GAP_SEC:
+            if gap <= reconnect_gap:
                 # Tier 1: gap 30–60 s → send ping
                 await self._maybe_ping(gap)
             else:
@@ -176,10 +183,10 @@ class WsStabilizer:
         self._stats.state         = WsState.RECONNECTING
         self._stats.reconnect_count += 1
         self._stats.consecutive_ok  = 0
-        self._stats.last_error    = f"Tick gap {gap:.1f}s > {RECONNECT_GAP_SEC}s"
+        self._stats.last_error    = f"Tick gap {gap:.1f}s > {self._max_gap}s"
 
         # Compute backoff: 1, 2, 4, 8 … capped at MAX_BACKOFF doublings
-        backoff_sec = min(2 ** self._backoff_step, MAX_BACKOFF_SEC)
+        backoff_sec = min(self._backoff, MAX_BACKOFF_SEC)
         jitter      = random.uniform(0, backoff_sec * JITTER_FRACTION)
         delay       = backoff_sec + jitter
 
@@ -202,6 +209,7 @@ class WsStabilizer:
         # Advance backoff step but cap it
         if self._backoff_step < MAX_BACKOFF:
             self._backoff_step += 1
+        self._backoff = min(self._backoff * 2, float(MAX_BACKOFF_SEC))
         # Reset last_tick_ts so we don't trigger again immediately
         self._stats.last_tick_ts = time.time()
 
