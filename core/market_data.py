@@ -146,6 +146,21 @@ class MarketDataProvider:
     def price_buffer(self, symbol: str) -> deque:
         return self.tick_buffers[symbol]
 
+    def redis_connected(self) -> bool:
+        """True when Redis pub/sub client is active."""
+        return self._redis is not None
+
+    def websocket_state(self) -> str:
+        """Runtime websocket state for health endpoints."""
+        ws = self._ws
+        if not self._running:
+            return "STOPPED"
+        if ws is None:
+            return "CONNECTING"
+        if getattr(ws, "closed", False):
+            return "RECONNECTING"
+        return "CONNECTED"
+
     # ── Symbol Discovery ────────────────────────────────────────────────────
 
     # Fallback top pairs used when API call fails or returns too few symbols
