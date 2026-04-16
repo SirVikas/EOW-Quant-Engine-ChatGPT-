@@ -33,8 +33,8 @@ class ApiLoader:
         self._infra = InfraHealthManager(redis_retries=3)
         self._api_connected:  bool        = False
         self._api_mode:       str         = "NOT CONNECTED"
-        self._ws_status:      str         = "STABLE"      # assumed until first gap
-        self._ind_status:     str         = "VALIDATED"   # static — guard is inline
+        self._ws_status:      str         = "CONNECTING"
+        self._ind_status:     str         = "PENDING_RUNTIME_VALIDATION"
 
     # ── Public ────────────────────────────────────────────────────────────────
 
@@ -82,11 +82,13 @@ class ApiLoader:
 
         r_ok = self._redis_status == RedisStatus.CONNECTED
         a_ok = self._api_connected
+        ws_ok = self._ws_status == "CONNECTED"
+        ind_ok = self._ind_status == "VALIDATED"
 
         logger.info(
             f"[BOOT] Redis: {self._redis_status.value} {tick(r_ok)} | "
-            f"WebSocket: {self._ws_status} {tick(True)} | "
-            f"Indicators: {self._ind_status} {tick(True)}"
+            f"WebSocket: {self._ws_status} {tick(ws_ok)} | "
+            f"Indicators: {self._ind_status} {tick(ind_ok)}"
         )
         logger.info(
             f"[BOOT] Strategy Engine: ACTIVE ✅ | "
