@@ -30,7 +30,7 @@ class InfraHealthManager:
         api_mode: str = "NOT CONNECTED",
         api_ok: bool = False,
     ) -> dict:
-        redis_state = await self._redis_health.check(timeout=2.0, retries=self._redis_retries)
+        redis_state = await self._redis_health.check(timeout=5.0, retries=self._redis_retries)
         self._last = {
             "redis": redis_state.value,
             "websocket": ws_state,

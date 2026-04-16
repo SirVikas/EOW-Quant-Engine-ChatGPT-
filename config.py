@@ -15,7 +15,7 @@ class EngineConfig(BaseSettings):
     BINANCE_TESTNET: bool = Field(default=True, env="BINANCE_TESTNET")
 
     # ── Redis ────────────────────────────────────────────────────────────────
-    REDIS_URL: str = Field(default="redis://localhost:6379/0", env="REDIS_URL")
+    REDIS_URL: str = Field(default="redis://127.0.0.1:6379/0", env="REDIS_URL")
 
     # ── TimescaleDB ──────────────────────────────────────────────────────────
     DB_URL: str = Field(

@@ -56,36 +56,43 @@ def banner():
 
 
 def check_redis():
-    """Ping Redis; if not running but redis-server is installed, start it."""
-    # ── Step 1: already running? ─────────────────────────────────────────────
+    """Ping Redis via REDIS_URL first; fall back to redis-cli/server if needed."""
+    try:
+        from core.redis_client import get_redis
+
+        client = get_redis(timeout=5.0)
+        if client.ping():
+            print(f"  {G}●{NC} Redis      : connected")
+            return
+    except ImportError:
+        print(f"  {Y}●{NC} Redis      : python client missing — install with `pip install redis`")
+    except Exception:
+        pass
+
+    # Fallback probe using redis-cli when present.
     try:
         result = subprocess.run(
             ["redis-cli", "ping"],
-            capture_output=True, text=True, timeout=3,
+            capture_output=True, text=True, timeout=5,
         )
         if result.stdout.strip() == "PONG":
             print(f"  {G}●{NC} Redis      : running")
             return
     except FileNotFoundError:
-        # redis-cli not installed — truly unavailable
-        print(f"  {Y}●{NC} Redis      : not installed — engine will use in-memory cache")
+        print(f"  {Y}●{NC} Redis      : not reachable at REDIS_URL — engine will use in-memory cache")
         return
 
-    # ── Step 2: installed but not running — start it ─────────────────────────
     print(f"  {Y}●{NC} Redis      : not running — starting…", end="", flush=True)
     try:
         cfg_file = Path("/etc/redis/redis.conf")
         cmd = ["redis-server", str(cfg_file)] if cfg_file.exists() else ["redis-server", "--daemonize", "yes"]
         subprocess.run(cmd, capture_output=True, timeout=5)
-        # Give it up to 3 s to bind the port
         for _ in range(6):
             time.sleep(0.5)
             try:
-                r = subprocess.run(
-                    ["redis-cli", "ping"],
-                    capture_output=True, text=True, timeout=2,
-                )
-                if r.stdout.strip() == "PONG":
+                from core.redis_client import get_redis
+
+                if get_redis(timeout=5.0).ping():
                     print(f"\r  {G}●{NC} Redis      : started successfully          ")
                     return
             except Exception:

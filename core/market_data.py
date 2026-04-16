@@ -16,6 +16,7 @@ import httpx
 import redis.asyncio as aioredis
 
 from config import cfg
+from core.redis_client import get_async_redis
 
 
 # ── Data Models ──────────────────────────────────────────────────────────────
@@ -283,13 +284,7 @@ class MarketDataProvider:
     async def _connect_redis_with_retries(self, retries: int = 3) -> Optional[aioredis.Redis]:
         for attempt in range(1, max(1, retries) + 1):
             try:
-                r = await aioredis.from_url(
-                    cfg.REDIS_URL,
-                    decode_responses=True,
-                    socket_connect_timeout=2,
-                    socket_timeout=2,
-                    retry_on_timeout=True,
-                )
+                r = get_async_redis(timeout=5.0)
                 await r.ping()
                 return r
             except Exception as exc:

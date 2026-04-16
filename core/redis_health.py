@@ -9,10 +9,9 @@ import asyncio
 from enum import Enum
 from typing import Optional
 
-import redis.asyncio as aioredis
 from loguru import logger
 
-from config import cfg
+from core.redis_client import get_async_redis, get_redis_url
 
 
 class RedisStatus(str, Enum):
@@ -26,7 +25,7 @@ class RedisHealth:
     """
 
     def __init__(self, url: Optional[str] = None):
-        self._url = url or cfg.REDIS_URL
+        self._url = url or get_redis_url()
         self._status = RedisStatus.NOT_AVAILABLE
 
     @property
@@ -37,17 +36,11 @@ class RedisHealth:
     def is_connected(self) -> bool:
         return self._status == RedisStatus.CONNECTED
 
-    async def check_redis(self, timeout: float = 2.0) -> bool:
+    async def check_redis(self, timeout: float = 5.0) -> bool:
         """Hard validation probe: True only when Redis ping succeeds."""
         client = None
         try:
-            client = await aioredis.from_url(
-                self._url,
-                decode_responses=True,
-                socket_connect_timeout=timeout,
-                socket_timeout=timeout,
-                retry_on_timeout=True,
-            )
+            client = get_async_redis(timeout=timeout, url=self._url)
             await asyncio.wait_for(client.ping(), timeout=timeout)
             return True
         except Exception as exc:
@@ -60,7 +53,7 @@ class RedisHealth:
                 except Exception:
                     pass
 
-    async def check(self, timeout: float = 2.0, retries: int = 1) -> RedisStatus:
+    async def check(self, timeout: float = 5.0, retries: int = 1) -> RedisStatus:
         """Probe Redis and update cached status. Retries before declaring unavailable."""
         attempts = max(1, retries)
         for attempt in range(1, attempts + 1):
