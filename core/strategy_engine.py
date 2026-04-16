@@ -12,6 +12,7 @@ Wired in main.py:
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Dict, List
 
 from loguru import logger
@@ -21,11 +22,21 @@ from loguru import logger
 ACTIVE_THRESH        = 0.05   # strategy is "active" if usage fraction ≥ this
 MIN_TRADES_FOR_WARN  = 10     # need this many trades before single-strategy warning
 
+MIN_SIGNAL_RR        = 1.5
+MIN_SIGNAL_CONFIDENCE = 0.5
+BLOCKED_REGIMES      = {"UNSTABLE"}
+
 KNOWN_STRATEGIES: tuple = (
     "TrendFollowing",
     "MeanReversion",
     "VolatilityExpansion",
 )
+
+
+@dataclass
+class StrategyDecision:
+    ok: bool
+    reason: str = ""
 
 
 class StrategyEngine:
@@ -67,6 +78,16 @@ class StrategyEngine:
         """Return list of strategy names with usage fraction ≥ ACTIVE_THRESH."""
         return [s for s, u in self.usage().items() if u >= ACTIVE_THRESH]
 
+    def evaluate_signal(self, rr: float, confidence: float, regime: str) -> StrategyDecision:
+        """Hard quality gate used before order submission."""
+        if (regime or "").upper() in BLOCKED_REGIMES:
+            return StrategyDecision(False, f"REGIME_BLOCKED({regime})")
+        if rr < MIN_SIGNAL_RR:
+            return StrategyDecision(False, f"LOW_RR({rr:.2f}<{MIN_SIGNAL_RR:.2f})")
+        if confidence < MIN_SIGNAL_CONFIDENCE:
+            return StrategyDecision(False, f"LOW_CONFIDENCE({confidence:.2f}<{MIN_SIGNAL_CONFIDENCE:.2f})")
+        return StrategyDecision(True, "")
+
     def summary(self) -> dict:
         """Full summary dict suitable for the /api/strategy-usage endpoint."""
         u      = self.usage()
@@ -87,6 +108,11 @@ class StrategyEngine:
             "usage_fractions":   u,
             "active_strategies": active,
             "warning":           f"⚠ Only 1 strategy active ({active[0] if active else 'none'} dominates)" if warn else "",
+            "quality_gate": {
+                "min_rr": MIN_SIGNAL_RR,
+                "min_confidence": MIN_SIGNAL_CONFIDENCE,
+                "blocked_regimes": sorted(BLOCKED_REGIMES),
+            },
         }
 
 

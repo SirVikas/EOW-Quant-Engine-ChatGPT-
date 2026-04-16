@@ -33,8 +33,10 @@ from loguru import logger
 RISK_PCT_MIN        = 0.005   # 0.5% minimum risk per trade
 RISK_PCT_MAX        = 0.010   # 1.0% maximum risk per trade
 MAX_DAILY_LOSS_PCT  = 0.030   # 3% of equity-at-day-start → halt
-MAX_DRAWDOWN_PCT    = 0.150   # 15% peak-to-trough → halt
+MAX_DRAWDOWN_PCT    = 0.150   # 15% peak-to-trough → halt (stricter than 20% kill-switch)
 MAX_TRADES_PER_DAY  = 6       # absolute daily trade cap
+MAX_RISK_OF_RUIN    = 0.30    # >30% risk-of-ruin → reduce size
+ROR_SIZE_REDUCTION  = 0.50    # halve size when RoR is elevated
 
 # ── Tiered DD size cuts (FTD-REF-024 Capital Preservation Mode) ───────────────
 SIZE_SOFT_CUT_AT    = 0.050   # 5% DD  → reduce to SIZE_SOFT_CUT_TO
@@ -64,6 +66,7 @@ class RiskEngineState:
     win_streak:        int   = 0
     loss_streak:       int   = 0
     last_day:          str   = ""
+    risk_of_ruin:      float = 0.0
 
 
 class RiskEngine:
@@ -133,6 +136,17 @@ class RiskEngine:
                 f"MAX_DAILY_LOSS({daily_loss_pct:.1%}>={MAX_DAILY_LOSS_PCT:.0%})"
             )
 
+
+    def update_risk_of_ruin(self, risk_of_ruin: float):
+        """Update latest risk-of-ruin estimate (fraction 0.0-1.0)."""
+        self._state.risk_of_ruin = max(0.0, float(risk_of_ruin))
+        if self._state.risk_of_ruin > MAX_RISK_OF_RUIN:
+            self._state.size_multiplier = min(self._state.size_multiplier, ROR_SIZE_REDUCTION)
+            logger.warning(
+                f"[RISK-ENG] High RoR={self._state.risk_of_ruin:.1%} "
+                f"→ reducing size to {self._state.size_multiplier:.0%}."
+            )
+
     def check_new_trade(self) -> tuple[bool, str]:
         """
         Returns (allowed, reason).
@@ -147,6 +161,9 @@ class RiskEngine:
         daily_loss_pct = self._daily_loss_pct()
         if daily_loss_pct >= MAX_DAILY_LOSS_PCT:
             return False, f"MAX_DAILY_LOSS({daily_loss_pct:.1%})"
+
+        if self._state.risk_of_ruin > MAX_RISK_OF_RUIN:
+            return False, f"HIGH_ROR({self._state.risk_of_ruin:.1%}>{MAX_RISK_OF_RUIN:.0%})"
 
         return True, ""
 
@@ -237,11 +254,13 @@ class RiskEngine:
             "loss_streak":         self._state.loss_streak,
             "peak_equity":         round(self._state.peak_equity, 4),
             "current_equity":   round(self._state.current_equity, 4),
+            "risk_of_ruin":      round(self._state.risk_of_ruin, 4),
             "limits": {
                 "max_daily_loss_pct": MAX_DAILY_LOSS_PCT * 100,
                 "max_drawdown_pct":   MAX_DRAWDOWN_PCT * 100,
                 "max_trades_per_day": MAX_TRADES_PER_DAY,
                 "risk_pct_range":     [RISK_PCT_MIN * 100, RISK_PCT_MAX * 100],
+                "max_risk_of_ruin":  MAX_RISK_OF_RUIN,
             },
         }
 

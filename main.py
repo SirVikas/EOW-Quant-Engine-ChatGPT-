@@ -33,6 +33,7 @@ from core.guardian        import GuardianLogic, AGGRESSION_PROFILES
 from core.security        import ensure_auth_ready_for_mode, require_roles
 from core.scorecard       import compute_scorecard
 from core.analytics       import compute_full_analytics
+from core.metrics_engine   import rolling_ratios
 from core.redis_health    import redis_health
 from core.ws_stabilizer   import WsStabilizer
 from core.regime_debounce import regime_debounce
@@ -53,6 +54,7 @@ from core.profit_guard       import profit_guard        # FTD-REF-026
 from core.ct_scan_engine     import ct_scan_engine      # FTD-REF-026
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
+from core.infra_health_manager import InfraHealthManager
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
@@ -91,9 +93,11 @@ data_lake  = DataLake()
 vault      = VaultManager()
 guardian   = GuardianLogic()
 ws_stab    = WsStabilizer(mdp)        # FTD-REF-019: tick watchdog
+infra_health = InfraHealthManager(redis_health=redis_health, redis_retries=3)
 
 # FTD-REF-019: store boot diagnostics for /api/boot-status
 _boot_status: dict = {}
+_engine_running: bool = False
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
@@ -383,6 +387,21 @@ async def on_tick(tick: Tick):
                 }
                 return
 
+            # FTD-REDIS-017: hard strategy quality gate (RR/confidence/regime)
+            strat_gate = strategy_engine.evaluate_signal(
+                rr=sf_result.rr,
+                confidence=_adjusted_conf,
+                regime=("UNSTABLE" if r_ai.block_trade else r_ai.regime.value),
+            )
+            if not strat_gate.ok:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": strat_gate.reason, "rr": sf_result.rr,
+                    "confidence": _adjusted_conf, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
+
             edge_ok, edge = risk_ctrl.get_trade_decision(
                 side=sig.signal.value,
                 entry=sig.entry_price,
@@ -541,6 +560,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(_asyncio_exception_handler)
 
+    global _engine_running
+    _engine_running = True
     ensure_auth_ready_for_mode()
     mdp.register_callback(on_tick)
     _thought("🚀 EOW Quant Engine booting…", "SYSTEM")
@@ -563,6 +584,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         asyncio.create_task(healer.start()),
         asyncio.create_task(data_lake.start()),
         asyncio.create_task(ws_stab.start()),   # FTD-REF-019: tick watchdog
+        asyncio.create_task(infra_health.monitor(
+            interval_seconds=15,
+            ws_state_fn=lambda: ws_stab.summary().get("state", "UNKNOWN"),
+            api_mode_fn=lambda: _boot_status.get("api", "NOT CONNECTED"),
+            api_ok_fn=lambda: _boot_status.get("api_ok", False),
+            running_fn=lambda: _engine_running,
+        )),
     ]
 
     # ── Fix D: Restore previous session's trade history from DataLake ─────────
@@ -609,6 +637,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
+    _engine_running = False
     for t in tasks:
         t.cancel()
     await mdp.stop()
@@ -654,8 +683,10 @@ async def get_boot_status():
         risk_of_ruin = stats.get("risk_of_ruin", 0.0),
         avg_r        = stats.get("avg_r_multiple", 0.0),
     )
+    infra = infra_health.snapshot()
     return {
         **_boot_status,
+        "redis":         infra.get("redis", _boot_status.get("redis", "NOT_AVAILABLE")),
         "websocket":     live_stab["state"],
         "ws_gap_s":      live_stab["gap_seconds"],
         "ws_reconnects": live_stab["reconnect_count"],
@@ -845,7 +876,7 @@ async def get_analytics():
         for t in pnl_calc.trades
     ]
 
-    return _sanitize(compute_full_analytics(
+    analytics_payload = compute_full_analytics(
         pnl_trades=trade_dicts,
         initial_capital=pnl_calc._initial_capital,
         session_stats=pnl_calc.session_stats,
@@ -854,7 +885,15 @@ async def get_analytics():
         genome_state=genome.export_state(),
         redis_ok=redis_ok,
         persistence_ok=persistence_ok,
-    ))
+    )
+    corrected = rolling_ratios(
+        pnl_values=[t.get("net_pnl", 0.0) for t in trade_dicts],
+        initial_capital=pnl_calc._initial_capital,
+        max_drawdown_pct=pnl_calc.session_stats.get("max_drawdown_pct", 0.0),
+        window=200,
+    )
+    analytics_payload.update(corrected)
+    return _sanitize(analytics_payload)
 
 
 @app.get("/api/mode-info")

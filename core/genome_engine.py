@@ -551,7 +551,13 @@ class GenomeEngine:
                 if st in self.active_dna and isinstance(dna, dict):
                     self.active_dna[st] = dna
             self.per_regime_dna = payload.get("per_regime_dna", {})
-            age_s = (int(time.time() * 1000) - payload.get("saved_at", 0)) / 1000
+            saved_at_raw = payload.get("saved_at", 0)
+            # Backward compatibility: some old files stored seconds, not ms.
+            if saved_at_raw and saved_at_raw < 10_000_000_000:
+                saved_at_ms = int(saved_at_raw * 1000)
+            else:
+                saved_at_ms = int(saved_at_raw)
+            age_s = max(0.0, (int(time.time() * 1000) - saved_at_ms) / 1000)
             logger.success(
                 f"[GENOME] DNA restored from disk "
                 f"(saved {age_s / 60:.1f} min ago). "

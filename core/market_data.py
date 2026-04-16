@@ -105,20 +105,16 @@ class MarketDataProvider:
 
     async def start(self):
         """Discover top-N pairs then open the combined WebSocket stream."""
-        # Redis is optional — engine runs without it (in-memory only).
-        # Log at INFO, not WARNING, because absence of Redis is expected behaviour.
-        try:
-            self._redis = await aioredis.from_url(
-                cfg.REDIS_URL, decode_responses=True, socket_connect_timeout=2
-            )
-            await self._redis.ping()
+        # Redis is optional, but we only fall back to in-memory mode
+        # after 3 failed retries to avoid transient startup false negatives.
+        self._redis = await self._connect_redis_with_retries(retries=3)
+        if self._redis is not None:
             logger.info("[MDP] Redis connected — pub/sub active.")
-        except Exception as e:
+        else:
             logger.info(
-                f"[MDP] Redis not available ({type(e).__name__}) — "
+                "[MDP] Redis unavailable after 3 retries — "
                 "running in-memory only. Engine will auto-reconnect if Redis starts later."
             )
-            self._redis = None
         self.symbols = await self._discover_symbols()
         logger.info(f"[MDP] Watching {len(self.symbols)} symbols: {self.symbols[:5]}…")
         self._running = True
@@ -284,6 +280,24 @@ class MarketDataProvider:
                 await asyncio.sleep(delay)
                 backoff = min(backoff * 2, 60)
 
+    async def _connect_redis_with_retries(self, retries: int = 3) -> Optional[aioredis.Redis]:
+        for attempt in range(1, max(1, retries) + 1):
+            try:
+                r = await aioredis.from_url(
+                    cfg.REDIS_URL,
+                    decode_responses=True,
+                    socket_connect_timeout=2,
+                    socket_timeout=2,
+                    retry_on_timeout=True,
+                )
+                await r.ping()
+                return r
+            except Exception as exc:
+                if attempt >= retries:
+                    logger.debug(f"[MDP] Redis connect failed: {type(exc).__name__}")
+                await asyncio.sleep(0.2 * attempt)
+        return None
+
     async def _redis_reconnect_loop(self):
         """
         Background task: silently retry Redis connection every 60 s when not connected.
@@ -294,15 +308,10 @@ class MarketDataProvider:
             await asyncio.sleep(60)
             if self._redis is not None:
                 continue   # already connected
-            try:
-                r = await aioredis.from_url(
-                    cfg.REDIS_URL, decode_responses=True, socket_connect_timeout=1
-                )
-                await r.ping()
+            r = await self._connect_redis_with_retries(retries=1)
+            if r is not None:
                 self._redis = r
                 logger.info("[MDP] Redis reconnected — pub/sub now active.")
-            except Exception:
-                pass   # still not available — stay silent, retry next cycle
 
     async def reconnect(self):
         """
