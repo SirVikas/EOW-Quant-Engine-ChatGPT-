@@ -27,7 +27,7 @@ MIN_CANDLES        = 30     # minimum history before any signal is valid
 ADX_UNSTABLE_BELOW =  5.0  # hard block — pure noise
 ADX_WEAK_BELOW     = 10.0  # soft warning — low trend confidence
 ADX_CLAMP_ABOVE    = 60.0  # clamp ceiling (was 80 — tightened per MASTER-001)
-ATR_PCT_MIN        =  0.05 # ATR% < 0.05% → near-zero volatility, skip
+ATR_PCT_MIN        =  0.03 # ATR% < 0.03% → near-zero volatility, skip
 
 AdxQuality = Literal["STRONG", "WEAK", "UNSTABLE", "NOT_READY"]
 

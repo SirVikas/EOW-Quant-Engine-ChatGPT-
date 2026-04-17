@@ -26,8 +26,8 @@ ADX_RANGE_MAX     = 15.0    # ADX < this + BB tight → RANGE
 BB_TREND_MIN      = 3.5     # BB width ≥ this in a trending market
 BB_RANGE_MAX      = 2.5     # BB width < this in a ranging market
 BB_FAKE_MAX       = 3.0     # ADX ambiguous + BB below this → FAKE_BREAKOUT
-ATR_FAKE_MAX      = 0.10    # tightened: only block genuine low-ATR fake breakouts
-ATR_LOW_VOL_TRAP  = 0.05    # tightened: only block near-zero volatility traps
+ATR_FAKE_MAX      = 0.05    # only block near-zero ATR fake breakouts
+ATR_LOW_VOL_TRAP  = 0.03    # only block stablecoin-level volatility traps
 
 # ── Status constants ───────────────────────────────────────────────────────────
 STRUCTURE_TREND         = "TREND"

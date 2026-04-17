@@ -1045,7 +1045,8 @@ async def get_analytics():
     """
     heal    = healer.snapshot()
     recent  = heal.get("recent_events", [])
-    redis_ok = any(
+    # Use live redis connection as primary signal; healer events as fallback
+    redis_ok = mdp.redis_connected() or any(
         e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
         for e in recent
     )
