@@ -189,6 +189,8 @@ class MarketDataProvider:
         "TAOUSDT", "ZECUSDT", "ENJUSDT", "XAUTUSDT",
         # TP too tight relative to costs — never profitable
         "STOUSDT",
+        # Ripple RLUSD stablecoin — pegged to USD, no directional edge
+        "RLUSDUSDT",
     }
 
     async def _discover_symbols(self) -> List[str]:

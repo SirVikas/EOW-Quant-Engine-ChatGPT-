@@ -59,7 +59,11 @@ class RegimeDebounce:
             )
 
         if old is None:
-            logger.info(f"[REGIME-DB] {symbol} initial → {new_regime.value}{details}")
+            # Suppress UNKNOWN initial noise; only log first meaningful regime
+            if new_regime.value == "UNKNOWN":
+                logger.debug(f"[REGIME-DB] {symbol} initial → UNKNOWN (warming up)")
+            else:
+                logger.info(f"[REGIME-DB] {symbol} initial → {new_regime.value}{details}")
         else:
             logger.info(
                 f"[REGIME-DB] {symbol} {old.value} → {new_regime.value}{details}"
