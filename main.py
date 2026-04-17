@@ -273,8 +273,15 @@ async def on_tick(tick: Tick):
         lows   = [p * 0.999 for p in buf]
 
         # FTD-REF-019: validate indicator quality before generating signal
-        r_state = regime_det.state(sym)
-        guard   = indicator_guard.validate_from_state(sym, len(buf), r_state)
+        # NOTE: regime_det.state().atr_pct is 0 for single-price ticks (high=low=close),
+        # so we compute atr_pct from the close buffer BEFORE calling indicator_guard.
+        r_state  = regime_det.state(sym)
+        atr_pct  = _estimate_atr_pct(closes)
+        raw_adx  = getattr(r_state, "adx", 0.0)
+        adx_val  = raw_adx if (raw_adx > 0 or len(buf) >= 28) else None
+        guard    = indicator_guard.validate(
+            symbol=sym, n_candles=len(buf), adx=adx_val, atr_pct=atr_pct,
+        )
         if not guard.ok:
             error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
             return   # insufficient candles / unstable ADX / near-zero ATR
@@ -377,7 +384,7 @@ async def on_tick(tick: Tick):
                 return
             _edge_mult = edge_engine.get_size_multiplier(regime.value, strategy_type)
             sizing.qty = sizing.qty * _edge_mult   # boost qty on strong positive edge
-            atr_pct    = _estimate_atr_pct(closes)
+            # atr_pct already computed above from close buffer (not regime_det tick ATR)
 
             # FTD-REF-023: realistic cost via execution_engine
             notional  = sizing.qty * sig.entry_price
@@ -647,9 +654,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         historical_trades = data_lake.get_trades(limit=5000)
         if historical_trades:
             n = pnl_calc.replay_from_history(historical_trades)
+            # Sync risk_engine and scaler equity after replay so RoR/sizing use real capital
+            replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
+            risk_engine.update_equity(replayed_equity)
+            scaler.equity = replayed_equity
             _thought(
                 f"📂 Session restored: {n} trades replayed from DataLake. "
-                f"Equity: {pnl_calc.capital:.2f} USDT",
+                f"Equity: {replayed_equity:.2f} USDT",
                 "SYSTEM",
             )
         else:
