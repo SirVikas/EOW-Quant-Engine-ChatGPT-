@@ -192,7 +192,10 @@ class WsStabilizer:
         jitter      = random.uniform(0, backoff_sec * JITTER_FRACTION)
         delay       = backoff_sec + jitter
 
-        self._error_log("WS_002", extra=f"gap={gap:.1f}s attempt={self._stats.reconnect_count}")
+        # First reconnect after a stale gap is treated as a soft recovery path.
+        # Escalate to WS_002 only when the first attempt failed to recover.
+        err_code = "WS_001" if self._stats.reconnect_count == 1 else "WS_002"
+        self._error_log(err_code, extra=f"gap={gap:.1f}s attempt={self._stats.reconnect_count}")
         logger.warning(
             f"[WS-STAB] No tick for {gap:.1f}s — "
             f"reconnect #{self._stats.reconnect_count} in {delay:.1f}s "
