@@ -433,16 +433,53 @@ def compute_full_analytics(
     mdd_pct = session_stats.get("max_drawdown_pct", 0.0)
     calmar  = calmar_ratio(nets, initial_capital, mdd_pct)
 
-    win_rate   = session_stats.get("win_rate", 0.0) / 100.0  # convert % → fraction
-    avg_r_win  = statistics.mean([r for r in valid_r if r > 0]) if [r for r in valid_r if r > 0] else 1.0
-    avg_r_loss = statistics.mean([abs(r) for r in valid_r if r < 0]) if [r for r in valid_r if r < 0] else 1.0
+    # Use only non-zero R trades for RoR math so breakeven/invalid-R records
+    # don't dilute win-rate and falsely imply 100% ruin.
+    wins_valid = [r for r in valid_r if r > 0]
+    losses_valid = [r for r in valid_r if r < 0]
+    if valid_r:
+        win_rate = len(wins_valid) / len(valid_r)
+    else:
+        win_rate = session_stats.get("win_rate", 0.0) / 100.0  # convert % → fraction
+    avg_r_win  = statistics.mean(wins_valid) if wins_valid else 1.0
+    avg_r_loss = statistics.mean([abs(r) for r in losses_valid]) if losses_valid else 1.0
 
-    # During very early runtime, win_rate / R stats are not meaningful and used
-    # to produce false 100% RoR in the UI. Treat as "not enough evidence yet".
-    if len(nets) < 5 or len(valid_r) < 5:
+    # During early runtime, RoR can overreact and pin to 100% on tiny samples.
+    # Require a minimum body of valid-R evidence before enabling hard RoR values.
+    min_valid_r_for_ror = 20
+    min_each_side_for_ror = 3
+    if len(nets) < min_valid_r_for_ror or len(valid_r) < min_valid_r_for_ror:
         ror = 0.0
+        ror_debug = {
+            "status": "WARMUP",
+            "reason": "INSUFFICIENT_VALID_R_SAMPLE",
+            "min_valid_r_required": min_valid_r_for_ror,
+            "valid_r_count": len(valid_r),
+            "wins_count": len(wins_valid),
+            "losses_count": len(losses_valid),
+        }
+    elif len(wins_valid) < min_each_side_for_ror or len(losses_valid) < min_each_side_for_ror:
+        ror = 0.0
+        ror_debug = {
+            "status": "WARMUP",
+            "reason": "INSUFFICIENT_WIN_LOSS_DISTRIBUTION",
+            "min_each_side_required": min_each_side_for_ror,
+            "valid_r_count": len(valid_r),
+            "wins_count": len(wins_valid),
+            "losses_count": len(losses_valid),
+        }
     else:
         ror = risk_of_ruin(win_rate, avg_r_win, avg_r_loss, account_units=20)
+        ror_debug = {
+            "status": "ACTIVE",
+            "reason": "OK",
+            "valid_r_count": len(valid_r),
+            "wins_count": len(wins_valid),
+            "losses_count": len(losses_valid),
+            "win_rate": round(win_rate, 4),
+            "avg_r_win": round(avg_r_win, 4),
+            "avg_r_loss": round(avg_r_loss, 4),
+        }
     growth = geometric_mean_growth(
         valid_r[-100:] if len(valid_r) > 100 else valid_r,
         risk_fraction=0.01,
@@ -466,6 +503,7 @@ def compute_full_analytics(
         "sortino_ratio":    sortino,
         "calmar_ratio":     calmar,
         "risk_of_ruin_pct": ror,
+        "risk_of_ruin_debug": ror_debug,
         "growth_chart":     growth,
         "deployability":    deploy,
         "benchmark":        bench,
