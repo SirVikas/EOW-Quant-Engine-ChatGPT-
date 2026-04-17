@@ -107,6 +107,7 @@ MAX_TRADES_PER_HOUR = 12          # absolute cap across all symbols
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens
 _last_symbol_eval_ms: dict = {}   # symbol → last strategy evaluation ts
+_last_processed_candle_ts: dict = {}  # symbol → last closed candle ts evaluated
 SYMBOL_EVAL_DEBOUNCE_MS = 750     # throttle heavy signal path per symbol
 
 # Active WebSocket clients
@@ -198,13 +199,16 @@ async def on_tick(tick: Tick):
     risk_engine.update_equity(scaler.equity)
 
     # 2. Get candle data for strategy
-    candle = mdp.latest_candle(sym)
-    if not candle or not candle.closed:
-        _last_skip = {
-            "ts": int(time.time() * 1000), "symbol": sym,
-            "reason": "NO_TRADE_ZONE(MISSING_OR_OPEN_CANDLE)",
-        }
-        return   # Only act on closed candles
+    candle = mdp.latest_closed_candle(sym)
+    if not candle:
+        # Startup warmup: until first closed candle lands, skip silently.
+        return
+
+    # Evaluate each symbol once per freshly closed candle to avoid
+    # repeatedly rejecting open candles between kline close events.
+    if _last_processed_candle_ts.get(sym) == candle.ts:
+        return
+    _last_processed_candle_ts[sym] = candle.ts
 
     buf     = list(mdp.price_buffer(sym))
     data_gate = strategy_engine.evaluate_data_sufficiency(len(buf))

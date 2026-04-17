@@ -81,6 +81,7 @@ class MarketDataProvider:
         self.symbols:      List[str]              = []
         self.ticks:        Dict[str, Tick]        = {}
         self.candles:      Dict[str, Candle]      = {}
+        self.closed_candles: Dict[str, Candle]    = {}
         self.order_books:  Dict[str, OrderBook]   = {}
         self.funding:      Dict[str, FundingRate] = {}
 
@@ -143,6 +144,9 @@ class MarketDataProvider:
 
     def latest_candle(self, symbol: str) -> Optional[Candle]:
         return self.candles.get(symbol)
+
+    def latest_closed_candle(self, symbol: str) -> Optional[Candle]:
+        return self.closed_candles.get(symbol)
 
     def price_buffer(self, symbol: str) -> deque:
         return self.tick_buffers[symbol]
@@ -406,6 +410,7 @@ class MarketDataProvider:
         )
         self.candles[sym] = candle
         if candle.closed:
+            self.closed_candles[sym] = candle
             await self._publish("closed_candles", asdict(candle))
 
     # ── Funding Rate Loop ───────────────────────────────────────────────────
