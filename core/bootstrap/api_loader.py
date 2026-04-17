@@ -35,6 +35,8 @@ class ApiLoader:
         self._api_mode:       str         = "NOT CONNECTED"
         self._ws_status:      str         = "CONNECTING"
         self._ind_status:     str         = "PENDING_RUNTIME_VALIDATION"
+        self._deployability_score: float  = 0.0
+        self._deployability_status: str   = "NOT_READY"
 
     # ── Public ────────────────────────────────────────────────────────────────
 
@@ -71,8 +73,13 @@ class ApiLoader:
             "strategy_engine": "ACTIVE",
             "risk_engine":     "ACTIVE",
             "execution_mode":  cfg.TRADE_MODE,
-            "deployability":   "IMPROVING",   # updated live via /api/boot-status
+            "deployability":   self._deployability_status,
+            "deployability_score": self._deployability_score,
         }
+
+    def set_deployability(self, score: float, status: str) -> None:
+        self._deployability_score = max(0.0, min(100.0, float(score)))
+        self._deployability_status = str(status or "NOT_READY")
 
     # ── Internals ─────────────────────────────────────────────────────────────
 
@@ -97,7 +104,7 @@ class ApiLoader:
         )
         logger.info(
             f"[BOOT] API: {self._api_mode} {tick(a_ok)} | "
-            f"Deployability: IMPROVING (score accumulates during session)"
+            f"Deployability: {self._deployability_status} ({self._deployability_score:.0f}/100)"
         )
 
 

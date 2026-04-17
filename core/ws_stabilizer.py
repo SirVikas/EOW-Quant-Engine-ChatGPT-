@@ -117,10 +117,12 @@ class WsStabilizer:
 
     def summary(self) -> dict:
         s = self.stats
+        network_penalty = 10 if s.reconnect_count > 2 else 0
         return {
             "state":            s.state.value,
             "gap_seconds":      round(s.gap_seconds, 1),
             "reconnect_count":  s.reconnect_count,
+            "network_penalty":  network_penalty,
             "consecutive_ok":   s.consecutive_ok,
             "ping_sent_count":  s.ping_sent_count,
             "last_error":       s.last_error,
