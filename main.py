@@ -795,12 +795,18 @@ async def get_boot_status():
     except Exception:
         lake_s    = {}
         sqlite_ok = False
+    valid_r = [t.r_multiple for t in pnl_calc.trades if t.r_multiple != 0.0]
     dep_idx = deployability_index(
         healer_snapshot=heal,
         lake_stats=lake_s,
         genome_state=genome.export_state(),
         redis_ok=redis_ok,
         persistence_ok=(redis_ok or sqlite_ok),
+        runtime_rr={
+            "avg_r_multiple": (sum(valid_r) / len(valid_r)) if valid_r else 0.0,
+            "win_rate": stats.get("win_rate", 0.0) / 100.0,
+            "trades": n_trades,
+        },
     )
     dep_breakdown = dep_idx.get("breakdown", {})
     network_score = float((dep_breakdown.get("network") or {}).get("score", 0))
