@@ -22,8 +22,8 @@ from loguru import logger
 ACTIVE_THRESH        = 0.05   # strategy is "active" if usage fraction ≥ this
 MIN_TRADES_FOR_WARN  = 10     # need this many trades before single-strategy warning
 
-MIN_SIGNAL_RR        = 1.2    # aligned with signal_filter RR gate (was 1.5)
-MIN_SIGNAL_CONFIDENCE = 0.25  # aligned with regime_ai MIN_CONFIDENCE_TRADE (was 0.5)
+MIN_SIGNAL_RR        = 1.1    # aligned with signal_filter floor (was 1.5)
+MIN_SIGNAL_CONFIDENCE = 0.10  # aligned with regime_ai MIN_CONFIDENCE_TRADE (was 0.5)
 BLOCKED_REGIMES      = {"UNSTABLE"}
 REQUIRED_CANDLE_MIN  = 30     # sufficient for ATR+EMA indicators (was 50)
 

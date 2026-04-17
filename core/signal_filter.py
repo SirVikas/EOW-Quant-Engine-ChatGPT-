@@ -42,14 +42,14 @@ _REGIME_RR: Dict[str, float] = {
     "UNKNOWN":              1.4,   # matches TRENDING (TrendFollowing is UNKNOWN default)
 }
 _REGIME_CONF: Dict[str, float] = {
-    "TRENDING":             0.50,
-    "MEAN_REVERTING":       0.40,  # relaxed from 0.45
-    "VOLATILITY_EXPANSION": 0.50,  # relaxed from 0.55
-    "UNKNOWN":              0.45,  # relaxed from 0.60 (was blocking warmup trading)
+    "TRENDING":             0.20,  # was 0.50 — allows adj_conf ~0.19 after pf_mult
+    "MEAN_REVERTING":       0.15,  # was 0.40
+    "VOLATILITY_EXPANSION": 0.20,  # was 0.50
+    "UNKNOWN":              0.18,  # was 0.45
 }
 
 # ── Fixed thresholds (regime-independent) ─────────────────────────────────────
-MIN_ATR_PCT        = 0.20   # minimum ATR% floor
+MIN_ATR_PCT        = 0.03   # minimum ATR% floor (aligned with indicator_guard)
 MAX_COST_FRACTION  = 0.30   # cost < 30% of gross TP
 
 # ── Consecutive-loss protection ───────────────────────────────────────────────
@@ -120,8 +120,8 @@ class SignalFilter:
         min_rr   = _REGIME_RR.get(regime,   _REGIME_RR["UNKNOWN"])   * relaxation_factor
         min_conf = _REGIME_CONF.get(regime, _REGIME_CONF["UNKNOWN"]) * relaxation_factor
         # Never relax below absolute floor values
-        min_rr   = max(min_rr,   0.90)
-        min_conf = max(min_conf, 0.30)
+        min_rr   = max(min_rr,   0.80)
+        min_conf = max(min_conf, 0.10)
 
         # 3. RR gate
         gross_tp = abs(take_profit - entry)

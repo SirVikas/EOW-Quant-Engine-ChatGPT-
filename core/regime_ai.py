@@ -53,7 +53,7 @@ STAB_BOOST            =  1.15  # confidence multiplier in high-vol environment
 STAB_REDUCE           =  0.85  # confidence multiplier in low-vol environment
 
 # ── FTD-REF-026: trade block gates ───────────────────────────────────────────
-MIN_CONFIDENCE_TRADE  =  0.25  # relaxed: block only truly uncertain signals
+MIN_CONFIDENCE_TRADE  =  0.10  # only block near-zero confidence (warmup/noise)
 MIN_STABILITY_TICKS   =  1     # allow trading from first tick (warmup-safe)
 
 

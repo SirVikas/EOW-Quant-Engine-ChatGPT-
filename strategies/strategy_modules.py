@@ -35,7 +35,7 @@ class TradeSignal:
 # Minimum ATR% to even consider a trade.
 # Stablecoins: ATR% ≈ 0.002–0.05%  → blocked
 # Real coins:  ATR% ≈ 0.1%+        → allowed
-MIN_ATR_PCT = 0.20   # 0.20% minimum — must exceed 0.14% round-trip cost
+MIN_ATR_PCT = 0.05   # 0.05% minimum — 1-min candle ATR typically 0.05-0.15%
 
 # ── Shared Indicator Helpers ─────────────────────────────────────────────────
 
@@ -87,8 +87,8 @@ class TrendFollowingStrategy:
     ID = "TF_EMA_RSI_v1"
 
     # RSI zones: only enter when momentum supports the direction
-    RSI_LONG_MIN  = 45   # RSI must be building upward momentum for LONG
-    RSI_SHORT_MAX = 55   # RSI must be fading for SHORT (not already oversold)
+    RSI_LONG_MIN  = 40   # widened from 45 — allows more long signals
+    RSI_SHORT_MAX = 60   # widened from 55 — allows more short signals
 
     def __init__(self, dna: dict = None):
         d = dna or {}

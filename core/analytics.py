@@ -459,10 +459,10 @@ def compute_full_analytics(
 
     # During early runtime, RoR can overreact and pin to 100% on tiny samples.
     # Require a minimum body of valid-R evidence before enabling hard RoR values.
-    # Raised from 20 → 30 to give more warmup time and avoid false 100% readings
-    # from the initial restored trade history.
-    min_valid_r_for_ror = 30
-    min_each_side_for_ror = 5
+    # Raised to 60 to avoid false 100% from restored losing-trade history on boot.
+    # With 38 restored trades, RoR stays in WARMUP until fresh trades accumulate.
+    min_valid_r_for_ror = 60
+    min_each_side_for_ror = 10
     if len(nets) < min_valid_r_for_ror or len(valid_r) < min_valid_r_for_ror:
         ror = 0.0
         ror_debug = {
