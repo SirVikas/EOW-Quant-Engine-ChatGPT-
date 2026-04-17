@@ -1,0 +1,255 @@
+# 📦 FTD-REF-052-A
+
+## OBJECTIVE
+
+Eliminate all contradictions between:
+
+* Boot Log (BL)
+* API (/api/boot-status)
+* UI Dashboard
+
+Ensure:
+👉 "System kabhi jhooth na bole"
+
+---
+
+# 🚨 RULE ZERO (MANDATORY)
+
+```text
+IF any critical component NOT ready → Deployability can NEVER be READY
+```
+
+---
+
+# 🔧 FIX 1: DEPLOYABILITY LOGIC CORRECTION
+
+## 📁 File:
+
+`/core/bootstrap/api_loader.py`
+
+---
+
+## FIND:
+
+Search:
+
+```python
+Deployability: READY
+```
+
+---
+
+## REPLACE LOGIC:
+
+❌ REMOVE:
+
+```python
+if infra_healthy:
+    deployability = 100
+```
+
+---
+
+✅ ADD:
+
+```python
+deployability_score = min(
+    network_score,
+    database_score,
+    rr_edge_score
+)
+
+is_ready = (
+    network_score >= 25 and
+    database_score >= 25 and
+    rr_edge_score >= 30
+)
+
+status = "READY" if is_ready else "NOT_READY"
+```
+
+---
+
+# 🔧 FIX 2: INDICATOR BLOCKING
+
+## 📁 File:
+
+`/core/bootstrap/api_loader.py`
+
+---
+
+## ADD HARD BLOCK:
+
+```python
+if indicators_state != "VALIDATED":
+    deployability_score = min(deployability_score, 40)
+    status = "NOT_READY"
+```
+
+---
+
+# 🔧 FIX 3: RR EDGE INTEGRATION
+
+## 📁 File:
+
+`/api/boot-status`
+
+---
+
+## ENSURE:
+
+```python
+if rr_edge_score == 0:
+    deployability_score = 0
+    status = "NOT_READY"
+```
+
+---
+
+# 🔧 FIX 4: BOOT LOG TRUTH SYNC
+
+## 📁 File:
+
+`/core/bootstrap/api_loader.py`
+
+---
+
+## FIND:
+
+```python
+_print_boot_lines
+```
+
+---
+
+## MODIFY:
+
+Replace static line:
+
+```python
+[BOOT] API: READ-ONLY ✅ | Deployability: READY
+```
+
+---
+
+## WITH:
+
+```python
+[BOOT] API: READ-ONLY ✅ | Deployability: {status} ({score}/100)
+```
+
+---
+
+# 🔧 FIX 5: ERROR IMPACT SYSTEM
+
+## 📁 File:
+
+`/core/error_registry.py`
+
+---
+
+## ADD:
+
+```python
+CRITICAL_ERRORS = ["WS_002", "DATA_001"]
+
+if error_code in CRITICAL_ERRORS:
+    system_health.degrade(10)
+```
+
+---
+
+# 🔧 FIX 6: WEBSOCKET STABILITY IMPACT
+
+## 📁 File:
+
+`/core/ws_stabilizer.py`
+
+---
+
+## ADD:
+
+```python
+if reconnect_attempts > 2:
+    network_score -= 10
+```
+
+---
+
+# 🔧 FIX 7: DATA SUFFICIENCY BLOCK
+
+## 📁 File:
+
+`/core/strategy_engine.py`
+
+---
+
+## ADD:
+
+```python
+if candle_buffer < required_min:
+    return "NO_TRADE_DATA_INSUFFICIENT"
+```
+
+---
+
+# 🔧 FIX 8: UI SYNC GUARANTEE
+
+## RULE:
+
+```text
+UI must ONLY display values from /api/boot-status
+NO independent calculation allowed
+```
+
+---
+
+# 🧪 VERIFIER (MANDATORY)
+
+## 📁 File:
+
+`/tests/test_boot_integrity.py`
+
+---
+
+## TEST CASES:
+
+1. Indicators pending → deployability < 50
+2. RR edge = 0 → deployability = 0
+3. WebSocket down → score drops
+4. Data insufficient → NOT_READY
+5. UI == API == BootLog
+
+---
+
+# 📊 SUCCESS CRITERIA
+
+```text
+- No contradiction between UI & BL
+- No false READY state
+- Deployability reflects REAL system condition
+```
+
+---
+
+# 🚫 STRICT RULES
+
+* NO override allowed
+* NO artificial boosting
+* NO silent fallback
+
+---
+
+# 📢 FINAL DEV INSTRUCTION
+
+Deliver:
+
+1. Fixed deployability logic
+2. Boot log truth sync
+3. Error impact integration
+4. Verifier passing
+5. Full implementation report
+
+---
+
+END OF FTD-REF-052-A
