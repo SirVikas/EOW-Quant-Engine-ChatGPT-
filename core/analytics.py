@@ -97,7 +97,15 @@ def risk_of_ruin(
 
     Returns a value in [0, 100].
     """
-    if not (0.0 < win_rate < 1.0) or avg_r_win <= 0 or avg_r_loss <= 0:
+    # Boundary handling:
+    # - 100% win-rate cannot imply 100% ruin; treat as 0% ruin.
+    # - 0% win-rate is immediate ruin (100%).
+    # - invalid payoff inputs remain hard-fail (100%).
+    if win_rate >= 1.0:
+        return 0.0
+    if win_rate <= 0.0:
+        return 100.0
+    if avg_r_win <= 0 or avg_r_loss <= 0:
         return 100.0
 
     p = win_rate

@@ -93,7 +93,11 @@ class VetoEvent:
 def _estimate_ror(win_rate: float, avg_r_win: float, avg_r_loss: float,
                   account_units: int = 20) -> float:
     """Gambler's-ruin RoR estimate (mirrors analytics.risk_of_ruin)."""
-    if not (0.0 < win_rate < 1.0) or avg_r_win <= 0 or avg_r_loss <= 0:
+    if win_rate >= 1.0:
+        return 0.0
+    if win_rate <= 0.0:
+        return 100.0
+    if avg_r_win <= 0 or avg_r_loss <= 0:
         return 100.0
     p = win_rate
     q = 1.0 - p
