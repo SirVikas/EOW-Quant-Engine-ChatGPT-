@@ -44,6 +44,17 @@ def test_warming_up_with_healthy_infra_gets_improving_floor():
     assert score >= 60
 
 
+def test_warming_up_with_relaxed_boot_gates_is_improving():
+    score, status = _resolve_boot_deployability(
+        network_score=20,
+        database_score=10,
+        rr_edge_score=0,
+        indicators_state="WARMING_UP",
+    )
+    assert status == "IMPROVING"
+    assert score >= 60
+
+
 def test_websocket_instability_applies_network_penalty():
     stab = WsStabilizer(_MockMdp())
     stab._stats.reconnect_count = 3
