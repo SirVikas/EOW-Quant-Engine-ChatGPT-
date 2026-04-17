@@ -759,11 +759,24 @@ def _resolve_boot_deployability(
     )
     status = "READY" if is_ready else "NOT_READY"
 
+    # With validated indicators, a zero RR-edge means no proven trading edge
+    # yet, so boot deployability must remain hard-blocked at 0.
+    if indicators_state == "VALIDATED" and rr_edge_score <= 0:
+        return 0.0, "NOT_READY"
+
     # WARMING_UP is healthy — indicators are filling and will auto-validate.
     # Only cap score when no market data whatsoever has been received.
     if indicators_state == "PENDING_RUNTIME_VALIDATION":
         deployability_score = min(deployability_score, 40.0)
         status = "NOT_READY"
+    elif indicators_state == "WARMING_UP":
+        # Warm-up means ticks are flowing and indicator buffers are filling.
+        # If infra pillars are healthy, expose an "IMPROVING" floor so boot
+        # status doesn't look degraded purely due to early RR-edge sparsity.
+        if network_score >= 25 and database_score >= 15:
+            deployability_score = max(deployability_score, 60.0)
+            if status != "READY":
+                status = "IMPROVING"
 
     return round(float(deployability_score), 1), status
 
