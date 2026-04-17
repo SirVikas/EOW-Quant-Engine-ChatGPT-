@@ -21,10 +21,10 @@ from loguru import logger
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
 PROFIT_FACTOR_MIN  = 1.0     # below this PF → reduce frequency
-FEE_RATIO_MAX      = 0.20    # fees as fraction of gross TP profit (20%)
-FREQ_REDUCE_MULT   = 0.50    # confidence multiplier when PF < 1 (halves trade rate)
-MIN_TRADES_FOR_PF  = 10      # minimum trades before PF gate activates
-MAX_CONSEC_LOSSES  = 4       # hard-stop threshold after repeated losses
+FEE_RATIO_MAX      = 0.35    # raised from 0.20 — allows larger ATR-scaled stops
+FREQ_REDUCE_MULT   = 0.80    # gentle 20% reduction instead of 50% halving
+MIN_TRADES_FOR_PF  = 30      # need 30 trades before PF gate activates (not 10)
+MAX_CONSEC_LOSSES  = 8       # hard-stop only after 8 consecutive losses (not 4)
 
 
 class ProfitGuard:
