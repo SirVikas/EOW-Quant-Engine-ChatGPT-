@@ -97,8 +97,18 @@ def risk_of_ruin(
 
     Returns a value in [0, 100].
     """
-    if not (0.0 < win_rate < 1.0) or avg_r_win <= 0 or avg_r_loss <= 0:
-        return 100.0
+    max_ror = 99.99  # UI/ops-safe cap: avoid sticky 100.00% display lock.
+
+    # Boundary handling:
+    # - 100% win-rate cannot imply 100% ruin; treat as 0% ruin.
+    # - 0% win-rate implies near-certain ruin (capped below 100 for diagnostics).
+    # - invalid payoff inputs remain near-certain ruin.
+    if win_rate >= 1.0:
+        return 0.0
+    if win_rate <= 0.0:
+        return max_ror
+    if avg_r_win <= 0 or avg_r_loss <= 0:
+        return max_ror
 
     p = win_rate
     q = 1.0 - p
@@ -107,11 +117,11 @@ def risk_of_ruin(
 
     expected_edge = p * W - q * L
     if expected_edge <= 0:
-        return 100.0
+        return max_ror
 
     total = p * W + q * L
     if total <= 0:
-        return 100.0
+        return max_ror
 
     edge_ratio = expected_edge / total          # normalised edge in (-1, 1)
     base       = (1.0 - edge_ratio) / (1.0 + edge_ratio)
@@ -120,7 +130,7 @@ def risk_of_ruin(
         return 0.0
 
     ror = base ** account_units
-    return round(min(ror * 100.0, 100.0), 4)
+    return round(min(ror * 100.0, max_ror), 4)
 
 
 # ── Geometric vs Linear Growth ────────────────────────────────────────────────

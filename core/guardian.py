@@ -93,19 +93,26 @@ class VetoEvent:
 def _estimate_ror(win_rate: float, avg_r_win: float, avg_r_loss: float,
                   account_units: int = 20) -> float:
     """Gambler's-ruin RoR estimate (mirrors analytics.risk_of_ruin)."""
-    if not (0.0 < win_rate < 1.0) or avg_r_win <= 0 or avg_r_loss <= 0:
-        return 100.0
+    max_ror = 99.99
+    if win_rate >= 1.0:
+        return 0.0
+    if win_rate <= 0.0:
+        return max_ror
+    if avg_r_win <= 0 or avg_r_loss <= 0:
+        return max_ror
     p = win_rate
     q = 1.0 - p
     edge = p * avg_r_win - q * avg_r_loss
     if edge <= 0:
-        return 100.0
+        return max_ror
     total = p * avg_r_win + q * avg_r_loss
+    if total <= 0:
+        return max_ror
     edge_ratio = edge / total
     base = (1.0 - edge_ratio) / (1.0 + edge_ratio)
     if base <= 0:
         return 0.0
-    return round(min(base ** account_units * 100.0, 100.0), 4)
+    return round(min(base ** account_units * 100.0, max_ror), 4)
 
 
 # ── GuardianLogic ─────────────────────────────────────────────────────────────
