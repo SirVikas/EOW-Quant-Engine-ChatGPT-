@@ -176,6 +176,7 @@ def deployability_index(
     genome_state: dict,
     redis_ok: bool = False,
     persistence_ok: bool = True,
+    runtime_rr: Optional[dict] = None,
 ) -> dict:
     """
     Composite 0-100 score across three pillars:
@@ -241,6 +242,15 @@ def deployability_index(
         last_promo = [p for p in promotion_log if p.get("decision") == "PROMOTED"]
         if last_promo:
             avg_r = last_promo[-1].get("avg_r_multiple", 0.0)
+    # Runtime fallback: use live closed-trade R profile when no promoted genome
+    # exists yet. This prevents RR Edge from being pinned to 0 during valid
+    # warmup sessions where evolution is still accumulating data.
+    rr_runtime = runtime_rr or {}
+    runtime_avg_r = float(rr_runtime.get("avg_r_multiple", 0.0) or 0.0)
+    runtime_trades = int(rr_runtime.get("trades", 0) or 0)
+    runtime_wr = float(rr_runtime.get("win_rate", 0.0) or 0.0)
+    if avg_r <= 0 and runtime_trades >= 10:
+        avg_r = runtime_avg_r
 
     if avg_r >= 0.50:
         rr_score += 15
@@ -256,7 +266,7 @@ def deployability_index(
 
     # win_rate from genome (genome doesn't track live win_rate directly, use pnl session if accessible)
     gen = genome_state.get("generation", 0)
-    if gen > 0:
+    if gen > 0 or (runtime_trades >= 20 and runtime_wr >= 0.50):
         rr_score += 10   # genome has run at least one generation
 
     breakdown["rr_edge"] = {
@@ -264,6 +274,11 @@ def deployability_index(
         "avg_r_multiple": round(avg_r, 4),
         "oos_pf_pass": oos_pass,
         "genome_generation": gen,
+        "runtime_fallback": {
+            "trades": runtime_trades,
+            "win_rate": round(runtime_wr, 4),
+            "avg_r_multiple": round(runtime_avg_r, 4),
+        },
     }
     score += rr_score
 
@@ -411,16 +426,27 @@ def compute_full_analytics(
     avg_r_win  = statistics.mean([r for r in valid_r if r > 0]) if [r for r in valid_r if r > 0] else 1.0
     avg_r_loss = statistics.mean([abs(r) for r in valid_r if r < 0]) if [r for r in valid_r if r < 0] else 1.0
 
-    ror    = risk_of_ruin(win_rate, avg_r_win, avg_r_loss, account_units=20)
+    # During very early runtime, win_rate / R stats are not meaningful and used
+    # to produce false 100% RoR in the UI. Treat as "not enough evidence yet".
+    if len(nets) < 5 or len(valid_r) < 5:
+        ror = 0.0
+    else:
+        ror = risk_of_ruin(win_rate, avg_r_win, avg_r_loss, account_units=20)
     growth = geometric_mean_growth(
         valid_r[-100:] if len(valid_r) > 100 else valid_r,
         risk_fraction=0.01,
         initial_capital=initial_capital,
     )
+    runtime_rr = {
+        "avg_r_multiple": (sum(valid_r) / len(valid_r)) if valid_r else 0.0,
+        "win_rate": win_rate,
+        "trades": len(nets),
+    }
     deploy = deployability_index(
         healer_snapshot, lake_stats, genome_state,
         redis_ok=redis_ok,
         persistence_ok=persistence_ok,
+        runtime_rr=runtime_rr,
     )
     bench  = benchmark_comparison(nets, initial_capital, mdd_pct)
 
