@@ -433,9 +433,16 @@ def compute_full_analytics(
     mdd_pct = session_stats.get("max_drawdown_pct", 0.0)
     calmar  = calmar_ratio(nets, initial_capital, mdd_pct)
 
-    win_rate   = session_stats.get("win_rate", 0.0) / 100.0  # convert % → fraction
-    avg_r_win  = statistics.mean([r for r in valid_r if r > 0]) if [r for r in valid_r if r > 0] else 1.0
-    avg_r_loss = statistics.mean([abs(r) for r in valid_r if r < 0]) if [r for r in valid_r if r < 0] else 1.0
+    # Use only non-zero R trades for RoR math so breakeven/invalid-R records
+    # don't dilute win-rate and falsely imply 100% ruin.
+    wins_valid = [r for r in valid_r if r > 0]
+    losses_valid = [r for r in valid_r if r < 0]
+    if valid_r:
+        win_rate = len(wins_valid) / len(valid_r)
+    else:
+        win_rate = session_stats.get("win_rate", 0.0) / 100.0  # convert % → fraction
+    avg_r_win  = statistics.mean(wins_valid) if wins_valid else 1.0
+    avg_r_loss = statistics.mean([abs(r) for r in losses_valid]) if losses_valid else 1.0
 
     # During very early runtime, win_rate / R stats are not meaningful and used
     # to produce false 100% RoR in the UI. Treat as "not enough evidence yet".
