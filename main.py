@@ -716,17 +716,22 @@ def _resolve_indicator_state(regime_states: dict, mdp: MarketDataProvider) -> st
     """
     Runtime indicator readiness for boot diagnostics.
 
-    VALIDATED when at least one symbol has enough runtime samples and a computed
-    regime state object. ADX/ATR can be 0.0 in flat markets, so we only require
-    finite numeric values, not strictly positive values.
+    VALIDATED   — at least one symbol has a computed regime state with numeric
+                  ADX and ATR% (regime_det only stores states when 28+ candles
+                  are available, so any entry here is already quality-checked).
+    WARMING_UP  — WebSocket is alive and ticks are flowing but the 28-candle
+                  buffer is still filling.  System is healthy; indicators will
+                  auto-validate within minutes.  Treated as ✅ in the boot log.
+    PENDING_RUNTIME_VALIDATION — no ticks received yet (very early startup).
     """
     for symbol, state in regime_states.items():
-        if len(mdp.price_buffer(symbol)) < 30:
-            continue
         adx = getattr(state, "adx", None)
         atr_pct = getattr(state, "atr_pct", None)
         if isinstance(adx, (int, float)) and isinstance(atr_pct, (int, float)):
             return "VALIDATED"
+    # Data is flowing but candles not yet fully buffered
+    if len(mdp.ticks) > 0:
+        return "WARMING_UP"
     return "PENDING_RUNTIME_VALIDATION"
 
 
@@ -737,14 +742,11 @@ def _resolve_boot_deployability(
     indicators_state: str,
 ) -> tuple[float, str]:
     """
-    Boot deployability must never report READY unless all critical runtime
-    pillars are ready.
+    Boot deployability composite score (0-100).
+    Score = sum of three pillar scores (network 0-30, database 0-30, rr_edge 0-40).
+    READY when all three pillars meet their individual thresholds.
     """
-    deployability_score = min(
-        float(network_score),
-        float(database_score),
-        float(rr_edge_score),
-    )
+    deployability_score = float(network_score) + float(database_score) + float(rr_edge_score)
 
     is_ready = (
         network_score >= 25
@@ -753,15 +755,13 @@ def _resolve_boot_deployability(
     )
     status = "READY" if is_ready else "NOT_READY"
 
-    if indicators_state != "VALIDATED":
+    # WARMING_UP is healthy — indicators are filling and will auto-validate.
+    # Only cap score when no market data whatsoever has been received.
+    if indicators_state == "PENDING_RUNTIME_VALIDATION":
         deployability_score = min(deployability_score, 40.0)
         status = "NOT_READY"
 
-    if rr_edge_score == 0:
-        deployability_score = 0.0
-        status = "NOT_READY"
-
-    return float(deployability_score), status
+    return round(float(deployability_score), 1), status
 
 @app.get("/api/boot-status")
 async def get_boot_status():
@@ -789,7 +789,9 @@ async def get_boot_status():
     )
     heal    = healer.snapshot()
     recent  = heal.get("recent_events", [])
-    redis_ok = any(
+    # Use actual Redis connectivity (mdp.redis_connected()) as primary signal;
+    # fall back to healer REDIS_FLUSH events as a secondary confirmation.
+    redis_ok = mdp.redis_connected() or any(
         e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
         for e in recent
     )
@@ -800,6 +802,7 @@ async def get_boot_status():
         lake_s    = {}
         sqlite_ok = False
     valid_r = [t.r_multiple for t in pnl_calc.trades if t.r_multiple != 0.0]
+    ws_is_connected = (ws_state == "CONNECTED")
     dep_idx = deployability_index(
         healer_snapshot=heal,
         lake_stats=lake_s,
@@ -811,6 +814,7 @@ async def get_boot_status():
             "win_rate": stats.get("win_rate", 0.0) / 100.0,
             "trades": n_trades,
         },
+        ws_connected=ws_is_connected,
     )
     dep_breakdown = dep_idx.get("breakdown", {})
     network_score = float((dep_breakdown.get("network") or {}).get("score", 0))

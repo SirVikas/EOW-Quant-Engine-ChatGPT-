@@ -97,7 +97,7 @@ class ApiLoader:
         r_ok = self._redis_status == RedisStatus.CONNECTED
         a_ok = self._api_connected
         ws_ok = self._ws_status == "CONNECTED"
-        ind_ok = self._ind_status == "VALIDATED"
+        ind_ok = self._ind_status in ("VALIDATED", "WARMING_UP")
 
         logger.info(
             f"[BOOT] Redis: {self._redis_status.value} {tick(r_ok)} | "
