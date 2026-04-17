@@ -309,10 +309,18 @@ class MarketDataProvider:
                 self._last_ws_error = str(exc)
                 jitter = random.uniform(0, backoff * 0.3)
                 delay  = backoff + jitter
-                logger.warning(
-                    f"[MDP] WS error: {exc}. "
-                    f"Reconnecting in {delay:.1f}s (backoff={backoff}s)…"
-                )
+                msg = str(exc)
+                # Expected during intentional close/reconnect races on some platforms.
+                if "sent 1000 (OK); no close frame received" in msg:
+                    logger.debug(
+                        f"[MDP] WS close-race during reconnect: {msg}. "
+                        f"Retrying in {delay:.1f}s (backoff={backoff}s)…"
+                    )
+                else:
+                    logger.warning(
+                        f"[MDP] WS error: {msg}. "
+                        f"Reconnecting in {delay:.1f}s (backoff={backoff}s)…"
+                    )
                 await asyncio.sleep(delay)
                 backoff = min(backoff * 2, 60)
 
