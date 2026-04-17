@@ -771,9 +771,9 @@ def _resolve_boot_deployability(
         status = "NOT_READY"
     elif indicators_state == "WARMING_UP":
         # Warm-up means ticks are flowing and indicator buffers are filling.
-        # If infra pillars are healthy, expose an "IMPROVING" floor so boot
-        # status doesn't look degraded purely due to early RR-edge sparsity.
-        if network_score >= 25 and database_score >= 15:
+        # Use relaxed infra gates at boot so healthy live flow is reflected as
+        # IMPROVING (not NOT_READY) while RR-edge is still building from zero.
+        if network_score >= 20 and database_score >= 10:
             deployability_score = max(deployability_score, 60.0)
             if status != "READY":
                 status = "IMPROVING"
