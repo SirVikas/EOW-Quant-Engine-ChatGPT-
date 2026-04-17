@@ -81,6 +81,13 @@ class ApiLoader:
         self._deployability_score = max(0.0, min(100.0, float(score)))
         self._deployability_status = str(status or "NOT_READY")
 
+    def set_runtime_status(self, websocket: str, indicators: str) -> None:
+        """
+        Keep loader summary aligned with live runtime checks.
+        """
+        self._ws_status = str(websocket or self._ws_status)
+        self._ind_status = str(indicators or self._ind_status)
+
     # ── Internals ─────────────────────────────────────────────────────────────
 
     def _print_boot_lines(self):
