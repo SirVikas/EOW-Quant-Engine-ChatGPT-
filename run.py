@@ -193,7 +193,7 @@ def print_boot_status():
         print(
             f"    Redis: {C}{redis}{NC} {tk(redis=='CONNECTED')}  |  "
             f"WebSocket: {C}{ws}{NC} {tk(ws=='CONNECTED' or ws=='STABLE')}  |  "
-            f"Indicators: {C}{ind}{NC} {tk(ind=='VALIDATED')}"
+            f"Indicators: {C}{ind}{NC} {tk(ind in ('VALIDATED', 'WARMING_UP'))}"
         )
         print(
             f"    Strategy Engine: {C}{strat}{NC} {tk(strat=='ACTIVE')}  |  "
