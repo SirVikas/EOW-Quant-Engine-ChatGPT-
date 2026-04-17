@@ -1,12 +1,16 @@
 """
-EOW Quant Engine — Signal Quality Filter  (FTD-REF-023 + FTD-REF-024 — Adaptive)
+EOW Quant Engine — Signal Quality Filter  (FTD-REF-023 + FTD-REF-024 + FTD-REF-025)
 High-quality trade gate with per-regime adaptive thresholds.
 
 Static thresholds are replaced by regime-aware ones:
   TRENDING:             RR ≥ 1.4  confidence ≥ 0.50
-  MEAN_REVERTING:       RR ≥ 1.2  confidence ≥ 0.45
-  VOLATILITY_EXPANSION: RR ≥ 1.6  confidence ≥ 0.55
-  UNKNOWN / default:    RR ≥ 1.8  confidence ≥ 0.60  (conservative)
+  MEAN_REVERTING:       RR ≥ 1.1  confidence ≥ 0.40
+  VOLATILITY_EXPANSION: RR ≥ 1.5  confidence ≥ 0.50
+  UNKNOWN / default:    RR ≥ 1.4  confidence ≥ 0.45  (matches TRENDING — default is TrendFollowing)
+
+UNKNOWN uses the same bar as TRENDING because the engine defaults to TrendFollowing
+for unclassified regimes. Using a stricter threshold for UNKNOWN prevents all trading
+during warmup (when all regimes read UNKNOWN for the first 10+ minutes).
 
 A `relaxation_factor` (0.8–1.0) from TradeFrequency can lower effective
 thresholds when the engine has been in a dry spell (no trades).
@@ -14,9 +18,11 @@ thresholds when the engine has been in a dry spell (no trades).
 FTD-REF-024 — Edge gate (applied first):
   expected_edge < 0 → reject immediately; strategy has negative expectancy
   for this regime (data-driven kill — bypasses all other checks).
+  NOTE: only applied when EdgeEngine has ≥ MIN_TRADES of data. With no data,
+  expected_edge defaults to 0.0 which does NOT trigger this gate.
 
 Protective pause:
-  3 consecutive losses on any symbol → 60-min pause for that symbol
+  3 consecutive losses on any symbol → 30-min pause for that symbol
 """
 from __future__ import annotations
 
@@ -31,15 +37,15 @@ from loguru import logger
 # Keys must match Regime.value strings
 _REGIME_RR: Dict[str, float] = {
     "TRENDING":             1.4,
-    "MEAN_REVERTING":       1.2,
-    "VOLATILITY_EXPANSION": 1.6,
-    "UNKNOWN":              1.8,   # conservative fallback
+    "MEAN_REVERTING":       1.1,   # relaxed: high WR compensates lower R
+    "VOLATILITY_EXPANSION": 1.5,   # reduced from 1.6 (VE strategy RR ≈ 1.5)
+    "UNKNOWN":              1.4,   # matches TRENDING (TrendFollowing is UNKNOWN default)
 }
 _REGIME_CONF: Dict[str, float] = {
     "TRENDING":             0.50,
-    "MEAN_REVERTING":       0.45,
-    "VOLATILITY_EXPANSION": 0.55,
-    "UNKNOWN":              0.60,
+    "MEAN_REVERTING":       0.40,  # relaxed from 0.45
+    "VOLATILITY_EXPANSION": 0.50,  # relaxed from 0.55
+    "UNKNOWN":              0.45,  # relaxed from 0.60 (was blocking warmup trading)
 }
 
 # ── Fixed thresholds (regime-independent) ─────────────────────────────────────
@@ -48,7 +54,7 @@ MAX_COST_FRACTION  = 0.30   # cost < 30% of gross TP
 
 # ── Consecutive-loss protection ───────────────────────────────────────────────
 MAX_CONSECUTIVE_LOSSES = 3
-PAUSE_MINUTES          = 60
+PAUSE_MINUTES          = 30   # reduced from 60 — allow faster recovery
 
 
 @dataclass
@@ -114,8 +120,8 @@ class SignalFilter:
         min_rr   = _REGIME_RR.get(regime,   _REGIME_RR["UNKNOWN"])   * relaxation_factor
         min_conf = _REGIME_CONF.get(regime, _REGIME_CONF["UNKNOWN"]) * relaxation_factor
         # Never relax below absolute floor values
-        min_rr   = max(min_rr,   1.0)
-        min_conf = max(min_conf, 0.35)
+        min_rr   = max(min_rr,   0.90)
+        min_conf = max(min_conf, 0.30)
 
         # 3. RR gate
         gross_tp = abs(take_profit - entry)

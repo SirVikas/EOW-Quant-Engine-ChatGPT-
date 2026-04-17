@@ -66,19 +66,19 @@ class EngineConfig(BaseSettings):
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
 
     # ── Genome Engine ────────────────────────────────────────────────────────
-    GENOME_CYCLE_MINUTES: int = 5          # Mutation cycle interval (was 15 — frequent calibration)
+    GENOME_CYCLE_MINUTES: int = 3          # Reduced 5→3: faster evolution cycles
     GENOME_POPULATION: int = 20            # Shadow strategies per cycle
     GENOME_LOOKBACK_HOURS: int = 24        # Backtest window (fresh data)
-    GENOME_PROMOTE_WIN_RATE: float = 0.55  # Min win-rate to promote
-    GENOME_PROMOTE_PF: float = 1.5         # Min profit-factor to promote
+    GENOME_PROMOTE_WIN_RATE: float = 0.50  # Reduced 0.55→0.50: achievable promotion gate
+    GENOME_PROMOTE_PF: float = 1.2         # Reduced 1.5→1.2: achievable promotion gate
     # Phase 3 — OOS Validation & Execution-Cost Gating
     GENOME_OOS_SPLIT_RATIO: float = 0.70       # 70% candles for training, 30% held-out OOS test
     GENOME_OOS_MIN_PF: float = 1.0             # OOS profit-factor floor
-    GENOME_OVERFITTING_MAX_RATIO: float = 2.0  # Reject if train_pf / oos_pf exceeds this
-    GENOME_MIN_AVG_R: float = 0.35             # Min net average R-multiple (was 0.50 — relaxed gate)
+    GENOME_OVERFITTING_MAX_RATIO: float = 2.5  # Relaxed 2.0→2.5: avoid over-penalising good fits
+    GENOME_MIN_AVG_R: float = 0.20             # Relaxed 0.35→0.20: allow early-stage promotions
 
     # ── Self-Healing ─────────────────────────────────────────────────────────
-    HEAL_INTERVAL_SECONDS: int = 60
+    HEAL_INTERVAL_SECONDS: int = 45       # Reduced 60→45: faster ping accumulation for Network score
     MAX_RECONNECT_ATTEMPTS: int = 10
 
     # ── Regime Detection ─────────────────────────────────────────────────────
@@ -93,10 +93,10 @@ class EngineConfig(BaseSettings):
     EMA_SLOW: int = 50                    # Raised 21→50: stronger trend confirmation
     EMA_TREND: int = 100                  # NEW: macro trend direction filter (price vs EMA100)
     ATR_PERIOD: int = 14
-    ATR_MULT_SL: float = 2.0              # Tightened 2.5→2.0: smaller loss per loser
-    ATR_MULT_TP: float = 3.0              # Lowered 4.5→3.0: more achievable targets
+    ATR_MULT_SL: float = 1.5              # Tightened 2.0→1.5: tighter stop, higher RR ratio
+    ATR_MULT_TP: float = 4.0              # Raised 3.0→4.0: gross RR = 4.0/1.5 = 2.67 — passes all regimes
     BB_PERIOD: int = 20
-    BB_STD: float = 2.5                   # Widened 2.2→2.5: only trade extreme BB deviations
+    BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

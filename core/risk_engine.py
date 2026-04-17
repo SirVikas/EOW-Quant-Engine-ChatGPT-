@@ -1,12 +1,12 @@
 """
-EOW Quant Engine — Risk Engine  (FTD-REF-023 + FTD-REF-024 upgraded)
+EOW Quant Engine — Risk Engine  (FTD-REF-023 + FTD-REF-024 + FTD-REF-025)
 Institutional-grade daily and portfolio risk controls.
 
 Enforces:
-  • Risk per trade:    0.5 – 1.0% of current equity
-  • Max daily loss:    3% of equity at day-start → halt new entries
+  • Risk per trade:    0.5 – 1.5% of current equity
+  • Max daily loss:    5% of equity at day-start → halt new entries
   • Max drawdown:      15% → halt new entries
-  • Max trades/day:    6 (prevents over-trading)
+  • Max trades/day:    12 (balanced opportunity window)
 
 Dynamic controls (FTD-REF-023):
   • win_streak  ≥ 3  → increase position size by 20% (scale up winners)
@@ -18,6 +18,12 @@ Capital Preservation Mode — tiered DD cuts (FTD-REF-024):
   • 10% ≤ DD < 15%   → size_multiplier = 0.50 (reduce trading by 50%)
   •      DD ≥ 15%    → HALT new entries
   • Recovery < 5% DD → size_multiplier restored to 1.00 automatically
+
+Risk-of-Ruin (FTD-REF-025):
+  • RoR is an ADVISORY metric only — never a hard trade block.
+  • High RoR → position SIZE is reduced (not trading halted).
+  • Hard stops are DD and daily-loss limits only.
+  • This prevents a bad historical sample from locking the engine permanently.
 """
 from __future__ import annotations
 
@@ -31,12 +37,12 @@ from loguru import logger
 
 # ── Limits ────────────────────────────────────────────────────────────────────
 RISK_PCT_MIN        = 0.005   # 0.5% minimum risk per trade
-RISK_PCT_MAX        = 0.010   # 1.0% maximum risk per trade
-MAX_DAILY_LOSS_PCT  = 0.030   # 3% of equity-at-day-start → halt
-MAX_DRAWDOWN_PCT    = 0.150   # 15% peak-to-trough → halt (stricter than 20% kill-switch)
-MAX_TRADES_PER_DAY  = 6       # absolute daily trade cap
-MAX_RISK_OF_RUIN    = 0.30    # >30% risk-of-ruin → reduce size
-ROR_SIZE_REDUCTION  = 0.50    # halve size when RoR is elevated
+RISK_PCT_MAX        = 0.015   # 1.5% maximum risk per trade (increased for opportunity)
+MAX_DAILY_LOSS_PCT  = 0.050   # 5% of equity-at-day-start → halt (raised from 3%)
+MAX_DRAWDOWN_PCT    = 0.150   # 15% peak-to-trough → halt
+MAX_TRADES_PER_DAY  = 12      # daily trade cap (raised from 6)
+MAX_RISK_OF_RUIN    = 0.60    # RoR threshold for SIZE reduction only (not a trade block)
+ROR_SIZE_REDUCTION  = 0.65    # reduce to 65% size when RoR is elevated
 
 # ── Tiered DD size cuts (FTD-REF-024 Capital Preservation Mode) ───────────────
 SIZE_SOFT_CUT_AT    = 0.050   # 5% DD  → reduce to SIZE_SOFT_CUT_TO
@@ -138,19 +144,34 @@ class RiskEngine:
 
 
     def update_risk_of_ruin(self, risk_of_ruin: float):
-        """Update latest risk-of-ruin estimate (fraction 0.0-1.0)."""
+        """
+        Update latest risk-of-ruin estimate (fraction 0.0-1.0).
+        RoR is ADVISORY: it adjusts position size but never halts trading.
+        Size recovers automatically when RoR drops below threshold.
+        """
         self._state.risk_of_ruin = max(0.0, float(risk_of_ruin))
         if self._state.risk_of_ruin > MAX_RISK_OF_RUIN:
-            self._state.size_multiplier = min(self._state.size_multiplier, ROR_SIZE_REDUCTION)
-            logger.warning(
-                f"[RISK-ENG] High RoR={self._state.risk_of_ruin:.1%} "
-                f"→ reducing size to {self._state.size_multiplier:.0%}."
+            new_mult = min(self._state.size_multiplier, ROR_SIZE_REDUCTION)
+            if new_mult != self._state.size_multiplier:
+                self._state.size_multiplier = new_mult
+                logger.warning(
+                    f"[RISK-ENG] RoR={self._state.risk_of_ruin:.1%} > {MAX_RISK_OF_RUIN:.0%} "
+                    f"→ size reduced to {self._state.size_multiplier:.0%} (advisory)."
+                )
+        else:
+            # RoR returned to healthy range — size multiplier restored via DD tiering
+            logger.debug(
+                f"[RISK-ENG] RoR={self._state.risk_of_ruin:.1%} within limit — no size cut."
             )
 
     def check_new_trade(self) -> tuple[bool, str]:
         """
         Returns (allowed, reason).
         Call BEFORE submitting a new order.
+
+        Hard stops: engine halt, daily trade cap, daily loss limit, max drawdown.
+        RoR is ADVISORY only — it reduces position size but never blocks trading.
+        This prevents a stale bad-sample from permanently locking the engine.
         """
         if self._state.halted:
             return False, f"HALTED: {self._state.halt_reason}"
@@ -161,9 +182,6 @@ class RiskEngine:
         daily_loss_pct = self._daily_loss_pct()
         if daily_loss_pct >= MAX_DAILY_LOSS_PCT:
             return False, f"MAX_DAILY_LOSS({daily_loss_pct:.1%})"
-
-        if self._state.risk_of_ruin > MAX_RISK_OF_RUIN:
-            return False, f"HIGH_ROR({self._state.risk_of_ruin:.1%}>{MAX_RISK_OF_RUIN:.0%})"
 
         return True, ""
 
