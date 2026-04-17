@@ -45,6 +45,7 @@ MAX_HISTORY  = 200   # maximum errors kept in memory
 ERROR_THROTTLE: Dict[str, float] = {
     "DATA_001": 10.0,   # max 1 loguru line per 10 s  (FTD-REF-026)
 }
+CRITICAL_ERRORS = ["WS_002", "DATA_001"]
 
 
 # ── Built-in error catalogue ──────────────────────────────────────────────────
@@ -132,6 +133,7 @@ class ErrorRegistry:
         self._records:     Deque[ErrorRecord] = deque(maxlen=max_history)
         self._counts:      Dict[str, int]     = {}
         self._throttle_ts: Dict[str, float]   = {}  # FTD-REF-026: last loguru emit ts
+        self._health_penalty: int             = 0
 
     # ── Public ────────────────────────────────────────────────────────────────
 
@@ -166,6 +168,8 @@ class ErrorRegistry:
         )
         self._records.append(rec)
         self._counts[code] = self._counts.get(code, 0) + 1
+        if code in CRITICAL_ERRORS:
+            self._health_penalty += 10
 
         # FTD-REF-026: throttle — skip loguru emit if within throttle window.
         # Counts and records are always updated so summaries remain accurate.
@@ -213,6 +217,7 @@ class ErrorRegistry:
             "total_errors":  sum(self._counts.values()),
             "unique_codes":  len(self._counts),
             "counts":        self.counts(),
+            "health_penalty": self._health_penalty,
             "recent_5":      self.recent(5),
             "catalogue_size": len(ERROR_CATALOGUE),
         }

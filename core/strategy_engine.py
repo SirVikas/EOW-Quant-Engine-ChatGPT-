@@ -25,6 +25,7 @@ MIN_TRADES_FOR_WARN  = 10     # need this many trades before single-strategy war
 MIN_SIGNAL_RR        = 1.5
 MIN_SIGNAL_CONFIDENCE = 0.5
 BLOCKED_REGIMES      = {"UNSTABLE"}
+REQUIRED_CANDLE_MIN  = 50
 
 KNOWN_STRATEGIES: tuple = (
     "TrendFollowing",
@@ -87,6 +88,12 @@ class StrategyEngine:
         if confidence < MIN_SIGNAL_CONFIDENCE:
             return StrategyDecision(False, f"LOW_CONFIDENCE({confidence:.2f}<{MIN_SIGNAL_CONFIDENCE:.2f})")
         return StrategyDecision(True, "")
+
+    @staticmethod
+    def evaluate_data_sufficiency(candle_buffer: int, required_min: int = REQUIRED_CANDLE_MIN) -> str:
+        if candle_buffer < required_min:
+            return "NO_TRADE_DATA_INSUFFICIENT"
+        return "OK"
 
     def summary(self) -> dict:
         """Full summary dict suitable for the /api/strategy-usage endpoint."""

@@ -32,7 +32,7 @@ from core.vault           import VaultManager, WrongPassword, VaultNotConfigured
 from core.guardian        import GuardianLogic, AGGRESSION_PROFILES
 from core.security        import ensure_auth_ready_for_mode, require_roles
 from core.scorecard       import compute_scorecard
-from core.analytics       import compute_full_analytics
+from core.analytics       import compute_full_analytics, deployability_index
 from core.metrics_engine   import rolling_ratios
 from core.redis_health    import redis_health
 from core.ws_stabilizer   import WsStabilizer
@@ -207,11 +207,12 @@ async def on_tick(tick: Tick):
         return   # Only act on closed candles
 
     buf     = list(mdp.price_buffer(sym))
-    if len(buf) < 50:
+    data_gate = strategy_engine.evaluate_data_sufficiency(len(buf))
+    if data_gate != "OK":
         error_registry.log("DATA_001", symbol=sym, extra=f"buf={len(buf)}")  # FTD-REF-025
         _last_skip = {
             "ts": int(time.time() * 1000), "symbol": sym,
-            "reason": f"NO_TRADE_ZONE(INSUFFICIENT_BUFFER:{len(buf)})",
+            "reason": f"{data_gate}({len(buf)})",
         }
         return
 
@@ -726,27 +727,37 @@ def _resolve_indicator_state(regime_states: dict, mdp: MarketDataProvider) -> st
 
 
 def _resolve_boot_deployability(
-    live_score: float,
-    live_status: str,
-    redis_state: str,
-    ws_state: str,
+    network_score: float,
+    database_score: float,
+    rr_edge_score: float,
     indicators_state: str,
 ) -> tuple[float, str]:
     """
-    Boot deployability reflects operational readiness (infra + indicators) while
-    preserving live strategy score when it is already higher.
+    Boot deployability must never report READY unless all critical runtime
+    pillars are ready.
     """
-    runtime_ready = (
-        redis_state in {"CONNECTED", "NOT_AVAILABLE"}
-        and ws_state in {"CONNECTED", "CONNECTING", "RECONNECTING"}
-        and indicators_state in {"VALIDATED", "PENDING_RUNTIME_VALIDATION"}
+    deployability_score = min(
+        float(network_score),
+        float(database_score),
+        float(rr_edge_score),
     )
-    runtime_score = 100.0 if runtime_ready else 70.0
-    runtime_status = "READY" if runtime_ready else "IMPROVING"
 
-    if live_score >= runtime_score:
-        return float(live_score), live_status
-    return runtime_score, runtime_status
+    is_ready = (
+        network_score >= 25
+        and database_score >= 25
+        and rr_edge_score >= 30
+    )
+    status = "READY" if is_ready else "NOT_READY"
+
+    if indicators_state != "VALIDATED":
+        deployability_score = min(deployability_score, 40.0)
+        status = "NOT_READY"
+
+    if rr_edge_score == 0:
+        deployability_score = 0.0
+        status = "NOT_READY"
+
+    return float(deployability_score), status
 
 @app.get("/api/boot-status")
 async def get_boot_status():
@@ -756,15 +767,6 @@ async def get_boot_status():
     re_snap   = risk_engine.snapshot()
     stats     = pnl_calc.session_stats
     n_trades  = len(pnl_calc.trades)
-    dep_result = deployability_engine.compute(
-        trades       = n_trades,
-        sharpe       = stats.get("sharpe_ratio", 0.0),
-        sortino      = stats.get("sortino_ratio", 0.0),
-        win_rate     = stats.get("win_rate", 0.0),
-        max_drawdown = stats.get("max_drawdown_pct", 0.0) / 100,
-        risk_of_ruin = stats.get("risk_of_ruin", 0.0),
-        avg_r        = stats.get("avg_r_multiple", 0.0),
-    )
     infra = infra_health.snapshot()
     redis_state = infra.get("redis", _boot_status.get("redis", "NOT_AVAILABLE"))
     if mdp.redis_connected():
@@ -781,12 +783,41 @@ async def get_boot_status():
         regime_states=regime_det.all_states(),
         mdp=mdp,
     )
+    heal    = healer.snapshot()
+    recent  = heal.get("recent_events", [])
+    redis_ok = any(
+        e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
+        for e in recent
+    )
+    try:
+        lake_s    = data_lake.db_stats()
+        sqlite_ok = lake_s.get("trades", -1) >= 0
+    except Exception:
+        lake_s    = {}
+        sqlite_ok = False
+    dep_idx = deployability_index(
+        healer_snapshot=heal,
+        lake_stats=lake_s,
+        genome_state=genome.export_state(),
+        redis_ok=redis_ok,
+        persistence_ok=(redis_ok or sqlite_ok),
+    )
+    dep_breakdown = dep_idx.get("breakdown", {})
+    network_score = float((dep_breakdown.get("network") or {}).get("score", 0))
+    if live_stab.get("reconnect_count", 0) > 2:
+        network_score = max(0.0, network_score - 10.0)
+    database_score = float((dep_breakdown.get("database") or {}).get("score", 0))
+    rr_edge_score = float((dep_breakdown.get("rr_edge") or {}).get("score", 0))
+
     boot_deployability_score, boot_deployability_status = _resolve_boot_deployability(
-        live_score=dep_result.score,
-        live_status=dep_result.status,
-        redis_state=redis_state,
-        ws_state=ws_state,
+        network_score=network_score,
+        database_score=database_score,
+        rr_edge_score=rr_edge_score,
         indicators_state=indicators_state,
+    )
+    api_loader.set_deployability(
+        score=boot_deployability_score,
+        status=boot_deployability_status,
     )
 
     return {
@@ -802,14 +833,11 @@ async def get_boot_status():
         "deployability":   boot_deployability_status,
         "deployability_score": boot_deployability_score,
         "deployability_components": {
-            "sharpe_norm": dep_result.sharpe_norm,
-            "sortino_norm": dep_result.sortino_norm,
-            "win_rate_score": dep_result.win_rate_score,
-            "risk_ctrl_score": dep_result.risk_ctrl_score,
-            "dd_inverse": dep_result.dd_inverse,
-            "consistency_bonus": dep_result.consistency_bonus,
-            "warmup_mode": dep_result.warmup_mode,
-            "runtime_override": boot_deployability_score > dep_result.score,
+            "network_score": network_score,
+            "database_score": database_score,
+            "rr_edge_score": rr_edge_score,
+            "thresholds": {"network": 25, "database": 25, "rr_edge": 30},
+            "analytics_tier": dep_idx.get("tier", "NOT READY"),
         },
     }
 
