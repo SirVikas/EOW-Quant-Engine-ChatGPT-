@@ -45,8 +45,11 @@ def test_data_insufficient_returns_hard_block_reason():
 
 def test_boot_loader_summary_syncs_with_api_status_values():
     loader = ApiLoader()
+    loader.set_runtime_status(websocket="STABLE", indicators="VALIDATED")
     loader.set_deployability(score=37, status="NOT_READY")
     payload = loader.summary()
 
+    assert payload["websocket"] == "STABLE"
+    assert payload["indicators"] == "VALIDATED"
     assert payload["deployability"] == "NOT_READY"
     assert payload["deployability_score"] == 37

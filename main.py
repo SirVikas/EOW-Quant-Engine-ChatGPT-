@@ -825,10 +825,16 @@ async def get_boot_status():
         rr_edge_score=rr_edge_score,
         indicators_state=indicators_state,
     )
+    api_loader.set_runtime_status(
+        websocket=ws_state,
+        indicators=indicators_state,
+    )
     api_loader.set_deployability(
         score=boot_deployability_score,
         status=boot_deployability_status,
     )
+    _boot_status["websocket"] = ws_state
+    _boot_status["indicators"] = indicators_state
 
     return {
         **_boot_status,
