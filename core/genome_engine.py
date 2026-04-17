@@ -81,6 +81,11 @@ _STRATEGY_TARGET_REGIME: Dict[str, str] = {
     "VolatilityExpansion": "VOLATILE",
 }
 
+# Avoid noisy startup warnings when the market stream has not produced
+# any closed candles yet. If data is still missing after this grace window,
+# emit a warning so operators can investigate feed issues.
+_NO_CANDLE_WARNING_GRACE_CYCLES = 2
+
 
 # ── Data classes ─────────────────────────────────────────────────────────────
 
@@ -156,6 +161,8 @@ class GenomeEngine:
         self._candle_store:  Dict[str, List[dict]]     = {}  # symbol → candles
         self._running = False
         self._lock    = asyncio.Lock()
+        self._started_at_ms = int(time.time() * 1000)
+        self._last_no_candle_warning_ms = 0
         self._backtester = DeterministicBacktestEngine(
             fill=FillModelConfig(
                 taker_fee=cfg.TAKER_FEE,
@@ -180,6 +187,8 @@ class GenomeEngine:
 
     async def start(self):
         self._running = True
+        self._started_at_ms = int(time.time() * 1000)
+        self._last_no_candle_warning_ms = 0
         logger.info("[GENOME] Engine started.")
         while self._running:
             await asyncio.sleep(cfg.GENOME_CYCLE_MINUTES * 60)
@@ -196,7 +205,14 @@ class GenomeEngine:
         async with self._lock:
             symbols = list(self._candle_store.keys())
             if not symbols:
-                logger.warning("[GENOME] No candle data yet — skipping cycle.")
+                now_ms = int(time.time() * 1000)
+                cycle_ms = max(cfg.GENOME_CYCLE_MINUTES * 60 * 1000, 1)
+                grace_ms = cycle_ms * _NO_CANDLE_WARNING_GRACE_CYCLES
+                past_grace = (now_ms - self._started_at_ms) >= grace_ms
+                can_warn = (now_ms - self._last_no_candle_warning_ms) >= grace_ms
+                if past_grace and can_warn:
+                    logger.warning("[GENOME] No candle data yet — skipping cycle.")
+                    self._last_no_candle_warning_ms = now_ms
                 return
 
             # Sample up to 5 symbols and bucket them by recent market regime.
