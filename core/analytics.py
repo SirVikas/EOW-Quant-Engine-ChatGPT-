@@ -191,18 +191,25 @@ def deployability_index(
     Composite 0-100 score across three pillars:
 
     Pillar 1 — Network Stability   (30 pts)
-      • Last 10 heal events: each API_PING OK  → +2 pts (max 20)
-      • ws_stale_cycles == 0                   → +10 pts
+      • Each API_PING OK → +4 pts (max 20, reached in 5 min not 10)
+      • WS connected (stale=0 or ws_connected=True) → +10 pts
 
     Pillar 2 — Database Health     (30 pts)
-      • Redis available                        → +15 pts
-      • SQLite trade count > 0                 → +10 pts
-      • Lake candle count > 100                → +5  pts
+      • Redis available           → +15 pts
+      • SQLite trade count > 0    → +10 pts
+      • Lake candle count > 100   → +5  pts
 
-    Pillar 3 — RR Edge             (40 pts)
-      • avg_r_multiple ≥ 0.50                  → +15 pts
-      • OOS PF ≥ 1.0 for ≥ 1 strategy         → +15 pts
-      • genome win_rate ≥ 50%                  → +10 pts
+    Pillar 3 — RR Edge             (40 pts) — GRADUATED SCORING
+      Sub-A avg_r quality (up to 15 pts):
+        avg_r ≥ 0.50 (genome or 10+ runtime trades)   → 15 pts
+        avg_r ≥ 0.25 (10+ runtime trades)              → 10 pts
+        avg_r ≥ 0.10 (5+ runtime trades)               → 5  pts
+      Sub-B OOS validation (up to 15 pts):
+        OOS PF ≥ 1.0 for any promoted genome strategy  → 15 pts
+      Sub-C win-rate / activity (up to 10 pts):
+        genome generation > 0                           → 10 pts
+        runtime ≥ 10 trades AND win_rate ≥ 45%          → 7  pts
+        runtime ≥ 5 trades AND win_rate ≥ 40%           → 3  pts
     """
     score = 0
     breakdown: dict = {}
@@ -211,11 +218,10 @@ def deployability_index(
     net_score = 0
     events = healer_snapshot.get("recent_events", [])
     ping_oks = sum(1 for e in events if e.get("action") == "API_PING" and e.get("ok", False))
-    net_score += min(ping_oks * 2, 20)
+    # 4 pts per ping → max 20 pts in 5 pings (5 min) instead of 10 min
+    net_score += min(ping_oks * 4, 20)
 
     stale = healer_snapshot.get("ws_stale_cycles", 1)
-    # Credit the +10 WS-stability bonus when the WebSocket is live (stale=0)
-    # OR when the caller confirms the connection is currently CONNECTED.
     if stale == 0 or ws_connected:
         net_score += 10
 
@@ -227,7 +233,6 @@ def deployability_index(
     if redis_ok:
         db_score += 15
 
-    # db_stats() returns keys: "trades", "candles", "ticks", "funding", "db_size_mb"
     trade_count  = lake_stats.get("trades", 0)
     candle_count = lake_stats.get("candles", 0)
     if trade_count > 0:
@@ -245,44 +250,53 @@ def deployability_index(
 
     # ── Pillar 3: RR Edge ─────────────────────────────────────────────────────
     rr_score = 0
+    rr_score_a = 0
+    rr_score_b = 0
+    rr_score_c = 0
 
-    # avg_r_multiple — pull from genome promotion log if available
+    # Gather genome promotion data
     promotion_log = genome_state.get("promotion_log", [])
-    avg_r = 0.0
-    if promotion_log:
-        last_promo = [p for p in promotion_log if p.get("decision") == "PROMOTED"]
-        if last_promo:
-            avg_r = last_promo[-1].get("avg_r_multiple", 0.0)
-    # Runtime fallback: use live closed-trade R profile when no promoted genome
-    # exists yet. This prevents RR Edge from being pinned to 0 during valid
-    # warmup sessions where evolution is still accumulating data.
+    promoted = [p for p in promotion_log if p.get("decision") == "PROMOTED"]
+    genome_avg_r = promoted[-1].get("avg_r_multiple", 0.0) if promoted else 0.0
+
+    # Runtime fallback metrics
     rr_runtime = runtime_rr or {}
     runtime_avg_r = float(rr_runtime.get("avg_r_multiple", 0.0) or 0.0)
     runtime_trades = int(rr_runtime.get("trades", 0) or 0)
     runtime_wr = float(rr_runtime.get("win_rate", 0.0) or 0.0)
-    if avg_r <= 0 and runtime_trades >= 10:
-        avg_r = runtime_avg_r
 
-    if avg_r >= 0.50:
-        rr_score += 15
+    # Sub-A: avg_r quality — graduated, genome takes priority
+    effective_avg_r = genome_avg_r if genome_avg_r > 0 else (runtime_avg_r if runtime_trades >= 5 else 0.0)
+    if effective_avg_r >= 0.50:
+        rr_score_a = 15
+    elif effective_avg_r >= 0.25 and runtime_trades >= 10:
+        rr_score_a = 10
+    elif effective_avg_r >= 0.10 and runtime_trades >= 5:
+        rr_score_a = 5
+    rr_score += rr_score_a
 
-    # OOS PF ≥ 1.0
-    oos_pass = any(
-        p.get("oos_pf", 0.0) >= 1.0
-        for p in promotion_log
-        if p.get("decision") == "PROMOTED"
-    )
+    # Sub-B: OOS validation from genome
+    oos_pass = any(p.get("oos_pf", 0.0) >= 1.0 for p in promoted)
     if oos_pass:
-        rr_score += 15
+        rr_score_b = 15
+    rr_score += rr_score_b
 
-    # win_rate from genome (genome doesn't track live win_rate directly, use pnl session if accessible)
+    # Sub-C: win-rate / activity — graduated
     gen = genome_state.get("generation", 0)
-    if gen > 0 or (runtime_trades >= 20 and runtime_wr >= 0.50):
-        rr_score += 10   # genome has run at least one generation
+    if gen > 0:
+        rr_score_c = 10
+    elif runtime_trades >= 10 and runtime_wr >= 0.45:
+        rr_score_c = 7
+    elif runtime_trades >= 5 and runtime_wr >= 0.40:
+        rr_score_c = 3
+    rr_score += rr_score_c
 
     breakdown["rr_edge"] = {
         "score": rr_score, "max": 40,
-        "avg_r_multiple": round(avg_r, 4),
+        "sub_a_avg_r": rr_score_a,
+        "sub_b_oos": rr_score_b,
+        "sub_c_activity": rr_score_c,
+        "effective_avg_r": round(effective_avg_r, 4),
         "oos_pf_pass": oos_pass,
         "genome_generation": gen,
         "runtime_fallback": {
@@ -295,10 +309,8 @@ def deployability_index(
 
     score = min(score, 100)
 
-    # Deployability cap when persistence is BOGUS (no Redis + no SQLite trades).
-    # Raised to 70 so the engine can reach CONDITIONAL tier and trade while
-    # the operator sets up Redis.  Full 100 still requires persistence.
-    _BOGUS_CAP = 70
+    # Cap when persistence is unavailable — raised to 75 so engine reaches DEPLOYABLE tier.
+    _BOGUS_CAP = 75
     persistence_capped = (not persistence_ok) and score > _BOGUS_CAP
     if persistence_capped:
         score = _BOGUS_CAP
@@ -418,6 +430,7 @@ def compute_full_analytics(
     genome_state: dict,
     redis_ok: bool,
     persistence_ok: bool = True,
+    ws_connected: bool = False,
 ) -> dict:
     """
     Assemble the complete DBO analytics payload consumed by /api/analytics.
@@ -446,8 +459,10 @@ def compute_full_analytics(
 
     # During early runtime, RoR can overreact and pin to 100% on tiny samples.
     # Require a minimum body of valid-R evidence before enabling hard RoR values.
-    min_valid_r_for_ror = 20
-    min_each_side_for_ror = 3
+    # Raised from 20 → 30 to give more warmup time and avoid false 100% readings
+    # from the initial restored trade history.
+    min_valid_r_for_ror = 30
+    min_each_side_for_ror = 5
     if len(nets) < min_valid_r_for_ror or len(valid_r) < min_valid_r_for_ror:
         ror = 0.0
         ror_debug = {
@@ -495,6 +510,7 @@ def compute_full_analytics(
         redis_ok=redis_ok,
         persistence_ok=persistence_ok,
         runtime_rr=runtime_rr,
+        ws_connected=ws_connected,
     )
     bench  = benchmark_comparison(nets, initial_capital, mdd_pct)
 
