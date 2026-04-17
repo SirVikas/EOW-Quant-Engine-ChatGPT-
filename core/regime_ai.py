@@ -46,15 +46,15 @@ RSI_SLOPE_BULLISH     =  0.5
 MIN_CONFIDENCE        =  0.30   # below this → demote to UNKNOWN
 
 # ── Fallback & stability ──────────────────────────────────────────────────────
-FALLBACK_CONF_PENALTY = 0.70   # multiply confidence by this on UNKNOWN fallback
+FALLBACK_CONF_PENALTY = 0.90   # light penalty on UNKNOWN fallback to keep trading
 ATR_HIGH_THRESH       =  0.50  # ATR% above this → high volatility regime
 ATR_LOW_THRESH        =  0.10  # ATR% below this → low volatility (cautious)
 STAB_BOOST            =  1.15  # confidence multiplier in high-vol environment
 STAB_REDUCE           =  0.85  # confidence multiplier in low-vol environment
 
 # ── FTD-REF-026: trade block gates ───────────────────────────────────────────
-MIN_CONFIDENCE_TRADE  =  0.50  # confidence below this → block_trade = True
-MIN_STABILITY_TICKS   =  3     # regime must hold for ≥ this many ticks
+MIN_CONFIDENCE_TRADE  =  0.25  # relaxed: block only truly uncertain signals
+MIN_STABILITY_TICKS   =  1     # allow trading from first tick (warmup-safe)
 
 
 @dataclass

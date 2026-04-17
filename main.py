@@ -238,14 +238,12 @@ async def on_tick(tick: Tick):
     # FTD-REF-019: debounce — only log on genuine regime transitions
     regime_debounce.push(sym, regime, state=regime_det.state(sym))
 
-    # 4. Get appropriate strategy — skip if warmup incomplete
-    if regime.value == "UNKNOWN":
-        return   # need 28+ candles before trading
-
+    # 4. Get appropriate strategy — UNKNOWN defaults to TrendFollowing during warmup
     strategy_type = {
         "TRENDING":             "TrendFollowing",
         "MEAN_REVERTING":       "MeanReversion",
         "VOLATILITY_EXPANSION": "VolatilityExpansion",
+        "UNKNOWN":              "TrendFollowing",
     }.get(regime.value, "TrendFollowing")
 
     dna      = genome.active_dna.get(strategy_type, {})
@@ -820,9 +818,13 @@ async def get_boot_status():
         sqlite_ok = False
     valid_r = [t.r_multiple for t in pnl_calc.trades if t.r_multiple != 0.0]
     ws_is_connected = (ws_state == "CONNECTED")
+    # Enrich lake_s with in-memory trade count when SQLite hasn't persisted yet
+    merged_lake_s = dict(lake_s)
+    if merged_lake_s.get("trades", 0) == 0 and n_trades > 0:
+        merged_lake_s["trades"] = n_trades
     dep_idx = deployability_index(
         healer_snapshot=heal,
-        lake_stats=lake_s,
+        lake_stats=merged_lake_s,
         genome_state=genome.export_state(),
         redis_ok=redis_ok,
         persistence_ok=(redis_ok or sqlite_ok),
@@ -1069,6 +1071,7 @@ async def get_analytics():
         genome_state=genome.export_state(),
         redis_ok=redis_ok,
         persistence_ok=persistence_ok,
+        ws_connected=(mdp.websocket_state() == "CONNECTED"),
     )
     corrected = rolling_ratios(
         pnl_values=[t.get("net_pnl", 0.0) for t in trade_dicts],
