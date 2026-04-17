@@ -46,11 +46,11 @@ class EngineConfig(BaseSettings):
     # ── Binance Fee Schedule ─────────────────────────────────────────────────
     MAKER_FEE: float = 0.0002             # 0.02%
     TAKER_FEE: float = 0.0004             # 0.04%
-    SLIPPAGE_EST: float = 0.0012          # Realistic slippage (was 0.03%, observed ~0.15%)
+    SLIPPAGE_EST: float = 0.0003          # 0.03% — realistic Binance futures slippage for major pairs
     VOL_BASELINE_ATR_PCT: float = 0.20    # Baseline ATR% for dynamic edge premium
-    VOL_PREMIUM_MULT: float = 1.5         # How aggressively volatility raises min-R
+    VOL_PREMIUM_MULT: float = 0.05        # Small linear premium on required_r per unit ATR above baseline
     BASE_MIN_R: float = 1.10               # Fallback post-cost R threshold (was 1.20 — relaxed for more entries)
-    ATR_SLIPPAGE_MULT: float = 0.20       # Extra slippage buffer as % of ATR
+    ATR_SLIPPAGE_MULT: float = 0.10       # Reduced from 0.20 — keeps per-trade ATR overhead proportionate
     # Per-regime minimum R thresholds — relaxed for higher signal frequency
     REGIME_MIN_R_TRENDING: float = 1.10        # was 1.20 — still captures strong trends
     REGIME_MIN_R_MEAN_REVERTING: float = 1.05  # unchanged — high WR compensates

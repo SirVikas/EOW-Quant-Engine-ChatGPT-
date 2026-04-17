@@ -177,6 +177,7 @@ def deployability_index(
     redis_ok: bool = False,
     persistence_ok: bool = True,
     runtime_rr: Optional[dict] = None,
+    ws_connected: bool = False,
 ) -> dict:
     """
     Composite 0-100 score across three pillars:
@@ -205,7 +206,9 @@ def deployability_index(
     net_score += min(ping_oks * 2, 20)
 
     stale = healer_snapshot.get("ws_stale_cycles", 1)
-    if stale == 0:
+    # Credit the +10 WS-stability bonus when the WebSocket is live (stale=0)
+    # OR when the caller confirms the connection is currently CONNECTED.
+    if stale == 0 or ws_connected:
         net_score += 10
 
     breakdown["network"] = {"score": net_score, "max": 30, "stale_cycles": stale, "ping_oks": ping_oks}
