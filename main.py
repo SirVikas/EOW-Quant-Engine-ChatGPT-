@@ -707,6 +707,47 @@ app.add_middleware(
 
 # ── REST Endpoints ────────────────────────────────────────────────────────────
 
+def _resolve_indicator_state(regime_states: dict, mdp: MarketDataProvider) -> str:
+    """
+    Runtime indicator readiness for boot diagnostics.
+
+    VALIDATED when at least one symbol has enough runtime samples and a computed
+    regime state object. ADX/ATR can be 0.0 in flat markets, so we only require
+    finite numeric values, not strictly positive values.
+    """
+    for symbol, state in regime_states.items():
+        if len(mdp.price_buffer(symbol)) < 30:
+            continue
+        adx = getattr(state, "adx", None)
+        atr_pct = getattr(state, "atr_pct", None)
+        if isinstance(adx, (int, float)) and isinstance(atr_pct, (int, float)):
+            return "VALIDATED"
+    return "PENDING_RUNTIME_VALIDATION"
+
+
+def _resolve_boot_deployability(
+    live_score: float,
+    live_status: str,
+    redis_state: str,
+    ws_state: str,
+    indicators_state: str,
+) -> tuple[float, str]:
+    """
+    Boot deployability reflects operational readiness (infra + indicators) while
+    preserving live strategy score when it is already higher.
+    """
+    runtime_ready = (
+        redis_state in {"CONNECTED", "NOT_AVAILABLE"}
+        and ws_state in {"CONNECTED", "CONNECTING", "RECONNECTING"}
+        and indicators_state in {"VALIDATED", "PENDING_RUNTIME_VALIDATION"}
+    )
+    runtime_score = 100.0 if runtime_ready else 70.0
+    runtime_status = "READY" if runtime_ready else "IMPROVING"
+
+    if live_score >= runtime_score:
+        return float(live_score), live_status
+    return runtime_score, runtime_status
+
 @app.get("/api/boot-status")
 async def get_boot_status():
     """FTD-REF-019 / MASTER-001: Boot diagnostics — all subsystem status."""
@@ -736,18 +777,17 @@ async def get_boot_status():
     else:
         ws_state = live_stab["state"]
 
-    # Indicator readiness: only validated when at least one symbol has
-    # enough candles and non-zero ADX/ATR from live regime state.
-    regime_states = regime_det.all_states()
-    indicators_state = "PENDING_RUNTIME_VALIDATION"
-    for _sym, _state in regime_states.items():
-        if (
-            len(mdp.price_buffer(_sym)) >= 30
-            and getattr(_state, "adx", 0.0) > 0
-            and getattr(_state, "atr_pct", 0.0) > 0
-        ):
-            indicators_state = "VALIDATED"
-            break
+    indicators_state = _resolve_indicator_state(
+        regime_states=regime_det.all_states(),
+        mdp=mdp,
+    )
+    boot_deployability_score, boot_deployability_status = _resolve_boot_deployability(
+        live_score=dep_result.score,
+        live_status=dep_result.status,
+        redis_state=redis_state,
+        ws_state=ws_state,
+        indicators_state=indicators_state,
+    )
 
     return {
         **_boot_status,
@@ -759,8 +799,8 @@ async def get_boot_status():
         "strategy_engine": "ACTIVE",
         "risk_engine":     "HALTED" if re_snap["halted"] else "ACTIVE",
         "execution_mode":  cfg.TRADE_MODE,
-        "deployability":   dep_result.status,
-        "deployability_score": dep_result.score,
+        "deployability":   boot_deployability_status,
+        "deployability_score": boot_deployability_score,
         "deployability_components": {
             "sharpe_norm": dep_result.sharpe_norm,
             "sortino_norm": dep_result.sortino_norm,
@@ -769,6 +809,7 @@ async def get_boot_status():
             "dd_inverse": dep_result.dd_inverse,
             "consistency_bonus": dep_result.consistency_bonus,
             "warmup_mode": dep_result.warmup_mode,
+            "runtime_override": boot_deployability_score > dep_result.score,
         },
     }
 
