@@ -158,6 +158,10 @@ async def on_tick(tick: Tick):
     sym   = tick.symbol
     price = tick.price
 
+    # Guard: reject malformed symbols that somehow bypass _is_valid_symbol
+    if len(sym) < 5 or not sym.endswith("USDT"):
+        return
+
     # FTD-REF-019/025: record liveness for tick watchdog + truth engine
     ws_stab.record_tick()
     ws_truth_engine.record_tick()                        # FTD-REF-025
@@ -840,11 +844,14 @@ async def get_boot_status():
     _boot_status["websocket"] = ws_state
     _boot_status["indicators"] = indicators_state
 
+    indicators_ok = indicators_state in ("VALIDATED", "WARMING_UP")
+
     return {
         **_boot_status,
         "redis":         redis_state,
         "websocket":     ws_state,
         "indicators":    indicators_state,
+        "indicators_ok": indicators_ok,
         "ws_gap_s":      live_stab["gap_seconds"],
         "ws_reconnects": live_stab["reconnect_count"],
         "strategy_engine": "ACTIVE",
