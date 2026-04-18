@@ -52,13 +52,14 @@ from core.error_registry     import error_registry      # FTD-REF-025
 from core.strategy_engine    import strategy_engine     # FTD-REF-026
 from core.profit_guard       import profit_guard        # FTD-REF-026
 from core.ct_scan_engine     import ct_scan_engine      # FTD-REF-026
+from core.inverse_engine     import inverse_engine, TradeMode  # A.I.E.
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
-from strategies.strategy_modules import get_strategy, Signal
+from strategies.strategy_modules import get_strategy, Signal, TradeSignal
 
 
 def _safe_num(v):
@@ -197,6 +198,8 @@ async def on_tick(tick: Tick):
                 "VOLATILITY_EXPANSION": "VolatilityExpansion",
             }.get(_trade_regime, "TrendFollowing")
             strategy_engine.record_trade(_closed_strat_type)
+            # A.I.E.: feed outcome so engine learns which strategies to invert
+            inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0)
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # MASTER-001: keep risk engine equity up to date
@@ -386,6 +389,36 @@ async def on_tick(tick: Tick):
         sig = strategy.generate_signal(sym, closes, highs, lows)
         if sig and sig.signal != Signal.NONE:
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
+
+            # ── A.I.E. — Adaptive Inverse Engine ─────────────────────────────
+            # If this strategy's win-rate is in the "wrong" zone, flip it.
+            # NO_TRADE (40–60% WR) → skip; INVERSE (<40% WR) → flip direction.
+            _inv = inverse_engine.get_decision(
+                strategy_id=strategy_type,
+                signal=sig.signal.value,
+                entry_price=sig.entry_price,
+                stop_loss=sig.stop_loss,
+                take_profit=sig.take_profit,
+            )
+            if _inv.mode in (TradeMode.NO_TRADE, TradeMode.CALIBRATE):
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _inv.reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
+            if _inv.inverted:
+                sig = TradeSignal(
+                    symbol=sig.symbol,
+                    signal=Signal(_inv.final_signal),
+                    entry_price=_inv.entry_price,
+                    stop_loss=_inv.stop_loss,
+                    take_profit=_inv.take_profit,
+                    confidence=sig.confidence,
+                    strategy_id=sig.strategy_id + "_INV",
+                    reason=f"{sig.reason} | {_inv.reason}",
+                )
+                _thought(f"🔄 AIE INVERSE → {sig.signal.value} {sym}", "SIGNAL")
 
             # 6. Size the position (FTD-REF-024: apply edge booster multiplier)
             sizing = scaler.compute(sym, sig.entry_price, sig.stop_loss)
@@ -671,9 +704,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
             risk_engine.update_equity(replayed_equity)
             scaler.set_equity(replayed_equity)
+            # A.I.E. session restore: replay trade outcomes so InverseEngine starts
+            # with a pre-warmed win-rate, not a cold NORMAL default.
+            _strat_id_map = {
+                "TF_EMA_RSI_v1":       "TrendFollowing",
+                "TF_EMA_RSI_v1_INV":   "TrendFollowing",
+                "MR_BB_RSI_v1":        "MeanReversion",
+                "MR_BB_RSI_v1_INV":    "MeanReversion",
+                "VE_BREAKOUT_ATR_v1":  "VolatilityExpansion",
+                "VE_BREAKOUT_ATR_v1_INV": "VolatilityExpansion",
+            }
+            for _ht in historical_trades:
+                _sid  = _ht.get("strategy_id", "") if isinstance(_ht, dict) else getattr(_ht, "strategy_id", "")
+                _pnl  = _ht.get("net_pnl", 0.0)   if isinstance(_ht, dict) else getattr(_ht, "net_pnl", 0.0)
+                _stype = _strat_id_map.get(_sid, "")
+                if _stype:
+                    inverse_engine.record(_stype, won=_pnl >= 0)
             _thought(
                 f"📂 Session restored: {n} trades replayed from DataLake. "
-                f"Equity: {replayed_equity:.2f} USDT",
+                f"Equity: {replayed_equity:.2f} USDT | "
+                f"AIE modes: { {k: v['mode'] for k, v in inverse_engine.summary().items()} }",
                 "SYSTEM",
             )
         else:
@@ -1511,6 +1561,19 @@ async def get_profit_guard():
         profit_factor=stats.get("profit_factor", 0.0),
         n_trades=len(pnl_calc.trades),
     )
+
+
+@app.get("/api/inverse-engine")
+async def get_inverse_engine():
+    """A.I.E.: Adaptive Inverse Engine — per-strategy mode and win-rate."""
+    return {
+        "strategies": inverse_engine.summary(),
+        "thresholds": {
+            "win_threshold":     0.60,
+            "inverse_threshold": 0.40,
+            "min_samples":       10,
+        },
+    }
 
 
 @app.get("/api/ct-scan")
