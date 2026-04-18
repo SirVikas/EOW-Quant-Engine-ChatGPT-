@@ -1,24 +1,28 @@
 """
 EOW Quant Engine — Adaptive Inverse Engine  (A.I.E.)
 
-Blueprint: if a strategy is consistently wrong it is a reliable contra-indicator.
-Instead of patching a broken strategy, we detect when its win-rate drops below
-a threshold and flip every signal it produces — turning losses into profits.
+A strategy is a reliable contra-indicator only when it is *significantly and
+consistently* wrong — not merely average.  A 44% win-rate with a 2:1 RR is
+actually profitable (0.44×2 − 0.56×1 = +0.32R per trade).  Only flip when
+the system is demonstrably worse than random and improving nothing.
 
-Per-strategy mode state machine (requires MIN_SAMPLES before activating):
-  NORMAL    win_rate ≥ WIN_THRESHOLD  (≥ 60%)  → trade as generated
-  NO_TRADE  WIN_THRESHOLD > win_rate ≥ INVERSE_THRESHOLD (40–60%) → skip entry
-                                                   (slow-death avoidance zone)
-  INVERSE   win_rate < INVERSE_THRESHOLD (< 40%) → flip direction + mirror SL/TP
+Design principles (root-cause corrected):
+  1. Default state is NORMAL — never block trading due to insufficient data.
+  2. NO_TRADE zone is removed.  A 40–60% WR strategy should keep trading;
+     the RR ratio is what determines profitability, not WR alone.
+  3. INVERSE only activates when WR < INVERSE_THRESHOLD (≤ 35%) after
+     MIN_SAMPLES (≥ 30) fresh trades from the current (fixed) system.
+  4. Historical trades from broken sessions are NOT fed in at startup —
+     old fake-ATR losses are not representative of the fixed engine.
 
-Signal inversion preserves RR ratio by mirroring SL/TP distances around entry:
-  Original LONG  entry=P, sl=P−d, tp=P+D  →  SHORT  sl=P+d, tp=P−D  (RR = D/d ✓)
-  Original SHORT entry=P, sl=P+d, tp=P−D  →  LONG   sl=P−d, tp=P+D  (RR = D/d ✓)
+Per-strategy mode state machine (minimum MIN_SAMPLES fresh trades required):
+  NORMAL    default / WR ≥ INVERSE_THRESHOLD  → trade as generated
+  INVERSE   WR < INVERSE_THRESHOLD (≤ 35%)    → flip direction + mirror SL/TP
+  CALIBRATE consecutive losses ≥ EQUITY_PROTECT_LOSSES → global pause
 
-Equity Protector:
-  If any strategy accumulates EQUITY_PROTECT_LOSSES consecutive losses while in
-  INVERSE mode, a global CALIBRATE pause is triggered. All strategies pause for
-  CALIBRATE_PAUSE_MIN minutes then restart in NORMAL mode.
+Signal inversion preserves RR by mirroring SL/TP distances around entry:
+  Original LONG  entry=P, sl=P−d, tp=P+D  →  SHORT  sl=P+d, tp=P−D  (RR=D/d ✓)
+  Original SHORT entry=P, sl=P+d, tp=P−D  →  LONG   sl=P−d, tp=P+D  (RR=D/d ✓)
 """
 from __future__ import annotations
 
@@ -31,18 +35,16 @@ from loguru import logger
 
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
-WIN_THRESHOLD          = 0.60   # ≥ 60% WR → NORMAL
-INVERSE_THRESHOLD      = 0.40   # < 40% WR → INVERSE
-MIN_SAMPLES            = 10     # minimum trades before mode can change from NORMAL
-ROLLING_WINDOW         = 50     # look back at most last 50 trades per strategy
-EQUITY_PROTECT_LOSSES  = 5      # consecutive losses (any mode) → CALIBRATE pause
-CALIBRATE_PAUSE_MIN    = 30     # minutes to pause before resuming NORMAL
+INVERSE_THRESHOLD      = 0.35   # only invert when WR < 35% (truly contra-indicator)
+MIN_SAMPLES            = 30     # need 30 fresh trades before any mode can change
+ROLLING_WINDOW         = 50     # rolling window for win-rate calculation
+EQUITY_PROTECT_LOSSES  = 6      # consecutive losses → global CALIBRATE pause
+CALIBRATE_PAUSE_MIN    = 20     # minutes to pause before resuming NORMAL
 
 
 class TradeMode(str, Enum):
     NORMAL    = "NORMAL"
     INVERSE   = "INVERSE"
-    NO_TRADE  = "NO_TRADE"
     CALIBRATE = "CALIBRATE"
 
 
@@ -63,25 +65,25 @@ class InverseEngine:
     Stateful, per-strategy adaptive mode selector.
 
     Usage:
-      # After trade closes:
+      # After every trade close:
       inverse_engine.record(strategy_type, won=net_pnl >= 0)
 
-      # Before opening a new trade:
+      # Before every new entry:
       decision = inverse_engine.get_decision(strategy_type, signal, entry, sl, tp)
-      if decision.mode in (TradeMode.NO_TRADE, TradeMode.CALIBRATE):
-          skip_entry(decision.reason)
+      if decision.mode == TradeMode.CALIBRATE:
+          skip(decision.reason)
       use(decision.final_signal, decision.stop_loss, decision.take_profit)
     """
 
     def __init__(self):
-        self._outcomes:      Dict[str, List[bool]] = {}   # strategy → rolling win list
-        self._consec_losses: Dict[str, int]         = {}  # strategy → current streak
+        self._outcomes:      Dict[str, List[bool]] = {}   # strategy → rolling outcomes
+        self._consec_losses: Dict[str, int]         = {}  # strategy → consecutive loss count
         self._calibrate_until: float = 0.0                # epoch when global pause expires
 
     # ── Public ────────────────────────────────────────────────────────────────
 
     def record(self, strategy_id: str, won: bool) -> None:
-        """Record a trade result.  Call once per trade close."""
+        """Record a live trade result.  Do NOT call for historical replay."""
         history = self._outcomes.setdefault(strategy_id, [])
         history.append(won)
         if len(history) > ROLLING_WINDOW:
@@ -96,27 +98,22 @@ class InverseEngine:
                 self._calibrate_until = time.time() + CALIBRATE_PAUSE_MIN * 60
                 logger.warning(
                     f"[AIE] ⛔ Equity Protector — {strategy_id} hit "
-                    f"{streak} consecutive losses → {CALIBRATE_PAUSE_MIN}min "
-                    f"CALIBRATE pause."
+                    f"{streak} consecutive losses → {CALIBRATE_PAUSE_MIN}min pause."
                 )
 
     def get_decision(
         self,
         strategy_id: str,
-        signal:      str,    # "LONG" or "SHORT"
+        signal:      str,
         entry_price: float,
         stop_loss:   float,
         take_profit: float,
     ) -> InverseDecision:
-        """
-        Return an InverseDecision with the final (possibly flipped) signal and levels.
-        Callers must use decision.final_signal / .stop_loss / .take_profit.
-        """
+        """Return the final (possibly inverted) signal and SL/TP levels."""
         mode = self._mode(strategy_id)
         wr   = self._win_rate(strategy_id)
         n    = len(self._outcomes.get(strategy_id, []))
 
-        # Pass-through modes — no change to signal
         if mode in (TradeMode.NORMAL, TradeMode.CALIBRATE):
             return InverseDecision(
                 mode=mode, original_signal=signal, final_signal=signal,
@@ -125,29 +122,17 @@ class InverseEngine:
                 reason=f"AIE_{mode.value}(WR={wr*100:.1f}% n={n})",
             )
 
-        if mode == TradeMode.NO_TRADE:
-            return InverseDecision(
-                mode=mode, original_signal=signal, final_signal=signal,
-                entry_price=entry_price, stop_loss=stop_loss,
-                take_profit=take_profit,
-                reason=(
-                    f"AIE_NO_TRADE(WR={wr*100:.1f}% in 40–60% "
-                    f"slow-death zone, n={n})"
-                ),
-            )
-
-        # ── INVERSE mode: mirror-flip signal, preserve RR ratio ───────────────
+        # ── INVERSE: mirror SL/TP distances to preserve RR ratio ─────────────
         sl_dist = abs(entry_price - stop_loss)
         tp_dist = abs(take_profit - entry_price)
-
         if signal == "LONG":
-            final_signal = "SHORT"
-            new_sl = entry_price + sl_dist   # above entry — SHORT gets stopped going up
-            new_tp = entry_price - tp_dist   # below entry — SHORT profits going down
+            final_signal, new_sl, new_tp = (
+                "SHORT", entry_price + sl_dist, entry_price - tp_dist
+            )
         else:
-            final_signal = "LONG"
-            new_sl = entry_price - sl_dist   # below entry — LONG gets stopped going down
-            new_tp = entry_price + tp_dist   # above entry — LONG profits going up
+            final_signal, new_sl, new_tp = (
+                "LONG", entry_price - sl_dist, entry_price + tp_dist
+            )
 
         logger.info(
             f"[AIE] 🔄 INVERSE {strategy_id}: {signal}→{final_signal} "
@@ -165,7 +150,6 @@ class InverseEngine:
         return self._mode(strategy_id)
 
     def summary(self) -> dict:
-        """Human-readable engine state for /api/inverse-engine."""
         return {
             s: {
                 "mode":          self._mode(s).value,
@@ -180,23 +164,21 @@ class InverseEngine:
 
     def _win_rate(self, strategy_id: str) -> float:
         h = self._outcomes.get(strategy_id, [])
-        return sum(h) / len(h) if h else 1.0   # optimistic default before data
+        return sum(h) / len(h) if h else 1.0
 
     def _mode(self, strategy_id: str) -> TradeMode:
-        # Global calibration pause overrides everything
         if time.time() < self._calibrate_until:
             return TradeMode.CALIBRATE
 
         outcomes = self._outcomes.get(strategy_id, [])
         if len(outcomes) < MIN_SAMPLES:
-            return TradeMode.NORMAL   # not enough data — default to normal
+            return TradeMode.NORMAL   # not enough fresh data — keep trading
 
-        wr = self._win_rate(strategy_id)
-        if wr < INVERSE_THRESHOLD:
-            return TradeMode.INVERSE
-        if wr < WIN_THRESHOLD:
-            return TradeMode.NO_TRADE
-        return TradeMode.NORMAL
+        return (
+            TradeMode.INVERSE
+            if self._win_rate(strategy_id) < INVERSE_THRESHOLD
+            else TradeMode.NORMAL
+        )
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

@@ -400,7 +400,7 @@ async def on_tick(tick: Tick):
                 stop_loss=sig.stop_loss,
                 take_profit=sig.take_profit,
             )
-            if _inv.mode in (TradeMode.NO_TRADE, TradeMode.CALIBRATE):
+            if _inv.mode == TradeMode.CALIBRATE:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _inv.reason, "regime": regime.value,
@@ -704,26 +704,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
             risk_engine.update_equity(replayed_equity)
             scaler.set_equity(replayed_equity)
-            # A.I.E. session restore: replay trade outcomes so InverseEngine starts
-            # with a pre-warmed win-rate, not a cold NORMAL default.
-            _strat_id_map = {
-                "TF_EMA_RSI_v1":       "TrendFollowing",
-                "TF_EMA_RSI_v1_INV":   "TrendFollowing",
-                "MR_BB_RSI_v1":        "MeanReversion",
-                "MR_BB_RSI_v1_INV":    "MeanReversion",
-                "VE_BREAKOUT_ATR_v1":  "VolatilityExpansion",
-                "VE_BREAKOUT_ATR_v1_INV": "VolatilityExpansion",
-            }
-            for _ht in historical_trades:
-                _sid  = _ht.get("strategy_id", "") if isinstance(_ht, dict) else getattr(_ht, "strategy_id", "")
-                _pnl  = _ht.get("net_pnl", 0.0)   if isinstance(_ht, dict) else getattr(_ht, "net_pnl", 0.0)
-                _stype = _strat_id_map.get(_sid, "")
-                if _stype:
-                    inverse_engine.record(_stype, won=_pnl >= 0)
+            # A.I.E. starts fresh each session — historical trades from prior runs
+            # used a broken ATR/cost model and are not representative of the fixed
+            # engine.  InverseEngine will build its own sample from live trades.
             _thought(
                 f"📂 Session restored: {n} trades replayed from DataLake. "
-                f"Equity: {replayed_equity:.2f} USDT | "
-                f"AIE modes: { {k: v['mode'] for k, v in inverse_engine.summary().items()} }",
+                f"Equity: {replayed_equity:.2f} USDT",
                 "SYSTEM",
             )
         else:
