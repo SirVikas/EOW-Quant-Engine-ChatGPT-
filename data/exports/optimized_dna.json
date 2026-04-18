@@ -10,8 +10,8 @@
         "rsi_ob": 65.0,
         "rsi_os": 35.0,
         "atr_period": 14,
-        "atr_sl": 1.5,
-        "atr_tp": 4.0
+        "atr_sl": 2.5,
+        "atr_tp": 6.0
       },
       "MeanReversion": {
         "strategy": "MR_BB_RSI_v1",
@@ -21,15 +21,15 @@
         "rsi_ob": 65.0,
         "rsi_os": 35.0,
         "atr_period": 14,
-        "atr_sl": 1.5,
-        "atr_tp": 2.8
+        "atr_sl": 2.5,
+        "atr_tp": 4.2
       },
       "VolatilityExpansion": {
         "strategy": "VE_BREAKOUT_ATR_v1",
         "lookback": 20,
         "atr_period": 14,
-        "atr_sl": 2.25,
-        "atr_tp": 6.0,
+        "atr_sl": 3.75,
+        "atr_tp": 9.0,
         "vol_filter": 1.2
       }
     }
