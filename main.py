@@ -719,6 +719,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
 
+    # ── Pre-seed genome candle store after bootstrap completes ────────────────
+    async def _seed_genome_from_bootstrap():
+        """Wait for mdp bootstrap to complete, then inject candles into genome."""
+        for _ in range(90):   # wait up to 90s for mdp._running to be True
+            if getattr(mdp, "_running", False):
+                genome.seed_from_market_data(mdp)
+                return
+            await asyncio.sleep(1)
+        logger.warning("[GENOME] Bootstrap seed timeout — candle store will fill naturally from live stream.")
+
+    tasks.append(asyncio.create_task(_seed_genome_from_bootstrap()))
+
     # ── Guardian periodic reactive check ─────────────────────────────────────
     async def _guardian_watch():
         """Every 60 s, check if live risk has drifted into unsafe territory."""

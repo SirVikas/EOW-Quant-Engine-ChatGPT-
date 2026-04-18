@@ -30,8 +30,9 @@ class CapitalScaler:
     3. Hard stop: reduce to minimum if drawdown exceeds threshold
     """
 
-    MIN_RISK_PCT = 0.002    # 0.2% floor
-    MAX_RISK_PCT = 0.025    # 2.5% ceiling
+    MIN_RISK_PCT     = 0.002   # 0.2% floor
+    MAX_RISK_PCT     = 0.025   # 2.5% ceiling
+    MAX_NOTIONAL_PCT = 0.15    # 15% of equity max position notional (prevents oversizing on low-priced assets)
 
     def __init__(self):
         self._results: List[float] = []   # +ve win, -ve loss in USDT
@@ -98,6 +99,17 @@ class CapitalScaler:
         usdt_risk = equity * adjusted_pct
         sl_dist   = abs(entry_price - stop_loss)
         qty       = (usdt_risk / sl_dist) if sl_dist > 0 else 0.0
+
+        # Hard notional cap: never risk more than MAX_NOTIONAL_PCT of equity in one position.
+        # Prevents qty blow-up when sl_dist is tiny (low-priced assets, tight ATR).
+        if entry_price > 0 and qty > 0:
+            max_qty = equity * self.MAX_NOTIONAL_PCT / entry_price
+            if qty > max_qty:
+                logger.debug(
+                    f"[SCALER] {symbol} notional cap: qty {qty:.6f}→{max_qty:.6f} "
+                    f"(≤{self.MAX_NOTIONAL_PCT*100:.0f}% equity)"
+                )
+                qty = max_qty
 
         logger.debug(
             f"[SCALER] {symbol} | Equity={equity:.2f} DD={drawdown*100:.1f}% "

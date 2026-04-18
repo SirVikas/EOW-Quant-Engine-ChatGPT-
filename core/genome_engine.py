@@ -60,8 +60,8 @@ GENE_BOUNDS: Dict[str, tuple] = {
     "rsi_os":     (20.0, 45.0),
     # Shared
     "atr_period": (7, 21),
-    "atr_sl":     (1.0, 3.5),
-    "atr_tp":     (1.5, 5.0),
+    "atr_sl":     (1.5, 4.5),   # floor raised: tight stops kill 1-min edge; ceiling raised for VE
+    "atr_tp":     (3.0, 9.0),   # floor raised: minimum TP must exceed fee drag at 2.5× SL
     # MeanReversion
     "bb_period":  (10, 30),
     "bb_std":     (2.0, 3.5),
@@ -182,6 +182,44 @@ class GenomeEngine:
         self._candle_store[symbol].append(candle)
         # Keep last 24 h × 60 min = 1 440 candles per symbol.
         self._candle_store[symbol] = self._candle_store[symbol][-1440:]
+
+    def seed_from_market_data(self, mdp) -> None:
+        """
+        Pre-seed candle_store from bootstrap buffers so the first evolution cycle
+        has enough candles to run a meaningful backtest (>100 bars) rather than
+        waiting 90+ minutes for live stream candles to accumulate.
+
+        Reconstructs candle dicts from the parallel OHLC deques seeded by
+        CandleBootstrapper.  Open is approximated from the previous close.
+        Timestamps are synthetic (1-min spacing backwards from now).
+        """
+        seeded = 0
+        now_ms = int(time.time() * 1000)
+        for symbol in getattr(mdp, "symbols", []):
+            closes = list(getattr(mdp, "candle_close_buffers", {}).get(symbol, []))
+            highs  = list(getattr(mdp, "candle_high_buffers",  {}).get(symbol, []))
+            lows   = list(getattr(mdp, "candle_low_buffers",   {}).get(symbol, []))
+            n = min(len(closes), len(highs), len(lows))
+            if n < 10:
+                continue
+            candles = [
+                {
+                    "open":   closes[i - 1] if i > 0 else closes[i],
+                    "high":   highs[i],
+                    "low":    lows[i],
+                    "close":  closes[i],
+                    "volume": 0.0,
+                    "ts":     now_ms - (n - i) * 60_000,
+                }
+                for i in range(n)
+            ]
+            self._candle_store[symbol] = candles
+            seeded += 1
+        if seeded:
+            logger.info(
+                f"[GENOME] Pre-seeded {seeded} symbols from bootstrap candle buffers "
+                f"(avg {sum(len(v) for v in self._candle_store.values()) // max(1, seeded)} bars/symbol)."
+            )
 
     # ── Main Loop ─────────────────────────────────────────────────────────────
 

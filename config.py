@@ -93,8 +93,8 @@ class EngineConfig(BaseSettings):
     EMA_SLOW: int = 50                    # Raised 21→50: stronger trend confirmation
     EMA_TREND: int = 100                  # NEW: macro trend direction filter (price vs EMA100)
     ATR_PERIOD: int = 14
-    ATR_MULT_SL: float = 1.5              # Tightened 2.0→1.5: tighter stop, higher RR ratio
-    ATR_MULT_TP: float = 4.0              # Raised 3.0→4.0: gross RR = 4.0/1.5 = 2.67 — passes all regimes
+    ATR_MULT_SL: float = 2.5              # Widened 1.5→2.5: survives 1-min noise, fewer premature SL hits
+    ATR_MULT_TP: float = 6.0              # Raised 4.0→6.0: gross RR = 6.0/2.5 = 2.4 — covers fees & slippage
     BB_PERIOD: int = 20
     BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
 

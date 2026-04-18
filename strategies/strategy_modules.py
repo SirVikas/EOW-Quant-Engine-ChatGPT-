@@ -35,7 +35,7 @@ class TradeSignal:
 # Minimum ATR% to even consider a trade.
 # Stablecoins: ATR% ≈ 0.002–0.05%  → blocked
 # Real coins:  ATR% ≈ 0.1%+        → allowed
-MIN_ATR_PCT = 0.05   # 0.05% minimum — 1-min candle ATR typically 0.05-0.15%
+MIN_ATR_PCT = 0.03   # 0.03% minimum — allows BTC 1-min ATR (~0.02-0.04%); blocks only stablecoins
 
 # ── Shared Indicator Helpers ─────────────────────────────────────────────────
 
@@ -213,30 +213,33 @@ class MeanReversionStrategy:
             return None
 
         if price <= lower and rsi < self.rsi_os:
-            tp = mean
-            # Skip if TP too close to entry — fees require at least 0.2% gross move
-            if (tp - price) / price < 0.002:
+            # TP = BB mean, but at least atr_tp×ATR away to guarantee positive RR.
+            # When BB is tight the mean can be less than 1×ATR, killing the RR ratio.
+            tp = max(mean, price + atr * self.atr_tp)
+            sl = price - atr * self.atr_sl
+            if (tp - price) / price < 0.001:   # sanity: skip if still < 0.1% gross
                 return None
             return TradeSignal(
                 symbol=symbol, signal=Signal.LONG, entry_price=price,
-                stop_loss=price - atr * self.atr_sl,
+                stop_loss=sl,
                 take_profit=tp,
                 confidence=min(0.85, (self.rsi_os - rsi) / self.rsi_os + 0.4),
                 strategy_id=self.ID,
-                reason=f"BB lower touch | RSI={rsi:.1f} | Mean={mean:.4f}",
+                reason=f"BB lower touch | RSI={rsi:.1f} | Mean={mean:.4f} | TP={tp:.4f}",
             )
         if price >= upper and rsi > self.rsi_ob:
-            tp = mean
-            # Skip if TP too close to entry — fees require at least 0.2% gross move
-            if (price - tp) / price < 0.002:
+            # TP = BB mean, but at least atr_tp×ATR away to guarantee positive RR.
+            tp = min(mean, price - atr * self.atr_tp)
+            sl = price + atr * self.atr_sl
+            if (price - tp) / price < 0.001:
                 return None
             return TradeSignal(
                 symbol=symbol, signal=Signal.SHORT, entry_price=price,
-                stop_loss=price + atr * self.atr_sl,
+                stop_loss=sl,
                 take_profit=tp,
                 confidence=min(0.85, (rsi - self.rsi_ob) / (100 - self.rsi_ob) + 0.4),
                 strategy_id=self.ID,
-                reason=f"BB upper touch | RSI={rsi:.1f} | Mean={mean:.4f}",
+                reason=f"BB upper touch | RSI={rsi:.1f} | Mean={mean:.4f} | TP={tp:.4f}",
             )
         return None
 
