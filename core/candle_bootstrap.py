@@ -24,7 +24,7 @@ class CandleBootstrapper:
         self.lookback = max(30, int(lookback))
         self.concurrency = max(1, int(concurrency))
 
-    async def warmup(self, market_data: Any, symbols: list[str]) -> None:
+    async def warmup(self, market_data: Any, symbols: list[str], regime_detector=None) -> None:
         if not symbols:
             return
 
@@ -32,7 +32,7 @@ class CandleBootstrapper:
         sem = asyncio.Semaphore(self.concurrency)
 
         async with httpx.AsyncClient(base_url=self.base_url, timeout=timeout) as client:
-            tasks = [self._warm_symbol(client, sem, market_data, sym) for sym in symbols]
+            tasks = [self._warm_symbol(client, sem, market_data, sym, regime_detector) for sym in symbols]
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
         ok = sum(1 for r in results if r is True)
@@ -42,7 +42,7 @@ class CandleBootstrapper:
             f"(failed={fail})."
         )
 
-    async def _warm_symbol(self, client: httpx.AsyncClient, sem: asyncio.Semaphore, market_data: Any, symbol: str) -> bool:
+    async def _warm_symbol(self, client: httpx.AsyncClient, sem: asyncio.Semaphore, market_data: Any, symbol: str, regime_detector=None) -> bool:
         async with sem:
             try:
                 resp = await client.get(
@@ -57,6 +57,19 @@ class CandleBootstrapper:
                 for row in rows:
                     close_price = float(row[4])
                     market_data.tick_buffers[symbol].append(close_price)
+                    # Pre-seed regime_detector with historical OHLC so indicators are
+                    # warm from boot (avoids 28-minute regime warmup blackout per session).
+                    if regime_detector is not None:
+                        try:
+                            regime_detector.push(
+                                symbol,
+                                float(row[4]),   # close
+                                float(row[2]),   # high
+                                float(row[3]),   # low
+                                int(row[0]),     # ts
+                            )
+                        except Exception:
+                            pass
 
                 last = rows[-1]
                 candle = {

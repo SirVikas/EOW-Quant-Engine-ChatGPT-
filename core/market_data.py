@@ -101,12 +101,17 @@ class MarketDataProvider:
         # Execution URL: testnet only when BINANCE_TESTNET=true
         self._exec_url = self.EXEC_API_TEST if cfg.BINANCE_TESTNET else self.EXEC_API_LIVE
         self._candle_bootstrap = CandleBootstrapper(self._api_url)
+        self._regime_detector = None   # injected by main.py via set_regime_detector()
         logger.info(
             f"[MDP] Streams → real Binance (public) | "
             f"Execution → {'TESTNET' if cfg.BINANCE_TESTNET else 'LIVE'}"
         )
 
     # ── Public API ──────────────────────────────────────────────────────────
+
+    def set_regime_detector(self, rd) -> None:
+        """Inject regime_detector so candle bootstrap can pre-seed it at warmup."""
+        self._regime_detector = rd
 
     async def start(self):
         """Discover top-N pairs then open the combined WebSocket stream."""
@@ -122,7 +127,7 @@ class MarketDataProvider:
             )
         self.symbols = await self._discover_symbols()
         logger.info(f"[MDP] Watching {len(self.symbols)} symbols: {self.symbols[:5]}…")
-        await self._candle_bootstrap.warmup(self, self.symbols)
+        await self._candle_bootstrap.warmup(self, self.symbols, self._regime_detector)
         self._running = True
         await asyncio.gather(
             self._stream_loop(),

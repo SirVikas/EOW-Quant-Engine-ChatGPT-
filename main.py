@@ -273,14 +273,18 @@ async def on_tick(tick: Tick):
         lows   = [p * 0.999 for p in buf]
 
         # FTD-REF-019: validate indicator quality before generating signal
-        # NOTE: regime_det.state().atr_pct is 0 for single-price ticks (high=low=close),
-        # so we compute atr_pct from the close buffer BEFORE calling indicator_guard.
-        r_state  = regime_det.state(sym)
-        atr_pct  = _estimate_atr_pct(closes)
-        raw_adx  = getattr(r_state, "adx", 0.0)
-        adx_val  = raw_adx if (raw_adx > 0 or len(buf) >= 28) else None
-        guard    = indicator_guard.validate(
-            symbol=sym, n_candles=len(buf), adx=adx_val, atr_pct=atr_pct,
+        # ATR source priority:
+        #   1. regime_det accumulated ATR (real OHLC, 28+ candles) — most accurate
+        #   2. Single closed-kline (high-low)/close proxy — available after first kline
+        # tick_buffers are individual trade prices (not candle closes), so
+        # tick-to-tick ATR is 0.0001% and must NOT be used here.
+        r_state        = regime_det.state(sym)
+        regime_atr_pct = getattr(r_state, "atr_pct", 0.0)
+        candle_atr_pct = ((candle.high - candle.low) / candle.close * 100) if candle.close > 0 else 0.0
+        atr_pct        = regime_atr_pct if regime_atr_pct > 0 else candle_atr_pct
+        raw_adx        = getattr(r_state, "adx", 0.0)
+        guard          = indicator_guard.validate(
+            symbol=sym, n_candles=len(buf), adx=raw_adx, atr_pct=atr_pct,
         )
         if not guard.ok:
             error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
@@ -384,7 +388,7 @@ async def on_tick(tick: Tick):
                 return
             _edge_mult = edge_engine.get_size_multiplier(regime.value, strategy_type)
             sizing.qty = sizing.qty * _edge_mult   # boost qty on strong positive edge
-            # atr_pct already computed above from close buffer (not regime_det tick ATR)
+            # atr_pct already computed above from candle OHLC / regime_det
 
             # FTD-REF-023: realistic cost via execution_engine
             notional  = sizing.qty * sig.entry_price
@@ -614,6 +618,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     _engine_running = True
     ensure_auth_ready_for_mode()
     mdp.register_callback(on_tick)
+    # Pre-seed regime_detector during candle bootstrap so indicators are warm from boot
+    mdp.set_regime_detector(regime_det)
     _thought("🚀 EOW Quant Engine booting…", "SYSTEM")
     _thought(f"Mode: {cfg.TRADE_MODE} | Capital: {cfg.INITIAL_CAPITAL} USDT", "SYSTEM")
 
@@ -657,7 +663,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             # Sync risk_engine and scaler equity after replay so RoR/sizing use real capital
             replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
             risk_engine.update_equity(replayed_equity)
-            scaler.equity = replayed_equity
+            scaler.set_equity(replayed_equity)
             _thought(
                 f"📂 Session restored: {n} trades replayed from DataLake. "
                 f"Equity: {replayed_equity:.2f} USDT",
