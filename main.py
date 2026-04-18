@@ -101,7 +101,7 @@ _engine_running: bool = False
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
-SYMBOL_COOLDOWN_SEC = 1800        # 30 minutes per symbol
+SYMBOL_COOLDOWN_SEC = 300         # 5 minutes per symbol (was 30 — shorter window = faster learning)
 MAX_TRADES_PER_HOUR = 12          # absolute cap across all symbols
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
@@ -214,13 +214,14 @@ async def on_tick(tick: Tick):
         return
     _last_processed_candle_ts[sym] = candle.ts
 
-    buf     = list(mdp.price_buffer(sym))
-    data_gate = strategy_engine.evaluate_data_sufficiency(len(buf))
+    buf        = list(mdp.price_buffer(sym))           # tick prices — kept for legacy checks
+    candle_buf = list(mdp.candle_close_buffer(sym))    # 1-min candle closes — real OHLC data
+    data_gate = strategy_engine.evaluate_data_sufficiency(len(candle_buf))
     if data_gate != "OK":
-        error_registry.log("DATA_001", symbol=sym, extra=f"buf={len(buf)}")  # FTD-REF-025
+        error_registry.log("DATA_001", symbol=sym, extra=f"candles={len(candle_buf)}")  # FTD-REF-025
         _last_skip = {
             "ts": int(time.time() * 1000), "symbol": sym,
-            "reason": f"{data_gate}({len(buf)})",
+            "reason": f"{data_gate}({len(candle_buf)})",
         }
         return
 
@@ -268,9 +269,13 @@ async def on_tick(tick: Tick):
         if not sym.isascii():
             return
 
-        closes = buf
-        highs  = [p * 1.001 for p in buf]
-        lows   = [p * 0.999 for p in buf]
+        # Use real 1-min candle OHLC for strategy indicators.
+        # tick_buffers hold individual trade prices (noisy, many per second) — they
+        # produce fake ATR ≈ 0.1% which causes undersized SL distances, oversized qty,
+        # and HIGH_FEE_RATIO / COST_HIGH failures. Candle buffers give accurate ATR.
+        closes = candle_buf
+        highs  = list(mdp.candle_high_buffer(sym)) or [p * 1.001 for p in candle_buf]
+        lows   = list(mdp.candle_low_buffer(sym))  or [p * 0.999 for p in candle_buf]
 
         # FTD-REF-019: validate indicator quality before generating signal
         # ATR source priority:
