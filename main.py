@@ -391,8 +391,10 @@ async def on_tick(tick: Tick):
             # atr_pct already computed above from candle OHLC / regime_det
 
             # FTD-REF-023: realistic cost via execution_engine
-            notional  = sizing.qty * sig.entry_price
-            cost_usdt = execution_engine.fee_for_notional(notional) * 2
+            notional      = sizing.qty * sig.entry_price
+            cost_usdt     = execution_engine.fee_for_notional(notional) * 2
+            # Per-unit cost for signal_filter (which computes gross_tp per-unit as abs(tp-entry))
+            cost_per_unit = cost_usdt / sizing.qty if sizing.qty > 0 else cost_usdt
 
             # FTD-REF-024: fee-aware gate — reject if TP profit can't cover fees
             _gross_tp = abs(sig.take_profit - sig.entry_price) * sizing.qty
@@ -426,7 +428,7 @@ async def on_tick(tick: Tick):
             sf_result = signal_filter.check(
                 symbol=sym, entry=sig.entry_price,
                 take_profit=sig.take_profit, stop_loss=sig.stop_loss,
-                cost_usdt=cost_usdt, atr_pct=atr_pct,
+                cost_usdt=cost_per_unit, atr_pct=atr_pct,
                 confidence=_adjusted_conf,
                 regime=r_ai.regime.value,
                 relaxation_factor=relax_factor,
