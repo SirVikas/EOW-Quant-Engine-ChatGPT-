@@ -56,16 +56,23 @@ class CandleBootstrapper:
 
                 for row in rows:
                     close_price = float(row[4])
+                    high_price  = float(row[2])
+                    low_price   = float(row[3])
                     market_data.tick_buffers[symbol].append(close_price)
+                    # Seed candle OHLC buffers so strategies have accurate ATR data
+                    # from boot rather than noisy tick-price approximations.
+                    market_data.candle_close_buffers[symbol].append(close_price)
+                    market_data.candle_high_buffers[symbol].append(high_price)
+                    market_data.candle_low_buffers[symbol].append(low_price)
                     # Pre-seed regime_detector with historical OHLC so indicators are
                     # warm from boot (avoids 28-minute regime warmup blackout per session).
                     if regime_detector is not None:
                         try:
                             regime_detector.push(
                                 symbol,
-                                float(row[4]),   # close
-                                float(row[2]),   # high
-                                float(row[3]),   # low
+                                close_price,
+                                high_price,
+                                low_price,
                                 int(row[0]),     # ts
                             )
                         except Exception:
