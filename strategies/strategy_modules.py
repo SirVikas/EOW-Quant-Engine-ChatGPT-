@@ -35,7 +35,7 @@ class TradeSignal:
 # Minimum ATR% to even consider a trade.
 # Stablecoins: ATR% ≈ 0.002–0.05%  → blocked
 # Real coins:  ATR% ≈ 0.1%+        → allowed
-MIN_ATR_PCT = 0.03   # 0.03% minimum — allows BTC 1-min ATR (~0.02-0.04%); blocks only stablecoins
+MIN_ATR_PCT = 0.015  # Phase 3.1: 0.03→0.015% — aligned with indicator_guard; stablecoins still blocked
 
 # ── Shared Indicator Helpers ─────────────────────────────────────────────────
 
