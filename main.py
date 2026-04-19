@@ -60,6 +60,11 @@ from core.trade_scorer       import trade_scorer               # Phase 4: alpha 
 from core.capital_allocator  import capital_allocator          # Phase 4: score-based sizing
 from core.trade_manager      import trade_manager, ManagedPosition  # Phase 4: lifecycle
 from strategies.alpha_engine import alpha_engine               # Phase 4: alpha signals
+from core.ev_engine          import ev_engine                  # Phase 5: EV gate
+from core.adaptive_scorer    import adaptive_scorer            # Phase 5: dynamic weights
+from core.confidence_decay   import confidence_decay           # Phase 5: signal staleness
+from core.drawdown_controller import drawdown_controller       # Phase 5: DD protection
+from core.regime_memory      import regime_memory              # Phase 5: regime learning
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
@@ -211,11 +216,28 @@ async def on_tick(tick: Tick):
             inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0, direction=_trade_direction)
             # Mandate: trigger genome evolution every 50 trades (not just on timer)
             genome.on_trade_closed()
+            # Phase 5: update EV engine, adaptive scorer, and regime memory
+            _trade_cost = (getattr(last_trade, "fee_entry", 0.0)
+                           + getattr(last_trade, "fee_exit", 0.0)
+                           + getattr(last_trade, "slippage_cost", 0.0))
+            _trade_won  = last_trade.net_pnl >= 0
+            ev_engine.record(
+                strategy_id=_trade_strategy, symbol=sym,
+                net_pnl=last_trade.net_pnl, cost=_trade_cost,
+            )
+            adaptive_scorer.record_outcome(sym, won=_trade_won)
+            regime_memory.record(
+                regime=_trade_regime, strategy_type=_closed_strat_type,
+                won=_trade_won, r_mult=_r_mult,
+            )
+            confidence_decay.reset(sym, _trade_strategy)  # fresh start after trade
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # MASTER-001: keep risk engine equity up to date
     risk_engine.update_equity(scaler.equity)
+    # Phase 5: keep drawdown controller in sync
+    drawdown_controller.update_equity(scaler.equity)
 
     # Phase 4: Trade Manager lifecycle update for managed open positions
     if trade_manager.is_managed(sym):
@@ -568,25 +590,26 @@ async def on_tick(tick: Tick):
                 }
                 return
 
-            # ── Phase 4: Trade Scorer — alpha quality gate ────────────────────
+            # ── Phase 5: Adaptive Scorer — dynamic-weight quality gate ──────────
             _vol_list   = list(vol_buf)
-            _avg_vol_p4 = sum(_vol_list[-20:]) / max(len(_vol_list[-20:]), 1) if _vol_list else 1.0
-            _cur_vol_p4 = _vol_list[-1] if _vol_list else 0.0
-            _vol_ratio  = _cur_vol_p4 / _avg_vol_p4 if _avg_vol_p4 > 0 else 1.0
+            _avg_vol_p5 = sum(_vol_list[-20:]) / max(len(_vol_list[-20:]), 1) if _vol_list else 1.0
+            _cur_vol_p5 = _vol_list[-1] if _vol_list else 0.0
+            _vol_ratio  = _cur_vol_p5 / _avg_vol_p5 if _avg_vol_p5 > 0 else 1.0
             _rsi_now    = _rsi(closes, cfg.RSI_PERIOD) if len(closes) >= cfg.RSI_PERIOD + 1 else 50.0
             _rsi_prev   = _rsi(closes[:-1], cfg.RSI_PERIOD) if len(closes) >= cfg.RSI_PERIOD + 2 else _rsi_now
-            _tp_dist_p4 = abs(sig.take_profit - sig.entry_price)
-            _cost_frac_p4 = cost_per_unit / _tp_dist_p4 if _tp_dist_p4 > 0 else 1.0
+            _tp_dist_p5 = abs(sig.take_profit - sig.entry_price)
+            _cost_frac_p5 = cost_per_unit / _tp_dist_p5 if _tp_dist_p5 > 0 else 1.0
 
-            _score_result = trade_scorer.score(
+            _score_result = adaptive_scorer.score(
+                symbol=sym,
                 regime=r_ai.regime.value,
                 adx=guard.adx,
                 rsi=_rsi_now,
                 rsi_prev=_rsi_prev,
                 atr_pct=atr_pct,
-                avg_atr_pct=atr_pct,  # baseline = current when no rolling avg available
+                avg_atr_pct=atr_pct,
                 vol_ratio=_vol_ratio,
-                cost_fraction=_cost_frac_p4,
+                cost_fraction=_cost_frac_p5,
                 signal_side=sig.signal.value,
             )
             if not _score_result.ok:
@@ -595,6 +618,21 @@ async def on_tick(tick: Tick):
                     "reason": _score_result.reason,
                     "score": _score_result.score,
                     "regime": regime.value, "strategy": strategy_type,
+                }
+                return
+
+            # ── Phase 5: Confidence Decay — penalise overused patterns ────────
+            _decay_result = confidence_decay.decay(
+                symbol=sym, strategy_id=sig.strategy_id,
+                base_conf=_score_result.score,
+            )
+            _decayed_conf = _decay_result.decayed_confidence
+            if _decayed_conf < cfg.MIN_TRADE_SCORE:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": f"DECAY_FILTER({_decay_result.reason})",
+                    "score": _decayed_conf, "regime": regime.value,
+                    "strategy": strategy_type,
                 }
                 return
 
@@ -621,10 +659,47 @@ async def on_tick(tick: Tick):
                 entry_price=sig.entry_price,
                 stop_loss=_rr_result.adjusted_sl,
                 take_profit=_rr_result.adjusted_tp,
-                confidence=min(sig.confidence, _score_result.score),
+                confidence=min(sig.confidence, _decayed_conf),
                 strategy_id=sig.strategy_id,
-                reason=f"{sig.reason} | RR={_rr_result.rr:.2f} SCORE={_score_result.score:.3f}",
+                reason=(f"{sig.reason} | RR={_rr_result.rr:.2f} "
+                        f"SCORE={_score_result.score:.3f} "
+                        f"DECAY={_decay_result.decay_factor:.2f}"),
             )
+
+            # ── Phase 5: EV Engine — expected value gate ──────────────────────
+            _est_reward = abs(sig.take_profit - sig.entry_price) * sizing.qty
+            _est_risk   = abs(sig.entry_price - sig.stop_loss) * sizing.qty
+            _ev_result  = ev_engine.evaluate(
+                strategy_id=sig.strategy_id,
+                symbol=sym,
+                est_reward=_est_reward,
+                est_risk=_est_risk,
+                current_cost=cost_usdt,
+            )
+            if not _ev_result.ok:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _ev_result.reason,
+                    "ev": _ev_result.ev, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
+            if not _ev_result.bootstrapped:
+                _thought(
+                    f"🧮 EV {sym}: ev={_ev_result.ev:.4f} "
+                    f"p_win={_ev_result.p_win:.1%} n={_ev_result.n_trades}",
+                    "SIGNAL",
+                )
+
+            # ── Phase 5: Drawdown Controller — capital protection gate ────────
+            _dd_result = drawdown_controller.check()
+            if not _dd_result.allowed:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _dd_result.reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
 
             # ── Phase 4: Capital Allocator — score-based sizing ───────────────
             _alloc = capital_allocator.allocate(
@@ -639,12 +714,16 @@ async def on_tick(tick: Tick):
                     "strategy": strategy_type,
                 }
                 return
-            sizing.qty = round(sizing.qty * _alloc.size_multiplier, 8)
+            # Apply capital allocator multiplier then drawdown controller multiplier
+            _combined_mult = round(_alloc.size_multiplier * _dd_result.multiplier, 6)
+            sizing.qty = round(sizing.qty * _combined_mult, 8)
             if sizing.qty <= 0:
                 return
             _thought(
                 f"💰 Capital alloc {sym}: score={_score_result.score:.3f} "
-                f"mult={_alloc.size_multiplier:.2f}x qty={sizing.qty:.6f}",
+                f"alloc_mult={_alloc.size_multiplier:.2f}× "
+                f"dd_mult={_dd_result.multiplier:.2f}× "
+                f"qty={sizing.qty:.6f}",
                 "SIGNAL",
             )
 
@@ -896,6 +975,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         f"daily_cap={capital_allocator.daily_risk_cap:.0%}",
         "SYSTEM",
     )
+    # ── Phase 5: EV + Adaptive Intelligence boot log ─────────────────────────
+    _thought(
+        f"🧠 Phase 5 EV Engine online | "
+        f"ev_window={cfg.EV_WINDOW} ev_min_trades={cfg.EV_MIN_TRADES} "
+        f"adaptive_lr={cfg.ADAPTIVE_LR} "
+        f"dd_stop={cfg.DD_STOP_AT:.0%}",
+        "SYSTEM",
+    )
+    # Initialise drawdown controller with starting capital
+    drawdown_controller.update_equity(cfg.INITIAL_CAPITAL)
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
 
     # ── Pre-seed genome candle store after bootstrap completes ────────────────
