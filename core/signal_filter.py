@@ -49,7 +49,7 @@ _REGIME_CONF: Dict[str, float] = {
 }
 
 # ── Fixed thresholds (regime-independent) ─────────────────────────────────────
-MIN_ATR_PCT        = 0.03   # minimum ATR% floor (aligned with indicator_guard)
+MIN_ATR_PCT        = 0.010  # Phase 3.1: aligned with indicator_guard ATR_PCT_MIN=0.010%
 MAX_COST_FRACTION  = 0.20   # 5× rule: cost < 20% of gross TP (aligned with profit_guard FEE_RATIO_MAX)
 
 # ── Consecutive-loss protection ───────────────────────────────────────────────

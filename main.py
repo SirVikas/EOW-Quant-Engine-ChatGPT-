@@ -781,6 +781,34 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
                 pass
 
     tasks.append(asyncio.create_task(_guardian_watch()))
+
+    # ── 8-hour checkpoint: JSON state + QPR report (Phase 3.1 persistence) ───
+    async def _periodic_checkpoint():
+        """Every 8 hours save full engine state + generate QPR for 7-day stress test."""
+        while True:
+            await asyncio.sleep(8 * 3600)
+            try:
+                # 1. JSON state export
+                json_path = exporter.export(label="8h_checkpoint")
+                # 2. QPR report archive
+                stats    = pnl_calc.session_stats
+                trades   = [asdict(t) for t in pnl_calc.trades]
+                mode_info = {"trade_mode": cfg.TRADE_MODE, "engine_ver": "EOW_v1.0"}
+                analytics = {}
+                archive  = build_report_archive(trades, stats, mode_info, analytics, _thought_log)
+                ts_tag   = int(time.time())
+                rpt_path = f"data/exports/QPR_{ts_tag}_8h.zip"
+                with open(rpt_path, "wb") as f:
+                    f.write(archive)
+                _thought(
+                    f"📊 8h checkpoint: state saved → {json_path} | QPR → {rpt_path}",
+                    "SYSTEM",
+                )
+                logger.info(f"[CHECKPOINT] 8h state+QPR saved: {json_path}, {rpt_path}")
+            except Exception as exc:
+                logger.warning(f"[CHECKPOINT] 8h export failed: {exc}")
+
+    tasks.append(asyncio.create_task(_periodic_checkpoint()))
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")

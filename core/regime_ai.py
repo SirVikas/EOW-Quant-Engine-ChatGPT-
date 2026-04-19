@@ -21,6 +21,7 @@ Output: RegimeAiResult (regime, confidence, factor scores, stability_factor,
 """
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
@@ -39,14 +40,16 @@ WEIGHTS: Dict[str, float] = {
 
 # ── Decision thresholds ───────────────────────────────────────────────────────
 ADX_TRENDING_MIN      = 20.0
+ADX_TRENDING_STRONG   = 35.0   # Phase 3.1: ADX ≥ 35 → TRENDING without RSI slope requirement
 ADX_MEAN_REV_MAX      = 15.0
 ATR_EXPANSION_THRESH  =  0.40
 BB_WIDTH_EXPANSION    =  4.0
 RSI_SLOPE_BULLISH     =  0.5
-MIN_CONFIDENCE        =  0.30   # below this → demote to UNKNOWN
+MIN_CONFIDENCE        =  0.15   # Phase 3.1: relaxed 0.30→0.15 — fewer UNKNOWN demotions
+MAJORITARIAN_LOOKBACK =  5      # Phase 3.1: last N regimes to compute majority fallback
 
 # ── Fallback & stability ──────────────────────────────────────────────────────
-FALLBACK_CONF_PENALTY = 0.90   # light penalty on UNKNOWN fallback to keep trading
+FALLBACK_CONF_PENALTY = 0.95   # Phase 3.1: raised 0.90→0.95 — stronger confidence on fallback
 ATR_HIGH_THRESH       =  0.50  # ATR% above this → high volatility regime
 ATR_LOW_THRESH        =  0.10  # ATR% below this → low volatility (cautious)
 STAB_BOOST            =  1.15  # confidence multiplier in high-vol environment
@@ -81,6 +84,8 @@ class RegimeAI:
     def __init__(self):
         # symbol → last non-UNKNOWN RegimeAiResult
         self._last_valid: Dict[str, RegimeAiResult] = {}
+        # Phase 3.1: rolling last-N regime history for majoritarian fallback
+        self._regime_history: Dict[str, deque] = {}   # symbol → deque of Regime values
         # FTD-REF-026: per-symbol stability tracking
         self._stability_ticks: Dict[str, int] = {}   # consecutive same-regime ticks
         self._last_regime_str: Dict[str, str] = {}   # last seen regime value string
@@ -120,7 +125,19 @@ class RegimeAI:
             ))
             notes = f"ATR%={atr_pct:.2f}>0.40 + BB={bb_width:.2f}>4.0"
 
-        # Priority 2: Trending
+        # Priority 2a: Strong trend — ADX ≥ 35 overrides RSI slope requirement.
+        # Clamped ADX=60 was blocking high-trend classification when RSI slope was low.
+        elif adx >= ADX_TRENDING_STRONG:
+            regime = Regime.TRENDING
+            confidence = min(0.95, (
+                WEIGHTS["adx"]       * adx_s +
+                WEIGHTS["rsi_slope"] * max(0.3, abs(rsi_s)) +  # minimum 0.3 contribution
+                WEIGHTS["atr_pct"]   * atr_s +
+                WEIGHTS["bb_width"]  * bb_s * 0.5
+            ))
+            notes = f"ADX={adx:.1f}≥{ADX_TRENDING_STRONG} (strong trend — RSI slope bypassed)"
+
+        # Priority 2b: Normal trend — ADX ≥ 20 + RSI slope confirmation
         elif adx >= ADX_TRENDING_MIN and abs(rsi_slope) >= abs(RSI_SLOPE_BULLISH):
             regime = Regime.TRENDING
             confidence = min(0.95, (
@@ -145,7 +162,7 @@ class RegimeAI:
         else:
             regime     = Regime.UNKNOWN
             confidence = 0.0
-            notes      = f"ADX={adx:.1f} in ambiguous range"
+            notes      = f"ADX={adx:.1f} ambiguous (15–35 range, weak RSI slope={rsi_slope:.2f})"
 
         # Demote low-confidence results
         if confidence < MIN_CONFIDENCE and regime != Regime.UNKNOWN:
@@ -164,18 +181,35 @@ class RegimeAI:
 
         confidence = min(0.95, confidence * stability_factor)
 
-        # ── C. UNKNOWN fallback — reuse last valid regime ─────────────────────
+        # ── C. UNKNOWN fallback — Phase 3.1: majoritarian regime from last 5 bars ─
+        # Instead of just using the single last-valid regime, pick the most
+        # frequently observed regime in the last MAJORITARIAN_LOOKBACK ticks.
+        # This is more robust against single-bar noise flips to UNKNOWN.
         fallback_used = False
-        if regime == Regime.UNKNOWN and symbol in self._last_valid:
-            prev = self._last_valid[symbol]
-            regime        = prev.regime
-            confidence    = round(prev.confidence * FALLBACK_CONF_PENALTY, 3)
-            fallback_used = True
-            notes        += f" | FALLBACK→{regime.value} conf×{FALLBACK_CONF_PENALTY}"
-            logger.debug(
-                f"[REGIME-AI] {symbol} UNKNOWN → fallback {regime.value} "
-                f"conf={confidence:.2f}"
-            )
+        if regime == Regime.UNKNOWN and symbol:
+            hist = self._regime_history.get(symbol)
+            if hist and len(hist) > 0:
+                # Count occurrences of each non-UNKNOWN regime in recent history
+                counts: Dict[Regime, int] = {}
+                for r in hist:
+                    if r != Regime.UNKNOWN:
+                        counts[r] = counts.get(r, 0) + 1
+                if counts:
+                    majority = max(counts, key=lambda r: counts[r])
+                    fallback_conf = round(
+                        (counts[majority] / len(hist)) * FALLBACK_CONF_PENALTY, 3
+                    )
+                    regime        = majority
+                    confidence    = max(0.15, fallback_conf)
+                    fallback_used = True
+                    notes        += (
+                        f" | MAJORITARIAN_FALLBACK→{regime.value} "
+                        f"({counts[majority]}/{len(hist)} bars, conf={confidence:.2f})"
+                    )
+                    logger.debug(
+                        f"[REGIME-AI] {symbol} UNKNOWN → majoritarian "
+                        f"{regime.value} ({counts[majority]}/{len(hist)}) conf={confidence:.2f}"
+                    )
 
         # ── FTD-REF-026: regime stability tracking ────────────────────────────
         regime_str = regime.value
@@ -214,9 +248,14 @@ class RegimeAI:
             stability_ticks=stab_ticks,
         )
 
-        # Cache last valid (non-fallback) result
-        if regime != Regime.UNKNOWN and not fallback_used:
-            self._last_valid[symbol] = result
+        # Cache last valid (non-fallback) result + rolling regime history
+        if symbol:
+            if regime != Regime.UNKNOWN and not fallback_used:
+                self._last_valid[symbol] = result
+            # Always append to history (including UNKNOWN) for majoritarian calculation
+            if symbol not in self._regime_history:
+                self._regime_history[symbol] = deque(maxlen=MAJORITARIAN_LOOKBACK)
+            self._regime_history[symbol].append(regime)
 
         logger.debug(
             f"[REGIME-AI] {symbol or '?'} → {regime.value} "
