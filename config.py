@@ -138,6 +138,40 @@ class EngineConfig(BaseSettings):
     # Regime Memory
     REGIME_MEMORY_WINDOW: int = 50     # Rolling trades per (regime, strategy) pair
 
+    # ── Phase 5.1: Activation + Exploration Control ──────────────────────────
+    # Trade Activator — prevents system freeze by relaxing filters
+    ACTIVATOR_T1_MIN: int = 30           # Minutes of no trade → Tier 1 relaxation
+    ACTIVATOR_T2_MIN: int = 60           # Minutes of no trade → Tier 2 relaxation
+    ACTIVATOR_T3_MIN: int = 90           # Minutes of no trade → Tier 3 relaxation
+    ACTIVATOR_T1_VOL_MULT: float = 0.60  # Volume threshold multiplier at Tier 1
+    ACTIVATOR_T2_VOL_MULT: float = 0.40  # Volume threshold multiplier at Tier 2
+    ACTIVATOR_T3_VOL_MULT: float = 0.30  # Volume threshold multiplier at Tier 3
+    ACTIVATOR_T1_SCORE: float = 0.55     # Relaxed score threshold at Tier 1
+    ACTIVATOR_T2_SCORE: float = 0.50     # Relaxed score threshold at Tier 2 / T3
+
+    # Exploration Engine — 10% learning trades
+    EXPLORE_RATE: float = 0.10           # Fraction of signal slots for exploration
+    EXPLORE_SIZE_MULT: float = 0.25      # Size multiplier for exploration trades
+    EXPLORE_SCORE_MIN: float = 0.45      # Absolute score floor for exploration
+    EXPLORE_EV_FLOOR: float = 0.50       # Max allowed EV negative fraction of est_risk
+    EXPLORE_DAILY_LOSS_CAP: float = 0.02 # Max daily equity loss from exploration
+
+    # Adaptive Filter Engine — dynamic threshold tuning
+    AF_RELAX_AFTER_MIN: int = 60         # Relax filters after N minutes without trade
+    AF_TIGHTEN_AFTER_LOSSES: int = 3     # Tighten after N consecutive losses
+    AF_RELAX_STEP: float = 0.05          # Score relaxation per step
+    AF_TIGHTEN_STEP: float = 0.05        # Score tightening per step
+    AF_MAX_RELAX: float = 0.15           # Maximum cumulative relaxation
+    AF_MAX_TIGHTEN: float = 0.15         # Maximum cumulative tightening
+
+    # Smart Fee Guard — RR-aware fee tolerance
+    SFG_HIGH_RR_THRESHOLD: float = 3.0  # RR above this → high-RR tolerance
+    SFG_HIGH_RR_FEE_MAX: float = 0.35   # Max fee/TP fraction for high-RR trades
+    SFG_NORMAL_FEE_MAX: float = 0.20    # Max fee/TP fraction for normal trades
+
+    # Trade Flow Monitor — frequency and health tracking
+    TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

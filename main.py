@@ -65,6 +65,11 @@ from core.adaptive_scorer    import adaptive_scorer            # Phase 5: dynami
 from core.confidence_decay   import confidence_decay           # Phase 5: signal staleness
 from core.drawdown_controller import drawdown_controller       # Phase 5: DD protection
 from core.regime_memory      import regime_memory              # Phase 5: regime learning
+from core.trade_activator    import trade_activator            # Phase 5.1: freeze prevention
+from core.exploration_engine import exploration_engine         # Phase 5.1: learning trades
+from core.adaptive_filter    import adaptive_filter            # Phase 5.1: dynamic thresholds
+from core.smart_fee_guard    import smart_fee_guard            # Phase 5.1: RR-aware fee gate
+from core.trade_flow_monitor import trade_flow_monitor         # Phase 5.1: flow health
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
@@ -123,6 +128,7 @@ _last_symbol_eval_ms: dict = {}   # symbol → last strategy evaluation ts
 _last_processed_candle_ts: dict = {}  # symbol → last closed candle ts evaluated
 SYMBOL_EVAL_DEBOUNCE_MS = 750     # throttle heavy signal path per symbol
 _closed_trade_count: list = [0]   # mutable counter for 50-trade genome trigger
+_is_exploration_trade: dict = {}  # symbol → True when open trade is exploration
 
 # Active WebSocket clients
 _ws_clients: list[WebSocket] = []
@@ -231,6 +237,11 @@ async def on_tick(tick: Tick):
                 won=_trade_won, r_mult=_r_mult,
             )
             confidence_decay.reset(sym, _trade_strategy)  # fresh start after trade
+            # Phase 5.1: record exploration outcome + reset activator timer + flow monitor
+            if _is_exploration_trade.pop(sym, False):
+                exploration_engine.record_result(sym, last_trade.net_pnl)
+            trade_activator.record_trade()
+            trade_flow_monitor.record_trade(sym)
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
@@ -359,12 +370,54 @@ async def on_tick(tick: Tick):
             }
             return
 
+        # ── Phase 5.1: Effective thresholds + signal registration ──────────────
+        # Compute how long the system has been without a trade (global)
+        _tf_mins = trade_flow_monitor.minutes_since_last_trade()
+        # Count consecutive losses for adaptive filter (lightweight — only recent trades)
+        _p51_cl = 0
+        for _t in reversed(pnl_calc.trades):
+            if _t.net_pnl < 0:
+                _p51_cl += 1
+            else:
+                break
+        # Trade Activator: relax thresholds when no trades for 30/60/90+ min
+        _activator_result = trade_activator.check(_tf_mins)
+        # Adaptive Filter: tighten on loss streaks, relax on extended quiet
+        _af_result = adaptive_filter.check(
+            consecutive_losses=_p51_cl,
+            minutes_no_trade=_tf_mins,
+        )
+        # Effective score min = most relaxed of activator vs adaptive filter
+        # (adaptive filter tightening can override activator relaxation)
+        if _af_result.state == "TIGHTEN":
+            _effective_score_min = _af_result.effective_score_min
+        else:
+            _effective_score_min = min(
+                _activator_result.effective_score_min,
+                _af_result.effective_score_min,
+            )
+        if _activator_result.active:
+            _thought(
+                f"⚡ ACTIVATOR {sym}: tier={_activator_result.tier} "
+                f"score_min={_effective_score_min:.3f} "
+                f"vol_mult={_activator_result.effective_vol_mult:.2f}×",
+                "SIGNAL",
+            )
+        # Register signal in flow monitor
+        trade_flow_monitor.record_signal(sym)
+
         # Phase 3: Volume Sleep Mode — skip signal in dormant/thin markets.
+        # When trade activator is in TIER_2+ (vol_mult ≤ 0.40), bypass volume filter
+        # to prevent freeze in low-volume periods.
         vol_buf = mdp.candle_volume_buffer(sym)
+        _bypass_vol = _activator_result.effective_vol_mult <= 0.40
         vol_active, vol_reason = volume_filter.is_active(sym, vol_buf)
-        if not vol_active:
+        if not vol_active and not _bypass_vol:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
+            trade_flow_monitor.record_skip(sym, vol_reason)
             return
+        if not vol_active and _bypass_vol:
+            _thought(f"⚡ VOL_BYPASS {sym}: {_activator_result.tier}", "SIGNAL")
 
         # Phase 3: Sector Correlation Guard — max 2 open positions from same sector.
         sector_ok, sector_reason = sector_guard.check(sym, risk_ctrl.positions)
@@ -542,6 +595,8 @@ async def on_tick(tick: Tick):
                 return
 
             # FTD-REF-026: profit guard fee-ratio check (fees > 20% of gross TP)
+            # Note: Phase 5.1 Smart Fee Guard below (after RR Engine) provides the
+            # RR-aware replacement; this check serves as a hard pre-filter.
             _pg_block, _pg_reason = profit_guard.check_fee_ratio(
                 gross_tp_profit=_gross_tp, fee_cost=cost_usdt,
             )
@@ -551,6 +606,7 @@ async def on_tick(tick: Tick):
                     "reason": _pg_reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, _pg_reason)
                 return
 
             # FTD-REF-024: get current edge for signal filter gate
@@ -619,6 +675,7 @@ async def on_tick(tick: Tick):
                     "score": _score_result.score,
                     "regime": regime.value, "strategy": strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, _score_result.reason)
                 return
 
             # ── Phase 5: Confidence Decay — penalise overused patterns ────────
@@ -627,13 +684,14 @@ async def on_tick(tick: Tick):
                 base_conf=_score_result.score,
             )
             _decayed_conf = _decay_result.decayed_confidence
-            if _decayed_conf < cfg.MIN_TRADE_SCORE:
+            if _decayed_conf < _effective_score_min:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": f"DECAY_FILTER({_decay_result.reason})",
                     "score": _decayed_conf, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, "DECAY_FILTER")
                 return
 
             # ── Phase 4: RR Engine — enforce min Risk-Reward ──────────────────
@@ -666,6 +724,21 @@ async def on_tick(tick: Tick):
                         f"DECAY={_decay_result.decay_factor:.2f}"),
             )
 
+            # ── Phase 5.1: Smart Fee Guard — RR-aware fee tolerance ───────────
+            _sfg_result = smart_fee_guard.check(
+                rr=_rr_result.rr,
+                gross_tp=_gross_tp,
+                fee_cost=cost_usdt,
+            )
+            if not _sfg_result.ok:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _sfg_result.reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, _sfg_result.reason)
+                return
+
             # ── Phase 5: EV Engine — expected value gate ──────────────────────
             _est_reward = abs(sig.take_profit - sig.entry_price) * sizing.qty
             _est_risk   = abs(sig.entry_price - sig.stop_loss) * sizing.qty
@@ -676,18 +749,55 @@ async def on_tick(tick: Tick):
                 est_risk=_est_risk,
                 current_cost=cost_usdt,
             )
-            if not _ev_result.ok:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": _ev_result.reason,
-                    "ev": _ev_result.ev, "regime": regime.value,
-                    "strategy": strategy_type,
-                }
-                return
-            if not _ev_result.bootstrapped:
+            _ev_ok = _ev_result.ok
+            if not _ev_ok:
+                # ── Phase 5.1: Exploration Engine — rescue 10% of EV-failed signals
+                _explore = exploration_engine.should_explore(
+                    symbol=sym,
+                    score=_decayed_conf,
+                    equity=scaler.equity,
+                    ev_ok=False,
+                    est_risk=_est_risk,
+                )
+                if not _explore.is_exploration:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": _ev_result.reason,
+                        "ev": _ev_result.ev, "regime": regime.value,
+                        "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, _ev_result.reason)
+                    return
+                # Exploration trade approved — mark and apply reduced sizing
+                _is_exploration_trade[sym] = True
+                sizing.qty = round(sizing.qty * _explore.size_mult, 8)
+                if sizing.qty <= 0:
+                    return
                 _thought(
-                    f"🧮 EV {sym}: ev={_ev_result.ev:.4f} "
-                    f"p_win={_ev_result.p_win:.1%} n={_ev_result.n_trades}",
+                    f"🔬 EXPLORE {sym}: score={_decayed_conf:.3f} "
+                    f"ev={_ev_result.ev:.4f} size={_explore.size_mult}×",
+                    "SIGNAL",
+                )
+            else:
+                if not _ev_result.bootstrapped:
+                    _thought(
+                        f"🧮 EV {sym}: ev={_ev_result.ev:.4f} "
+                        f"p_win={_ev_result.p_win:.1%} n={_ev_result.n_trades}",
+                        "SIGNAL",
+                    )
+
+            # ── Phase 5.1: Trade Activator gate — log if relaxation active ────
+            if _activator_result.active:
+                _thought(
+                    f"⚡ ACTIVATOR_GATE {sym}: {_activator_result.tier} "
+                    f"score_used={_effective_score_min:.3f}",
+                    "SIGNAL",
+                )
+
+            # ── Phase 5.1: Adaptive Filter gate — log state ───────────────────
+            if _af_result.state != "NORMAL":
+                _thought(
+                    f"🎛 ADAPTIVE_FILTER {sym}: {_af_result.reason}",
                     "SIGNAL",
                 )
 
@@ -699,6 +809,7 @@ async def on_tick(tick: Tick):
                     "reason": _dd_result.reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, _dd_result.reason)
                 return
 
             # ── Phase 4: Capital Allocator — score-based sizing ───────────────
@@ -713,8 +824,10 @@ async def on_tick(tick: Tick):
                     "reason": _alloc.reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, _alloc.reason)
                 return
             # Apply capital allocator multiplier then drawdown controller multiplier
+            # (for exploration trades, size is already reduced; multiply on top)
             _combined_mult = round(_alloc.size_multiplier * _dd_result.multiplier, 6)
             sizing.qty = round(sizing.qty * _combined_mult, 8)
             if sizing.qty <= 0:
@@ -985,6 +1098,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     )
     # Initialise drawdown controller with starting capital
     drawdown_controller.update_equity(cfg.INITIAL_CAPITAL)
+    # ── Phase 5.1: Activation + Exploration Control boot log ─────────────────
+    _thought(
+        f"🔓 Phase 5.1 Activation Layer online | "
+        f"activator_tiers=T1@{cfg.ACTIVATOR_T1_MIN}min "
+        f"T2@{cfg.ACTIVATOR_T2_MIN}min "
+        f"T3@{cfg.ACTIVATOR_T3_MIN}min | "
+        f"explore_rate={cfg.EXPLORE_RATE:.0%} "
+        f"smart_fee_rr≥{cfg.SFG_HIGH_RR_THRESHOLD}:{cfg.SFG_HIGH_RR_FEE_MAX:.0%}",
+        "SYSTEM",
+    )
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
 
     # ── Pre-seed genome candle store after bootstrap completes ────────────────
