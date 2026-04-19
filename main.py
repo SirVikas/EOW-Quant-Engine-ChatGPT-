@@ -53,6 +53,8 @@ from core.strategy_engine    import strategy_engine     # FTD-REF-026
 from core.profit_guard       import profit_guard        # FTD-REF-026
 from core.ct_scan_engine     import ct_scan_engine      # FTD-REF-026
 from core.inverse_engine     import inverse_engine, TradeMode  # A.I.E.
+from core.volume_filter      import volume_filter              # Phase 3: sleep mode
+from core.sector_guard       import sector_guard               # Phase 3: correlation guard
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
@@ -199,8 +201,9 @@ async def on_tick(tick: Tick):
                 "VOLATILITY_EXPANSION": "VolatilityExpansion",
             }.get(_trade_regime, "TrendFollowing")
             strategy_engine.record_trade(_closed_strat_type)
-            # A.I.E.: feed outcome so engine learns which strategies to invert
-            inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0)
+            # A.I.E.: feed outcome + direction so engine learns per-strategy and per-direction
+            _trade_direction = getattr(last_trade, "side", "")
+            inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0, direction=_trade_direction)
             # Mandate: trigger genome evolution every 50 trades (not just on timer)
             genome.on_trade_closed()
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
@@ -301,15 +304,26 @@ async def on_tick(tick: Tick):
             error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
             return   # insufficient candles / unstable ADX / near-zero ATR
 
-        # Mandate: Hard-lock MeanReversion when ADX > 25 (strong trend regardless of regime label).
-        # Regime detector can lag; ADX > 25 is a direct trend-strength signal.
-        # MR "buy the dip" in a trend = fighting momentum → SL hit immediately.
+        # Phase 2: Hard-lock MeanReversion when ADX > 25 (strong trend regardless of regime label).
         if strategy_type == "MeanReversion" and raw_adx > 25.0:
             _last_skip = {
                 "ts": now_ms, "symbol": sym,
                 "reason": f"MR_TREND_LOCK(ADX={raw_adx:.1f}>25)",
                 "regime": regime.value,
             }
+            return
+
+        # Phase 3: Volume Sleep Mode — skip signal in dormant/thin markets.
+        vol_buf = mdp.candle_volume_buffer(sym)
+        vol_active, vol_reason = volume_filter.is_active(sym, vol_buf)
+        if not vol_active:
+            _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
+            return
+
+        # Phase 3: Sector Correlation Guard — max 2 open positions from same sector.
+        sector_ok, sector_reason = sector_guard.check(sym, risk_ctrl.positions)
+        if not sector_ok:
+            _last_skip = {"ts": now_ms, "symbol": sym, "reason": sector_reason, "regime": regime.value}
             return
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)

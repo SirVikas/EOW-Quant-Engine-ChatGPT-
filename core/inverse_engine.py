@@ -27,6 +27,7 @@ Signal inversion preserves RR by mirroring SL/TP distances around entry:
 from __future__ import annotations
 
 import time
+from collections import deque
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List
@@ -75,19 +76,40 @@ class InverseEngine:
       use(decision.final_signal, decision.stop_loss, decision.take_profit)
     """
 
+    DIRECTION_LOOKBACK    = 10    # last N per-direction trades to evaluate
+    DIRECTION_FAIL_RATE   = 0.80  # ≥ 80% failure in last N → invert that direction
+
     def __init__(self):
         self._outcomes:      Dict[str, List[bool]] = {}   # strategy → rolling outcomes
         self._consec_losses: Dict[str, int]         = {}  # strategy → consecutive loss count
         self._calibrate_until: float = 0.0                # epoch when global pause expires
+        # Phase 3: per-direction (LONG/SHORT) outcome deques for direction-specific inversion
+        self._dir_outcomes: Dict[str, deque] = {}         # "strategy:LONG" / "strategy:SHORT"
 
     # ── Public ────────────────────────────────────────────────────────────────
 
-    def record(self, strategy_id: str, won: bool) -> None:
-        """Record a live trade result.  Do NOT call for historical replay."""
+    def record(self, strategy_id: str, won: bool, direction: str = "") -> None:
+        """Record a live trade result.  Do NOT call for historical replay.
+        direction: "LONG" or "SHORT" — enables per-direction inversion logic.
+        """
         history = self._outcomes.setdefault(strategy_id, [])
         history.append(won)
         if len(history) > ROLLING_WINDOW:
             history.pop(0)
+
+        # Phase 3: track per-direction outcomes for autonomous direction inversion
+        if direction in ("LONG", "SHORT"):
+            dir_key = f"{strategy_id}:{direction}"
+            dir_hist = self._dir_outcomes.setdefault(
+                dir_key, deque(maxlen=self.DIRECTION_LOOKBACK)
+            )
+            dir_hist.append(won)
+            fail_rate = sum(1 for x in dir_hist if not x) / len(dir_hist)
+            if len(dir_hist) >= self.DIRECTION_LOOKBACK and fail_rate >= self.DIRECTION_FAIL_RATE:
+                logger.warning(
+                    f"[AIE] ⚡ DIR-BIAS {strategy_id}:{direction} — "
+                    f"{fail_rate*100:.0f}% fail in last {len(dir_hist)} trades → direction inversion armed."
+                )
 
         if won:
             self._consec_losses[strategy_id] = 0
@@ -101,6 +123,15 @@ class InverseEngine:
                     f"{streak} consecutive losses → {CALIBRATE_PAUSE_MIN}min pause."
                 )
 
+    def _direction_inverted(self, strategy_id: str, signal: str) -> bool:
+        """True when the last DIRECTION_LOOKBACK trades in this direction had ≥ DIRECTION_FAIL_RATE failures."""
+        dir_key = f"{strategy_id}:{signal}"
+        hist = self._dir_outcomes.get(dir_key)
+        if not hist or len(hist) < self.DIRECTION_LOOKBACK:
+            return False
+        fail_rate = sum(1 for x in hist if not x) / len(hist)
+        return fail_rate >= self.DIRECTION_FAIL_RATE
+
     def get_decision(
         self,
         strategy_id: str,
@@ -113,6 +144,16 @@ class InverseEngine:
         mode = self._mode(strategy_id)
         wr   = self._win_rate(strategy_id)
         n    = len(self._outcomes.get(strategy_id, []))
+
+        # Phase 3: direction-specific inversion overrides NORMAL mode.
+        # If 80%+ of last 10 trades in this direction failed, flip direction.
+        if mode == TradeMode.NORMAL and self._direction_inverted(strategy_id, signal):
+            mode = TradeMode.INVERSE
+            logger.info(
+                f"[AIE] ⚡ DIR-INVERT {strategy_id}:{signal} — "
+                f"≥{self.DIRECTION_FAIL_RATE*100:.0f}% failure in last "
+                f"{self.DIRECTION_LOOKBACK} {signal} trades"
+            )
 
         if mode in (TradeMode.NORMAL, TradeMode.CALIBRATE):
             return InverseDecision(
