@@ -113,6 +113,31 @@ class EngineConfig(BaseSettings):
     # Trade Manager
     PARTIAL_TP_R: float = 1.5            # Book 50% position at 1.5R profit
 
+    # ── Phase 5: EV Engine + Adaptive Intelligence ───────────────────────────
+    # EV Engine
+    EV_MIN_TRADES: int = 10             # Minimum history before EV gate activates
+    EV_WINDOW: int = 30                 # Rolling trade window for EV calculation
+    EV_BOOTSTRAP_PASS: bool = True      # Allow trades when < EV_MIN_TRADES (bootstrap)
+
+    # Adaptive Scorer
+    ADAPTIVE_LR: float = 0.05          # Weight learning rate per trade outcome
+    ADAPTIVE_MIN_WEIGHT: float = 0.05  # Floor for any single factor weight
+    ADAPTIVE_MAX_WEIGHT: float = 0.40  # Ceiling for any single factor weight
+
+    # Confidence Decay Engine
+    DECAY_FREQ_WINDOW_MIN: int = 30    # Signal frequency tracking window (minutes)
+    DECAY_FREQ_MAX: int = 3            # Signals above this count trigger decay
+    DECAY_PER_EXTRA: float = 0.10      # Confidence reduction per extra signal (10%)
+    DECAY_MIN_FACTOR: float = 0.70     # Minimum decay factor (max 30% reduction)
+
+    # Drawdown Controller
+    DD_SOFT_CUT_AT: float = 0.05       # 5% DD → 0.75× size
+    DD_HARD_CUT_AT: float = 0.10       # 10% DD → 0.50× size
+    DD_STOP_AT: float = 0.15           # 15% DD → STOP all new trades
+
+    # Regime Memory
+    REGIME_MEMORY_WINDOW: int = 50     # Rolling trades per (regime, strategy) pair
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 
