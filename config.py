@@ -98,6 +98,21 @@ class EngineConfig(BaseSettings):
     BB_PERIOD: int = 20
     BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
 
+    # ── Phase 4: Profit Engine ───────────────────────────────────────────────
+    # RR Engine
+    MIN_RR_RATIO: float = 1.5            # Minimum TP/SL ratio to accept a trade
+
+    # Trade Scorer
+    MIN_TRADE_SCORE: float = 0.60        # Minimum composite alpha score (0–1)
+    MAX_COST_FRACTION: float = 0.20      # Max cost as fraction of gross TP (matches 5× fee rule)
+
+    # Capital Allocator
+    MAX_CAPITAL_PER_TRADE: float = 0.05  # Max 5% of equity per trade
+    DAILY_RISK_CAP: float = 0.03         # Max 3% of equity risked per day
+
+    # Trade Manager
+    PARTIAL_TP_R: float = 1.5            # Book 50% position at 1.5R profit
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

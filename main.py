@@ -55,13 +55,18 @@ from core.ct_scan_engine     import ct_scan_engine      # FTD-REF-026
 from core.inverse_engine     import inverse_engine, TradeMode  # A.I.E.
 from core.volume_filter      import volume_filter              # Phase 3: sleep mode
 from core.sector_guard       import sector_guard               # Phase 3: correlation guard
+from core.rr_engine          import rr_engine                  # Phase 4: RR enforcement
+from core.trade_scorer       import trade_scorer               # Phase 4: alpha quality gate
+from core.capital_allocator  import capital_allocator          # Phase 4: score-based sizing
+from core.trade_manager      import trade_manager, ManagedPosition  # Phase 4: lifecycle
+from strategies.alpha_engine import alpha_engine               # Phase 4: alpha signals
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
-from strategies.strategy_modules import get_strategy, Signal, TradeSignal
+from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 
 
 def _safe_num(v):
@@ -206,10 +211,29 @@ async def on_tick(tick: Tick):
             inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0, direction=_trade_direction)
             # Mandate: trigger genome evolution every 50 trades (not just on timer)
             genome.on_trade_closed()
+        trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # MASTER-001: keep risk engine equity up to date
     risk_engine.update_equity(scaler.equity)
+
+    # Phase 4: Trade Manager lifecycle update for managed open positions
+    if trade_manager.is_managed(sym):
+        _tm_r_state  = regime_det.state(sym)
+        _tm_atr_pct  = getattr(_tm_r_state, "atr_pct", 0.0)
+        _tm_atr_price = _tm_atr_pct * price / 100 if _tm_atr_pct > 0 else 0.0
+        _tm_action = trade_manager.update(sym, price, _tm_atr_price)
+        if _tm_action.action == "MOVE_BE" and _tm_action.new_sl > 0:
+            _pos = risk_ctrl.positions.get(sym)
+            if _pos:
+                _pos.stop_loss = _tm_action.new_sl
+                _thought(f"[TM] {sym} BE: SL→{_tm_action.new_sl:.4f} ({_tm_action.reason})", "TRADE")
+        elif _tm_action.action == "TRAIL_SL" and _tm_action.new_sl > 0:
+            _pos = risk_ctrl.positions.get(sym)
+            if _pos:
+                _pos.stop_loss = _tm_action.new_sl
+        elif _tm_action.action == "PARTIAL_TP":
+            _thought(f"[TM] {sym} PARTIAL_TP {_tm_action.partial_qty:.6f} @ {price:.4f} ({_tm_action.reason})", "TRADE")
 
     # 2. Get candle data for strategy
     candle = mdp.latest_closed_candle(sym)
@@ -415,6 +439,26 @@ async def on_tick(tick: Tick):
         _adjusted_conf = round(r_ai.confidence * _regime_weight * _pf_mult, 3)
 
         sig = strategy.generate_signal(sym, closes, highs, lows)
+
+        # Phase 4: Alpha Engine — supplementary high-quality signals
+        # Runs when existing strategy produces no signal; all alpha signals
+        # have already passed internal RR + Trade Scorer gates.
+        if not sig or sig.signal == Signal.NONE:
+            _vol_list_alpha = list(vol_buf)
+            _alpha_sig = alpha_engine.generate(
+                symbol=sym, closes=closes, highs=highs, lows=lows,
+                volumes=_vol_list_alpha, adx=guard.adx,
+                atr_pct=atr_pct, avg_atr_pct=atr_pct,
+                regime=regime.value,
+            )
+            if _alpha_sig:
+                sig = _alpha_sig.trade_signal
+                _thought(
+                    f"⚡ ALPHA {_alpha_sig.alpha_type} {sym} "
+                    f"score={_alpha_sig.score:.3f} rr={_alpha_sig.rr:.2f}",
+                    "SIGNAL",
+                )
+
         if sig and sig.signal != Signal.NONE:
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
 
@@ -524,6 +568,86 @@ async def on_tick(tick: Tick):
                 }
                 return
 
+            # ── Phase 4: Trade Scorer — alpha quality gate ────────────────────
+            _vol_list   = list(vol_buf)
+            _avg_vol_p4 = sum(_vol_list[-20:]) / max(len(_vol_list[-20:]), 1) if _vol_list else 1.0
+            _cur_vol_p4 = _vol_list[-1] if _vol_list else 0.0
+            _vol_ratio  = _cur_vol_p4 / _avg_vol_p4 if _avg_vol_p4 > 0 else 1.0
+            _rsi_now    = _rsi(closes, cfg.RSI_PERIOD) if len(closes) >= cfg.RSI_PERIOD + 1 else 50.0
+            _rsi_prev   = _rsi(closes[:-1], cfg.RSI_PERIOD) if len(closes) >= cfg.RSI_PERIOD + 2 else _rsi_now
+            _tp_dist_p4 = abs(sig.take_profit - sig.entry_price)
+            _cost_frac_p4 = cost_per_unit / _tp_dist_p4 if _tp_dist_p4 > 0 else 1.0
+
+            _score_result = trade_scorer.score(
+                regime=r_ai.regime.value,
+                adx=guard.adx,
+                rsi=_rsi_now,
+                rsi_prev=_rsi_prev,
+                atr_pct=atr_pct,
+                avg_atr_pct=atr_pct,  # baseline = current when no rolling avg available
+                vol_ratio=_vol_ratio,
+                cost_fraction=_cost_frac_p4,
+                signal_side=sig.signal.value,
+            )
+            if not _score_result.ok:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _score_result.reason,
+                    "score": _score_result.score,
+                    "regime": regime.value, "strategy": strategy_type,
+                }
+                return
+
+            # ── Phase 4: RR Engine — enforce min Risk-Reward ──────────────────
+            _atr_price = atr_pct * sig.entry_price / 100
+            _rr_result = rr_engine.evaluate(
+                side=sig.signal.value,
+                entry=sig.entry_price,
+                stop_loss=sig.stop_loss,
+                take_profit=sig.take_profit,
+                atr=_atr_price,
+                atr_pct=atr_pct,
+            )
+            if not _rr_result.ok:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _rr_result.reason, "rr": _rr_result.rr,
+                    "regime": regime.value, "strategy": strategy_type,
+                }
+                return
+            # Apply volatility-adjusted TP/SL from RR Engine
+            sig = TradeSignal(
+                symbol=sig.symbol, signal=sig.signal,
+                entry_price=sig.entry_price,
+                stop_loss=_rr_result.adjusted_sl,
+                take_profit=_rr_result.adjusted_tp,
+                confidence=min(sig.confidence, _score_result.score),
+                strategy_id=sig.strategy_id,
+                reason=f"{sig.reason} | RR={_rr_result.rr:.2f} SCORE={_score_result.score:.3f}",
+            )
+
+            # ── Phase 4: Capital Allocator — score-based sizing ───────────────
+            _alloc = capital_allocator.allocate(
+                trade_score=_score_result.score,
+                equity=scaler.equity,
+                base_risk_usdt=sizing.usdt_risk,
+            )
+            if _alloc.size_multiplier <= 0:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _alloc.reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                return
+            sizing.qty = round(sizing.qty * _alloc.size_multiplier, 8)
+            if sizing.qty <= 0:
+                return
+            _thought(
+                f"💰 Capital alloc {sym}: score={_score_result.score:.3f} "
+                f"mult={_alloc.size_multiplier:.2f}x qty={sizing.qty:.6f}",
+                "SIGNAL",
+            )
+
             edge_ok, edge = risk_ctrl.get_trade_decision(
                 side=sig.signal.value,
                 entry=sig.entry_price,
@@ -581,6 +705,15 @@ async def on_tick(tick: Tick):
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
+                    # Phase 4: register with trade manager for lifecycle tracking
+                    trade_manager.register(ManagedPosition(
+                        symbol=sym, side=sig.signal.value,
+                        entry_price=limit_px, stop_loss=sig.stop_loss,
+                        take_profit=sig.take_profit,
+                        initial_risk=abs(limit_px - sig.stop_loss),
+                        qty=sizing.qty,
+                    ))
+                    capital_allocator.record_risk_used(sizing.usdt_risk)
                     _thought(
                         f"📋 Limit {sig.signal.value} {sym} @ {limit_px:.4f} "
                         f"qty={sizing.qty:.6f} risk={sizing.usdt_risk:.2f}U "
@@ -605,6 +738,15 @@ async def on_tick(tick: Tick):
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
+                    # Phase 4: register with trade manager for lifecycle tracking
+                    trade_manager.register(ManagedPosition(
+                        symbol=sym, side=sig.signal.value,
+                        entry_price=sig.entry_price, stop_loss=sig.stop_loss,
+                        take_profit=sig.take_profit,
+                        initial_risk=abs(sig.entry_price - sig.stop_loss),
+                        qty=sizing.qty,
+                    ))
+                    capital_allocator.record_risk_used(sizing.usdt_risk)
                     _thought(
                         f"✅ Opened {sig.signal.value} {sym} "
                         f"qty={sizing.qty:.6f} risk={sizing.usdt_risk:.2f}U "
@@ -745,6 +887,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as exc:
         _thought(f"⚠️ Session restore failed: {exc} — starting fresh.", "SYSTEM")
 
+    # ── Phase 4: Profit Engine boot log ─────────────────────────────────────
+    _thought(
+        f"⚡ Phase 4 Profit Engine online | "
+        f"rr_min={rr_engine.min_rr} "
+        f"score_min={trade_scorer.min_score} "
+        f"max_per_trade={capital_allocator.max_capital_pct:.0%} "
+        f"daily_cap={capital_allocator.daily_risk_cap:.0%}",
+        "SYSTEM",
+    )
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
 
     # ── Pre-seed genome candle store after bootstrap completes ────────────────
@@ -1025,6 +1176,14 @@ async def get_status():
         "total_trades":    len(pnl_calc.trades),
         "ws_status":   ws_truth_engine.get_ui_label(),   # FTD-REF-026: truth-engine label
         "ts":          int(time.time() * 1000),
+        # Phase 4 Profit Engine summary
+        "profit_engine": {
+            "rr_engine":         rr_engine.summary(),
+            "trade_scorer":      trade_scorer.summary(),
+            "capital_allocator": capital_allocator.summary(),
+            "trade_manager":     trade_manager.summary(),
+            "alpha_engine":      alpha_engine.summary(),
+        },
     }
 
 
