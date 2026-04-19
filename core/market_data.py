@@ -91,9 +91,10 @@ class MarketDataProvider:
 
         # Rolling 200-candle OHLC buffers — updated only on 1-min kline close.
         # These give strategies accurate ATR/EMA data instead of noisy tick prices.
-        self.candle_close_buffers: Dict[str, deque] = defaultdict(lambda: deque(maxlen=200))
-        self.candle_high_buffers:  Dict[str, deque] = defaultdict(lambda: deque(maxlen=200))
-        self.candle_low_buffers:   Dict[str, deque] = defaultdict(lambda: deque(maxlen=200))
+        self.candle_close_buffers:  Dict[str, deque] = defaultdict(lambda: deque(maxlen=200))
+        self.candle_high_buffers:   Dict[str, deque] = defaultdict(lambda: deque(maxlen=200))
+        self.candle_low_buffers:    Dict[str, deque] = defaultdict(lambda: deque(maxlen=200))
+        self.candle_volume_buffers: Dict[str, deque] = defaultdict(lambda: deque(maxlen=200))
 
         self._redis:          Optional[aioredis.Redis] = None
         self._ws:             Optional[Any]            = None
@@ -173,6 +174,9 @@ class MarketDataProvider:
 
     def candle_low_buffer(self, symbol: str) -> deque:
         return self.candle_low_buffers[symbol]
+
+    def candle_volume_buffer(self, symbol: str) -> deque:
+        return self.candle_volume_buffers[symbol]
 
     def redis_connected(self) -> bool:
         """True when Redis pub/sub client is active."""
@@ -447,6 +451,7 @@ class MarketDataProvider:
             self.candle_close_buffers[sym].append(candle.close)
             self.candle_high_buffers[sym].append(candle.high)
             self.candle_low_buffers[sym].append(candle.low)
+            self.candle_volume_buffers[sym].append(candle.volume)
             await self._publish("closed_candles", asdict(candle))
 
     # ── Funding Rate Loop ───────────────────────────────────────────────────
