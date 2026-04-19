@@ -110,6 +110,7 @@ _trades_this_hour: list = []      # timestamps of recent trade opens
 _last_symbol_eval_ms: dict = {}   # symbol → last strategy evaluation ts
 _last_processed_candle_ts: dict = {}  # symbol → last closed candle ts evaluated
 SYMBOL_EVAL_DEBOUNCE_MS = 750     # throttle heavy signal path per symbol
+_closed_trade_count: list = [0]   # mutable counter for 50-trade genome trigger
 
 # Active WebSocket clients
 _ws_clients: list[WebSocket] = []
@@ -200,6 +201,8 @@ async def on_tick(tick: Tick):
             strategy_engine.record_trade(_closed_strat_type)
             # A.I.E.: feed outcome so engine learns which strategies to invert
             inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0)
+            # Mandate: trigger genome evolution every 50 trades (not just on timer)
+            genome.on_trade_closed()
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
     # MASTER-001: keep risk engine equity up to date
@@ -297,6 +300,17 @@ async def on_tick(tick: Tick):
         if not guard.ok:
             error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
             return   # insufficient candles / unstable ADX / near-zero ATR
+
+        # Mandate: Hard-lock MeanReversion when ADX > 25 (strong trend regardless of regime label).
+        # Regime detector can lag; ADX > 25 is a direct trend-strength signal.
+        # MR "buy the dip" in a trend = fighting momentum → SL hit immediately.
+        if strategy_type == "MeanReversion" and raw_adx > 25.0:
+            _last_skip = {
+                "ts": now_ms, "symbol": sym,
+                "reason": f"MR_TREND_LOCK(ADX={raw_adx:.1f}>25)",
+                "regime": regime.value,
+            }
+            return
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
         risk_allowed, risk_reason = risk_engine.check_new_trade()
