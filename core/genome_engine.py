@@ -163,6 +163,7 @@ class GenomeEngine:
         self._lock    = asyncio.Lock()
         self._started_at_ms = int(time.time() * 1000)
         self._last_no_candle_warning_ms = 0
+        self._trade_close_count = 0   # 50-trade evolution trigger counter
         self._backtester = DeterministicBacktestEngine(
             fill=FillModelConfig(
                 taker_fee=cfg.TAKER_FEE,
@@ -236,6 +237,21 @@ class GenomeEngine:
         self._running = False
         logger.info("[GENOME] Engine stopped.")
 
+    def on_trade_closed(self) -> None:
+        """
+        Called after every live trade close.  Every 50 trades, schedules an
+        immediate evolution cycle regardless of the normal time-based timer.
+        This implements the mandate: mutate DNA every 50 trades based on
+        live performance, not just on a fixed clock cycle.
+        """
+        self._trade_close_count += 1
+        if self._trade_close_count % 50 == 0:
+            logger.info(
+                f"[GENOME] 50-trade trigger — scheduling immediate evolution cycle "
+                f"(total closes={self._trade_close_count})."
+            )
+            asyncio.create_task(self._evolution_cycle())
+
     # ── Evolution Cycle ───────────────────────────────────────────────────────
 
     async def _evolution_cycle(self):
@@ -275,7 +291,8 @@ class GenomeEngine:
                 self.generation_log = self.generation_log[-500:]
 
                 # Select the best candidate by training-window fitness.
-                best = max(results, key=lambda r: r.profit_factor * r.win_rate)
+                # Fitness = WinRate × ProfitFactor − CostDrag (mandate fitness function)
+                best = max(results, key=lambda r: r.profit_factor * r.win_rate - r.cost_drag_pct / 100)
                 logger.info(
                     f"[GENOME] {strategy_type} ({target_regime}) best: "
                     f"Train PF={best.profit_factor:.2f}  "
