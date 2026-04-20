@@ -200,6 +200,39 @@ class EngineConfig(BaseSettings):
     # Exploration Guard — prevents exploration from causing uncontrolled damage
     EG_DAILY_LOSS_CAP_PCT: float = 0.02 # Disable exploration when daily loss ≥ 2%
 
+    # ── Phase 6.5: Data Stability + Boot Readiness ───────────────────────────
+    # Data Health Monitor
+    DHM_STALE_TICK_SEC: float = 30.0       # Tick older than this → stale
+    DHM_MAX_MISSING_CANDLE_PCT: float = 0.20  # >20% missing candles → unhealthy
+    DHM_MIN_HEALTH_SCORE: float = 60.0     # Below this → block trading
+    DHM_LATENCY_WARN_MS: float = 500.0     # Warn if WS latency > 500ms
+    DHM_LATENCY_BLOCK_MS: float = 2000.0   # Block if WS latency > 2000ms
+
+    # Indicator Validator
+    IV_MIN_CANDLES: int = 30               # Minimum candles before any indicator is valid
+    IV_RSI_MIN_CANDLES: int = 15           # RSI needs at least RSI_PERIOD+1 candles
+    IV_ADX_MIN_CANDLES: int = 28           # ADX (DI period×2) for reliable reading
+    IV_ATR_MIN_CANDLES: int = 15           # ATR needs ATR_PERIOD+1 candles
+    IV_VOLUME_MIN_CANDLES: int = 20        # Volume avg needs this many samples
+
+    # WS Stability Engine
+    WSS_MAX_RECONNECTS_SAFE_MODE: int = 3  # Reconnects above this → safe mode
+    WSS_LATENCY_WARN_MS: float = 500.0     # Log warning above this latency
+    WSS_LATENCY_BLOCK_MS: float = 2000.0   # Block trading above this latency
+    WSS_HEARTBEAT_INTERVAL_SEC: float = 15.0  # Heartbeat check interval
+    WSS_STABILITY_WINDOW: int = 10         # Recent ticks to measure stability score
+
+    # Boot Deployability Engine (Phase 6.5 — data-readiness gate)
+    BDE_MIN_SCORE: float = 70.0            # Below this → block all new trades
+    BDE_DATA_HEALTH_WEIGHT: float = 0.30
+    BDE_INDICATOR_WEIGHT: float = 0.25
+    BDE_WS_STABILITY_WEIGHT: float = 0.25
+    BDE_RISK_ENGINE_WEIGHT: float = 0.20
+
+    # Safe Mode Controller
+    SMC_RESUME_AFTER_MIN: float = 5.0      # Auto-resume safe mode check interval (minutes)
+    SMC_MIN_SCORE_RESUME: float = 75.0     # Deployability score needed to exit safe mode
+
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine
     TR_MIN_RANK_SCORE: float = 0.60       # Trades below this rank are rejected
