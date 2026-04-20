@@ -200,6 +200,47 @@ class EngineConfig(BaseSettings):
     # Exploration Guard — prevents exploration from causing uncontrolled damage
     EG_DAILY_LOSS_CAP_PCT: float = 0.02 # Disable exploration when daily loss ≥ 2%
 
+    # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
+    # Trade Ranker — edge prioritization engine
+    TR_MIN_RANK_SCORE: float = 0.60       # Trades below this rank are rejected
+    TR_EV_WEIGHT: float = 0.30            # Weight for EV score in composite rank
+    TR_TRADE_SCORE_WEIGHT: float = 0.25   # Weight for adaptive trade score
+    TR_REGIME_WEIGHT: float = 0.25        # Weight for regime alignment score
+    TR_HISTORY_WEIGHT: float = 0.20       # Weight for historical performance score
+
+    # Capital Concentrator — allocate more to top-ranked trades
+    CC_BAND_LOW_MIN: float = 0.60         # Band lower bound (maps to 0.5× mult)
+    CC_BAND_LOW_MAX: float = 0.70         # Band upper bound
+    CC_BAND_MID_MIN: float = 0.70         # Band lower bound (maps to 1.0× mult)
+    CC_BAND_MID_MAX: float = 0.80
+    CC_BAND_HIGH_MIN: float = 0.80        # Band lower bound (maps to 1.5× mult)
+    CC_BAND_HIGH_MAX: float = 0.90
+    CC_BAND_ELITE_MIN: float = 0.90       # Band lower bound (maps to 2.0× mult)
+    CC_MULT_LOW: float = 0.50
+    CC_MULT_MID: float = 1.00
+    CC_MULT_HIGH: float = 1.50
+    CC_MULT_ELITE: float = 2.00
+    CC_MAX_POSITION_PCT: float = 0.05     # Hard cap: max % equity per trade
+
+    # Edge Amplifier — boost TP and trailing aggressiveness on elite setups
+    EA_EV_THRESHOLD: float = 0.15         # Minimum EV for amplification
+    EA_RANK_THRESHOLD: float = 0.80       # Minimum rank score for amplification
+    EA_VOL_RATIO_THRESHOLD: float = 1.5   # Minimum volume ratio for amplification
+    EA_TP_BOOST_MULT: float = 1.25        # TP target multiplier when amplified
+    EA_TRAIL_BOOST_MULT: float = 1.20     # Trailing SL aggressiveness multiplier
+
+    # Trade Competition Engine — select best N trades per cycle
+    TCE_MAX_CONCURRENT: int = 3           # Maximum trades accepted per cycle
+    TCE_MIN_RANK_GAP: float = 0.05        # Minimum rank difference to prefer one over another
+
+    # Edge Memory Engine — remember what works
+    EM_WINDOW: int = 50                   # Rolling trades per (strategy, symbol, regime) key
+    EM_MIN_TRADES: int = 5                # Minimum trades before memory boost activates
+    EM_BOOST_MAX: float = 0.15            # Maximum positive boost to rank score
+    EM_PENALTY_MAX: float = 0.15          # Maximum negative penalty to rank score
+    EM_WIN_RATE_BOOST_THRESHOLD: float = 0.60   # Win rate above this → boost
+    EM_WIN_RATE_PENALTY_THRESHOLD: float = 0.40 # Win rate below this → penalize
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 
