@@ -207,3 +207,152 @@ class DeployabilityEngine:
 
 # ── Module-level singleton ────────────────────────────────────────────────────
 deployability_engine = DeployabilityEngine()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 6.5 — Boot Deployability Engine (Data-Readiness Gate)
+#
+# Scores the system's OPERATIONAL readiness at boot and during runtime,
+# combining four data-stability signals into a 0–100 readiness score:
+#
+#   Data Health     30%  — tick freshness, candle coverage, latency
+#   Indicator Ready 25%  — all indicators warmed and free of NaN
+#   WS Stability    25%  — reconnect count, latency, connection state
+#   Risk Engine     20%  — drawdown + daily loss headroom
+#
+# Rule:
+#   score < BDE_MIN_SCORE (70) → block_trading = True → activate safe mode
+# ═══════════════════════════════════════════════════════════════════════════════
+
+from dataclasses import dataclass as _dc
+
+
+@_dc
+class BootDeployabilityResult:
+    score:              float     # 0–100 composite readiness
+    ok:                 bool      # True → system ready to trade
+    block_trading:      bool
+    data_health_score:  float     # 0–100 component
+    indicator_score:    float     # 0–100 component
+    ws_stability_score: float     # 0–100 component
+    risk_score:         float     # 0–100 component
+    status:             str       # "READY" | "DEGRADED" | "BLOCKED"
+    reason:             str = ""
+
+
+class BootDeployabilityEngine:
+    """
+    Combines DataHealthMonitor, IndicatorValidator, WsStabilityEngine, and
+    risk headroom into a single operational readiness score.
+
+    Call evaluate() before every signal cycle. If ok=False, block new trades
+    and activate SafeModeController.
+
+    Args to evaluate():
+        data_health_score:  0–100 from DataHealthMonitor.check().health_score
+        indicator_score:    0–1 from IndicatorValidator.validate().score → ×100
+        ws_stability_score: 0–100 from WsStabilityEngine.stability_score()
+        current_drawdown:   current DD as fraction (0–1)
+        daily_loss_pct:     today's loss as fraction of equity (0–1)
+    """
+
+    def __init__(self):
+        from loguru import logger as _log
+        from config import cfg as _cfg
+        _log.info(
+            f"[BOOT-DEPLOY] Phase 6.5 activated | "
+            f"min_score={_cfg.BDE_MIN_SCORE} "
+            f"weights(data={_cfg.BDE_DATA_HEALTH_WEIGHT} "
+            f"ind={_cfg.BDE_INDICATOR_WEIGHT} "
+            f"ws={_cfg.BDE_WS_STABILITY_WEIGHT} "
+            f"risk={_cfg.BDE_RISK_ENGINE_WEIGHT})"
+        )
+
+    def evaluate(
+        self,
+        data_health_score:  float,   # 0–100
+        indicator_score:    float,   # 0–1  (fraction of checks passed)
+        ws_stability_score: float,   # 0–100
+        current_drawdown:   float = 0.0,
+        daily_loss_pct:     float = 0.0,
+    ) -> BootDeployabilityResult:
+        from loguru import logger as _log
+        from config import cfg as _cfg
+
+        # Normalise all to 0–100
+        ind_100 = min(100.0, max(0.0, indicator_score * 100.0))
+        dh_100  = min(100.0, max(0.0, data_health_score))
+        ws_100  = min(100.0, max(0.0, ws_stability_score))
+
+        # Risk score: penalise for drawdown and daily loss proximity to limits
+        dd_headroom   = max(0.0, 1.0 - current_drawdown / max(_cfg.DD_STOP_AT, 1e-9))
+        dl_headroom   = max(0.0, 1.0 - daily_loss_pct / max(_cfg.DAILY_RISK_CAP * 3, 1e-9))
+        risk_100      = round(min(1.0, (dd_headroom * 0.6 + dl_headroom * 0.4)) * 100, 1)
+
+        composite = (
+            dh_100  * _cfg.BDE_DATA_HEALTH_WEIGHT
+            + ind_100 * _cfg.BDE_INDICATOR_WEIGHT
+            + ws_100  * _cfg.BDE_WS_STABILITY_WEIGHT
+            + risk_100 * _cfg.BDE_RISK_ENGINE_WEIGHT
+        )
+        score = round(composite, 1)
+
+        block_trading = score < _cfg.BDE_MIN_SCORE
+        ok = not block_trading
+
+        if score >= 85:
+            status = "READY"
+        elif score >= _cfg.BDE_MIN_SCORE:
+            status = "DEGRADED"
+        else:
+            status = "BLOCKED"
+
+        reason = ""
+        if block_trading:
+            parts = []
+            if dh_100 < 60:
+                parts.append(f"data_health={dh_100:.0f}")
+            if ind_100 < 60:
+                parts.append(f"indicators={ind_100:.0f}%")
+            if ws_100 < 50:
+                parts.append(f"ws_stability={ws_100:.0f}")
+            if risk_100 < 50:
+                parts.append(f"risk={risk_100:.0f}")
+            reason = f"BOOT_DEPLOY_BLOCK({score:.1f}<{_cfg.BDE_MIN_SCORE}): {', '.join(parts)}"
+            _log.warning(f"[BOOT-DEPLOY] {reason}")
+        else:
+            _log.debug(
+                f"[BOOT-DEPLOY] {status} score={score:.1f} "
+                f"data={dh_100:.0f} ind={ind_100:.0f} "
+                f"ws={ws_100:.0f} risk={risk_100:.0f}"
+            )
+
+        return BootDeployabilityResult(
+            score=score,
+            ok=ok,
+            block_trading=block_trading,
+            data_health_score=dh_100,
+            indicator_score=ind_100,
+            ws_stability_score=ws_100,
+            risk_score=risk_100,
+            status=status,
+            reason=reason,
+        )
+
+    def summary(self) -> dict:
+        from config import cfg as _cfg
+        return {
+            "min_score":    _cfg.BDE_MIN_SCORE,
+            "weights": {
+                "data_health":   _cfg.BDE_DATA_HEALTH_WEIGHT,
+                "indicator":     _cfg.BDE_INDICATOR_WEIGHT,
+                "ws_stability":  _cfg.BDE_WS_STABILITY_WEIGHT,
+                "risk_engine":   _cfg.BDE_RISK_ENGINE_WEIGHT,
+            },
+            "module": "BOOT_DEPLOYABILITY_ENGINE",
+            "phase":  "6.5",
+        }
+
+
+# ── Phase 6.5 singleton ───────────────────────────────────────────────────────
+boot_deployability_engine = BootDeployabilityEngine()
