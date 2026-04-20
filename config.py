@@ -233,6 +233,30 @@ class EngineConfig(BaseSettings):
     SMC_RESUME_AFTER_MIN: float = 5.0      # Auto-resume safe mode check interval (minutes)
     SMC_MIN_SCORE_RESUME: float = 75.0     # Deployability score needed to exit safe mode
 
+    # ── Phase 6.6: Hard Gating + Safety Enforcement ───────────────────────────
+    # Global Gate Controller — master trading permission authority
+    GGL_DEPLOY_MIN_SCORE: float = 70.0     # Min boot-deployability score to allow trading
+    GGL_WS_MIN_SCORE: float = 50.0         # Min WS stability score to allow trading
+    GGL_DATA_MIN_HEALTH: float = 60.0      # Min data health score to allow trading
+    GGL_CACHE_TTL_SEC: float = 1.0         # Seconds to cache last gate result
+
+    # Hard Start Validator — pre-boot stop gate
+    HSV_EXIT_ON_FAIL: bool = False          # True = sys.exit(1) on failure (set True for prod)
+    HSV_MIN_CANDLES_BOOT: int = 30          # Minimum candles before engine is allowed to start
+
+    # Safe Mode Enforcer — runtime auto-protection
+    SME_DEPLOY_LOW_THRESHOLD: float = 65.0  # Activate safe mode if deploy score drops here
+    SME_WS_LOW_THRESHOLD: float = 40.0      # Activate safe mode if WS stability drops here
+    SME_DATA_LOW_THRESHOLD: float = 50.0    # Activate safe mode if data health drops here
+
+    # Pre-Trade Gate — final validation before every trade execution
+    PTG_REQUIRE_INDICATORS: bool = True      # Must indicators be validated for each trade
+    PTG_REQUIRE_DATA_FRESH: bool = True      # Must data be fresh for each trade
+    PTG_LOG_ALLOWED: bool = False            # Log allowed trades (set True for debugging)
+
+    # Gate Logger
+    GL_HISTORY_SIZE: int = 500              # Max gate events to retain in memory
+
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine
     TR_MIN_RANK_SCORE: float = 0.60       # Trades below this rank are rejected
