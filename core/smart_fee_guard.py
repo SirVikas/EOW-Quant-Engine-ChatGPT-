@@ -48,17 +48,20 @@ class SmartFeeGuard:
 
     def check(
         self,
-        rr:       float,
-        gross_tp: float,
-        fee_cost: float,
+        rr:                 float,
+        gross_tp:           float,
+        fee_cost:           float,
+        normal_max_override: float | None = None,
     ) -> FeeGuardResult:
         """
         Evaluate fee acceptability with RR-aware tolerance.
 
         Args:
-            rr:       risk-reward ratio for the signal
-            gross_tp: gross TP profit in USDT (|tp − entry| × qty)
-            fee_cost: total round-trip fee + slippage in USDT
+            rr:                  risk-reward ratio for the signal
+            gross_tp:            gross TP profit in USDT (|tp − entry| × qty)
+            fee_cost:            total round-trip fee + slippage in USDT
+            normal_max_override: dynamic fee tolerance from DynamicThresholdProvider
+                                 (overrides cfg.SFG_NORMAL_FEE_MAX for normal-RR trades)
 
         Returns FeeGuardResult; ok=False → reject trade.
         """
@@ -68,9 +71,14 @@ class SmartFeeGuard:
                 fee_ratio=0.0, high_rr=False, reason="NO_TP(pass)",
             )
 
+        normal_max = (
+            normal_max_override
+            if normal_max_override is not None
+            else cfg.SFG_NORMAL_FEE_MAX
+        )
         fee_ratio  = fee_cost / gross_tp
         high_rr    = rr >= cfg.SFG_HIGH_RR_THRESHOLD
-        eff_max    = cfg.SFG_HIGH_RR_FEE_MAX if high_rr else cfg.SFG_NORMAL_FEE_MAX
+        eff_max    = cfg.SFG_HIGH_RR_FEE_MAX if high_rr else normal_max
 
         if fee_ratio > eff_max:
             reason = (

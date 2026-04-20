@@ -65,11 +65,12 @@ from core.adaptive_scorer    import adaptive_scorer            # Phase 5: dynami
 from core.confidence_decay   import confidence_decay           # Phase 5: signal staleness
 from core.drawdown_controller import drawdown_controller       # Phase 5: DD protection
 from core.regime_memory      import regime_memory              # Phase 5: regime learning
-from core.trade_activator    import trade_activator            # Phase 5.1: freeze prevention
-from core.exploration_engine import exploration_engine         # Phase 5.1: learning trades
-from core.adaptive_filter    import adaptive_filter            # Phase 5.1: dynamic thresholds
-from core.smart_fee_guard    import smart_fee_guard            # Phase 5.1: RR-aware fee gate
-from core.trade_flow_monitor import trade_flow_monitor         # Phase 5.1: flow health
+from core.trade_activator      import trade_activator            # Phase 5.1: freeze prevention
+from core.exploration_engine   import exploration_engine         # Phase 5.1: learning trades
+from core.adaptive_filter      import adaptive_filter            # Phase 5.1: dynamic thresholds
+from core.smart_fee_guard      import smart_fee_guard            # Phase 5.1: RR-aware fee gate
+from core.trade_flow_monitor   import trade_flow_monitor         # Phase 5.1: flow health
+from core.dynamic_thresholds   import dynamic_threshold_provider # Phase 5.2: master control
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
@@ -370,54 +371,38 @@ async def on_tick(tick: Tick):
             }
             return
 
-        # ── Phase 5.1: Effective thresholds + signal registration ──────────────
-        # Compute how long the system has been without a trade (global)
+        # ── Phase 5.2: Dynamic Threshold Provider — master control layer ────────
+        # Single source of truth: aggregates TradeActivator + AdaptiveFilter + DD
         _tf_mins = trade_flow_monitor.minutes_since_last_trade()
-        # Count consecutive losses for adaptive filter (lightweight — only recent trades)
-        _p51_cl = 0
+        _p52_cl  = 0
         for _t in reversed(pnl_calc.trades):
             if _t.net_pnl < 0:
-                _p51_cl += 1
+                _p52_cl += 1
             else:
                 break
-        # Trade Activator: relax thresholds when no trades for 30/60/90+ min
-        _activator_result = trade_activator.check(_tf_mins)
-        # Adaptive Filter: tighten on loss streaks, relax on extended quiet
-        _af_result = adaptive_filter.check(
-            consecutive_losses=_p51_cl,
+        thresholds = dynamic_threshold_provider.get(
             minutes_no_trade=_tf_mins,
+            consecutive_losses=_p52_cl,
         )
-        # Effective score min = most relaxed of activator vs adaptive filter
-        # (adaptive filter tightening can override activator relaxation)
-        if _af_result.state == "TIGHTEN":
-            _effective_score_min = _af_result.effective_score_min
-        else:
-            _effective_score_min = min(
-                _activator_result.effective_score_min,
-                _af_result.effective_score_min,
-            )
-        if _activator_result.active:
+        if thresholds.tier != "NORMAL" or thresholds.af_state != "NORMAL":
             _thought(
-                f"⚡ ACTIVATOR {sym}: tier={_activator_result.tier} "
-                f"score_min={_effective_score_min:.3f} "
-                f"vol_mult={_activator_result.effective_vol_mult:.2f}×",
+                f"⚡ DTP {sym}: tier={thresholds.tier} af={thresholds.af_state} "
+                f"score_min={thresholds.score_min:.3f} "
+                f"vol_mult={thresholds.volume_multiplier:.2f}×"
+                f" fee_tol={thresholds.fee_tolerance:.2f}",
                 "SIGNAL",
             )
-        # Register signal in flow monitor
         trade_flow_monitor.record_signal(sym)
 
-        # Phase 3: Volume Sleep Mode — skip signal in dormant/thin markets.
-        # When trade activator is in TIER_2+ (vol_mult ≤ 0.40), bypass volume filter
-        # to prevent freeze in low-volume periods.
+        # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
-        _bypass_vol = _activator_result.effective_vol_mult <= 0.40
-        vol_active, vol_reason = volume_filter.is_active(sym, vol_buf)
-        if not vol_active and not _bypass_vol:
+        vol_active, vol_reason = volume_filter.is_active(
+            sym, vol_buf, vol_multiplier=thresholds.volume_multiplier,
+        )
+        if not vol_active:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
             trade_flow_monitor.record_skip(sym, vol_reason)
             return
-        if not vol_active and _bypass_vol:
-            _thought(f"⚡ VOL_BYPASS {sym}: {_activator_result.tier}", "SIGNAL")
 
         # Phase 3: Sector Correlation Guard — max 2 open positions from same sector.
         sector_ok, sector_reason = sector_guard.check(sym, risk_ctrl.positions)
@@ -594,172 +579,175 @@ async def on_tick(tick: Tick):
                 }
                 return
 
-            # FTD-REF-026: profit guard fee-ratio check (fees > 20% of gross TP)
-            # Note: Phase 5.1 Smart Fee Guard below (after RR Engine) provides the
-            # RR-aware replacement; this check serves as a hard pre-filter.
-            _pg_block, _pg_reason = profit_guard.check_fee_ratio(
-                gross_tp_profit=_gross_tp, fee_cost=cost_usdt,
+            # ── Phase 5.2: Exploration Hard Injection ─────────────────────────
+            # Exploration check runs BEFORE all quality filters.
+            # Only DrawdownController and risk_engine caps apply to explore trades.
+            _p52_conf       = min(sig.confidence, _adjusted_conf)
+            _explore_inject = exploration_engine.should_explore(
+                symbol=sym, score=_p52_conf, equity=scaler.equity,
+                ev_ok=False, est_risk=0.0,
             )
-            if _pg_block:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": _pg_reason, "regime": regime.value,
-                    "strategy": strategy_type,
-                }
-                trade_flow_monitor.record_skip(sym, _pg_reason)
-                return
-
-            # FTD-REF-024: get current edge for signal filter gate
-            _expected_edge = edge_engine.get_edge(regime.value, strategy_type)
-
-            # MASTER-001 + FTD-REF-023 + FTD-REF-024: adaptive signal quality filter
-            sf_result = signal_filter.check(
-                symbol=sym, entry=sig.entry_price,
-                take_profit=sig.take_profit, stop_loss=sig.stop_loss,
-                cost_usdt=cost_per_unit, atr_pct=atr_pct,
-                confidence=_adjusted_conf,
-                regime=r_ai.regime.value,
-                relaxation_factor=relax_factor,
-                expected_edge=_expected_edge,
-            )
-            if not sf_result.ok:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": sf_result.reason, "rr": sf_result.rr,
-                    "confidence": r_ai.confidence, "regime": regime.value,
-                    "strategy": strategy_type,
-                }
-                return
-
-            # FTD-REDIS-017: hard strategy quality gate (RR/confidence/regime)
-            strat_gate = strategy_engine.evaluate_signal(
-                rr=sf_result.rr,
-                confidence=_adjusted_conf,
-                regime=("UNSTABLE" if r_ai.block_trade else r_ai.regime.value),
-            )
-            if not strat_gate.ok:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": strat_gate.reason, "rr": sf_result.rr,
-                    "confidence": _adjusted_conf, "regime": regime.value,
-                    "strategy": strategy_type,
-                }
-                return
-
-            # ── Phase 5: Adaptive Scorer — dynamic-weight quality gate ──────────
-            _vol_list   = list(vol_buf)
-            _avg_vol_p5 = sum(_vol_list[-20:]) / max(len(_vol_list[-20:]), 1) if _vol_list else 1.0
-            _cur_vol_p5 = _vol_list[-1] if _vol_list else 0.0
-            _vol_ratio  = _cur_vol_p5 / _avg_vol_p5 if _avg_vol_p5 > 0 else 1.0
-            _rsi_now    = _rsi(closes, cfg.RSI_PERIOD) if len(closes) >= cfg.RSI_PERIOD + 1 else 50.0
-            _rsi_prev   = _rsi(closes[:-1], cfg.RSI_PERIOD) if len(closes) >= cfg.RSI_PERIOD + 2 else _rsi_now
-            _tp_dist_p5 = abs(sig.take_profit - sig.entry_price)
-            _cost_frac_p5 = cost_per_unit / _tp_dist_p5 if _tp_dist_p5 > 0 else 1.0
-
-            _score_result = adaptive_scorer.score(
-                symbol=sym,
-                regime=r_ai.regime.value,
-                adx=guard.adx,
-                rsi=_rsi_now,
-                rsi_prev=_rsi_prev,
-                atr_pct=atr_pct,
-                avg_atr_pct=atr_pct,
-                vol_ratio=_vol_ratio,
-                cost_fraction=_cost_frac_p5,
-                signal_side=sig.signal.value,
-            )
-            if not _score_result.ok:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": _score_result.reason,
-                    "score": _score_result.score,
-                    "regime": regime.value, "strategy": strategy_type,
-                }
-                trade_flow_monitor.record_skip(sym, _score_result.reason)
-                return
-
-            # ── Phase 5: Confidence Decay — penalise overused patterns ────────
-            _decay_result = confidence_decay.decay(
-                symbol=sym, strategy_id=sig.strategy_id,
-                base_conf=_score_result.score,
-            )
-            _decayed_conf = _decay_result.decayed_confidence
-            if _decayed_conf < _effective_score_min:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": f"DECAY_FILTER({_decay_result.reason})",
-                    "score": _decayed_conf, "regime": regime.value,
-                    "strategy": strategy_type,
-                }
-                trade_flow_monitor.record_skip(sym, "DECAY_FILTER")
-                return
-
-            # ── Phase 4: RR Engine — enforce min Risk-Reward ──────────────────
-            _atr_price = atr_pct * sig.entry_price / 100
-            _rr_result = rr_engine.evaluate(
-                side=sig.signal.value,
-                entry=sig.entry_price,
-                stop_loss=sig.stop_loss,
-                take_profit=sig.take_profit,
-                atr=_atr_price,
-                atr_pct=atr_pct,
-            )
-            if not _rr_result.ok:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": _rr_result.reason, "rr": _rr_result.rr,
-                    "regime": regime.value, "strategy": strategy_type,
-                }
-                return
-            # Apply volatility-adjusted TP/SL from RR Engine
-            sig = TradeSignal(
-                symbol=sig.symbol, signal=sig.signal,
-                entry_price=sig.entry_price,
-                stop_loss=_rr_result.adjusted_sl,
-                take_profit=_rr_result.adjusted_tp,
-                confidence=min(sig.confidence, _decayed_conf),
-                strategy_id=sig.strategy_id,
-                reason=(f"{sig.reason} | RR={_rr_result.rr:.2f} "
-                        f"SCORE={_score_result.score:.3f} "
-                        f"DECAY={_decay_result.decay_factor:.2f}"),
-            )
-
-            # ── Phase 5.1: Smart Fee Guard — RR-aware fee tolerance ───────────
-            _sfg_result = smart_fee_guard.check(
-                rr=_rr_result.rr,
-                gross_tp=_gross_tp,
-                fee_cost=cost_usdt,
-            )
-            if not _sfg_result.ok:
-                _last_skip = {
-                    "ts": int(time.time() * 1000), "symbol": sym,
-                    "reason": _sfg_result.reason, "regime": regime.value,
-                    "strategy": strategy_type,
-                }
-                trade_flow_monitor.record_skip(sym, _sfg_result.reason)
-                return
-
-            # ── Phase 5: EV Engine — expected value gate ──────────────────────
-            _est_reward = abs(sig.take_profit - sig.entry_price) * sizing.qty
-            _est_risk   = abs(sig.entry_price - sig.stop_loss) * sizing.qty
-            _ev_result  = ev_engine.evaluate(
-                strategy_id=sig.strategy_id,
-                symbol=sym,
-                est_reward=_est_reward,
-                est_risk=_est_risk,
-                current_cost=cost_usdt,
-            )
-            _ev_ok = _ev_result.ok
-            if not _ev_ok:
-                # ── Phase 5.1: Exploration Engine — rescue 10% of EV-failed signals
-                _explore = exploration_engine.should_explore(
-                    symbol=sym,
-                    score=_decayed_conf,
-                    equity=scaler.equity,
-                    ev_ok=False,
-                    est_risk=_est_risk,
+            _skip_quality   = _explore_inject.is_exploration
+            if _skip_quality:
+                _is_exploration_trade[sym] = True
+                sizing.qty = round(sizing.qty * _explore_inject.size_mult, 8)
+                if sizing.qty <= 0:
+                    return
+                _thought(
+                    f"🔬 EXPLORE_INJECT {sym}: score={_p52_conf:.3f} "
+                    f"size={_explore_inject.size_mult}× qty={sizing.qty:.6f}"
+                    f" — quality gates bypassed, only risk limits apply",
+                    "SIGNAL",
                 )
-                if not _explore.is_exploration:
+                _alloc_score = _p52_conf  # use raw confidence for capital band
+
+            if not _skip_quality:
+                # FTD-REF-026: profit guard pre-filter (fee sanity before quality chain)
+                _pg_block, _pg_reason = profit_guard.check_fee_ratio(
+                    gross_tp_profit=_gross_tp, fee_cost=cost_usdt,
+                )
+                if _pg_block:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": _pg_reason, "regime": regime.value,
+                        "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, _pg_reason)
+                    return
+
+                # FTD-REF-024: get current edge for signal filter gate
+                _expected_edge = edge_engine.get_edge(regime.value, strategy_type)
+
+                # MASTER-001 + FTD-REF-023/024: adaptive signal quality filter
+                sf_result = signal_filter.check(
+                    symbol=sym, entry=sig.entry_price,
+                    take_profit=sig.take_profit, stop_loss=sig.stop_loss,
+                    cost_usdt=cost_per_unit, atr_pct=atr_pct,
+                    confidence=_adjusted_conf, regime=r_ai.regime.value,
+                    relaxation_factor=relax_factor, expected_edge=_expected_edge,
+                )
+                if not sf_result.ok:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": sf_result.reason, "rr": sf_result.rr,
+                        "confidence": r_ai.confidence, "regime": regime.value,
+                        "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, sf_result.reason)
+                    return
+
+                # FTD-REDIS-017: hard strategy quality gate (RR/confidence/regime)
+                strat_gate = strategy_engine.evaluate_signal(
+                    rr=sf_result.rr, confidence=_adjusted_conf,
+                    regime=("UNSTABLE" if r_ai.block_trade else r_ai.regime.value),
+                )
+                if not strat_gate.ok:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": strat_gate.reason, "rr": sf_result.rr,
+                        "confidence": _adjusted_conf, "regime": regime.value,
+                        "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, strat_gate.reason)
+                    return
+
+                # ── Phase 5: Adaptive Scorer — dynamic-weight quality gate ────
+                _vol_list     = list(vol_buf)
+                _avg_vol_p5   = (sum(_vol_list[-20:]) / max(len(_vol_list[-20:]), 1)
+                                 if _vol_list else 1.0)
+                _cur_vol_p5   = _vol_list[-1] if _vol_list else 0.0
+                _vol_ratio    = _cur_vol_p5 / _avg_vol_p5 if _avg_vol_p5 > 0 else 1.0
+                _rsi_now      = (_rsi(closes, cfg.RSI_PERIOD)
+                                 if len(closes) >= cfg.RSI_PERIOD + 1 else 50.0)
+                _rsi_prev     = (_rsi(closes[:-1], cfg.RSI_PERIOD)
+                                 if len(closes) >= cfg.RSI_PERIOD + 2 else _rsi_now)
+                _tp_dist_p5   = abs(sig.take_profit - sig.entry_price)
+                _cost_frac_p5 = cost_per_unit / _tp_dist_p5 if _tp_dist_p5 > 0 else 1.0
+
+                _score_result = adaptive_scorer.score(
+                    symbol=sym, regime=r_ai.regime.value,
+                    adx=guard.adx, rsi=_rsi_now, rsi_prev=_rsi_prev,
+                    atr_pct=atr_pct, avg_atr_pct=atr_pct,
+                    vol_ratio=_vol_ratio, cost_fraction=_cost_frac_p5,
+                    signal_side=sig.signal.value,
+                )
+                if not _score_result.ok:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": _score_result.reason,
+                        "score": _score_result.score,
+                        "regime": regime.value, "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, _score_result.reason)
+                    return
+
+                # ── Phase 5: Confidence Decay — dynamic threshold from DTP ────
+                _decay_result = confidence_decay.decay(
+                    symbol=sym, strategy_id=sig.strategy_id,
+                    base_conf=_score_result.score,
+                )
+                _decayed_conf = _decay_result.decayed_confidence
+                if _decayed_conf < thresholds.score_min:  # dynamic, not cfg.MIN_TRADE_SCORE
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": f"DECAY_FILTER({_decay_result.reason})",
+                        "score": _decayed_conf,
+                        "score_min_used": thresholds.score_min,
+                        "regime": regime.value, "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, "DECAY_FILTER")
+                    return
+
+                # ── Phase 4: RR Engine — enforce min Risk-Reward ──────────────
+                _atr_price = atr_pct * sig.entry_price / 100
+                _rr_result = rr_engine.evaluate(
+                    side=sig.signal.value, entry=sig.entry_price,
+                    stop_loss=sig.stop_loss, take_profit=sig.take_profit,
+                    atr=_atr_price, atr_pct=atr_pct,
+                )
+                if not _rr_result.ok:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": _rr_result.reason, "rr": _rr_result.rr,
+                        "regime": regime.value, "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, _rr_result.reason)
+                    return
+                sig = TradeSignal(
+                    symbol=sig.symbol, signal=sig.signal,
+                    entry_price=sig.entry_price,
+                    stop_loss=_rr_result.adjusted_sl,
+                    take_profit=_rr_result.adjusted_tp,
+                    confidence=min(sig.confidence, _decayed_conf),
+                    strategy_id=sig.strategy_id,
+                    reason=(f"{sig.reason} | RR={_rr_result.rr:.2f} "
+                            f"SCORE={_score_result.score:.3f} "
+                            f"DECAY={_decay_result.decay_factor:.2f}"),
+                )
+
+                # ── Phase 5.2: Smart Fee Guard — fully dynamic (RR + DTP) ─────
+                _sfg_result = smart_fee_guard.check(
+                    rr=_rr_result.rr, gross_tp=_gross_tp, fee_cost=cost_usdt,
+                    normal_max_override=thresholds.fee_tolerance,  # dynamic
+                )
+                if not _sfg_result.ok:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": _sfg_result.reason, "regime": regime.value,
+                        "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, _sfg_result.reason)
+                    return
+
+                # ── Phase 5: EV Engine — expected value gate ──────────────────
+                _est_reward = abs(sig.take_profit - sig.entry_price) * sizing.qty
+                _est_risk   = abs(sig.entry_price - sig.stop_loss) * sizing.qty
+                _ev_result  = ev_engine.evaluate(
+                    strategy_id=sig.strategy_id, symbol=sym,
+                    est_reward=_est_reward, est_risk=_est_risk,
+                    current_cost=cost_usdt,
+                )
+                if not _ev_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": _ev_result.reason,
@@ -768,17 +756,6 @@ async def on_tick(tick: Tick):
                     }
                     trade_flow_monitor.record_skip(sym, _ev_result.reason)
                     return
-                # Exploration trade approved — mark and apply reduced sizing
-                _is_exploration_trade[sym] = True
-                sizing.qty = round(sizing.qty * _explore.size_mult, 8)
-                if sizing.qty <= 0:
-                    return
-                _thought(
-                    f"🔬 EXPLORE {sym}: score={_decayed_conf:.3f} "
-                    f"ev={_ev_result.ev:.4f} size={_explore.size_mult}×",
-                    "SIGNAL",
-                )
-            else:
                 if not _ev_result.bootstrapped:
                     _thought(
                         f"🧮 EV {sym}: ev={_ev_result.ev:.4f} "
@@ -786,22 +763,10 @@ async def on_tick(tick: Tick):
                         "SIGNAL",
                     )
 
-            # ── Phase 5.1: Trade Activator gate — log if relaxation active ────
-            if _activator_result.active:
-                _thought(
-                    f"⚡ ACTIVATOR_GATE {sym}: {_activator_result.tier} "
-                    f"score_used={_effective_score_min:.3f}",
-                    "SIGNAL",
-                )
+                _alloc_score = _score_result.score  # use adaptive scorer score
 
-            # ── Phase 5.1: Adaptive Filter gate — log state ───────────────────
-            if _af_result.state != "NORMAL":
-                _thought(
-                    f"🎛 ADAPTIVE_FILTER {sym}: {_af_result.reason}",
-                    "SIGNAL",
-                )
-
-            # ── Phase 5: Drawdown Controller — capital protection gate ────────
+            # ── Common path: Drawdown Controller + Capital Allocator ──────────
+            # DrawdownController is always re-checked fresh (not from cached DTP)
             _dd_result = drawdown_controller.check()
             if not _dd_result.allowed:
                 _last_skip = {
@@ -812,9 +777,8 @@ async def on_tick(tick: Tick):
                 trade_flow_monitor.record_skip(sym, _dd_result.reason)
                 return
 
-            # ── Phase 4: Capital Allocator — score-based sizing ───────────────
             _alloc = capital_allocator.allocate(
-                trade_score=_score_result.score,
+                trade_score=_alloc_score,  # dynamic: explore uses raw conf, normal uses scorer
                 equity=scaler.equity,
                 base_risk_usdt=sizing.usdt_risk,
             )
@@ -826,16 +790,15 @@ async def on_tick(tick: Tick):
                 }
                 trade_flow_monitor.record_skip(sym, _alloc.reason)
                 return
-            # Apply capital allocator multiplier then drawdown controller multiplier
-            # (for exploration trades, size is already reduced; multiply on top)
             _combined_mult = round(_alloc.size_multiplier * _dd_result.multiplier, 6)
             sizing.qty = round(sizing.qty * _combined_mult, 8)
             if sizing.qty <= 0:
                 return
             _thought(
-                f"💰 Capital alloc {sym}: score={_score_result.score:.3f} "
+                f"💰 Capital alloc {sym}: score={_alloc_score:.3f} "
                 f"alloc_mult={_alloc.size_multiplier:.2f}× "
                 f"dd_mult={_dd_result.multiplier:.2f}× "
+                f"explore={_skip_quality} "
                 f"qty={sizing.qty:.6f}",
                 "SIGNAL",
             )
