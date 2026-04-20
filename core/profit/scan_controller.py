@@ -78,6 +78,27 @@ class ScanController:
         self._total_allowed += 1
         return _SCAN_OK
 
+    def enforce_no_scan(self, gate_status: dict) -> None:
+        """
+        Hard enforcement guard — raises immediately if a scan is attempted
+        while the system is in SAFE MODE or the gate is blocked.
+
+        Call this at any scan entry-point where a silent bypass would be
+        a critical error.  Unlike can_scan(), there is no return value —
+        either the call is allowed (no exception) or the system crashes.
+
+        Args:
+            gate_status: dict from GlobalGateController.evaluate()
+
+        Raises:
+            RuntimeError: if can_trade is False or safe_mode is True
+        """
+        decision = self.can_scan(gate_status)
+        if not decision.allowed:
+            raise RuntimeError(
+                f"CRITICAL: Scan attempted in SAFE MODE — {decision.reason}"
+            )
+
     def summary(self) -> dict:
         total = self._total_allowed + self._total_blocked
         return {

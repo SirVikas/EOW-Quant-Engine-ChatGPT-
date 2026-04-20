@@ -16,6 +16,7 @@ from core.orchestrator.execution_orchestrator import (
     GateCheckResult,
     _EXECUTION_AUTHORITY,
 )
+from core.orchestrator.execution_lock import ExecutionLock
 
 __all__ = [
     "ExecutionOrchestrator",
@@ -24,4 +25,5 @@ __all__ = [
     "CycleResult",
     "GateCheckResult",
     "_EXECUTION_AUTHORITY",
+    "ExecutionLock",
 ]
