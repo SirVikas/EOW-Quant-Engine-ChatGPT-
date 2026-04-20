@@ -172,6 +172,34 @@ class EngineConfig(BaseSettings):
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
 
+    # ── Phase 6: Stability + Profit Consistency ───────────────────────────────
+    # EV Confidence Engine — EV-tier-based sizing
+    EVC_HIGH_THRESHOLD: float = 0.15    # EV ≥ 0.15 → HIGH_CONF (full size)
+    EVC_MID_THRESHOLD: float = 0.05     # EV ≥ 0.05 → MEDIUM_CONF (normal size)
+    EVC_HIGH_SIZE_MULT: float = 1.00    # HIGH_CONF size multiplier
+    EVC_MID_SIZE_MULT: float = 1.00     # MEDIUM_CONF size multiplier
+    EVC_LOW_SIZE_MULT: float = 0.70     # LOW_CONF size multiplier (EV barely positive)
+
+    # Loss Cluster Controller — consecutive-loss circuit breaker
+    LCC_REDUCE_AFTER: int = 3           # Consecutive losses → reduce to 50%
+    LCC_PAUSE_AFTER: int = 5            # Consecutive losses → pause trading
+    LCC_PAUSE_MINUTES: int = 30         # Pause duration in minutes
+    LCC_REDUCE_SIZE_MULT: float = 0.50  # Size multiplier when clustering detected
+
+    # Streak Intelligence Engine — hot/cold streak detection
+    SE_WIN_STREAK_MIN: int = 3          # Consecutive wins to declare HOT streak
+    SE_LOSS_STREAK_MIN: int = 3         # Consecutive losses to declare COLD streak
+    SE_HOT_SCORE_ADJ: float = -0.03     # Score_min delta on HOT (negative = relax)
+    SE_COLD_SCORE_ADJ: float = 0.05     # Score_min delta on COLD (positive = tighten)
+
+    # Capital Recovery Engine — intelligent size restoration after drawdown
+    CRE_DEFENSIVE_DD: float = 0.05      # Begin defensive sizing above this DD
+    CRE_RECOVERY_SIZE_MIN: float = 0.70 # Minimum size during defensive/early recovery
+    CRE_RECOVERY_STEP_PCT: float = 0.10 # Fraction of full recovery per step (unused directly)
+
+    # Exploration Guard — prevents exploration from causing uncontrolled damage
+    EG_DAILY_LOSS_CAP_PCT: float = 0.02 # Disable exploration when daily loss ≥ 2%
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 
