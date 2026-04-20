@@ -76,6 +76,13 @@ from core.loss_cluster         import loss_cluster_controller     # Phase 6: los
 from core.streak_engine        import streak_engine               # Phase 6: hot/cold detection
 from core.capital_recovery     import capital_recovery_engine     # Phase 6: recovery sizing
 from core.exploration_guard    import exploration_guard           # Phase 6: exploration gate
+from core.gating import (                                         # Phase 6.6: hard gating
+    gate_logger,
+    safe_mode_engine,
+    global_gate_controller,
+    hard_start_validator,
+    pre_trade_gate,
+)
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
@@ -435,6 +442,23 @@ async def on_tick(tick: Tick):
         sector_ok, sector_reason = sector_guard.check(sym, risk_ctrl.positions)
         if not sector_ok:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": sector_reason, "regime": regime.value}
+            return
+
+        # Phase 6.6: Pre-trade gate — master permission check
+        _gate_status = global_gate_controller.evaluate()
+        _ptg = pre_trade_gate.check(
+            _gate_status,
+            indicator_ok=guard.ok,
+            data_fresh=True,
+            symbol=sym,
+            strategy=strategy_type,
+        )
+        if not _ptg["allowed"]:
+            _last_skip = {
+                "ts": now_ms, "symbol": sym,
+                "reason": _ptg["reason"], "regime": regime.value,
+                "strategy": strategy_type,
+            }
             return
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
@@ -1081,6 +1105,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     if missing:
         raise RuntimeError(f"DNA validation failed before engine start: missing={missing}")
 
+    # ── Phase 6.6: Hard Start Validator — boot gate ──────────────────────────
+    _hsv_result = hard_start_validator.run(
+        candle_count=cfg.HSV_MIN_CANDLES_BOOT,   # assume warm after mdp bootstrap
+        indicator_ok=True,
+        ws_reachable=True,
+    )
+    if not _hsv_result.ok:
+        logger.critical(f"[HARD-START] Blocking engine start: {_hsv_result.failures}")
+        # enforce() already called inside run(); execution stops here in prod.
+
     # ── MASTER-001: Initialise risk engine with current equity ───────────────
     risk_engine.initialize(cfg.INITIAL_CAPITAL)
 
@@ -1157,6 +1191,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         f"smart_fee_rr≥{cfg.SFG_HIGH_RR_THRESHOLD}:{cfg.SFG_HIGH_RR_FEE_MAX:.0%}",
         "SYSTEM",
     )
+    # ── Phase 6.6: Initial gate evaluation ───────────────────────────────────
+    _gate_boot = global_gate_controller.evaluate()
+    _gate_msg  = (
+        f"Phase 6.6 Gate online | can_trade={_gate_boot['can_trade']} "
+        f"reason={_gate_boot['reason']} safe_mode={_gate_boot['safe_mode']}"
+    )
+    _thought(_gate_msg, "SYSTEM")
+    logger.info(f"[GLOBAL-GATE] {_gate_msg}")
+
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
 
     # ── Pre-seed genome candle store after bootstrap completes ────────────────
