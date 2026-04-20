@@ -83,6 +83,10 @@ from core.gating import (                                         # Phase 6.6: h
     hard_start_validator,
     pre_trade_gate,
 )
+from core.orchestrator import (                                    # Phase 7A: execution orchestrator
+    execution_orchestrator,
+    TickContext,
+)
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
@@ -444,19 +448,16 @@ async def on_tick(tick: Tick):
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": sector_reason, "regime": regime.value}
             return
 
-        # Phase 6.6: Pre-trade gate — master permission check
-        _gate_status = global_gate_controller.evaluate()
-        _ptg = pre_trade_gate.check(
-            _gate_status,
-            indicator_ok=guard.ok,
-            data_fresh=True,
-            symbol=sym,
-            strategy=strategy_type,
+        # Phase 7A: Orchestrator gate + scan check — MUST run before signal generation.
+        # Blocks ALL scanning in safe mode or when gate is down.
+        _gate_chk = execution_orchestrator.gate_check(
+            symbol=sym, strategy=strategy_type,
+            indicator_ok=guard.ok, data_fresh=True,
         )
-        if not _ptg["allowed"]:
+        if not _gate_chk.allowed:
             _last_skip = {
                 "ts": now_ms, "symbol": sym,
-                "reason": _ptg["reason"], "regime": regime.value,
+                "reason": _gate_chk.reason, "regime": regime.value,
                 "strategy": strategy_type,
             }
             return
@@ -900,16 +901,51 @@ async def on_tick(tick: Tick):
                     f"size={_recovery_result.size_mult:.2f}×",
                     "SIGNAL",
                 )
-            sizing.qty = round(sizing.qty * _combined_mult, 8)
+            # ── Phase 7A: Execution Orchestrator — full profit pipeline ─────
+            # Receives the combined upstream multiplier and applies gate-aware
+            # rank → compete → concentrate → pre-trade gate → amplify on top.
+            _vol_list_orch = list(vol_buf)
+            _avg_vol_orch  = (sum(_vol_list_orch[-20:]) / max(len(_vol_list_orch[-20:]), 1)
+                              if _vol_list_orch else 1.0)
+            _cur_vol_orch  = _vol_list_orch[-1] if _vol_list_orch else 0.0
+            _vol_ratio_orch = _cur_vol_orch / _avg_vol_orch if _avg_vol_orch > 0 else 1.0
+            _orch_ev = getattr(_ev_result, "ev", 0.0) if not _skip_quality else 0.0
+            _orch_score = _alloc_score
+            _orch_ctx = TickContext(
+                symbol=sym,
+                price=price,
+                regime=regime.value,
+                strategy=strategy_type,
+                ev=_orch_ev,
+                trade_score=_orch_score,
+                volume_ratio=_vol_ratio_orch,
+                equity=scaler.equity,
+                base_risk_usdt=sizing.usdt_risk,
+                upstream_mult=_combined_mult,
+                indicator_ok=guard.ok,
+                data_fresh=True,
+            )
+            _cycle = execution_orchestrator.run_cycle(_orch_ctx)
+            if not _cycle.execute:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _cycle.reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, _cycle.reason)
+                return
+
+            # Apply orchestrator concentration multiplier (folds in upstream_mult + band boost)
+            sizing.qty = round(sizing.qty * _cycle.concentration_mult, 8)
             if sizing.qty <= 0:
                 return
             _thought(
-                f"💰 Capital alloc {sym}: score={_alloc_score:.3f} "
-                f"alloc_mult={_alloc.size_multiplier:.2f}× "
-                f"dd_mult={_dd_result.multiplier:.2f}× "
-                f"recovery_mult={_recovery_result.size_mult:.2f}× "
-                f"explore={_skip_quality} "
-                f"qty={sizing.qty:.6f}",
+                f"💰 Orchestrator {sym}: score={_alloc_score:.3f} "
+                f"upstream_mult={_combined_mult:.2f}× "
+                f"conc_mult={_cycle.concentration_mult:.2f}× "
+                f"band={_cycle.band} rank={_cycle.rank_score:.3f} "
+                f"amplified={_cycle.amplified} "
+                f"explore={_skip_quality} qty={sizing.qty:.6f}",
                 "SIGNAL",
             )
 
