@@ -66,11 +66,16 @@ from core.confidence_decay   import confidence_decay           # Phase 5: signal
 from core.drawdown_controller import drawdown_controller       # Phase 5: DD protection
 from core.regime_memory      import regime_memory              # Phase 5: regime learning
 from core.trade_activator      import trade_activator            # Phase 5.1: freeze prevention
-from core.exploration_engine   import exploration_engine         # Phase 5.1: learning trades
+from core.exploration_engine   import exploration_engine, ExploreResult  # Phase 5.1
 from core.adaptive_filter      import adaptive_filter            # Phase 5.1: dynamic thresholds
 from core.smart_fee_guard      import smart_fee_guard            # Phase 5.1: RR-aware fee gate
 from core.trade_flow_monitor   import trade_flow_monitor         # Phase 5.1: flow health
 from core.dynamic_thresholds   import dynamic_threshold_provider # Phase 5.2: master control
+from core.ev_confidence        import ev_confidence_engine        # Phase 6: EV tier sizing
+from core.loss_cluster         import loss_cluster_controller     # Phase 6: loss circuit breaker
+from core.streak_engine        import streak_engine               # Phase 6: hot/cold detection
+from core.capital_recovery     import capital_recovery_engine     # Phase 6: recovery sizing
+from core.exploration_guard    import exploration_guard           # Phase 6: exploration gate
 from core.exchange.api_manager  import api_manager
 from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
@@ -250,6 +255,7 @@ async def on_tick(tick: Tick):
     risk_engine.update_equity(scaler.equity)
     # Phase 5: keep drawdown controller in sync
     drawdown_controller.update_equity(scaler.equity)
+    capital_recovery_engine.update_equity(scaler.equity)  # Phase 6
 
     # Phase 4: Trade Manager lifecycle update for managed open positions
     if trade_manager.is_managed(sym):
@@ -393,6 +399,27 @@ async def on_tick(tick: Tick):
                 "SIGNAL",
             )
         trade_flow_monitor.record_signal(sym)
+
+        # ── Phase 6: Streak Intelligence — momentum-aware score adjustment ──
+        _p52_cw = 0
+        for _t in reversed(pnl_calc.trades):
+            if _t.net_pnl > 0: _p52_cw += 1
+            else: break
+        _streak_result = streak_engine.check(
+            consecutive_wins=_p52_cw, consecutive_losses=_p52_cl,
+        )
+        # Effective score_min = DTP base ± streak delta, floored at 0.40
+        _eff_score_min = max(0.40, round(
+            thresholds.score_min + _streak_result.score_adjustment, 4
+        ))
+        if _streak_result.state != "NEUTRAL":
+            _thought(
+                f"📈 STREAK {sym}: {_streak_result.state} "
+                f"len={_streak_result.streak_len} "
+                f"score_adj={_streak_result.score_adjustment:+.2f} "
+                f"→ eff_min={_eff_score_min:.3f}",
+                "SIGNAL",
+            )
 
         # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
@@ -579,13 +606,39 @@ async def on_tick(tick: Tick):
                 }
                 return
 
-            # ── Phase 5.2: Exploration Hard Injection ─────────────────────────
-            # Exploration check runs BEFORE all quality filters.
-            # Only DrawdownController and risk_engine caps apply to explore trades.
-            _p52_conf       = min(sig.confidence, _adjusted_conf)
-            _explore_inject = exploration_engine.should_explore(
-                symbol=sym, score=_p52_conf, equity=scaler.equity,
-                ev_ok=False, est_risk=0.0,
+            # ── Phase 6: Loss Cluster Controller — gates ALL trades ──────────
+            _lcc_result = loss_cluster_controller.check(consecutive_losses=_p52_cl)
+            if not _lcc_result.ok:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _lcc_result.reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, _lcc_result.reason)
+                return
+            if _lcc_result.size_mult < 1.0:
+                sizing.qty = round(sizing.qty * _lcc_result.size_mult, 8)
+                if sizing.qty <= 0:
+                    return
+
+            # ── Phase 5.2 + 6: Exploration Hard Injection (guarded) ──────────
+            # ExplorationGuard pre-checks daily loss cap before slot allocation.
+            # Exploration runs BEFORE all quality filters; only DD + risk caps apply.
+            _p52_conf  = min(sig.confidence, _adjusted_conf)
+            _eg_result = exploration_guard.check(
+                daily_loss_pct=exploration_engine.daily_loss_pct(scaler.equity),
+            )
+            _explore_inject = (
+                exploration_engine.should_explore(
+                    symbol=sym, score=_p52_conf, equity=scaler.equity,
+                    ev_ok=False, est_risk=0.0,
+                )
+                if _eg_result.allowed
+                else ExploreResult(
+                    is_exploration=False, size_mult=1.0,
+                    daily_loss_used_pct=exploration_engine.daily_loss_pct(scaler.equity),
+                    reason=_eg_result.reason,
+                )
             )
             _skip_quality   = _explore_inject.is_exploration
             if _skip_quality:
@@ -687,12 +740,12 @@ async def on_tick(tick: Tick):
                     base_conf=_score_result.score,
                 )
                 _decayed_conf = _decay_result.decayed_confidence
-                if _decayed_conf < thresholds.score_min:  # dynamic, not cfg.MIN_TRADE_SCORE
+                if _decayed_conf < _eff_score_min:  # Phase 6: DTP + streak-adjusted
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": f"DECAY_FILTER({_decay_result.reason})",
                         "score": _decayed_conf,
-                        "score_min_used": thresholds.score_min,
+                        "score_min_used": _eff_score_min,
                         "regime": regime.value, "strategy": strategy_type,
                     }
                     trade_flow_monitor.record_skip(sym, "DECAY_FILTER")
@@ -763,6 +816,26 @@ async def on_tick(tick: Tick):
                         "SIGNAL",
                     )
 
+                # ── Phase 6: EV Confidence Engine — tier-based size mult ──────
+                _evc_result = ev_confidence_engine.classify(_ev_result.ev)
+                if not _evc_result.ok:
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": _evc_result.reason, "regime": regime.value,
+                        "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, _evc_result.reason)
+                    return
+                if _evc_result.size_mult < 1.0:
+                    sizing.qty = round(sizing.qty * _evc_result.size_mult, 8)
+                    if sizing.qty <= 0:
+                        return
+                    _thought(
+                        f"📊 EVC {sym}: tier={_evc_result.tier} "
+                        f"ev={_evc_result.ev:.4f} → {_evc_result.size_mult:.0%}× size",
+                        "SIGNAL",
+                    )
+
                 _alloc_score = _score_result.score  # use adaptive scorer score
 
             # ── Common path: Drawdown Controller + Capital Allocator ──────────
@@ -790,7 +863,19 @@ async def on_tick(tick: Tick):
                 }
                 trade_flow_monitor.record_skip(sym, _alloc.reason)
                 return
-            _combined_mult = round(_alloc.size_multiplier * _dd_result.multiplier, 6)
+            # ── Phase 6: Capital Recovery Engine — smooth size restoration ──
+            _recovery_result = capital_recovery_engine.check()
+            _combined_mult = round(
+                _alloc.size_multiplier * _dd_result.multiplier * _recovery_result.size_mult,
+                6,
+            )
+            if _recovery_result.state not in ("NORMAL", "FULLY_RECOVERED"):
+                _thought(
+                    f"🔄 RECOVERY {sym}: state={_recovery_result.state} "
+                    f"recovery={_recovery_result.recovery_pct:.0%} "
+                    f"size={_recovery_result.size_mult:.2f}×",
+                    "SIGNAL",
+                )
             sizing.qty = round(sizing.qty * _combined_mult, 8)
             if sizing.qty <= 0:
                 return
@@ -798,6 +883,7 @@ async def on_tick(tick: Tick):
                 f"💰 Capital alloc {sym}: score={_alloc_score:.3f} "
                 f"alloc_mult={_alloc.size_multiplier:.2f}× "
                 f"dd_mult={_dd_result.multiplier:.2f}× "
+                f"recovery_mult={_recovery_result.size_mult:.2f}× "
                 f"explore={_skip_quality} "
                 f"qty={sizing.qty:.6f}",
                 "SIGNAL",
