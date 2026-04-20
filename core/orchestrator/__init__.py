@@ -14,6 +14,7 @@ from core.orchestrator.execution_orchestrator import (
     TickContext,
     CycleResult,
     GateCheckResult,
+    _EXECUTION_AUTHORITY,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "TickContext",
     "CycleResult",
     "GateCheckResult",
+    "_EXECUTION_AUTHORITY",
 ]

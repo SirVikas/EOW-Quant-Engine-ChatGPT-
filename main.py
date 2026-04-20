@@ -924,6 +924,7 @@ async def on_tick(tick: Tick):
                 upstream_mult=_combined_mult,
                 indicator_ok=guard.ok,
                 data_fresh=True,
+                is_exploration=_skip_quality,
             )
             _cycle = execution_orchestrator.run_cycle(_orch_ctx)
             if not _cycle.execute:

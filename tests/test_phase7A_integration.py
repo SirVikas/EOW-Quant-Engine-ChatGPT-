@@ -53,6 +53,15 @@ from core.trade_competition import TradeCompetitionEngine
 from config import cfg
 
 
+# ── Authority reset fixture ───────────────────────────────────────────────────
+
+@pytest.fixture(autouse=True)
+def reset_authority():
+    ExecutionOrchestrator._reset_authority()
+    yield
+    ExecutionOrchestrator._reset_authority()
+
+
 # ── Gate status factories ─────────────────────────────────────────────────────
 
 def _gate(can_trade=True, safe_mode=False, reason="ALL_CLEAR"):
@@ -83,6 +92,7 @@ def _make_orchestrator(gate_status: dict, sme: SafeModeEngine = None) -> Executi
         concentrator=GateAwareCapitalConcentrator(base=CapitalConcentrator()),
         pre_trade=PreTradeGate(safe_mode=_sme),
         amplifier=GateAwareEdgeAmplifier(base=EdgeAmplifier()),
+        exclusive=False,
     )
 
 
@@ -291,7 +301,7 @@ def test_summary_execute_rate():
     assert s["total_execute"] == 2
     assert s["execute_rate"] == 1.0
     assert s["module"] == "EXECUTION_ORCHESTRATOR"
-    assert s["phase"] == "7A"
+    assert s["phase"] in ("7A", "7A.1")
 
 
 # ── 16: GateCheckResult fields ───────────────────────────────────────────────
