@@ -45,11 +45,14 @@ class RegimeDetector:
         self._low_buf:    Dict[str, deque] = {}
         self._states:     Dict[str, RegimeState] = {}
         self._period = max(cfg.ATR_PERIOD, cfg.BB_PERIOD, 28)  # enough for ADX
+        self.safe_mode: bool = False  # Phase 7A.3: hard block set by gate controller
 
     # ── Public ──────────────────────────────────────────────────────────────
 
     def push(self, symbol: str, close: float, high: float, low: float, ts: int):
         """Feed a new closed candle into the detector."""
+        if self.safe_mode:
+            return  # hard block — gate is down or safe mode active
         self._init_bufs(symbol)
         self._price_buf[symbol].append(close)
         self._high_buf[symbol].append(high)
