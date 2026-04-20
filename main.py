@@ -317,6 +317,14 @@ async def on_tick(tick: Tick):
         return
     _last_symbol_eval_ms[sym] = now_ms
 
+    # Phase 7A.3: Pre-gate control — gate must approve before ANY data processing.
+    # regime.push, strategy eval, signal gen, broadcasts — ALL blocked in safe mode.
+    # Position management (SL/TP) above this line is exempt: it must always run.
+    _pre_gate = execution_orchestrator.gate_check(symbol=sym)
+    if not _pre_gate.allowed:
+        _last_skip = {"ts": now_ms, "symbol": sym, "reason": _pre_gate.reason}
+        return
+
     # 3. Detect regime
     regime_det.push(sym, candle.close, candle.high, candle.low, candle.ts)
     regime = regime_det.get(sym)
