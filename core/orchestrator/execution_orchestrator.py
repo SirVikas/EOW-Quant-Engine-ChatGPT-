@@ -295,6 +295,14 @@ class ExecutionOrchestrator:
             CycleResult(execute=False, reason=...)
                 → skip trade; log reason
         """
+        from core.orchestrator.execution_lock import ExecutionLock
+        ExecutionLock.acquire()
+        try:
+            return self._run_cycle_inner(ctx)
+        finally:
+            ExecutionLock.release()
+
+    def _run_cycle_inner(self, ctx: TickContext) -> CycleResult:
         self.enforce_exclusivity()
         self._total_cycles += 1
 
