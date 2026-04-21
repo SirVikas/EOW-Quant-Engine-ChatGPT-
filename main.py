@@ -37,7 +37,8 @@ from core.metrics_engine   import rolling_ratios
 from core.redis_health    import redis_health
 from core.ws_stabilizer   import WsStabilizer
 from core.regime_debounce import regime_debounce
-from core.indicator_guard import indicator_guard
+from core.indicator_guard     import indicator_guard
+from core.indicator_validator import indicator_validator          # qFTD-007: keeps deploy iv_score accurate
 from core.regime_ai       import regime_ai
 from core.signal_filter   import signal_filter
 from core.risk_engine     import risk_engine
@@ -310,6 +311,17 @@ async def on_tick(tick: Tick):
     _n_candles     = len(candle_buf)
     _ind_ok_coarse = _n_candles >= cfg.IV_MIN_CANDLES
     now_ms         = int(time.time() * 1000)
+
+    # qFTD-007: Update indicator_validator singleton on every tick so the
+    # GlobalGateController._deploy_fn() sees real indicator readiness instead
+    # of always returning False (iv_score=0 → deploy score capped at 75).
+    # indicator_validator.is_ready() is called by _deploy_fn() which feeds
+    # BootDeployabilityEngine — this was the source of the chronic "ind=0" log.
+    indicator_validator.validate_symbol_buffers(
+        candle_close_buf=candle_buf,
+        candle_volume_buf=list(mdp.candle_volume_buffer(sym)),
+    )
+
     _dh_result = data_health_monitor.check(
         last_tick_ts=tick.ts / 1000.0,
         symbol_tick_ages={sym: max(0.0, time.time() - tick.ts / 1000.0)},
@@ -1214,29 +1226,34 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         )),
     ]
 
-    # ── Fix D: Restore previous session's trade history from DataLake ─────────
-    # Give the data_lake task a moment to open the SQLite connection.
-    await asyncio.sleep(0.5)
-    try:
-        historical_trades = data_lake.get_trades(limit=5000)
-        if historical_trades:
-            n = pnl_calc.replay_from_history(historical_trades)
-            # Sync risk_engine and scaler equity after replay so RoR/sizing use real capital
-            replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
-            risk_engine.update_equity(replayed_equity)
-            scaler.set_equity(replayed_equity)
-            # A.I.E. starts fresh each session — historical trades from prior runs
-            # used a broken ATR/cost model and are not representative of the fixed
-            # engine.  InverseEngine will build its own sample from live trades.
-            _thought(
-                f"📂 Session restored: {n} trades replayed from DataLake. "
-                f"Equity: {replayed_equity:.2f} USDT",
-                "SYSTEM",
-            )
-        else:
-            _thought("📂 No prior trade history found — starting fresh.", "SYSTEM")
-    except Exception as exc:
-        _thought(f"⚠️ Session restore failed: {exc} — starting fresh.", "SYSTEM")
+    # ── qFTD-007: Session restore — controlled by BOOT_MODE ──────────────────
+    # FRESH (default): ignore prior trade history — clean slate every boot.
+    # RESUME:          replay DataLake trades to restore equity curve.
+    # Set env var BOOT_MODE=RESUME to re-enable session restore.
+    await asyncio.sleep(0.5)  # give data_lake task a moment to open SQLite
+    if cfg.BOOT_MODE == "RESUME":
+        try:
+            historical_trades = data_lake.get_trades(limit=5000)
+            if historical_trades:
+                n = pnl_calc.replay_from_history(historical_trades)
+                replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
+                risk_engine.update_equity(replayed_equity)
+                scaler.set_equity(replayed_equity)
+                _thought(
+                    f"📂 Session restored: {n} trades replayed from DataLake. "
+                    f"Equity: {replayed_equity:.2f} USDT",
+                    "SYSTEM",
+                )
+            else:
+                _thought("📂 No prior trade history found — starting fresh.", "SYSTEM")
+        except Exception as exc:
+            _thought(f"⚠️ Session restore failed: {exc} — starting fresh.", "SYSTEM")
+    else:
+        _thought(
+            f"📂 BOOT_MODE=FRESH — prior trade history ignored. "
+            f"Starting with clean equity ({cfg.INITIAL_CAPITAL:.2f} USDT).",
+            "SYSTEM",
+        )
 
     # ── Phase 4: Profit Engine boot log ─────────────────────────────────────
     _thought(
