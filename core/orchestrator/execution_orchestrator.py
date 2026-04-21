@@ -233,10 +233,11 @@ class ExecutionOrchestrator:
 
     def gate_check(
         self,
-        symbol:       str            = "",
-        strategy:     str            = "",
-        indicator_ok: Optional[bool] = None,
-        data_fresh:   Optional[bool] = None,
+        symbol:             str            = "",
+        strategy:           str            = "",
+        indicator_ok:       Optional[bool] = None,
+        data_fresh:         Optional[bool] = None,
+        activate_safe_mode: bool           = True,
     ) -> GateCheckResult:
         """
         Fast gate + scan check.  MUST be called before signal generation.
@@ -245,10 +246,13 @@ class ExecutionOrchestrator:
         Caller MUST return without generating any signals on BLOCKED.
 
         Args:
-            indicator_ok: Pre-computed indicator readiness from caller (qFTD-004 SSOT fix).
-                          None → gate uses its internal indicator_ready_fn().
-            data_fresh:   Pre-computed data freshness from data_health_monitor.check().
-                          None → gate uses its internal data_fresh_fn().
+            indicator_ok:       Pre-computed indicator readiness from caller (qFTD-004 SSOT fix).
+                                None → gate uses its internal indicator_ready_fn().
+            data_fresh:         Pre-computed data freshness from data_health_monitor.check().
+                                None → gate uses its internal data_fresh_fn().
+            activate_safe_mode: When False, gate failures block trading but do NOT activate
+                                safe mode. Use False during BOOTING phase so warmup noise
+                                does not permanently trip safe mode before data streams open.
 
         Returns:
             GateCheckResult(allowed=True)  → proceed with signal generation
@@ -257,11 +261,13 @@ class ExecutionOrchestrator:
         gate_status = self._gate.evaluate(
             indicator_ok=indicator_ok,
             data_fresh=data_fresh,
+            activate_safe_mode=activate_safe_mode,
         )
 
         if not gate_status["can_trade"]:
             reason = gate_status.get("reason", "GATE_BLOCKED")
-            self._sme.activate(reason)
+            if activate_safe_mode:
+                self._sme.activate(reason)
             logger.warning(
                 f"[ORCHESTRATOR] GATE BLOCKED — no scan | sym={symbol} reason={reason}"
             )

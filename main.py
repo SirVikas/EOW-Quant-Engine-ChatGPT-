@@ -136,6 +136,12 @@ infra_health = InfraHealthManager(redis_health=redis_health, redis_retries=3)
 _boot_status: dict = {}
 _engine_running: bool = False
 
+# qFTD-007-v2: boot-phase state lock
+# BOOTING: warmup in progress — gate failures block trading but do NOT activate safe mode.
+# LIVE:    normal operation — all gate failures trigger safe mode as usual.
+_system_state: str = "BOOTING"   # "BOOTING" | "LIVE"
+_boot_ts: float = 0.0            # set to time.time() in lifespan() for grace period tracking
+
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
 SYMBOL_COOLDOWN_SEC = 300         # 5 minutes per symbol (was 30 — shorter window = faster learning)
@@ -193,7 +199,7 @@ def _estimate_atr_pct(closes: list[float]) -> float:
 
 async def on_tick(tick: Tick):
     """Called for every new tick from MarketDataProvider."""
-    global _last_skip   # must be declared before any assignment in this function
+    global _last_skip, _system_state   # must be declared before any assignment in this function
     sym   = tick.symbol
     price = tick.price
 
@@ -317,10 +323,32 @@ async def on_tick(tick: Tick):
     # of always returning False (iv_score=0 → deploy score capped at 75).
     # indicator_validator.is_ready() is called by _deploy_fn() which feeds
     # BootDeployabilityEngine — this was the source of the chronic "ind=0" log.
-    indicator_validator.validate_symbol_buffers(
+    # qFTD-007-v2: pass previous-tick indicator values for NaN detection.
+    _r_state_early = regime_det.state(sym)
+    _iv_values = None
+    if _r_state_early is not None:
+        _iv_values = {
+            "adx": float(getattr(_r_state_early, "adx", float("nan"))),
+            "atr": float(getattr(_r_state_early, "atr_pct", float("nan"))),
+        }
+    iv_result = indicator_validator.validate_symbol_buffers(
         candle_close_buf=candle_buf,
         candle_volume_buf=list(mdp.candle_volume_buffer(sym)),
+        indicator_values=_iv_values,
     )
+
+    # qFTD-007-v2: BOOTING→LIVE transition.
+    # While BOOTING, gate failures block trading but never activate safe mode so
+    # warmup noise cannot permanently trip the engine before data streams open.
+    # Transition to LIVE when indicators are ready OR grace period has elapsed.
+    if _system_state == "BOOTING":
+        _elapsed = time.time() - _boot_ts
+        if iv_result.ok or _elapsed >= cfg.STARTUP_GRACE_SECONDS:
+            _system_state = "LIVE"
+            logger.info(
+                f"[BOOT] BOOTING→LIVE | iv_ok={iv_result.ok} "
+                f"elapsed={_elapsed:.1f}s grace={cfg.STARTUP_GRACE_SECONDS}s"
+            )
 
     _dh_result = data_health_monitor.check(
         last_tick_ts=tick.ts / 1000.0,
@@ -332,10 +360,13 @@ async def on_tick(tick: Tick):
     # Phase 7A.3: Pre-gate control — gate must approve before ANY data processing.
     # regime.push, strategy eval, signal gen, broadcasts — ALL blocked in safe mode.
     # Position management (SL/TP) above this line is exempt: it must always run.
+    # qFTD-007-v2: activate_safe_mode=False during BOOTING to prevent warmup noise
+    # from permanently tripping safe mode before data streams are ready.
     _pre_gate = execution_orchestrator.gate_check(
         symbol=sym,
         indicator_ok=_ind_ok_coarse,
         data_fresh=_data_fresh_ok,
+        activate_safe_mode=(_system_state == "LIVE"),
     )
     if not _pre_gate.allowed:
         _last_skip = {"ts": now_ms, "symbol": sym, "reason": _pre_gate.reason}
@@ -493,22 +524,6 @@ async def on_tick(tick: Tick):
         sector_ok, sector_reason = sector_guard.check(sym, risk_ctrl.positions)
         if not sector_ok:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": sector_reason, "regime": regime.value}
-            return
-
-        # Phase 7A: Orchestrator gate + scan check — MUST run before signal generation.
-        # Blocks ALL scanning in safe mode or when gate is down.
-        # qFTD-004: uses guard.ok (fine-grained check) + _data_fresh_ok (from data_health_monitor)
-        _gate_chk = execution_orchestrator.gate_check(
-            symbol=sym, strategy=strategy_type,
-            indicator_ok=guard.ok,
-            data_fresh=_data_fresh_ok,
-        )
-        if not _gate_chk.allowed:
-            _last_skip = {
-                "ts": now_ms, "symbol": sym,
-                "reason": _gate_chk.reason, "regime": regime.value,
-                "strategy": strategy_type,
-            }
             return
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
@@ -1177,8 +1192,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(_asyncio_exception_handler)
 
-    global _engine_running
+    global _engine_running, _boot_ts
     _engine_running = True
+    _boot_ts = time.time()
     ensure_auth_ready_for_mode()
     mdp.register_callback(on_tick)
     # Pre-seed regime_detector during candle bootstrap so indicators are warm from boot
