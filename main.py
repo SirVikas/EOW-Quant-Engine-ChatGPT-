@@ -832,6 +832,8 @@ async def on_tick(tick: Tick):
                     strategy_id=sig.strategy_id, symbol=sym,
                     est_reward=_est_reward, est_risk=_est_risk,
                     current_cost=cost_usdt,
+                    drawdown=drawdown_controller.current_drawdown(),           # Phase 7B
+                    regime_confidence=r_ai.confidence,                         # Phase 7B
                 )
                 if not _ev_result.ok:
                     _last_skip = {

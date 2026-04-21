@@ -64,6 +64,7 @@ class GateAwareCapitalConcentrator:
         equity:         float,
         base_risk_usdt: float,
         upstream_mult:  float = 1.0,
+        ev:             float = 0.0,   # Phase 7B: direct EV for secondary sizing
     ) -> ConcentrationResult:
         """
         Gate-checked capital concentration.
@@ -74,6 +75,7 @@ class GateAwareCapitalConcentrator:
             equity:         current account equity (USDT)
             base_risk_usdt: raw risk USDT before any multiplier
             upstream_mult:  combined multiplier from DD+LossCluster+CapAllocator
+            ev:             Phase 7B — direct EV value passed to base concentrator
 
         Returns:
             ConcentrationResult with band boost when gate allows.
@@ -96,6 +98,7 @@ class GateAwareCapitalConcentrator:
             equity=equity,
             base_risk_usdt=base_risk_usdt,
             upstream_mult=upstream_mult,
+            ev=ev,
         )
 
     def record_risk_used(self, risk_usdt: float) -> None:

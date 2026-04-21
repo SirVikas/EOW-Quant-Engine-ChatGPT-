@@ -404,6 +404,7 @@ class ExecutionOrchestrator:
             equity=ctx.equity,
             base_risk_usdt=ctx.base_risk_usdt,
             upstream_mult=ctx.upstream_mult,
+            ev=ctx.ev,   # Phase 7B: direct EV for secondary sizing boost/penalty
         )
         if not conc.ok:
             self._total_blocked += 1

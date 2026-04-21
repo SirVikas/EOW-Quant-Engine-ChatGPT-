@@ -111,6 +111,17 @@ class TradeRanker:
             history_score: Optional [0, 1] from EdgeMemoryEngine. Defaults to
                            neutral 0.5 when not available.
         """
+        # Phase 7B: hard reject any trade with strictly negative EV
+        if ev < 0:
+            reason = f"NEGATIVE_EV({ev:.4f})"
+            logger.debug(f"[TRADE-RANKER] {reason}")
+            return RankResult(
+                ok=False, rank_score=0.0,
+                ev_component=0.0, score_component=0.0,
+                regime_component=0.0, history_component=0.0,
+                reason=reason,
+            )
+
         c_ev     = self._normalise_ev(ev)
         c_score  = max(0.0, min(trade_score, 1.0))
         c_regime = _regime_fit(regime, strategy)

@@ -76,6 +76,7 @@ class CapitalConcentrator:
         equity:           float,
         base_risk_usdt:   float,
         upstream_mult:    float = 1.0,
+        ev:               float = 0.0,   # Phase 7B: direct EV for secondary sizing
     ) -> ConcentrationResult:
         """
         Compute concentrated size multiplier based on rank_score.
@@ -87,6 +88,8 @@ class CapitalConcentrator:
             upstream_mult:  combined multiplier from DD+LossCluster+CapAllocator
                             (applied first; concentration multiplier is additive
                             on top within safety caps)
+            ev:             Phase 7B — direct EV value; applies an additional
+                            boost/penalty on proposed_risk after band selection
 
         Returns ConcentrationResult; ok=False → skip trade.
         """
@@ -112,6 +115,14 @@ class CapitalConcentrator:
         # Proposed risk = base × upstream_mult × concentration_mult
         proposed_risk = base_risk_usdt * upstream_mult * band_mult
 
+        # Phase 7B: direct EV boost/penalty applied after band selection
+        ev_boost = 1.0
+        if ev > cfg.P7B_EV_HIGH_THRESHOLD:
+            ev_boost = cfg.P7B_EV_CC_BOOST
+        elif ev < cfg.P7B_EV_LOW_THRESHOLD:
+            ev_boost = cfg.P7B_EV_CC_PENALTY
+        proposed_risk = proposed_risk * ev_boost
+
         # Hard cap: max % equity per trade
         max_trade_risk = equity * cfg.CC_MAX_POSITION_PCT
         capped = proposed_risk > max_trade_risk
@@ -125,7 +136,7 @@ class CapitalConcentrator:
 
         reason = (
             f"CC_{band_label}(rank={rank_score:.3f} → {band_mult}× "
-            f"× upstream={upstream_mult:.2f}× = {final_mult:.2f}×"
+            f"× upstream={upstream_mult:.2f}× × ev_boost={ev_boost:.2f}× = {final_mult:.2f}×"
             + (" [CAPPED]" if capped else "")
             + ")"
         )

@@ -260,10 +260,10 @@ class EngineConfig(BaseSettings):
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine
     TR_MIN_RANK_SCORE: float = 0.60       # Trades below this rank are rejected
-    TR_EV_WEIGHT: float = 0.30            # Weight for EV score in composite rank
-    TR_TRADE_SCORE_WEIGHT: float = 0.25   # Weight for adaptive trade score
-    TR_REGIME_WEIGHT: float = 0.25        # Weight for regime alignment score
-    TR_HISTORY_WEIGHT: float = 0.20       # Weight for historical performance score
+    TR_EV_WEIGHT: float = 0.55            # Phase 7B: EV is dominant (was 0.30)
+    TR_TRADE_SCORE_WEIGHT: float = 0.20   # Phase 7B: reduced (was 0.25)
+    TR_REGIME_WEIGHT: float = 0.15        # Phase 7B: reduced (was 0.25)
+    TR_HISTORY_WEIGHT: float = 0.10       # Phase 7B: reduced (was 0.20)
 
     # Capital Concentrator — allocate more to top-ranked trades
     CC_BAND_LOW_MIN: float = 0.60         # Band lower bound (maps to 0.5× mult)
@@ -297,6 +297,29 @@ class EngineConfig(BaseSettings):
     EM_PENALTY_MAX: float = 0.15          # Maximum negative penalty to rank score
     EM_WIN_RATE_BOOST_THRESHOLD: float = 0.60   # Win rate above this → boost
     EM_WIN_RATE_PENALTY_THRESHOLD: float = 0.40 # Win rate below this → penalize
+
+    # ── Phase 7B: EV Engine Evolution ────────────────────────────────────────
+    # Performance-history scaling (applied inside EVEngine.evaluate)
+    P7B_PERF_MIN_TRADES: int = 5               # Trades before perf scaling activates
+    P7B_PERF_WIN_THRESHOLD: float = 0.65       # Win-rate above this → perf boost
+    P7B_PERF_LOSS_THRESHOLD: float = 0.40      # Win-rate below this → perf penalty
+    P7B_PERF_BOOST: float = 1.20               # EV multiplier for strong historical perf
+    P7B_PERF_PENALTY: float = 0.80             # EV multiplier for weak historical perf
+
+    # Drawdown dampening
+    P7B_DD_MAX: float = 0.20                   # DD fraction above which EV is forced ≤ 0
+
+    # Regime-confidence scaling
+    P7B_REGIME_CONF_HIGH: float = 0.70         # Confidence above this → regime boost
+    P7B_REGIME_CONF_LOW: float = 0.30          # Confidence below this → regime penalty
+    P7B_REGIME_BOOST: float = 1.15             # EV multiplier for high regime confidence
+    P7B_REGIME_PENALTY: float = 0.85           # EV multiplier for low regime confidence
+
+    # CapitalConcentrator direct-EV sizing
+    P7B_EV_HIGH_THRESHOLD: float = 0.15        # EV above this → CC boost
+    P7B_EV_LOW_THRESHOLD: float = 0.03         # EV below this → CC penalty
+    P7B_EV_CC_BOOST: float = 1.50              # Proposed-risk multiplier for high-EV trades
+    P7B_EV_CC_PENALTY: float = 0.70            # Proposed-risk multiplier for low-EV trades
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 
