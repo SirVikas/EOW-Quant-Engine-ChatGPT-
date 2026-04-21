@@ -83,6 +83,7 @@ from core.gating import (                                         # Phase 6.6: h
     hard_start_validator,
     pre_trade_gate,
 )
+from core.data_health import data_health_monitor                  # qFTD-004: data freshness SSOT
 from core.orchestrator import (                                    # Phase 7A: execution orchestrator
     execution_orchestrator,
     TickContext,
@@ -317,10 +318,27 @@ async def on_tick(tick: Tick):
         return
     _last_symbol_eval_ms[sym] = now_ms
 
+    # Phase 7A.3 / qFTD-004: Compute data health ONCE here (single source of truth).
+    # data_health_monitor.check() was never called → last_result() always None →
+    # gate's _data_fn() permanently returned False → DATA_NOT_FRESH deadlock.
+    # Fix: call check() with current candle data and wire result through entire chain.
+    _n_candles     = len(candle_buf)
+    _ind_ok_coarse = _n_candles >= cfg.IV_MIN_CANDLES
+    _dh_result = data_health_monitor.check(
+        last_tick_ts=candle.ts / 1000.0,
+        symbol_tick_ages={sym: max(0.0, time.time() - candle.ts / 1000.0)},
+        indicator_ready=_ind_ok_coarse,
+    )
+    _data_fresh_ok = not _dh_result.block_trading
+
     # Phase 7A.3: Pre-gate control — gate must approve before ANY data processing.
     # regime.push, strategy eval, signal gen, broadcasts — ALL blocked in safe mode.
     # Position management (SL/TP) above this line is exempt: it must always run.
-    _pre_gate = execution_orchestrator.gate_check(symbol=sym)
+    _pre_gate = execution_orchestrator.gate_check(
+        symbol=sym,
+        indicator_ok=_ind_ok_coarse,
+        data_fresh=_data_fresh_ok,
+    )
     if not _pre_gate.allowed:
         _last_skip = {"ts": now_ms, "symbol": sym, "reason": _pre_gate.reason}
         return
@@ -458,9 +476,11 @@ async def on_tick(tick: Tick):
 
         # Phase 7A: Orchestrator gate + scan check — MUST run before signal generation.
         # Blocks ALL scanning in safe mode or when gate is down.
+        # qFTD-004: uses guard.ok (fine-grained check) + _data_fresh_ok (from data_health_monitor)
         _gate_chk = execution_orchestrator.gate_check(
             symbol=sym, strategy=strategy_type,
-            indicator_ok=guard.ok, data_fresh=True,
+            indicator_ok=guard.ok,
+            data_fresh=_data_fresh_ok,
         )
         if not _gate_chk.allowed:
             _last_skip = {
@@ -933,7 +953,7 @@ async def on_tick(tick: Tick):
                 base_risk_usdt=sizing.usdt_risk,
                 upstream_mult=_combined_mult,
                 indicator_ok=guard.ok,
-                data_fresh=True,
+                data_fresh=_data_fresh_ok,     # qFTD-004: from data_health_monitor (not hardcoded)
                 is_exploration=_skip_quality,
             )
             _cycle = execution_orchestrator.run_cycle(_orch_ctx)

@@ -233,10 +233,10 @@ class ExecutionOrchestrator:
 
     def gate_check(
         self,
-        symbol:       str  = "",
-        strategy:     str  = "",
-        indicator_ok: bool = True,
-        data_fresh:   bool = True,
+        symbol:       str            = "",
+        strategy:     str            = "",
+        indicator_ok: Optional[bool] = None,
+        data_fresh:   Optional[bool] = None,
     ) -> GateCheckResult:
         """
         Fast gate + scan check.  MUST be called before signal generation.
@@ -244,11 +244,20 @@ class ExecutionOrchestrator:
         Returns BLOCKED immediately if gate is down or safe mode is active.
         Caller MUST return without generating any signals on BLOCKED.
 
+        Args:
+            indicator_ok: Pre-computed indicator readiness from caller (qFTD-004 SSOT fix).
+                          None → gate uses its internal indicator_ready_fn().
+            data_fresh:   Pre-computed data freshness from data_health_monitor.check().
+                          None → gate uses its internal data_fresh_fn().
+
         Returns:
             GateCheckResult(allowed=True)  → proceed with signal generation
             GateCheckResult(allowed=False) → return from caller immediately
         """
-        gate_status = self._gate.evaluate()
+        gate_status = self._gate.evaluate(
+            indicator_ok=indicator_ok,
+            data_fresh=data_fresh,
+        )
 
         if not gate_status["can_trade"]:
             reason = gate_status.get("reason", "GATE_BLOCKED")
@@ -306,8 +315,11 @@ class ExecutionOrchestrator:
         self.enforce_exclusivity()
         self._total_cycles += 1
 
-        # ── 1. Gate re-evaluation (1s cache — essentially free) ──────────
-        gate_status = self._gate.evaluate()
+        # ── 1. Gate re-evaluation — pass ctx readiness values (qFTD-004 SSOT fix) ──
+        gate_status = self._gate.evaluate(
+            indicator_ok=ctx.indicator_ok,
+            data_fresh=ctx.data_fresh,
+        )
 
         if not gate_status["can_trade"]:
             reason = gate_status.get("reason", "GATE_BLOCKED")
