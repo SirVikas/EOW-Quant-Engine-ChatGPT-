@@ -12,7 +12,9 @@ class EngineConfig(BaseSettings):
     # ── Binance API ─────────────────────────────────────────────────────────
     BINANCE_API_KEY: str = Field(default="", env="BINANCE_API_KEY")
     BINANCE_API_SECRET: str = Field(default="", env="BINANCE_API_SECRET")
-    BINANCE_TESTNET: bool = Field(default=True, env="BINANCE_TESTNET")
+    # qFTD-007: False — PAPER mode uses real Binance public endpoints; testnet
+    # is only needed when explicitly set via env var BINANCE_TESTNET=true.
+    BINANCE_TESTNET: bool = Field(default=False, env="BINANCE_TESTNET")
 
     # ── Redis ────────────────────────────────────────────────────────────────
     REDIS_URL: str = Field(default="redis://127.0.0.1:6379/0", env="REDIS_URL")
@@ -25,6 +27,10 @@ class EngineConfig(BaseSettings):
 
     # ── Trading Mode ─────────────────────────────────────────────────────────
     TRADE_MODE: Literal["PAPER", "LIVE"] = Field(default="PAPER", env="TRADE_MODE")
+    # qFTD-007: FRESH = ignore prior trade history at boot (clean slate).
+    # RESUME = replay DataLake trades to restore equity curve from last session.
+    # Set env var BOOT_MODE=RESUME to re-enable session restore.
+    BOOT_MODE: Literal["FRESH", "RESUME"] = Field(default="FRESH", env="BOOT_MODE")
     AUTH_ENABLED: bool = Field(default=False, env="AUTH_ENABLED")
     # Comma-separated origins, e.g. "http://localhost:8000,https://ops.example.com"
     ALLOWED_ORIGINS: str = Field(default="http://localhost:8000", env="ALLOWED_ORIGINS")

@@ -1,8 +1,9 @@
 """
 EOW Quant Engine — Dual-API Credential Vault  (stdlib-only implementation)
 
-Encrypts and stores Binance API credentials for both PAPER (testnet) and
-LIVE (production) modes using only Python standard-library primitives:
+Encrypts and stores Binance API credentials for both PAPER (real API,
+virtual execution) and LIVE (production) modes using only Python
+standard-library primitives:
 
   Key derivation  — PBKDF2-HMAC-SHA256 (480 000 iterations, 64-byte output)
   Encryption      — HMAC-CTR (XOR plaintext with HMAC-SHA256 keystream)
@@ -127,8 +128,8 @@ def _open(password: str, data: bytes) -> bytes:
 
 class VaultManager:
     """
-    Manages encrypted at-rest storage of PAPER (testnet) and LIVE (production)
-    Binance API credentials.
+    Manages encrypted at-rest storage of PAPER (real API, virtual execution)
+    and LIVE (production) Binance API credentials.
 
     The master password is NEVER stored — it is used only during setup/switch to
     derive ephemeral encryption keys.  Plaintext credentials are held in memory
@@ -220,7 +221,11 @@ class VaultManager:
             "key":     creds["key"],
             "secret":  creds["secret"],
             "mode":    target_mode,
-            "testnet": target_mode == "PAPER",
+            # qFTD-007: PAPER uses real Binance API endpoints (real market data,
+            # virtual execution — no real orders placed).  testnet=False always;
+            # previously was True for PAPER which routed execution to testnet.binance.vision
+            # unnecessarily (paper mode never places real orders anyway).
+            "testnet": False,
         }
 
     def status(self) -> dict:
