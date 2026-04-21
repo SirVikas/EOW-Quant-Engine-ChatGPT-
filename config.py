@@ -31,6 +31,9 @@ class EngineConfig(BaseSettings):
     # RESUME = replay DataLake trades to restore equity curve from last session.
     # Set env var BOOT_MODE=RESUME to re-enable session restore.
     BOOT_MODE: Literal["FRESH", "RESUME"] = Field(default="FRESH", env="BOOT_MODE")
+    # qFTD-007-v2: seconds after boot during which gate failures do NOT trigger safe mode.
+    # Engine transitions BOOTING→LIVE when indicator_validator.is_ready() OR elapsed≥grace.
+    STARTUP_GRACE_SECONDS: float = Field(default=60.0, env="STARTUP_GRACE_SECONDS")
     AUTH_ENABLED: bool = Field(default=False, env="AUTH_ENABLED")
     # Comma-separated origins, e.g. "http://localhost:8000,https://ops.example.com"
     ALLOWED_ORIGINS: str = Field(default="http://localhost:8000", env="ALLOWED_ORIGINS")
