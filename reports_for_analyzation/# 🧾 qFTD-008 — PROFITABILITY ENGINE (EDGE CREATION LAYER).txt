@@ -1,0 +1,289 @@
+# 🧾 qFTD-008 — PROFITABILITY ENGINE (EDGE CREATION LAYER)
+
+## 🎯 Objective
+
+Transform the system from:
+❌ Safe but losing
+➡️
+✅ Statistically profitable (positive expectancy system)
+
+---
+
+# 🔍 SECTION 1 — SIGNAL QUALITY & FILTERING
+
+### Q1.1 — Current Threshold Logic
+
+* What is current `score_min` per tier?
+* How is it calculated (static / dynamic / DTP)?
+
+---
+
+### Q1.2 — Signal Distribution
+
+* Out of all generated signals:
+
+  * % above 0.75 score?
+  * % between 0.60–0.75?
+  * % below 0.60?
+
+---
+
+### Q1.3 — Trade Acceptance Logic
+
+* Why are trades allowed at score ~0.60?
+* Is there any hard floor? (yes/no)
+
+---
+
+### Q1.4 — Strategy-wise Performance
+
+Provide PF / win rate per strategy:
+
+* TrendFollowing
+* MeanReversion
+* VolatilityExpansion
+
+---
+
+---
+
+# 🔍 SECTION 2 — EXPLORE MODE (CRITICAL)
+
+### Q2.1 — Explore Trigger
+
+* What conditions trigger:
+
+  ```
+  EXPLORE_INJECT
+  ```
+
+---
+
+### Q2.2 — Gate Bypass Scope
+
+* Which filters are bypassed during explore?
+
+  * score?
+  * EV?
+  * regime?
+  * risk?
+
+---
+
+### Q2.3 — Explore Impact
+
+* % of trades coming from explore mode?
+* Their PF vs normal trades?
+
+---
+
+---
+
+# 🔍 SECTION 3 — EXPECTED VALUE (EV ENGINE)
+
+### Q3.1 — EV Calculation
+
+* How is EV computed?
+
+  ```
+  EV = ?
+  ```
+
+---
+
+### Q3.2 — Current Status
+
+* Why logs show:
+
+  ```
+  ev=0.0000
+  ```
+* Is EV disabled / not trained / insufficient data?
+
+---
+
+### Q3.3 — EV Usage
+
+* Does EV influence:
+
+  * trade entry?
+  * position size?
+  * filtering?
+
+---
+
+### Q3.4 — Minimum Trades Requirement
+
+* EV activation requires how many trades?
+* Is that threshold met?
+
+---
+
+---
+
+# 🔍 SECTION 4 — COST MODEL (FEES IMPACT)
+
+### Q4.1 — Fee Model
+
+* What is per trade fee (entry + exit)?
+* Is fee dynamic (maker/taker)?
+
+---
+
+### Q4.2 — Cost Awareness
+
+* Is RR adjusted for fees before trade?
+
+---
+
+### Q4.3 — Trade Rejection Logic
+
+* Is there any rule:
+
+  ```
+  reject trade if expected profit < fees
+  ```
+
+---
+
+---
+
+# 🔍 SECTION 5 — RISK–REWARD STRUCTURE
+
+### Q5.1 — RR Calculation
+
+* How is RR computed per signal?
+
+---
+
+### Q5.2 — Enforcement
+
+* Is there a hard rule:
+
+  ```
+  RR >= X required
+  ```
+
+---
+
+### Q5.3 — Realized R-Multiple
+
+* Average R of winning trades?
+* Average R of losing trades?
+
+---
+
+---
+
+# 🔍 SECTION 6 — GENOME ENGINE (LEARNING SYSTEM)
+
+### Q6.1 — Activation
+
+* Why most genomes show:
+
+  ```
+  trades=0
+  oos_valid=false
+  ```
+
+---
+
+### Q6.2 — Promotion Criteria
+
+* What is required for promotion?
+
+  * PF threshold?
+  * min trades?
+
+---
+
+### Q6.3 — Live Impact
+
+* Does genome actually influence:
+
+  * strategy parameters?
+  * signal generation?
+
+---
+
+---
+
+# 🔍 SECTION 7 — TRADE FREQUENCY & SELECTION
+
+### Q7.1 — Trades per Hour
+
+* Current trade frequency?
+
+---
+
+### Q7.2 — Selection Logic
+
+* Is there ranking across symbols?
+* Or first-come signal executed?
+
+---
+
+### Q7.3 — Overtrading Check
+
+* Any max trades per hour/day?
+
+---
+
+---
+
+# 🔍 SECTION 8 — DEPLOYABILITY & GATING
+
+### Q8.1 — Deployability Threshold
+
+* At what score is trading allowed?
+
+---
+
+### Q8.2 — Indicator Weight
+
+* How much weight indicator contributes?
+
+---
+
+### Q8.3 — Gate Override
+
+* Any case where gate is bypassed?
+
+---
+
+---
+
+# 🔍 SECTION 9 — REQUIRED OUTPUT
+
+Developer must provide:
+
+### ✔ Signal distribution stats
+
+### ✔ Explore vs normal trade breakdown
+
+### ✔ EV engine status (why zero)
+
+### ✔ Cost vs profit comparison
+
+### ✔ Strategy-wise PF
+
+### ✔ Genome activity status
+
+---
+
+# 📦 Expected AnswerFTD (aFTD)
+
+Must include:
+
+1. Root causes of negative PF
+2. Which layer is failing (signal / EV / cost / selection)
+3. Data-backed explanation (not assumptions)
+4. Feasible upgrade path
+
+---
+
+# 🧠 FINAL PRINCIPLE
+
+“No trade is better than a bad trade.”
+
+---
