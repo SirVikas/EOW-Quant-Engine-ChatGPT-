@@ -86,18 +86,22 @@ class GlobalGateController:
 
     def evaluate(
         self,
-        indicator_ok: Optional[bool] = None,
-        data_fresh:   Optional[bool] = None,
+        indicator_ok:       Optional[bool] = None,
+        data_fresh:         Optional[bool] = None,
+        activate_safe_mode: bool           = True,
     ) -> dict:
         """
         Evaluate all gate conditions and return the canonical gate dict.
 
         Args:
-            indicator_ok: When provided, overrides the internal indicator_ready_fn().
-                          Pass the caller's pre-computed readiness value so the gate
-                          uses a single source of truth instead of re-querying singletons.
-            data_fresh:   When provided, overrides the internal data_fresh_fn().
-                          Pass the result of data_health_monitor.check() from the caller.
+            indicator_ok:       When provided, overrides the internal indicator_ready_fn().
+                                Pass the caller's pre-computed readiness value so the gate
+                                uses a single source of truth instead of re-querying singletons.
+            data_fresh:         When provided, overrides the internal data_fresh_fn().
+                                Pass the result of data_health_monitor.check() from the caller.
+            activate_safe_mode: When False, a failing gate does NOT activate SafeModeEngine.
+                                Use during boot / diagnostic probes where the system is not
+                                yet fully initialised and a failure is expected.
 
         Returns:
             {
@@ -108,8 +112,8 @@ class GlobalGateController:
 
         Side effects:
             • Logs every decision through GatingLogger
-            • Activates SafeModeEngine on failure
-            • Calls SafeModeEngine.check_recovery() on success
+            • Activates SafeModeEngine on failure (only when activate_safe_mode=True)
+            • Calls SafeModeEngine.check_recovery(can_trade=True) on success
         """
         self._total_evals += 1
         now = time.time()
@@ -139,12 +143,14 @@ class GlobalGateController:
 
         if can_trade:
             gate_logger.allowed()
-            # Try auto-resume if we just cleared
-            self._sme.check_recovery(deploy_score=deploy)
+            # qFTD-005: pass can_trade=True so SAFE exits immediately on all-clear
+            self._sme.check_recovery(deploy_score=deploy, can_trade=True)
         else:
             for f in failures:
                 gate_logger.blocked(reason=f)
-            self._sme.activate(reason)
+            # qFTD-005: skip safe mode activation during boot / diagnostic probes
+            if activate_safe_mode:
+                self._sme.activate(reason)
             self._total_blocked += 1
 
         result = {

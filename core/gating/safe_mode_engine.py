@@ -15,9 +15,10 @@ Activation:
     safe_mode_engine.deactivate()              → NORMAL mode (manual only)
 
 Auto-resume:
-    check_recovery(deploy_score) is called by GlobalGateController every
-    evaluation cycle. When deploy_score ≥ SMC_MIN_SCORE_RESUME the engine
-    automatically transitions SAFE → NORMAL. BLOCKED never auto-recovers.
+    check_recovery(deploy_score, can_trade) is called by GlobalGateController
+    every evaluation cycle. When can_trade=True OR deploy_score ≥
+    SMC_MIN_SCORE_RESUME the engine transitions SAFE → NORMAL automatically.
+    BLOCKED never auto-recovers.
 
 Non-negotiable:
     BLOCKED state can only be cleared by explicit operator call to
@@ -139,10 +140,18 @@ class SafeModeEngine:
         )
         self._log(SafeMode.NORMAL, f"FORCE_RESET:{reason}")
 
-    def check_recovery(self, deploy_score: float) -> bool:
+    def check_recovery(self, deploy_score: float, can_trade: bool = False) -> bool:
         """
-        Auto-resume from SAFE to NORMAL when deploy_score ≥ threshold.
-        Only fires at SMC_RESUME_AFTER_MIN intervals. BLOCKED never recovers here.
+        Auto-resume from SAFE to NORMAL.
+
+        Exits SAFE when either condition holds:
+          • can_trade=True  (GlobalGate just evaluated all-clear)
+          • deploy_score ≥ SMC_MIN_SCORE_RESUME
+
+        Throttle applies only after the first check since activation
+        (_last_resume_check == 0.0 means never checked → always permitted).
+        BLOCKED never recovers here.
+
         Returns True if mode was changed to NORMAL.
         """
         if self._mode != SafeMode.SAFE:
@@ -150,21 +159,24 @@ class SafeModeEngine:
 
         now = time.time()
         interval = cfg.SMC_RESUME_AFTER_MIN * 60.0
-        if now - self._last_resume_check < interval:
+        # qFTD-005: skip throttle on the very first check after activation
+        if self._last_resume_check > 0 and (now - self._last_resume_check) < interval:
             return False
         self._last_resume_check = now
 
-        if deploy_score >= cfg.SMC_MIN_SCORE_RESUME:
+        if can_trade or deploy_score >= cfg.SMC_MIN_SCORE_RESUME:
             logger.info(
-                f"[SAFE-MODE-ENGINE] Auto-resume: score={deploy_score:.1f}"
-                f"≥{cfg.SMC_MIN_SCORE_RESUME}"
+                f"[SAFE-MODE-ENGINE] Auto-resume: score={deploy_score:.1f} "
+                f"can_trade={can_trade} threshold={cfg.SMC_MIN_SCORE_RESUME}"
             )
-            self.deactivate(reason=f"AUTO_RESUME(score={deploy_score:.1f})")
+            self.deactivate(
+                reason=f"AUTO_RESUME(score={deploy_score:.1f} can_trade={can_trade})"
+            )
             return True
 
         logger.debug(
             f"[SAFE-MODE-ENGINE] Auto-resume denied: "
-            f"score={deploy_score:.1f}<{cfg.SMC_MIN_SCORE_RESUME}"
+            f"score={deploy_score:.1f}<{cfg.SMC_MIN_SCORE_RESUME} can_trade={can_trade}"
         )
         return False
 

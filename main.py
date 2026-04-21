@@ -1258,8 +1258,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         f"smart_fee_rr≥{cfg.SFG_HIGH_RR_THRESHOLD}:{cfg.SFG_HIGH_RR_FEE_MAX:.0%}",
         "SYSTEM",
     )
-    # ── Phase 6.6: Initial gate evaluation ───────────────────────────────────
-    _gate_boot = global_gate_controller.evaluate()
+    # ── Phase 6.6: Initial gate probe (diagnostic only — no safe mode side-effect)
+    # qFTD-005: system is not yet ready at boot; a failing gate here is expected.
+    # activate_safe_mode=False prevents premature SAFE activation before data streams open.
+    _gate_boot = global_gate_controller.evaluate(activate_safe_mode=False)
     _gate_msg  = (
         f"Phase 6.6 Gate online | can_trade={_gate_boot['can_trade']} "
         f"reason={_gate_boot['reason']} safe_mode={_gate_boot['safe_mode']}"
