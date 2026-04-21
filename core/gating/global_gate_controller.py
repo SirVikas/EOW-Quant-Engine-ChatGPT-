@@ -30,7 +30,7 @@ testable without the full Phase 6.5 singletons.
 from __future__ import annotations
 
 import time
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from loguru import logger
 
@@ -84,9 +84,20 @@ class GlobalGateController:
 
     # ── Primary spec-compliant interface ──────────────────────────────────────
 
-    def evaluate(self) -> dict:
+    def evaluate(
+        self,
+        indicator_ok: Optional[bool] = None,
+        data_fresh:   Optional[bool] = None,
+    ) -> dict:
         """
         Evaluate all gate conditions and return the canonical gate dict.
+
+        Args:
+            indicator_ok: When provided, overrides the internal indicator_ready_fn().
+                          Pass the caller's pre-computed readiness value so the gate
+                          uses a single source of truth instead of re-querying singletons.
+            data_fresh:   When provided, overrides the internal data_fresh_fn().
+                          Pass the result of data_health_monitor.check() from the caller.
 
         Returns:
             {
@@ -103,10 +114,12 @@ class GlobalGateController:
         self._total_evals += 1
         now = time.time()
 
-        ind_ready  = self._ind_fn()
-        ws_score   = self._ws_fn()
-        data_fresh = self._data_fn()
-        deploy     = self._deploy_fn()
+        # qFTD-004: Use caller-supplied readiness when provided (single source of truth).
+        # Fall back to internal singleton queries only when caller passes None.
+        ind_ready      = indicator_ok if indicator_ok is not None else self._ind_fn()
+        data_fresh_val = data_fresh   if data_fresh   is not None else self._data_fn()
+        ws_score       = self._ws_fn()
+        deploy         = self._deploy_fn()
 
         ws_ok     = ws_score  >= cfg.GGL_WS_MIN_SCORE
         deploy_ok = deploy    >= cfg.GGL_DEPLOY_MIN_SCORE
@@ -116,7 +129,7 @@ class GlobalGateController:
             failures.append("INDICATOR_NOT_READY")
         if not ws_ok:
             failures.append(f"WS_UNSTABLE(score={ws_score:.1f}<{cfg.GGL_WS_MIN_SCORE})")
-        if not data_fresh:
+        if not data_fresh_val:
             failures.append("DATA_NOT_FRESH")
         if not deploy_ok:
             failures.append(f"DEPLOY_LOW(score={deploy:.1f}<{cfg.GGL_DEPLOY_MIN_SCORE})")
@@ -142,7 +155,7 @@ class GlobalGateController:
             "_ws_score":     round(ws_score, 1),
             "_deploy_score": round(deploy, 1),
             "_ind_ready":    ind_ready,
-            "_data_fresh":   data_fresh,
+            "_data_fresh":   data_fresh_val,
         }
         self._last_result = result
         self._last_ts = now
