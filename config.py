@@ -274,7 +274,12 @@ class EngineConfig(BaseSettings):
 
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine
-    TR_MIN_RANK_SCORE: float = 0.60       # Trades below this rank are rejected
+    # qFTD-008: was 0.60 — with EV_WEIGHT=0.55 and bootstrap ev=0.0, max achievable
+    # rank during bootstrap = 0.45, making the 0.60 gate mathematically impossible.
+    # Lowered to 0.30 so bootstrap trades (with trade_score≥0.65, good regime fit)
+    # can execute and accumulate the 10-trade history needed for real EV computation.
+    # After 10 trades, genuine EV drives rank above 0.30 naturally.
+    TR_MIN_RANK_SCORE: float = 0.30       # qFTD-008: 0.60→0.30 — break EV bootstrap deadlock
     TR_EV_WEIGHT: float = 0.55            # Phase 7B: EV is dominant (was 0.30)
     TR_TRADE_SCORE_WEIGHT: float = 0.20   # Phase 7B: reduced (was 0.25)
     TR_REGIME_WEIGHT: float = 0.15        # Phase 7B: reduced (was 0.25)

@@ -119,11 +119,17 @@ class EVEngine:
         history = self._history.get(key)
         n = len(history) if history else 0
 
-        # Bootstrap: pass when not enough history
+        # Bootstrap: pass when not enough history.
+        # qFTD-008: ev=0.05 instead of 0.0 — a small positive placeholder representing
+        # neutral-to-slightly-positive expectation during warmup.  ev=0.0 caused the
+        # ranker's 55%-weighted EV component to be zero, making rank ≈ 0.34 which is
+        # below TR_MIN_RANK_SCORE, permanently blocking all trades until 10 trades
+        # accumulated — a mathematical impossibility (catch-22).  0.05 USDT/unit-risk
+        # is conservative and still dwarfed by real EV once history accumulates.
         if n < MIN_TRADES:
             if cfg.EV_BOOTSTRAP_PASS:
                 return EVResult(
-                    ok=True, ev=0.0, p_win=0.5, avg_win=0.0, avg_loss=0.0,
+                    ok=True, ev=0.05, p_win=0.5, avg_win=0.0, avg_loss=0.0,
                     avg_cost=current_cost, n_trades=n, bootstrapped=True,
                     confidence=0.3,
                     reason=f"BOOTSTRAP({n}<{MIN_TRADES})",
