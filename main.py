@@ -293,40 +293,26 @@ async def on_tick(tick: Tick):
         # Startup warmup: until first closed candle lands, skip silently.
         return
 
-    # Evaluate each symbol once per freshly closed candle to avoid
-    # repeatedly rejecting open candles between kline close events.
-    if _last_processed_candle_ts.get(sym) == candle.ts:
-        return
-    _last_processed_candle_ts[sym] = candle.ts
-
-    buf        = list(mdp.price_buffer(sym))           # tick prices — kept for legacy checks
-    candle_buf = list(mdp.candle_close_buffer(sym))    # 1-min candle closes — real OHLC data
-    data_gate = strategy_engine.evaluate_data_sufficiency(len(candle_buf))
-    if data_gate != "OK":
-        error_registry.log("DATA_001", symbol=sym, extra=f"candles={len(candle_buf)}")  # FTD-REF-025
-        _last_skip = {
-            "ts": int(time.time() * 1000), "symbol": sym,
-            "reason": f"{data_gate}({len(candle_buf)})",
-        }
-        return
-
-    # 2b. Performance debounce: avoid repeated heavy regime/signal passes
-    # for the same symbol within sub-second windows.
-    prev_eval = _last_symbol_eval_ms.get(sym, 0)
-    now_ms = int(time.time() * 1000)
-    if now_ms - prev_eval < SYMBOL_EVAL_DEBOUNCE_MS:
-        return
-    _last_symbol_eval_ms[sym] = now_ms
-
-    # Phase 7A.3 / qFTD-004: Compute data health ONCE here (single source of truth).
-    # data_health_monitor.check() was never called → last_result() always None →
-    # gate's _data_fn() permanently returned False → DATA_NOT_FRESH deadlock.
-    # Fix: call check() with current candle data and wire result through entire chain.
+    # qFTD-006 — two bugs fixed here, must stay before candle dedup:
+    #
+    # Bug 1 — wrong timestamp source:
+    #   candle.ts is the kline OPEN time (start of the 1-min bar) — always
+    #   60–120 s old by the time on_tick fires.  tick_age > DHM_STALE_TICK_SEC
+    #   on every single call → permanent STALE_TICK block regardless of WS health.
+    #   Fix: use tick.ts (aggTrade exchange timestamp, milliseconds old).
+    #
+    # Bug 2 — gate starved by candle dedup:
+    #   Pre-gate was placed after the dedup guard, so the gate was only re-evaluated
+    #   once per candle close (~60 s).  After a WS reconnect the gate stayed blocked
+    #   until the next candle — creating a safe-mode infinite loop.
+    #   Fix: evaluate health + gate on every tick so the gate clears mid-minute.
+    candle_buf     = list(mdp.candle_close_buffer(sym))
     _n_candles     = len(candle_buf)
     _ind_ok_coarse = _n_candles >= cfg.IV_MIN_CANDLES
+    now_ms         = int(time.time() * 1000)
     _dh_result = data_health_monitor.check(
-        last_tick_ts=candle.ts / 1000.0,
-        symbol_tick_ages={sym: max(0.0, time.time() - candle.ts / 1000.0)},
+        last_tick_ts=tick.ts / 1000.0,
+        symbol_tick_ages={sym: max(0.0, time.time() - tick.ts / 1000.0)},
         indicator_ready=_ind_ok_coarse,
     )
     _data_fresh_ok = not _dh_result.block_trading
@@ -342,6 +328,29 @@ async def on_tick(tick: Tick):
     if not _pre_gate.allowed:
         _last_skip = {"ts": now_ms, "symbol": sym, "reason": _pre_gate.reason}
         return
+
+    # Strategy/signal logic runs only on new candle closes (not every tick).
+    if _last_processed_candle_ts.get(sym) == candle.ts:
+        return
+    _last_processed_candle_ts[sym] = candle.ts
+
+    buf       = list(mdp.price_buffer(sym))           # tick prices — kept for legacy checks
+    # candle_buf already computed above (before gate check)
+    data_gate = strategy_engine.evaluate_data_sufficiency(len(candle_buf))
+    if data_gate != "OK":
+        error_registry.log("DATA_001", symbol=sym, extra=f"candles={len(candle_buf)}")  # FTD-REF-025
+        _last_skip = {
+            "ts": int(time.time() * 1000), "symbol": sym,
+            "reason": f"{data_gate}({len(candle_buf)})",
+        }
+        return
+
+    # 2b. Performance debounce: avoid repeated heavy regime/signal passes
+    # for the same symbol within sub-second windows.
+    prev_eval = _last_symbol_eval_ms.get(sym, 0)
+    if now_ms - prev_eval < SYMBOL_EVAL_DEBOUNCE_MS:
+        return
+    _last_symbol_eval_ms[sym] = now_ms
 
     # 3. Detect regime
     regime_det.push(sym, candle.close, candle.high, candle.low, candle.ts)
