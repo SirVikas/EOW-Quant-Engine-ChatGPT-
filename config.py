@@ -202,16 +202,17 @@ class EngineConfig(BaseSettings):
 
     # ── Phase 6.5: Data Stability + Boot Readiness ───────────────────────────
     # Data Health Monitor
-    DHM_STALE_TICK_SEC: float = 30.0       # Tick older than this → stale
+    # FTD-REF-055: 30→60s — ticks can arrive up to 60s apart during low-volume periods
+    DHM_STALE_TICK_SEC: float = 60.0       # Tick older than this → stale (was 30.0)
     DHM_MAX_MISSING_CANDLE_PCT: float = 0.20  # >20% missing candles → unhealthy
     DHM_MIN_HEALTH_SCORE: float = 60.0     # Below this → block trading
     DHM_LATENCY_WARN_MS: float = 500.0     # Warn if WS latency > 500ms
     DHM_LATENCY_BLOCK_MS: float = 2000.0   # Block if WS latency > 2000ms
 
     # Indicator Validator
-    IV_MIN_CANDLES: int = 30               # Minimum candles before any indicator is valid
+    IV_MIN_CANDLES: int = 20               # FTD-REF-055: 30→20 — reduced warmup window
     IV_RSI_MIN_CANDLES: int = 15           # RSI needs at least RSI_PERIOD+1 candles
-    IV_ADX_MIN_CANDLES: int = 28           # ADX (DI period×2) for reliable reading
+    IV_ADX_MIN_CANDLES: int = 20           # FTD-REF-055: 28→20 — ADX reliable at 20 candles
     IV_ATR_MIN_CANDLES: int = 15           # ATR needs ATR_PERIOD+1 candles
     IV_VOLUME_MIN_CANDLES: int = 20        # Volume avg needs this many samples
 
@@ -223,7 +224,9 @@ class EngineConfig(BaseSettings):
     WSS_STABILITY_WINDOW: int = 10         # Recent ticks to measure stability score
 
     # Boot Deployability Engine (Phase 6.5 — data-readiness gate)
-    BDE_MIN_SCORE: float = 70.0            # Below this → block all new trades
+    # FTD-REF-055: Max achievable score at boot (data=0, ind=0) = ws×0.25 + risk×0.20 = 45.0
+    # Threshold must be ≤ 45 so gate can open during warmup; per-trade PTG still enforces safety.
+    BDE_MIN_SCORE: float = 45.0            # FTD-REF-055: 70→45 — warmup-safe threshold
     BDE_DATA_HEALTH_WEIGHT: float = 0.30
     BDE_INDICATOR_WEIGHT: float = 0.25
     BDE_WS_STABILITY_WEIGHT: float = 0.25
@@ -231,21 +234,24 @@ class EngineConfig(BaseSettings):
 
     # Safe Mode Controller
     SMC_RESUME_AFTER_MIN: float = 5.0      # Auto-resume safe mode check interval (minutes)
-    SMC_MIN_SCORE_RESUME: float = 75.0     # Deployability score needed to exit safe mode
+    # FTD-REF-055: 75→47 — safe mode can exit once WS+Risk healthy (warmup-safe)
+    SMC_MIN_SCORE_RESUME: float = 47.0     # Deployability score needed to exit safe mode (was 75.0)
 
     # ── Phase 6.6: Hard Gating + Safety Enforcement ───────────────────────────
     # Global Gate Controller — master trading permission authority
-    GGL_DEPLOY_MIN_SCORE: float = 70.0     # Min boot-deployability score to allow trading
+    # FTD-REF-055: thresholds aligned with warmup-safe BDE_MIN_SCORE
+    GGL_DEPLOY_MIN_SCORE: float = 45.0     # FTD-REF-055: 70→45 — warmup-safe (was 70.0)
     GGL_WS_MIN_SCORE: float = 50.0         # Min WS stability score to allow trading
-    GGL_DATA_MIN_HEALTH: float = 60.0      # Min data health score to allow trading
+    GGL_DATA_MIN_HEALTH: float = 20.0      # FTD-REF-055: 60→20 — PTG enforces per-trade (was 60.0)
     GGL_CACHE_TTL_SEC: float = 1.0         # Seconds to cache last gate result
 
     # Hard Start Validator — pre-boot stop gate
     HSV_EXIT_ON_FAIL: bool = False          # True = sys.exit(1) on failure (set True for prod)
-    HSV_MIN_CANDLES_BOOT: int = 30          # Minimum candles before engine is allowed to start
+    HSV_MIN_CANDLES_BOOT: int = 20          # FTD-REF-055: 30→20 — aligned with IV_MIN_CANDLES
 
     # Safe Mode Enforcer — runtime auto-protection
-    SME_DEPLOY_LOW_THRESHOLD: float = 65.0  # Activate safe mode if deploy score drops here
+    # FTD-REF-055: triggers only on genuine WS/risk failures, not boot warmup
+    SME_DEPLOY_LOW_THRESHOLD: float = 40.0  # FTD-REF-055: 65→40 — don't enter safe mode at boot
     SME_WS_LOW_THRESHOLD: float = 40.0      # Activate safe mode if WS stability drops here
     SME_DATA_LOW_THRESHOLD: float = 50.0    # Activate safe mode if data health drops here
 

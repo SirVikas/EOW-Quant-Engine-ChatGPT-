@@ -32,6 +32,10 @@ class TradeRecord:
 
     order_type:     str   = "MARKET"  # "MARKET" | "LIMIT" — affects fees & slippage
 
+    # FTD-REF-055: SL/TP preserved from OpenPosition for DataLake analysis
+    stop_loss:      float = 0.0   # initial stop-loss price at trade open
+    take_profit:    float = 0.0   # initial take-profit price at trade open
+
     # Computed fields (filled by calculator)
     gross_pnl:      float = 0.0
     fee_entry:      float = 0.0

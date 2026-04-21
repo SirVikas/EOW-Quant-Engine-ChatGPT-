@@ -366,6 +366,8 @@ class RiskController:
             regime=pos.regime,
             mode=cfg.TRADE_MODE,
             order_type=order_type,
+            stop_loss=pos.initial_stop_loss,   # FTD-REF-055: preserve initial SL
+            take_profit=pos.take_profit,        # FTD-REF-055: preserve TP
         )
         result = self.pnl_calc.calculate(record, initial_risk_usdt=pos.initial_risk)
         self.scaler.record_trade(result.net_pnl)
