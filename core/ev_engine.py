@@ -45,13 +45,14 @@ class _TradeRec(NamedTuple):
 @dataclass
 class EVResult:
     ok:          bool
-    ev:          float   # expected value in USDT
+    ev:          float   # expected value in USDT (after Phase 7B scaling)
     p_win:       float
     avg_win:     float
     avg_loss:    float
     avg_cost:    float
     n_trades:    int
     bootstrapped: bool   # True = gate passed because < MIN_TRADES
+    confidence:  float = 1.0  # Phase 7B: estimate reliability (0–1); 0.3 = bootstrap
     reason:      str = ""
 
 
@@ -100,15 +101,19 @@ class EVEngine:
 
     def evaluate(
         self,
-        strategy_id:   str,
-        symbol:        str,
-        est_reward:    float,   # |take_profit − entry| × qty (USDT)
-        est_risk:      float,   # |entry − stop_loss| × qty (USDT)
-        current_cost:  float,   # round-trip fee + slippage for this trade
+        strategy_id:       str,
+        symbol:            str,
+        est_reward:        float,        # |take_profit − entry| × qty (USDT)
+        est_risk:          float,        # |entry − stop_loss| × qty (USDT)
+        current_cost:      float,        # round-trip fee + slippage for this trade
+        drawdown:          float = 0.0,  # Phase 7B: current drawdown fraction (0–1)
+        regime_confidence: float = 0.5,  # Phase 7B: regime detection confidence (0–1)
     ) -> EVResult:
         """
         Evaluate prospective EV using historical win-rate + current trade parameters.
-        Returns EVResult(ok=True) when EV > 0.
+        Phase 7B: applies adaptive scaling via drawdown dampening, regime-confidence
+        multiplier, and historical-performance multiplier.
+        Returns EVResult(ok=True) when scaled EV > 0.
         """
         key = (strategy_id, symbol)
         history = self._history.get(key)
@@ -120,12 +125,14 @@ class EVEngine:
                 return EVResult(
                     ok=True, ev=0.0, p_win=0.5, avg_win=0.0, avg_loss=0.0,
                     avg_cost=current_cost, n_trades=n, bootstrapped=True,
+                    confidence=0.3,
                     reason=f"BOOTSTRAP({n}<{MIN_TRADES})",
                 )
             else:
                 return EVResult(
                     ok=False, ev=0.0, p_win=0.0, avg_win=0.0, avg_loss=0.0,
                     avg_cost=current_cost, n_trades=n, bootstrapped=True,
+                    confidence=0.3,
                     reason=f"BOOTSTRAP_BLOCKED({n}<{MIN_TRADES})",
                 )
 
@@ -134,14 +141,36 @@ class EVEngine:
         p_loss   = 1.0 - p_win
         avg_cost = stats["avg_cost"]
 
-        # Prospective EV uses current trade's reward/risk with historical win rate
+        # Base prospective EV
         ev = (p_win * est_reward) - (p_loss * est_risk) - avg_cost
+
+        # ── Phase 7B: Adaptive Scaling ─────────────────────────────────────
+        # 1. Performance-history multiplier (only if enough trades)
+        if n >= cfg.P7B_PERF_MIN_TRADES:
+            if p_win >= cfg.P7B_PERF_WIN_THRESHOLD:
+                ev *= cfg.P7B_PERF_BOOST
+            elif p_win < cfg.P7B_PERF_LOSS_THRESHOLD:
+                ev *= cfg.P7B_PERF_PENALTY
+
+        # 2. Drawdown dampening — extreme DD forces EV to ≤ 0
+        if drawdown >= cfg.P7B_DD_MAX:
+            ev = min(ev, 0.0)
+
+        # 3. Regime-confidence multiplier
+        if regime_confidence >= cfg.P7B_REGIME_CONF_HIGH:
+            ev *= cfg.P7B_REGIME_BOOST
+        elif regime_confidence < cfg.P7B_REGIME_CONF_LOW:
+            ev *= cfg.P7B_REGIME_PENALTY
+
+        # Confidence scales with history depth (0.3 → 1.0 as n → WINDOW)
+        confidence = min(1.0, 0.3 + 0.7 * (n / WINDOW))
 
         if ev <= 0:
             return EVResult(
                 ok=False, ev=round(ev, 4), p_win=round(p_win, 4),
                 avg_win=stats["avg_win"], avg_loss=stats["avg_loss"],
                 avg_cost=round(avg_cost, 4), n_trades=n, bootstrapped=False,
+                confidence=round(confidence, 3),
                 reason=f"NEGATIVE_EV({ev:.4f}≤0 p_win={p_win:.1%})",
             )
 
@@ -149,6 +178,7 @@ class EVEngine:
             ok=True, ev=round(ev, 4), p_win=round(p_win, 4),
             avg_win=stats["avg_win"], avg_loss=stats["avg_loss"],
             avg_cost=round(avg_cost, 4), n_trades=n, bootstrapped=False,
+            confidence=round(confidence, 3),
         )
 
     # ── Inspection ───────────────────────────────────────────────────────────
