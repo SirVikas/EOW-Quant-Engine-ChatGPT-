@@ -1,0 +1,343 @@
+# 📦 qFTD-006 — MARKET DATA PIPELINE FAILURE (WS + TICK FLOW)
+
+# 🧠 OBJECTIVE
+
+Identify why:
+→ WebSocket is connected BUT tick flow becomes stale  
+→ Data Health reports STALE_TICK despite active system  
+→ Safe mode is triggered due to DATA_NOT_FRESH  
+
+Goal:
+→ Ensure continuous, real-time tick delivery to system  
+→ Eliminate data starvation under live conditions  
+
+---
+
+# 🔥 CONTEXT (CRITICAL)
+
+Observed:
+
+- [MDP] Streams → real Binance ✅
+- Regime engine active ✅
+- WebSocket initially connected ✅
+
+BUT:
+
+- [DATA-HEALTH] STALE_TICK(96s > 60s) ❌
+- [HEAL] WS_CHECK: STALE — no ticks in 30s ❌
+- Safe mode triggered ❌
+
+---
+
+# 🧩 SECTION 1 — WEBSOCKET CONNECTION LAYER
+
+## Q1.1 — WS Initialization
+
+Where is WebSocket created?
+
+Provide:
+- File path
+- Function name
+
+---
+
+## Q1.2 — Subscription Details
+
+Confirm:
+
+- Which streams are subscribed?
+  (e.g., trade, kline, ticker)
+
+- How many symbols?
+
+---
+
+## Q1.3 — Subscription Confirmation
+
+Provide logs confirming:
+
+- Successful subscription per symbol
+
+---
+
+## Q1.4 — WS Keepalive
+
+Is there:
+
+- ping/pong mechanism?
+- heartbeat validation?
+
+---
+
+## Q1.5 — WS Disconnect Detection
+
+Does system detect:
+
+- connection drop?
+- silent disconnect?
+
+---
+
+# 🧩 SECTION 2 — TICK FLOW TRACE (CRITICAL)
+
+## Q2.1 — Tick Entry Point
+
+Where does incoming tick first enter system?
+
+Provide:
+- Function name
+- File path
+
+---
+
+## Q2.2 — Tick Frequency
+
+Provide:
+
+- Expected ticks/sec per symbol
+- Actual observed ticks/sec
+
+---
+
+## Q2.3 — Last Tick Timestamp
+
+Log:
+
+- last_tick_time per symbol
+
+---
+
+## Q2.4 — Gap Detection
+
+Provide example where:
+
+- No tick received for >60s
+
+---
+
+# 🧩 SECTION 3 — REDIS PUB/SUB PIPELINE
+
+## Q3.1 — Publish Flow
+
+Where are ticks published to Redis?
+
+---
+
+## Q3.2 — Subscribe Flow
+
+Which module consumes ticks?
+
+---
+
+## Q3.3 — Delay / Loss Check
+
+Check:
+
+- Any lag between publish and consume?
+- Message drop?
+
+---
+
+## Q3.4 — Buffer / Queue Status
+
+Is there:
+
+- queue overflow?
+- backlog?
+
+---
+
+# 🧩 SECTION 4 — DATA HEALTH MONITOR
+
+## Q4.1 — Update Source
+
+What triggers:
+
+data_health.update() ?
+
+(A) Every tick  
+(B) Timer  
+(C) Event-based  
+
+---
+
+## Q4.2 — Timestamp Source
+
+What timestamp is used?
+
+- system time?
+- exchange time?
+
+---
+
+## Q4.3 — Freshness Logic
+
+Confirm:
+
+now - last_tick_time > stale_after
+
+---
+
+## Q4.4 — Mismatch Investigation
+
+Explain why:
+
+Ticks exist BUT data marked stale
+
+---
+
+# 🧩 SECTION 5 — SELF-HEALING ENGINE
+
+## Q5.1 — WS_CHECK Logic
+
+How does:
+
+WS_CHECK detect stale?
+
+---
+
+## Q5.2 — Reconnect Trigger
+
+When does system reconnect WS?
+
+---
+
+## Q5.3 — Reconnect Execution
+
+Provide:
+
+- reconnect function
+- logs of reconnect
+
+---
+
+## Q5.4 — Failure Case
+
+Explain why:
+
+WS stale detected BUT reconnect not triggered (if applicable)
+
+---
+
+# 🧩 SECTION 6 — MULTI-THREAD / ASYNC FLOW
+
+## Q6.1 — Thread Model
+
+Is MDP running:
+
+- separate thread?
+- async loop?
+
+---
+
+## Q6.2 — Race Condition Check
+
+Could ticks be:
+
+- received but not processed?
+
+---
+
+## Q6.3 — Lock / Blocking Check
+
+Any blocking operations:
+
+- DB write?
+- logging?
+- heavy computation?
+
+---
+
+# 🧩 SECTION 7 — ROOT FAILURE CONFIRMATION
+
+## Q7.1
+
+Confirm exact failure point:
+
+(A) WS not receiving data  
+(B) WS receiving but not forwarding  
+(C) Redis drop  
+(D) Data health not updating  
+
+---
+
+## Q7.2
+
+Provide code + logs proof
+
+---
+
+# 🧩 SECTION 8 — REQUIRED FIX DESIGN
+
+## Q8.1 — Guaranteed Tick Flow
+
+Design:
+
+- Ensure every tick updates data_health
+
+---
+
+## Q8.2 — WS Stability Fix
+
+- Auto reconnect on silence (≤30s)
+- Force resubscribe
+
+---
+
+## Q8.3 — Tick Watchdog (MANDATORY)
+
+Implement:
+
+If no tick for X seconds → trigger alert + reconnect
+
+---
+
+## Q8.4 — Redundancy (RECOMMENDED)
+
+- Dual stream OR fallback polling
+
+---
+
+# 🧩 SECTION 9 — TARGET ARCHITECTURE
+
+WS →
+Tick Handler →
+Redis →
+Consumer →
+Data Health →
+Gate
+
+NO break allowed in chain
+
+---
+
+# 🧩 SECTION 10 — PROOF TEST (MANDATORY)
+
+After fix:
+
+Expected:
+
+- No STALE_TICK errors
+- Continuous ticks
+- DATA_FRESH maintained
+- Gate opens normally
+
+---
+
+# 🔥 FINAL INSTRUCTION
+
+- DO NOT bypass data health  
+- DO NOT increase stale_after blindly  
+- FIX data pipeline integrity  
+
+---
+
+# 🏁 OUTPUT REQUIRED (aFTD)
+
+Developer must provide:
+
+1. Exact failure point  
+2. Tick flow trace  
+3. WS stability analysis  
+4. Fix design  
+5. Post-fix logs  
