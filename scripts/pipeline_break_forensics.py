@@ -12,15 +12,29 @@ import json
 from pathlib import Path
 import sqlite3
 import sys
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from core.gating.gate_logger import gate_logger
-from core.orchestrator.execution_orchestrator import TickContext, execution_orchestrator
-from core.gating.global_gate_controller import global_gate_controller
-from core.gating.safe_mode_engine import safe_mode_engine
+
+def _runtime_handles() -> dict:
+    """
+    Lazy-load runtime singletons to avoid heavy side effects during module import.
+    This also makes unit testing easy via dependency injection.
+    """
+    from core.gating.gate_logger import gate_logger
+    from core.orchestrator.execution_orchestrator import TickContext, execution_orchestrator
+    from core.gating.global_gate_controller import global_gate_controller
+    from core.gating.safe_mode_engine import safe_mode_engine
+    return {
+        "gate_logger": gate_logger,
+        "TickContext": TickContext,
+        "execution_orchestrator": execution_orchestrator,
+        "global_gate_controller": global_gate_controller,
+        "safe_mode_engine": safe_mode_engine,
+    }
 
 
 def _db_snapshot(db_path: Path) -> dict:
@@ -54,7 +68,19 @@ def _db_snapshot(db_path: Path) -> dict:
     return out
 
 
-def run_probe(cycles: int = 100, symbol: str = "BTCUSDT", strategy: str = "TrendFollowing") -> dict:
+def run_probe(
+    cycles: int = 100,
+    symbol: str = "BTCUSDT",
+    strategy: str = "TrendFollowing",
+    runtime: dict | None = None,
+) -> dict:
+    rt = runtime or _runtime_handles()
+    orchestrator = rt["execution_orchestrator"]
+    TickContext = rt["TickContext"]
+    global_gate_controller = rt["global_gate_controller"]
+    safe_mode_engine = rt["safe_mode_engine"]
+    gate_logger = rt["gate_logger"]
+
     gate_reason_counts: Counter[str] = Counter()
     scan_reason_counts: Counter[str] = Counter()  # Derived from gate_check action.
     gate_action_counts: Counter[str] = Counter()
@@ -62,7 +88,7 @@ def run_probe(cycles: int = 100, symbol: str = "BTCUSDT", strategy: str = "Trend
     gate_blocked = 0
 
     for _ in range(cycles):
-        gc = execution_orchestrator.gate_check(
+        gc = orchestrator.gate_check(
             symbol=symbol,
             strategy=strategy,
             indicator_ok=True,
@@ -95,7 +121,7 @@ def run_probe(cycles: int = 100, symbol: str = "BTCUSDT", strategy: str = "Trend
         data_fresh=True,
         is_exploration=False,
     )
-    cycle = execution_orchestrator.run_cycle(ctx)
+    cycle = orchestrator.run_cycle(ctx)
 
     return {
         "cycles": cycles,
