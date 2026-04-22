@@ -352,6 +352,7 @@ async def on_tick(tick: Tick):
         _elapsed = time.time() - _boot_ts
         if iv_result.ok or _elapsed >= cfg.STARTUP_GRACE_SECONDS:
             _system_state = "LIVE"
+            global_gate_controller.set_system_state("LIVE")  # qFTD-010: lift BOOT_GRACE
             logger.info(
                 f"[BOOT] BOOTING→LIVE | iv_ok={iv_result.ok} "
                 f"elapsed={_elapsed:.1f}s grace={cfg.STARTUP_GRACE_SECONDS}s"
