@@ -1,0 +1,330 @@
+# 🧾 qFTD-012 — FILTER DEADLOCK INVESTIGATION (CRITICAL)
+
+### Ref: qFTD-012-EOW-GUARD-SUPPRESSION
+
+---
+
+# 🎯 OBJECTIVE
+
+Resolve:
+
+```text
+Signals may exist BUT are being silently blocked by filters/guards
+```
+
+---
+
+# 🚨 SECTION 1 — CONFIRMED SYSTEM STATE
+
+From runtime:
+
+* Scan Engine → ACTIVE ✔
+* Alpha Engine → ACTIVE ✔
+* Data → OK ✔
+* Indicators → OK ✔
+* Gate → NOT blocking ✔
+
+BUT:
+
+```text
+NO:
+- Signal logs
+- Score logs
+- EV logs
+- Trade attempts
+```
+
+---
+
+## ❗ CRITICAL HYPOTHESIS
+
+```text
+Signals are generated BUT rejected BEFORE visibility
+```
+
+---
+
+# 🧠 SECTION 2 — TARGET LAYERS (SUSPECT STACK)
+
+Developer must investigate ALL:
+
+```text
+1. Profit Guard
+2. Loss Cluster Engine
+3. Streak Engine
+4. Adaptive Filter
+5. Edge Filter
+6. Pre-Trade Gate
+```
+
+---
+
+# 🔍 SECTION 3 — DEVELOPER MUST ANSWER (MANDATORY)
+
+---
+
+## Q1 — SIGNAL VISIBILITY BREAKPOINT
+
+Provide exact pipeline:
+
+```text
+alpha_engine →
+    signal_filter →
+        edge_filter →
+            scorer →
+                execution
+```
+
+👉 Answer:
+
+```text
+At which exact layer signal count becomes ZERO?
+```
+
+---
+
+## Q2 — RAW SIGNAL COUNT
+
+Add debug BEFORE ANY FILTER:
+
+```python
+logger.info(f"[DEBUG-RAW] signals_found={len(signals)}")
+```
+
+👉 Provide:
+
+```text
+Values for 10 consecutive ticks
+```
+
+---
+
+## Q3 — FILTER REJECTION LOG
+
+Add:
+
+```python
+logger.info(f"[FILTER-REJECT] layer={layer} reason={reason}")
+```
+
+👉 Provide sample output
+
+---
+
+## Q4 — PROFIT GUARD STATE
+
+Provide current:
+
+```text
+PF (profit factor) =
+Total trades =
+Win rate =
+Consecutive losses =
+```
+
+---
+
+## Q5 — LOSS CLUSTER STATUS
+
+```text
+Is loss cluster ACTIVE?
+YES / NO
+```
+
+If YES:
+
+```text
+What action:
+- reduce size?
+- pause trading?
+```
+
+---
+
+## Q6 — STREAK ENGINE STATE
+
+```text
+Is system in COLD mode?
+YES / NO
+```
+
+Adjustment:
+
+```text
+Score delta =
+```
+
+---
+
+## Q7 — ADAPTIVE FILTER STATUS
+
+Provide:
+
+```text
+Current score threshold =
+Base threshold =
+Adjustment applied =
+```
+
+---
+
+## Q8 — EDGE FILTER BLOCK
+
+From config:
+
+```text
+MIN_TRADE_SCORE =
+MIN_RR_RATIO =
+```
+
+👉 Provide rejection logs like:
+
+```text
+score=0.52 < 0.58 → BLOCK
+rr=1.2 < 1.5 → BLOCK
+```
+
+---
+
+## Q9 — SESSION vs HISTORY (CRITICAL)
+
+Confirm:
+
+```text
+Are these computed from:
+(A) Session trades only
+OR
+(B) Full replay history
+```
+
+---
+
+## Q10 — HARD STOP CONDITIONS
+
+Confirm:
+
+```text
+Is ANY of these triggering?
+- PF below threshold
+- consecutive loss limit
+- drawdown tier stop
+```
+
+---
+
+# ⚠️ SECTION 4 — CRITICAL BUG HYPOTHESIS
+
+We suspect:
+
+```text
+Replay history is incorrectly affecting live decision
+```
+
+---
+
+## ❗ REQUIRED ANSWER:
+
+```text
+Does replayed 121 trades affect:
+- PF?
+- streak?
+- loss cluster?
+```
+
+YES / NO
+
+---
+
+# 🔧 SECTION 5 — MANDATORY TEST ACTIONS
+
+---
+
+## ✅ TEST 1 — DISABLE ALL GUARDS
+
+Temporarily disable:
+
+```text
+- ProfitGuard
+- LossCluster
+- AdaptiveFilter
+- EdgeFilter
+```
+
+👉 Result:
+
+```text
+Do signals appear?
+YES / NO
+```
+
+---
+
+## ✅ TEST 2 — SESSION RESET
+
+Force:
+
+```text
+PF = 1.0
+consecutive_losses = 0
+streak = neutral
+```
+
+👉 Result:
+
+```text
+Do signals appear?
+```
+
+---
+
+## ✅ TEST 3 — THRESHOLD RELAX
+
+```text
+min_score → 0.1
+min_rr → 1.0
+```
+
+---
+
+# 📦 REQUIRED aFTD OUTPUT
+
+Developer MUST provide:
+
+1. Raw signal count
+2. Filter rejection logs
+3. Guard states (PF, streak, loss cluster)
+4. Exact blocking layer
+5. Session vs history clarification
+6. Results of all 3 tests
+
+---
+
+# 🧠 FINAL PRINCIPLE
+
+```text
+Risk system ka kaam loss control karna hai
+
+Opportunity ko eliminate karna nahi
+```
+
+---
+
+# 🚨 FINAL WARNING
+
+```text
+If guards block ALL signals → system is unusable
+```
+
+---
+
+# 🏁 FINAL LINE
+
+```text
+Trading system tab fail hota hai jab:
+Woh galat trade leta hai ❌
+
+Par usse bada failure hai:
+Woh koi trade hi nahi leta ❌❌
+```
+
+---
