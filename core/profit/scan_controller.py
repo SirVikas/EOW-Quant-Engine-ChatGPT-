@@ -1,17 +1,16 @@
 """
 EOW Quant Engine — core/profit/scan_controller.py
-Phase 7A: Scan Controller — Signal Generation Gate
+Phase 7A / qFTD-010: Scan Controller — Signal Generation Authority
 
-First check in the profit pipeline. Stops ALL signal generation when the
-system is in safe mode or when the gate has blocked trading.
+Design principle (qFTD-010): Signal generation is ALWAYS ON.
+Gate state controls EXECUTION only — never signal generation.
 
 Interface:
     scan_controller.can_scan(gate_status: dict) -> ScanDecision
+    → Always returns ScanDecision(allowed=True, reason="SCAN_OK")
 
-    ScanDecision.allowed == False → return NO_SIGNALS immediately;
-                                    skip the entire strategy evaluation path.
-
-Design principle: cheap — called on every tick before any indicator work.
+    Execution gating is handled downstream in ExecutionOrchestrator.run_cycle()
+    and in the _execution_allowed check in main.py.
 """
 from __future__ import annotations
 
@@ -36,46 +35,36 @@ _SCAN_OK           = ScanDecision(allowed=True,  reason="SCAN_OK")
 
 class ScanController:
     """
-    Lightweight gate between the tick stream and the signal generation path.
+    Signal generation authority for the EOW Quant Engine.
 
-    Checks gate_status on every call — no caching, no state.
-    The GlobalGateController already caches its result for GGL_CACHE_TTL_SEC;
-    we just consume it.
+    qFTD-010: can_scan() always permits signal generation regardless of gate state.
+    Gate state is used only for execution control (ExecutionOrchestrator.run_cycle).
     """
 
     def __init__(self):
-        logger.info("[SCAN-CTRL] Phase 7A activated — signal generation gated")
+        logger.info("[SCAN-CTRL] Phase 7A activated — signal generation ALWAYS ON (qFTD-010)")
         self._total_blocked: int = 0
         self._total_allowed: int = 0
 
     def can_scan(self, gate_status: dict) -> ScanDecision:
         """
-        Determine whether market scanning / signal generation is permitted.
+        Signal generation is always permitted — qFTD-010 architectural principle.
+
+        Gate state (can_trade / safe_mode) controls EXECUTION only.
+        Callers that need to block execution should check gate_status directly
+        or use ExecutionOrchestrator.run_cycle().
 
         Args:
-            gate_status: dict from GlobalGateController.evaluate()
+            gate_status: dict from GlobalGateController.evaluate() (informational)
 
         Returns:
-            ScanDecision(allowed=True)  → proceed with signal generation
-            ScanDecision(allowed=False) → abort; return NO_SIGNALS
+            ScanDecision(allowed=True, reason="SCAN_OK") unconditionally.
         """
-        if not gate_status.get("can_trade", False):
-            self._total_blocked += 1
-            gate_logger.blocked(
-                reason=f"SCAN_BLOCKED:{gate_status.get('reason', 'GATE')}",
-                context="ScanController",
-            )
-            return _NO_SCAN_GATE
-
-        if gate_status.get("safe_mode", True):
-            self._total_blocked += 1
-            gate_logger.blocked(
-                reason="SCAN_BLOCKED:SAFE_MODE",
-                context="ScanController",
-            )
-            return _NO_SCAN_SAFE_MODE
-
         self._total_allowed += 1
+        logger.debug(
+            f"[SCAN-CTRL] Heartbeat — scanning active "
+            f"(can_trade={gate_status.get('can_trade')}, safe_mode={gate_status.get('safe_mode')})"
+        )
         return _SCAN_OK
 
     def enforce_no_scan(self, gate_status: dict) -> None:
@@ -93,8 +82,8 @@ class ScanController:
         Raises:
             RuntimeError: if can_trade is False or safe_mode is True
         """
-        decision = self.can_scan(gate_status)
-        if not decision.allowed:
+        if not gate_status.get("can_trade", False) or gate_status.get("safe_mode", True):
+            decision = _NO_SCAN_GATE if not gate_status.get("can_trade") else _NO_SCAN_SAFE_MODE
             raise RuntimeError(
                 f"CRITICAL: Scan attempted in SAFE MODE — {decision.reason}"
             )

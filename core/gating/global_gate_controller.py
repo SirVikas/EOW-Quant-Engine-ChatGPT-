@@ -74,6 +74,7 @@ class GlobalGateController:
         self._last_ts: float = 0.0
         self._total_evals: int = 0
         self._total_blocked: int = 0
+        self._system_state: str = "BOOTING"   # qFTD-010: BOOTING → LIVE, set via set_system_state()
 
         logger.info(
             f"[GLOBAL-GATE] Phase 6.6 activated | "
@@ -81,6 +82,23 @@ class GlobalGateController:
             f"ws_min={cfg.GGL_WS_MIN_SCORE} "
             f"cache_ttl={cfg.GGL_CACHE_TTL_SEC}s"
         )
+
+    # ── System state management ───────────────────────────────────────────────
+
+    def set_system_state(self, state: str) -> None:
+        """
+        Notify the gate of system state transitions (qFTD-010).
+
+        During BOOTING, evaluate() returns ALL_CLEAR unconditionally so that
+        run_cycle()'s internal gate re-evaluation never activates safe mode
+        before indicator/data streams have fully opened.
+
+        Args:
+            state: "BOOTING" | "LIVE"
+        """
+        if state != self._system_state:
+            logger.info(f"[GLOBAL-GATE] system_state transition: {self._system_state} → {state}")
+            self._system_state = state
 
     # ── Primary spec-compliant interface ──────────────────────────────────────
 
@@ -117,6 +135,25 @@ class GlobalGateController:
         """
         self._total_evals += 1
         now = time.time()
+
+        # qFTD-010: BOOTING grace — warmup noise must not activate safe mode.
+        # During BOOTING, all conditions are unconditionally satisfied so that
+        # run_cycle()'s internal gate re-evaluation does not block execution or
+        # trip safe mode before indicator/data streams have fully opened.
+        if self._system_state == "BOOTING":
+            result = {
+                "can_trade": True,
+                "reason":    "BOOT_GRACE",
+                "safe_mode": self._sme.mode.value != "NORMAL",
+                "_ws_score":     100.0,
+                "_deploy_score": 100.0,
+                "_ind_ready":    True,
+                "_data_fresh":   True,
+            }
+            self._last_result = result
+            self._last_ts = now
+            gate_logger.allowed()
+            return result
 
         # qFTD-004: Use caller-supplied readiness when provided (single source of truth).
         # Fall back to internal singleton queries only when caller passes None.
