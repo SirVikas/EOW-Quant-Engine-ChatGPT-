@@ -193,9 +193,9 @@ class EngineConfig(BaseSettings):
     AF_RELAX_AFTER_MIN: int = 60         # Relax filters after N minutes without trade
     AF_TIGHTEN_AFTER_LOSSES: int = 3     # Tighten after N consecutive losses
     AF_RELAX_STEP: float = 0.05          # Score relaxation per step
-    AF_TIGHTEN_STEP: float = 0.05        # Score tightening per step
+    AF_TIGHTEN_STEP: float = 0.03        # qFTD-010: 0.05→0.03 — recalibrated for raised MIN_TRADE_SCORE=0.70
     AF_MAX_RELAX: float = 0.15           # Maximum cumulative relaxation
-    AF_MAX_TIGHTEN: float = 0.15         # Maximum cumulative tightening
+    AF_MAX_TIGHTEN: float = 0.08         # qFTD-010: 0.15→0.08 — cap total tightening so eff_min never exceeds 0.78
 
     # Smart Fee Guard — RR-aware fee tolerance
     # qFTD-008-EDGE: fee ceilings cut in half. At round-trip cost 0.09% and TP=3%,
