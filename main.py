@@ -142,6 +142,7 @@ _engine_running: bool = False
 # LIVE:    normal operation — all gate failures trigger safe mode as usual.
 _system_state: str = "BOOTING"   # "BOOTING" | "LIVE"
 _boot_ts: float = 0.0            # set to time.time() in lifespan() for grace period tracking
+_boot_replay_count: int = 0      # qFTD-010: trades replayed from DataLake at boot; streak/AF use session trades only
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
@@ -200,7 +201,7 @@ def _estimate_atr_pct(closes: list[float]) -> float:
 
 async def on_tick(tick: Tick):
     """Called for every new tick from MarketDataProvider."""
-    global _last_skip, _system_state   # must be declared before any assignment in this function
+    global _last_skip, _system_state, _boot_replay_count   # must be declared before any assignment in this function
     sym   = tick.symbol
     price = tick.price
 
@@ -474,9 +475,12 @@ async def on_tick(tick: Tick):
 
         # ── Phase 5.2: Dynamic Threshold Provider — master control layer ────────
         # Single source of truth: aggregates TradeActivator + AdaptiveFilter + DD
+        # qFTD-010: streak/AF use session-only trades so replayed loss history
+        # doesn't permanently tighten quality gates at boot (stacking deadlock fix).
         _tf_mins = trade_flow_monitor.minutes_since_last_trade()
+        _session_trades = pnl_calc.trades[_boot_replay_count:]
         _p52_cl  = 0
-        for _t in reversed(pnl_calc.trades):
+        for _t in reversed(_session_trades):
             if _t.net_pnl < 0:
                 _p52_cl += 1
             else:
@@ -497,7 +501,7 @@ async def on_tick(tick: Tick):
 
         # ── Phase 6: Streak Intelligence — momentum-aware score adjustment ──
         _p52_cw = 0
-        for _t in reversed(pnl_calc.trades):
+        for _t in reversed(_session_trades):
             if _t.net_pnl > 0: _p52_cw += 1
             else: break
         _streak_result = streak_engine.check(
@@ -1291,6 +1295,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         if _hist:
             _replay_count  = pnl_calc.replay_from_history(_hist)
             _replay_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
+            # qFTD-010: record replay boundary so streak/AF use session-only trades
+            global _boot_replay_count
+            _boot_replay_count = _replay_count
             _thought(
                 f"📂 DataLake replay: {_replay_count} trades → "
                 f"equity={_replay_equity:.2f} USDT",
