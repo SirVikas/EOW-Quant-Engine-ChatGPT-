@@ -1,0 +1,343 @@
+# 🧾 qFTD-009 — STATE PERSISTENCE + EXECUTION CONTROL
+
+### Ref: qFTD-009-EOW-CORE-INTEGRITY
+
+---
+
+# 🧠 🎯 OBJECTIVE
+
+Ensure system:
+
+1. **True equity continuity** (no reset, no fake PnL)
+2. **Deterministic execution mode** (paper-only, no accidental live)
+3. **State integrity across restarts**
+4. **Alignment with core principle:**
+
+   ```
+   “Real market data + Virtual execution”
+   ```
+
+---
+
+# 🔍 SECTION 1 — EQUITY & PNL PERSISTENCE
+
+---
+
+## Q1.1 — Current Equity Source
+
+* Equity currently comes from:
+
+  * trade replay?
+  * in-memory variable?
+  * database?
+
+---
+
+## Q1.2 — Replay Behavior
+
+* Is this always executed?
+* Controlled by:
+
+  ```
+  BOOT_MODE?
+  ```
+
+---
+
+## Q1.3 — Reset Condition
+
+* Why does system show:
+
+  ```
+  Equity = 1000 on restart
+  ```
+* Which component resets it?
+
+---
+
+## Q1.4 — Trade Table Truth
+
+* Confirm:
+
+  * trades table is **single source of truth**
+  * equity derived from trades?
+
+---
+
+## Q1.5 — Missing Layer
+
+* Is there any of the following:
+
+  * equity_snapshot.json ❓
+  * balance_cache ❓
+  * last_equity stored ❓
+
+---
+
+---
+
+# 🔍 SECTION 2 — EQUITY SNAPSHOT DESIGN
+
+---
+
+## Q2.1 — Snapshot Feasibility
+
+Can we store:
+
+```json
+{
+  "equity": 999.50,
+  "timestamp": "...",
+  "trade_count": 116
+}
+```
+
+---
+
+## Q2.2 — Save Trigger
+
+When should snapshot save?
+
+* after every trade?
+* periodic (e.g., every 30 sec)?
+* both?
+
+---
+
+## Q2.3 — Restore Logic
+
+On boot:
+
+```text
+Snapshot exists → restore
+Else → replay trades
+```
+
+---
+
+## Q2.4 — Consistency Check
+
+Should system validate:
+
+```text
+snapshot_equity ≈ replay_equity ?
+```
+
+---
+
+If mismatch:
+
+* log warning?
+* block system?
+
+---
+
+---
+
+# 🔍 SECTION 3 — EXECUTION MODE CONTROL
+
+---
+
+## Q3.1 — Current Execution Mode
+
+* What modes exist?
+
+  * LIVE?
+  * TESTNET?
+  * PAPER?
+
+---
+
+## Q3.2 — Default Mode
+
+* What is current default?
+* Where is it defined?
+
+---
+
+## Q3.3 — Testnet Usage
+
+* Is Binance testnet still used anywhere?
+* Any fallback logic?
+
+---
+
+## Q3.4 — Paper Mode Design
+
+Confirm:
+
+```text
+Market data → REAL
+Execution → INTERNAL ONLY
+```
+
+---
+
+## Q3.5 — Order Placement Safety
+
+* Is there ANY path that can:
+
+  * place real order?
+  * call exchange trade endpoint?
+
+---
+
+---
+
+# 🔍 SECTION 4 — VAULT / API PRIORITY
+
+---
+
+## Q4.1 — API Source Priority
+
+Which is used:
+
+```text
+User API > Testnet > Default?
+```
+
+---
+
+## Q4.2 — Credential Handling
+
+* Are user API keys:
+
+  * read-only?
+  * trading enabled?
+
+---
+
+## Q4.3 — Execution Separation
+
+Confirm:
+
+```text
+Data API ≠ Execution API
+```
+
+---
+
+---
+
+# 🔍 SECTION 5 — BOOT INTEGRITY
+
+---
+
+## Q5.1 — Boot Sequence
+
+Order:
+
+```text
+DB load → Replay → State init → UI render?
+```
+
+---
+
+## Q5.2 — Required Change
+
+Should boot become:
+
+```text
+Load snapshot → Validate → Replay fallback → Then UI
+```
+
+---
+
+## Q5.3 — Failure Case
+
+If:
+
+```text
+Equity mismatch
+or missing trades
+```
+
+What should system do?
+
+* continue?
+* safe mode?
+* block?
+
+---
+
+---
+
+# 🔍 SECTION 6 — DISPLAY CONSISTENCY
+
+---
+
+## Q6.1 — UI Source
+
+* Equity display comes from:
+
+  * runtime variable?
+  * DB?
+  * snapshot?
+
+---
+
+## Q6.2 — Issue Confirmation
+
+* Why UI shows:
+
+  ```
+  +0.00% after restart
+  ```
+
+---
+
+## Q6.3 — Required Behavior
+
+UI must show:
+
+```text
+Last session equity
+Correct % change
+No reset illusion
+```
+
+---
+
+---
+
+# 🔍 SECTION 7 — REQUIRED OUTPUT (FROM DEVELOPER)
+
+Developer MUST provide:
+
+---
+
+## ✔ Exact equity flow diagram
+
+## ✔ Source of truth confirmation
+
+## ✔ Snapshot feasibility
+
+## ✔ Execution mode mapping
+
+## ✔ Any real trade risk (YES/NO)
+
+## ✔ Boot sequence validation
+
+---
+
+---
+
+# 📦 EXPECTED aFTD-009
+
+Must include:
+
+1. Root cause of balance reset
+2. Exact persistence gaps
+3. Safe snapshot design
+4. Execution mode enforcement plan
+5. Risk analysis (real trade prevention)
+
+---
+
+---
+
+# 🧠 FINAL PRINCIPLE
+
+“अगर डेटा गलत है, तो strategy बेकार है।”
+
+---
