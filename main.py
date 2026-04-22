@@ -1056,7 +1056,18 @@ async def on_tick(tick: Tick):
                 }
                 return
 
-            # 7. Open position — use Limit Order when enabled (saves fees + slippage)
+            # 7. PAPER MODE EXECUTION LOCK (qFTD-009 §FIX5 — non-negotiable)
+            # This engine operates on real market data + virtual execution only.
+            # All fills are internal simulations; NO exchange order API is called.
+            # If TRADE_MODE is ever misconfigured to "LIVE", hard-block here.
+            if cfg.TRADE_MODE != "PAPER":
+                logger.critical(
+                    f"[EXECUTION-LOCK] TRADE_MODE={cfg.TRADE_MODE} — "
+                    f"real order BLOCKED. Only PAPER mode is permitted."
+                )
+                return
+
+            # Open position — use Limit Order when enabled (saves fees + slippage)
             if cfg.USE_LIMIT_ORDERS:
                 offset = sig.entry_price * (cfg.LIMIT_ENTRY_OFFSET_BPS / 10_000)
                 if sig.signal.value == "LONG":
@@ -1225,8 +1236,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         logger.critical(f"[HARD-START] Blocking engine start: {_hsv_result.failures}")
         # enforce() already called inside run(); execution stops here in prod.
 
-    # ── MASTER-001: Initialise risk engine with current equity ───────────────
-    risk_engine.initialize(cfg.INITIAL_CAPITAL)
+    # ── MASTER-001: risk_engine.initialize() MOVED — see qFTD-009 boot block below ──
+    # Risk engine MUST be initialized with the RESTORED equity, not INITIAL_CAPITAL.
+    # Initialize call is deferred until after snapshot + replay determine the correct value.
 
     # ── FTD-REF-019: Boot diagnostics ────────────────────────────────────────
     global _boot_status
@@ -1246,66 +1258,80 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             api_ok_fn=lambda: _boot_status.get("api_ok", False),
             running_fn=lambda: _engine_running,
         )),
+        # qFTD-009: periodic snapshot backup every 30 s (guards against missed trade-close saves)
+        asyncio.create_task(
+            equity_snapshot.start_periodic_save(
+                equity_fn=lambda: scaler.equity,
+                trade_count_fn=lambda: len(pnl_calc.trades),
+                interval_sec=30,
+            )
+        ),
     ]
 
-    # ── qFTD-007 / qFTD-009: Session restore — controlled by BOOT_MODE ─────────
-    # FRESH (default): snapshot-only restore (fast, no replay).
-    #                  Equity persisted after every trade — no reset on restart.
-    # RESUME:          full DataLake replay → validate against snapshot → apply.
-    # Set env var BOOT_MODE=RESUME for full replay (e.g. after crash/data loss).
-    await asyncio.sleep(0.5)  # give data_lake task a moment to open SQLite
-    if cfg.BOOT_MODE == "RESUME":
-        try:
-            historical_trades = data_lake.get_trades(limit=5000)
-            if historical_trades:
-                n = pnl_calc.replay_from_history(historical_trades)
-                replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
-                # qFTD-009: validate snapshot against replay; use whichever is trustworthy
-                restored_equity = equity_snapshot.restore_or_replay(
-                    replay_equity=replayed_equity,
-                    replay_trade_count=n,
-                )
-                risk_engine.update_equity(restored_equity)
-                scaler.set_equity(restored_equity)
-                _thought(
-                    f"📂 Session restored: {n} trades replayed. "
-                    f"Equity: {restored_equity:.2f} USDT "
-                    f"(replay={replayed_equity:.2f})",
-                    "SYSTEM",
-                )
-            else:
-                # No replay data — try snapshot fallback
-                snap = equity_snapshot.load()
-                if snap:
-                    risk_engine.update_equity(snap.equity)
-                    scaler.set_equity(snap.equity)
-                    _thought(
-                        f"📂 No DataLake history — snapshot restored: "
-                        f"equity={snap.equity:.2f} USDT trades={snap.trade_count}",
-                        "SYSTEM",
-                    )
-                else:
-                    _thought("📂 No prior trade history found — starting fresh.", "SYSTEM")
-        except Exception as exc:
-            _thought(f"⚠️ Session restore failed: {exc} — starting fresh.", "SYSTEM")
-    else:
-        # FRESH mode: use snapshot if available so UI shows correct equity
-        snap = equity_snapshot.load()
-        if snap:
-            risk_engine.update_equity(snap.equity)
-            scaler.set_equity(snap.equity)
+    # ── qFTD-009 FINAL: Authoritative Boot State Restoration ─────────────────
+    #
+    # CORRECT SEQUENCE (non-negotiable):
+    #   1. Load equity snapshot  (instant, from JSON)
+    #   2. Run DataLake replay   (always — for validation AND as fallback)
+    #   3. Validate: snapshot ≈ replay → if mismatch → SAFE MODE
+    #   4. Determine final equity (snapshot > replay > fresh)
+    #   5. risk_engine.initialize(final_equity)  ← NEVER before this point
+    #
+    # BOOT_MODE=FRESH: snapshot-first, replay fallback if no snapshot
+    # BOOT_MODE=RESUME: replay-first, snapshot validation layer on top
+    #
+    await asyncio.sleep(0.5)   # give data_lake.start() a moment to open SQLite
+
+    _snap          = equity_snapshot.load()
+    _replay_equity = cfg.INITIAL_CAPITAL
+    _replay_count  = 0
+
+    try:
+        _hist = data_lake.get_trades(limit=5000)
+        if _hist:
+            _replay_count  = pnl_calc.replay_from_history(_hist)
+            _replay_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
             _thought(
-                f"📂 BOOT_MODE=FRESH — snapshot restored: "
-                f"equity={snap.equity:.2f} USDT trades={snap.trade_count} "
-                f"ts={snap.timestamp}",
+                f"📂 DataLake replay: {_replay_count} trades → "
+                f"equity={_replay_equity:.2f} USDT",
                 "SYSTEM",
             )
         else:
-            _thought(
-                f"📂 BOOT_MODE=FRESH — no snapshot found. "
-                f"Starting with clean equity ({cfg.INITIAL_CAPITAL:.2f} USDT).",
-                "SYSTEM",
+            _thought("📂 DataLake: no trade history found.", "SYSTEM")
+    except Exception as _exc:
+        _thought(f"⚠️ DataLake replay failed: {_exc} — will use snapshot only.", "SYSTEM")
+
+    # Determine the single authoritative equity value
+    if _snap and _replay_count > 0:
+        if equity_snapshot.validate(_snap.equity, _replay_equity):
+            _final_equity = _snap.equity
+            _restore_src  = (
+                f"snapshot({_snap.equity:.2f}) validated vs replay({_replay_equity:.2f})"
             )
+        else:
+            # Mismatch is a data integrity event — activate safe mode
+            safe_mode_engine.activate("EQUITY_MISMATCH_BOOT")
+            _final_equity = _replay_equity   # DataLake is ground truth
+            _restore_src  = (
+                f"MISMATCH equity — SAFE MODE activated | "
+                f"snapshot={_snap.equity:.2f} replay={_replay_equity:.2f} | "
+                f"using replay (DataLake is ground truth)"
+            )
+    elif _snap:
+        _final_equity = _snap.equity
+        _restore_src  = f"snapshot only ({_snap.equity:.2f} USDT, no replay history)"
+    elif _replay_count > 0:
+        _final_equity = _replay_equity
+        _restore_src  = f"replay only ({_replay_equity:.2f} USDT, no snapshot file)"
+    else:
+        _final_equity = cfg.INITIAL_CAPITAL
+        _restore_src  = f"fresh start ({cfg.INITIAL_CAPITAL:.2f} USDT — no prior state found)"
+
+    # ── MASTER-001 (qFTD-009): Initialize risk engine with RESTORED equity ────
+    risk_engine.initialize(_final_equity)
+    scaler.set_equity(_final_equity)
+    _thought(f"📂 State restored: {_restore_src}", "SYSTEM")
+    logger.info(f"[BOOT-STATE] {_restore_src}")
 
     # ── Phase 4: Profit Engine boot log ─────────────────────────────────────
     _thought(
@@ -1324,8 +1350,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         f"dd_stop={cfg.DD_STOP_AT:.0%}",
         "SYSTEM",
     )
-    # Initialise drawdown controller with starting capital
-    drawdown_controller.update_equity(cfg.INITIAL_CAPITAL)
+    # Initialise drawdown controller with RESTORED equity (qFTD-009: not INITIAL_CAPITAL)
+    drawdown_controller.update_equity(_final_equity)
     # ── Phase 5.1: Activation + Exploration Control boot log ─────────────────
     _thought(
         f"🔓 Phase 5.1 Activation Layer online | "
