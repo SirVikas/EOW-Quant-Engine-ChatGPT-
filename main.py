@@ -364,20 +364,28 @@ async def on_tick(tick: Tick):
     )
     _data_fresh_ok = not _dh_result.block_trading
 
-    # Phase 7A.3: Pre-gate control — gate must approve before ANY data processing.
-    # regime.push, strategy eval, signal gen, broadcasts — ALL blocked in safe mode.
-    # Position management (SL/TP) above this line is exempt: it must always run.
-    # qFTD-007-v2: activate_safe_mode=False during BOOTING to prevent warmup noise
-    # from permanently tripping safe mode before data streams are ready.
+    # Phase 7A.3: Pre-gate control.
+    # qFTD-010 Design Change 1/2/3:
+    #   Signal generation ALWAYS runs — gate only locks EXECUTION.
+    #   During BOOTING, indicator/data warmup conditions are bypassed so the
+    #   scan pipeline warms up (learning engines, scorer) before going LIVE.
+    #   INDICATOR_NOT_READY + DATA_NOT_FRESH are expected during the first 20 min
+    #   and must not prevent signal observation.
+    _gate_ind_ok    = True if _system_state == "BOOTING" else _ind_ok_coarse
+    _gate_data_frsh = True if _system_state == "BOOTING" else _data_fresh_ok
     _pre_gate = execution_orchestrator.gate_check(
         symbol=sym,
-        indicator_ok=_ind_ok_coarse,
-        data_fresh=_data_fresh_ok,
+        indicator_ok=_gate_ind_ok,
+        data_fresh=_gate_data_frsh,
         activate_safe_mode=(_system_state == "LIVE"),
     )
-    if not _pre_gate.allowed:
-        _last_skip = {"ts": now_ms, "symbol": sym, "reason": _pre_gate.reason}
-        return
+    # qFTD-010: store execution permission — do NOT return early.
+    # The scan pipeline continues regardless; only run_cycle is gated below.
+    _execution_allowed = _pre_gate.allowed
+    if not _execution_allowed:
+        logger.debug(
+            f"[SCAN] {sym} gate locked (execution blocked): {_pre_gate.reason}"
+        )
 
     # Strategy/signal logic runs only on new candle closes (not every tick).
     if _last_processed_candle_ts.get(sym) == candle.ts:
@@ -647,6 +655,10 @@ async def on_tick(tick: Tick):
 
         if sig and sig.signal != Signal.NONE:
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
+            logger.info(
+                f"[SCAN] Signal generated: {sig.signal.value} {sym} "
+                f"score={sig.confidence:.3f} exec={'YES' if _execution_allowed else 'LOCKED'}"
+            )
 
             # ── A.I.E. — Adaptive Inverse Engine ─────────────────────────────
             # If this strategy's win-rate is in the "wrong" zone, flip it.
@@ -987,6 +999,22 @@ async def on_tick(tick: Tick):
             _vol_ratio_orch = _cur_vol_orch / _avg_vol_orch if _avg_vol_orch > 0 else 1.0
             _orch_ev = getattr(_ev_result, "ev", 0.0) if not _skip_quality else 0.0
             _orch_score = _alloc_score
+            # qFTD-010 Design Change 2: execution gate — final lock before position open.
+            # Scan ran fully (warm-up, learning engines, scoring) regardless of gate status.
+            # Only actual position creation is blocked when execution is not allowed.
+            if not _execution_allowed:
+                logger.info(
+                    f"[SCAN] Signal rejected — execution locked: {_pre_gate.reason} "
+                    f"| {sig.signal.value} {sym} score={_alloc_score:.3f}"
+                )
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": f"EXEC_GATE:{_pre_gate.reason}",
+                    "regime": regime.value, "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, f"EXEC_GATE:{_pre_gate.reason}")
+                return
+
             _orch_ctx = TickContext(
                 symbol=sym,
                 price=price,
