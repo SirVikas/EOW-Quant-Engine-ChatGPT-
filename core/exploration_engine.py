@@ -188,3 +188,21 @@ class ExplorationEngine:
 
 # ── Module-level singleton ────────────────────────────────────────────────────
 exploration_engine = ExplorationEngine()
+
+
+# ── FTD-008: Explore gate helper ──────────────────────────────────────────────
+
+def allow_explore(system_state: str, trades_last_30m: int) -> bool:
+    """
+    Returns True only when it is safe to run an exploration trade.
+
+    Rules (from FTD-008):
+      - system must be in LIVE state (not BOOTING / SAFE_MODE)
+      - no regular trades executed in the last 30 minutes
+        (exploration only fills idle cycles, never competes with real signals)
+    """
+    if system_state != "LIVE":
+        return False
+    if trades_last_30m > 0:
+        return False
+    return True

@@ -241,3 +241,27 @@ class EVEngine:
 
 # ── Module-level singleton ────────────────────────────────────────────────────
 ev_engine = EVEngine()
+
+
+# ── FTD-008: Phased EV activation helpers ────────────────────────────────────
+# Before 30 trades there is not enough history for EV to be statistically
+# meaningful.  These two functions implement the bootstrap / hard-filter split
+# described in FTD-008 without touching the core EVEngine class.
+
+_EV_RELIABILITY_THRESHOLD = 30  # trades required before EV becomes a hard gate
+
+
+def is_ev_reliable(trade_count: int) -> bool:
+    """True once we have enough history for EV to be a hard gate (≥30 trades)."""
+    return trade_count >= _EV_RELIABILITY_THRESHOLD
+
+
+def is_trade_allowed(ev: float, trade_count: int) -> bool:
+    """
+    Phase-based EV gate:
+      <30 trades → bootstrap phase, EV is ignored (always passes)
+      ≥30 trades → EV must be > 0 (hard filter)
+    """
+    if not is_ev_reliable(trade_count):
+        return True   # bootstrap phase — no EV data yet
+    return ev > 0

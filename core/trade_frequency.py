@@ -18,6 +18,8 @@ from typing import Deque
 
 from loguru import logger
 
+from config import cfg
+
 
 # ── Dry-spell windows ─────────────────────────────────────────────────────────
 WINDOW_SHORT_SEC  = 30 * 60    # 30 minutes
@@ -100,3 +102,22 @@ class TradeFrequency:
 
 # ── Module-level singleton ────────────────────────────────────────────────────
 trade_frequency = TradeFrequency()
+
+
+# ── FTD-008: Hard frequency gate ─────────────────────────────────────────────
+
+def can_trade(hour_count: int, day_count: int) -> bool:
+    """
+    Returns True only when both rolling counts are below the configured caps.
+    Call before executing any trade:
+        if not can_trade(tf.trades_in_window(3600), tf.trades_in_window(86400)):
+            return
+
+    Limits are set in config:
+        MAX_TRADES_PER_HOUR = 3
+        MAX_TRADES_PER_DAY  = 10
+    """
+    return (
+        hour_count < cfg.MAX_TRADES_PER_HOUR
+        and day_count < cfg.MAX_TRADES_PER_DAY
+    )

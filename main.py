@@ -61,6 +61,7 @@ from core.trade_scorer       import trade_scorer               # Phase 4: alpha 
 from core.capital_allocator  import capital_allocator          # Phase 4: score-based sizing
 from core.trade_manager      import trade_manager, ManagedPosition  # Phase 4: lifecycle
 from strategies.alpha_engine import alpha_engine               # Phase 4: alpha signals
+from core.equity_snapshot    import equity_snapshot             # qFTD-009: equity persistence
 from core.ev_engine          import ev_engine                  # Phase 5: EV gate
 from core.adaptive_scorer    import adaptive_scorer            # Phase 5: dynamic weights
 from core.confidence_decay   import confidence_decay           # Phase 5: signal staleness
@@ -267,6 +268,11 @@ async def on_tick(tick: Tick):
                 exploration_engine.record_result(sym, last_trade.net_pnl)
             trade_activator.record_trade()
             trade_flow_monitor.record_trade(sym)
+            # qFTD-009: persist equity after every trade so restarts show correct balance
+            equity_snapshot.save(
+                equity=scaler.equity,
+                trade_count=len(pnl_calc.trades),
+            )
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
@@ -1242,10 +1248,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         )),
     ]
 
-    # ── qFTD-007: Session restore — controlled by BOOT_MODE ──────────────────
-    # FRESH (default): ignore prior trade history — clean slate every boot.
-    # RESUME:          replay DataLake trades to restore equity curve.
-    # Set env var BOOT_MODE=RESUME to re-enable session restore.
+    # ── qFTD-007 / qFTD-009: Session restore — controlled by BOOT_MODE ─────────
+    # FRESH (default): snapshot-only restore (fast, no replay).
+    #                  Equity persisted after every trade — no reset on restart.
+    # RESUME:          full DataLake replay → validate against snapshot → apply.
+    # Set env var BOOT_MODE=RESUME for full replay (e.g. after crash/data loss).
     await asyncio.sleep(0.5)  # give data_lake task a moment to open SQLite
     if cfg.BOOT_MODE == "RESUME":
         try:
@@ -1253,23 +1260,52 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             if historical_trades:
                 n = pnl_calc.replay_from_history(historical_trades)
                 replayed_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
-                risk_engine.update_equity(replayed_equity)
-                scaler.set_equity(replayed_equity)
+                # qFTD-009: validate snapshot against replay; use whichever is trustworthy
+                restored_equity = equity_snapshot.restore_or_replay(
+                    replay_equity=replayed_equity,
+                    replay_trade_count=n,
+                )
+                risk_engine.update_equity(restored_equity)
+                scaler.set_equity(restored_equity)
                 _thought(
-                    f"📂 Session restored: {n} trades replayed from DataLake. "
-                    f"Equity: {replayed_equity:.2f} USDT",
+                    f"📂 Session restored: {n} trades replayed. "
+                    f"Equity: {restored_equity:.2f} USDT "
+                    f"(replay={replayed_equity:.2f})",
                     "SYSTEM",
                 )
             else:
-                _thought("📂 No prior trade history found — starting fresh.", "SYSTEM")
+                # No replay data — try snapshot fallback
+                snap = equity_snapshot.load()
+                if snap:
+                    risk_engine.update_equity(snap.equity)
+                    scaler.set_equity(snap.equity)
+                    _thought(
+                        f"📂 No DataLake history — snapshot restored: "
+                        f"equity={snap.equity:.2f} USDT trades={snap.trade_count}",
+                        "SYSTEM",
+                    )
+                else:
+                    _thought("📂 No prior trade history found — starting fresh.", "SYSTEM")
         except Exception as exc:
             _thought(f"⚠️ Session restore failed: {exc} — starting fresh.", "SYSTEM")
     else:
-        _thought(
-            f"📂 BOOT_MODE=FRESH — prior trade history ignored. "
-            f"Starting with clean equity ({cfg.INITIAL_CAPITAL:.2f} USDT).",
-            "SYSTEM",
-        )
+        # FRESH mode: use snapshot if available so UI shows correct equity
+        snap = equity_snapshot.load()
+        if snap:
+            risk_engine.update_equity(snap.equity)
+            scaler.set_equity(snap.equity)
+            _thought(
+                f"📂 BOOT_MODE=FRESH — snapshot restored: "
+                f"equity={snap.equity:.2f} USDT trades={snap.trade_count} "
+                f"ts={snap.timestamp}",
+                "SYSTEM",
+            )
+        else:
+            _thought(
+                f"📂 BOOT_MODE=FRESH — no snapshot found. "
+                f"Starting with clean equity ({cfg.INITIAL_CAPITAL:.2f} USDT).",
+                "SYSTEM",
+            )
 
     # ── Phase 4: Profit Engine boot log ─────────────────────────────────────
     _thought(

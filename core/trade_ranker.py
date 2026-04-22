@@ -177,3 +177,28 @@ class TradeRanker:
 
 # ── Module-level singleton ────────────────────────────────────────────────────
 trade_ranker = TradeRanker()
+
+
+# ── FTD-008: Multi-signal ranking helper ─────────────────────────────────────
+
+def rank_trades(signals: list) -> list:
+    """
+    Sort a list of signal objects by quality in descending order.
+    Primary key: score, secondary: ev, tertiary: rr.
+
+    Each signal must expose .score, .ev, and .rr attributes.
+    Returns a new sorted list — caller should execute only signals[0].
+
+    Usage:
+        ranked = rank_trades(valid_signals)
+        execute(ranked[0])
+    """
+    return sorted(
+        signals,
+        key=lambda s: (
+            getattr(s, "score", 0.0),
+            getattr(s, "ev",    0.0),
+            getattr(s, "rr",    0.0),
+        ),
+        reverse=True,
+    )

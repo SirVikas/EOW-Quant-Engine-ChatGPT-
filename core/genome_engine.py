@@ -677,3 +677,22 @@ class GenomeEngine:
             # Per-symbol candle counts in the in-memory store (diagnostics).
             "candle_counts":   {sym: len(c) for sym, c in self._candle_store.items()},
         }
+
+
+# ── FTD-008: Strategy activation gate ────────────────────────────────────────
+
+def is_strategy_allowed(strategy) -> bool:
+    """
+    Returns True only when a genome/strategy has enough live-trade history
+    and has demonstrated out-of-sample profitability.
+
+    Rules (FTD-008 / Genome activation gate):
+      trades  ≥ 30   — minimum sample for statistical validity
+      oos_pf  > 1.2  — must be profitable on unseen data
+
+    `strategy` must expose .trades (int) and .oos_pf (float).
+    Compatible with both GenomeResult dataclass and any duck-typed strategy object.
+    """
+    trades = getattr(strategy, "trades", 0)
+    oos_pf = getattr(strategy, "oos_pf", 0.0)
+    return trades >= 30 and oos_pf > 1.2
