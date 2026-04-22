@@ -109,9 +109,12 @@ class MarketDataProvider:
         self._exec_url = self.EXEC_API_TEST if cfg.BINANCE_TESTNET else self.EXEC_API_LIVE
         self._candle_bootstrap = CandleBootstrapper(self._api_url)
         self._regime_detector = None   # injected by main.py via set_regime_detector()
+        # qFTD-009: "Execution → LIVE" referred to the Binance API URL (not real trade execution).
+        # Renamed to "DataFeed" to avoid confusion. Execution mode is always PAPER (virtual only).
         logger.info(
             f"[MDP] Streams → real Binance (public) | "
-            f"Execution → {'TESTNET' if cfg.BINANCE_TESTNET else 'LIVE'}"
+            f"DataFeed → {'TESTNET' if cfg.BINANCE_TESTNET else 'LIVE'} | "
+            f"Execution → PAPER (virtual simulation only)"
         )
 
     # ── Public API ──────────────────────────────────────────────────────────

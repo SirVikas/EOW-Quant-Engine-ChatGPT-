@@ -1,5 +1,5 @@
 """
-EOW Quant Engine — qFTD-009: Equity Snapshot Manager
+EOW Quant Engine — qFTD-009 FINAL: Equity Snapshot Manager
 Provides true equity continuity across restarts without full trade replay.
 
 Design (per qFTD-009):
@@ -23,12 +23,13 @@ Consistency check:
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Callable, Optional
 
 from loguru import logger
 
@@ -121,6 +122,41 @@ class EquitySnapshotManager:
             )
             return False
         return True
+
+    # ── Periodic save ─────────────────────────────────────────────────────────
+
+    async def start_periodic_save(
+        self,
+        equity_fn:       Callable[[], float],
+        trade_count_fn:  Callable[[], int],
+        interval_sec:    int = 30,
+        session_id:      str = "",
+    ) -> None:
+        """
+        Background task: saves equity snapshot every `interval_sec` seconds.
+        Guarantees snapshot exists even when no trades were closed during a session.
+        Wire into asyncio tasks list at boot.
+
+        Args:
+            equity_fn:      callable returning current equity (e.g. lambda: scaler.equity)
+            trade_count_fn: callable returning trade count  (e.g. lambda: len(pnl_calc.trades))
+            interval_sec:   save interval in seconds (default 30)
+            session_id:     optional session identifier for the snapshot
+        """
+        logger.info(
+            f"[EQUITY-SNAPSHOT] Periodic save started "
+            f"(every {interval_sec}s)"
+        )
+        while True:
+            await asyncio.sleep(interval_sec)
+            try:
+                self.save(
+                    equity=equity_fn(),
+                    trade_count=trade_count_fn(),
+                    session_id=session_id,
+                )
+            except Exception as exc:
+                logger.warning(f"[EQUITY-SNAPSHOT] periodic save error: {exc}")
 
     # ── Boot helper ───────────────────────────────────────────────────────────
 
