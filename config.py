@@ -103,24 +103,42 @@ class EngineConfig(BaseSettings):
     EMA_TREND: int = 100                  # NEW: macro trend direction filter (price vs EMA100)
     ATR_PERIOD: int = 14
     ATR_MULT_SL: float = 2.5              # Widened 1.5→2.5: survives 1-min noise, fewer premature SL hits
-    ATR_MULT_TP: float = 6.0              # Raised 4.0→6.0: gross RR = 6.0/2.5 = 2.4 — covers fees & slippage
+    # qFTD-008-EDGE: 6.0→7.5 — lifts RR across all strategies:
+    #   TF:  7.5/2.5       = 3.0×  (was 2.4)
+    #   MR:  7.5×0.7/2.5   = 2.1×  (was 1.68 — now above MIN_RR_RATIO=2.0)
+    #   VE:  7.5×1.5/3.75  = 3.0×  (was 2.4)
+    # Break-even win rate at RR=2.0 (with 0.09% round-trip cost) = 35.8%.
+    # At RR=1.68 (old MR), break-even needed 40.7% — margin destroyed by any adverse run.
+    ATR_MULT_TP: float = 7.5              # qFTD-008-EDGE: 6.0→7.5 — all strategies now RR≥2.1
     BB_PERIOD: int = 20
     BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
 
     # ── Phase 4: Profit Engine ───────────────────────────────────────────────
     # RR Engine
-    MIN_RR_RATIO: float = 1.5            # Minimum TP/SL ratio to accept a trade
+    # qFTD-008-EDGE: 1.5→2.0 — minimum required for positive EV at crypto fee levels.
+    # Math: EV = RR×P_win − (1−P_win) − 0.09 (round-trip cost)
+    #   RR=1.5, P_win=0.40 → EV = −0.09  (LOSING)
+    #   RR=2.0, P_win=0.40 → EV = +0.11  (POSITIVE)
+    # MR strategy (was RR=1.68) now produces RR=2.1 after ATR_MULT_TP raise — still qualifies.
+    MIN_RR_RATIO: float = 2.0            # qFTD-008-EDGE: 1.5→2.0 — crypto fee-adjusted minimum
 
     # Trade Scorer
-    MIN_TRADE_SCORE: float = 0.60        # Minimum composite alpha score (0–1)
-    MAX_COST_FRACTION: float = 0.20      # Max cost as fraction of gross TP (matches 5× fee rule)
+    # qFTD-008-EDGE: 0.60→0.70 — requires strong multi-factor confirmation before entry.
+    # Bootstrap rank at score=0.70: 0.111×0.55 + 0.70×0.20 + 1.0×0.15 + 0.5×0.10 = 0.401 > 0.30 ✓
+    MIN_TRADE_SCORE: float = 0.70        # qFTD-008-EDGE: 0.60→0.70 — cut marginal signals
+    # qFTD-008-EDGE: 0.20→0.10 — stricter fee discipline; round-trip cost 0.09% must stay
+    # well below 10% of gross TP for any trade to be worth taking.
+    MAX_COST_FRACTION: float = 0.10      # qFTD-008-EDGE: 0.20→0.10 — tighter fee ceiling
 
     # Capital Allocator
     MAX_CAPITAL_PER_TRADE: float = 0.05  # Max 5% of equity per trade
     DAILY_RISK_CAP: float = 0.03         # Max 3% of equity risked per day
 
     # Trade Manager
-    PARTIAL_TP_R: float = 1.5            # Book 50% position at 1.5R profit
+    # qFTD-008-EDGE: 1.5→2.0 — partial TP milestone raised to match new MIN_RR_RATIO.
+    # Booking 50% at 1.5R when minimum RR is 2.0 is too early — it captures profit
+    # before the trade reaches its intended target, dragging down average R.
+    PARTIAL_TP_R: float = 2.0            # qFTD-008-EDGE: 1.5→2.0 — book 50% at min RR achieved
 
     # ── Phase 5: EV Engine + Adaptive Intelligence ───────────────────────────
     # EV Engine
@@ -155,13 +173,19 @@ class EngineConfig(BaseSettings):
     ACTIVATOR_T1_VOL_MULT: float = 0.60  # Volume threshold multiplier at Tier 1
     ACTIVATOR_T2_VOL_MULT: float = 0.40  # Volume threshold multiplier at Tier 2
     ACTIVATOR_T3_VOL_MULT: float = 0.30  # Volume threshold multiplier at Tier 3
-    ACTIVATOR_T1_SCORE: float = 0.55     # Relaxed score threshold at Tier 1
-    ACTIVATOR_T2_SCORE: float = 0.50     # Relaxed score threshold at Tier 2 / T3
+    # qFTD-008-EDGE: raised alongside MIN_TRADE_SCORE. T1 relaxes from 0.70→0.65,
+    # T2/T3 relaxes to 0.60 — still enforces meaningful quality during dry spells.
+    ACTIVATOR_T1_SCORE: float = 0.65     # qFTD-008-EDGE: 0.55→0.65 (aligned with new MIN_TRADE_SCORE=0.70)
+    ACTIVATOR_T2_SCORE: float = 0.60     # qFTD-008-EDGE: 0.50→0.60 (floor during extended no-trade)
 
-    # Exploration Engine — 10% learning trades
-    EXPLORE_RATE: float = 0.10           # Fraction of signal slots for exploration
+    # Exploration Engine — learning trades
+    # qFTD-008-EDGE: 0.10→0.05 — reduce exploration noise. Now that bootstrap deadlock
+    # is fixed (qFTD-008), normal trades execute; exploration is a secondary learning
+    # mechanism, not a primary execution path. Half-rate reduces noise PnL drag.
+    EXPLORE_RATE: float = 0.05           # qFTD-008-EDGE: 0.10→0.05 — reduce noise, keep learning
     EXPLORE_SIZE_MULT: float = 0.25      # Size multiplier for exploration trades
-    EXPLORE_SCORE_MIN: float = 0.45      # Absolute score floor for exploration
+    # qFTD-008-EDGE: 0.45→0.60 — exploration quality bar raised to match new baseline.
+    EXPLORE_SCORE_MIN: float = 0.60      # qFTD-008-EDGE: 0.45→0.60 — no low-quality exploration
     EXPLORE_EV_FLOOR: float = 0.50       # Max allowed EV negative fraction of est_risk
     EXPLORE_DAILY_LOSS_CAP: float = 0.02 # Max daily equity loss from exploration
 
@@ -174,9 +198,12 @@ class EngineConfig(BaseSettings):
     AF_MAX_TIGHTEN: float = 0.15         # Maximum cumulative tightening
 
     # Smart Fee Guard — RR-aware fee tolerance
+    # qFTD-008-EDGE: fee ceilings cut in half. At round-trip cost 0.09% and TP=3%,
+    # cost_fraction ≈ 3% — well below new 10% ceiling. Threshold is now meaningful
+    # and will block genuinely fee-heavy micro-move setups.
     SFG_HIGH_RR_THRESHOLD: float = 3.0  # RR above this → high-RR tolerance
-    SFG_HIGH_RR_FEE_MAX: float = 0.35   # Max fee/TP fraction for high-RR trades
-    SFG_NORMAL_FEE_MAX: float = 0.20    # Max fee/TP fraction for normal trades
+    SFG_HIGH_RR_FEE_MAX: float = 0.15   # qFTD-008-EDGE: 0.35→0.15 — high-RR still gets some slack
+    SFG_NORMAL_FEE_MAX: float = 0.10    # qFTD-008-EDGE: 0.20→0.10 — aligned with MAX_COST_FRACTION
 
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
