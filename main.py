@@ -607,9 +607,11 @@ async def on_tick(tick: Tick):
         # FTD-REF-023: scale confidence by per-regime learning-engine weight
         _regime_weight = learning_engine.get_regime_weight(r_ai.regime.value)
         # FTD-REF-026: profit guard — reduce effective confidence when PF < 1
+        # qFTD-011: use session-only trades for consecutive_losses so replayed
+        # loss history cannot trigger HARD_STOP at boot (same fix as _p52_cl).
         _pf_stats = pnl_calc.session_stats
         _consecutive_losses = 0
-        for _t in reversed(pnl_calc.trades):
+        for _t in reversed(pnl_calc.trades[_boot_replay_count:]):
             if _t.net_pnl < 0:
                 _consecutive_losses += 1
             else:
@@ -633,17 +635,43 @@ async def on_tick(tick: Tick):
         )
         _adjusted_conf = round(r_ai.confidence * _regime_weight * _pf_mult, 3)
 
+        # qFTD-011: diagnostic log before signal generation so we can see indicator
+        # state at each candle close and confirm the pipeline is reaching this point.
+        logger.info(
+            f"[SIG] {sym} n={len(closes)} regime={regime.value} "
+            f"adx={guard.adx:.1f} atr={guard.atr_pct:.4f}% "
+            f"conf={_adjusted_conf:.3f} consec_loss={_consecutive_losses}"
+        )
+
         sig = strategy.generate_signal(sym, closes, highs, lows)
+        if not sig or sig.signal == Signal.NONE:
+            logger.debug(f"[SIG] {sym} strategy={strategy_type} → NONE (no crossover / conditions unmet)")
 
         # Phase 4: Alpha Engine — supplementary high-quality signals
         # Runs when existing strategy produces no signal; all alpha signals
         # have already passed internal RR + Trade Scorer gates.
         if not sig or sig.signal == Signal.NONE:
             _vol_list_alpha = list(vol_buf)
+            # qFTD-011: compute actual avg_atr_pct from recent candle history so
+            # vol_expansion sub-score in trade_scorer uses a real baseline, not current ATR.
+            _recent_candle_highs  = list(mdp.candle_high_buffer(sym))
+            _recent_candle_lows   = list(mdp.candle_low_buffer(sym))
+            _window = min(20, len(_recent_candle_highs))
+            if _window >= 5 and candle_buf[-1] > 0:
+                _avg_atr_pct = sum(
+                    (h - l) / c * 100
+                    for h, l, c in zip(
+                        _recent_candle_highs[-_window:],
+                        _recent_candle_lows[-_window:],
+                        candle_buf[-_window:],
+                    )
+                ) / _window
+            else:
+                _avg_atr_pct = atr_pct
             _alpha_sig = alpha_engine.generate(
                 symbol=sym, closes=closes, highs=highs, lows=lows,
                 volumes=_vol_list_alpha, adx=guard.adx,
-                atr_pct=atr_pct, avg_atr_pct=atr_pct,
+                atr_pct=atr_pct, avg_atr_pct=_avg_atr_pct,
                 regime=regime.value,
             )
             if _alpha_sig:
@@ -653,6 +681,8 @@ async def on_tick(tick: Tick):
                     f"score={_alpha_sig.score:.3f} rr={_alpha_sig.rr:.2f}",
                     "SIGNAL",
                 )
+            else:
+                logger.debug(f"[SIG] {sym} alpha → NONE (RR/score below threshold)")
 
         if sig and sig.signal != Signal.NONE:
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")

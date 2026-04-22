@@ -141,6 +141,9 @@ class GlobalGateController:
         # run_cycle()'s internal gate re-evaluation does not block execution or
         # trip safe mode before indicator/data streams have fully opened.
         if self._system_state == "BOOTING":
+            # qFTD-011: attempt safe-mode recovery even during BOOTING so stale
+            # safe mode (activated before BOOT_GRACE was in place) auto-clears.
+            self._sme.check_recovery(deploy_score=100.0, can_trade=True)
             result = {
                 "can_trade": True,
                 "reason":    "BOOT_GRACE",
