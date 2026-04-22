@@ -208,6 +208,10 @@ class EngineConfig(BaseSettings):
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
 
+    # FTD-008: Hard trade frequency caps (daily discipline)
+    MAX_TRADES_PER_HOUR: int = 3         # Hard ceiling per rolling 60-min window
+    MAX_TRADES_PER_DAY:  int = 10        # Hard ceiling per calendar day
+
     # ── Phase 6: Stability + Profit Consistency ───────────────────────────────
     # EV Confidence Engine — EV-tier-based sizing
     EVC_HIGH_THRESHOLD: float = 0.15    # EV ≥ 0.15 → HIGH_CONF (full size)
