@@ -99,36 +99,29 @@ class EngineConfig(BaseSettings):
     RSI_OVERSOLD: float = 35.0            # Raised 28→35: require more bearish momentum for SHORT
     RSI_OVERBOUGHT: float = 65.0          # Lowered 72→65: require less overbought for LONG entry
     EMA_FAST: int = 12                    # Raised 8→12: reduce whipsaw noise
-    EMA_SLOW: int = 50                    # Raised 21→50: stronger trend confirmation
-    EMA_TREND: int = 100                  # NEW: macro trend direction filter (price vs EMA100)
+    EMA_SLOW: int = 21                    # qFTD-011: 50→21 — EMA50 needs 52 candles on 1-min; EMA21 fires after 23 min
+    EMA_TREND: int = 34                   # qFTD-011: 100→34 — Fibonacci macro filter; min_len 102→36 candles
     ATR_PERIOD: int = 14
     ATR_MULT_SL: float = 2.5              # Widened 1.5→2.5: survives 1-min noise, fewer premature SL hits
-    # qFTD-008-EDGE: 6.0→7.5 — lifts RR across all strategies:
-    #   TF:  7.5/2.5       = 3.0×  (was 2.4)
-    #   MR:  7.5×0.7/2.5   = 2.1×  (was 1.68 — now above MIN_RR_RATIO=2.0)
-    #   VE:  7.5×1.5/3.75  = 3.0×  (was 2.4)
-    # Break-even win rate at RR=2.0 (with 0.09% round-trip cost) = 35.8%.
-    # At RR=1.68 (old MR), break-even needed 40.7% — margin destroyed by any adverse run.
-    ATR_MULT_TP: float = 7.5              # qFTD-008-EDGE: 6.0→7.5 — all strategies now RR≥2.1
+    # Raw RR = ATR_MULT_TP / ATR_MULT_SL = 7.5/2.5 = 3.0× — well above MIN_RR_RATIO=1.5.
+    # qFTD-011: MIN_RR reverted 2.0→1.5; ATR_MULT_TP kept at 7.5 giving 3× raw RR.
+    ATR_MULT_TP: float = 7.5              # 3.0× raw RR (SL=2.5, TP=7.5 → RR=3.0)
     BB_PERIOD: int = 20
     BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
 
     # ── Phase 4: Profit Engine ───────────────────────────────────────────────
     # RR Engine
-    # qFTD-008-EDGE: 1.5→2.0 — minimum required for positive EV at crypto fee levels.
-    # Math: EV = RR×P_win − (1−P_win) − 0.09 (round-trip cost)
-    #   RR=1.5, P_win=0.40 → EV = −0.09  (LOSING)
-    #   RR=2.0, P_win=0.40 → EV = +0.11  (POSITIVE)
-    # MR strategy (was RR=1.68) now produces RR=2.1 after ATR_MULT_TP raise — still qualifies.
-    MIN_RR_RATIO: float = 2.0            # qFTD-008-EDGE: 1.5→2.0 — crypto fee-adjusted minimum
+    # qFTD-011: reverted 2.0→1.5. ATR_MULT_TP=7.5 already gives 3.0× raw RR so
+    # 2.0 minimum was double-gating; fee-adjusted RR at 7.5×ATR TP easily clears 1.5.
+    MIN_RR_RATIO: float = 1.5            # qFTD-011: 2.0→1.5 — revert overcorrection (raw RR = 3.0×)
 
     # Trade Scorer
-    # qFTD-008-EDGE: 0.60→0.70 — requires strong multi-factor confirmation before entry.
-    # Bootstrap rank at score=0.70: 0.111×0.55 + 0.70×0.20 + 1.0×0.15 + 0.5×0.10 = 0.401 > 0.30 ✓
-    MIN_TRADE_SCORE: float = 0.70        # qFTD-008-EDGE: 0.60→0.70 — cut marginal signals
-    # qFTD-008-EDGE: 0.20→0.10 — stricter fee discipline; round-trip cost 0.09% must stay
-    # well below 10% of gross TP for any trade to be worth taking.
-    MAX_COST_FRACTION: float = 0.10      # qFTD-008-EDGE: 0.20→0.10 — tighter fee ceiling
+    # qFTD-011: reverted 0.70→0.58. Typical alpha signal scores ≈0.60 in TRENDING market
+    # with ADX=25 and vol_ratio=1.5 — the 0.70 bar was blocking ALL signals silently.
+    # Score formula: regime(25%) + volume(20%) + adx(20%) + rsi_slope(15%) + vol_exp(10%) + cost(10%)
+    MIN_TRADE_SCORE: float = 0.58        # qFTD-011: 0.70→0.58 — revert overcorrection
+    # qFTD-011: 0.10→0.15 — tighter cost ceiling was blocking small-notional valid trades.
+    MAX_COST_FRACTION: float = 0.15      # qFTD-011: 0.10→0.15 — realistic fee ceiling
 
     # Capital Allocator
     MAX_CAPITAL_PER_TRADE: float = 0.05  # Max 5% of equity per trade
