@@ -1,0 +1,329 @@
+# 🧾 FTD-016 — SEMI-AUTONOMOUS EXECUTION (CONTROLLED AUTO-TUNING)
+
+### Ref: FTD-016-EOW-CONTROLLED-TUNING (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Enable **safe, stepwise auto-tuning** of parameters based on FTD-015 suggestions:
+
+```text id="y6m2a1"
+Suggest → Validate → Apply (small step) → Measure → Keep / Rollback
+```
+
+❗ **No full automation**
+❗ **Human override always available**
+
+---
+
+# 🧠 POSITION IN STACK
+
+```text id="9k2p7v"
+014B → Data
+014C → Intelligence (Why)
+015 → Suggestions (What)
+016 → Controlled Execution (How much, when, how safely)
+```
+
+---
+
+# 🏗️ ARCHITECTURE OVERVIEW
+
+```text id="2f4q8r"
+Suggestion Intake
+      ↓
+Eligibility Gate
+      ↓
+Change Planner (step sizing)
+      ↓
+Sandbox (paper/shadow)
+      ↓
+Limited Live Rollout
+      ↓
+Monitoring Window
+      ↓
+Decision: Accept / Rollback
+      ↓
+State Registry (versioned)
+```
+
+---
+
+# 📁 DIRECTORY & MODULES
+
+```text id="u1b7t3"
+/core/tuning/
+    tuner_controller.py
+    eligibility_engine.py
+    change_planner.py
+    rollout_engine.py
+    monitor_engine.py
+    rollback_engine.py
+    state_registry.py
+    guardrail_engine.py
+
+/reports/intelligence/auto_tuning/
+    sessions/
+    history/
+```
+
+---
+
+# 🔒 GLOBAL RULES (NON-NEGOTIABLE)
+
+```text id="r3n8p4"
+1. Max step change per cycle ≤ 10% of parameter range
+2. One change at a time (no multi-variate jumps initially)
+3. Mandatory sandbox validation before live
+4. Mandatory monitoring window (≥ 10–20 trades)
+5. Automatic rollback on guardrail breach
+6. Full versioning of every change
+7. Human kill-switch always available
+```
+
+---
+
+# 🥇 PART 1 — SUGGESTION INTAKE
+
+## 📁 tuner_controller.py
+
+```python id="a8d3k1"
+def fetch_suggestions():
+    return load_latest("/reports/intelligence/fix/")
+```
+
+---
+
+# 🥈 PART 2 — ELIGIBILITY ENGINE
+
+## 📁 eligibility_engine.py
+
+### Reject if:
+
+```text id="b5p2c7"
+- confidence < 0.7
+- conflicting active experiment
+- recent rollback for same parameter
+- system in high drawdown state
+```
+
+```python id="c4f9m2"
+def is_eligible(suggestion, state):
+    return suggestion.confidence >= 0.7 and not state.locked
+```
+
+---
+
+# 🥉 PART 3 — CHANGE PLANNER (STEPWISE)
+
+## 📁 change_planner.py
+
+```python id="d2v7s8"
+def plan_change(param, current, target):
+    step = (target - current) * 0.25   # 25% of delta
+    return current + step
+```
+
+❗ First iteration = **partial move**, not full
+
+---
+
+# 🛡 PART 4 — GUARDRAIL ENGINE
+
+## 📁 guardrail_engine.py
+
+### Hard Stops:
+
+```text id="g1x6q3"
+- Max DD increase > +3%
+- PF drop below threshold
+- Risk-of-Ruin increase > limit
+- Consecutive losses spike
+```
+
+```python id="h7k3n9"
+def safe_to_proceed(metrics):
+    return metrics.dd_delta < 0.03 and metrics.pf > min_pf
+```
+
+---
+
+# 🧪 PART 5 — SANDBOX (PAPER / SHADOW MODE)
+
+## 📁 rollout_engine.py
+
+```python id="j9p4t6"
+def run_shadow_test(change):
+    # apply in paper mode
+    return simulate(change)
+```
+
+❗ Minimum: **N trades or T time window**
+
+---
+
+# 🚀 PART 6 — LIMITED LIVE ROLLOUT
+
+## 📁 rollout_engine.py
+
+```python id="k6m2v8"
+def limited_live_apply(change):
+    apply(change, exposure_limit=0.25)  # 25% capital cap
+```
+
+---
+
+# ⏱ PART 7 — MONITOR ENGINE
+
+## 📁 monitor_engine.py
+
+### Track:
+
+```text id="m4q8z1"
+- signal count
+- win rate
+- PF
+- DD
+- latency impact
+```
+
+```python id="n8c5p3"
+def evaluate_window(metrics):
+    return {
+        "improved": metrics.pf_up and metrics.signals_up,
+        "risk_ok": metrics.dd_delta < 0.03
+    }
+```
+
+---
+
+# 🔁 PART 8 — ROLLBACK ENGINE
+
+## 📁 rollback_engine.py
+
+```python id="p3r7w2"
+def rollback(prev_state):
+    restore(prev_state)
+```
+
+### Trigger:
+
+```text id="q2n6x4"
+Any guardrail breach OR performance degradation
+```
+
+---
+
+# 🗂 PART 9 — STATE REGISTRY (VERSIONING)
+
+## 📁 state_registry.py
+
+```python id="r5m9k1"
+def save_version(config):
+    version_id = timestamp()
+    persist(config, version_id)
+```
+
+### Must store:
+
+```text id="s1v4b8"
+- parameter values
+- change reason
+- metrics before/after
+- decision (accept/reject)
+```
+
+---
+
+# 📊 PART 10 — SESSION OUTPUT
+
+📁 `/reports/intelligence/auto_tuning/sessions/session_YYYYMMDD_HHMM.txt`
+
+```text id="t9c2w7"
+CHANGE: min_score 0.58 → 0.52 (step)
+MODE: shadow → limited live (25%)
+
+WINDOW: 18 trades
+
+RESULT:
+signals: +28%
+PF: +0.06
+DD: +1.1%
+
+DECISION: ACCEPTED
+VERSION: v2026_04_23_1030
+```
+
+---
+
+# 🔌 PART 11 — INTEGRATION POINTS
+
+* Input: FTD-015 suggestions
+* Read: FTD-014B/014C reports
+* Output: tuning sessions + updated config (versioned)
+
+---
+
+# 🧪 PART 12 — VERIFIER (MANDATORY)
+
+📁 `/tests/test_auto_tuning.py`
+
+```python id="u3b8m6"
+def test_step_change():
+    assert abs(new-old) <= 0.1 * range
+
+def test_rollback():
+    assert restored == prev_state
+
+def test_guardrails():
+    assert not safe_to_proceed(bad_metrics)
+```
+
+---
+
+# 🧠 PART 13 — DBO COMPLIANCE
+
+| Filter           | Coverage                       |
+| ---------------- | ------------------------------ |
+| 🌍 Institutional | change mgmt + audit trail ✔    |
+| 📚 CTA           | adaptive tuning cycles ✔       |
+| 📈 Growth        | compounding via optimization ✔ |
+| 🛡 Risk          | strict guardrails + rollback ✔ |
+| ⚙ Deployability  | shadow→limited live rollout ✔  |
+
+---
+
+# 🚨 FAILURE CONDITIONS (REJECT IF)
+
+```text id="v8k1p5"
+- Multiple params changed together (early phase)
+- No sandbox validation
+- No versioning
+- No rollback proof
+- Live loop slowdown
+```
+
+---
+
+# 🏁 FINAL STATE
+
+```text id="w6p2r9"
+System will:
+- Suggest changes (015)
+- Test safely (016)
+- Improve gradually
+- Protect capital
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="x4n7q2"
+Yeh auto-trading nahi hai
+
+Yeh disciplined, auditable, safe evolution hai
+```
+
+---

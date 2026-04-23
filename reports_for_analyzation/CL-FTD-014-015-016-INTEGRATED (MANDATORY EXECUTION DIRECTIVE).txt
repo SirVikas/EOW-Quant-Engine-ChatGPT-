@@ -1,0 +1,359 @@
+# 🧾 MASTER COVERING LETTER — REPORTING + INTELLIGENCE + AUTO-TUNING SYSTEM
+
+### Ref: CL-FTD-014-015-016-INTEGRATED (MANDATORY EXECUTION DIRECTIVE)
+
+---
+
+# 🎯 PURPOSE
+
+This document instructs the developer to implement **7 FTDs as ONE unified system**, ensuring:
+
+```text id="0a1xpl"
+No duplication
+No chaos
+No conflicting logic
+Fully structured, layered architecture
+```
+
+---
+
+# 📦 DOCUMENTS IN SCOPE (TOTAL 7)
+
+### 🔹 FOUNDATION
+
+1. FTD-014B — Auto + On-Demand Reporting
+2. Technical Reporting Framework
+3. Full Stack Reporting Framework
+
+### 🔹 INTELLIGENCE LAYER
+
+4. FTD-014C — Intelligence Reporting (BLACKBOX)
+5. FTD-014C Warning (Avoid reporting jungle)
+
+### 🔹 DECISION & ACTION LAYER
+
+6. FTD-015 — Auto Fix Suggestion Engine
+7. FTD-016 — Semi-Autonomous Execution (Controlled Auto-Tuning)
+
+---
+
+# 🚨 CRITICAL WARNING (READ FIRST)
+
+```text id="y9n1za"
+DO NOT implement these as separate systems
+DO NOT duplicate logs or reports
+DO NOT bypass layering
+```
+
+👉 If violated:
+
+```text id="u2z4hx"
+System will become slow, confusing, and unusable
+```
+
+---
+
+# 🧠 MASTER ARCHITECTURE (NON-NEGOTIABLE)
+
+```text id="h8w6mc"
+LAYER 1 → DATA (FTD-014B)
+LAYER 2 → ANALYTICS (FTD-014C Derived)
+LAYER 3 → DECISION (FTD-014C Decision)
+LAYER 4 → SUGGESTION (FTD-015)
+LAYER 5 → CONTROLLED EXECUTION (FTD-016)
+```
+
+---
+
+# 🏗️ ROLE OF EACH FTD (STRICT MAPPING)
+
+---
+
+## 🥇 FTD-014B → DATA ENGINE
+
+```text id="x3m7kp"
+Captures raw truth (ONLY source of truth)
+```
+
+Includes:
+
+* Trades
+* Signals
+* Risk
+* Execution
+* System logs
+
+❗ RULE:
+
+```text id="v5k2sn"
+NO OTHER FTD can create raw logs
+```
+
+---
+
+## 🥈 FTD-014C → INTELLIGENCE ENGINE
+
+```text id="z7p4wd"
+Converts data → insights → explanations
+```
+
+Includes:
+
+* Derived analytics
+* Decision trace
+* Pipeline trace
+* Missed opportunity
+
+❗ RULE:
+
+```text id="m6q2rt"
+Must read ONLY from FTD-014B
+```
+
+---
+
+## 🥉 FTD-015 → SUGGESTION ENGINE
+
+```text id="q1f8by"
+Converts insights → actionable fixes
+```
+
+Includes:
+
+* Root cause detection
+* Suggested parameter changes
+* Impact estimation
+
+❗ RULE:
+
+```text id="d8n3uc"
+NO auto-apply of changes
+```
+
+---
+
+## 🏁 FTD-016 → CONTROLLED EXECUTION ENGINE
+
+```text id="p9r6vk"
+Applies fixes safely with validation & rollback
+```
+
+Includes:
+
+* Stepwise tuning
+* Sandbox testing
+* Limited rollout
+* Monitoring + rollback
+
+❗ RULE:
+
+```text id="k4w1hz"
+Safety > Profit
+```
+
+---
+
+# 🔄 IMPLEMENTATION ORDER (STRICT SEQUENCE)
+
+---
+
+## ✅ STEP 1 — BUILD & VERIFY FTD-014B
+
+Must confirm:
+
+```text id="j2x7qa"
+✔ Trade logs
+✔ Signal audit
+✔ Risk logs
+✔ Execution logs
+```
+
+❌ If incomplete → STOP
+
+---
+
+## ✅ STEP 2 — LOCK DATA LAYER
+
+```text id="t5m8cs"
+FTD-014B becomes immutable
+```
+
+---
+
+## ✅ STEP 3 — BUILD FTD-014C (INTELLIGENCE)
+
+Modules:
+
+* derived_engine
+* decision_engine
+* diagnostic_engine
+
+---
+
+## ✅ STEP 4 — BUILD FTD-015 (SUGGESTION)
+
+Modules:
+
+* root_cause_engine
+* suggestion_engine
+* impact_simulator
+* safety_engine
+
+---
+
+## ✅ STEP 5 — BUILD FTD-016 (AUTO-TUNING)
+
+Modules:
+
+* eligibility_engine
+* change_planner
+* rollout_engine
+* monitor_engine
+* rollback_engine
+* state_registry
+
+---
+
+# 🚫 GLOBAL NO-DUPLICATION POLICY
+
+---
+
+## ❌ STRICTLY FORBIDDEN:
+
+```text id="g1x9mq"
+Duplicate trade logs
+Duplicate signal logs
+Recomputing inside live loop
+Multiple sources of truth
+```
+
+---
+
+## ✅ REQUIRED PATTERN:
+
+```text id="b4v2kn"
+READ → ANALYZE → SUGGEST → TEST → APPLY
+```
+
+---
+
+# ⚙️ SYSTEM INTEGRATION FLOW
+
+```text id="c7n3px"
+Logs (014B)
+   ↓
+Analytics (014C)
+   ↓
+Suggestions (015)
+   ↓
+Controlled Execution (016)
+```
+
+---
+
+# 🛡 SAFETY PRINCIPLES (MANDATORY)
+
+---
+
+## 1. NO DIRECT AUTO-CHANGE
+
+---
+
+## 2. STEPWISE TUNING ONLY
+
+---
+
+## 3. MANDATORY ROLLBACK
+
+---
+
+## 4. VERSION CONTROL REQUIRED
+
+---
+
+## 5. HUMAN OVERRIDE ALWAYS
+
+---
+
+# 🧪 VERIFICATION REQUIREMENTS
+
+Developer MUST deliver:
+
+---
+
+## ✅ 1. Sample Outputs
+
+* Signal audit
+* Decision trace
+* Fix suggestions
+* Auto-tuning session
+
+---
+
+## ✅ 2. Full Data Flow Proof
+
+```text id="y8w3mt"
+One raw source → multiple intelligence outputs
+```
+
+---
+
+## ✅ 3. Rollback Demonstration
+
+---
+
+## ✅ 4. No Performance Lag
+
+---
+
+## ✅ 5. Version Registry Dump
+
+---
+
+# 🧠 FINAL SYSTEM STATE (TARGET)
+
+```text id="n6q4hy"
+System will:
+Know what happened
+Know why it happened
+Know what to fix
+Know how to fix safely
+```
+
+---
+
+# 🚨 FAILURE CONDITIONS (REJECT IF)
+
+```text id="w2m7rs"
+Duplicate data exists
+Reports contradict each other
+No rollback mechanism
+Unsafe tuning allowed
+System becomes slow
+```
+
+---
+
+# 🏁 FINAL INSTRUCTION TO DEVELOPER
+
+```text id="z9k5pc"
+Do NOT treat this as reporting project
+
+Treat this as:
+A full decision intelligence + controlled evolution system
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="q4p8vn"
+A basic system trades
+
+An advanced system analyzes
+
+An institutional system:
+Learns → Adapts → Improves safely
+```
+
+---

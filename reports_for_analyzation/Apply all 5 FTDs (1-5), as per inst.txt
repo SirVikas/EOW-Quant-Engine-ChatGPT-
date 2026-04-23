@@ -1,0 +1,14 @@
+Apply all 7 FTDs (1-7), as per instructions mentioned in document. "CL-FTD-014-015-016-INTEGRATED (MANDATORY EXECUTION DIRECTIVE).txt".
+" 
+
+
+Location : - https://github.com/SirVikas/EOW-Quant-Engine-ChatGPT-/tree/main/reports_for_analyzation
+
+0. CL-FTD-014-015-016-INTEGRATED (MANDATORY EXECUTION DIRECTIVE).txt
+1. ### Ref_FTD-014C-EOW-INTELLIGENCE-REPORTING (BLACKBOX).txt
+2. FTD-014C → redundant, heavy, unusable reporting jungle ban jayega.txt
+3. # 🧾 FTD-014B — AUTO + ON-DEMAND REPORTING SYSTEM (FULL IMPLEMENTATION).txt
+4. # 🧠 🏛 TECHNICAL REPORTING FRAMEWORK (INSTITUTIONAL GRADE).txt
+5. # 🧠 🏛 EOW REPORTING FRAMEWORK (FULL STACK.txt
+6. # 🧾 FTD-015 — AUTO FIX SUGGESTION ENGINE (FULL IMPLEMENTATION).txt
+7. # 🧾 FTD-016 — SEMI-AUTONOMOUS EXECUTION (CONTROLLED AUTO-TUNING).txt

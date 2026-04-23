@@ -1,0 +1,365 @@
+# 🧾 FTD-015 — AUTO FIX SUGGESTION ENGINE (FULL IMPLEMENTATION)
+
+### Ref: FTD-015-EOW-AUTO-FIX-INTELLIGENCE (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Build a **semi-autonomous decision assistant** that:
+
+```text id="2xk8p1"
+Detects root cause → Suggests fixes → Estimates impact → Ensures safety
+```
+
+❗ It MUST **NOT auto-apply changes**
+❗ It MUST **guide, not override**
+
+---
+
+# 🧠 CORE ROLE IN SYSTEM
+
+```text id="7m2c4n"
+FTD-014B → Data (WHAT happened)
+FTD-014C → Intelligence (WHY happened)
+FTD-015 → Action (WHAT TO DO NEXT)
+```
+
+---
+
+# 🏗️ ARCHITECTURE OVERVIEW
+
+```text id="l0s9a7"
+Reports (014B/014C)
+        ↓
+Root Cause Engine
+        ↓
+Suggestion Engine
+        ↓
+Impact Simulator
+        ↓
+Safety Filter
+        ↓
+Priority Ranker
+        ↓
+Fix Recommendation Output
+```
+
+---
+
+# 📁 NEW DIRECTORY STRUCTURE
+
+```text id="b7q4n2"
+/core/intelligence/
+    root_cause_engine.py
+    suggestion_engine.py
+    impact_simulator.py
+    safety_engine.py
+    priority_engine.py
+
+/reports/intelligence/fix/
+    fix_suggestions_YYYYMMDD.txt
+```
+
+---
+
+# 🥇 PART 1 — ROOT CAUSE ENGINE
+
+## 📁 FILE:
+
+```text id="r1c6t8"
+/core/intelligence/root_cause_engine.py
+```
+
+---
+
+## 🔧 FUNCTION:
+
+```python id="3k2p7d"
+def detect_root_causes(data):
+    return [
+        {"issue": "NO_SIGNAL", "confidence": 0.92},
+        {"issue": "EDGE_BLOCK", "confidence": 0.87},
+    ]
+```
+
+---
+
+## 📊 INPUT SOURCES:
+
+* signal_audit logs
+* decision_trace
+* risk_state
+* strategy_diagnostics
+
+---
+
+## 🎯 DETECTABLE ISSUES (MANDATORY)
+
+```text id="8t1m6x"
+NO_SIGNAL
+OVER_FILTERING
+EDGE_BLOCK
+RISK_GUARD_BLOCK
+EXECUTION_BLOCK
+LATENCY_DELAY
+STRATEGY_TOO_STRICT
+DATA_ISSUE
+```
+
+---
+
+# 🥈 PART 2 — SUGGESTION ENGINE
+
+## 📁 FILE:
+
+```text id="z9n3w6"
+/core/intelligence/suggestion_engine.py
+```
+
+---
+
+## 🔧 FUNCTION:
+
+```python id="6v4q1y"
+def generate_suggestions(issue):
+    if issue == "EDGE_BLOCK":
+        return {
+            "action": "reduce_min_score",
+            "from": 0.58,
+            "to": 0.42,
+        }
+```
+
+---
+
+## 📊 RULE BASE (MANDATORY)
+
+| Issue            | Suggested Fix             |
+| ---------------- | ------------------------- |
+| NO_SIGNAL        | Relax strategy conditions |
+| EDGE_BLOCK       | Reduce min_score          |
+| RISK_GUARD_BLOCK | Session-based PF          |
+| EXECUTION_BLOCK  | Check pipeline            |
+| LATENCY_DELAY    | Optimize loop             |
+
+---
+
+---
+
+# 🥉 PART 3 — IMPACT SIMULATOR
+
+## 📁 FILE:
+
+```text id="p8x4k2"
+/core/intelligence/impact_simulator.py
+```
+
+---
+
+## 🎯 PURPOSE:
+
+```text id="5f7v3m"
+Estimate outcome BEFORE applying fix
+```
+
+---
+
+## 🔧 FUNCTION:
+
+```python id="9c2k8d"
+def simulate_fix(change, data):
+    return {
+        "signal_increase": "+40%",
+        "drawdown_risk": "+5%",
+        "win_rate_change": "-2%"
+    }
+```
+
+---
+
+# 🛡 PART 4 — SAFETY ENGINE
+
+## 📁 FILE:
+
+```text id="w6n3p1"
+/core/intelligence/safety_engine.py
+```
+
+---
+
+## 🎯 PURPOSE:
+
+```text id="q3h7k9"
+Reject unsafe suggestions
+```
+
+---
+
+## RULES:
+
+```text id="x8k2m5"
+NO suggestion allowed if:
+- Risk-of-Ruin > threshold
+- Drawdown exceeds max
+- Capital risk violated
+```
+
+---
+
+# 📊 PART 5 — PRIORITY ENGINE
+
+## 📁 FILE:
+
+```text id="y5k8r2"
+/core/intelligence/priority_engine.py
+```
+
+---
+
+## 🎯 PURPOSE:
+
+```text id="u2v6n8"
+Rank fixes based on impact
+```
+
+---
+
+## OUTPUT:
+
+```text id="k4j9t3"
+1. Fix EDGE_BLOCK (High impact)
+2. Fix RISK_GUARD (Medium)
+```
+
+---
+
+# 📦 PART 6 — FINAL OUTPUT ENGINE
+
+## 📁 OUTPUT FILE:
+
+```text id="m7t3n1"
+/reports/intelligence/fix/fix_suggestions_YYYYMMDD.txt
+```
+
+---
+
+## FORMAT:
+
+```text id="v2p8x6"
+ISSUE: EDGE_BLOCK
+CONFIDENCE: 91%
+
+SUGGESTED FIX:
+min_score: 0.58 → 0.42
+
+EXPECTED IMPACT:
++40% signals
+
+RISK:
+Moderate DD increase
+
+PRIORITY: HIGH
+```
+
+---
+
+# 🔌 PART 7 — INTEGRATION
+
+---
+
+## INPUT HOOKS:
+
+```text id="n9c2x7"
+decision_engine output
+signal logs
+risk logs
+```
+
+---
+
+## TRIGGER:
+
+```text id="t4k7y2"
+On-demand OR every 20 trades
+```
+
+---
+
+# 🧪 PART 8 — VERIFIER SCRIPT
+
+📁 `/tests/test_fix_engine.py`
+
+---
+
+### TESTS:
+
+```python id="r8v2m4"
+def test_root_detection():
+    assert detect_root_causes(data)
+
+def test_suggestion():
+    assert generate_suggestions("EDGE_BLOCK")
+
+def test_safety():
+    assert safe == True
+```
+
+---
+
+# 🧠 PART 9 — DBO COMPLIANCE
+
+| Filter           | Coverage                |
+| ---------------- | ----------------------- |
+| 🌍 Institutional | explainable decisions ✔ |
+| 📚 CTA           | data-driven tuning ✔    |
+| 📈 Growth        | optimized parameters ✔  |
+| 🛡 Risk          | safety checks ✔         |
+| ⚙ Deployability  | real-world applicable ✔ |
+
+---
+
+# 🚨 MANDATORY RULES
+
+```text id="z6p8x3"
+1. NO auto-apply of fixes
+2. All suggestions must include impact + risk
+3. No blind recommendations
+4. Must be explainable
+5. Must be reversible
+```
+
+---
+
+# 🏁 FINAL SYSTEM STATE
+
+After FTD-015:
+
+```text id="x1k9v3"
+System will:
+- Detect issue
+- Explain issue
+- Suggest fix
+- Estimate impact
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="c7p2x8"
+This is NOT automation
+
+This is assisted intelligence
+```
+
+---
+
+What we get after this : Data Engine → Intelligence Engine → Decision Engine → Guidance Engine
+
+
+ASIDE : please share the followings to us.
+1. Sample fix suggestions
+2. Impact simulation proof
+3. Safety validation
+4. Verifier results
