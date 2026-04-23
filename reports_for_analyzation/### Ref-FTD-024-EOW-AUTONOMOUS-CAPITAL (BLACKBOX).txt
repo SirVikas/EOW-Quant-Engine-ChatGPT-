@@ -1,0 +1,310 @@
+# 🧾 FTD-024 — AUTONOMOUS CAPITAL ENGINE (FULL SELF-SCALING SYSTEM)
+
+### Ref: FTD-024-EOW-AUTONOMOUS-CAPITAL (BLACKBOX)
+### Ref-FTD-024-EOW-AUTONOMOUS-CAPITAL (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Enable the system to **dynamically scale capital, exposure, and deployment scope** based on verified performance and risk:
+
+```text id="k8m3p1"
+Earn → Validate → Scale → Protect → Repeat
+```
+
+❗ No blind scaling
+❗ Always gated by risk + validation
+❗ Fully auditable, reversible
+
+---
+
+# 🧠 POSITION IN STACK
+
+```text id="p2m7k4"
+014–022 → Data, Intelligence, Risk, Audit
+023 → AI Brain (Meta Decisions)
+024 → Autonomous Capital Engine (Execution of Capital Scaling)
+```
+
+👉 AI Brain decides **“scale or not”**
+👉 FTD-024 executes **“how much, where, when”**
+
+---
+
+# 🏗️ CORE ARCHITECTURE
+
+```text id="n6p2k9"
+Performance Evidence (014C/019)
+        ↓
+Eligibility Gate (Risk + Stability)
+        ↓
+Scaling Policy Engine
+        ↓
+Capital Allocation Engine (020)
+        ↓
+Deployment Controller
+        ↓
+Monitoring Window
+        ↓
+Feedback Loop → Continue / Pause / Rollback
+```
+
+---
+
+# 📁 DIRECTORY & MODULES
+
+```text id="r3k8m2"
+/core/capital/
+    eligibility_engine.py
+    scaling_policy_engine.py
+    deployment_controller.py
+    exposure_scaler.py
+    capital_registry.py
+    growth_tracker.py
+    rollback_engine.py
+
+/reports/intelligence/capital/
+    scaling_sessions/
+    capital_state.json
+    growth_curve.json
+    deployment_log.csv
+```
+
+---
+
+# 🔒 GLOBAL RULES (NON-NEGOTIABLE)
+
+```text id="x1m7k3"
+1. Scaling allowed ONLY after validated performance
+2. Stepwise scaling (no sudden jumps)
+3. Capital exposure caps enforced (via 021)
+4. Mandatory monitoring window after each scale
+5. Instant rollback on degradation
+6. Full versioning of capital states
+```
+
+---
+
+# 🥇 PART 1 — ELIGIBILITY ENGINE
+
+## 📁 eligibility_engine.py
+
+### Conditions to SCALE:
+
+```text id="t9k2m4"
+- PF stable & above threshold
+- Drawdown controlled
+- Sufficient trade sample (N trades)
+- No recent rollback
+- Risk-of-Ruin acceptable
+```
+
+```python id="a3k7m1"
+def is_scalable(metrics):
+    return metrics.pf > 1.3 and metrics.dd < 0.1
+```
+
+---
+
+# 🥈 PART 2 — SCALING POLICY ENGINE
+
+## 📁 scaling_policy_engine.py
+
+### Policies:
+
+```text id="c6m2k8"
+Conservative → +5–10%
+Balanced → +10–20%
+Aggressive → +20–30%
+```
+
+---
+
+### Example:
+
+```python id="p4k9m2"
+def compute_scale(current_capital, policy):
+    return current_capital * (1 + policy.rate)
+```
+
+---
+
+# 🥉 PART 3 — DEPLOYMENT CONTROLLER
+
+## 📁 deployment_controller.py
+
+### Responsibilities:
+
+```text id="v8k1m3"
+- Apply new capital allocation
+- Limit exposure during transition
+- Sync with portfolio engine (020)
+```
+
+---
+
+### Example:
+
+```python id="z2k7m5"
+def deploy(capital):
+    apply_allocation(capital, cap_limit=0.25)
+```
+
+---
+
+# 🛡 PART 4 — EXPOSURE SCALER
+
+## 📁 exposure_scaler.py
+
+Controls:
+
+```text id="b5k9m2"
+- Position sizing
+- Strategy allocation
+- Symbol exposure
+```
+
+---
+
+# 🔁 PART 5 — MONITORING WINDOW
+
+## 📁 growth_tracker.py
+
+### Track:
+
+```text id="m1k8p3"
+- Equity growth
+- DD change
+- Stability
+```
+
+---
+
+### Decision:
+
+```text id="q3k7m4"
+Continue scaling OR pause OR rollback
+```
+
+---
+
+# 🔁 PART 6 — ROLLBACK ENGINE
+
+## 📁 rollback_engine.py
+
+```python id="r9k2m1"
+def rollback(prev_capital):
+    restore(prev_capital)
+```
+
+---
+
+### Trigger:
+
+```text id="s6k3m8"
+- DD spike
+- PF drop
+- Risk breach
+```
+
+---
+
+# 🗂 PART 7 — CAPITAL REGISTRY
+
+## 📁 capital_registry.py
+
+Stores:
+
+```text id="u2k7m5"
+- capital levels
+- scaling history
+- deployment states
+```
+
+---
+
+# 📊 PART 8 — OUTPUT REPORTS
+
+📁 `/reports/intelligence/capital/`
+
+```text id="w8k3m1"
+capital_state.json
+growth_curve.json
+scaling_sessions/session_YYYYMMDD.txt
+deployment_log.csv
+```
+
+---
+
+# 🔌 PART 9 — INTEGRATION
+
+* Uses: AI Brain decisions (023)
+* Uses: Portfolio engine (020)
+* Enforced by: Risk engine (021)
+* Observed by: Audit layer (022)
+
+---
+
+# 🧪 PART 10 — VERIFIER
+
+📁 `/tests/test_capital.py`
+
+```python id="x5k2m9"
+def test_scaling():
+    assert capital_increase_if_good
+
+def test_rollback():
+    assert restored_if_bad
+
+def test_limits():
+    assert exposure_within_bounds
+```
+
+---
+
+# 🧠 DBO COMPLIANCE
+
+| Filter           | Coverage                      |
+| ---------------- | ----------------------------- |
+| 🌍 Institutional | capital scaling discipline ✔  |
+| 📚 CTA           | adaptive capital deployment ✔ |
+| 📈 Growth        | compounding engine ✔          |
+| 🛡 Risk          | strict caps + rollback ✔      |
+| ⚙ Deployability  | realistic scaling ✔           |
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text id="y7k2m4"
+Blind scaling
+No monitoring
+No rollback
+No risk control
+Capital overexposure
+```
+
+---
+
+# 🏁 FINAL SYSTEM STATE
+
+```text id="z3k8m1"
+System will:
+Scale capital intelligently
+Grow profits systematically
+Protect downside
+Adapt capital dynamically
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="p6k1m9"
+Profit banana strategy ka kaam hai
+
+Wealth banana capital engine ka kaam hai
+```
+
+---

@@ -1,0 +1,415 @@
+# 🧾 FTD-019 — AUTONOMOUS STRATEGY EVOLUTION ENGINE (CONTROLLED, AUDITABLE)
+
+### Ref: FTD-019-EOW-STRATEGY-EVOLUTION (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Evolve strategies **safely and systematically** using live-equivalent evidence:
+
+```text id="v8c3p1"
+Observe → Hypothesize → Generate → Validate → Select → Deploy (controlled)
+```
+
+❗ No blind invention
+❗ No unsafe live deployment
+❗ Full audit trail + rollback
+
+---
+
+# 🧠 POSITION IN STACK
+
+```text id="q4m7k2"
+014B → Data
+014C → Intelligence (WHY)
+015 → Suggestions (WHAT)
+016 → Controlled Tuning (HOW MUCH / WHEN)
+017 → Dashboard (VISIBILITY)
+018 → Alerts (AWARENESS)
+019 → Strategy Evolution (WHAT NEW / WHAT BETTER)
+```
+
+---
+
+# 🏗️ HIGH-LEVEL ARCHITECTURE
+
+```text id="n6t2r9"
+Evidence (014B/014C)
+        ↓
+Hypothesis Engine
+        ↓
+Strategy Generator (variants)
+        ↓
+Validator (paper + shadow + walk-forward)
+        ↓
+Selector (multi-objective scoring)
+        ↓
+Portfolio Allocator (weighting)
+        ↓
+Controlled Deployment (via 016)
+        ↓
+Registry + Audit + Rollback
+```
+
+---
+
+# 📁 DIRECTORY & MODULES
+
+```text id="d2x9p4"
+/core/evolution/
+    hypothesis_engine.py
+    strategy_generator.py
+    feature_library.py
+    validator_engine.py
+    selector_engine.py
+    allocator_engine.py
+    champion_challenger.py
+    evolution_scheduler.py
+    strategy_registry.py
+    audit_engine.py
+
+/reports/intelligence/evolution/
+    hypotheses/
+    candidates/
+    validations/
+    selections/
+    allocations/
+    audits/
+```
+
+---
+
+# 🔒 GLOBAL RULES (NON-NEGOTIABLE)
+
+```text id="a1k8r6"
+1. NO direct live deployment of new strategies
+2. Mandatory multi-stage validation before promotion
+3. Champion–Challenger model always ON
+4. Full versioning of every strategy (params + logic hash)
+5. Rollback must be instant and loss-bounded
+6. Capital caps for challengers (≤ 10–20%)
+7. Changes must be explainable (feature/logic provenance)
+```
+
+---
+
+# 🥇 PART 1 — HYPOTHESIS ENGINE
+
+## 📁 hypothesis_engine.py
+
+### Inputs:
+
+* Decision traces (014C)
+* Missed opportunities
+* Signal drop-off
+* Regime performance
+
+### Output:
+
+```text id="h3v7n2"
+"Hypothesis: Edge filter too strict in low-vol regime"
+"Hypothesis: RSI threshold suboptimal for BTC during high volatility"
+```
+
+```python id="p5n2k8"
+def generate_hypotheses(evidence):
+    return [{"id": hid, "text": "...", "confidence": 0.8}]
+```
+
+---
+
+# 🥈 PART 2 — STRATEGY GENERATOR (VARIANTS)
+
+## 📁 strategy_generator.py
+
+### Methods:
+
+```text id="c6t4m1"
+- Parameter mutation (bounded)
+- Rule toggles (enable/disable filters)
+- Feature combinations (from library)
+- Regime-conditioned variants
+```
+
+```python id="z2r8c7"
+def generate_variants(base_strategy, hypothesis):
+    return [variant_1, variant_2, ...]
+```
+
+---
+
+# 🧩 FEATURE LIBRARY (MANDATORY)
+
+## 📁 feature_library.py
+
+```text id="e7y3q5"
+RSI, EMA, ADX, ATR, Volume, Volatility regimes,
+Market structure flags, Session timing, etc.
+```
+
+❗ Only **approved features** allowed (no arbitrary code)
+
+---
+
+# 🥉 PART 3 — VALIDATOR ENGINE (MULTI-STAGE)
+
+## 📁 validator_engine.py
+
+### Validation Pipeline:
+
+```text id="b9k1s6"
+1. Historical Walk-Forward
+2. Paper Trading (simulated live)
+3. Shadow Mode (parallel to live)
+```
+
+### Metrics:
+
+```text id="w2m8q4"
+- PF, Sharpe, Sortino
+- Max DD, Recovery time
+- Trade frequency
+- Stability (variance)
+- Slippage-adjusted returns
+```
+
+```python id="t4v6p2"
+def validate(strategy):
+    return {"score": ..., "risk": ..., "stability": ...}
+```
+
+---
+
+# 🏁 PART 4 — SELECTOR ENGINE (MULTI-OBJECTIVE)
+
+## 📁 selector_engine.py
+
+### Objective:
+
+```text id="g8c2n5"
+Maximize:
+- Risk-adjusted return
+- Stability
+- Capital efficiency
+
+Minimize:
+- Drawdown
+- Tail risk
+```
+
+```python id="y6r3k1"
+def select_best(candidates):
+    return sorted(candidates, key=score_fn)[0:K]
+```
+
+---
+
+# ⚖️ PART 5 — ALLOCATOR ENGINE
+
+## 📁 allocator_engine.py
+
+### Allocate capital across:
+
+```text id="s5p9n3"
+Champion (existing) + Challengers (new)
+```
+
+### Methods:
+
+* Volatility scaling
+* Risk parity
+* Capped Kelly (fractional)
+
+```python id="m1k7t8"
+def allocate(strategies):
+    return {"champion": 0.8, "challengers": 0.2}
+```
+
+---
+
+# 🥇 PART 6 — CHAMPION–CHALLENGER FRAMEWORK
+
+## 📁 champion_challenger.py
+
+```text id="u4c8q2"
+Champion → current live strategy
+Challenger → new candidate (limited exposure)
+```
+
+### Promotion Rule:
+
+```text id="r3p6v9"
+Promote if:
+- Outperforms champion over N trades
+- No guardrail breach
+```
+
+---
+
+# 🔁 PART 7 — CONTROLLED DEPLOYMENT (VIA FTD-016)
+
+* Sandbox → Limited live (≤ 20%)
+* Monitor window (≥ 20 trades)
+* Accept / Rollback
+
+---
+
+# 🗂 PART 8 — STRATEGY REGISTRY (VERSIONING)
+
+## 📁 strategy_registry.py
+
+```text id="k2n5p7"
+Store:
+- strategy_id
+- parameters
+- feature set
+- hypothesis link
+- validation metrics
+- deployment status
+```
+
+---
+
+# 🧾 PART 9 — AUDIT ENGINE
+
+## 📁 audit_engine.py
+
+### Every evolution must log:
+
+```text id="q7t1m4"
+WHY created
+HOW generated
+WHERE validated
+WHY selected
+WHEN deployed
+RESULT after deployment
+```
+
+---
+
+# 📊 PART 10 — OUTPUT REPORTS
+
+📁 `/reports/intelligence/evolution/`
+
+```text id="l5c3v8"
+hypotheses_YYYYMMDD.json
+candidates_YYYYMMDD.json
+validation_results.json
+selected_strategies.json
+allocation_plan.json
+audit_log.txt
+```
+
+---
+
+# ⏱ PART 11 — SCHEDULER
+
+## 📁 evolution_scheduler.py
+
+```text id="n8w2r6"
+Run cadence:
+- Daily: hypothesis + generation
+- Weekly: validation batch
+- Live: shadow + monitoring
+```
+
+---
+
+# 🧪 PART 12 — VERIFIER (MANDATORY)
+
+📁 `/tests/test_evolution.py`
+
+```python id="b4m9p2"
+def test_variant_generation():
+    assert len(variants) > 0
+
+def test_validation():
+    assert metrics["pf"] > 1
+
+def test_promotion():
+    assert promoted_if_better
+```
+
+---
+
+# 🧠 DBO COMPLIANCE
+
+| Filter           | Coverage                            |
+| ---------------- | ----------------------------------- |
+| 🌍 Institutional | audit trail + champion/challenger ✔ |
+| 📚 CTA           | walk-forward + regime awareness ✔   |
+| 📈 Growth        | compounding via better strategies ✔ |
+| 🛡 Risk          | caps, guardrails, rollback ✔        |
+| ⚙ Deployability  | shadow → limited live ✔             |
+
+---
+
+# 🚨 FAILURE CONDITIONS (REJECT IF)
+
+```text id="c9p2k6"
+- Direct live deployment without validation
+- No versioning / no audit trail
+- Overfitting (no walk-forward)
+- No capital caps for challengers
+- No rollback path
+```
+
+---
+
+# 🏁 FINAL STATE
+
+```text id="x1v6m3"
+System will:
+- Discover weaknesses
+- Propose new strategies
+- Validate rigorously
+- Deploy safely
+- Evolve continuously
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="z4k7n1"
+This is NOT auto-trading
+
+This is:
+Controlled, auditable, institutional-grade strategy evolution
+```
+
+---
+
+---
+
+## 🚀 NEXT STEP
+
+👉 Developer को भेजें और मांगें:
+
+```text id="p2m8q5"
+1. 1 champion + 2 challengers example
+2. Validation reports (walk-forward + shadow)
+3. Promotion + rollback demo
+4. Strategy registry dump
+```
+
+---
+
+## 🧠 STRATEGIC NOTE
+
+अब आपका सिस्टम बन चुका है:
+
+```text id="r8n3k2"
+Observe → Explain → Suggest → Tune → Control → Alert → Evolve
+```
+
+---
+
+अगर आगे बढ़ना है:
+
+👉 **FTD-020 — Capital Scaling & Portfolio Optimization Engine**
+
+---
+
+Ready for next evolution 🚀

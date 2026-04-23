@@ -1,0 +1,340 @@
+# 🧾 FTD-021 — INSTITUTIONAL RISK ENGINE (FULL SPAG GOVERNANCE)
+
+### Ref: FTD-021-EOW-SPAG-RISK-GOVERNANCE (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Establish a **top-level, system-wide risk governance layer** that **overrides everything** to ensure:
+
+```text id="g7p3m1"
+Survival → Stability → Scalable Growth
+```
+
+This is **NOT a module** — this is **THE GOVERNOR OF THE ENTIRE SYSTEM**
+
+---
+
+# 🧠 WHAT IS SPAG?
+
+```text id="k2n8r4"
+S → Safety (Capital Protection)
+P → Protection (Drawdown Control)
+A → Adaptation (Dynamic Risk Adjustment)
+G → Governance (System-wide enforcement)
+```
+
+---
+
+# 🏗️ POSITION IN SYSTEM
+
+```text id="v4m9k2"
+ALL modules (014 → 020)
+        ↓
+SPAG RISK ENGINE (021)
+        ↓
+Final decision authority
+```
+
+❗ SPAG can:
+
+* Block trades
+* Reduce capital
+* Pause system
+* Override tuning
+* Override evolution
+
+---
+
+# 📁 DIRECTORY & MODULES
+
+```text id="p6k2r9"
+/core/risk/
+    spag_controller.py
+    safety_engine.py
+    protection_engine.py
+    adaptation_engine.py
+    governance_engine.py
+    drawdown_engine.py
+    ruin_model.py
+    regime_detector.py
+    kill_switch.py
+
+/reports/intelligence/risk/
+    spag_state.json
+    drawdown_log.csv
+    risk_events.log
+```
+
+---
+
+# 🛡 PART 1 — SAFETY ENGINE (CAPITAL PROTECTION)
+
+## 📁 safety_engine.py
+
+### HARD LIMITS:
+
+```text id="n3k8m1"
+- Max portfolio DD = 15%
+- Max daily loss = 5%
+- Max trade risk = 1–2%
+```
+
+---
+
+### ACTIONS:
+
+```python id="s1k9r3"
+if dd > limit:
+    reduce_positions()
+```
+
+---
+
+# 🥈 PART 2 — PROTECTION ENGINE (DRAWDOWN CONTROL)
+
+## 📁 protection_engine.py
+
+### Logic:
+
+```text id="q4p2m7"
+Drawdown rising → reduce exposure progressively
+```
+
+---
+
+### Example:
+
+```python id="t8k3n6"
+if dd > 10%:
+    exposure *= 0.7
+```
+
+---
+
+# 🥉 PART 3 — ADAPTATION ENGINE
+
+## 📁 adaptation_engine.py
+
+### Purpose:
+
+```text id="w2m6k9"
+Adjust risk based on performance + regime
+```
+
+---
+
+### Inputs:
+
+* PF
+* Win rate
+* Volatility
+* Market regime
+
+---
+
+### Output:
+
+```text id="x7k1p4"
+Risk level:
+LOW / NORMAL / AGGRESSIVE
+```
+
+---
+
+# 🧠 PART 4 — GOVERNANCE ENGINE (MASTER CONTROL)
+
+## 📁 governance_engine.py
+
+### Authority:
+
+```text id="c5m8r2"
+Overrides:
+- Strategy
+- Execution
+- Tuning
+- Allocation
+```
+
+---
+
+### Example:
+
+```python id="v9k3n1"
+if risk_high:
+    block_new_trades()
+```
+
+---
+
+# ⚠️ PART 5 — DRAWdown ENGINE
+
+## 📁 drawdown_engine.py
+
+Tracks:
+
+```text id="r1k7m5"
+- Peak equity
+- Current DD
+- Recovery time
+```
+
+---
+
+# ☠️ PART 6 — RISK OF RUIN MODEL
+
+## 📁 ruin_model.py
+
+### Purpose:
+
+```text id="y3k9m2"
+Estimate probability of capital wipeout
+```
+
+---
+
+### Example:
+
+```python id="z8k2n6"
+if ruin_prob > threshold:
+    reduce risk
+```
+
+---
+
+# 🌍 PART 7 — REGIME DETECTOR
+
+## 📁 regime_detector.py
+
+### Detect:
+
+```text id="u2k5m9"
+- Trending
+- Ranging
+- High volatility
+- Low volatility
+```
+
+---
+
+### Impact:
+
+```text id="b7k3n4"
+Adjust:
+- position size
+- strategy activation
+```
+
+---
+
+# 🚨 PART 8 — KILL SWITCH (ULTIMATE SAFETY)
+
+## 📁 kill_switch.py
+
+### Trigger:
+
+```text id="m4k9r1"
+- Extreme DD
+- System anomaly
+- Execution failure
+```
+
+---
+
+### Action:
+
+```python id="p8k2n3"
+halt_all_trading()
+```
+
+---
+
+# 🔌 PART 9 — INTEGRATION
+
+SPAG connects to:
+
+* 016 (tuning) → override
+* 019 (evolution) → block unsafe strategies
+* 020 (portfolio) → adjust allocation
+* 018 (alerts) → send CRITICAL alerts
+* 017 (dashboard) → display risk state
+
+---
+
+# 📊 PART 10 — OUTPUT
+
+📁 `/reports/intelligence/risk/`
+
+```text id="q6k3m8"
+spag_state.json
+drawdown_log.csv
+risk_events.log
+ruin_probability.json
+```
+
+---
+
+# 🧪 PART 11 — VERIFIER
+
+📁 `/tests/test_spag.py`
+
+```python id="t2k7n5"
+def test_dd_control():
+    assert exposure_reduced
+
+def test_kill_switch():
+    assert system_halted
+
+def test_ruin_model():
+    assert risk_reduced_if_high
+```
+
+---
+
+# 🧠 DBO COMPLIANCE
+
+| Filter           | Coverage             |
+| ---------------- | -------------------- |
+| 🌍 Institutional | governance layer ✔   |
+| 📚 CTA           | adaptive risk ✔      |
+| 📈 Growth        | controlled scaling ✔ |
+| 🛡 Risk          | full protection ✔    |
+| ⚙ Deployability  | real-world safety ✔  |
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text id="v3k9m2"
+- No kill switch
+- No DD control
+- No override authority
+- Risk not enforced globally
+```
+
+---
+
+# 🏁 FINAL SYSTEM STATE
+
+```text id="x1k7m4"
+System will:
+Protect capital
+Adapt to market
+Control risk globally
+Prevent catastrophic loss
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="z5k2n8"
+Profit banana skill hai
+
+Capital bachana survival hai
+
+SPAG = survival engine
+```
+
+---

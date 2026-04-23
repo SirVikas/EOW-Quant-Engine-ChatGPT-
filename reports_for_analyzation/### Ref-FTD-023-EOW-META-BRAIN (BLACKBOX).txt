@@ -1,0 +1,328 @@
+# 🧾 FTD-023 — INSTITUTIONAL AI BRAIN (META DECISION LAYER)
+
+### Ref: FTD-023-EOW-META-BRAIN (BLACKBOX)
+### Ref-FTD-023-EOW-META-BRAIN (BLACKBOX)
+---
+
+# 🎯 OBJECTIVE
+
+Build a **Meta Decision Layer (AI Brain)** that sits above the entire system and:
+
+```text id="b1m7k3"
+Observes → Synthesizes → Decides → Orchestrates
+```
+
+❗ यह trade execute नहीं करता
+❗ यह system को **guide + coordinate + optimize** करता है
+
+---
+
+# 🧠 ROLE OF AI BRAIN
+
+```text id="k9p2m4"
+System ke sab modules alag-alag kaam karte hain
+
+AI Brain:
+Un sabko ek direction deta hai
+```
+
+---
+
+# 🏗️ POSITION IN SYSTEM
+
+```text id="x3m8k1"
+014–022 (All Engines)
+        ↓
+FTD-023 (AI Brain)
+        ↓
+Global Decision Layer
+```
+
+👉 यह highest-level intelligence है
+
+---
+
+# 🧠 CORE CAPABILITIES
+
+---
+
+## 🥇 1. GLOBAL STATE UNDERSTANDING
+
+AI Brain reads:
+
+* Performance
+* Risk state
+* Strategy health
+* Portfolio allocation
+* Alerts
+
+---
+
+## 🥈 2. CROSS-MODULE DECISION MAKING
+
+```text id="r6k1m9"
+Should we:
+- Trade more?
+- Reduce risk?
+- Pause system?
+- Tune aggressively?
+- Switch strategy?
+```
+
+---
+
+## 🥉 3. PRIORITY MANAGEMENT
+
+```text id="y2k8m5"
+Multiple issues → choose most critical
+```
+
+---
+
+## 🧠 4. META-STRATEGY CONTROL
+
+```text id="t7k3m1"
+Control:
+- Aggression level
+- Risk appetite
+- Strategy activation
+```
+
+---
+
+## ⚙️ 5. SYSTEM ORCHESTRATION
+
+AI Brain coordinates:
+
+* FTD-015 (suggestions)
+* FTD-016 (tuning)
+* FTD-019 (evolution)
+* FTD-020 (portfolio)
+* FTD-021 (risk)
+
+---
+
+# 📁 DIRECTORY & MODULES
+
+```text id="p4k9m2"
+/core/meta/
+    ai_brain.py
+    state_aggregator.py
+    decision_engine.py
+    policy_engine.py
+    priority_engine.py
+    orchestration_engine.py
+    memory_engine.py
+
+/reports/intelligence/meta/
+    brain_state.json
+    decisions_log.txt
+    policy_state.json
+```
+
+---
+
+# 🥇 PART 1 — STATE AGGREGATOR
+
+## 📁 state_aggregator.py
+
+Collects:
+
+```text id="c8k1m4"
+- Risk (021)
+- Portfolio (020)
+- Evolution (019)
+- Suggestions (015)
+- Alerts (018)
+```
+
+---
+
+### Output:
+
+```text id="m3k9p2"
+Unified system state
+```
+
+---
+
+# 🥈 PART 2 — DECISION ENGINE
+
+## 📁 decision_engine.py
+
+### Purpose:
+
+```text id="q5k2m7"
+Take high-level decisions
+```
+
+---
+
+### Example:
+
+```python id="z7k1m3"
+if risk_high:
+    action = "reduce_exposure"
+
+elif no_trades and signals_exist:
+    action = "relax_filters"
+```
+
+---
+
+# 🥉 PART 3 — POLICY ENGINE
+
+## 📁 policy_engine.py
+
+### Defines modes:
+
+```text id="v2k8m1"
+- Conservative
+- Balanced
+- Aggressive
+```
+
+---
+
+### Controls:
+
+* Risk limits
+* Tuning aggressiveness
+* Strategy activation
+
+---
+
+# 🧠 PART 4 — PRIORITY ENGINE
+
+## 📁 priority_engine.py
+
+Ranks:
+
+```text id="t1k7m4"
+- Risk issues
+- Signal issues
+- Execution issues
+```
+
+---
+
+# ⚙️ PART 5 — ORCHESTRATION ENGINE
+
+## 📁 orchestration_engine.py
+
+### Executes decisions across modules:
+
+```python id="k9m3p2"
+if action == "reduce_risk":
+    spag_engine.reduce_exposure()
+```
+
+---
+
+# 🧠 PART 6 — MEMORY ENGINE
+
+## 📁 memory_engine.py
+
+Stores:
+
+```text id="r4k8m3"
+- Past decisions
+- Outcomes
+- Learning patterns
+```
+
+---
+
+### Purpose:
+
+```text id="y6k2m9"
+Improve future decisions
+```
+
+---
+
+# 📊 PART 7 — OUTPUT
+
+📁 `/reports/intelligence/meta/`
+
+```text id="p8k1m5"
+brain_state.json
+decisions_log.txt
+policy_state.json
+```
+
+---
+
+# 🔌 PART 8 — INTEGRATION
+
+AI Brain interacts with:
+
+* Risk (021)
+* Portfolio (020)
+* Evolution (019)
+* Tuning (016)
+* Alerts (018)
+
+---
+
+# 🧪 PART 9 — VERIFIER
+
+📁 `/tests/test_meta.py`
+
+```python id="n3k7m2"
+def test_decision():
+    assert action_generated
+
+def test_policy():
+    assert mode_changes
+
+def test_orchestration():
+    assert modules_triggered
+```
+
+---
+
+# 🧠 DBO COMPLIANCE
+
+| Filter           | Coverage                    |
+| ---------------- | --------------------------- |
+| 🌍 Institutional | top-level control ✔         |
+| 📚 CTA           | adaptive decision making ✔  |
+| 📈 Growth        | optimized system behavior ✔ |
+| 🛡 Risk          | global risk awareness ✔     |
+| ⚙ Deployability  | coordinated execution ✔     |
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text id="v7k2m1"
+No coordination between modules
+Conflicting decisions
+No priority logic
+No memory/learning
+```
+
+---
+
+# 🏁 FINAL SYSTEM STATE
+
+```text id="x2k9m4"
+System will:
+Think globally
+Act intelligently
+Adapt dynamically
+Coordinate all components
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="z4k1m7"
+Modules execute
+
+AI Brain decides
+```
+
+---

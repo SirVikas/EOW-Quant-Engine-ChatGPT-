@@ -1,0 +1,345 @@
+# 🧾 FTD-020 — CAPITAL SCALING & PORTFOLIO OPTIMIZATION ENGINE (INSTITUTIONAL GRADE)
+
+### Ref: FTD-020-EOW-CAPITAL-OPTIMIZATION (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Transform the system from **strategy-level trading** to **portfolio-level capital management**:
+
+```text id="g1x8m3"
+Allocate → Scale → Rebalance → Protect capital for maximum geometric growth
+```
+
+❗ Focus = **Capital efficiency + Risk control + Compounding**
+
+---
+
+# 🧠 POSITION IN SYSTEM STACK
+
+```text id="p7n4k2"
+014B → Data
+014C → Intelligence
+015 → Suggestions
+016 → Controlled Tuning
+017 → Dashboard
+018 → Alerts
+019 → Strategy Evolution
+020 → Capital Scaling & Portfolio Optimization
+```
+
+---
+
+# 🏗️ CORE ARCHITECTURE
+
+```text id="v5c2r9"
+Strategy Performance Data
+        ↓
+Risk Engine (DD, PF, Volatility)
+        ↓
+Allocation Engine
+        ↓
+Scaling Engine
+        ↓
+Rebalancing Engine
+        ↓
+Capital Protection Layer
+        ↓
+Execution Constraints (016)
+```
+
+---
+
+# 📁 DIRECTORY & MODULES
+
+```text id="k9r3t6"
+/core/portfolio/
+    allocation_engine.py
+    scaling_engine.py
+    rebalance_engine.py
+    risk_budget_engine.py
+    correlation_engine.py
+    exposure_manager.py
+    capital_protection.py
+    portfolio_registry.py
+
+/reports/intelligence/portfolio/
+    allocation_plan.json
+    scaling_actions.json
+    rebalance_log.csv
+    risk_budget.json
+```
+
+---
+
+# 🥇 PART 1 — RISK BUDGET ENGINE
+
+## 📁 risk_budget_engine.py
+
+### Purpose:
+
+```text id="n2x7p4"
+Define how much risk each strategy can take
+```
+
+### Inputs:
+
+* Drawdown
+* Volatility
+* PF
+* Correlation
+
+---
+
+### Output:
+
+```text id="s6k8m2"
+Strategy A → 20% capital
+Strategy B → 15%
+Strategy C → 5%
+```
+
+---
+
+# 🥈 PART 2 — ALLOCATION ENGINE
+
+## 📁 allocation_engine.py
+
+### Methods:
+
+```text id="r1v9c3"
+- Risk parity
+- Volatility scaling
+- Performance-weighted allocation
+```
+
+---
+
+### Example:
+
+```python id="t5k2n8"
+def allocate(strategies):
+    return normalize(weights)
+```
+
+---
+
+# 🥉 PART 3 — SCALING ENGINE (CRITICAL)
+
+## 📁 scaling_engine.py
+
+### Logic:
+
+```text id="x3m7q1"
+If strategy performs well → increase capital
+If underperforms → reduce exposure
+```
+
+---
+
+### Rules:
+
+```text id="b8k4p6"
+Scale UP:
+- PF rising
+- DD low
+- Stability high
+
+Scale DOWN:
+- DD rising
+- PF dropping
+```
+
+---
+
+### Example:
+
+```python id="y4n8c2"
+def scale(position_size, performance):
+    if performance.good:
+        return position_size * 1.2
+    return position_size * 0.8
+```
+
+---
+
+# 🛡 PART 4 — CAPITAL PROTECTION LAYER
+
+## 📁 capital_protection.py
+
+### Hard Rules:
+
+```text id="q6r2m9"
+- Max portfolio DD limit
+- Kill-switch trigger
+- Exposure cap per strategy
+- Correlation cap
+```
+
+---
+
+### Example:
+
+```python id="m7p3t1"
+if portfolio_dd > 0.15:
+    reduce_all_positions()
+```
+
+---
+
+# 🔁 PART 5 — REBALANCING ENGINE
+
+## 📁 rebalance_engine.py
+
+### Frequency:
+
+```text id="d9n4k7"
+- Daily (light)
+- Weekly (full rebalance)
+```
+
+---
+
+### Purpose:
+
+```text id="c2x8m5"
+Maintain optimal allocation
+```
+
+---
+
+# 🔗 PART 6 — CORRELATION ENGINE
+
+## 📁 correlation_engine.py
+
+### Purpose:
+
+```text id="h5k1p9"
+Avoid over-concentration
+```
+
+---
+
+### Output:
+
+```text id="v2r6m4"
+Correlation matrix → reduce overlapping exposure
+```
+
+---
+
+# ⚙️ PART 7 — EXPOSURE MANAGER
+
+## 📁 exposure_manager.py
+
+### Controls:
+
+```text id="j3k9n2"
+- Max exposure per symbol
+- Max exposure per strategy
+- Sector caps
+```
+
+---
+
+# 🗂 PART 8 — PORTFOLIO REGISTRY
+
+## 📁 portfolio_registry.py
+
+Stores:
+
+```text id="p1k6r8"
+- allocations
+- scaling history
+- rebalance history
+- exposure states
+```
+
+---
+
+# 📊 PART 9 — OUTPUT REPORTS
+
+📁 `/reports/intelligence/portfolio/`
+
+```text id="u4m7k3"
+allocation_plan.json
+scaling_actions.json
+rebalance_log.csv
+risk_budget.json
+correlation_matrix.csv
+```
+
+---
+
+# 🔌 PART 10 — INTEGRATION
+
+* Reads: strategy performance (014C)
+* Uses: tuning constraints (016)
+* Updates: execution sizing
+
+---
+
+# 🧪 PART 11 — VERIFIER
+
+📁 `/tests/test_portfolio.py`
+
+```python id="n8k2r5"
+def test_allocation():
+    assert sum(weights) == 1
+
+def test_scaling():
+    assert size_increase_if_good
+
+def test_dd_protection():
+    assert positions_reduced_if_dd_high
+```
+
+---
+
+# 🧠 DBO COMPLIANCE
+
+| Filter           | Coverage                    |
+| ---------------- | --------------------------- |
+| 🌍 Institutional | portfolio-level control ✔   |
+| 📚 CTA           | diversification + scaling ✔ |
+| 📈 Growth        | compounding optimization ✔  |
+| 🛡 Risk          | DD control + caps ✔         |
+| ⚙ Deployability  | realistic capital flow ✔    |
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text id="w2p8k6"
+- Over-allocation to single strategy
+- No DD protection
+- No correlation control
+- No scaling logic
+- Capital concentration risk
+```
+
+---
+
+# 🏁 FINAL SYSTEM STATE
+
+```text id="z5n3r1"
+System will:
+- Allocate capital intelligently
+- Scale winning strategies
+- Cut losing exposure
+- Protect downside
+- Optimize portfolio growth
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="x7k2m9"
+Strategy makes money
+
+Portfolio decides how much money you make
+```
+
+---
