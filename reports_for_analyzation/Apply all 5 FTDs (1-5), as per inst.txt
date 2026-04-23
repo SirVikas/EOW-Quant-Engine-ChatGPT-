@@ -1,3 +1,6 @@
+NOTE : Follow the sequence STRICTLY — no deviation allowed : AS MENTIONED IN : 0. CL-FTD-014-015-016-INTEGRATED (MANDATORY EXECUTION DIRECTIVE).txt
+
+
 Apply all 7 FTDs (1-7), as per instructions mentioned in document. "CL-FTD-014-015-016-INTEGRATED (MANDATORY EXECUTION DIRECTIVE).txt".
 " 
 
