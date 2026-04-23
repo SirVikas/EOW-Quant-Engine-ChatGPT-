@@ -1,0 +1,358 @@
+# 🧾 COVERING LETTER — REPORTING SYSTEM IMPLEMENTATION DIRECTIVE
+
+### Ref: CL-FTD-014-SERIES (MANDATORY EXECUTION GUIDELINE)
+
+---
+
+# 🎯 PURPOSE
+
+This document **directs the developer** on how to implement the following 5 FTDs in a **structured, non-redundant, institutional-grade manner**:
+
+1. FTD-014C — Intelligence Reporting (BLACKBOX)
+2. FTD-014C Risk Note — Avoid Reporting Jungle
+3. FTD-014B — Auto + On-Demand Reporting
+4. Technical Reporting Framework
+5. Full Stack Reporting Framework
+
+---
+
+# 🚨 CRITICAL WARNING (READ FIRST)
+
+```text
+DO NOT implement these FTDs independently or in parallel.
+DO NOT create duplicate reports.
+DO NOT create raw logs again.
+```
+
+👉 If done incorrectly:
+
+```text
+System → Slow + Confusing + Unusable
+```
+
+---
+
+# 🧠 CORE IMPLEMENTATION PHILOSOPHY
+
+```text
+FTD-014B = DATA COLLECTION (Foundation)
+FTD-014C = INTELLIGENCE (Brain)
+Framework Docs = DESIGN REFERENCE (NOT separate modules)
+```
+
+---
+
+# 🏗️ IMPLEMENTATION ARCHITECTURE (MANDATORY)
+
+## 🥇 LAYER 1 — RAW DATA (ONLY FTD-014B)
+
+```text
+Purpose: Capture ground truth
+```
+
+### Includes ONLY:
+
+* Trade logs
+* Signal logs
+* Risk logs
+* Execution logs
+* System logs
+
+❗ RULE:
+
+```text
+NO OTHER FTD is allowed to create raw logs
+```
+
+---
+
+## 🥈 LAYER 2 — DERIVED ANALYTICS (FTD-014C PART 1)
+
+```text
+Purpose: Convert raw data → metrics
+```
+
+### Examples:
+
+* Expectancy
+* Kelly
+* Correlation
+* Tail risk
+* Edge stability
+
+❗ RULE:
+
+```text
+MUST read from FTD-014B logs
+MUST NOT store duplicate raw data
+```
+
+---
+
+## 🥉 LAYER 3 — DECISION INTELLIGENCE (FTD-014C PART 2)
+
+```text
+Purpose: Answer WHY + WHAT NEXT
+```
+
+### Examples:
+
+* Decision Trace
+* Missed Opportunity
+* Pipeline Trace
+* Strategy Failure
+
+---
+
+# 🔄 IMPLEMENTATION ORDER (STRICT)
+
+## STEP 1 — VERIFY FTD-014B (BASE ENGINE)
+
+Developer MUST confirm:
+
+```text
+✔ Trade logs working
+✔ Signal audit working
+✔ Risk logs working
+✔ Execution logs working
+```
+
+❌ If NOT → STOP everything
+
+---
+
+## STEP 2 — DO NOT TOUCH RAW ENGINE AGAIN
+
+```text
+FTD-014B is LOCKED after validation
+```
+
+---
+
+## STEP 3 — BUILD DERIVED ENGINE (FTD-014C)
+
+```text
+/core/reporting/derived_engine.py
+```
+
+---
+
+## STEP 4 — BUILD DECISION ENGINE
+
+```text
+/core/reporting/decision_engine.py
+```
+
+---
+
+## STEP 5 — BUILD DIAGNOSTIC ENGINE
+
+```text
+/core/reporting/diagnostic_engine.py
+```
+
+---
+
+# 🚫 STRICT NO-DUPLICATION RULES
+
+## ❌ DO NOT:
+
+* Create another trade log
+* Create another signal log
+* Store same data in multiple files
+* Recompute inside live loop
+
+---
+
+## ✅ ALWAYS:
+
+```text
+READ → PROCESS → GENERATE REPORT
+```
+
+---
+
+# 📁 FILE OWNERSHIP RULE
+
+| Layer     | File Owner     |
+| --------- | -------------- |
+| Raw Data  | FTD-014B       |
+| Derived   | FTD-014C       |
+| Decision  | FTD-014C       |
+| Framework | Reference only |
+
+---
+
+# 🧠 MAPPING OF 5 DOCUMENTS
+
+---
+
+## 1. FTD-014B
+
+👉 ROLE:
+
+```text
+ONLY data collection
+```
+
+---
+
+## 2. FTD-014C (BLACKBOX)
+
+👉 ROLE:
+
+```text
+Derived + Decision engine
+```
+
+---
+
+## 3. FTD-014C WARNING DOC
+
+👉 ROLE:
+
+```text
+Prevent over-engineering
+```
+
+---
+
+## 4. TECHNICAL REPORTING FRAMEWORK
+
+👉 ROLE:
+
+```text
+Checklist (what to cover)
+NOT implementation layer
+```
+
+---
+
+## 5. FULL STACK REPORTING FRAMEWORK
+
+👉 ROLE:
+
+```text
+High-level coverage validation
+```
+
+---
+
+# ⚙️ IMPLEMENTATION STRATEGY (MANDATORY)
+
+---
+
+## 🔹 RULE 1 — MODULAR BUILD
+
+Each engine must be separate:
+
+```text
+reporting_engine.py (FTD-014B)
+derived_engine.py (FTD-014C)
+decision_engine.py (FTD-014C)
+```
+
+---
+
+## 🔹 RULE 2 — NO CROSS-WRITES
+
+```text
+Derived engine MUST NOT write into /auto/
+Decision engine MUST NOT modify raw logs
+```
+
+---
+
+## 🔹 RULE 3 — TIMESTAMP EVERYTHING
+
+---
+
+## 🔹 RULE 4 — NO SILENT FAILURES
+
+Every failure must log:
+
+```text
+[REPORT-ERROR]
+```
+
+---
+
+# 🧪 VERIFICATION REQUIREMENTS (MANDATORY)
+
+Developer MUST deliver:
+
+---
+
+## ✅ 1. Sample Outputs
+
+* Trade log
+* Signal audit
+* Decision trace
+* Missed opportunity
+
+---
+
+## ✅ 2. Proof of Non-Duplication
+
+```text
+Show:
+1 raw source → multiple derived outputs
+```
+
+---
+
+## ✅ 3. Performance Check
+
+```text
+No lag in live system
+```
+
+---
+
+## ✅ 4. File Structure Validation
+
+---
+
+# 🧠 FINAL SYSTEM DESIGN (TARGET)
+
+```text
+DATA → ANALYTICS → DECISION
+```
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+If ANY of these occur → REJECT IMPLEMENTATION:
+
+```text
+Duplicate logs created
+Reports contradict each other
+System slows down
+No decision clarity
+```
+
+---
+
+# 🏁 FINAL INSTRUCTION TO DEVELOPER
+
+```text
+Do NOT think of this as “report generation”
+
+Think of this as:
+Building a decision intelligence system
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+A good system logs data
+
+A great system explains data
+
+An institutional system decides based on data
+```
+
+---
