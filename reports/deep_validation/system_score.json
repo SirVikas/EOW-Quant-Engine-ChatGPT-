@@ -1,0 +1,10 @@
+{
+  "phase": "FTD-028",
+  "module": "META_SCORE_ENGINE",
+  "system_score": 0,
+  "risk_score": 0,
+  "stability_score": 0,
+  "confidence_score": 0,
+  "verdict": "NOT_RUN",
+  "snapshot_ts": 0
+}
