@@ -1283,6 +1283,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     _thought("🚀 EOW Quant Engine booting…", "SYSTEM")
     _thought(f"Mode: {cfg.TRADE_MODE} | Capital: {cfg.INITIAL_CAPITAL} USDT", "SYSTEM")
 
+    # ── FTD-014B: Function Registry startup validation ────────────────────────
+    try:
+        import json, pathlib
+        _reg_path = pathlib.Path(__file__).parent / "core" / "registry" / "function_registry.json"
+        if _reg_path.exists():
+            _reg = json.loads(_reg_path.read_text())
+            _reg_count = len(_reg) if isinstance(_reg, list) else 0
+            _thought(f"📋 Function Registry loaded — {_reg_count} functions registered", "SYSTEM")
+        else:
+            _thought("⚠ Function Registry not found at core/registry/function_registry.json", "HALT")
+    except Exception as _e:
+        _thought(f"⚠ Function Registry load error: {_e}", "HALT")
+
     # ── Fix A: Reload promoted DNA so genome doesn't reset on restart ─────────
     genome.load_persisted_dna()
     required_strategies = {"TrendFollowing", "MeanReversion", "VolatilityExpansion"}
@@ -2460,6 +2473,119 @@ async def get_ct_scan():
         win_rate=win_rate_pct / 100.0,
         regime_stable=True,
         n_trades=n_trades,
+    )
+
+
+# ── FTD-026A: Layer integration endpoints ────────────────────────────────────
+
+@app.get("/api/suggestions")
+async def get_suggestions():
+    """FTD-015 Suggestion Engine — CT-Scan enriched with confidence + impact."""
+    from core.intelligence.suggestion_engine import suggestion_engine
+    stats    = pnl_calc.session_stats
+    n_trades = len(pnl_calc.trades)
+    total_gross = abs(stats.get("total_net_pnl", 0.0)) + stats.get("total_fees_paid", 0.0)
+    fee_ratio   = stats.get("total_fees_paid", 0.0) / max(total_gross, 1e-9)
+    return suggestion_engine.detect(
+        profit_factor=stats.get("profit_factor", 0.0),
+        fee_ratio=round(fee_ratio, 4),
+        win_rate=stats.get("win_rate", 0.0) / 100.0,
+        n_trades=n_trades,
+        strategy_usage=strategy_engine.usage(),
+        regime_stable=True,
+    )
+
+
+@app.get("/api/auto-tuning")
+async def get_auto_tuning():
+    """FTD-016 Auto-Tuning — current dynamic threshold state."""
+    from core.tuning.tuner_controller import tuner_controller
+    return tuner_controller.get_state()
+
+
+@app.get("/api/alert-state")
+async def get_alert_state():
+    """FTD-018 Alert Engine — severity-sorted, deduplicated alerts."""
+    from core.alerts.alert_engine import alert_engine
+    gs   = global_gate_controller.snapshot() if hasattr(global_gate_controller, "snapshot") else {}
+    halt = {}
+    try:
+        halt = risk_ctrl.halt_audit() if hasattr(risk_ctrl, "halt_audit") else {}
+    except Exception:
+        pass
+    return alert_engine.get_alerts(
+        gate_status=gs,
+        halt_audit=halt,
+        error_recent=error_registry.recent(50),
+        drawdown=drawdown_controller.summary(),
+    )
+
+
+@app.get("/api/evolution")
+async def get_evolution():
+    """FTD-019 Strategy Evolution — genome champion/challenger state."""
+    from core.evolution.evolution_engine import evolution_engine
+    return evolution_engine.get_state()
+
+
+@app.get("/api/portfolio-state")
+async def get_portfolio_state():
+    """FTD-020 Portfolio — allocation + exposure view."""
+    from core.portfolio.allocation_engine import allocation_engine
+    positions = []
+    try:
+        for sym, pos in risk_ctrl.positions.items():
+            positions.append({
+                "symbol":   sym,
+                "side":     getattr(pos, "side",       ""),
+                "qty":      getattr(pos, "qty",        0.0),
+                "entry_px": getattr(pos, "entry_px",   0.0),
+                "stop":     getattr(pos, "stop",       0.0),
+                "tp":       getattr(pos, "tp",         0.0),
+                "unrealised": getattr(pos, "unrealised_pnl", 0.0),
+            })
+    except Exception:
+        pass
+    return allocation_engine.get_state(
+        positions=positions,
+        equity=scaler.equity,
+    )
+
+
+@app.get("/api/risk-state")
+async def get_risk_state():
+    """FTD-021 Risk Engine — unified risk + drawdown view."""
+    rs = risk_ctrl.snapshot()
+    dd = drawdown_controller.summary()
+    return {
+        **rs,
+        "drawdown": dd,
+        "module":   "RISK_STATE",
+        "phase":    "021",
+    }
+
+
+@app.get("/api/audit-log")
+async def get_audit_log():
+    """FTD-022 Audit Layer — structured event log."""
+    from core.audit.audit_engine import audit_engine
+    return audit_engine.get_log(limit=100)
+
+
+@app.get("/api/ai-brain")
+async def get_ai_brain():
+    """FTD-023 AI Brain — aggregated intelligence state + decision."""
+    from core.meta.ai_brain import ai_brain
+    return ai_brain.get_state()
+
+
+@app.get("/api/capital-allocator")
+async def get_capital_allocator():
+    """FTD-024 Capital Scaling — allocator + growth state."""
+    from core.capital.scaling_engine import scaling_engine
+    return scaling_engine.get_state(
+        equity=scaler.equity,
+        initial_capital=pnl_calc._initial_capital,
     )
 
 
