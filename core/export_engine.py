@@ -97,6 +97,9 @@ class SystemSnapshot:
     # 8. Gate / Pipeline
     gate_status:        Dict[str, Any] = None        # global_gate_controller.snapshot()
 
+    # 9. AI Brain (FTD-027: must produce concrete decisions, not empty state)
+    ai_brain_state:     Dict[str, Any] = None        # ai_brain.get_state()
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
@@ -380,19 +383,30 @@ class SystemExportEngine:
 
     def _section_7_ai_brain(self, md: _MarkdownBuilder, s: SystemSnapshot):
         md.h2("7. AI Brain")
-        md.h3("Regime")
-        reg = s.regime or {}
+
+        # FTD-027: show concrete AI Brain decision — not empty state
+        brain = getattr(s, "ai_brain_state", None) or {}
+        md.h3("AI Decision (FTD-023)")
         md.kv_table([
-            ("Current",      str(reg.get("current", "—"))),
+            ("Mode",     str(brain.get("mode",     "—"))),
+            ("Decision", str(brain.get("decision", "—"))),
+            ("Module",   str(brain.get("module",   "AI_BRAIN"))),
+            ("Phase",    str(brain.get("phase",    "023"))),
+        ])
+
+        md.h3("Regime")
+        reg = s.regime or brain.get("regime") or {}
+        md.kv_table([
+            ("Current",      str(reg.get("current",      "—"))),
             ("Confidence",   _fmt_num(reg.get("confidence"), 3)),
             ("Stable ticks", str(reg.get("stable_ticks", "—"))),
         ])
         md.h3("Learning Engine")
-        lr = s.learning or {}
+        lr = s.learning or brain.get("learning") or {}
         md.kv_table([(k, str(v)) for k, v in lr.items()])
 
         md.h3("Edge Engine")
-        eg = s.edge or {}
+        eg = s.edge or brain.get("edge") or {}
         md.kv_table([(k, str(v)) for k, v in eg.items()])
 
         md.h3("Strategy Usage")
@@ -405,9 +419,29 @@ class SystemExportEngine:
     def _section_8_suggestions(self, md: _MarkdownBuilder, s: SystemSnapshot):
         md.h2("8. Suggestions (CT-Scan)")
         ct = s.ct_scan or {}
+
+        # Summary row (health + score) — works with both enriched and raw ct_scan format
+        health = ct.get("health", ct.get("system_health", "—"))
+        score  = ct.get("score", "—")
+        action = ct.get("action", "—")
+        md.kv_table([
+            ("Health", str(health)),
+            ("Score",  str(score)),
+            ("Action", str(action)[:120]),
+        ])
+
+        # FTD-027: findings come from suggestion_engine (enriched) or fall back to
+        # converting raw ct_scan 'issues' strings → dicts
         findings = ct.get("findings") or ct.get("suggestions") or []
         if not findings:
-            md.p("_No suggestions issued._")
+            issues = ct.get("issues", [])
+            for i, iss in enumerate(issues, 1):
+                sev = "CRITICAL" if health == "CRITICAL" else "HIGH" if health == "WARNING" else "MEDIUM"
+                findings.append({"code": f"CT-{i:03d}", "severity": sev,
+                                  "message": str(iss), "action": action})
+
+        if not findings:
+            md.p("_No issues detected — system is healthy._")
             return
         rows = [[
             str(f.get("code", "")),
@@ -512,39 +546,155 @@ class SystemExportEngine:
     # ── Diagnostic logic (sections 14 & 15) ──────────────────────────────────
 
     def _diagnose(self, s: SystemSnapshot) -> List[str]:
-        out: List[str] = []
+        """
+        FTD-027: Structured diagnosis — Primary Issue, Secondary Issue, Actionable Fix.
+        Checks: signal/trade contradiction, loss state, gate blocking, risk of ruin
+        control, drawdown state, dry spell, error flood.
+        """
         ss = s.session_stats or {}
         tf = s.trade_flow    or {}
         dd = s.drawdown      or {}
         gs = s.gate_status   or {}
+        an = s.analytics     or {}
 
-        n_tr = ss.get("total_trades", 0)
+        n_tr    = ss.get("total_trades", 0)
+        pf      = ss.get("profit_factor", 0.0)
+        wr      = ss.get("win_rate", 0.0)
+        n_sig   = tf.get("total_signals", 0)
+        ror_pct = float(an.get("risk_of_ruin_pct", 0.0) or 0.0)
+        dd_state = str(dd.get("state", "NORMAL")).upper()
+        dd_mult  = float(dd.get("risk_multiplier", 1.0) or 1.0)
+        dry_min  = float(tf.get("minutes_since_last_trade", 0) or 0.0)
+        errs     = s.error_registry or []
+
+        # Priority queue: (priority_int, title, detail, fix)
+        issues: List[tuple] = []
+
+        # 1. Trade-signal data contradiction (highest priority — data integrity)
+        if n_tr > 0 and n_sig == 0:
+            issues.append((0,
+                "CONTRADICTION — trades recorded but signal count = 0",
+                (f"{n_tr} closed trades exist but trade_flow_monitor reports 0 signals. "
+                 "This is a data-integrity gap in the signal pipeline tracker."),
+                ("Verify on_tick calls trade_flow_monitor.record_signal() for every "
+                 "evaluated signal. Restart trade_flow_monitor if counter was reset."),
+            ))
+
+        # 2. System in loss OR no trades
         if n_tr == 0:
-            out.append("**No trades executed** — possible causes: safe-mode, "
-                       "PTG blocking, ranker threshold, or signal engine dry.")
-        else:
-            pf = ss.get("profit_factor", 0.0)
-            out.append(f"System has processed {n_tr} trades; profit_factor={pf:.2f}.")
+            gate_reason = gs.get("reason", "unknown")
+            issues.append((1,
+                "NO TRADES EXECUTED — signal pipeline silent",
+                (f"0 closed trades. Gate can_trade={gs.get('can_trade', '?')}, "
+                 f"safe_mode={gs.get('safe_mode', False)}, reason='{gate_reason}'."),
+                ("Check PreTradeGate + ScanController logs. Confirm ACTIVATOR_T1 < "
+                 "MIN_TRADE_SCORE in config.py. If gate blocked, resolve cause and "
+                 "call POST /api/resume."),
+            ))
+        elif pf < 1.0:
+            issues.append((1,
+                f"SYSTEM IN LOSS — profit_factor={pf:.3f} (negative expectancy)",
+                (f"{n_tr} trades; win_rate={wr:.1f}%. Every trade destroys capital "
+                 f"on average. Immediate action required."),
+                ("Widen RR target to ≥1.5R; tighten entry criteria; reduce "
+                 "trade frequency until PF recovers above 1.0. Review Section 3 "
+                 "(Signal Pipeline) and Section 8 (Suggestions)."),
+            ))
 
-        if tf.get("minutes_since_last_trade", 0) > 60:
-            out.append("**Trade dry-spell > 60 min** — Trade Activator should be "
-                       "relaxing thresholds; verify T1/T2 scores are below base.")
-
+        # 3. Gate blocking
         if not gs.get("can_trade", True):
-            out.append(f"**Gate is blocking** trades: {gs.get('reason', '?')}.")
-        if gs.get("safe_mode", False):
-            out.append(f"**SAFE_MODE active** — cause: {gs.get('reason', '?')}.")
+            issues.append((2,
+                f"GATE BLOCKED — can_trade=False",
+                (f"reason='{gs.get('reason', 'unknown')}', "
+                 f"safe_mode={gs.get('safe_mode', False)}, "
+                 f"halt={gs.get('halted', False)}."),
+                ("Identify blocking condition (daily loss limit / safe mode / halt). "
+                 "Fix root cause then call POST /api/resume."),
+            ))
 
-        if dd.get("state") and dd["state"] != "NORMAL":
-            out.append(f"Drawdown state = **{dd['state']}** "
-                       f"(risk_mult={dd.get('risk_multiplier', 1.0)}).")
+        # 4. Risk of ruin — show system control response
+        if ror_pct >= 95.0:
+            ctrl_applied = (f"risk_multiplier={dd_mult:.2f} "
+                            f"({'reduced' if dd_mult < 1.0 else 'NOT yet reduced'})")
+            issues.append((2,
+                f"RISK OF RUIN = {ror_pct:.1f}% — CAPITAL IN DANGER",
+                (f"System controls active: DD state={dd_state}, {ctrl_applied}, "
+                 f"halted={gs.get('halted', False)}."),
+                ("Halve base_risk immediately. drawdown_controller auto-reduces "
+                 "sizing when risk_multiplier < 1.0. Activate DEFENSIVE mode. "
+                 "Do not add new positions until RoR drops below 50%."),
+            ))
+        elif ror_pct >= 50.0:
+            issues.append((3,
+                f"ELEVATED RISK OF RUIN = {ror_pct:.1f}%",
+                f"DD state={dd_state}, risk_multiplier={dd_mult:.2f}.",
+                ("Monitor closely. drawdown_controller will deepen size reduction "
+                 "as drawdown progresses. Consider reducing base_risk by 25%."),
+            ))
 
-        errs = s.error_registry or []
+        # 5. Drawdown state
+        if dd_state in ("WARNING", "CRITICAL"):
+            dd_cur = _fmt_pct(dd.get("current_pct", 0), 2)
+            issues.append((3,
+                f"DRAWDOWN {dd_state} at {dd_cur}",
+                (f"risk_multiplier={dd_mult:.2f} — system auto-reduces size by "
+                 f"{(1.0 - dd_mult) * 100:.0f}%."),
+                "Allow drawdown_controller to manage recovery; avoid manual risk overrides.",
+            ))
+
+        # 6. Trade dry spell
+        if dry_min > 60:
+            issues.append((4,
+                f"TRADE DRY-SPELL — {dry_min:.0f} min since last trade",
+                "Trade Activator should be auto-relaxing thresholds after 60 min.",
+                ("Verify ACTIVATOR_T1/T2 < MIN_TRADE_SCORE in config.py. "
+                 "Check adaptive_filter state and volume_filter thresholds."),
+            ))
+
+        # 7. Error flood
         if len(errs) > 20:
-            out.append(f"**{len(errs)} errors** recorded — inspect Section 12.")
+            issues.append((5,
+                f"{len(errs)} ERRORS recorded in audit log",
+                "High error count may indicate WS connectivity or data quality issues.",
+                "Inspect Section 12 (Audit) for error codes; verify WebSocket health.",
+            ))
 
-        if not out:
-            out.append("All green — no anomalies detected in this snapshot.")
+        # Sort by priority (0 = most critical)
+        issues.sort(key=lambda x: x[0])
+
+        out: List[str] = []
+        if not issues:
+            out.append("**PRIMARY ISSUE:** None — all systems green.")
+            out.append("**SECONDARY ISSUE:** None.")
+            out.append("**ACTIONABLE FIX:** Continue normal operation. "
+                       "Re-export in 1 hour for trend comparison.")
+            return out
+
+        pri = issues[0]
+        out.append(f"**PRIMARY ISSUE:** {pri[1]}")
+        out.append(f"  Detail — {pri[2]}")
+        out.append(f"  Fix — {pri[3]}")
+        out.append("")
+
+        if len(issues) > 1:
+            sec = issues[1]
+            out.append(f"**SECONDARY ISSUE:** {sec[1]}")
+            out.append(f"  Detail — {sec[2]}")
+            out.append(f"  Fix — {sec[3]}")
+        else:
+            out.append("**SECONDARY ISSUE:** None identified beyond primary.")
+
+        out.append("")
+        out.append(f"**ACTIONABLE FIX (primary):** {pri[3]}")
+
+        # Surface all remaining issues so nothing critical is hidden
+        remaining = issues[2:]
+        if remaining:
+            out.append("")
+            out.append("**Also noted (requires attention):**")
+            for iss in remaining:
+                out.append(f"  - {iss[1]}: {iss[2][:120]}")
+
         return out
 
     def _action_items(self, s: SystemSnapshot) -> List[str]:
@@ -666,24 +816,38 @@ class SystemExportEngine:
                 (t.get("regime", "") or "")[:10],
             ], widths)
 
-        # 7. AI Brain
+        # 7. AI Brain — FTD-027: show concrete decision
         pdf.new_page()
-        pdf.h2("7. AI Brain — Regime & Learning")
-        reg = s.regime or {}
-        pdf.kv("Regime",       str(reg.get("current", "—")))
-        pdf.kv("Confidence",   _fmt_num(reg.get("confidence"), 3))
-        pdf.kv("Stable ticks", str(reg.get("stable_ticks", "—")))
+        pdf.h2("7. AI Brain — Decision & Regime")
+        brain = getattr(s, "ai_brain_state", None) or {}
+        pdf.kv("Mode",          str(brain.get("mode",     "—")))
+        pdf.kv("Decision",      str(brain.get("decision", "—")))
+        pdf.blank()
+        reg = s.regime or brain.get("regime") or {}
+        pdf.kv("Regime",        str(reg.get("current",      "—")))
+        pdf.kv("Confidence",    _fmt_num(reg.get("confidence"), 3))
+        pdf.kv("Stable ticks",  str(reg.get("stable_ticks",  "—")))
         pdf.blank()
         pdf.body("Learning engine summary:")
-        for k, v in (s.learning or {}).items():
+        for k, v in (s.learning or brain.get("learning") or {}).items():
             pdf.kv(str(k), str(v))
 
-        # 8. Suggestions
+        # 8. Suggestions — FTD-027: findings from enriched suggestion_engine output
         pdf.h2("8. Suggestions (CT-Scan)")
         ct = s.ct_scan or {}
+        health_pdf = ct.get("health", ct.get("system_health", "—"))
+        score_pdf  = ct.get("score", "—")
+        pdf.kv("Health", str(health_pdf))
+        pdf.kv("Score",  str(score_pdf))
         findings = ct.get("findings") or ct.get("suggestions") or []
         if not findings:
-            pdf.body("No suggestions issued.")
+            issues_raw = ct.get("issues", [])
+            for i, iss in enumerate(issues_raw, 1):
+                sev = "CRITICAL" if health_pdf == "CRITICAL" else "WARNING"
+                findings.append({"code": f"CT-{i:03d}", "severity": sev,
+                                  "message": str(iss), "action": ct.get("action", "")})
+        if not findings:
+            pdf.body("No issues detected — system is healthy.")
         else:
             for f in findings[:20]:
                 pdf.kv(str(f.get("code", "")) + " / " + str(f.get("severity", "")),
