@@ -1,35 +1,48 @@
 """
 FTD-029 — Self-Correction Engine (Closed-Loop Intelligence)
 
-aFTD (locked design answers):
-  Q1  Scope:      A+C+D  — strategy params, signal tuning, portfolio allocation
-                           (B risk hard-limits are FROZEN — see HARD_LIMITS)
-  Q2  Autonomy:   B      — semi-auto (≤5% → auto; 5–15% → validation cycle; >15% → blocked)
-  Q3  Change limit: C    — dynamic, bounded by confidence score
-  Q4  Validation: C      — both FTD-027 AND FTD-028 must PASS before apply
-  Q5  Rollback:   D      — all triggers: perf-drop + risk-violation + validation-fail
-  Q6  Frequency:  D      — only after validation cycle; ≤3 cycles/session; 4 h cooldown
-  Q7  Authority:  C      — combined AI Brain + MetaScoreEngine (both ≥ 70)
-  Q8  Override:   C      — Risk Engine veto + human override both mandatory
-  Q9  Target:     D      — multi-objective (Sharpe + win-rate + DD + consistency)
-  Q10 Failure:    D      — all: stop auto-correction + safe-mode + alert
-  Q11 Logging:    A      — every correction: what/why/before/after/result
-  Q12 Export:     A      — corrections appear in session export report
-  Q13 Dashboard:  D      — enable/disable + view last changes + manual override
-  Q14 Hard limits — MAX_DRAWDOWN_HALT, MAX_LEVERAGE_CAP, KILL_SWITCH_THRESHOLD,
-                    MIN_EQUITY_FLOOR, MAX_TRADES_PER_DAY  (never auto-changed)
-  Q15 Start:      C      — ≥30 trades AND FTD-028 system_score ≥ 70
+Full architecture (11 modules):
+  correction_orchestrator  → main entry point (Detect→Decide→Plan→Apply→Validate→Keep/Rollback)
+  issue_extractor          → Part 1: parse FTD-027 + FTD-028 into actionable issues
+  confidence_engine        → Part 2: composite confidence (0.4*Meta+0.3*Decision+0.2*Stability+0.1*Consistency)
+  policy_guard             → Part 3: all gate conditions (Q4, Q7, Q8, Q14, Q15)
+  priority_resolver        → Part 4a: sort by locked priority (risk-safety first)
+  collision_handler        → Part 4b: conflict resolution + queue management
+  change_planner           → Part 5: bounded change plans with rationale + impact
+  change_applier           → Part 6: delegation to existing owners, session overlay
+  cooldown_manager         → Part 7: ≤3/session, 4h cooldown, critical bypass
+  rollback_manager         → Part 8: re-validate after apply, KEEP/ROLLBACK decision
+  audit_logger             → Part 9: immutable append-only audit trail (Q11)
+
+aFTD locked design answers: Q1–Q15 (see correction_orchestrator.py docstring)
 """
-from core.self_correction.correction_proposal import CorrectionProposal, HARD_LIMITS
-from core.self_correction.correction_audit    import CorrectionAudit
-from core.self_correction.rollback_engine     import RollbackEngine
-from core.self_correction.correction_engine   import SelfCorrectionEngine, self_correction_engine
+from core.self_correction.correction_orchestrator import CorrectionOrchestrator, correction_orchestrator
+from core.self_correction.issue_extractor         import IssueExtractor, Issue, IssueType, IssueSeverity
+from core.self_correction.confidence_engine       import ConfidenceEngine
+from core.self_correction.policy_guard            import PolicyGuard
+from core.self_correction.cooldown_manager        import CooldownManager
+from core.self_correction.priority_resolver       import PriorityResolver
+from core.self_correction.change_planner          import ChangePlanner, ChangePlan
+from core.self_correction.collision_handler       import CollisionHandler
+from core.self_correction.change_applier          import ChangeApplier, AppliedChange
+from core.self_correction.rollback_manager        import RollbackManager, RollbackTrigger
+from core.self_correction.audit_logger            import AuditLogger, FinalState
+from core.self_correction.correction_proposal     import HARD_LIMITS, TUNABLE_PARAMS
+# Legacy engine kept for backward compatibility with existing tests + singleton
+from core.self_correction.correction_engine       import SelfCorrectionEngine, self_correction_engine
 
 __all__ = [
-    "CorrectionProposal",
-    "CorrectionAudit",
-    "RollbackEngine",
-    "SelfCorrectionEngine",
-    "self_correction_engine",
-    "HARD_LIMITS",
+    "CorrectionOrchestrator", "correction_orchestrator",
+    "IssueExtractor", "Issue", "IssueType", "IssueSeverity",
+    "ConfidenceEngine",
+    "PolicyGuard",
+    "CooldownManager",
+    "PriorityResolver",
+    "ChangePlanner", "ChangePlan",
+    "CollisionHandler",
+    "ChangeApplier", "AppliedChange",
+    "RollbackManager", "RollbackTrigger",
+    "AuditLogger", "FinalState",
+    "HARD_LIMITS", "TUNABLE_PARAMS",
+    "SelfCorrectionEngine", "self_correction_engine",
 ]

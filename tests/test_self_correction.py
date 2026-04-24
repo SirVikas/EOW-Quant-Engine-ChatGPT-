@@ -489,3 +489,511 @@ class TestStartConditions:
     def test_constants_match_spec(self):
         assert MIN_TRADES_TO_START == 30
         assert MIN_SYSTEM_SCORE_TO_START == 70.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FTD-029 FULL ARCHITECTURE TESTS (11 new modules)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+from core.self_correction.issue_extractor    import IssueExtractor, IssueType, IssueSeverity
+from core.self_correction.confidence_engine  import ConfidenceEngine
+from core.self_correction.policy_guard       import PolicyGuard
+from core.self_correction.cooldown_manager   import CooldownManager, MAX_CYCLES_PER_SESSION, COOLDOWN_SECONDS
+from core.self_correction.priority_resolver  import PriorityResolver
+from core.self_correction.change_planner     import ChangePlanner
+from core.self_correction.collision_handler  import CollisionHandler
+from core.self_correction.change_applier     import ChangeApplier
+from core.self_correction.rollback_manager   import RollbackManager, RollbackTrigger
+from core.self_correction.audit_logger       import AuditLogger, FinalState
+from core.self_correction.correction_orchestrator import CorrectionOrchestrator
+
+
+def _ftd028_failed_validators():
+    return {
+        "contradiction": {"passed": False, "contradiction_count": 1,
+                          "contradictions": [{"message": "trades without signals"}]},
+        "risk":          {"passed": False, "error_count": 1,
+                          "errors": [{"message": "over exposed"}]},
+        "performance":   {"passed": False, "issue_count": 1,
+                          "issues": [{"message": "pnl deviation"}]},
+    }
+
+def _ftd028_meta(score: float = 75.0) -> dict:
+    return {"system_score": score, "stability_score": 70.0, "confidence_score": 65.0}
+
+def _fresh_orchestrator() -> CorrectionOrchestrator:
+    return CorrectionOrchestrator()
+
+def _orchestrator_state(n_trades: int = 35) -> dict:
+    return {
+        "total_trades": n_trades, "total_pnl": -150.0,
+        "win_rate": 0.38, "current_drawdown_pct": 0.11,
+        "equity": 890.0, "halted": False,
+    }
+
+
+# ── Part 1: Issue Extractor ───────────────────────────────────────────────────
+
+class TestIssueExtractor:
+    def test_failed_validators_produce_issues(self):
+        extractor = IssueExtractor()
+        issues = extractor.extract(_ftd028_failed_validators())
+        assert len(issues) > 0
+
+    def test_passed_validators_produce_no_issues(self):
+        extractor = IssueExtractor()
+        issues = extractor.extract({
+            "contradiction": {"passed": True},
+            "risk":          {"passed": True},
+        })
+        assert len(issues) == 0
+
+    def test_issue_has_required_fields(self):
+        extractor = IssueExtractor()
+        issues = extractor.extract(_ftd028_failed_validators())
+        for issue in issues:
+            assert issue.issue_type is not None
+            assert issue.severity is not None
+            assert issue.affected_module
+            assert issue.suggested_fix
+
+    def test_ftd027_failures_produce_issues(self):
+        extractor = IssueExtractor()
+        issues = extractor.extract({}, ftd027_result={
+            "passed": False,
+            "failed_scenarios": [{"module": "risk_engine", "detail": "RoR breach", "fix": "reduce size"}],
+        })
+        assert len(issues) > 0
+        assert issues[0].source_validator == "ftd027"
+
+
+# ── Part 2: Confidence Engine ─────────────────────────────────────────────────
+
+class TestConfidenceEngine:
+    def test_high_inputs_give_high_confidence(self):
+        result = ConfidenceEngine().compute(
+            meta_score=90.0, decision_score=0.8, stability_score=85.0, consistency_score=80.0
+        )
+        assert result["confidence"] >= 70.0
+
+    def test_low_inputs_give_low_confidence(self):
+        result = ConfidenceEngine().compute(
+            meta_score=20.0, decision_score=-0.5, stability_score=10.0, consistency_score=5.0
+        )
+        assert result["confidence"] < 50.0
+
+    def test_confidence_bounded_0_100(self):
+        for meta in (0, 50, 100):
+            result = ConfidenceEngine().compute(meta_score=meta)
+            assert 0.0 <= result["confidence"] <= 100.0
+
+    def test_formula_weights_sum_to_1(self):
+        from core.self_correction.confidence_engine import (
+            W_META_SCORE, W_DECISION_SCORE, W_STABILITY_SCORE, W_CONSISTENCY
+        )
+        total = W_META_SCORE + W_DECISION_SCORE + W_STABILITY_SCORE + W_CONSISTENCY
+        assert abs(total - 1.0) < 1e-9
+
+    def test_allowed_delta_scales_with_confidence(self):
+        # Use full parameter spread so the two scores land in different buckets
+        low  = ConfidenceEngine().compute(meta_score=10.0,  decision_score=-1.0, stability_score=5.0,  consistency_score=5.0)
+        high = ConfidenceEngine().compute(meta_score=100.0, decision_score=1.0,  stability_score=95.0, consistency_score=90.0)
+        assert high["allowed_delta_pct"] > low["allowed_delta_pct"]
+
+    def test_decision_score_normalisation(self):
+        neg = ConfidenceEngine().compute(meta_score=70.0, decision_score=-1.0)
+        pos = ConfidenceEngine().compute(meta_score=70.0, decision_score=1.0)
+        assert pos["confidence"] > neg["confidence"]
+
+
+# ── Part 3: Policy Guard ──────────────────────────────────────────────────────
+
+class TestPolicyGuard:
+    def _all_clear(self, **overrides) -> dict:
+        defaults = dict(
+            n_trades=35, ftd027_passed=True, ftd028_score=80.0,
+            ai_brain_score=80.0, meta_score=80.0, in_cooldown=False,
+            risk_halted=False, human_stopped=False, rollback_stop=False,
+            disabled=False,
+        )
+        defaults.update(overrides)
+        return defaults
+
+    def test_all_clear_is_allowed(self):
+        result = PolicyGuard().check(**self._all_clear())
+        assert result["allowed"] is True
+
+    def test_insufficient_trades_blocks(self):
+        result = PolicyGuard().check(**self._all_clear(n_trades=5))
+        assert result["allowed"] is False
+        assert any("INSUFFICIENT_TRADES" in r for r in result["blocking_reasons"])
+
+    def test_ftd027_fail_blocks(self):
+        result = PolicyGuard().check(**self._all_clear(ftd027_passed=False))
+        assert result["allowed"] is False
+
+    def test_low_ai_brain_score_blocks(self):
+        result = PolicyGuard().check(**self._all_clear(ai_brain_score=40.0))
+        assert result["allowed"] is False
+
+    def test_human_stop_blocks(self):
+        result = PolicyGuard().check(**self._all_clear(human_stopped=True))
+        assert result["allowed"] is False
+
+    def test_cooldown_bypassed_on_critical_score(self):
+        result = PolicyGuard().check(
+            **self._all_clear(in_cooldown=True),
+            system_score=40.0,   # below CRITICAL_BYPASS_SCORE
+        )
+        # Should allow with bypass
+        assert result["allowed"] is True
+        assert result["bypass_cooldown"] is True
+
+    def test_hard_limit_param_blocks(self):
+        result = PolicyGuard().check(
+            **self._all_clear(),
+            proposed_params={"MAX_DRAWDOWN_HALT": 0.10},
+        )
+        assert result["allowed"] is False
+        assert any("HARD_LIMIT" in r for r in result["blocking_reasons"])
+
+
+# ── Part 4: Priority Resolver ─────────────────────────────────────────────────
+
+class TestPriorityResolver:
+    def test_risk_issue_comes_first(self):
+        from core.self_correction.issue_extractor import Issue, IssueType, IssueSeverity
+        issues = [
+            Issue(IssueType.PERFORMANCE_DRIFT, IssueSeverity.MEDIUM, "perf", "fix", "perf", [], 1),
+            Issue(IssueType.RISK_VIOLATION,    IssueSeverity.CRITICAL,"risk","fix","risk",[], 1),
+            Issue(IssueType.CAPITAL_MISMATCH,  IssueSeverity.HIGH,    "cap", "fix","cap", [], 1),
+        ]
+        sorted_issues = PriorityResolver().sort(issues)
+        assert sorted_issues[0].issue_type == IssueType.RISK_VIOLATION
+
+    def test_sort_is_stable_for_same_type(self):
+        from core.self_correction.issue_extractor import Issue, IssueType, IssueSeverity
+        issues = [
+            Issue(IssueType.DECISION_QUALITY, IssueSeverity.HIGH,   "m", "f", "dq", [], 1),
+            Issue(IssueType.DECISION_QUALITY, IssueSeverity.MEDIUM, "m", "f", "dq", [], 1),
+        ]
+        sorted_issues = PriorityResolver().sort(issues)
+        assert sorted_issues[0].severity == IssueSeverity.HIGH
+
+
+# ── Part 4b: Collision Handler ────────────────────────────────────────────────
+
+class TestCollisionHandler:
+    def test_no_collision_returns_all_safe(self):
+        plans = [
+            {"parameter": "KELLY_FRACTION", "priority_rank": 0},
+            {"parameter": "TR_EV_WEIGHT",   "priority_rank": 1},
+        ]
+        safe, queued = CollisionHandler().resolve(plans)
+        assert len(safe) == 2
+        assert len(queued) == 0
+
+    def test_duplicate_param_queues_lower_priority(self):
+        plans = [
+            {"parameter": "KELLY_FRACTION", "priority_rank": 0},
+            {"parameter": "KELLY_FRACTION", "priority_rank": 1},
+        ]
+        safe, queued = CollisionHandler().resolve(plans)
+        assert len(safe) == 1
+        assert len(queued) == 1
+        assert queued[0]["parameter"] == "KELLY_FRACTION"
+
+    def test_pending_queue_persists(self):
+        ch = CollisionHandler()
+        plans = [
+            {"parameter": "A", "priority_rank": 0},
+            {"parameter": "A", "priority_rank": 1},
+        ]
+        ch.resolve(plans)
+        assert len(ch.pending_queue()) == 1
+
+
+# ── Part 5: Change Planner ────────────────────────────────────────────────────
+
+class TestChangePlanner:
+    def _risk_issue(self):
+        from core.self_correction.issue_extractor import Issue, IssueType, IssueSeverity
+        return [Issue(IssueType.RISK_VIOLATION, IssueSeverity.CRITICAL,
+                      "risk_engine", "Reduce Kelly", "risk", [], 1)]
+
+    def test_risk_issue_produces_kelly_plan(self):
+        plans = ChangePlanner().plan(self._risk_issue(), _base_params(), 0.10)
+        params = {p.parameter for p in plans}
+        assert "KELLY_FRACTION" in params
+
+    def test_plan_within_bounds(self):
+        from core.self_correction.correction_proposal import TUNABLE_PARAMS
+        plans = ChangePlanner().plan(self._risk_issue(), _base_params(), 0.15)
+        for p in plans:
+            lo, hi, _ = TUNABLE_PARAMS[p.parameter]
+            assert lo <= p.proposed_value <= hi
+
+    def test_plan_delta_respects_allowed_pct(self):
+        plans = ChangePlanner().plan(self._risk_issue(), _base_params(), 0.05)
+        for p in plans:
+            assert p.delta_pct <= 0.05 + 1e-9
+
+    def test_no_hard_limit_params_planned(self):
+        from core.self_correction.issue_extractor import Issue, IssueType, IssueSeverity
+        from core.self_correction.correction_proposal import HARD_LIMITS
+        all_issues = [
+            Issue(it, IssueSeverity.HIGH, "m", "fix", str(it), [], 1)
+            for it in IssueType
+        ]
+        plans = ChangePlanner().plan(all_issues, _base_params(), 0.15)
+        for p in plans:
+            assert p.parameter not in HARD_LIMITS
+
+
+# ── Part 6: Change Applier ────────────────────────────────────────────────────
+
+class TestChangeApplier:
+    def _risk_plan(self):
+        from core.self_correction.change_planner import ChangePlan
+        return ChangePlan(
+            plan_id="p1", issue_type="RISK_VIOLATION", target_module="risk_engine",
+            parameter="KELLY_FRACTION", current_value=0.25, proposed_value=0.22,
+            delta_pct=0.12, rationale="high DD", expected_impact="reduce size",
+            auto_eligible=False, priority_rank=0,
+        )
+
+    def test_valid_plan_applied(self):
+        applier = ChangeApplier()
+        applied, blocked = applier.apply([self._risk_plan()], _base_params())
+        assert len(applied) == 1
+        assert "KELLY_FRACTION" in applier.get_overlay()
+        assert applier.get_overlay()["KELLY_FRACTION"] == pytest.approx(0.22)
+
+    def test_hard_limit_plan_blocked(self):
+        from core.self_correction.change_planner import ChangePlan
+        applier = ChangeApplier()
+        bad_plan = ChangePlan(
+            plan_id="bad", issue_type="RISK_VIOLATION", target_module="risk",
+            parameter="MAX_DRAWDOWN_HALT", current_value=0.15, proposed_value=0.10,
+            delta_pct=0.33, rationale="test", expected_impact="none",
+            auto_eligible=False, priority_rank=0,
+        )
+        applied, blocked = applier.apply([bad_plan], _base_params())
+        assert len(applied) == 0
+        assert "MAX_DRAWDOWN_HALT" not in applier.get_overlay()
+
+    def test_rollback_restores_value(self):
+        applier = ChangeApplier()
+        applied, _ = applier.apply([self._risk_plan()], _base_params())
+        assert len(applied) == 1
+        change_id = applied[0].change_id
+        applier.rollback_change(change_id)
+        # After rollback, overlay should have original value
+        assert applier.get_overlay().get("KELLY_FRACTION") == pytest.approx(0.25)
+
+    def test_version_hash_present(self):
+        applier = ChangeApplier()
+        applied, _ = applier.apply([self._risk_plan()], _base_params())
+        assert applied[0].version_hash
+        assert len(applied[0].version_hash) == 8   # SHA1 first 8 chars
+
+
+# ── Part 7: Cooldown Manager ──────────────────────────────────────────────────
+
+class TestCooldownManager:
+    def test_first_cycle_always_allowed(self):
+        cm = CooldownManager()
+        result = cm.can_run()
+        assert result["allowed"] is True
+
+    def test_session_limit_blocks(self):
+        cm = CooldownManager()
+        for _ in range(MAX_CYCLES_PER_SESSION):
+            cm.record_cycle()
+        result = cm.can_run()
+        assert result["allowed"] is False
+        assert "SESSION_LIMIT" in result["blocking_reason"]
+
+    def test_cooldown_blocks_after_cycle(self):
+        cm = CooldownManager()
+        cm.record_cycle()
+        result = cm.can_run()
+        assert result["allowed"] is False
+        assert "COOLDOWN" in result["blocking_reason"]
+
+    def test_critical_bypass_overrides_cooldown(self):
+        cm = CooldownManager()
+        cm.record_cycle()
+        result = cm.can_run(risk_violated=True)
+        assert result["allowed"] is True
+        assert result["bypass_active"] is True
+
+    def test_score_below_floor_triggers_bypass(self):
+        cm = CooldownManager()
+        cm.record_cycle()
+        result = cm.can_run(system_score=30.0)
+        assert result["allowed"] is True
+
+    def test_reset_clears_state(self):
+        cm = CooldownManager()
+        for _ in range(MAX_CYCLES_PER_SESSION):
+            cm.record_cycle()
+        cm.reset()
+        assert cm.can_run()["allowed"] is True
+
+
+# ── Part 8: Rollback Manager ──────────────────────────────────────────────────
+
+class TestRollbackManager:
+    def test_keep_when_all_good(self):
+        rm = RollbackManager()
+        result = rm.evaluate("c1", "KELLY_FRACTION", 0.25,
+                             100.0, 110.0, 75.0, 78.0, False, True)
+        assert result["decision"] == "KEEP"
+        assert result["stop_engine"] is False
+
+    def test_rollback_on_perf_drop(self):
+        rm = RollbackManager()
+        result = rm.evaluate("c2", "KELLY_FRACTION", 0.25,
+                             100.0, 80.0, 75.0, 74.0, False, True)
+        assert result["decision"] == "ROLLBACK"
+        assert result["trigger"] == RollbackTrigger.PERF_DROP.value
+
+    def test_rollback_on_score_drop(self):
+        rm = RollbackManager()
+        result = rm.evaluate("c3", "TR_EV_WEIGHT", 0.55,
+                             100.0, 102.0, 75.0, 68.0, False, True)
+        assert result["decision"] == "ROLLBACK"
+        assert result["trigger"] == RollbackTrigger.VALIDATION_FAIL.value
+
+    def test_rollback_on_risk_violation(self):
+        rm = RollbackManager()
+        result = rm.evaluate("c4", "KELLY_FRACTION", 0.25,
+                             100.0, 105.0, 75.0, 76.0, True, True)
+        assert result["decision"] == "ROLLBACK"
+        assert result["trigger"] == RollbackTrigger.RISK_VIOLATION.value
+
+    def test_3_rollbacks_stops_engine(self):
+        rm = RollbackManager()
+        for i in range(3):
+            rm.evaluate(f"c{i}", "KELLY_FRACTION", 0.25,
+                        100.0, 80.0, 75.0, 74.0, False, True)
+        assert rm.should_stop() is True
+
+    def test_reset_clears_stop(self):
+        rm = RollbackManager()
+        for i in range(3):
+            rm.evaluate(f"c{i}", "KELLY_FRACTION", 0.25, 100.0, 80.0, 75.0, 74.0, False, True)
+        rm.reset()
+        assert rm.should_stop() is False
+
+
+# ── Part 9: Audit Logger ──────────────────────────────────────────────────────
+
+class TestAuditLogger:
+    def test_applied_entry_logged(self):
+        al = AuditLogger()
+        entry = al.log_applied(
+            change_id="CHG_001", issue_type="RISK_VIOLATION",
+            issue_severity="CRITICAL", affected_module="risk_engine",
+            rationale="high DD", parameter="KELLY_FRACTION",
+            value_before=0.25, value_after=0.22,
+            delta_pct=0.12, confidence=75.0, pre_score=72.0,
+        )
+        assert entry.parameter == "KELLY_FRACTION"
+        assert entry.final_state == FinalState.KEPT
+
+    def test_blocked_entry_logged(self):
+        al = AuditLogger()
+        entry = al.log_blocked("CHG_002", "MAX_DRAWDOWN_HALT", "HARD_LIMIT", 60.0, 65.0)
+        assert entry.final_state == FinalState.BLOCKED
+
+    def test_resolve_updates_final_state(self):
+        al = AuditLogger()
+        al.log_applied(
+            change_id="CHG_003", issue_type="PERF", issue_severity="HIGH",
+            affected_module="m", rationale="r", parameter="TR_EV_WEIGHT",
+            value_before=0.55, value_after=0.58, delta_pct=0.05,
+            confidence=80.0, pre_score=70.0,
+        )
+        al.resolve("CHG_003", 68.0, FinalState.ROLLED_BACK, "PERF_DROP")
+        recent = al.recent(5)
+        entry = [e for e in recent if e["change_id"] == "CHG_003"][0]
+        assert entry["final_state"] == FinalState.ROLLED_BACK.value
+        assert entry["rollback_trigger"] == "PERF_DROP"
+
+    def test_last_change_returns_most_recent(self):
+        al = AuditLogger()
+        al.log_applied(
+            change_id="CHG_004", issue_type="RISK", issue_severity="HIGH",
+            affected_module="m", rationale="r", parameter="KELLY_FRACTION",
+            value_before=0.25, value_after=0.22, delta_pct=0.12,
+            confidence=75.0, pre_score=70.0,
+        )
+        last = al.last_change()
+        assert last is not None
+        assert last["change_id"] == "CHG_004"
+
+    def test_summary_has_required_fields(self):
+        al = AuditLogger()
+        s = al.summary()
+        for k in ("total_entries", "kept", "rolled_back", "blocked", "last_change"):
+            assert k in s
+
+
+# ── Full Orchestrator (integration) ──────────────────────────────────────────
+
+class TestCorrectionOrchestrator:
+    def _run_cycle(self, orch: CorrectionOrchestrator, n_trades: int = 35, score: float = 80.0):
+        return orch.run_cycle(
+            ftd028_validators=_ftd028_failed_validators(),
+            ftd028_meta=_ftd028_meta(score),
+            current_params=_base_params(),
+            system_state=_orchestrator_state(n_trades),
+            ai_brain_score=score,
+        )
+
+    def test_insufficient_trades_blocked(self):
+        orch = _fresh_orchestrator()
+        result = self._run_cycle(orch, n_trades=5)
+        assert result["verdict"] == "BLOCKED"
+
+    def test_low_meta_score_blocked(self):
+        orch = _fresh_orchestrator()
+        result = self._run_cycle(orch, score=40.0)
+        assert result["verdict"] == "BLOCKED"
+
+    def test_healthy_cycle_produces_result(self):
+        orch = _fresh_orchestrator()
+        result = self._run_cycle(orch, n_trades=35, score=80.0)
+        assert result["verdict"] in ("APPLIED", "NO_ACTION", "BLOCKED")
+        # Must have required fields
+        for key in ("cycle_id", "module", "phase", "applied", "ts"):
+            assert key in result
+
+    def test_human_override_stop_blocks(self):
+        orch = _fresh_orchestrator()
+        orch.human_override_stop()
+        result = self._run_cycle(orch)
+        assert result["verdict"] == "BLOCKED"
+
+    def test_clear_overlay_resets(self):
+        orch = _fresh_orchestrator()
+        orch._change_applier._overlay["KELLY_FRACTION"] = 0.20
+        orch.clear_overlay()
+        assert orch.get_overlay() == {}
+
+    def test_summary_is_json_serialisable(self):
+        import json
+        orch = _fresh_orchestrator()
+        s = json.dumps(orch.summary(), default=str)
+        assert len(s) > 0
+
+    def test_logs_returns_list(self):
+        orch = _fresh_orchestrator()
+        logs = orch.logs(10)
+        assert isinstance(logs, list)
+
+    def test_last_change_none_before_any_correction(self):
+        orch = _fresh_orchestrator()
+        assert orch.last_change() is None

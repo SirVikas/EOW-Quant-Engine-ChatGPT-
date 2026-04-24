@@ -2617,15 +2617,9 @@ async def get_capital_allocator():
 
 # ── FTD-029: Self-Correction Engine (Closed-Loop Intelligence) ───────────────
 
-@app.post("/api/self-correction/run")
-async def run_self_correction():
-    """
-    FTD-029 — Execute one self-correction cycle.
-    Requires ≥30 trades + FTD-028 score ≥ 70 + AI Brain score ≥ 70.
-    Returns applied corrections, blocked proposals, and cycle verdict.
-    """
-    from core.self_correction.correction_engine import self_correction_engine
-    from core.deep_validation.meta_score_engine import MetaScoreEngine
+def _sc_build_state():
+    """Shared helper: build system_state + current_params for FTD-029 endpoints."""
+    from config import cfg
     from core.deep_validation.contradiction_engine import ContradictionEngine
 
     stats    = pnl_calc.session_stats
@@ -2634,11 +2628,11 @@ async def run_self_correction():
     rs       = risk_ctrl.snapshot()
     gs       = global_gate_controller.snapshot() if hasattr(global_gate_controller, "snapshot") else {}
 
-    equity       = float(scaler.equity or 0.0)
-    dd_pct       = float(dd.get("drawdown_pct", 0.0) or 0.0)
-    win_rate     = float(stats.get("win_rate", 0.0) or 0.0) / 100.0
-    total_pnl    = float(stats.get("total_net_pnl", 0.0) or 0.0)
-    halted       = rs.get("halted", False)
+    equity    = float(scaler.equity or 0.0)
+    dd_pct    = float(dd.get("drawdown_pct", 0.0) or 0.0)
+    win_rate  = float(stats.get("win_rate", 0.0) or 0.0) / 100.0
+    total_pnl = float(stats.get("total_net_pnl", 0.0) or 0.0)
+    halted    = rs.get("halted", False)
 
     system_state = {
         "equity":               equity,
@@ -2651,21 +2645,16 @@ async def run_self_correction():
         "sharpe_ratio":         stats.get("sharpe_ratio", None),
     }
 
-    # Approximate FTD-028 score from a lightweight contradiction check
     contradiction = ContradictionEngine().run({
         **system_state,
-        "total_signals": n_trades,
-        "trades_active": len(risk_ctrl.positions) > 0,
+        "total_signals":    n_trades,
+        "trades_active":    len(risk_ctrl.positions) > 0,
         "max_drawdown_pct": 0.15,
         "kill_switch_active": not gs.get("can_trade", True),
     })
-    deep_validation_score = 85.0 if contradiction["passed"] else 55.0
-
-    # Approximate AI Brain score from win-rate + PnL direction
+    meta_score     = 85.0 if contradiction["passed"] else 55.0
     ai_brain_score = min(100.0, max(0.0, win_rate * 100.0 + (10.0 if total_pnl >= 0 else -10.0)))
 
-    # Base config params for correction proposals
-    from config import cfg
     current_params = {
         "P7B_PERF_WIN_THRESHOLD":  cfg.P7B_PERF_WIN_THRESHOLD,
         "P7B_PERF_LOSS_THRESHOLD": cfg.P7B_PERF_LOSS_THRESHOLD,
@@ -2679,60 +2668,135 @@ async def run_self_correction():
         "EXPLORE_EV_FLOOR":        cfg.EXPLORE_EV_FLOOR,
     }
 
-    return self_correction_engine.run_cycle(
-        state=system_state,
+    ftd028_validators = {
+        "contradiction": contradiction,
+        "performance": {
+            "passed":    total_pnl >= 0,
+            "issue_count": 0 if total_pnl >= 0 else 1,
+            "issues":    [] if total_pnl >= 0 else [{"message": f"negative PnL={total_pnl:.2f}"}],
+        },
+        "risk": {
+            "passed":    not halted,
+            "error_count": 0 if not halted else 1,
+            "errors":    [] if not halted else [{"message": "engine halted"}],
+        },
+    }
+    ftd028_meta = {
+        "system_score":     meta_score,
+        "stability_score":  max(0.0, 100.0 - dd_pct * 500),
+        "confidence_score": min(100.0, win_rate * 100.0 + 40.0),
+    }
+
+    return system_state, current_params, ftd028_validators, ftd028_meta, ai_brain_score, halted
+
+
+@app.post("/api/self-correction/run")
+async def run_self_correction():
+    """
+    FTD-029 — Full orchestrated correction cycle (Part 1–9).
+    Flow: IssueExtract → Confidence → Policy → Priority → Plan → Collide → Apply → Audit.
+    Requires ≥30 trades + FTD-028 score ≥ 70 + AI Brain ≥ 70.
+    """
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+
+    system_state, current_params, ftd028_validators, ftd028_meta, ai_brain_score, halted = (
+        _sc_build_state()
+    )
+    return correction_orchestrator.run_cycle(
+        ftd028_validators=ftd028_validators,
+        ftd028_meta=ftd028_meta,
         current_params=current_params,
-        deep_validation_score=deep_validation_score,
+        system_state=system_state,
         ai_brain_score=ai_brain_score,
         risk_halted=halted,
+        risk_violated=halted,
+        contradiction_critical=not ftd028_validators["contradiction"].get("passed", True),
     )
 
 
-@app.get("/api/self-correction/status")
-async def get_self_correction_status():
-    """FTD-029 — Dashboard view (Q13): current state, active corrections, audit summary."""
-    from core.self_correction.correction_engine import self_correction_engine
-    return self_correction_engine.summary()
+@app.get("/api/self-correction/state")
+async def get_self_correction_state():
+    """FTD-029 — Full dashboard state (Q13): enabled, cooldown, overlay, audit, rollback."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    return correction_orchestrator.summary()
+
+
+@app.get("/api/self-correction/logs")
+async def get_self_correction_logs(n: int = 50):
+    """FTD-029 — Recent correction audit log (Q11/Q13)."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    return {"logs": correction_orchestrator.logs(n), "phase": "029"}
+
+
+@app.get("/api/self-correction/last-change")
+async def get_last_self_correction():
+    """FTD-029 — Last correction card for dashboard (Q13)."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    last = correction_orchestrator.last_change()
+    return last or {"detail": "No corrections applied yet", "phase": "029"}
+
+
+@app.post("/api/self-correction/manual-override")
+async def manual_override_self_correction(body: dict = None):
+    """
+    FTD-029 — Human override endpoint (Q8/Q13).
+    Body: {"action": "stop"|"resume"|"clear_overlay"|"enable"|"disable"}
+    """
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    action = (body or {}).get("action", "stop")
+    if action == "stop":
+        correction_orchestrator.human_override_stop()
+    elif action == "resume":
+        correction_orchestrator.human_override_resume()
+    elif action == "clear_overlay":
+        correction_orchestrator.clear_overlay()
+    elif action == "enable":
+        correction_orchestrator.enable()
+    elif action == "disable":
+        correction_orchestrator.disable()
+    else:
+        return {"error": f"Unknown action '{action}'", "phase": "029"}
+    return {"status": f"override_{action}_applied", "phase": "029"}
 
 
 @app.post("/api/self-correction/enable")
 async def enable_self_correction():
-    """FTD-029 — Dashboard control (Q13): enable auto-correction."""
-    from core.self_correction.correction_engine import self_correction_engine
-    self_correction_engine.enable()
-    return {"status": "enabled", "module": "SELF_CORRECTION_ENGINE", "phase": "029"}
+    """FTD-029 — Enable auto-correction."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    correction_orchestrator.enable()
+    return {"status": "enabled", "phase": "029"}
 
 
 @app.post("/api/self-correction/disable")
 async def disable_self_correction():
-    """FTD-029 — Dashboard control (Q13): disable auto-correction."""
-    from core.self_correction.correction_engine import self_correction_engine
-    self_correction_engine.disable()
-    return {"status": "disabled", "module": "SELF_CORRECTION_ENGINE", "phase": "029"}
+    """FTD-029 — Disable auto-correction."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    correction_orchestrator.disable()
+    return {"status": "disabled", "phase": "029"}
 
 
 @app.post("/api/self-correction/override/stop")
 async def override_stop_self_correction():
-    """FTD-029 — Human override (Q8): immediately halt all auto-correction."""
-    from core.self_correction.correction_engine import self_correction_engine
-    self_correction_engine.human_override_stop()
-    return {"status": "stopped_by_human_override", "module": "SELF_CORRECTION_ENGINE", "phase": "029"}
+    """FTD-029 — Human override: immediately halt."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    correction_orchestrator.human_override_stop()
+    return {"status": "stopped_by_human_override", "phase": "029"}
 
 
 @app.post("/api/self-correction/override/resume")
 async def override_resume_self_correction():
-    """FTD-029 — Human override (Q8): resume auto-correction after manual stop."""
-    from core.self_correction.correction_engine import self_correction_engine
-    self_correction_engine.human_override_resume()
-    return {"status": "resumed", "module": "SELF_CORRECTION_ENGINE", "phase": "029"}
+    """FTD-029 — Human override: resume."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    correction_orchestrator.human_override_resume()
+    return {"status": "resumed", "phase": "029"}
 
 
 @app.post("/api/self-correction/override/clear")
 async def clear_self_correction_overlay():
-    """FTD-029 — Manual override (Q13): clear all active corrections, revert to base config."""
-    from core.self_correction.correction_engine import self_correction_engine
-    self_correction_engine.clear_overlay()
-    return {"status": "overlay_cleared", "module": "SELF_CORRECTION_ENGINE", "phase": "029"}
+    """FTD-029 — Clear all active corrections, revert to base config."""
+    from core.self_correction.correction_orchestrator import correction_orchestrator
+    correction_orchestrator.clear_overlay()
+    return {"status": "overlay_cleared", "phase": "029"}
 
 
 # ── FTD-028: Deep Intelligence Validation Layer ──────────────────────────────
