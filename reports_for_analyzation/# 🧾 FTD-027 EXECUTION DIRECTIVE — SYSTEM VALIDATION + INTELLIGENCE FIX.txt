@@ -1,0 +1,174 @@
+# 🧾 FTD-027 EXECUTION DIRECTIVE — SYSTEM VALIDATION + INTELLIGENCE FIX
+
+---
+
+## 🎯 CONTEXT
+
+System integration is complete.
+
+However, validation shows that **Export Engine and Intelligence layer are NOT correct**.
+
+---
+
+## 🚨 CORE INSTRUCTION
+
+```text
+NO new features
+NO structural changes
+
+ONLY:
+Validation + Intelligence Correction
+```
+
+---
+
+# ❗ PART 1 — SYSTEM VALIDATION (MANDATORY)
+
+Developer MUST prove:
+
+---
+
+### 1. REAL TRADE EXECUTION
+
+* Show actual trades (entry, exit, PnL)
+
+---
+
+### 2. SIGNAL PIPELINE
+
+* Raw → Filter → Edge → Score → Trade
+* NO contradictions allowed
+
+---
+
+### 3. DECISION EXPLANATION
+
+* Why trade taken / rejected
+
+---
+
+### 4. RISK ENGINE
+
+* Show blocking behavior
+* Show kill switch
+
+---
+
+### 5. AI BRAIN
+
+* Must output real decisions
+* No empty state
+
+---
+
+# ❗ PART 2 — EXPORT ENGINE FIX (CRITICAL)
+
+Current export report is **structurally correct but logically incorrect**
+
+---
+
+## REQUIRED FIXES:
+
+---
+
+### 1. ❌ CONTRADICTION FIX
+
+```text
+Trades exist but signals = 0 → INVALID
+```
+
+---
+
+### 2. ❌ FUNCTION REGISTRY FIX
+
+```text
+Currently: 0 functions registered → INVALID
+Must register real system functions
+```
+
+---
+
+### 3. ❌ AI BRAIN FIX
+
+```text
+Currently inactive → MUST produce decisions
+```
+
+---
+
+### 4. ❌ SUGGESTION ENGINE FIX
+
+```text
+System in loss → suggestions MUST trigger
+```
+
+---
+
+### 5. ❌ FINAL DIAGNOSIS FIX
+
+```text
+NOT summary
+MUST include:
+
+Primary issue
+Secondary issue
+Actionable fix
+```
+
+---
+
+### 6. ❌ RISK ENGINE FIX
+
+```text
+Risk of ruin = 100%
+→ System must reflect control (block / reduce / halt)
+```
+
+---
+
+# 📦 REQUIRED DELIVERABLES
+
+Developer MUST provide:
+
+```text
+1. Live trade execution logs
+2. Signal pipeline proof
+3. Risk engine behavior proof
+4. AI Brain decisions output
+5. Corrected export report (no contradictions)
+```
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text
+Any contradiction
+Missing suggestions
+Inactive AI Brain
+Incorrect diagnosis
+```
+
+→ SYSTEM = FAIL
+
+---
+
+# 🛑 FINAL RULE
+
+```text
+Do NOT build anything new
+
+Fix + validate what already exists
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+A system that cannot explain itself correctly
+
+Is not ready for real trading
+```
+
+---
