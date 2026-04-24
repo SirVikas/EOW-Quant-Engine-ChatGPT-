@@ -90,7 +90,7 @@ GATE_SAFE    = _gate(True,  True,  "SAFE_MODE")
 
 class _FakeGate:
     def __init__(self, status): self._s = status
-    def evaluate(self): return self._s
+    def evaluate(self, **kwargs): return self._s
     def can_trade(self): return self._s.get("can_trade", False)
 
 

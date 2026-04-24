@@ -1,0 +1,536 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-04-24",
+  "governance_rule": "ONE LOGIC → ONE OWNER → MANY USERS",
+  "anti_duplication_rule": "Unregistered function = INVALID CODE",
+  "functions": [
+
+    {
+      "function_name": "build_report_archive",
+      "owner_module": "utils.report_generator",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Generates ZIP archive with XLSX + PDF + MD report (triple-format)"
+    },
+
+    {
+      "function_name": "ExportManager.export",
+      "owner_module": "utils.export_manager",
+      "used_by_modules": ["main"],
+      "description": "One-click full JSON state export: strategy DNA + trade history + ratios"
+    },
+    {
+      "function_name": "ExportManager.import_dna",
+      "owner_module": "utils.export_manager",
+      "used_by_modules": ["main"],
+      "description": "Load exported state file and extract strategy DNA for re-injection"
+    },
+    {
+      "function_name": "ExportManager.latest_export_path",
+      "owner_module": "utils.export_manager",
+      "used_by_modules": ["main"],
+      "description": "Returns path to the most recent export file"
+    },
+
+    {
+      "function_name": "SystemExportEngine.build_full_report",
+      "owner_module": "core.export_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-025A: Builds full institutional system report (MD + PDF) with all 15 sections"
+    },
+    {
+      "function_name": "SystemExportEngine.collect_snapshot",
+      "owner_module": "core.export_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-025A: Aggregates live system state from all modules into one snapshot dict"
+    },
+
+    {
+      "function_name": "PurePnLCalculator.record_trade",
+      "owner_module": "core.pnl_calculator",
+      "used_by_modules": ["core.risk_controller", "main"],
+      "description": "Records closed trade, computes net PnL after fees/slippage/borrow"
+    },
+    {
+      "function_name": "PurePnLCalculator.session_stats",
+      "owner_module": "core.pnl_calculator",
+      "used_by_modules": ["main", "core.export_engine", "utils.report_generator", "utils.export_manager"],
+      "description": "Returns aggregate session statistics dict (win_rate, profit_factor, sharpe, etc.)"
+    },
+    {
+      "function_name": "PurePnLCalculator.alpha_beta",
+      "owner_module": "core.pnl_calculator",
+      "used_by_modules": ["main", "utils.export_manager"],
+      "description": "Computes alpha/beta vs benchmark equity curve"
+    },
+
+    {
+      "function_name": "GenomeEngine.ingest_candle",
+      "owner_module": "core.genome_engine",
+      "used_by_modules": ["main"],
+      "description": "Feed closed candle to genome; triggers warmup counter"
+    },
+    {
+      "function_name": "GenomeEngine.export_state",
+      "owner_module": "core.genome_engine",
+      "used_by_modules": ["main", "utils.export_manager", "core.export_engine"],
+      "description": "Returns full genome state: active DNA, metrics, recent genome log"
+    },
+    {
+      "function_name": "GenomeEngine.on_trade_closed",
+      "owner_module": "core.genome_engine",
+      "used_by_modules": ["main"],
+      "description": "Notifies genome that a trade closed; triggers evolution every 50 trades"
+    },
+    {
+      "function_name": "GenomeEngine.load_persisted_dna",
+      "owner_module": "core.genome_engine",
+      "used_by_modules": ["main"],
+      "description": "Reloads promoted DNA from disk on boot"
+    },
+
+    {
+      "function_name": "RegimeDetector.detect",
+      "owner_module": "core.regime_detector",
+      "used_by_modules": ["main"],
+      "description": "Classifies market regime (TRENDING / MEAN_REVERTING / VOLATILITY_EXPANSION / UNKNOWN)"
+    },
+
+    {
+      "function_name": "RegimeAI.classify",
+      "owner_module": "core.regime_ai",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-023/026: Multi-factor weighted regime classification with confidence + stability tracking"
+    },
+
+    {
+      "function_name": "RegimeDebounce.push",
+      "owner_module": "core.regime_debounce",
+      "used_by_modules": ["main"],
+      "description": "Deduplication gate: fires callback only on genuine regime transitions"
+    },
+
+    {
+      "function_name": "RegimeMemory.update",
+      "owner_module": "core.regime_memory",
+      "used_by_modules": ["main"],
+      "description": "Accumulates per-regime performance history for adaptive learning"
+    },
+
+    {
+      "function_name": "RiskController.update_positions",
+      "owner_module": "core.risk_controller",
+      "used_by_modules": ["main"],
+      "description": "Checks SL/TP/trailing for all open positions on each tick"
+    },
+    {
+      "function_name": "RiskController.snapshot",
+      "owner_module": "core.risk_controller",
+      "used_by_modules": ["main", "core.export_engine", "utils.export_manager"],
+      "description": "Returns dict of open positions, halted state, drawdown, MDD"
+    },
+    {
+      "function_name": "RiskController.emergency_close_all",
+      "owner_module": "core.risk_controller",
+      "used_by_modules": ["main"],
+      "description": "Force-close all open positions at current market prices"
+    },
+
+    {
+      "function_name": "CtScanEngine.scan",
+      "owner_module": "core.ct_scan_engine",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "FTD-REF-026: System health scan → HEALTHY/WARNING/CRITICAL + issues + score"
+    },
+
+    {
+      "function_name": "StrategyEngine.evaluate_signal",
+      "owner_module": "core.strategy_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-026: Evaluate whether strategy signal passes quality gate"
+    },
+    {
+      "function_name": "StrategyEngine.record_trade",
+      "owner_module": "core.strategy_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-026: Record trade closure for strategy usage distribution tracking"
+    },
+    {
+      "function_name": "StrategyEngine.usage",
+      "owner_module": "core.strategy_engine",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Returns per-strategy trade share as dict {strategy_id: fraction}"
+    },
+    {
+      "function_name": "StrategyEngine.summary",
+      "owner_module": "core.strategy_engine",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Returns full strategy engine summary including usage + gate thresholds"
+    },
+    {
+      "function_name": "StrategyEngine.evaluate_data_sufficiency",
+      "owner_module": "core.strategy_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-026: Returns True if enough candles exist for signal generation"
+    },
+
+    {
+      "function_name": "LearningEngine.record",
+      "owner_module": "core.learning_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-023: Records trade outcome for per-regime win-rate tracking"
+    },
+    {
+      "function_name": "LearningEngine.get_regime_weight",
+      "owner_module": "core.learning_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-023: Returns position-size multiplier based on regime win-rate"
+    },
+    {
+      "function_name": "LearningEngine.summary",
+      "owner_module": "core.learning_engine",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Returns learning engine state: per-regime trade counts, win-rates, weights"
+    },
+
+    {
+      "function_name": "EdgeEngine.record",
+      "owner_module": "core.edge_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-024: Records trade outcome for per-regime/strategy edge tracking"
+    },
+    {
+      "function_name": "EdgeEngine.check_trade",
+      "owner_module": "core.edge_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-024: Returns (allowed, reason) — blocks trades in negative-edge regimes"
+    },
+    {
+      "function_name": "EdgeEngine.get_size_multiplier",
+      "owner_module": "core.edge_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-024: Returns position-size multiplier based on observed edge"
+    },
+    {
+      "function_name": "EdgeEngine.summary",
+      "owner_module": "core.edge_engine",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Returns edge engine state: per-regime/strategy edge, win-rate, trade count"
+    },
+
+    {
+      "function_name": "SignalFilter.evaluate",
+      "owner_module": "core.signal_filter",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-023/024/025: Multi-gate signal quality filter — returns (pass, reason)"
+    },
+
+    {
+      "function_name": "ExecutionEngine.decide",
+      "owner_module": "core.execution_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-023: Decides whether to execute a trade based on engine state"
+    },
+
+    {
+      "function_name": "TradeFrequency.record",
+      "owner_module": "core.trade_frequency",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-023: Records trade timestamp for frequency rate-limiting"
+    },
+    {
+      "function_name": "TradeFrequency.check",
+      "owner_module": "core.trade_frequency",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-023: Returns (allowed, reason) for frequency gate"
+    },
+
+    {
+      "function_name": "CapitalAllocator.allocate",
+      "owner_module": "core.capital_allocator",
+      "used_by_modules": ["main"],
+      "description": "Phase 4: Score-based position sizing — returns USDT amount to risk"
+    },
+    {
+      "function_name": "CapitalAllocator.record_risk_used",
+      "owner_module": "core.capital_allocator",
+      "used_by_modules": ["main"],
+      "description": "Phase 4: Records daily risk usage for daily limit enforcement"
+    },
+    {
+      "function_name": "CapitalAllocator.summary",
+      "owner_module": "core.capital_allocator",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Returns capital allocator state: daily risk used, limits, base risk"
+    },
+
+    {
+      "function_name": "DrawdownController.update",
+      "owner_module": "core.drawdown_controller",
+      "used_by_modules": ["main"],
+      "description": "Phase 5: Updates peak/current equity and returns tiered DD protection level"
+    },
+    {
+      "function_name": "DrawdownController.summary",
+      "owner_module": "core.drawdown_controller",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Returns drawdown state: peak equity, current equity, DD%, tier thresholds"
+    },
+
+    {
+      "function_name": "ErrorRegistry.log",
+      "owner_module": "core.error_registry",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-025: Logs structured error event with per-code throttling"
+    },
+    {
+      "function_name": "ErrorRegistry.recent",
+      "owner_module": "core.error_registry",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "FTD-REF-025: Returns last N error events from rolling deque"
+    },
+    {
+      "function_name": "ErrorRegistry.counts",
+      "owner_module": "core.error_registry",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "FTD-REF-025: Returns total event count per error code"
+    },
+    {
+      "function_name": "ErrorRegistry.summary",
+      "owner_module": "core.error_registry",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "FTD-REF-025: Returns full error registry summary: counts + recent events"
+    },
+
+    {
+      "function_name": "WsStabilizer.on_tick",
+      "owner_module": "core.ws_stabilizer",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-019/025: Records WebSocket tick arrival for health monitoring"
+    },
+    {
+      "function_name": "WsStabilizer.snapshot",
+      "owner_module": "core.ws_stabilizer",
+      "used_by_modules": ["main"],
+      "description": "Returns WebSocket stability snapshot: tick rate, gap count, health"
+    },
+
+    {
+      "function_name": "WsTruthEngine.record",
+      "owner_module": "core.ws_truth_engine",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-025: Records authoritative tick for WebSocket truth tracking"
+    },
+    {
+      "function_name": "WsTruthEngine.snapshot",
+      "owner_module": "core.ws_truth_engine",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "FTD-REF-025: Returns WebSocket truth state dataclass"
+    },
+
+    {
+      "function_name": "ProfitGuard.check",
+      "owner_module": "core.profit_guard",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-026: Checks whether profit target or drawdown-from-peak triggers guard"
+    },
+
+    {
+      "function_name": "AdaptiveFilter.evaluate",
+      "owner_module": "core.adaptive_filter",
+      "used_by_modules": ["main"],
+      "description": "Phase 5.1: Dynamic threshold adaptation — adjusts signal gates based on recent performance"
+    },
+
+    {
+      "function_name": "DynamicThresholdProvider.get",
+      "owner_module": "core.dynamic_thresholds",
+      "used_by_modules": ["main"],
+      "description": "Phase 5.2: Returns currently active threshold for a given parameter key"
+    },
+    {
+      "function_name": "DynamicThresholdProvider.summary",
+      "owner_module": "core.dynamic_thresholds",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Returns all currently active dynamic thresholds and their sources"
+    },
+
+    {
+      "function_name": "StreakEngine.summary",
+      "owner_module": "core.streak_engine",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Phase 6: Returns streak state — hot/cold streaks, current streak length"
+    },
+
+    {
+      "function_name": "EquitySnapshot.save",
+      "owner_module": "core.equity_snapshot",
+      "used_by_modules": ["main"],
+      "description": "qFTD-009: Persists current equity to disk for boot recovery"
+    },
+    {
+      "function_name": "EquitySnapshot.load",
+      "owner_module": "core.equity_snapshot",
+      "used_by_modules": ["main"],
+      "description": "qFTD-009: Loads persisted equity snapshot from disk"
+    },
+    {
+      "function_name": "EquitySnapshot.validate",
+      "owner_module": "core.equity_snapshot",
+      "used_by_modules": ["main"],
+      "description": "qFTD-009: Validates snapshot equity vs replay equity — mismatch triggers safe mode"
+    },
+
+    {
+      "function_name": "DataHealthMonitor.record",
+      "owner_module": "core.data_health",
+      "used_by_modules": ["main"],
+      "description": "qFTD-004: Records data arrival timestamp for freshness tracking (SSOT)"
+    },
+    {
+      "function_name": "DataHealthMonitor.check",
+      "owner_module": "core.data_health",
+      "used_by_modules": ["main"],
+      "description": "qFTD-004: Returns (fresh, age_seconds) for data freshness gate"
+    },
+
+    {
+      "function_name": "GlobalGateController.check",
+      "owner_module": "core.gating.global_gate_controller",
+      "used_by_modules": ["main", "core.orchestrator.execution_orchestrator"],
+      "description": "Phase 6.6: Master gate authority — returns (allowed, reason) for trade execution"
+    },
+
+    {
+      "function_name": "PreTradeGate.validate",
+      "owner_module": "core.gating.pre_trade_gate",
+      "used_by_modules": ["core.orchestrator.execution_orchestrator"],
+      "description": "Phase 6.6: Final pre-trade validation gate before position sizing"
+    },
+
+    {
+      "function_name": "ExecutionOrchestrator.run_cycle",
+      "owner_module": "core.orchestrator.execution_orchestrator",
+      "used_by_modules": ["main"],
+      "description": "Phase 7A: Single execution authority — runs one trade decision cycle per tick"
+    },
+    {
+      "function_name": "ExecutionOrchestrator.enforce_exclusivity",
+      "owner_module": "core.orchestrator.execution_orchestrator",
+      "used_by_modules": ["core.orchestrator.execution_orchestrator"],
+      "description": "Phase 7A: Raises RuntimeError if a second orchestrator instance tries to execute"
+    },
+
+    {
+      "function_name": "DataLake.insert_trade",
+      "owner_module": "core.data_lake",
+      "used_by_modules": ["main"],
+      "description": "Persists closed trade to SQLite data lake"
+    },
+    {
+      "function_name": "DataLake.db_stats",
+      "owner_module": "core.data_lake",
+      "used_by_modules": ["main"],
+      "description": "Returns SQLite row counts for ticks, candles, trades"
+    },
+    {
+      "function_name": "DataLake.replay_trades",
+      "owner_module": "core.data_lake",
+      "used_by_modules": ["main"],
+      "description": "Replays all trades from SQLite for equity reconciliation on boot"
+    },
+
+    {
+      "function_name": "compute_full_analytics",
+      "owner_module": "core.analytics",
+      "used_by_modules": ["main", "core.export_engine"],
+      "description": "Computes full analytics: sortino, calmar, risk-of-ruin, benchmark, deployability"
+    },
+    {
+      "function_name": "compute_scorecard",
+      "owner_module": "core.scorecard",
+      "used_by_modules": ["main"],
+      "description": "Computes go-live readiness scorecard across all systems"
+    },
+
+    {
+      "function_name": "AlphaEngine.generate",
+      "owner_module": "strategies.alpha_engine",
+      "used_by_modules": ["main"],
+      "description": "Phase 4: Generates LONG / SHORT / NONE alpha signal from indicator set"
+    },
+
+    {
+      "function_name": "MarketDataProvider.start_stream",
+      "owner_module": "core.market_data",
+      "used_by_modules": ["main"],
+      "description": "Starts Binance WebSocket stream for all configured symbols"
+    },
+    {
+      "function_name": "MarketDataProvider.ticks",
+      "owner_module": "core.market_data",
+      "used_by_modules": ["main"],
+      "description": "Dict of latest tick per symbol (symbol → Tick)"
+    },
+
+    {
+      "function_name": "SelfHealingProtocol.snapshot",
+      "owner_module": "core.self_healing",
+      "used_by_modules": ["main"],
+      "description": "Returns self-healing event log and last recovery action"
+    },
+
+    {
+      "function_name": "MarketStructureDetector.detect",
+      "owner_module": "core.market_structure",
+      "used_by_modules": ["main"],
+      "description": "FTD-REF-024: Detects support/resistance levels and market structure patterns"
+    },
+
+    {
+      "function_name": "TradeManager.open_position",
+      "owner_module": "core.trade_manager",
+      "used_by_modules": ["main"],
+      "description": "Phase 4: Opens and tracks a managed position with SL/TP lifecycle"
+    },
+    {
+      "function_name": "TradeManager.update",
+      "owner_module": "core.trade_manager",
+      "used_by_modules": ["main"],
+      "description": "Phase 4: Updates all managed positions on each tick"
+    },
+
+    {
+      "function_name": "TradeScorer.score",
+      "owner_module": "core.trade_scorer",
+      "used_by_modules": ["main"],
+      "description": "Phase 4: Scores signal quality 0–1 for capital allocation weighting"
+    },
+
+    {
+      "function_name": "EVEngine.evaluate",
+      "owner_module": "core.ev_engine",
+      "used_by_modules": ["main"],
+      "description": "Phase 5: Computes expected value of signal — gates entry on positive EV only"
+    },
+
+    {
+      "function_name": "CapitalScaler.size",
+      "owner_module": "utils.capital_scaler",
+      "used_by_modules": ["main", "core.risk_controller"],
+      "description": "Kelly Criterion + streak scaling → returns final position size fraction"
+    },
+
+    {
+      "function_name": "VaultManager.setup",
+      "owner_module": "core.vault",
+      "used_by_modules": ["main"],
+      "description": "Encrypts and persists PAPER + LIVE API credentials under master password"
+    },
+    {
+      "function_name": "VaultManager.switch",
+      "owner_module": "core.vault",
+      "used_by_modules": ["main"],
+      "description": "Password-gated hot-swap of Binance API credentials (PAPER ↔ LIVE)"
+    }
+  ]
+}
