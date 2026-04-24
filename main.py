@@ -1289,7 +1289,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         _reg_path = pathlib.Path(__file__).parent / "core" / "registry" / "function_registry.json"
         if _reg_path.exists():
             _reg = json.loads(_reg_path.read_text())
-            _reg_count = len(_reg) if isinstance(_reg, list) else 0
+            if isinstance(_reg, dict):
+                _reg_count = len(_reg.get("functions", []))
+            else:
+                _reg_count = len(_reg) if isinstance(_reg, list) else 0
             _thought(f"📋 Function Registry loaded — {_reg_count} functions registered", "SYSTEM")
         else:
             _thought("⚠ Function Registry not found at core/registry/function_registry.json", "HALT")
@@ -2244,8 +2247,30 @@ async def get_full_system_report():
     except Exception:
         positions = []
 
-    # CT-Scan findings (best-effort, wrapped in try so snapshot survives if empty)
-    ct_scan = await _safe_async(get_ct_scan)
+    # FTD-027: Use suggestion_engine.detect() for ct_scan field — it converts
+    # ct_scan_engine's raw 'issues' list into structured 'findings' dicts,
+    # and fires emergency findings even with < 10 trades (loss / no-trade triggers).
+    _snap_stats      = pnl_calc.session_stats
+    _snap_n_trades   = len(pnl_calc.trades)
+    _snap_gross      = abs(_snap_stats.get("total_net_pnl", 0.0)) + _snap_stats.get("total_fees_paid", 0.0)
+    _snap_fee_ratio  = _snap_stats.get("total_fees_paid", 0.0) / max(_snap_gross, 1e-9)
+    ct_scan = _safe(
+        lambda: __import__("core.intelligence.suggestion_engine",
+                           fromlist=["suggestion_engine"]).suggestion_engine.detect(
+            profit_factor=_snap_stats.get("profit_factor", 0.0),
+            fee_ratio=round(_snap_fee_ratio, 4),
+            win_rate=_snap_stats.get("win_rate", 0.0) / 100.0,
+            n_trades=_snap_n_trades,
+            strategy_usage=strategy_engine.usage(),
+            regime_stable=True,
+        ), {}
+    )
+
+    # FTD-027: AI Brain must produce concrete decisions — not empty state
+    ai_brain_state = _safe(
+        lambda: __import__("core.meta.ai_brain",
+                           fromlist=["ai_brain"]).ai_brain.get_state(), {}
+    )
 
     snapshot = SystemSnapshot(
         session_stats     = pnl_calc.session_stats,
@@ -2275,6 +2300,7 @@ async def get_full_system_report():
         trades            = trade_dicts,
         gate_status       = _safe(lambda: global_gate_controller.snapshot()
                                   if "global_gate_controller" in globals() else {}, {}),
+        ai_brain_state    = ai_brain_state,
     )
 
     zip_bytes = system_export_engine.build_full_report(snapshot)
