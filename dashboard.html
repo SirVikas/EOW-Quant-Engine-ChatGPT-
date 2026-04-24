@@ -679,6 +679,91 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     </div>
   </div>
 
+
+  <!-- ── FTD-026A Layer panels ─────────────────────────────────────────── -->
+
+  <!-- Layer 3: Suggestions (FTD-015) -->
+  <div class="card lav" id="suggestions-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">🔍 Suggestions (FTD-015)</div>
+      <button class="btn purple" onclick="loadSuggestions()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="suggestions-body" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Layer 4: Auto-Tuning (FTD-016) -->
+  <div class="card lem" id="auto-tuning-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">⚙ Auto-Tuning (FTD-016)</div>
+      <button class="btn" onclick="loadAutoTuning()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="auto-tuning-body" style="font-size:12px;color:var(--muted);font-family:var(--fm);">Loading…</div>
+  </div>
+
+  <!-- Layer 6: Alerts (FTD-018) -->
+  <div class="card peach" id="alerts-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">🔔 Alerts (FTD-018)</div>
+      <button class="btn red" onclick="loadAlerts()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="alerts-body" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Layer 7: Strategy Evolution (FTD-019) -->
+  <div class="card sage" id="evolution-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">🧬 Strategy Evolution (FTD-019)</div>
+      <button class="btn green" onclick="loadEvolution()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="evolution-body" style="font-size:12px;color:var(--muted);font-family:var(--fm);">Loading…</div>
+  </div>
+
+  <!-- Layer 8: Portfolio (FTD-020) -->
+  <div class="card sky" id="portfolio-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">💰 Portfolio (FTD-020)</div>
+      <button class="btn blue" onclick="loadPortfolio()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="portfolio-body" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Layer 9: Risk State (FTD-021) -->
+  <div class="card peach" id="risk-state-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">🛡 Risk State (FTD-021)</div>
+      <button class="btn red" onclick="loadRiskState()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="risk-state-body" style="font-size:12px;color:var(--muted);font-family:var(--fm);">Loading…</div>
+  </div>
+
+  <!-- Layer 10: Audit Log (FTD-022) -->
+  <div class="card" id="audit-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">🧾 Audit Log (FTD-022)</div>
+      <button class="btn" onclick="loadAuditLog()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="audit-body" style="font-size:11px;color:var(--muted);max-height:180px;overflow-y:auto;font-family:var(--fm);">Loading…</div>
+  </div>
+
+  <!-- Layer 11: AI Brain (FTD-023) -->
+  <div class="card lav" id="ai-brain-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">🧠 AI Brain (FTD-023)</div>
+      <button class="btn purple" onclick="loadAIBrain()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="ai-brain-mode" style="font-size:20px;font-weight:700;color:var(--c-purple);margin-bottom:6px;">—</div>
+    <div id="ai-brain-decision" style="font-size:12px;color:var(--muted);">—</div>
+  </div>
+
+  <!-- Layer 12: Capital Engine (FTD-024) -->
+  <div class="card mint" id="capital-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="sec-hdr" style="margin:0;">💸 Capital Engine (FTD-024)</div>
+      <button class="btn" onclick="loadCapital()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+    </div>
+    <div id="capital-body" style="font-size:12px;color:var(--muted);font-family:var(--fm);">Loading…</div>
+  </div>
+
 </div><!-- /main dbo -->
 </div><!-- /tab-dbo -->
 
@@ -894,10 +979,11 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
           Opens as full HTML in a new tab — use browser Print → Save as PDF
         </div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn green" onclick="downloadArchive()" title="Download ZIP with XLSX + PDF + Markdown">⬇ Download Report Archive</button>
-        <button class="btn blue"  onclick="openReport()" title="Open full HTML report in new tab (printable to PDF)">Open HTML Report</button>
-        <button class="btn purple" onclick="refreshReport()">Refresh Preview</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn purple" onclick="downloadFullSystemReport()" title="FTD-025A: Full 15-section institutional report (MD + PDF) in ZIP" style="font-weight:700;">📄 EXPORT FULL SYSTEM REPORT</button>
+        <button class="btn green" onclick="downloadArchive()" title="Download ZIP with XLSX + PDF + Markdown">⬇ Archive</button>
+        <button class="btn blue"  onclick="openReport()" title="Open full HTML report in new tab">Open HTML</button>
+        <button class="btn" onclick="refreshReport()" style="font-size:10px;">Refresh</button>
       </div>
     </div>
     <iframe id="report-frame" src="about:blank"
@@ -1100,6 +1186,10 @@ function switchTab(name) {
     initGrowthChart();
     renderDBO();
     loadHaltAudit();
+    // FTD-026A layer panels
+    loadSuggestions(); loadAutoTuning(); loadAlerts();
+    loadEvolution();   loadPortfolio(); loadRiskState();
+    loadAuditLog();    loadAIBrain();   loadCapital();
   }
   if (name === 'combat') {
     loadGuardianStatus();
@@ -1280,6 +1370,173 @@ async function downloadArchive() {
     addThought('Archive download failed — backend offline', 'HALT');
   }
 }
+
+// ── FTD-025A: Full System Report button ──────────────────────────────────────
+async function downloadFullSystemReport() {
+  addThought('⏳ Building full system report (FTD-025A — 15 sections)…', 'SYSTEM');
+  try {
+    const r = await fetch(API+'/api/report/full-system');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || ('full_system_report_'+Date.now()+'.zip');
+    a.href = url; a.download = fn; a.click();
+    URL.revokeObjectURL(url);
+    addThought('✅ Full system report downloaded: ' + fn, 'SYSTEM');
+  } catch(e) {
+    addThought('Full system report failed — ' + e.message, 'HALT');
+  }
+}
+
+// ── FTD-026A: Layer panel loaders ────────────────────────────────────────────
+
+function _fmtKV(obj) {
+  if (!obj || typeof obj !== 'object') return String(obj);
+  return Object.entries(obj)
+    .filter(([k]) => !['module','phase'].includes(k))
+    .map(([k,v]) => `<span style="color:var(--muted)">${k}:</span> <strong>${JSON.stringify(v)}</strong>`)
+    .join('<br>');
+}
+
+async function loadSuggestions() {
+  const el = document.getElementById('suggestions-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/suggestions').then(r=>r.json());
+    const findings = d.findings || [];
+    if (!findings.length) { el.innerHTML = '<span style="color:var(--c-green)">✅ No issues detected</span>'; return; }
+    el.innerHTML = findings.map(f =>
+      `<div style="margin-bottom:8px;padding:8px 12px;border-radius:8px;border-left:3px solid ${f.severity==='CRITICAL'?'#E53E3E':f.severity==='HIGH'?'#DD6B20':'#D69E2E'};background:rgba(0,0,0,.03);">
+        <strong>${f.code||''}</strong> <span style="font-size:10px;padding:1px 6px;border-radius:6px;background:#FED7D7;color:#9B2C2C;">${f.severity||''}</span>
+        <span style="margin-left:6px;font-size:10px;color:var(--muted);">confidence: ${((f.confidence||0)*100).toFixed(0)}% · impact: ${f.expected_impact||'—'}</span>
+        <div style="margin-top:4px;color:#444;">${f.message||''}</div>
+        ${f.action?`<div style="margin-top:3px;font-size:10px;color:var(--c-blue);">→ ${f.action}</div>`:''}
+      </div>`
+    ).join('');
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+async function loadAutoTuning() {
+  const el = document.getElementById('auto-tuning-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/auto-tuning').then(r=>r.json());
+    const p = d.current_params || {};
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      ${['score_min','volume_multiplier','fee_tolerance','dd_size_mult','tier','af_state'].map(k=>
+        `<div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.04);">
+          <div class="label">${k}</div>
+          <div style="font-weight:700;font-size:14px;">${p[k]!==undefined?p[k]:'—'}</div>
+        </div>`
+      ).join('')}
+    </div>`;
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+async function loadAlerts() {
+  const el = document.getElementById('alerts-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/alert-state').then(r=>r.json());
+    const alerts = d.alerts || [];
+    if (!alerts.length) { el.innerHTML = '<span style="color:var(--c-green)">✅ No active alerts</span>'; return; }
+    el.innerHTML = alerts.map(a =>
+      `<div style="margin-bottom:6px;padding:7px 10px;border-radius:8px;border-left:3px solid ${a.severity==='CRITICAL'?'#E53E3E':a.severity==='HIGH'?'#DD6B20':'#D69E2E'};background:rgba(0,0,0,.03);">
+        <strong style="color:${a.severity==='CRITICAL'?'#E53E3E':a.severity==='HIGH'?'#DD6B20':'#555'}">${a.severity}</strong>
+        <span style="margin-left:8px;">${a.message}</span>
+        ${a.symbol?`<span style="margin-left:6px;font-size:10px;padding:1px 5px;background:#EBF8FF;color:#2B6CB0;border-radius:4px;">${a.symbol}</span>`:''}
+      </div>`
+    ).join('');
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+async function loadEvolution() {
+  const el = document.getElementById('evolution-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/evolution').then(r=>r.json());
+    const strats = d.strategies || [];
+    el.innerHTML = `<div style="margin-bottom:8px;">
+      <span style="margin-right:16px;"><strong>Generation:</strong> ${d.generation||0}</span>
+      <span style="margin-right:16px;"><strong>Fitness:</strong> ${(d.fitness||0).toFixed(4)}</span>
+      <span><strong>Champions:</strong> ${d.champion_count||0}</span>
+    </div>` + (strats.length
+      ? strats.map(s=>`<div style="padding:5px 10px;border-radius:6px;background:rgba(0,0,0,.04);margin-bottom:4px;font-size:11px;">
+          <strong>${s.name}</strong> <span style="margin-left:8px;color:var(--c-green);font-size:10px;">${s.role}</span>
+          <span style="margin-left:8px;color:var(--muted);">${s.param_count} params</span>
+        </div>`).join('')
+      : '<span style="color:var(--muted)">No active strategies</span>');
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+async function loadPortfolio() {
+  const el = document.getElementById('portfolio-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/portfolio-state').then(r=>r.json());
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+      <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.04);"><div class="label">Open Positions</div><div style="font-size:20px;font-weight:700;">${d.open_positions||0}</div></div>
+      <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.04);"><div class="label">Total Exposure</div><div style="font-size:20px;font-weight:700;">${(d.total_exposure||0).toFixed(2)} USDT</div></div>
+      <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.04);"><div class="label">Exposure %</div><div style="font-size:20px;font-weight:700;">${(d.exposure_pct||0).toFixed(2)}%</div></div>
+    </div>`;
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+async function loadRiskState() {
+  const el = document.getElementById('risk-state-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/risk-state').then(r=>r.json());
+    const dd = d.drawdown || {};
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      ${[['Equity',`${(d.equity||0).toFixed(2)} USDT`],['Halted',String(d.halted||false)],['Daily PnL',`${(d.daily_pnl||0).toFixed(2)} USDT`],
+         ['DD State',dd.state||'—'],['DD %',`${(dd.current_pct||0).toFixed(2)}%`],['Risk Mult',`${(dd.risk_multiplier||1).toFixed(3)}×`]]
+      .map(([k,v])=>`<div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.04);"><div class="label">${k}</div><div style="font-weight:700;font-size:13px;">${v}</div></div>`)
+      .join('')}
+    </div>`;
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+async function loadAuditLog() {
+  const el = document.getElementById('audit-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/audit-log').then(r=>r.json());
+    const events = d.events || [];
+    if (!events.length) { el.innerHTML = '<span style="color:var(--c-green)">No errors recorded</span>'; return; }
+    el.innerHTML = events.slice(-30).map(e=>
+      `<div style="border-bottom:1px solid var(--border);padding:3px 0;font-size:10px;">
+        <span style="color:var(--muted);">${e.ts||''}</span>
+        <span style="margin:0 8px;font-weight:700;color:#E53E3E;">${e.code||''}</span>
+        <span style="margin-right:6px;color:#2B6CB0;">${e.symbol||''}</span>
+        <span>${(e.extra||'').slice(0,80)}</span>
+      </div>`
+    ).join('');
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+async function loadAIBrain() {
+  const modeEl = document.getElementById('ai-brain-mode');
+  const decEl  = document.getElementById('ai-brain-decision');
+  if(!modeEl || !decEl) return;
+  try {
+    const d = await fetch(API+'/api/ai-brain').then(r=>r.json());
+    const colours = {AGGRESSIVE:'#276749', NORMAL:'#2B6CB0', CONSERVATIVE:'#D69E2E', DEFENSIVE:'#E53E3E'};
+    modeEl.textContent = d.mode || '—';
+    modeEl.style.color = colours[d.mode] || '#333';
+    decEl.textContent  = d.decision || '—';
+  } catch(e) { modeEl.textContent='ERR'; decEl.textContent=e.message; }
+}
+
+async function loadCapital() {
+  const el = document.getElementById('capital-body'); if(!el) return;
+  try {
+    const d = await fetch(API+'/api/capital-allocator').then(r=>r.json());
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      ${[['Equity',`${(d.equity||0).toFixed(2)} USDT`],['Initial',`${(d.initial_capital||0).toFixed(2)} USDT`],['Growth',`${(d.growth_pct||0).toFixed(2)}%`]]
+      .map(([k,v])=>`<div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.04);"><div class="label">${k}</div><div style="font-weight:700;font-size:15px;">${v}</div></div>`)
+      .join('')}
+    </div>`;
+  } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+// Auto-load layer panels when dbo tab is opened
+const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
 
 function pushEquityPoint(eq, bh) {
   if(!eqChart) return;
