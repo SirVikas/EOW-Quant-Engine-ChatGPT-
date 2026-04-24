@@ -1,0 +1,320 @@
+# 🧾 FTD-025A — UNIFIED INTELLIGENCE EXPORT ENGINE (ONE-CLICK REPORT SYSTEM)
+
+### Ref: FTD-025A-EOW-UNIFIED-REPORT-ENGINE (BLACKBOX)
+### Ref-FTD-025A-EOW-UNIFIED-REPORT-ENGINE (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Create a **one-click system** that consolidates **ALL reports (014B → 024)** into:
+
+```text
+ONE structured, readable, developer-ready report
+```
+
+---
+
+# 🧠 CORE PURPOSE
+
+```text
+Convert:
+Complex system logs + intelligence
+
+Into:
+Clear human-understandable decision report
+```
+
+---
+
+# 🏗️ POSITION IN SYSTEM
+
+```text
+ALL MODULES (014B → 024)
+        ↓
+FTD-025A (Aggregation Layer)
+        ↓
+Human / Developer Output
+```
+
+---
+
+# 🔘 DASHBOARD INTEGRATION
+
+Button:
+
+```text
+[ 📄 EXPORT FULL SYSTEM REPORT ]
+```
+
+---
+
+# 📁 DIRECTORY STRUCTURE
+
+```text
+/core/export/
+    report_aggregator.py
+    report_builder.py
+    report_formatter.py
+    export_engine.py
+
+/reports/exports/
+    system_report_YYYYMMDD_HHMM.md
+    system_report_YYYYMMDD_HHMM.pdf
+```
+
+---
+
+# 🧠 PART 1 — REPORT AGGREGATOR
+
+## 📁 report_aggregator.py
+
+Collect data from:
+
+```text
+014B → trades, signals, equity
+014C → decision, diagnostics
+015 → suggestions
+016 → tuning
+017 → dashboard state
+018 → alerts
+019 → evolution
+020 → portfolio
+021 → risk
+022 → audit
+023 → AI brain
+024 → capital
+```
+
+---
+
+### Function:
+
+```python
+def collect_all_data():
+    return {
+        "performance": ...,
+        "signals": ...,
+        "risk": ...,
+        "brain": ...,
+        "capital": ...
+    }
+```
+
+---
+
+# 🧠 PART 2 — REPORT BUILDER (STRUCTURE)
+
+## 📁 report_builder.py
+
+---
+
+## FINAL REPORT STRUCTURE (MANDATORY)
+
+---
+
+### 🧾 1. EXECUTIVE SUMMARY
+
+```text
+System Status:
+Main Issue:
+Confidence:
+```
+
+---
+
+### 📊 2. PERFORMANCE
+
+---
+
+### 🔍 3. SIGNAL PIPELINE
+
+---
+
+### 🧠 4. DECISION TRACE
+
+---
+
+### ⚙️ 5. SYSTEM HEALTH
+
+---
+
+### 🛡 6. RISK STATE
+
+---
+
+### 📈 7. PORTFOLIO
+
+---
+
+### 🧠 8. AI BRAIN
+
+---
+
+### 🔧 9. FIX SUGGESTIONS
+
+---
+
+### 🔄 10. AUTO-TUNING
+
+---
+
+### 🧬 11. STRATEGY EVOLUTION
+
+---
+
+### 💰 12. CAPITAL ENGINE
+
+---
+
+### 🧾 13. AUDIT SUMMARY
+
+---
+
+### 🚨 14. ALERT SUMMARY
+
+---
+
+### 🧠 15. FINAL DIAGNOSIS (AUTO)
+
+```text
+PRIMARY ISSUE:
+SECONDARY ISSUE:
+ACTION:
+```
+
+---
+
+### 📌 16. ACTION CHECKLIST
+
+---
+
+# 🧠 PART 3 — REPORT FORMATTER
+
+## 📁 report_formatter.py
+
+---
+
+Rules:
+
+```text
+- Clear headings
+- Bullet points
+- No raw logs
+- Human readable
+- Developer actionable
+```
+
+---
+
+# ⚙️ PART 4 — EXPORT ENGINE
+
+## 📁 export_engine.py
+
+---
+
+```python
+def export_report():
+    data = collect_all_data()
+    report = build_report(data)
+    save_md(report)
+    convert_to_pdf(report)
+```
+
+---
+
+# 📄 OUTPUT FORMAT
+
+---
+
+## PRIMARY:
+
+```text
+Markdown (.md)
+```
+
+---
+
+## OPTIONAL:
+
+```text
+PDF
+TXT
+```
+
+---
+
+# 🧪 PART 5 — VERIFIER
+
+## 📁 /tests/test_export.py
+
+```python
+def test_report_generated():
+    assert file_exists
+
+def test_sections_present():
+    assert "EXECUTIVE SUMMARY" in report
+
+def test_no_raw_logs():
+    assert "DEBUG" not in report
+```
+
+---
+
+# 🧠 DBO COMPLIANCE
+
+| Filter           | Coverage               |
+| ---------------- | ---------------------- |
+| 🌍 Institutional | structured reporting ✔ |
+| 📚 CTA           | actionable insights ✔  |
+| 📈 Growth        | performance clarity ✔  |
+| 🛡 Risk          | risk visibility ✔      |
+| ⚙ Deployability  | easy sharing ✔         |
+
+---
+
+# 🚨 RULES (VERY IMPORTANT)
+
+```text
+NO duplicate data storage
+ONLY read from existing reports
+NO heavy computation
+NO UI dependency
+```
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text
+Confusing report
+Missing sections
+Raw logs visible
+Duplicate data
+Slow generation
+```
+
+---
+
+# 🏁 FINAL SYSTEM STATE
+
+```text
+System will:
+
+Explain itself in one file
+Provide clear diagnosis
+Give exact actions
+Be developer-ready
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+A system that cannot explain itself
+
+Cannot be trusted
+```
+
+---
