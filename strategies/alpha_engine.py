@@ -50,7 +50,7 @@ class TrendContinuationBreakout:
         d = dna or {}
         self.adx_min    = float(d.get("adx_min",    25.0))
         self.lookback   = int(d.get("lookback",     20))
-        self.vol_spike  = float(d.get("vol_spike",  1.5))  # volume must be > 1.5× avg
+        self.vol_spike  = float(d.get("vol_spike",  1.2))  # 1-min candles: 1.5 was too rare; 1.2 still confirms participation
         self.atr_period = int(d.get("atr_period",   cfg.ATR_PERIOD))
         self.atr_sl     = float(d.get("atr_sl",     cfg.ATR_MULT_SL))
         self.atr_tp     = float(d.get("atr_tp",     cfg.ATR_MULT_TP))
@@ -147,7 +147,7 @@ class PullbackEntryInTrend:
         self.rsi_period      = int(d.get("rsi_period",      cfg.RSI_PERIOD))
         self.rsi_reset_long  = float(d.get("rsi_reset_long",  45.0))  # RSI must be below here for LONG reset
         self.rsi_reset_short = float(d.get("rsi_reset_short", 55.0))  # RSI must be above here for SHORT reset
-        self.ema_zone_pct    = float(d.get("ema_zone_pct",    0.5))   # price within 0.5% of EMA
+        self.ema_zone_pct    = float(d.get("ema_zone_pct",    1.0))   # price within 1.0% of EMA (was 0.5% — too tight for 1-min candles)
         self.atr_period      = int(d.get("atr_period",      cfg.ATR_PERIOD))
         self.atr_sl          = float(d.get("atr_sl",         cfg.ATR_MULT_SL))
         self.atr_tp          = float(d.get("atr_tp",         cfg.ATR_MULT_TP))

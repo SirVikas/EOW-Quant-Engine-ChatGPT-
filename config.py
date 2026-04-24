@@ -166,10 +166,11 @@ class EngineConfig(BaseSettings):
     ACTIVATOR_T1_VOL_MULT: float = 0.60  # Volume threshold multiplier at Tier 1
     ACTIVATOR_T2_VOL_MULT: float = 0.40  # Volume threshold multiplier at Tier 2
     ACTIVATOR_T3_VOL_MULT: float = 0.30  # Volume threshold multiplier at Tier 3
-    # qFTD-008-EDGE: raised alongside MIN_TRADE_SCORE. T1 relaxes from 0.70→0.65,
-    # T2/T3 relaxes to 0.60 — still enforces meaningful quality during dry spells.
-    ACTIVATOR_T1_SCORE: float = 0.65     # qFTD-008-EDGE: 0.55→0.65 (aligned with new MIN_TRADE_SCORE=0.70)
-    ACTIVATOR_T2_SCORE: float = 0.60     # qFTD-008-EDGE: 0.50→0.60 (floor during extended no-trade)
+    # qFTD-011-FIX: qFTD-011 lowered MIN_TRADE_SCORE 0.70→0.58 but these were never
+    # updated. T1/T2 were 0.65/0.60 — both ABOVE the new base of 0.58, so the activator
+    # was raising the bar after dry spells (backward). Fixed to relax below the base.
+    ACTIVATOR_T1_SCORE: float = 0.52     # qFTD-011-FIX: relax from base 0.58 → 0.52 after 30min dry spell
+    ACTIVATOR_T2_SCORE: float = 0.47     # qFTD-011-FIX: further relax → 0.47 after 60min (floor=0.45)
 
     # Exploration Engine — learning trades
     # qFTD-008-EDGE: 0.10→0.05 — reduce exploration noise. Now that bootstrap deadlock

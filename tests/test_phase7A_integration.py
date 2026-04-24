@@ -80,7 +80,7 @@ def _make_orchestrator(gate_status: dict, sme: SafeModeEngine = None) -> Executi
     _sme = sme or SafeModeEngine()
 
     class _FakeGate:
-        def evaluate(self): return gate_status
+        def evaluate(self, **kwargs): return gate_status
         def can_trade(self): return gate_status.get("can_trade", False)
 
     return ExecutionOrchestrator(

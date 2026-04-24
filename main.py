@@ -96,6 +96,7 @@ from core.infra_health_manager import InfraHealthManager
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
+from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
 from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 
 
@@ -2158,6 +2159,114 @@ async def get_report_archive():
     )
 
     filename = f"eow_report_{int(time.time())}.zip"
+    return StreamingResponse(
+        iter([zip_bytes]),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+# ── FTD-025A: [ EXPORT FULL SYSTEM REPORT ] ──────────────────────────────────
+
+@app.get("/api/report/full-system")
+async def get_full_system_report():
+    """
+    FTD-025A Export Engine — [ EXPORT FULL SYSTEM REPORT ] button handler.
+
+    Returns a ZIP containing a full 15-section institutional report in both
+    Markdown and PDF formats.  Single authority: core.export_engine.
+    """
+    from fastapi.responses import StreamingResponse
+
+    def _safe(fn, default=None):
+        try:
+            return fn()
+        except Exception as e:
+            return default if default is not None else {"error": str(e)}
+
+    async def _safe_async(fn, default=None):
+        try:
+            return await fn()
+        except Exception as e:
+            return default if default is not None else {"error": str(e)}
+
+    heal       = _safe(healer.snapshot, {})
+    lake_s     = _safe(data_lake.db_stats, {})
+    redis_ok   = any(
+        e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
+        for e in heal.get("recent_events", [])
+    )
+    sqlite_ok  = lake_s.get("trades", -1) >= 0
+
+    trade_dicts = [
+        {k: getattr(t, k) for k in t.__dataclass_fields__}
+        for t in pnl_calc.trades
+    ]
+    analytics = _sanitize(compute_full_analytics(
+        pnl_trades=[{"net_pnl": t.net_pnl, "r_multiple": t.r_multiple}
+                    for t in pnl_calc.trades],
+        initial_capital=pnl_calc._initial_capital,
+        session_stats=pnl_calc.session_stats,
+        healer_snapshot=heal,
+        lake_stats=lake_s,
+        genome_state=_safe(genome.export_state, {}),
+        redis_ok=redis_ok,
+        persistence_ok=(redis_ok or sqlite_ok),
+    ))
+    mode_info = await get_mode_info()
+
+    # Positions (best-effort)
+    positions = []
+    try:
+        for sym, pos in risk_ctrl.positions.items():
+            positions.append({
+                "symbol": sym,
+                "side":   getattr(pos, "side", ""),
+                "qty":    getattr(pos, "qty", 0.0),
+                "entry_px": getattr(pos, "entry_px", 0.0),
+                "stop":     getattr(pos, "stop", 0.0),
+                "tp":       getattr(pos, "tp", 0.0),
+                "unrealised": getattr(pos, "unrealised_pnl", 0.0),
+            })
+    except Exception:
+        positions = []
+
+    # CT-Scan findings (best-effort, wrapped in try so snapshot survives if empty)
+    ct_scan = await _safe_async(get_ct_scan)
+
+    snapshot = SystemSnapshot(
+        session_stats     = pnl_calc.session_stats,
+        analytics         = analytics,
+        mode_info         = mode_info,
+        thoughts          = _thought_log,
+        last_skip         = _safe(lambda: getattr(trade_flow_monitor,
+                                                  "last_skip", lambda: {})(), {}),
+        trade_flow        = _safe(trade_flow_monitor.summary, {}),
+        risk_snapshot     = _safe(risk_ctrl.snapshot, {}),
+        positions         = positions,
+        drawdown          = _safe(drawdown_controller.summary, {}),
+        genome_state      = _safe(genome.export_state, {}),
+        learning          = _safe(learning_engine.summary, {}),
+        edge              = _safe(edge_engine.summary, {}),
+        strategy_usage    = _safe(strategy_engine.usage, {}),
+        regime            = _safe(lambda: regime_memory.summary()
+                                  if hasattr(regime_memory, "summary") else {}, {}),
+        ct_scan           = ct_scan,
+        dynamic_thresholds= _safe(dynamic_threshold_provider.summary, {}),
+        streak            = _safe(streak_engine.summary, {}),
+        capital_allocator = _safe(capital_allocator.summary, {}),
+        error_registry    = _safe(lambda: error_registry.recent(50), []),
+        healer            = heal,
+        halt_audit        = _safe(lambda: risk_ctrl.halt_audit()
+                                  if hasattr(risk_ctrl, "halt_audit") else {}, {}),
+        trades            = trade_dicts,
+        gate_status       = _safe(lambda: global_gate_controller.snapshot()
+                                  if "global_gate_controller" in globals() else {}, {}),
+    )
+
+    zip_bytes = system_export_engine.build_full_report(snapshot)
+    filename  = f"full_system_report_{int(time.time())}.zip"
+    _thought(f"📦 Full system report exported ({len(zip_bytes)} bytes)", "SYSTEM")
     return StreamingResponse(
         iter([zip_bytes]),
         media_type="application/zip",

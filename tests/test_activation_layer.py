@@ -103,15 +103,16 @@ class TestExplorationEngine(unittest.TestCase):
             results.append(r)
         return results
 
-    def test_exploration_rate_approximately_10_percent(self):
-        """Every 10th slot should be exploration."""
-        results = self._fire_n_signals(100, score=0.50)
+    def test_exploration_rate_approximately_5_percent(self):
+        """Every 20th slot should be exploration (EXPLORE_RATE=0.05)."""
+        # score must be >= EXPLORE_SCORE_MIN (0.60) so score floor doesn't block slots
+        results = self._fire_n_signals(100, score=cfg.EXPLORE_SCORE_MIN + 0.05)
         explore_count = sum(1 for r in results if r.is_exploration)
-        self.assertEqual(explore_count, 10)
+        self.assertEqual(explore_count, 5)
 
     def test_exploration_applies_reduced_size(self):
         """Exploration trades must use EXPLORE_SIZE_MULT."""
-        results = self._fire_n_signals(20, score=0.50)
+        results = self._fire_n_signals(20, score=cfg.EXPLORE_SCORE_MIN + 0.05)
         explore_results = [r for r in results if r.is_exploration]
         for r in explore_results:
             self.assertAlmostEqual(r.size_mult, cfg.EXPLORE_SIZE_MULT)
@@ -247,28 +248,37 @@ class TestSmartFeeGuard(unittest.TestCase):
         self.sg = SmartFeeGuard()
 
     def test_normal_rr_below_20pct_passes(self):
-        result = self.sg.check(rr=2.0, gross_tp=100.0, fee_cost=18.0)
+        # qFTD-008-EDGE: SFG_NORMAL_FEE_MAX = 0.10; use fee_cost just below
+        result = self.sg.check(rr=2.0, gross_tp=100.0,
+                                fee_cost=round(cfg.SFG_NORMAL_FEE_MAX * 100 * 0.9, 1))
         self.assertTrue(result.ok)
         self.assertFalse(result.high_rr)
 
     def test_normal_rr_above_20pct_blocked(self):
-        result = self.sg.check(rr=2.0, gross_tp=100.0, fee_cost=25.0)
+        # Fee clearly above SFG_NORMAL_FEE_MAX
+        result = self.sg.check(rr=2.0, gross_tp=100.0,
+                                fee_cost=round(cfg.SFG_NORMAL_FEE_MAX * 100 * 2.0, 1))
         self.assertFalse(result.ok)
 
     def test_high_rr_allows_up_to_35pct(self):
-        # RR = 4.0 → high-RR tolerance (35%)
-        result = self.sg.check(rr=4.0, gross_tp=100.0, fee_cost=34.0)
+        # qFTD-008-EDGE: SFG_HIGH_RR_FEE_MAX = 0.15; use fee_cost just below
+        result = self.sg.check(rr=4.0, gross_tp=100.0,
+                                fee_cost=round(cfg.SFG_HIGH_RR_FEE_MAX * 100 * 0.9, 1))
         self.assertTrue(result.ok)
         self.assertTrue(result.high_rr)
 
     def test_high_rr_above_35pct_blocked(self):
-        result = self.sg.check(rr=4.0, gross_tp=100.0, fee_cost=36.0)
+        # Fee clearly above SFG_HIGH_RR_FEE_MAX
+        result = self.sg.check(rr=4.0, gross_tp=100.0,
+                                fee_cost=round(cfg.SFG_HIGH_RR_FEE_MAX * 100 * 2.5, 1))
         self.assertFalse(result.ok)
         self.assertTrue(result.high_rr)
 
     def test_rr_exactly_at_threshold_uses_high_rr(self):
+        # Fee just below SFG_HIGH_RR_FEE_MAX
         result = self.sg.check(rr=cfg.SFG_HIGH_RR_THRESHOLD,
-                                gross_tp=100.0, fee_cost=30.0)
+                                gross_tp=100.0,
+                                fee_cost=round(cfg.SFG_HIGH_RR_FEE_MAX * 100 * 0.9, 1))
         self.assertTrue(result.ok)
         self.assertTrue(result.high_rr)
 
@@ -399,21 +409,26 @@ class TestPhase51Pipeline(unittest.TestCase):
         self.assertGreater(f_result.effective_score_min, cfg.MIN_TRADE_SCORE)
 
     def test_exploration_rescues_ev_failed_signal(self):
-        """When EV fails, exploration engine can rescue 10% of slots."""
+        """When EV fails, exploration engine can rescue every Nth slot
+        (qFTD-008-EDGE: EXPLORE_RATE=0.05 → period=20)."""
         equity = 1000.0
-        # Advance counter to just before slot 10
-        for _ in range(9):
-            self.exp.should_explore("BTCUSDT", score=0.50,
+        # score must be >= EXPLORE_SCORE_MIN (0.60)
+        score = cfg.EXPLORE_SCORE_MIN + 0.05
+        period = max(1, round(1.0 / cfg.EXPLORE_RATE))
+        # Advance counter to just before the next slot
+        for _ in range(period - 1):
+            self.exp.should_explore("BTCUSDT", score=score,
                                     equity=equity, ev_ok=False)
-        # 10th signal — EV failed but exploration should step in
-        r = self.exp.should_explore("BTCUSDT", score=0.50,
+        # Nth signal — EV failed but exploration should step in
+        r = self.exp.should_explore("BTCUSDT", score=score,
                                     equity=equity, ev_ok=False)
         self.assertTrue(r.is_exploration)
         self.assertEqual(r.size_mult, cfg.EXPLORE_SIZE_MULT)
 
     def test_high_rr_trade_passes_fee_guard_despite_high_ratio(self):
-        """High-RR trade (RR=4) with 30% fee ratio should pass."""
-        result = self.sg.check(rr=4.0, gross_tp=100.0, fee_cost=30.0)
+        """High-RR trade (RR=4) with fee just under SFG_HIGH_RR_FEE_MAX should pass."""
+        fee = round(cfg.SFG_HIGH_RR_FEE_MAX * 100 * 0.9, 1)
+        result = self.sg.check(rr=4.0, gross_tp=100.0, fee_cost=fee)
         self.assertTrue(result.ok)
 
     def test_normal_rr_trade_blocked_at_25pct_fee(self):
