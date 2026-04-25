@@ -1,0 +1,375 @@
+# 🧾 FTD-031C — MERGE RESOLUTION + INTEGRATION STABILIZATION (UPDATED BLACKBOX)
+
+### Ref: FTD-031C-EOW-MERGE-INTEGRATION (MANDATORY BEFORE FTD-032)
+### Ref-FTD-031C-EOW-MERGE-INTEGRATION (MANDATORY BEFORE FTD-032)
+
+---
+
+# 🎯 OBJECTIVE
+
+Resolve ALL:
+
+```text
+✔ PR conflicts (FTD-030B, FTD-031)
+✔ Duplicate logic
+✔ Entry-point inconsistencies
+✔ Integration mismatch
+✔ Runtime instability risks
+✔ Diagnostic tools isolation
+```
+
+👉 Deliver a **clean, unified, production-ready system**
+
+---
+
+# 🚨 STRICT RULES (NON-NEGOTIABLE)
+
+```text
+❌ NO blind "Accept Current / Incoming / Both"
+❌ NO duplicate modules
+❌ NO legacy code retention
+❌ NO multiple entry points
+❌ NO debug tools inside core runtime
+
+✔ ONE module = ONE responsibility
+✔ ONE system = ONE entry point
+✔ ALL config via cfg (SSOT)
+```
+
+---
+
+# 🧠 MASTER ARCHITECTURE DECISION (LOCKED)
+
+```text
+Learning → orchestrator आधारित (FTD-030B)
+Correction → cfg आधारित (NO hardcoding)
+Performance → perf_monitor + perf_guard governed (FTD-031)
+Stability → hardened via FTD-031B
+Diagnostics → isolated (NOT core)
+```
+
+---
+
+# 🥇 PART 1 — FTD-030B MERGE CONFLICT RESOLUTION
+
+## 📁 core/learning_memory/**init**.py
+
+### FINAL CODE (MANDATORY)
+
+```python
+"""
+FTD-030B — Learning Memory Layer
+"""
+
+from core.learning_memory.learning_memory_orchestrator import (
+    learning_memory_orchestrator,
+    LearningMemoryOrchestrator,
+)
+
+__all__ = ["learning_memory_orchestrator", "LearningMemoryOrchestrator"]
+```
+
+---
+
+## RULE:
+
+```text
+❌ learning_memory_engine expose नहीं होगा
+❌ dual entry points strictly prohibited
+✔ ONLY orchestrator is entry point
+```
+
+---
+
+## ALL learning_memory modules:
+
+```text
+✔ keep orchestrator wiring
+✔ remove engine duplicates
+✔ ensure memory_applier integrated with correction pipeline
+```
+
+---
+
+# 🥈 PART 2 — FTD-031 MERGE VALIDATION
+
+## MUST VERIFY BEFORE MERGE
+
+---
+
+### ✅ Hook Safety
+
+```text
+on_cycle_start/end:
+✔ non-blocking
+✔ lightweight only
+❌ no heavy computation
+```
+
+---
+
+### ✅ Async Queue Shutdown
+
+```text
+✔ graceful drain
+✔ timeout fallback
+✔ no task loss
+```
+
+---
+
+### ✅ Cache Isolation
+
+```text
+✔ symbol-aware cache OR
+✔ context-keyed cache
+❌ shared ambiguous cache forbidden
+```
+
+---
+
+### ✅ Rate Limiter Behavior
+
+```text
+✔ blocked events logged
+✔ retry mechanism present
+✔ no silent drops
+```
+
+---
+
+### ✅ Perf Guard Visibility
+
+```text
+GET /api/perf-status MUST include:
+✔ mode (NORMAL / DEGRADED / SAFE_MODE)
+✔ reason
+✔ last transition
+```
+
+---
+
+### ✅ Memory Sync
+
+```text
+✔ soft delete only
+✔ delayed purge
+✔ learning_engine ignores deleted records
+```
+
+---
+
+# 🥉 PART 3 — CONFIG CONSOLIDATION
+
+## 📁 correction_proposal.py
+
+---
+
+### ENSURE:
+
+```text
+✔ ALL values from cfg.*
+✔ NO magic numbers
+✔ HARD_LIMITS fully dynamic
+```
+
+---
+
+### ADD (MANDATORY):
+
+```text
+config_snapshot logging in:
+✔ correction cycles
+✔ auto-intelligence cycles
+✔ learning cycles
+```
+
+---
+
+# 🏁 PART 4 — DUPLICATE & LEGACY REMOVAL
+
+---
+
+### REMOVE:
+
+```text
+❌ learning_memory_engine references
+❌ duplicate logic across modules
+❌ unused legacy imports
+```
+
+---
+
+### ENSURE:
+
+```text
+✔ clean dependency graph
+✔ no circular imports
+✔ no shadow logic
+```
+
+---
+
+# ⚙️ PART 5 — SYSTEM INTEGRATION FLOW
+
+---
+
+## FINAL FLOW MUST BE:
+
+```text
+FTD-028 → Validation
+FTD-029 → Correction
+FTD-030 → Automation
+FTD-030B → Learning
+FTD-031 → Performance
+FTD-031B → Stability
+```
+
+---
+
+## VERIFY:
+
+```text
+✔ all modules load at boot
+✔ no missing wiring
+✔ no broken dependency
+```
+
+---
+
+# 🔌 PART 6 — API VALIDATION
+
+---
+
+## MUST WORK:
+
+```text
+/api/auto-intelligence/*
+/api/learning-memory/*
+/api/perf-status
+/api/perf-guard/reset
+```
+
+---
+
+# 🧪 PART 7 — TEST VALIDATION
+
+---
+
+## MUST PASS:
+
+```text
+✔ all existing tests
+✔ no regression
+✔ system boot clean
+✔ no runtime exception
+```
+
+---
+
+# 🆕 PART 8 — DIAGNOSTIC TOOL HANDLING (CRITICAL)
+
+## 📁 pipeline_break_forensics.py
+
+---
+
+### CLASSIFICATION:
+
+```text
+TYPE: Diagnostic Tool (NOT core system)
+```
+
+---
+
+### RULES:
+
+```text
+✔ MUST NOT run automatically
+✔ MUST NOT be part of main execution loop
+✔ MUST NOT affect latency or performance
+✔ MUST NOT modify system state
+```
+
+---
+
+### IF MERGED:
+
+```text
+MOVE TO:
+/tools/diagnostics/  OR  /core/diagnostics/
+
+ADD:
+
+✔ manual trigger only
+✔ optional debug endpoint (disabled by default)
+```
+
+---
+
+### STRICTLY PROHIBITED:
+
+```text
+❌ integration into trading pipeline
+❌ auto-execution inside loops
+❌ dependency from core modules
+```
+
+---
+
+### PURPOSE:
+
+```text
+✔ debugging only
+✔ pipeline break analysis
+✔ developer support tool
+```
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text
+❌ multiple entry points
+❌ stale cache usage
+❌ async queue overflow without handling
+❌ memory inconsistency
+❌ config mismatch
+❌ diagnostic tool interfering with core system
+```
+
+---
+
+# 🏁 FINAL DELIVERABLE (MANDATORY)
+
+Developer MUST provide:
+
+```text
+1. Clean merged repository (zero conflicts)
+2. Conflict resolution report:
+   - what kept
+   - what removed
+   - why
+
+3. Boot log proof:
+   - all modules loaded
+   - no error
+
+4. API validation proof
+
+5. Test report (all passing)
+
+6. Confirmation:
+   diagnostic tools isolated
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+Merge ≠ combining code
+
+Merge = defining final system architecture
+```
+
+---
