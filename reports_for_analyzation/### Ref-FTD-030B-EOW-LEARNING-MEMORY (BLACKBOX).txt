@@ -1,0 +1,391 @@
+# 🧾 FTD-030B — LEARNING MEMORY COMPLETION (FULL IMPLEMENTATION)
+
+### Ref: FTD-030B-EOW-LEARNING-MEMORY (BLACKBOX)
+### Ref-FTD-030B-EOW-LEARNING-MEMORY (BLACKBOX)
+---
+
+# 🎯 OBJECTIVE
+
+Upgrade system from **self-correcting → self-learning**
+
+```text id="obj"
+Remember → Generalize → Apply → Forget → Improve
+```
+
+❗ Zero overfitting
+❗ Zero safety breach
+❗ Full explainability
+❗ Fully integrated with FTD-027 + 028 + 029 + 030
+
+---
+
+# 🧠 CORE PRINCIPLES (LOCKED)
+
+```text id="principles"
+- Memory = advisory (max 50% influence)
+- Hard limits NEVER touched
+- Multi-factor patterns only
+- Triple validation for pattern formation
+- Decay + penalty + removal = anti-drift
+- Learning only after stable system state
+```
+
+---
+
+# 🏗️ ARCHITECTURE
+
+```text id="arch"
+FTD-028 → Deep Validation
+FTD-029 → Self-Correction
+FTD-030 → Auto Loop
+FTD-030B → Learning Memory Layer
+```
+
+---
+
+# 📁 DIRECTORY STRUCTURE
+
+```text id="dir"
+/core/learning_memory/
+    memory_store.py
+    pattern_engine.py
+    confidence_updater.py
+    memory_applier.py
+    forgetting_engine.py
+    negative_memory.py
+    memory_guard.py
+    pattern_indexer.py
+    explainability_engine.py
+
+/reports/learning_memory/
+    memory_store.jsonl
+    negative_memory.jsonl
+    pattern_index.json
+    last_memory_report.md
+```
+
+---
+
+# 🥇 PART 1 — MEMORY STORE
+
+## 📁 memory_store.py
+
+### Record Schema (MANDATORY)
+
+```python
+{
+  "cycle_id": str,
+  "timestamp": float,
+  "context": {
+    "regime": str,
+    "volatility": str,
+    "timeframe": str,
+    "instrument": str
+  },
+  "change": {
+    "parameter": str,
+    "direction": "UP|DOWN"
+  },
+  "outcome": {
+    "score_delta": float,
+    "rollback": bool
+  },
+  "validation": {
+    "meta_score": float,
+    "contradiction": bool
+  },
+  "decision": {
+    "ai_mode": str,
+    "rationale": str
+  }
+}
+```
+
+### Rules:
+
+```text id="store_rules"
+- Append-only JSONL
+- Partial record = REJECT
+- Stored after resolve_cycle()
+```
+
+---
+
+# 🥈 PART 2 — PATTERN ENGINE
+
+## 📁 pattern_engine.py
+
+### Pattern Key:
+
+```text id="pattern_key"
+(regime, volatility, instrument, parameter, direction)
+```
+
+---
+
+### Pattern Structure:
+
+```python
+{
+  "pattern_id": str,
+  "samples": int,
+  "success": int,
+  "confidence": float,
+  "contexts": set,
+  "last_seen": int
+}
+```
+
+---
+
+### Formation Gate:
+
+```text id="pattern_gate"
+samples ≥ 20
+confidence ≥ 70
+contexts ≥ 3 distinct buckets
+```
+
+---
+
+# 🥉 PART 3 — CONFIDENCE UPDATER
+
+## 📁 confidence_updater.py
+
+### Formula:
+
+```text id="conf"
+confidence = success_rate × recency × regime_bonus
+```
+
+---
+
+### Components:
+
+```text id="conf_parts"
+success_rate = success / samples
+recency = 0.95^age
+regime_bonus = 1.1 if multi-regime else 1.0
+```
+
+---
+
+# 🧠 PART 4 — MEMORY APPLIER
+
+## 📁 memory_applier.py
+
+### Weighted Merge:
+
+```text id="merge"
+final = (0.5 × memory) + (0.5 × live)
+```
+
+---
+
+### Dynamic Rule:
+
+```text id="dynamic"
+if confidence < 60:
+    memory_weight = 0.2
+```
+
+---
+
+### Gate:
+
+```text id="apply_gate"
+FTD-027 PASS
+FTD-028 score ≥ 70
+pattern confidence ≥ 60
+policy_guard PASS
+```
+
+---
+
+# 🛡 PART 5 — MEMORY GUARD
+
+## 📁 memory_guard.py
+
+### Enforce:
+
+```text id="guard"
+- Hard limits untouched
+- Max 30% param shift
+- No duplicate changes
+- PolicyGuard final veto
+```
+
+---
+
+# 🔁 PART 6 — FORGETTING ENGINE
+
+## 📁 forgetting_engine.py
+
+### Rules:
+
+```text id="forget"
+- time decay: 0.95^age
+- rollback penalty: ×0.7
+- remove if confidence < 25
+```
+
+---
+
+# 🚫 PART 7 — NEGATIVE MEMORY
+
+## 📁 negative_memory.py
+
+### Rules:
+
+```text id="neg"
+- rollback → blacklist
+- 3 rollbacks → permanent ban
+- decay: 0.90^age
+```
+
+---
+
+# ⚙️ PART 8 — PATTERN INDEXER
+
+## 📁 pattern_indexer.py
+
+### Function:
+
+```text id="index"
+- build index from JSONL on startup
+- maintain in-memory lookup
+```
+
+---
+
+# 🧾 PART 9 — EXPLAINABILITY ENGINE
+
+## 📁 explainability_engine.py
+
+### Output:
+
+```python
+{
+  "pattern_id": str,
+  "confidence": float,
+  "success_rate": float,
+  "applied_weight": float,
+  "context_match": float
+}
+```
+
+---
+
+# 🔌 PART 10 — INTEGRATION
+
+---
+
+## 🔗 FTD-029 (Self-Correction)
+
+```text id="int1"
+memory_applier → inject into change_planner
+```
+
+---
+
+## 🔗 FTD-030 (Auto Loop)
+
+```text id="int2"
+after resolve_cycle() → memory_store.update()
+```
+
+---
+
+## 🔗 FTD-028 (Validation)
+
+```text id="int3"
+use meta_score + contradiction flags
+```
+
+---
+
+## 🔗 FTD-025A (Export)
+
+Add section:
+
+```text id="export"
+LEARNING MEMORY:
+- Top patterns
+- Failed patterns
+- Last applied pattern
+- Drift %
+```
+
+---
+
+# 🖥 PART 11 — DASHBOARD
+
+---
+
+### Panel:
+
+```text id="ui"
+- Pattern leaderboard
+- Heatmap (regime × parameter)
+- Last memory used
+- Drift indicator
+- Negative memory count
+```
+
+---
+
+# 🧪 PART 12 — TESTS
+
+## 📁 /tests/test_learning_memory.py
+
+```python
+def test_pattern_creation():
+    assert pattern_created_after_threshold
+
+def test_memory_weight():
+    assert weight ≤ 0.5
+
+def test_forgetting():
+    assert removed_if_conf_low
+
+def test_negative_memory():
+    assert blacklisted_after_failures
+```
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text id="fail"
+- Memory overrides risk limits
+- Confidence miscalculated
+- Pattern formed below threshold
+- No decay applied
+- Missing explainability
+```
+
+---
+
+# 🏁 FINAL DELIVERABLE
+
+Developer MUST provide:
+
+```text id="deliver"
+1. Working memory store (JSONL)
+2. Pattern index
+3. Live memory application demo
+4. Export with learning section
+5. Dashboard panel working
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="final"
+System अब सिर्फ react नहीं करेगा
+
+System अब याद रखेगा — और evolve करेगा
+```
+
+---
