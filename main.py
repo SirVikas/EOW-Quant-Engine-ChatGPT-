@@ -624,7 +624,12 @@ async def on_tick(tick: Tick):
         # FTD-REF-026: profit guard — reduce effective confidence when PF < 1
         # qFTD-011: use session-only trades for consecutive_losses so replayed
         # loss history cannot trigger HARD_STOP at boot (same fix as _p52_cl).
+        # qFTD-032: also use session-only count for n_trades passed to profit_guard.
+        # Without this, 131 replayed trades (PF=0.37) applied a permanent 20%
+        # confidence penalty from session start, blocking all signals until
+        # enough new winning trades could offset the historical deficit.
         _pf_stats = pnl_calc.session_stats
+        _session_trade_count = len(pnl_calc.trades) - _boot_replay_count
         _consecutive_losses = 0
         for _t in reversed(pnl_calc.trades[_boot_replay_count:]):
             if _t.net_pnl < 0:
@@ -633,7 +638,7 @@ async def on_tick(tick: Tick):
                 break
         _pg_hard_stop, _pg_hard_reason = profit_guard.hard_stop_required(
             profit_factor=_pf_stats.get("profit_factor", 1.0),
-            n_trades=len(pnl_calc.trades),
+            n_trades=_session_trade_count,
             consecutive_losses=_consecutive_losses,
         )
         if _pg_hard_stop:
@@ -646,7 +651,7 @@ async def on_tick(tick: Tick):
 
         _pf_mult  = profit_guard.frequency_multiplier(
             profit_factor=_pf_stats.get("profit_factor", 1.0),
-            n_trades=len(pnl_calc.trades),
+            n_trades=_session_trade_count,
         )
         _adjusted_conf = round(r_ai.confidence * _regime_weight * _pf_mult, 3)
 
