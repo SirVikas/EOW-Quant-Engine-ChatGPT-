@@ -33,10 +33,10 @@ class EngineConfig(BaseSettings):
     BOOT_MODE: Literal["FRESH", "RESUME"] = Field(default="FRESH", env="BOOT_MODE")
     # qFTD-007-v2: seconds after boot during which gate failures do NOT trigger safe mode.
     # Engine transitions BOOTING→LIVE when indicator_validator.is_ready() OR elapsed≥grace.
-    # qFTD-032: 60→120s — gives the engine 2 minutes of unchecked trading at boot
-    # before indicator warmup completes. Prevents a cold-start dead zone where
-    # gate blocks all execution while signals are already being generated.
-    STARTUP_GRACE_SECONDS: float = Field(default=120.0, env="STARTUP_GRACE_SECONDS")
+    # qFTD-032-R3: 120→900s. Grace must cover the full indicator warmup window
+    # (IV_MIN_CANDLES=14 → ~14 min). Setting grace to 900s (15 min) ensures
+    # there is no dead zone between grace expiry and indicator readiness.
+    STARTUP_GRACE_SECONDS: float = Field(default=900.0, env="STARTUP_GRACE_SECONDS")
     AUTH_ENABLED: bool = Field(default=False, env="AUTH_ENABLED")
     # Comma-separated origins, e.g. "http://localhost:8000,https://ops.example.com"
     ALLOWED_ORIGINS: str = Field(default="http://localhost:8000", env="ALLOWED_ORIGINS")
@@ -180,8 +180,11 @@ class EngineConfig(BaseSettings):
     # updated. T1/T2 were 0.65/0.60 — both ABOVE the new base of 0.58, so the activator
     # was raising the bar after dry spells (backward). Fixed to relax below the base.
     # qFTD-032: further relaxed to give more room for signals to pass at Tier 2/3.
-    ACTIVATOR_T1_SCORE: float = 0.50     # qFTD-032: relax from base 0.58 → 0.50 after 10min (was 0.52)
-    ACTIVATOR_T2_SCORE: float = 0.45     # qFTD-032: further relax → 0.45 after 20min (= floor)
+    # qFTD-032 R3: T1 score lowered 0.50→0.44. With _SCORE_FLOOR=0.40,
+    # TIER_1 effective = max(0.40, 0.44)=0.44. Signals scoring 0.45+ now
+    # pass at 10 min instead of waiting 20 min for TIER_2.
+    ACTIVATOR_T1_SCORE: float = 0.44     # qFTD-032-R3: 0.50→0.44 — TIER_1 effective floor = 0.44
+    ACTIVATOR_T2_SCORE: float = 0.42     # qFTD-032-R3: 0.45→0.42 — TIER_2 effective floor = 0.42
 
     # Exploration Engine — learning trades
     # qFTD-008-EDGE: 0.10→0.05 — reduce exploration noise. Now that bootstrap deadlock
@@ -255,11 +258,14 @@ class EngineConfig(BaseSettings):
     DHM_LATENCY_BLOCK_MS: float = 2000.0   # Block if WS latency > 2000ms
 
     # Indicator Validator
-    IV_MIN_CANDLES: int = 20               # FTD-REF-055: 30→20 — reduced warmup window
+    # qFTD-032-R3: candle requirements reduced to align with STARTUP_GRACE (900s=15min).
+    # ADX_PERIOD=14 → 14 candles is the minimum valid computation window.
+    # This avoids a dead zone where grace expires before indicators are ready.
+    IV_MIN_CANDLES: int = 14               # qFTD-032-R3: 20→14 — aligns with ADX_PERIOD
     IV_RSI_MIN_CANDLES: int = 15           # RSI needs at least RSI_PERIOD+1 candles
-    IV_ADX_MIN_CANDLES: int = 20           # FTD-REF-055: 28→20 — ADX reliable at 20 candles
-    IV_ATR_MIN_CANDLES: int = 15           # ATR needs ATR_PERIOD+1 candles
-    IV_VOLUME_MIN_CANDLES: int = 20        # Volume avg needs this many samples
+    IV_ADX_MIN_CANDLES: int = 14           # qFTD-032-R3: 20→14 — ADX_PERIOD=14, functional at period
+    IV_ATR_MIN_CANDLES: int = 14           # qFTD-032-R3: 15→14 — ATR_PERIOD=14
+    IV_VOLUME_MIN_CANDLES: int = 14        # qFTD-032-R3: 20→14 — 14-candle volume avg is sufficient
 
     # WS Stability Engine
     WSS_MAX_RECONNECTS_SAFE_MODE: int = 3  # Reconnects above this → safe mode
