@@ -1,0 +1,327 @@
+# 🧾 qFTD-030B — LEARNING MEMORY COMPLETION (PRECISION DESIGN)
+
+### Ref: qFTD-030B-EOW-LEARNING-MEMORY (PRE-FTD CLARIFICATION)
+### Ref-qFTD-030B-EOW-LEARNING-MEMORY (PRE-FTD CLARIFICATION)
+---
+
+# 🎯 PURPOSE
+
+Define a **safe, explainable, non-drifting Learning Memory Layer** that:
+
+```text id="obj1"
+Remembers → Generalizes → Applies → Forgets (when needed)
+```
+
+❗ Prevent overfitting
+❗ Prevent bias accumulation
+❗ Prevent system drift
+
+---
+
+# 🚨 WHY THIS qFTD IS CRITICAL
+
+```text id="why1"
+Wrong memory design = permanent system corruption
+
+We must lock:
+- What is stored
+- How patterns form
+- When memory is trusted
+- When memory is discarded
+```
+
+---
+
+# 🧠 SECTION 1 — MEMORY SCOPE
+
+### Q1. Exactly क्या store होगा? (Select ALL)
+
+```text id="q1"
+A. Correction events (param, delta, change_id)
+B. Outcomes (PnL, DD, score delta)
+C. Context (symbol, timeframe, regime, volatility bucket)
+D. Decision trace (AI Brain decision + rationale)
+E. Validation results (027 + 028 scores, contradictions)
+F. Failure cases (rollbacks, vetoes)
+G. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 2 — MEMORY UNIT (CANONICAL RECORD)
+
+### Q2. Memory का atomic unit क्या होगा?
+
+```text id="q2"
+A. Trade-level record
+B. Correction-cycle record (recommended)
+C. Hybrid (trade + cycle)
+```
+
+---
+
+# 🧠 SECTION 3 — FEATURE NORMALIZATION
+
+### Q3. Context कैसे normalize होगा? (to avoid noise)
+
+```text id="q3"
+A. Volatility buckets (low/med/high)
+B. Regime labels (trend/range/chop)
+C. Timeframe class (scalp/swing)
+D. Instrument class (crypto/forex/equity)
+E. ALL of the above (recommended)
+```
+
+---
+
+# 🧠 SECTION 4 — PATTERN DEFINITION
+
+### Q4. “Pattern” किसे माना जाएगा?
+
+```text id="q4"
+A. Single parameter change → outcome
+B. Multi-factor tuple (context + change + outcome) (recommended)
+C. Sequence pattern (multi-cycle)
+```
+
+---
+
+# 🧠 SECTION 5 — PATTERN FORMATION THRESHOLD
+
+### Q5. Pattern कब valid मानी जाएगी?
+
+```text id="q5"
+A. Min samples N (e.g., ≥20)
+B. Confidence ≥ threshold (e.g., ≥70)
+C. Stability across ≥K cycles
+D. ALL of the above (recommended)
+```
+
+---
+
+# 🧠 SECTION 6 — CONFIDENCE EVOLUTION
+
+### Q6. Pattern confidence कैसे evolve होगा?
+
+```text id="q6"
+A. Success-rate weighted
+B. Recency-weighted (decay older data)
+C. Regime-consistency weighted
+D. Hybrid (recommended)
+```
+
+---
+
+# 🧠 SECTION 7 — INFLUENCE MODEL
+
+### Q7. Memory का influence कितना होगा?
+
+```text id="q7"
+A. Advisory only
+B. Weighted (≤50%) (recommended)
+C. Dynamic (based on confidence)
+```
+
+---
+
+# 🧠 SECTION 8 — APPLICATION GATE
+
+### Q8. Memory कब apply होगी?
+
+```text id="q8"
+A. Only if FTD-027 PASS
+B. Only if FTD-028 score ≥ 70
+C. Pattern confidence ≥ threshold
+D. ALL of the above (mandatory)
+```
+
+---
+
+# 🧠 SECTION 9 — CONFLICT RESOLUTION
+
+### Q9. Memory vs Live signal conflict?
+
+```text id="q9"
+A. Weighted merge (recommended)
+B. Prefer live
+C. Prefer memory
+D. Risk engine override always wins (mandatory)
+```
+
+---
+
+# 🧠 SECTION 10 — FORGETTING (ANTI-DRIFT)
+
+### Q10. Old/bad memory कैसे हटेगी?
+
+```text id="q10"
+A. Time decay (e.g., half-life)
+B. Performance decay (negative outcomes reduce weight)
+C. Confidence drop threshold
+D. ALL of the above (recommended)
+```
+
+---
+
+# 🧠 SECTION 11 — ANTI-OVERFITTING GUARD
+
+### Q11. Overfitting कैसे रोका जाएगा?
+
+```text id="q11"
+A. Min diversity of contexts (≥M buckets)
+B. Cross-regime validation
+C. Cap on max influence per pattern
+D. ALL of the above (recommended)
+```
+
+---
+
+# 🧠 SECTION 12 — MEMORY UPDATE FREQUENCY
+
+### Q12. Memory कब update होगी?
+
+```text id="q12"
+A. After each correction cycle (recommended)
+B. After validation cycle
+C. Periodic batch (e.g., hourly/daily)
+```
+
+---
+
+# 🧠 SECTION 13 — NEGATIVE MEMORY (IMPORTANT)
+
+### Q13. Failed patterns कैसे store होंगे?
+
+```text id="q13"
+A. Blacklist with decay (recommended)
+B. Penalize confidence
+C. दोनों
+```
+
+---
+
+# 🧠 SECTION 14 — PRIORITY WITH SELF-CORRECTION
+
+### Q14. Memory vs FTD-029 planner?
+
+```text id="q14"
+A. Memory suggests candidates
+B. Planner validates + bounds (mandatory)
+C. Memory never bypasses policy_guard (mandatory)
+```
+
+---
+
+# 🧠 SECTION 15 — HARD SAFETY
+
+### Q15. Memory किन चीज़ों को NEVER influence करेगी?
+
+```text id="q15"
+- MAX_DRAWDOWN_HALT
+- MAX_LEVERAGE_CAP
+- KILL_SWITCH_THRESHOLD
+- MIN_EQUITY_FLOOR
+- MAX_TRADES_PER_DAY
+```
+
+---
+
+# 🧠 SECTION 16 — STORAGE DESIGN
+
+### Q16. Storage format?
+
+```text id="q16"
+A. JSONL append-only (recommended for v1)
+B. SQLite (indexed queries)
+C. Hybrid (JSONL + indexed cache)
+```
+
+---
+
+# 🧠 SECTION 17 — EXPLAINABILITY (MANDATORY)
+
+### Q17. System explain करेगा?
+
+```text id="q17"
+A. Yes (mandatory)
+
+Include:
+- Pattern used
+- Context match
+- Confidence
+- Historical success rate
+```
+
+---
+
+# 🧠 SECTION 18 — EXPORT INTEGRATION
+
+### Q18. Export में क्या दिखे?
+
+```text id="q18"
+A. Top patterns (win/lose)
+B. Recent learned insights
+C. Applied memory in last cycle
+D. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 19 — DASHBOARD VIEW
+
+### Q19. UI elements?
+
+```text id="q19"
+A. Pattern leaderboard
+B. Success vs failure heatmap
+C. Last applied memory card
+D. Drift/decay indicators
+E. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 20 — START CONDITION
+
+### Q20. Learning कब activate होगा?
+
+```text id="q20"
+A. ≥50 trades
+B. FTD-028 score stable ≥70 over K cycles
+C. BOTH (recommended)
+```
+
+---
+
+# 🧠 FINAL CONFIRMATION
+
+```text id="final"
+All answers must be explicit
+No defaults assumed
+No ambiguity allowed
+```
+
+---
+
+# 🚀 NEXT STEP
+
+👉 Developer को यह qFTD भेजें
+👉 उनसे **aFTD-030B (answers)** लें
+
+👉 उसके बाद:
+
+```text id="next"
+CREATE FTD-030B (Learning Memory Completion)
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="line"
+System वही बनता है जो वह याद रखता है
+
+Design memory carefully — that defines intelligence
+```
+
+---
