@@ -1,0 +1,133 @@
+# 🧾 qFTD-032 — TRADE ACTIVATION + ANTI-IDLE SYSTEM
+# 🧾 qFTD-032 — TRADE ACTIVATION + ANTI-IDLE SYSTEM
+
+
+## 🎯 Objective
+
+System “SLEEP_MODE lock” से बाहर आए
+→ controlled तरीके से trades बढ़ें
+→ बिना risk explosion के
+
+---
+
+# ❓ QUESTIONS (MANDATORY BEFORE FTD)
+
+## Q1 — Trading Frequency Target
+
+आप system से क्या चाहते हैं?
+
+A) High frequency (हर 5–10 min trade)
+B) Moderate (हर 30–60 min trade)
+C) Selective (few but high quality trades)
+
+---
+
+## Q2 — Risk Appetite
+
+A) Conservative (capital protection first)
+B) Balanced (risk + growth)
+C) Aggressive (growth priority)
+
+---
+
+## Q3 — Sleep Mode Behavior
+
+Current issue: system idle है
+
+आप क्या चाहते हैं?
+
+A) Sleep Mode soften (threshold ↓)
+B) Sleep Mode adaptive (market अनुसार बदलता रहे)
+C) Sleep Mode override (idle होने पर ignore)
+
+---
+
+## Q4 — Strategy Mix
+
+A) Single strategy (mean reverting / trending)
+B) Dual (trend + mean revert)
+C) Multi-strategy (trend + mean + breakout + scalping)
+
+---
+
+## Q5 — Anti-Idle Activation
+
+अगर system X minutes तक trade नहीं लेता:
+
+A) कोई action नहीं
+B) thresholds relax
+C) forced scan + relaxed entry
+
+---
+
+## Q6 — Confidence Relaxation
+
+A) Fixed confidence
+B) Dynamic (idle होने पर ↓)
+C) AI-driven adaptive confidence
+
+---
+
+## Q7 — Minimum Trade Guarantee
+
+A) No guarantee (system decides)
+B) Soft guarantee (≥1 trade/hour)
+C) Hard guarantee (force trades)
+
+---
+
+## Q8 — Drawdown Sensitivity
+
+A) Strict (loss → तुरंत block)
+B) Moderate
+C) Relaxed (allow recovery trades)
+
+---
+
+## Q9 — Multi-Asset Aggression
+
+A) Few symbols
+B) Moderate (10–20 symbols)
+C) Aggressive (20+ symbols scan)
+
+---
+
+## Q10 — Execution Mode
+
+A) Pure validation-based
+B) Semi-autonomous (FTD-016 style)
+C) Adaptive autonomous (self-tuning active)
+
+---
+
+# 🧠 OUTPUT REQUIRED
+
+Developer must return:
+
+```text
+AnswerFTD-032:
+Q1 → ?
+Q2 → ?
+...
+Q10 → ?
+```
+
+---
+
+# 🚨 IMPORTANT
+
+```text
+No implementation before AnswerFTD
+No assumption allowed
+System tuning = user intent driven
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+Correct answers → correct system behavior
+
+Wrong assumptions → dead system
+```
