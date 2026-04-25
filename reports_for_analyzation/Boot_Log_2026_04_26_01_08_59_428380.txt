@@ -1,0 +1,546 @@
+
+D:\EOW Quant Engine V17.0(ChatGPT)_INVERSE_LOGIC\eow_quant_engine_FINAL_v2.2\eow_quant_engine>git_to_local_restore.bat
+remote: Enumerating objects: 27, done.
+remote: Counting objects: 100% (22/22), done.
+remote: Compressing objects: 100% (7/7), done.
+remote: Total 13 (delta 9), reused 7 (delta 6), pack-reused 0 (from 0)
+Unpacking objects: 100% (13/13), 8.33 KiB | 88.00 KiB/s, done.
+From https://github.com/SirVikas/EOW-Quant-Engine-ChatGPT-
+ * branch            main       -> FETCH_HEAD
+   cfd3232..7c2b3c5  main       -> origin/main
+Updating cfd3232..7c2b3c5
+Fast-forward
+ config.py                                          |  26 +-
+ core/gating/pre_trade_gate.py                      |   8 +-
+ core/trade_activator.py                            |   5 +-
+ .../full_system_report_1777140055.md               | 328 +++++++++++++++++++++
+ 4 files changed, 355 insertions(+), 12 deletions(-)
+ create mode 100644 reports_for_analyzation/full_system_report_1777140055.md
+OK
+Press any key to continue . . .
+
+D:\EOW Quant Engine V17.0(ChatGPT)_INVERSE_LOGIC\eow_quant_engine_FINAL_v2.2\eow_quant_engine>install_and_run.bat
+
+ ================================================
+  EOW QUANT ENGINE  v1.6  ÔÇö  Self-Evolving AI
+  Paper Trading Mode  |  Auto-Optimized DNA
+ ================================================
+
+ [OK] Python 3.12.10 ready
+ [..] Setting up environment...
+ [OK] Environment ready
+ [..] Installing packages (1-2 minutes on first run)...
+ [OK] All packages installed
+ [OK] Data folders ready
+ [OK] Config ready
+ [OK] Optimized strategy DNA ready
+
+ ================================================
+  Starting engine in PAPER mode...
+  Dashboard: http://127.0.0.1:8000
+
+  Browser mein khud khul jaayega.
+  Band karne ke liye: Ctrl+C dabayein
+ ================================================
+
+
+←[96m╔══════════════════════════════════════════════════════╗
+║          EOW QUANT ENGINE  —  v1.0                   ║
+║          Self-Evolving Multi-Asset Trading System     ║
+╚══════════════════════════════════════════════════════╝←[0m
+  Mode      : ←[92mPAPER←[0m
+  API       : ←[96mhttp://127.0.0.1:8000←[0m
+  Dashboard : ←[96mhttp://127.0.0.1:8000←[0m
+
+←[94m  System Checks:←[0m
+  ←[92m●←[0m Redis      : connected
+  ←[93m●←[0m Engine     : starting.2026-04-26 01:08:23.261 | INFO     | core.indicator_validator:__init__:60 - [INDICATOR-VALIDATOR] Phase 6.5 activated | min_candles=14 rsi≥15 adx≥14 atr≥14 vol≥14
+2026-04-26 01:08:23.277 | INFO     | core.deployability:__init__:262 - [BOOT-DEPLOY] Phase 6.5 activated | min_score=45.0 weights(data=0.3 ind=0.25 ws=0.25 risk=0.2)
+2026-04-26 01:08:23.300 | INFO     | core.rr_engine:__init__:37 - [RR-ENGINE] Phase 4 activated | min_rr=1.5
+2026-04-26 01:08:23.312 | INFO     | core.trade_scorer:__init__:60 - [TRADE-SCORER] Phase 4 activated | min_score=0.58
+2026-04-26 01:08:23.312 | INFO     | core.capital_allocator:__init__:53 - [CAPITAL-ALLOCATOR] Phase 4 activated | max_per_trade=5% daily_cap=3%
+2026-04-26 01:08:23.312 | INFO     | core.trade_manager:__init__:60 - [TRADE-MANAGER] Phase 4 activated | be_r=1.0 partial_r=2.0 trail_mult=1.75
+2026-04-26 01:08:23.325 | INFO     | strategies.alpha_engine:__init__:355 - [ALPHA-ENGINE] Phase 4 Alpha Entry Engine activated | strategies=3
+2026-04-26 01:08:23.329 | INFO     | core.ev_engine:__init__:67 - [EV-ENGINE] Phase 5 activated | window=30 min_trades=10 bootstrap_pass=True
+2026-04-26 01:08:23.329 | INFO     | core.adaptive_scorer:__init__:69 - [ADAPTIVE-SCORER] Phase 5 activated | min_score=0.58 lr=0.05 w_range=[0.05,0.4]
+2026-04-26 01:08:23.329 | INFO     | core.confidence_decay:__init__:55 - [CONF-DECAY] Phase 5 activated | window=30min freq_max=3 decay_per_extra=10% min_factor=0.7
+2026-04-26 01:08:23.343 | INFO     | core.drawdown_controller:__init__:49 - [DD-CONTROLLER] Phase 5 activated | tiers: soft=5% hard=10% stop=15%
+2026-04-26 01:08:23.343 | INFO     | core.regime_memory:__init__:58 - [REGIME-MEMORY] Phase 5 activated | window=50
+2026-04-26 01:08:23.375 | INFO     | core.trade_activator:__init__:52 - [TRADE-ACTIVATOR] Phase 5.1 activated | tiers: T1=10min T2=20min T3=30min
+2026-04-26 01:08:23.375 | INFO     | core.exploration_engine:__init__:51 - [EXPLORE-ENGINE] Phase 5.1 activated | rate=5% (every 20th signal) size=0.25× daily_cap=2%
+2026-04-26 01:08:23.382 | INFO     | core.adaptive_filter:__init__:51 - [ADAPTIVE-FILTER] Phase 5.1 activated | relax_after=20min tighten_after=3losses steps=[relax=0.05 tighten=0.03]
+2026-04-26 01:08:23.382 | INFO     | core.smart_fee_guard:__init__:42 - [SMART-FEE-GUARD] Phase 5.1 activated | high_rr≥3.0: max=15%  normal: max=10%
+2026-04-26 01:08:23.389 | INFO     | core.trade_flow_monitor:__init__:51 - [FLOW-MONITOR] Phase 5.1 activated | window=60min
+2026-04-26 01:08:23.389 | INFO     | core.dynamic_thresholds:__init__:60 - [DTP] Phase 5.2 Dynamic Threshold Provider activated
+2026-04-26 01:08:23.389 | INFO     | core.ev_confidence:__init__:42 - [EV-CONF] Phase 6 activated | HIGH≥0.15(100%) MID≥0.05(100%) LOW≥0(70%)
+2026-04-26 01:08:23.389 | INFO     | core.loss_cluster:__init__:43 - [LOSS-CLUSTER] Phase 6 activated | reduce≥3 losses(50%×) pause≥5 losses(30min)
+2026-04-26 01:08:23.401 | INFO     | core.streak_engine:__init__:45 - [STREAK-ENGINE] Phase 6 activated | hot≥3wins(adj=-0.03) cold≥3losses(adj=+0.05)
+2026-04-26 01:08:23.409 | INFO     | core.capital_recovery:__init__:53 - [CAPITAL-RECOVERY] Phase 6 activated | defensive_dd>5% min_size=70%
+2026-04-26 01:08:23.409 | INFO     | core.exploration_guard:__init__:40 - [EXPLORE-GUARD] Phase 6 activated | daily_loss_cap=2%
+2026-04-26 01:08:23.409 | INFO     | core.gating.gate_logger:__init__:57 - [GATE] Gate logger online | history=500
+2026-04-26 01:08:23.422 | INFO     | core.gating.safe_mode_engine:__init__:81 - [SAFE-MODE-ENGINE] Phase 6.6 activated | auto_resume_score≥47.0 check_interval=5.0min
+2026-04-26 01:08:23.422 | INFO     | core.gating.global_gate_controller:__init__:79 - [GLOBAL-GATE] Phase 6.6 activated | deploy_min=45.0 ws_min=50.0 cache_ttl=1.0s
+2026-04-26 01:08:23.427 | INFO     | core.gating.hard_start_validator:__init__:49 - [HARD-START] Phase 6.6 initialised | exit_on_fail=False min_candles=20
+2026-04-26 01:08:23.443 | INFO     | core.gating.pre_trade_gate:__init__:54 - [PRE-TRADE-GATE] Phase 6.6 activated | require_indicators=True require_data_fresh=True
+2026-04-26 01:08:23.457 | INFO     | core.data_health:__init__:66 - [DATA-HEALTH] Phase 6.5 activated | stale_after=60.0s min_score=60.0 latency_block=2000.0ms
+2026-04-26 01:08:23.457 | INFO     | core.profit.gate_aware_controller:__init__:47 - [GATE-AWARE-CTRL] Phase 7A activated — profit engine gated
+2026-04-26 01:08:23.457 | INFO     | core.profit.scan_controller:__init__:45 - [SCAN-CTRL] Phase 7A activated — signal generation ALWAYS ON (qFTD-010)
+2026-04-26 01:08:23.466 | INFO     | core.trade_ranker:__init__:80 - [TRADE-RANKER] Phase 7 activated | min_rank=0.3 weights(ev=0.55 score=0.2 regime=0.15 history=0.1)
+2026-04-26 01:08:23.466 | INFO     | core.profit.trade_ranker:__init__:44 - [PROFIT-RANKER] Phase 7A gate-aware trade ranker activated
+2026-04-26 01:08:23.466 | INFO     | core.trade_competition:__init__:56 - [TRADE-COMPETITION] Phase 7 activated | max_concurrent=3 min_rank=0.3
+2026-04-26 01:08:23.466 | INFO     | core.profit.trade_competition:__init__:41 - [PROFIT-COMPETITION] Phase 7A gate-aware competition engine activated
+2026-04-26 01:08:23.486 | INFO     | core.capital_concentrator:__init__:60 - [CAPITAL-CONCENTRATOR] Phase 7 activated | bands: LOW=0.5× MID=1.0× HIGH=1.5× ELITE=2.0× | max_pos=5%
+2026-04-26 01:08:23.488 | INFO     | core.profit.capital_concentrator:__init__:56 - [PROFIT-CONCENTRATOR] Phase 7A gate-aware capital concentrator activated
+2026-04-26 01:08:23.490 | INFO     | core.edge_amplifier:__init__:54 - [EDGE-AMPLIFIER] Phase 7 activated | ev≥0.15 rank≥0.8 vol≥1.5 → TP×1.25 trail×1.2
+2026-04-26 01:08:23.490 | INFO     | core.profit.edge_amplifier:__init__:51 - [PROFIT-AMPLIFIER] Phase 7A gate-aware edge amplifier activated
+2026-04-26 01:08:23.490 | INFO     | core.orchestrator.execution_orchestrator:__init__:187 - [ORCHESTRATOR] Phase 7A.1 Execution Orchestrator online | exclusive=True
+..2026-04-26 01:08:25.802 | INFO     | core.market_data:__init__:114 - [MDP] Streams → real Binance (public) | DataFeed → LIVE | Execution → PAPER (virtual simulation only)
+2026-04-26 01:08:25.832 | INFO     | main:_thought:186 - [CT-SCAN] 🚀 EOW Quant Engine booting…
+2026-04-26 01:08:25.844 | INFO     | main:_thought:186 - [CT-SCAN] Mode: PAPER | Capital: 1000.0 USDT
+2026-04-26 01:08:25.846 | INFO     | main:_thought:186 - [CT-SCAN] 📋 Function Registry loaded — 81 functions registered
+2026-04-26 01:08:25.846 | SUCCESS  | core.genome_engine:load_persisted_dna:627 - [GENOME] DNA restored from disk (saved 541.0 min ago). Strategies: ['TrendFollowing', 'MeanReversion', 'VolatilityExpansion']
+2026-04-26 01:08:25.846 | INFO     | core.gating.gate_logger:boot_ok:89 - [GATE] BOOT_OK | stage=CANDLE_CHECK | count=20
+2026-04-26 01:08:25.846 | INFO     | core.gating.gate_logger:boot_ok:89 - [GATE] BOOT_OK | stage=INDICATOR_CHECK
+2026-04-26 01:08:25.846 | INFO     | core.gating.gate_logger:boot_ok:89 - [GATE] BOOT_OK | stage=WS_CHECK
+2026-04-26 01:08:25.846 | INFO     | core.gating.gate_logger:boot_ok:89 - [GATE] BOOT_OK | stage=CONFIG_CHECK
+2026-04-26 01:08:25.846 | INFO     | core.gating.hard_start_validator:run:127 - [HARD-START] All boot checks passed — engine cleared for start
+2026-04-26 01:08:25.846 | DEBUG    | core.exchange.api_manager:_load_credentials:113 - [API-MGR] Credentials loaded from environment.
+2026-04-26 01:08:26.364 | INFO     | core.exchange.binance_client:connect:62 - [BINANCE] Connected (LIVE | READ_ONLY)
+2026-04-26 01:08:26.386 | INFO     | core.bootstrap.api_loader:_print_boot_lines:102 - [BOOT] Redis: CONNECTED ✅ | WebSocket: CONNECTING ❌ | Indicators: PENDING_RUNTIME_VALIDATION ❌
+2026-04-26 01:08:26.386 | INFO     | core.bootstrap.api_loader:_print_boot_lines:107 - [BOOT] Strategy Engine: ACTIVE ✅ | Risk Engine: ACTIVE ✅ | Execution Mode: PAPER
+2026-04-26 01:08:26.391 | INFO     | core.bootstrap.api_loader:_print_boot_lines:112 - [BOOT] API: READ-ONLY ✅ | Deployability: NOT_READY (0/100)
+2026-04-26 01:08:26.413 | INFO     | core.genome_engine:start:231 - [GENOME] Engine started.
+2026-04-26 01:08:26.413 | INFO     | core.self_healing:start:76 - [HEAL] Self-Healing Protocol started.
+2026-04-26 01:08:26.424 | INFO     | core.data_lake:start:52 - [LAKE] SQLite data lake open → data/eow_lake.db
+2026-04-26 01:08:26.430 | INFO     | core.ws_stabilizer:start:111 - [WS-STAB] Watchdog started.
+2026-04-26 01:08:26.430 | INFO     | core.equity_snapshot:start_periodic_save:146 - [EQUITY-SNAPSHOT] Periodic save started (every 30s)
+2026-04-26 01:08:26.430 | INFO     | core.market_data:start:132 - [MDP] Redis connected — pub/sub active.
+.2026-04-26 01:08:26.934 | INFO     | core.equity_snapshot:load:97 - [EQUITY-SNAPSHOT] loaded equity=862.5756 trades=131 ts=2026-04-25T19:31:31Z
+2026-04-26 01:08:26.948 | SUCCESS  | core.pnl_calculator:replay_from_history:247 - [PNL] Session restored: 131 trades | Capital: 862.58 USDT (was 1000.00 USDT at start)
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] 📂 DataLake replay: 131 trades → equity=862.58 USDT
+2026-04-26 01:08:26.948 | INFO     | core.risk_engine:initialize:97 - [RISK-ENG] Initialized | equity=862.58 day=2026-04-25
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] 📂 State restored: snapshot(862.58) validated vs replay(862.58)
+2026-04-26 01:08:26.948 | INFO     | main:lifespan:1440 - [BOOT-STATE] snapshot(862.58) validated vs replay(862.58)
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] ⚡ Phase 4 Profit Engine online | rr_min=1.5 score_min=0.58 max_per_trade=5% daily_cap=3%
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] 🧠 Phase 5 EV Engine online | ev_window=30 ev_min_trades=10 adaptive_lr=0.05 dd_stop=15%
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] 🔓 Phase 5.1 Activation Layer online | activator_tiers=T1@10min T2@20min T3@30min | explore_rate=5% smart_fee_rr≥3.0:15%
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] Phase 6.6 Gate online | can_trade=True reason=BOOT_GRACE safe_mode=False
+2026-04-26 01:08:26.948 | INFO     | main:lifespan:1480 - [GLOBAL-GATE] Phase 6.6 Gate online | can_trade=True reason=BOOT_GRACE safe_mode=False
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] All subsystems online. Scanning markets…
+2026-04-26 01:08:26.948 | INFO     | core.intelligence.auto_intelligence_engine:__init__:121 - [FTD-030] AutoIntelligenceEngine initialised | interval=5.0min min_trades=30 max_daily=12
+2026-04-26 01:08:26.948 | INFO     | main:lifespan:1590 - [FTD-030] Auto-intelligence loop started | interval=5.0min
+2026-04-26 01:08:26.948 | INFO     | core.performance.async_task_queue:start:71 - [FTD-031] AsyncTaskQueue started: workers=2 max_size=500
+2026-04-26 01:08:26.948 | INFO     | core.performance.perf_monitor:start_background_tasks:302 - [FTD-031] PerfMonitor background tasks started
+2026-04-26 01:08:26.948 | INFO     | main:_thought:186 - [CT-SCAN] ⚡ [FTD-031] Performance layer online | target=100.0ms cache_ttl_pattern=60.0s queue_workers=2
+  ● Engine     : ready
+2026-04-26 01:08:27.556 | INFO     | core.market_data:start:139 - [MDP] Watching 15 symbols: ['BTCUSDT', 'ETHUSDT', 'APEUSDT', 'SOLUSDT', 'AXSUSDT']…
+2026-04-26 01:08:28.095 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=60.6 ATR%=0.55)
+2026-04-26 01:08:28.095 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=59.6 ATR%=0.57)
+2026-04-26 01:08:28.108 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=57.9 ATR%=0.56)
+2026-04-26 01:08:28.108 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=56.8 ATR%=0.56)
+2026-04-26 01:08:28.108 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=55.0 ATR%=0.58)
+2026-04-26 01:08:28.108 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=52.8 ATR%=0.59)
+2026-04-26 01:08:28.108 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=49.9 ATR%=0.57)
+2026-04-26 01:08:28.108 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=51.5 ATR%=0.56)
+2026-04-26 01:08:28.108 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=47.4 ATR%=0.54)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=41.9 ATR%=0.50)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=37.6 ATR%=0.48)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=35.5 ATR%=0.46)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=28.1 ATR%=0.43)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=24.5 ATR%=0.41)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=26.3 ATR%=0.40)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=27.2 ATR%=0.38)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=27.9 ATR%=0.38)
+2026-04-26 01:08:28.122 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=26.3 ATR%=0.36)
+2026-04-26 01:08:28.146 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=26.4 ATR%=0.34)
+2026-04-26 01:08:28.146 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=28.8 ATR%=0.34)
+2026-04-26 01:08:28.148 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=24.2 ATR%=0.34)
+2026-04-26 01:08:28.148 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=22.4 ATR%=0.33)
+2026-04-26 01:08:28.150 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=22.9 ATR%=0.34)
+2026-04-26 01:08:28.150 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=21.9 ATR%=0.33)
+2026-04-26 01:08:28.152 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=21.0 ATR%=0.40)
+2026-04-26 01:08:28.152 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → MEAN_REVERTING (ADX=19.1 ATR%=0.48)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → MEAN_REVERTING (ADX=17.7 ATR%=0.48)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=22.0 ATR%=0.52)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=25.1 ATR%=0.56)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=27.4 ATR%=0.59)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=31.7 ATR%=0.63)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=31.8 ATR%=0.65)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=33.4 ATR%=0.67)
+2026-04-26 01:08:28.158 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=38.4 ATR%=0.72)
+2026-04-26 01:08:28.170 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=41.4 ATR%=0.82)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=43.6 ATR%=0.93)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=53.5 ATR%=1.00)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=57.5 ATR%=1.07)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=58.0 ATR%=1.08)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=54.4 ATR%=1.09)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=54.7 ATR%=1.13)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=50.9 ATR%=1.10)
+2026-04-26 01:08:28.174 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=48.7 ATR%=1.07)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=48.7 ATR%=1.07)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=47.4 ATR%=1.08)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=49.8 ATR%=1.15)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=49.1 ATR%=1.15)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=52.1 ATR%=1.11)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=50.2 ATR%=1.02)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=48.3 ATR%=0.93)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=47.4 ATR%=0.84)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=48.2 ATR%=0.79)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=47.1 ATR%=0.78)
+2026-04-26 01:08:28.186 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=46.0 ATR%=0.74)
+2026-04-26 01:08:28.201 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=45.7 ATR%=0.76)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=44.3 ATR%=0.81)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=40.4 ATR%=0.82)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=34.1 ATR%=0.85)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=33.1 ATR%=0.85)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=28.2 ATR%=0.84)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=26.4 ATR%=0.83)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=26.1 ATR%=0.85)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=27.1 ATR%=0.86)
+2026-04-26 01:08:28.208 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=24.8 ATR%=0.85)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=22.2 ATR%=0.83)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → MEAN_REVERTING (ADX=16.9 ATR%=0.78)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → MEAN_REVERTING (ADX=14.9 ATR%=0.75)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → MEAN_REVERTING (ADX=17.5 ATR%=0.74)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=24.2 ATR%=0.68)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=33.6 ATR%=0.70)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=32.6 ATR%=0.69)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=26.2 ATR%=0.63)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=25.1 ATR%=0.60)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=24.3 ATR%=0.53)
+2026-04-26 01:08:28.219 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=23.5 ATR%=0.53)
+2026-04-26 01:08:28.233 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=29.3 ATR%=0.57)
+2026-04-26 01:08:28.235 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=26.8 ATR%=0.55)
+2026-04-26 01:08:28.235 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=35.7 ATR%=0.53)
+2026-04-26 01:08:28.235 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=36.9 ATR%=0.53)
+2026-04-26 01:08:28.235 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=37.2 ATR%=0.55)
+2026-04-26 01:08:28.235 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=36.0 ATR%=0.53)
+2026-04-26 01:08:28.235 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=39.4 ATR%=0.52)
+2026-04-26 01:08:28.235 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=42.4 ATR%=0.52)
+2026-04-26 01:08:28.247 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=53.5 ATR%=0.43)
+2026-04-26 01:08:28.247 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=51.3 ATR%=0.42)
+2026-04-26 01:08:28.251 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=48.3 ATR%=0.43)
+2026-04-26 01:08:28.256 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=61.0 ATR%=0.44)
+2026-04-26 01:08:28.256 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=56.4 ATR%=0.45)
+2026-04-26 01:08:28.256 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=54.5 ATR%=0.43)
+2026-04-26 01:08:28.260 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=49.0 ATR%=0.38)
+2026-04-26 01:08:28.260 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=46.9 ATR%=0.38)
+2026-04-26 01:08:28.262 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=37.6 ATR%=0.38)
+2026-04-26 01:08:28.262 | DEBUG    | core.regime_detector:push:66 - [REGIME] APEUSDT → TRENDING (ADX=33.1 ATR%=0.37)
+2026-04-26 01:08:28.269 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=23.9 ATR%=0.03)
+2026-04-26 01:08:28.269 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=20.9 ATR%=0.03)
+2026-04-26 01:08:28.269 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=17.7 ATR%=0.03)
+2026-04-26 01:08:28.269 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=16.0 ATR%=0.03)
+2026-04-26 01:08:28.280 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.2 ATR%=0.03)
+2026-04-26 01:08:28.282 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=12.1 ATR%=0.03)
+2026-04-26 01:08:28.282 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=11.4 ATR%=0.03)
+2026-04-26 01:08:28.282 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.3 ATR%=0.03)
+2026-04-26 01:08:28.282 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=8.5 ATR%=0.02)
+2026-04-26 01:08:28.282 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=9.1 ATR%=0.02)
+2026-04-26 01:08:28.282 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=8.4 ATR%=0.02)
+2026-04-26 01:08:28.282 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=7.2 ATR%=0.02)
+2026-04-26 01:08:28.290 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=7.1 ATR%=0.01)
+2026-04-26 01:08:28.290 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=9.0 ATR%=0.01)
+2026-04-26 01:08:28.290 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=5.2 ATR%=0.01)
+2026-04-26 01:08:28.290 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=5.8 ATR%=0.01)
+2026-04-26 01:08:28.294 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=8.9 ATR%=0.01)
+2026-04-26 01:08:28.294 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=7.8 ATR%=0.01)
+2026-04-26 01:08:28.296 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=9.8 ATR%=0.02)
+2026-04-26 01:08:28.305 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=13.2 ATR%=0.02)
+2026-04-26 01:08:28.308 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.2 ATR%=0.02)
+2026-04-26 01:08:28.308 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.8 ATR%=0.02)
+2026-04-26 01:08:28.308 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=15.4 ATR%=0.02)
+2026-04-26 01:08:28.308 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.5 ATR%=0.02)
+2026-04-26 01:08:28.308 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=15.6 ATR%=0.02)
+2026-04-26 01:08:28.312 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=16.8 ATR%=0.03)
+2026-04-26 01:08:28.314 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=21.0 ATR%=0.03)
+2026-04-26 01:08:28.314 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=25.3 ATR%=0.03)
+2026-04-26 01:08:28.314 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=26.3 ATR%=0.03)
+2026-04-26 01:08:28.314 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=26.6 ATR%=0.03)
+2026-04-26 01:08:28.314 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=34.6 ATR%=0.03)
+2026-04-26 01:08:28.314 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=35.3 ATR%=0.03)
+2026-04-26 01:08:28.320 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=32.4 ATR%=0.02)
+2026-04-26 01:08:28.320 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=29.4 ATR%=0.02)
+2026-04-26 01:08:28.320 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=24.9 ATR%=0.02)
+2026-04-26 01:08:28.320 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=21.9 ATR%=0.02)
+2026-04-26 01:08:28.324 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=19.9 ATR%=0.02)
+2026-04-26 01:08:28.324 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.8 ATR%=0.02)
+2026-04-26 01:08:28.324 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=12.5 ATR%=0.02)
+2026-04-26 01:08:28.324 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.7 ATR%=0.02)
+2026-04-26 01:08:28.332 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=13.5 ATR%=0.02)
+2026-04-26 01:08:28.332 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=12.6 ATR%=0.02)
+2026-04-26 01:08:28.332 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.7 ATR%=0.02)
+2026-04-26 01:08:28.332 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=13.8 ATR%=0.02)
+2026-04-26 01:08:28.332 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=12.3 ATR%=0.02)
+2026-04-26 01:08:28.343 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=11.0 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=10.4 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=13.7 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.6 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=15.0 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=29.2 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=27.7 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=26.0 ATR%=0.02)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=21.3 ATR%=0.01)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=18.1 ATR%=0.01)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.3 ATR%=0.01)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.8 ATR%=0.01)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=20.6 ATR%=0.01)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=20.1 ATR%=0.01)
+2026-04-26 01:08:28.345 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=20.2 ATR%=0.01)
+2026-04-26 01:08:28.361 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=21.5 ATR%=0.01)
+2026-04-26 01:08:28.361 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=24.4 ATR%=0.01)
+2026-04-26 01:08:28.361 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=32.8 ATR%=0.01)
+2026-04-26 01:08:28.361 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=24.3 ATR%=0.01)
+2026-04-26 01:08:28.361 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=22.4 ATR%=0.02)
+2026-04-26 01:08:28.374 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=18.5 ATR%=0.02)
+2026-04-26 01:08:28.375 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=17.5 ATR%=0.02)
+2026-04-26 01:08:28.376 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=21.4 ATR%=0.02)
+2026-04-26 01:08:28.378 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=19.6 ATR%=0.02)
+2026-04-26 01:08:28.378 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.4 ATR%=0.02)
+2026-04-26 01:08:28.380 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=13.1 ATR%=0.02)
+2026-04-26 01:08:28.380 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=27.6 ATR%=0.02)
+2026-04-26 01:08:28.380 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=25.0 ATR%=0.02)
+2026-04-26 01:08:28.380 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=22.5 ATR%=0.02)
+2026-04-26 01:08:28.384 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=20.3 ATR%=0.02)
+2026-04-26 01:08:28.384 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=12.7 ATR%=0.02)
+2026-04-26 01:08:28.386 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=9.4 ATR%=0.02)
+2026-04-26 01:08:28.386 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=7.5 ATR%=0.02)
+2026-04-26 01:08:28.386 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=7.8 ATR%=0.02)
+2026-04-26 01:08:28.386 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=6.3 ATR%=0.02)
+2026-04-26 01:08:28.393 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=9.4 ATR%=0.02)
+2026-04-26 01:08:28.395 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=8.4 ATR%=0.02)
+2026-04-26 01:08:28.395 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=7.9 ATR%=0.02)
+2026-04-26 01:08:28.395 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=11.3 ATR%=0.02)
+2026-04-26 01:08:28.395 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=14.8 ATR%=0.02)
+2026-04-26 01:08:28.406 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → MEAN_REVERTING (ADX=17.9 ATR%=0.02)
+2026-04-26 01:08:28.408 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=22.2 ATR%=0.02)
+2026-04-26 01:08:28.408 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=23.7 ATR%=0.02)
+2026-04-26 01:08:28.408 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=25.5 ATR%=0.02)
+2026-04-26 01:08:28.411 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=26.1 ATR%=0.02)
+2026-04-26 01:08:28.411 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=27.6 ATR%=0.02)
+2026-04-26 01:08:28.411 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=26.6 ATR%=0.02)
+2026-04-26 01:08:28.411 | DEBUG    | core.regime_detector:push:66 - [REGIME] ETHUSDT → TRENDING (ADX=25.6 ATR%=0.02)
+2026-04-26 01:08:28.411 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=12.6 ATR%=0.24)
+2026-04-26 01:08:28.417 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=12.1 ATR%=0.23)
+2026-04-26 01:08:28.417 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=12.5 ATR%=0.21)
+2026-04-26 01:08:28.417 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=12.9 ATR%=0.22)
+2026-04-26 01:08:28.417 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=12.2 ATR%=0.20)
+2026-04-26 01:08:28.417 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=11.8 ATR%=0.19)
+2026-04-26 01:08:28.424 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=10.7 ATR%=0.19)
+2026-04-26 01:08:28.432 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=10.3 ATR%=0.19)
+2026-04-26 01:08:28.432 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=9.6 ATR%=0.19)
+2026-04-26 01:08:28.432 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=14.1 ATR%=0.16)
+2026-04-26 01:08:28.432 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=12.2 ATR%=0.14)
+2026-04-26 01:08:28.432 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=10.2 ATR%=0.14)
+2026-04-26 01:08:28.438 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=11.6 ATR%=0.14)
+2026-04-26 01:08:28.440 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=20.3 ATR%=0.14)
+2026-04-26 01:08:28.440 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=31.1 ATR%=0.13)
+2026-04-26 01:08:28.442 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=31.7 ATR%=0.14)
+2026-04-26 01:08:28.442 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=23.3 ATR%=0.15)
+2026-04-26 01:08:28.442 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=24.5 ATR%=0.15)
+2026-04-26 01:08:28.442 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=24.8 ATR%=0.16)
+2026-04-26 01:08:28.442 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=26.2 ATR%=0.16)
+2026-04-26 01:08:28.447 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.2 ATR%=0.16)
+2026-04-26 01:08:28.447 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=20.5 ATR%=0.16)
+2026-04-26 01:08:28.447 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=36.8 ATR%=0.16)
+2026-04-26 01:08:28.447 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=34.4 ATR%=0.16)
+2026-04-26 01:08:28.447 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=32.9 ATR%=0.17)
+2026-04-26 01:08:28.453 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=34.7 ATR%=0.17)
+2026-04-26 01:08:28.455 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=37.8 ATR%=0.17)
+2026-04-26 01:08:28.459 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=21.3 ATR%=0.16)
+2026-04-26 01:08:28.466 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=19.9 ATR%=0.17)
+2026-04-26 01:08:28.466 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=23.1 ATR%=0.15)
+2026-04-26 01:08:28.466 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=29.2 ATR%=0.16)
+2026-04-26 01:08:28.466 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=33.1 ATR%=0.17)
+2026-04-26 01:08:28.469 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=27.9 ATR%=0.16)
+2026-04-26 01:08:28.471 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=24.9 ATR%=0.17)
+2026-04-26 01:08:28.471 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=28.1 ATR%=0.16)
+2026-04-26 01:08:28.471 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=26.3 ATR%=0.16)
+2026-04-26 01:08:28.475 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=31.2 ATR%=0.16)
+2026-04-26 01:08:28.475 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=30.2 ATR%=0.16)
+2026-04-26 01:08:28.477 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=37.7 ATR%=0.16)
+2026-04-26 01:08:28.477 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=37.3 ATR%=0.17)
+2026-04-26 01:08:28.479 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=32.4 ATR%=0.17)
+2026-04-26 01:08:28.479 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=30.6 ATR%=0.18)
+2026-04-26 01:08:28.481 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=28.3 ATR%=0.18)
+2026-04-26 01:08:28.481 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=31.9 ATR%=0.19)
+2026-04-26 01:08:28.481 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=26.4 ATR%=0.18)
+2026-04-26 01:08:28.481 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=25.9 ATR%=0.17)
+2026-04-26 01:08:28.485 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=26.1 ATR%=0.17)
+2026-04-26 01:08:28.489 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=23.8 ATR%=0.17)
+2026-04-26 01:08:28.489 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=23.5 ATR%=0.17)
+2026-04-26 01:08:28.497 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=21.4 ATR%=0.19)
+2026-04-26 01:08:28.497 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → TRENDING (ADX=20.3 ATR%=0.19)
+2026-04-26 01:08:28.497 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=19.5 ATR%=0.19)
+2026-04-26 01:08:28.501 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=16.7 ATR%=0.20)
+2026-04-26 01:08:28.503 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=16.2 ATR%=0.20)
+2026-04-26 01:08:28.505 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.6 ATR%=0.20)
+2026-04-26 01:08:28.505 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.2 ATR%=0.21)
+2026-04-26 01:08:28.507 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.0 ATR%=0.21)
+2026-04-26 01:08:28.509 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.7 ATR%=0.20)
+2026-04-26 01:08:28.509 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.4 ATR%=0.20)
+2026-04-26 01:08:28.509 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.6 ATR%=0.21)
+2026-04-26 01:08:28.511 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.0 ATR%=0.21)
+2026-04-26 01:08:28.511 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=16.1 ATR%=0.22)
+2026-04-26 01:08:28.514 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.9 ATR%=0.22)
+2026-04-26 01:08:28.514 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=15.0 ATR%=0.22)
+2026-04-26 01:08:28.514 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=15.4 ATR%=0.21)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=16.5 ATR%=0.21)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=16.8 ATR%=0.20)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.5 ATR%=0.20)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.8 ATR%=0.19)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=19.1 ATR%=0.17)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.3 ATR%=0.17)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=15.9 ATR%=0.17)
+2026-04-26 01:08:28.517 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=13.7 ATR%=0.17)
+2026-04-26 01:08:28.537 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=14.3 ATR%=0.17)
+2026-04-26 01:08:28.539 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.2 ATR%=0.19)
+2026-04-26 01:08:28.541 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.4 ATR%=0.19)
+2026-04-26 01:08:28.547 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=16.8 ATR%=0.19)
+2026-04-26 01:08:28.552 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.0 ATR%=0.17)
+2026-04-26 01:08:28.558 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=19.2 ATR%=0.17)
+2026-04-26 01:08:28.561 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.8 ATR%=0.18)
+2026-04-26 01:08:28.564 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.5 ATR%=0.17)
+2026-04-26 01:08:28.568 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=19.5 ATR%=0.17)
+2026-04-26 01:08:28.570 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=18.4 ATR%=0.17)
+2026-04-26 01:08:28.572 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=17.1 ATR%=0.18)
+2026-04-26 01:08:28.574 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=14.4 ATR%=0.19)
+2026-04-26 01:08:28.576 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=10.6 ATR%=0.19)
+2026-04-26 01:08:28.578 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=8.5 ATR%=0.19)
+2026-04-26 01:08:28.578 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=8.3 ATR%=0.17)
+2026-04-26 01:08:28.585 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=8.5 ATR%=0.14)
+2026-04-26 01:08:28.585 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=7.7 ATR%=0.15)
+2026-04-26 01:08:28.585 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=7.9 ATR%=0.14)
+2026-04-26 01:08:28.585 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=13.6 ATR%=0.14)
+2026-04-26 01:08:28.585 | DEBUG    | core.regime_detector:push:66 - [REGIME] TRUMPUSDT → MEAN_REVERTING (ADX=11.5 ATR%=0.13)
+2026-04-26 01:08:28.600 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=29.3 ATR%=0.06)
+2026-04-26 01:08:28.600 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=28.1 ATR%=0.06)
+2026-04-26 01:08:28.602 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=26.5 ATR%=0.06)
+2026-04-26 01:08:28.602 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=23.8 ATR%=0.06)
+2026-04-26 01:08:28.602 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=21.8 ATR%=0.06)
+2026-04-26 01:08:28.602 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=19.0 ATR%=0.06)
+2026-04-26 01:08:28.602 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=16.2 ATR%=0.06)
+2026-04-26 01:08:28.602 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=11.4 ATR%=0.05)
+2026-04-26 01:08:28.609 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=7.3 ATR%=0.05)
+2026-04-26 01:08:28.609 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=7.2 ATR%=0.04)
+2026-04-26 01:08:28.609 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=7.6 ATR%=0.04)
+2026-04-26 01:08:28.618 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=7.2 ATR%=0.04)
+2026-04-26 01:08:28.618 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=8.6 ATR%=0.03)
+2026-04-26 01:08:28.618 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=13.1 ATR%=0.03)
+2026-04-26 01:08:28.618 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=12.5 ATR%=0.03)
+2026-04-26 01:08:28.618 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.8 ATR%=0.03)
+2026-04-26 01:08:28.618 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=8.5 ATR%=0.04)
+2026-04-26 01:08:28.630 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=8.4 ATR%=0.03)
+2026-04-26 01:08:28.632 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=10.7 ATR%=0.04)
+2026-04-26 01:08:28.632 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=12.8 ATR%=0.04)
+2026-04-26 01:08:28.634 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=15.9 ATR%=0.05)
+2026-04-26 01:08:28.634 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=21.0 ATR%=0.05)
+2026-04-26 01:08:28.634 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=21.0 ATR%=0.05)
+2026-04-26 01:08:28.634 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=23.1 ATR%=0.05)
+2026-04-26 01:08:28.634 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=21.4 ATR%=0.05)
+2026-04-26 01:08:28.641 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=25.5 ATR%=0.06)
+2026-04-26 01:08:28.641 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=22.6 ATR%=0.06)
+2026-04-26 01:08:28.641 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=22.4 ATR%=0.05)
+2026-04-26 01:08:28.649 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=22.9 ATR%=0.05)
+2026-04-26 01:08:28.651 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=22.2 ATR%=0.05)
+2026-04-26 01:08:28.651 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=24.9 ATR%=0.05)
+2026-04-26 01:08:28.653 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=22.9 ATR%=0.06)
+2026-04-26 01:08:28.653 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=20.9 ATR%=0.04)
+2026-04-26 01:08:28.655 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.1 ATR%=0.04)
+2026-04-26 01:08:28.655 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=14.4 ATR%=0.04)
+2026-04-26 01:08:28.657 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=11.4 ATR%=0.04)
+2026-04-26 01:08:28.657 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=14.0 ATR%=0.04)
+2026-04-26 01:08:28.659 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=12.0 ATR%=0.04)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=10.4 ATR%=0.04)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.9 ATR%=0.04)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.6 ATR%=0.04)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.7 ATR%=0.04)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=10.0 ATR%=0.04)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.6 ATR%=0.05)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.8 ATR%=0.04)
+2026-04-26 01:08:28.663 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=11.9 ATR%=0.04)
+2026-04-26 01:08:28.675 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=11.8 ATR%=0.04)
+2026-04-26 01:08:28.685 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=11.0 ATR%=0.04)
+2026-04-26 01:08:28.685 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=10.3 ATR%=0.04)
+2026-04-26 01:08:28.685 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.7 ATR%=0.04)
+2026-04-26 01:08:28.685 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=39.6 ATR%=0.04)
+2026-04-26 01:08:28.692 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=41.2 ATR%=0.04)
+2026-04-26 01:08:28.694 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=40.9 ATR%=0.04)
+2026-04-26 01:08:28.694 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=34.7 ATR%=0.04)
+2026-04-26 01:08:28.694 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=30.7 ATR%=0.04)
+2026-04-26 01:08:28.694 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=27.3 ATR%=0.04)
+2026-04-26 01:08:28.694 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=20.9 ATR%=0.04)
+2026-04-26 01:08:28.694 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=19.6 ATR%=0.04)
+2026-04-26 01:08:28.694 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.0 ATR%=0.04)
+2026-04-26 01:08:28.704 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=16.9 ATR%=0.04)
+2026-04-26 01:08:28.704 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=16.3 ATR%=0.04)
+2026-04-26 01:08:28.708 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=15.2 ATR%=0.04)
+2026-04-26 01:08:28.715 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=19.2 ATR%=0.04)
+2026-04-26 01:08:28.715 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=19.9 ATR%=0.04)
+2026-04-26 01:08:28.715 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=19.4 ATR%=0.04)
+2026-04-26 01:08:28.715 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=16.5 ATR%=0.04)
+2026-04-26 01:08:28.715 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=11.5 ATR%=0.04)
+2026-04-26 01:08:28.726 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=10.2 ATR%=0.04)
+2026-04-26 01:08:28.728 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=6.3 ATR%=0.04)
+2026-04-26 01:08:28.728 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=5.2 ATR%=0.04)
+2026-04-26 01:08:28.728 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=4.8 ATR%=0.04)
+2026-04-26 01:08:28.728 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=10.4 ATR%=0.03)
+2026-04-26 01:08:28.728 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=11.3 ATR%=0.03)
+2026-04-26 01:08:28.728 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=9.4 ATR%=0.03)
+2026-04-26 01:08:28.728 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=19.1 ATR%=0.04)
+2026-04-26 01:08:28.737 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=15.9 ATR%=0.04)
+2026-04-26 01:08:28.741 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=14.7 ATR%=0.05)
+2026-04-26 01:08:28.741 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=14.5 ATR%=0.05)
+2026-04-26 01:08:28.751 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=17.1 ATR%=0.04)
+2026-04-26 01:08:28.751 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → TRENDING (ADX=21.4 ATR%=0.04)
+2026-04-26 01:08:28.757 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.0 ATR%=0.04)
+2026-04-26 01:08:28.757 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=17.2 ATR%=0.04)
+2026-04-26 01:08:28.759 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.6 ATR%=0.04)
+2026-04-26 01:08:28.759 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.0 ATR%=0.05)
+2026-04-26 01:08:28.763 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=16.8 ATR%=0.05)
+2026-04-26 01:08:28.765 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=15.9 ATR%=0.05)
+2026-04-26 01:08:28.767 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.5 ATR%=0.05)
+2026-04-26 01:08:28.769 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.5 ATR%=0.05)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=18.7 ATR%=0.04)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=17.5 ATR%=0.05)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=17.1 ATR%=0.04)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=16.5 ATR%=0.04)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] SOLUSDT → MEAN_REVERTING (ADX=14.8 ATR%=0.03)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=60.5 ATR%=0.53)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=62.7 ATR%=0.53)
+2026-04-26 01:08:28.773 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=63.6 ATR%=0.48)
+2026-04-26 01:08:28.785 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=63.5 ATR%=0.49)
+2026-04-26 01:08:28.785 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=62.2 ATR%=0.51)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=60.8 ATR%=0.50)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=55.1 ATR%=0.48)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=51.5 ATR%=0.46)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=44.6 ATR%=0.47)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=42.2 ATR%=0.47)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=39.2 ATR%=0.53)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=38.7 ATR%=0.49)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=37.2 ATR%=0.53)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=34.6 ATR%=0.58)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=37.6 ATR%=0.60)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=43.2 ATR%=0.62)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=41.4 ATR%=0.63)
+2026-04-26 01:08:28.789 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=39.6 ATR%=0.65)
+2026-04-26 01:08:28.800 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=38.4 ATR%=0.65)
+2026-04-26 01:08:28.809 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=34.7 ATR%=0.69)
+2026-04-26 01:08:28.809 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=27.5 ATR%=0.68)
+2026-04-26 01:08:28.809 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=31.9 ATR%=0.68)
+2026-04-26 01:08:28.809 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=35.4 ATR%=0.66)
+2026-04-26 01:08:28.816 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=35.3 ATR%=0.65)
+2026-04-26 01:08:28.818 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=31.5 ATR%=0.59)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=26.7 ATR%=0.61)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → TRENDING (ADX=23.2 ATR%=0.59)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=18.7 ATR%=0.56)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=16.1 ATR%=0.55)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=6.9 ATR%=0.55)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=5.1 ATR%=0.52)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=5.6 ATR%=0.51)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=6.4 ATR%=0.52)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=8.2 ATR%=0.48)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=9.5 ATR%=0.53)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=11.8 ATR%=0.51)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=13.6 ATR%=0.61)
+2026-04-26 01:08:28.820 | DEBUG    | core.regime_detector:push:66 - [REGIME] KATUSDT → MEAN_REVERTING (ADX=12.6 ATR%=0.61)
