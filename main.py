@@ -3454,6 +3454,26 @@ async def learning_memory_disable():
     return {"status": "disabled", "phase": "030B"}
 
 
+@app.get("/api/learning-memory/history")
+async def learning_memory_history(n: int = 10):
+    """FTD-030B — Recent memory store records (explainability log)."""
+    from core.learning_memory import learning_memory_orchestrator
+    return {
+        "history": learning_memory_orchestrator.recent_memory_log(n),
+        "phase": "030B",
+    }
+
+
+@app.get("/api/learning-memory/heatmap")
+async def learning_memory_heatmap():
+    """FTD-030B — Regime × parameter confidence heatmap."""
+    from core.learning_memory import learning_memory_orchestrator
+    return {
+        "heatmap": learning_memory_orchestrator.pattern_heatmap(),
+        "phase": "030B",
+    }
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly

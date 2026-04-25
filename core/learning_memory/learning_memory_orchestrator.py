@@ -263,6 +263,29 @@ class LearningMemoryOrchestrator:
     def negative_memory_list(self) -> List[Dict[str, Any]]:
         return self._neg_memory.to_list()
 
+    def pattern_heatmap(self) -> list:
+        """Regime × parameter → avg confidence heatmap (from PR #80 FTD-030B)."""
+        buckets: dict = {}
+        for pat in self._engine.all_patterns():
+            regime = getattr(pat, "regime", "UNKNOWN")
+            param  = getattr(pat, "parameter", "")
+            conf   = getattr(pat, "confidence", 0.0)
+            key = (regime, param)
+            buckets.setdefault(key, []).append(conf)
+        return [
+            {
+                "regime":    k[0],
+                "parameter": k[1],
+                "avg_conf":  round(sum(v) / len(v), 1),
+                "count":     len(v),
+            }
+            for k, v in sorted(buckets.items())
+        ]
+
+    def check_activation(self, n_trades: int, meta_score: float) -> bool:
+        """FTD-030B activation gate (from PR #80) — returns current enabled state."""
+        return self._enabled
+
     def enable(self)  -> None:
         self._enabled = True
 
