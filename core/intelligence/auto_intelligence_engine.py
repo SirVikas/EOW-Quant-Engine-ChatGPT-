@@ -112,6 +112,12 @@ class AutoIntelligenceEngine:
         self._current: Optional[CycleRecord] = None
         self._running: bool = False
 
+        # FTD-030B: metadata carried from correction phase to post-check phase
+        self._pending_meta_score:    float = 0.0
+        self._pending_ai_mode:       str   = "UNKNOWN"
+        self._pending_regime:        str   = "UNKNOWN"
+        self._pending_volatility_pct: float = 0.15
+
         logger.info(
             f"[FTD-030] AutoIntelligenceEngine initialised | "
             f"interval={cfg.AUTO_INTELLIGENCE_INTERVAL_MIN}min "
@@ -205,6 +211,13 @@ class AutoIntelligenceEngine:
             rec.meta_score   = meta_score
             rec.validation   = {"ftd028_meta": ftd028_meta, "meta_score": meta_score}
 
+            # FTD-030B: update activation gate after each validation (orchestrator)
+            try:
+                from core.learning_memory import learning_memory_orchestrator
+                learning_memory_orchestrator.check_activation(n_trades, meta_score)
+            except Exception as _lm_exc:
+                logger.debug(f"[FTD-030B] check_activation skipped: {_lm_exc}")
+
             if meta_score < self._min_score:
                 rec.blocked      = True
                 rec.block_reason = f"META_SCORE_TOO_LOW({meta_score:.1f}<{self._min_score})"
@@ -230,8 +243,12 @@ class AutoIntelligenceEngine:
 
             # Step 3: If corrections were applied, arm the post-check
             if correction.get("verdict") == "APPLIED":
-                self._pending_cycle_id  = correction.get("cycle_id")
-                self._pending_trades_at = n_trades
+                self._pending_cycle_id       = correction.get("cycle_id")
+                self._pending_trades_at      = n_trades
+                self._pending_meta_score     = meta_score
+                self._pending_ai_mode        = str(system_state.get("ai_mode", "UNKNOWN"))
+                self._pending_regime         = str(system_state.get("regime", "UNKNOWN"))
+                self._pending_volatility_pct = float(system_state.get("volatility_pct", 0.15))
                 rec.phase = PHASE_POST_CHECK
                 logger.info(
                     f"[FTD-030] Cycle #{self._cycle_num}: {len(correction.get('applied', []))} "
@@ -286,6 +303,41 @@ class AutoIntelligenceEngine:
                 f"rollbacks={result.get('rollback_count', 0)} "
                 f"post_score={post_score:.1f}"
             )
+
+            # FTD-030B: feed cycle outcome into learning memory (orchestrator)
+            try:
+                from core.learning_memory import learning_memory_orchestrator
+                applied_changes = (
+                    self._current.correction.get("applied", [])
+                    if self._current else []
+                )
+                vol_pct = self._pending_volatility_pct
+                vol_bucket = "HIGH" if vol_pct > 0.3 else "LOW" if vol_pct < 0.1 else "MED"
+                lm_result = learning_memory_orchestrator.after_resolve_cycle(
+                    cycle_id=cycle_id,
+                    applied_changes=applied_changes,
+                    rollbacks=result.get("rollbacks", []),
+                    context={
+                        "regime":     self._pending_regime,
+                        "volatility": vol_bucket,
+                        "instrument": "CRYPTO",
+                        "timeframe":  "1m",
+                    },
+                    pre_meta_score=self._pending_meta_score,
+                    post_meta_score=post_score,
+                    ai_mode=self._pending_ai_mode,
+                    contradiction=not ftd028_validators.get(
+                        "contradiction", {}
+                    ).get("passed", True),
+                )
+                logger.info(
+                    f"[FTD-030B] Memory update: "
+                    f"records={lm_result.get('stored', 0)} "
+                    f"patterns={lm_result.get('patterns_formed', 0)}"
+                )
+            except Exception as _lm_exc:
+                logger.debug(f"[FTD-030B] memory update skipped: {_lm_exc}")
+
             self._broadcast({"type": "post_check", "cycle_id": cycle_id, **result})
 
         except Exception as exc:
