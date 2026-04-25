@@ -2088,6 +2088,20 @@ async def reset_perf_guard():
     return {"ok": True, "state": perf_guard.state}
 
 
+@app.get("/api/diagnostics/pipeline-break-forensics")
+async def diagnostics_pipeline_break_forensics(cycles: int = 100):
+    """
+    FTD-031C: Pipeline break forensic probe — DISABLED BY DEFAULT.
+
+    Isolation rules: manual trigger only, read-only, not part of core loop.
+    Enable via DIAGNOSTICS_ENDPOINT_ENABLED=true in .env (developer use only).
+    """
+    if not cfg.DIAGNOSTICS_ENDPOINT_ENABLED:
+        return {"enabled": False, "message": "Set DIAGNOSTICS_ENDPOINT_ENABLED=true to use this endpoint"}
+    from tools.diagnostics.pipeline_break_forensics import run_probe
+    return run_probe(cycles=max(1, min(cycles, 1000)))
+
+
 @app.get("/api/report", response_class=HTMLResponse)
 async def get_report():
     """

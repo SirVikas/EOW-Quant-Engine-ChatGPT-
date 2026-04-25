@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
+from config import cfg
 from core.learning_memory.memory_store          import MemoryStore
 from core.learning_memory.pattern_engine        import PatternEngine
 from core.learning_memory.confidence_updater    import ConfidenceUpdater
@@ -137,6 +138,18 @@ class LearningMemoryOrchestrator:
         """
         if not self._enabled:
             return {"stored": 0, "patterns_updated": 0}
+
+        # FTD-031C: config_snapshot logging at learning cycle start
+        logger.info(
+            f"[FTD-030B] learning_cycle config_snapshot | "
+            f"cycle_id={cycle_id} ts={int(time.time() * 1000)} "
+            f"KELLY_FRACTION={cfg.KELLY_FRACTION} "
+            f"MAX_DRAWDOWN_HALT={cfg.MAX_DRAWDOWN_HALT} "
+            f"CORRECTION_CONF_HIGH={cfg.CORRECTION_CONF_HIGH} "
+            f"CORRECTION_CONF_MED={cfg.CORRECTION_CONF_MED} "
+            f"P7B_PERF_WIN_THRESHOLD={cfg.P7B_PERF_WIN_THRESHOLD} "
+            f"ADAPTIVE_LR={cfg.ADAPTIVE_LR}"
+        )
 
         self._cycle_count += 1
         rollback_params = {r.get("parameter", r.get("change_id", "")) for r in rollbacks}

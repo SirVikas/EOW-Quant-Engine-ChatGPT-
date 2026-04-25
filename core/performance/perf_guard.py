@@ -91,6 +91,9 @@ class PerfGuard:
         self._breach_threshold = cfg.PERF_LATENCY_BREACH_MS
         self._state_changes: List[_GuardSnapshot] = []
         self._lock = Lock()
+        # FTD-031C: track current reason and last transition for /api/perf-status
+        self._current_reason: str = "initialised"
+        self._last_transition_ts: Optional[int] = None
 
         # Build skip sets from config (with fallback to defaults)
         raw_degraded: list = cfg.PERF_DEGRADED_SKIP_MODULES or _DEFAULT_DEGRADED_SKIP
@@ -126,8 +129,12 @@ class PerfGuard:
                     f"memory_critical" if memory_critical
                     else f"cycle_ms={cycle_ms:.1f} breach_threshold={self._breach_threshold}"
                 )
+                ts_now = int(time.time() * 1000)
+                # FTD-031C: persist for /api/perf-status direct access
+                self._current_reason = reason
+                self._last_transition_ts = ts_now
                 snap = _GuardSnapshot(
-                    ts=int(time.time() * 1000),
+                    ts=ts_now,
                     state=new_state,
                     consecutive_breaches=self._consecutive_breaches,
                     consecutive_recoveries=self._consecutive_recoveries,
@@ -193,11 +200,18 @@ class PerfGuard:
             self._state = STATE_NORMAL
             self._consecutive_breaches = 0
             self._consecutive_recoveries = 0
+            self._current_reason = "operator_reset"
+            self._last_transition_ts = int(time.time() * 1000)
         logger.info(f"[FTD-031] PerfGuard reset: {old} → NORMAL (operator)")
 
     def stats(self) -> Dict[str, Any]:
         with self._lock:
             return {
+                # FTD-031C: mode/reason/last_transition required by /api/perf-status
+                "mode":                    self._state,
+                "reason":                  self._current_reason,
+                "last_transition":         self._last_transition_ts,
+                # existing fields retained for compatibility
                 "state":                   self._state,
                 "consecutive_breaches":    self._consecutive_breaches,
                 "consecutive_recoveries":  self._consecutive_recoveries,

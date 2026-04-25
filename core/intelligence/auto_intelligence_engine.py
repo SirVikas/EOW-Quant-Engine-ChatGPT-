@@ -182,7 +182,18 @@ class AutoIntelligenceEngine:
             phase=PHASE_VALIDATING,
         )
         self._current = rec
-        logger.info(f"[FTD-030] Starting cycle #{self._cycle_num} | trades={n_trades}")
+        # FTD-031C: config_snapshot logging at auto-intelligence cycle start
+        logger.info(
+            f"[FTD-030] Starting cycle #{self._cycle_num} | trades={n_trades} | "
+            f"config_snapshot: interval_min={cfg.AUTO_INTELLIGENCE_INTERVAL_MIN} "
+            f"min_trades={cfg.AUTO_INTELLIGENCE_MIN_TRADES} "
+            f"min_score={cfg.AUTO_INTELLIGENCE_MIN_SCORE} "
+            f"max_daily={cfg.AUTO_INTELLIGENCE_MAX_DAILY_CYCLES} "
+            f"KELLY_FRACTION={cfg.KELLY_FRACTION} "
+            f"MAX_DRAWDOWN_HALT={cfg.MAX_DRAWDOWN_HALT} "
+            f"P7B_PERF_WIN_THRESHOLD={cfg.P7B_PERF_WIN_THRESHOLD} "
+            f"TR_EV_WEIGHT={cfg.TR_EV_WEIGHT}"
+        )
 
         try:
             # Step 1: Build system state + run FTD-028 full validators

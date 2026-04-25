@@ -6,19 +6,22 @@ Respects HARD_LIMITS (Q14) and confidence-scaled change magnitude (Q3).
 """
 from __future__ import annotations
 import math
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from loguru import logger
 from config import cfg
 
 # ── Hard Limits — NEVER auto-changed (Q14) ───────────────────────────────────
+# FTD-031C: all values sourced from cfg (SSOT — no magic numbers)
 HARD_LIMITS: Dict[str, Any] = {
-    "MAX_DRAWDOWN_HALT":     cfg.MAX_DRAWDOWN_HALT,   # absolute DD halt — immutable
-    "MAX_LEVERAGE_CAP":      3.0,                      # max exposure / equity ratio — immutable
-    "KILL_SWITCH_THRESHOLD": 0.20,                     # emergency stop threshold — immutable
-    "MIN_EQUITY_FLOOR":      0.50,                     # equity must never drop below 50% initial — immutable
-    "MAX_TRADES_PER_DAY":    cfg.MAX_TRADES_PER_DAY,  # daily trade cap — immutable
-    "AUTH_ENABLED":          cfg.AUTH_ENABLED,         # auth config — immutable
+    "MAX_DRAWDOWN_HALT":     cfg.MAX_DRAWDOWN_HALT,        # absolute DD halt — immutable
+    "MAX_LEVERAGE_CAP":      cfg.MAX_LEVERAGE_CAP,         # max exposure / equity ratio — immutable
+    "KILL_SWITCH_THRESHOLD": cfg.KILL_SWITCH_THRESHOLD,    # emergency stop threshold — immutable
+    "MIN_EQUITY_FLOOR":      cfg.MIN_EQUITY_FLOOR,         # equity must never drop below 50% initial — immutable
+    "MAX_TRADES_PER_DAY":    cfg.MAX_TRADES_PER_DAY,       # daily trade cap — immutable
+    "AUTH_ENABLED":          cfg.AUTH_ENABLED,             # auth config — immutable
 }
 
 # ── Tunable parameter catalogue (Q1: scope A+C+D) ────────────────────────────
@@ -39,14 +42,14 @@ TUNABLE_PARAMS: Dict[str, tuple] = {
     "EXPLORE_EV_FLOOR":         (0.30, 0.70,  "Max EV negative fraction for exploration"),
 }
 
-# ── Change magnitude bounds by confidence (Q3: dynamic) ──────────────────────
+# ── Change magnitude bounds by confidence (Q3: dynamic, cfg-driven) ──────────
 def max_change_pct(confidence_score: float) -> float:
     """Returns the maximum allowed parameter change percentage (0–1 fraction)."""
-    if confidence_score >= 80:
-        return 0.15
-    if confidence_score >= 60:
-        return 0.10
-    return 0.05
+    if confidence_score >= cfg.CORRECTION_CONF_HIGH:
+        return cfg.CORRECTION_MAX_CHANGE_HIGH
+    if confidence_score >= cfg.CORRECTION_CONF_MED:
+        return cfg.CORRECTION_MAX_CHANGE_MED
+    return cfg.CORRECTION_MAX_CHANGE_LOW
 
 
 @dataclass
@@ -76,6 +79,20 @@ class CorrectionProposal:
         current_params: Dict[str, float],
         confidence_score: float = 70.0,
     ) -> List[Proposal]:
+        # FTD-031C: config_snapshot logging at correction cycle start
+        logger.info(
+            f"[FTD-029] correction_cycle config_snapshot | "
+            f"ts={int(time.time() * 1000)} "
+            f"confidence={confidence_score} "
+            f"max_change_pct={max_change_pct(confidence_score)} "
+            f"hard_limits={list(HARD_LIMITS.keys())} "
+            f"KELLY_FRACTION={cfg.KELLY_FRACTION} "
+            f"MAX_DRAWDOWN_HALT={cfg.MAX_DRAWDOWN_HALT} "
+            f"P7B_PERF_WIN_THRESHOLD={cfg.P7B_PERF_WIN_THRESHOLD} "
+            f"TR_EV_WEIGHT={cfg.TR_EV_WEIGHT} "
+            f"ADAPTIVE_LR={cfg.ADAPTIVE_LR}"
+        )
+
         proposals: List[Proposal] = []
         max_pct = max_change_pct(confidence_score)
 
