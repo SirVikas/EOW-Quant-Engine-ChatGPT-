@@ -98,6 +98,10 @@ from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
 from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
 from core.intelligence.auto_intelligence_engine import AutoIntelligenceEngine  # FTD-030
+from core.performance import (                                                 # FTD-031
+    perf_monitor, task_queue, perf_guard,
+    PRIORITY_LOW, PRIORITY_MEDIUM,
+)
 from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 
 
@@ -215,6 +219,10 @@ async def on_tick(tick: Tick):
     # Guard: reject malformed symbols that somehow bypass _is_valid_symbol
     if len(sym) < 5 or not sym.endswith("USDT"):
         return
+
+    # FTD-031: per-cycle latency tracking
+    if cfg.PERF_ENABLED:
+        perf_monitor.on_cycle_start(sym)
 
     # FTD-REF-019/025: record liveness for tick watchdog + truth engine
     ws_stab.record_tick()
@@ -1233,6 +1241,10 @@ async def on_tick(tick: Tick):
     # 10. Broadcast market update to dashboard
     await _broadcast_market_update(sym, tick, regime.value)
 
+    # FTD-031: record cycle latency, feed guard + alerting
+    if cfg.PERF_ENABLED:
+        perf_monitor.on_cycle_end(sym)
+
 
 async def _broadcast_market_update(sym: str, tick: Tick, regime: str):
     data = {
@@ -1574,6 +1586,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         f"[FTD-030] Auto-intelligence loop started | "
         f"interval={cfg.AUTO_INTELLIGENCE_INTERVAL_MIN}min"
     )
+
+    # ── FTD-031: Performance Optimization Layer ───────────────────────────────
+    if cfg.PERF_ENABLED:
+        await task_queue.start()
+        await perf_monitor.start_background_tasks()
+        _thought(
+            f"⚡ [FTD-031] Performance layer online | "
+            f"target={cfg.PERF_LATENCY_TARGET_MS}ms "
+            f"cache_ttl_pattern={cfg.PERF_CACHE_PATTERN_TTL_SEC}s "
+            f"queue_workers={cfg.PERF_QUEUE_WORKERS}",
+            "SYSTEM",
+        )
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -1586,6 +1611,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     await data_lake.stop()
     await ws_stab.stop()
     await api_manager.close()
+    if cfg.PERF_ENABLED:
+        await task_queue.shutdown()
 
 
 # ── FastAPI App ───────────────────────────────────────────────────────────────
@@ -2044,6 +2071,21 @@ async def get_mode_info():
         ),
         "ts": int(time.time() * 1000),
     }
+
+
+@app.get("/api/perf-status")
+async def get_perf_status():
+    """FTD-031: Full performance metrics — latency, cache, guard state, queue, memory."""
+    if not cfg.PERF_ENABLED:
+        return {"enabled": False}
+    return perf_monitor.snapshot()
+
+
+@app.post("/api/perf-guard/reset")
+async def reset_perf_guard():
+    """FTD-031: Operator reset of PerfGuard back to NORMAL state."""
+    perf_guard.reset()
+    return {"ok": True, "state": perf_guard.state}
 
 
 @app.get("/api/report", response_class=HTMLResponse)

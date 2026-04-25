@@ -366,13 +366,66 @@ class EngineConfig(BaseSettings):
     P7B_EV_CC_BOOST: float = 1.50              # Proposed-risk multiplier for high-EV trades
     P7B_EV_CC_PENALTY: float = 0.70            # Proposed-risk multiplier for low-EV trades
 
-    # ── FTD-030: Autonomous Background Intelligence Loop ──────────────────��──
+    # ── FTD-030: Autonomous Background Intelligence Loop ──────────────────────
     AUTO_INTELLIGENCE_ENABLED: bool = True          # Master switch for autonomous loop
     AUTO_INTELLIGENCE_INTERVAL_MIN: float = 5.0     # Minutes between correction cycles
     AUTO_INTELLIGENCE_MIN_TRADES: int = 30          # Minimum trades before auto-correction fires
     AUTO_INTELLIGENCE_MIN_SCORE: float = 55.0       # Min FTD-028 meta_score to allow correction
     AUTO_INTELLIGENCE_POST_WAIT_TRADES: int = 5     # Trades to wait before post-correction check
     AUTO_INTELLIGENCE_MAX_DAILY_CYCLES: int = 12    # Hard cap: corrections per 24h session
+
+    # ── FTD-031: Performance Optimization + Latency Control ───────────────────
+    # Master switch
+    PERF_ENABLED: bool = True                       # Enable FTD-031 performance layer
+
+    # Latency targets (ms)
+    PERF_LATENCY_TARGET_MS: float = 100.0           # Q1-B: recommended target per cycle
+    PERF_LATENCY_WARN_MS: float = 75.0              # Warn at 75% of target
+    PERF_LATENCY_BREACH_MS: float = 100.0           # Alert + degrade above this
+
+    # Cache TTLs (seconds)
+    PERF_CACHE_PATTERN_TTL_SEC: float = 60.0        # Pattern index cache TTL
+    PERF_CACHE_VALIDATION_TTL_SEC: float = 30.0     # Validation result cache TTL
+    PERF_CACHE_SIGNAL_TTL_SEC: float = 5.0          # Last signal state cache TTL
+    PERF_CACHE_CONFIG_TTL_SEC: float = 300.0        # Config snapshot cache TTL
+
+    # Async task queue
+    PERF_QUEUE_MAX_SIZE: int = 500                  # Max pending background tasks
+    PERF_QUEUE_WORKERS: int = 2                     # Concurrent background workers
+    PERF_QUEUE_BACKLOG_WARN: int = 100              # Alert when backlog exceeds this
+
+    # Rate limiting
+    PERF_MAX_CYCLES_PER_MIN: int = 600              # Max run_cycle() calls per minute
+    PERF_DASHBOARD_REFRESH_MAX_PER_SEC: float = 5.0 # Dashboard WS push rate cap
+    PERF_API_RATE_MAX_PER_MIN: int = 300            # REST API request cap per minute
+
+    # Memory management
+    PERF_MAX_PATTERN_RECORDS: int = 10_000          # Hard cap on in-memory pattern entries
+    PERF_JSONL_COMPACTION_THRESHOLD: int = 5_000    # Trigger JSONL compaction above this
+    PERF_ARCHIVE_DAYS: int = 7                      # Archive records older than N days
+    PERF_MEMORY_WARN_MB: float = 512.0              # Warn when process RSS exceeds this
+    PERF_MEMORY_CRITICAL_MB: float = 1024.0         # Enter safe mode above this
+
+    # Logging mode: "full" (dev) | "reduced" (prod) | "dynamic" (auto-switch)
+    PERF_LOG_MODE: str = "dynamic"                  # Q10-C: dynamic logging strategy
+
+    # Fail-safe / degraded mode
+    PERF_SAFE_MODE_LATENCY_CONSECUTIVE: int = 5     # Breaches in a row → enter DEGRADED
+    PERF_DEGRADED_SKIP_MODULES: list = []           # Modules to skip in DEGRADED mode
+    PERF_SAFE_MODE_SKIP_MODULES: list = []          # Modules to skip in SAFE_MODE
+
+    # Benchmark baseline
+    PERF_BENCHMARK_ENABLED: bool = True             # Q17-A: mandatory benchmark
+    PERF_BENCHMARK_WARMUP_CYCLES: int = 100         # Cycles before baseline is locked
+    PERF_BENCHMARK_SYMBOLS: int = 5                 # Symbols for multi-symbol benchmark
+
+    # Real-time vs batch classification (informational, used by async queue)
+    # Real-time: signal, risk, correction  |  Batch: validation, learning, export
+    PERF_BATCH_MODULES: list = [                    # Q12: modules routed to batch queue
+        "export_engine",
+        "deep_validation",
+        "learning_engine",
+    ]
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 
