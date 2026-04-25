@@ -16,7 +16,7 @@ from collections import deque
 from loguru import logger
 
 
-BASE_VOLUME_THRESHOLD_PCT = 0.60   # baseline: current ≥ 60% of 24-candle mean
+BASE_VOLUME_THRESHOLD_PCT = 0.45   # qFTD-032: 0.60→0.45 — 60% blocked too many legitimate low-volume windows
 VOLUME_LOOKBACK           = 24     # rolling window in candles (= 24 minutes)
 
 
