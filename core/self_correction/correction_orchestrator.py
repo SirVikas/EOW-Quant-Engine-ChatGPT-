@@ -30,6 +30,7 @@ from core.self_correction.collision_handler   import CollisionHandler
 from core.self_correction.change_applier      import ChangeApplier
 from core.self_correction.rollback_manager    import RollbackManager
 from core.self_correction.audit_logger        import AuditLogger, FinalState
+from core.learning_memory                     import learning_memory_orchestrator
 
 
 class CorrectionOrchestrator:
@@ -71,6 +72,7 @@ class CorrectionOrchestrator:
         risk_halted:          bool  = False,
         risk_violated:        bool  = False,
         contradiction_critical: bool = False,
+        memory_context:       Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         cycle_id = str(uuid.uuid4())[:8]
         self._last_cycle_id = cycle_id
@@ -163,6 +165,17 @@ class CorrectionOrchestrator:
         safe_param_set = {p["parameter"] for p in safe_plans_d}
         safe_plans  = [p for p in plans if p.parameter in safe_param_set]
 
+        # ── Step 6b: Memory enhancement (FTD-030B) ───────────────────────────
+        ftd027_passed = ftd027_result.get("passed", True) if ftd027_result else True
+        mem_result    = learning_memory_orchestrator.enhance_change_plans(
+            plans             = [self._plan_to_dict(p) for p in safe_plans],
+            context           = memory_context or {},
+            ftd028_meta_score = meta_score,
+            ftd027_passed     = ftd027_passed,
+        )
+        memory_log    = mem_result.get("memory_log", [])
+        memory_applied_count = mem_result.get("applied", 0)
+
         # ── Step 7: Apply ─────────────────────────────────────────────────────
         applied_changes, blocked_plans = self._change_applier.apply(safe_plans, effective_params)
 
@@ -200,18 +213,20 @@ class CorrectionOrchestrator:
         verdict = "APPLIED" if applied_changes else ("BLOCKED" if blocked_plans else "NO_ACTION")
 
         return {
-            "cycle_id":        cycle_id,
-            "module":          self.MODULE,
-            "phase":           self.PHASE,
-            "verdict":         verdict,
-            "issues_found":    len(issues),
-            "confidence":      round(confidence, 1),
-            "allowed_delta":   allowed_delta,
-            "applied":         [self._change_applier._serialise(c) for c in applied_changes],
-            "blocked":         blocked_plans,
-            "queued":          queued_d,
-            "param_overlay":   self._change_applier.get_overlay(),
-            "ts":              now,
+            "cycle_id":            cycle_id,
+            "module":              self.MODULE,
+            "phase":               self.PHASE,
+            "verdict":             verdict,
+            "issues_found":        len(issues),
+            "confidence":          round(confidence, 1),
+            "allowed_delta":       allowed_delta,
+            "applied":             [self._change_applier._serialise(c) for c in applied_changes],
+            "blocked":             blocked_plans,
+            "queued":              queued_d,
+            "param_overlay":       self._change_applier.get_overlay(),
+            "memory_log":          memory_log,
+            "memory_applied":      memory_applied_count,
+            "ts":                  now,
         }
 
     def resolve_cycle(
@@ -221,6 +236,9 @@ class CorrectionOrchestrator:
         post_ftd028_score: float,
         risk_violated:   bool = False,
         validation_passed: bool = True,
+        pre_meta_score:  float = 0.0,
+        memory_context:  Optional[Dict[str, Any]] = None,
+        contradiction:   bool = False,
     ) -> Dict[str, Any]:
         """
         Step 9: Post-correction re-validation and rollback decisions.
@@ -268,13 +286,27 @@ class CorrectionOrchestrator:
         if stop:
             logger.error("[FTD-029] Auto-correction STOPPED after 3 consecutive rollbacks (Q10)")
 
+        # ── FTD-030B: Update learning memory after cycle resolution ──────────
+        applied_serialised = self._change_applier.recent_applied(20)
+        mem_update = learning_memory_orchestrator.after_resolve_cycle(
+            cycle_id        = cycle_id,
+            applied_changes = applied_serialised,
+            rollbacks       = rollbacks,
+            context         = memory_context or {},
+            pre_meta_score  = pre_meta_score,
+            post_meta_score = post_ftd028_score,
+            ai_mode         = "AUTO",
+            contradiction   = contradiction,
+        )
+
         return {
-            "cycle_id":    cycle_id,
-            "rollbacks":   rollbacks,
+            "cycle_id":       cycle_id,
+            "rollbacks":      rollbacks,
             "rollback_count": len(rollbacks),
             "engine_stopped": stop,
-            "post_score":  post_ftd028_score,
-            "ts":          int(time.time() * 1000),
+            "post_score":     post_ftd028_score,
+            "memory_update":  mem_update,
+            "ts":             int(time.time() * 1000),
         }
 
     # ── Dashboard controls (Q13) ──────────────────────────────────────────────
