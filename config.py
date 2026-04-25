@@ -366,6 +366,14 @@ class EngineConfig(BaseSettings):
     P7B_EV_CC_BOOST: float = 1.50              # Proposed-risk multiplier for high-EV trades
     P7B_EV_CC_PENALTY: float = 0.70            # Proposed-risk multiplier for low-EV trades
 
+    # ── FTD-030: Autonomous Background Intelligence Loop ──────────────────��──
+    AUTO_INTELLIGENCE_ENABLED: bool = True          # Master switch for autonomous loop
+    AUTO_INTELLIGENCE_INTERVAL_MIN: float = 5.0     # Minutes between correction cycles
+    AUTO_INTELLIGENCE_MIN_TRADES: int = 30          # Minimum trades before auto-correction fires
+    AUTO_INTELLIGENCE_MIN_SCORE: float = 55.0       # Min FTD-028 meta_score to allow correction
+    AUTO_INTELLIGENCE_POST_WAIT_TRADES: int = 5     # Trades to wait before post-correction check
+    AUTO_INTELLIGENCE_MAX_DAILY_CYCLES: int = 12    # Hard cap: corrections per 24h session
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

@@ -991,6 +991,73 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
             title="Performance report preview"></iframe>
   </div>
 
+  <!-- ── FTD-030: Auto Intelligence Panel ────────────────────���────────────── -->
+  <div class="card" style="background:#FAF5FF;margin-top:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;color:#553C9A;">🧠 FTD-030 — Autonomous Intelligence Loop</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+          Auto-runs FTD-028 deep validation + FTD-029 self-correction every
+          <span id="ai-interval">5</span> min
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn purple" onclick="forceAutoIntelligenceRun()" title="Run one correction cycle immediately">⚡ Force Run</button>
+        <button class="btn green"  onclick="enableAutoIntelligence()"  title="Enable autonomous loop">Enable</button>
+        <button class="btn"        onclick="disableAutoIntelligence()" title="Disable autonomous loop" style="border-color:#E53E3E;color:#9B2C2C;">Disable</button>
+        <button class="btn"        onclick="loadAutoIntelligence()"    style="font-size:10px;padding:3px 10px;">Refresh</button>
+      </div>
+    </div>
+
+    <!-- Status row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;">
+      <div class="stat-box" style="border-left:4px solid #805AD5;">
+        <div class="stat-label">Status</div>
+        <div class="stat-val" id="ai-status" style="color:#805AD5;">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #3182CE;">
+        <div class="stat-label">Cycles Run</div>
+        <div class="stat-val" id="ai-cycles">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #38A169;">
+        <div class="stat-label">Daily Count</div>
+        <div class="stat-val" id="ai-daily">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #DD6B20;">
+        <div class="stat-label">Last Meta Score</div>
+        <div class="stat-val" id="ai-meta-score">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #E53E3E;">
+        <div class="stat-label">Last Verdict</div>
+        <div class="stat-val" id="ai-verdict">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #718096;">
+        <div class="stat-label">Post-Check Pending</div>
+        <div class="stat-val" id="ai-pending">—</div>
+      </div>
+    </div>
+
+    <!-- History table -->
+    <div id="ai-history-wrap" style="display:none;">
+      <div style="font-size:12px;font-weight:600;color:#553C9A;margin-bottom:6px;">Cycle History</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="background:#EDE9FE;text-align:left;">
+            <th style="padding:5px 8px;">#</th>
+            <th style="padding:5px 8px;">Phase</th>
+            <th style="padding:5px 8px;">Meta Score</th>
+            <th style="padding:5px 8px;">Verdict</th>
+            <th style="padding:5px 8px;">Applied</th>
+            <th style="padding:5px 8px;">Rollbacks</th>
+          </tr>
+        </thead>
+        <tbody id="ai-history-body"></tbody>
+      </table>
+    </div>
+
+    <div id="ai-spinner" style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Loading…</div>
+  </div>
+
 </div><!-- /main report -->
 </div><!-- /tab-report -->
 
@@ -1197,6 +1264,7 @@ function switchTab(name) {
   }
   if (name === 'report') {
     refreshReport();
+    loadAutoIntelligence();
   }
 }
 
@@ -1533,6 +1601,75 @@ async function loadCapital() {
       .join('')}
     </div>`;
   } catch(e) { el.innerHTML = '<span style="color:#E53E3E">Error: '+e.message+'</span>'; }
+}
+
+// ── FTD-030: Auto Intelligence Panel ─────────────────────────────────────────
+async function loadAutoIntelligence() {
+  const spinner = document.getElementById('ai-spinner');
+  const wrap    = document.getElementById('ai-history-wrap');
+  if (!spinner) return;
+  spinner.style.display = 'block';
+  if (wrap) wrap.style.display = 'none';
+  try {
+    const [state, hist] = await Promise.all([
+      fetch(API + '/api/auto-intelligence/state').then(r => r.json()),
+      fetch(API + '/api/auto-intelligence/history?n=10').then(r => r.json()),
+    ]);
+    const enabled   = state.enabled;
+    const cycles    = state.cycles_run  ?? '—';
+    const daily     = state.daily_cycles ?? '—';
+    const last      = state.last_cycle  ?? {};
+    const interval  = state.interval_min ?? 5;
+    const pending   = state.pending_check ? 'YES' : 'No';
+
+    document.getElementById('ai-status').textContent      = enabled ? 'ACTIVE' : 'DISABLED';
+    document.getElementById('ai-status').style.color      = enabled ? '#38A169' : '#E53E3E';
+    document.getElementById('ai-cycles').textContent      = cycles;
+    document.getElementById('ai-daily').textContent       = `${daily} / ${state.max_daily ?? '—'}`;
+    document.getElementById('ai-meta-score').textContent  = last.meta_score != null ? last.meta_score.toFixed(1) : '—';
+    document.getElementById('ai-verdict').textContent     = last.correction_verdict || '—';
+    document.getElementById('ai-pending').textContent     = pending;
+    document.getElementById('ai-interval').textContent    = interval;
+
+    const rows = (hist.history || []).reverse();
+    if (rows.length > 0 && wrap) {
+      const tbody = document.getElementById('ai-history-body');
+      tbody.innerHTML = rows.map(r => {
+        const col = r.blocked ? '#E53E3E' : (r.correction_verdict === 'APPLIED' ? '#38A169' : '#718096');
+        return `<tr style="border-bottom:1px solid #EDE9FE;">
+          <td style="padding:4px 8px;">#${r.cycle_num}</td>
+          <td style="padding:4px 8px;">${r.phase}</td>
+          <td style="padding:4px 8px;">${r.meta_score != null ? r.meta_score.toFixed(1) : '—'}</td>
+          <td style="padding:4px 8px;color:${col};font-weight:600;">${r.correction_verdict || (r.blocked ? 'BLOCKED' : '—')}</td>
+          <td style="padding:4px 8px;">${r.applied_count ?? 0}</td>
+          <td style="padding:4px 8px;">${r.rollback_count ?? 0}</td>
+        </tr>`;
+      }).join('');
+      wrap.style.display = 'block';
+    }
+  } catch(e) {
+    if (spinner) spinner.textContent = 'Error: ' + e.message;
+    return;
+  }
+  spinner.style.display = 'none';
+}
+
+async function forceAutoIntelligenceRun() {
+  try {
+    const r = await fetch(API + '/api/auto-intelligence/force-run', {method:'POST'}).then(r=>r.json());
+    alert('FTD-030 Cycle: ' + JSON.stringify(r.result?.verdict || r.status || r));
+    loadAutoIntelligence();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function enableAutoIntelligence() {
+  await fetch(API + '/api/auto-intelligence/enable', {method:'POST'});
+  loadAutoIntelligence();
+}
+
+async function disableAutoIntelligence() {
+  await fetch(API + '/api/auto-intelligence/disable', {method:'POST'});
+  loadAutoIntelligence();
 }
 
 // Auto-load layer panels when dbo tab is opened
