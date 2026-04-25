@@ -9,15 +9,16 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from config import cfg
 
 # ── Hard Limits — NEVER auto-changed (Q14) ───────────────────────────────────
 HARD_LIMITS: Dict[str, Any] = {
-    "MAX_DRAWDOWN_HALT":   0.15,    # absolute DD halt — immutable
-    "MAX_LEVERAGE_CAP":    3.0,     # max exposure / equity ratio — immutable
-    "KILL_SWITCH_THRESHOLD": 0.20,  # emergency stop threshold — immutable
-    "MIN_EQUITY_FLOOR":    0.50,    # equity must never drop below 50% initial — immutable
-    "MAX_TRADES_PER_DAY":  12,      # daily trade cap — immutable
-    "AUTH_ENABLED":        None,    # auth config — immutable
+    "MAX_DRAWDOWN_HALT":     cfg.MAX_DRAWDOWN_HALT,   # absolute DD halt — immutable
+    "MAX_LEVERAGE_CAP":      3.0,                      # max exposure / equity ratio — immutable
+    "KILL_SWITCH_THRESHOLD": 0.20,                     # emergency stop threshold — immutable
+    "MIN_EQUITY_FLOOR":      0.50,                     # equity must never drop below 50% initial — immutable
+    "MAX_TRADES_PER_DAY":    cfg.MAX_TRADES_PER_DAY,  # daily trade cap — immutable
+    "AUTH_ENABLED":          cfg.AUTH_ENABLED,         # auth config — immutable
 }
 
 # ── Tunable parameter catalogue (Q1: scope A+C+D) ────────────────────────────
@@ -86,7 +87,7 @@ class CorrectionProposal:
 
         # ── Diagnosis 1: Low win rate → tighten EV win threshold ─────────────
         if win_rate < 0.45 and n_trades >= 10:
-            cur = current_params.get("P7B_PERF_WIN_THRESHOLD", 0.65)
+            cur = current_params.get("P7B_PERF_WIN_THRESHOLD", cfg.P7B_PERF_WIN_THRESHOLD)
             delta = min(max_pct, 0.05) * cur
             proposed = min(cur + delta, TUNABLE_PARAMS["P7B_PERF_WIN_THRESHOLD"][1])
             if not math.isclose(proposed, cur):
@@ -98,7 +99,7 @@ class CorrectionProposal:
 
         # ── Diagnosis 2: High win rate but negative PnL → increase EV weight ─
         if win_rate > 0.60 and total_pnl < 0 and n_trades >= 10:
-            cur = current_params.get("TR_EV_WEIGHT", 0.55)
+            cur = current_params.get("TR_EV_WEIGHT", cfg.TR_EV_WEIGHT)
             delta = min(max_pct, 0.08) * cur
             proposed = min(cur + delta, TUNABLE_PARAMS["TR_EV_WEIGHT"][1])
             if not math.isclose(proposed, cur):
@@ -110,7 +111,7 @@ class CorrectionProposal:
 
         # ── Diagnosis 3: High drawdown → reduce Kelly fraction ────────────────
         if drawdown > 0.08:
-            cur = current_params.get("KELLY_FRACTION", 0.25)
+            cur = current_params.get("KELLY_FRACTION", cfg.KELLY_FRACTION)
             delta = min(max_pct, 0.10) * cur
             proposed = max(cur - delta, TUNABLE_PARAMS["KELLY_FRACTION"][0])
             if not math.isclose(proposed, cur):
@@ -122,7 +123,7 @@ class CorrectionProposal:
 
         # ── Diagnosis 4: Negative Sharpe → increase learning rate ─────────────
         if sharpe is not None and sharpe < 0 and n_trades >= 10:
-            cur = current_params.get("ADAPTIVE_LR", 0.05)
+            cur = current_params.get("ADAPTIVE_LR", cfg.ADAPTIVE_LR)
             delta = min(max_pct, 0.08) * cur
             proposed = min(cur + delta, TUNABLE_PARAMS["ADAPTIVE_LR"][1])
             if not math.isclose(proposed, cur):
@@ -133,8 +134,8 @@ class CorrectionProposal:
                 ))
 
         # ── Diagnosis 5: Recovery from DD → restore Kelly ─────────────────────
-        if drawdown < 0.03 and current_params.get("KELLY_FRACTION", 0.25) < 0.20:
-            cur = current_params.get("KELLY_FRACTION", 0.25)
+        if drawdown < 0.03 and current_params.get("KELLY_FRACTION", cfg.KELLY_FRACTION) < 0.20:
+            cur = current_params.get("KELLY_FRACTION", cfg.KELLY_FRACTION)
             delta = min(max_pct, 0.05) * 0.25   # target baseline = 0.25
             proposed = min(cur + delta, TUNABLE_PARAMS["KELLY_FRACTION"][1])
             if not math.isclose(proposed, cur):
