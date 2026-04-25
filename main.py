@@ -97,6 +97,7 @@ from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
 from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
+from core.intelligence.auto_intelligence_engine import AutoIntelligenceEngine  # FTD-030
 from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 
 
@@ -133,6 +134,11 @@ vault      = VaultManager()
 guardian   = GuardianLogic()
 ws_stab    = WsStabilizer(mdp)        # FTD-REF-019: tick watchdog
 infra_health = InfraHealthManager(redis_health=redis_health, redis_retries=3)
+
+# FTD-030: Auto Intelligence Engine — instantiated after pnl_calc/scaler are ready.
+# Wired to _sc_build_state() (defined later) and pnl_calc.trades count.
+# broadcast_fn set to _ai_broadcast (defined below) after WS clients are ready.
+_auto_intelligence: "AutoIntelligenceEngine | None" = None   # initialised in lifespan
 
 # FTD-REF-019: store boot diagnostics for /api/boot-status
 _boot_status: dict = {}
@@ -1520,6 +1526,54 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
                 logger.warning(f"[CHECKPOINT] 8h export failed: {exc}")
 
     tasks.append(asyncio.create_task(_periodic_checkpoint()))
+
+    # ── FTD-030: Autonomous Intelligence Loop ────────────────────────────────
+    global _auto_intelligence
+
+    def _ai_broadcast(payload: dict) -> None:
+        """Broadcast auto-intelligence events to all connected WS dashboard clients."""
+        import json as _json
+        msg = _json.dumps(payload, default=str)
+        for ws in list(_ws_clients):
+            try:
+                asyncio.create_task(_safe_send(ws, _json.loads(msg)))
+            except Exception:
+                pass
+
+    _auto_intelligence = AutoIntelligenceEngine(
+        state_fn=_sc_build_state,
+        trades_fn=lambda: len(pnl_calc.trades),
+        broadcast_fn=_ai_broadcast,
+    )
+
+    async def _auto_intelligence_loop():
+        """FTD-030: Runs every AUTO_INTELLIGENCE_INTERVAL_MIN minutes."""
+        interval_sec = cfg.AUTO_INTELLIGENCE_INTERVAL_MIN * 60.0
+        while True:
+            await asyncio.sleep(interval_sec)
+            try:
+                result = _auto_intelligence.tick()
+                action = result.get("action") or result.get("phase") or "?"
+                verdict = result.get("correction_verdict", "")
+                logger.info(
+                    f"[FTD-030] Auto-intelligence tick: action={action} "
+                    f"verdict={verdict} cycles={_auto_intelligence._cycle_num}"
+                )
+                if action not in ("SKIPPED",):
+                    _thought(
+                        f"🧠 [FTD-030] Auto-intelligence cycle #{result.get('cycle_num', '?')}: "
+                        f"meta_score={result.get('meta_score', 0):.1f} "
+                        f"verdict={verdict or action}",
+                        "SYSTEM",
+                    )
+            except Exception as exc:
+                logger.warning(f"[FTD-030] Auto-intelligence loop error: {exc}")
+
+    tasks.append(asyncio.create_task(_auto_intelligence_loop()))
+    logger.info(
+        f"[FTD-030] Auto-intelligence loop started | "
+        f"interval={cfg.AUTO_INTELLIGENCE_INTERVAL_MIN}min"
+    )
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -2797,6 +2851,61 @@ async def clear_self_correction_overlay():
     from core.self_correction.correction_orchestrator import correction_orchestrator
     correction_orchestrator.clear_overlay()
     return {"status": "overlay_cleared", "phase": "029"}
+
+
+# ── FTD-030: Autonomous Background Intelligence Loop ─────────────────────────
+
+@app.get("/api/auto-intelligence/state")
+async def get_auto_intelligence_state():
+    """FTD-030 — Auto-intelligence engine state: enabled, cycles, last result."""
+    if _auto_intelligence is None:
+        return {"detail": "Auto-intelligence not yet initialised", "phase": "030"}
+    return _auto_intelligence.summary()
+
+
+@app.get("/api/auto-intelligence/history")
+async def get_auto_intelligence_history(n: int = 20):
+    """FTD-030 — Recent correction cycle history (up to 20 records)."""
+    if _auto_intelligence is None:
+        return {"history": [], "phase": "030"}
+    return {"history": _auto_intelligence.history(n), "phase": "030"}
+
+
+@app.post("/api/auto-intelligence/force-run")
+async def force_auto_intelligence_run():
+    """FTD-030 — Bypass interval gate and trigger an immediate correction cycle."""
+    if _auto_intelligence is None:
+        return {"detail": "Auto-intelligence not yet initialised", "phase": "030"}
+    _auto_intelligence.force_run()
+    result = _auto_intelligence.tick()
+    return {"status": "executed", "result": result, "phase": "030"}
+
+
+@app.post("/api/auto-intelligence/enable")
+async def enable_auto_intelligence():
+    """FTD-030 — Enable the autonomous intelligence loop."""
+    if _auto_intelligence is None:
+        return {"detail": "Not initialised", "phase": "030"}
+    _auto_intelligence.enable()
+    return {"status": "enabled", "phase": "030"}
+
+
+@app.post("/api/auto-intelligence/disable")
+async def disable_auto_intelligence():
+    """FTD-030 — Disable the autonomous intelligence loop."""
+    if _auto_intelligence is None:
+        return {"detail": "Not initialised", "phase": "030"}
+    _auto_intelligence.disable()
+    return {"status": "disabled", "phase": "030"}
+
+
+@app.post("/api/auto-intelligence/reset-daily")
+async def reset_auto_intelligence_daily():
+    """FTD-030 — Reset the 24h cycle counter (admin use)."""
+    if _auto_intelligence is None:
+        return {"detail": "Not initialised", "phase": "030"}
+    _auto_intelligence.reset_daily_counter()
+    return {"status": "daily_counter_reset", "phase": "030"}
 
 
 # ── FTD-028: Deep Intelligence Validation Layer ──────────────────────────────
