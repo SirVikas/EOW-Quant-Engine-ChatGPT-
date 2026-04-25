@@ -98,6 +98,7 @@ from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
 from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
 from core.intelligence.auto_intelligence_engine import AutoIntelligenceEngine  # FTD-030
+from core.learning_memory import learning_memory                               # FTD-030B
 from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 
 
@@ -2906,6 +2907,40 @@ async def reset_auto_intelligence_daily():
         return {"detail": "Not initialised", "phase": "030"}
     _auto_intelligence.reset_daily_counter()
     return {"status": "daily_counter_reset", "phase": "030"}
+
+
+# ── FTD-030B: Learning Memory Layer ──────────────────────────────────────────
+
+@app.get("/api/learning-memory/state")
+async def get_learning_memory_state():
+    """FTD-030B — Learning memory engine full state: activation, patterns, applied count."""
+    return _sanitize(learning_memory.summary())
+
+
+@app.get("/api/learning-memory/history")
+async def get_learning_memory_history(n: int = 10):
+    """FTD-030B — Recent ExplainCards for memory-influenced corrections."""
+    return {"history": learning_memory._explainer.recent(n), "phase": "030B"}
+
+
+@app.get("/api/learning-memory/patterns")
+async def get_learning_memory_patterns():
+    """FTD-030B — All valid patterns with confidence, success rate, sample count."""
+    pats = [p.to_dict() for p in learning_memory._engine.valid_patterns()]
+    return {"patterns": pats, "count": len(pats), "phase": "030B"}
+
+
+@app.get("/api/learning-memory/heatmap")
+async def get_learning_memory_heatmap():
+    """FTD-030B — Regime × parameter confidence heatmap."""
+    return {"heatmap": learning_memory.pattern_heatmap(), "phase": "030B"}
+
+
+@app.post("/api/learning-memory/force-activate")
+async def force_activate_learning_memory():
+    """FTD-030B — Override activation gate (admin/testing only)."""
+    learning_memory._active = True
+    return {"status": "ACTIVATED", "phase": "030B"}
 
 
 # ── FTD-028: Deep Intelligence Validation Layer ──────────────────────────────

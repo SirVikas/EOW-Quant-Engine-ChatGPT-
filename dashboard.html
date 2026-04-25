@@ -1058,6 +1058,74 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <div id="ai-spinner" style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Loading…</div>
   </div>
 
+  <!-- ── FTD-030B: Learning Memory Panel ──────────────────────────────────── -->
+  <div class="card" style="background:#F0FFF4;margin-top:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;color:#276749;">🧬 FTD-030B — Learning Memory Layer</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+          Self-learning closed-loop intelligence — remembers, generalises, applies &amp; forgets corrections
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn green"  onclick="loadLearningMemory()" style="font-size:10px;padding:3px 10px;">Refresh</button>
+        <button class="btn" onclick="forceActivateLearningMemory()" title="Override activation gate" style="border-color:#276749;color:#276749;font-size:10px;padding:3px 10px;">Force Activate</button>
+      </div>
+    </div>
+
+    <!-- Status row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;">
+      <div class="stat-box" style="border-left:4px solid #38A169;">
+        <div class="stat-label">Status</div>
+        <div class="stat-val" id="lm-status">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #3182CE;">
+        <div class="stat-label">Valid Patterns</div>
+        <div class="stat-val" id="lm-patterns">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #805AD5;">
+        <div class="stat-label">Total Applied</div>
+        <div class="stat-val" id="lm-applied">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #E53E3E;">
+        <div class="stat-label">Blacklisted</div>
+        <div class="stat-val" id="lm-blacklisted">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #718096;">
+        <div class="stat-label">Perm Banned</div>
+        <div class="stat-val" id="lm-banned">—</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #DD6B20;">
+        <div class="stat-label">Total Records</div>
+        <div class="stat-val" id="lm-records">—</div>
+      </div>
+    </div>
+
+    <!-- Top patterns leaderboard -->
+    <div id="lm-patterns-wrap" style="display:none;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#276749;margin-bottom:6px;">Top Patterns (by confidence)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="background:#C6F6D5;text-align:left;">
+            <th style="padding:5px 8px;">Pattern ID</th>
+            <th style="padding:5px 8px;">Confidence</th>
+            <th style="padding:5px 8px;">Success Rate</th>
+            <th style="padding:5px 8px;">Samples</th>
+          </tr>
+        </thead>
+        <tbody id="lm-patterns-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Last applied memory card -->
+    <div id="lm-last-wrap" style="display:none;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#276749;margin-bottom:6px;">Last Applied Memory</div>
+      <div id="lm-last-card" style="font-size:11px;background:#EBF8F0;border-radius:6px;padding:10px;border-left:4px solid #38A169;"></div>
+    </div>
+
+    <div id="lm-spinner" style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Loading…</div>
+  </div>
+
 </div><!-- /main report -->
 </div><!-- /tab-report -->
 
@@ -1265,6 +1333,7 @@ function switchTab(name) {
   if (name === 'report') {
     refreshReport();
     loadAutoIntelligence();
+    loadLearningMemory();
   }
 }
 
@@ -1670,6 +1739,78 @@ async function enableAutoIntelligence() {
 async function disableAutoIntelligence() {
   await fetch(API + '/api/auto-intelligence/disable', {method:'POST'});
   loadAutoIntelligence();
+}
+
+// ── FTD-030B: Learning Memory Panel ──────────────────────────────────────────
+async function loadLearningMemory() {
+  const spinner = document.getElementById('lm-spinner');
+  const pWrap   = document.getElementById('lm-patterns-wrap');
+  const lWrap   = document.getElementById('lm-last-wrap');
+  if (!spinner) return;
+  spinner.style.display = 'block';
+  if (pWrap) pWrap.style.display = 'none';
+  if (lWrap) lWrap.style.display = 'none';
+  try {
+    const [state, pats] = await Promise.all([
+      fetch(API + '/api/learning-memory/state').then(r => r.json()),
+      fetch(API + '/api/learning-memory/patterns').then(r => r.json()),
+    ]);
+
+    const active     = state.active;
+    const negMem     = state.negative_memory || {};
+    const storeData  = state.store || {};
+    const patData    = state.patterns || {};
+
+    document.getElementById('lm-status').textContent      = active ? 'ACTIVE' : 'INACTIVE';
+    document.getElementById('lm-status').style.color      = active ? '#38A169' : '#E53E3E';
+    document.getElementById('lm-patterns').textContent    = patData.valid_count ?? '—';
+    document.getElementById('lm-applied').textContent     = state.total_applied ?? '—';
+    document.getElementById('lm-blacklisted').textContent = negMem.blacklisted ?? '—';
+    document.getElementById('lm-banned').textContent      = negMem.permanently_banned ?? '—';
+    document.getElementById('lm-records').textContent     = storeData.total_records ?? '—';
+
+    // Top patterns table
+    const topPats = (pats.patterns || []).slice(0, 8);
+    if (topPats.length > 0 && pWrap) {
+      document.getElementById('lm-patterns-body').innerHTML = topPats.map(p => {
+        const confColor = p.confidence >= 80 ? '#38A169' : p.confidence >= 60 ? '#DD6B20' : '#E53E3E';
+        return `<tr style="border-bottom:1px solid #C6F6D5;">
+          <td style="padding:4px 8px;font-family:monospace;font-size:10px;">${p.pattern_id}</td>
+          <td style="padding:4px 8px;font-weight:600;color:${confColor};">${p.confidence?.toFixed(1) ?? '—'}</td>
+          <td style="padding:4px 8px;">${p.success_rate != null ? (p.success_rate * 100).toFixed(1) + '%' : '—'}</td>
+          <td style="padding:4px 8px;">${p.samples ?? '—'}</td>
+        </tr>`;
+      }).join('');
+      pWrap.style.display = 'block';
+    }
+
+    // Last applied memory card
+    const lastExp = state.last_explain;
+    if (lastExp && lWrap) {
+      document.getElementById('lm-last-card').innerHTML = `
+        <strong>Pattern:</strong> <code>${lastExp.pattern_id}</code> &nbsp;
+        <strong>Confidence:</strong> ${lastExp.confidence?.toFixed(1)} &nbsp;
+        <strong>Success Rate:</strong> ${lastExp.success_rate != null ? (lastExp.success_rate * 100).toFixed(1) + '%' : '—'} &nbsp;
+        <strong>Weight:</strong> ${lastExp.applied_weight?.toFixed(2)} &nbsp;
+        <strong>Final Value:</strong> ${lastExp.final_value} &nbsp;
+        <strong>Memory Suggest:</strong> ${lastExp.memory_suggest} &nbsp;
+        <strong>Live Suggest:</strong> ${lastExp.live_suggest}
+      `;
+      lWrap.style.display = 'block';
+    }
+  } catch(e) {
+    if (spinner) spinner.textContent = 'Error: ' + e.message;
+    return;
+  }
+  spinner.style.display = 'none';
+}
+
+async function forceActivateLearningMemory() {
+  try {
+    const r = await fetch(API + '/api/learning-memory/force-activate', {method:'POST'}).then(r=>r.json());
+    alert('FTD-030B: ' + (r.status || JSON.stringify(r)));
+    loadLearningMemory();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 // Auto-load layer panels when dbo tab is opened
