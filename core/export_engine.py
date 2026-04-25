@@ -100,6 +100,9 @@ class SystemSnapshot:
     # 9. AI Brain (FTD-027: must produce concrete decisions, not empty state)
     ai_brain_state:     Dict[str, Any] = None        # ai_brain.get_state()
 
+    # 10. Learning Memory (FTD-030B)
+    learning_memory:    Dict[str, Any] = None        # learning_memory_orchestrator.summary()
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
@@ -238,6 +241,7 @@ class SystemExportEngine:
         self._section_13_alerts(md, s)
         self._section_14_final_diagnosis(md, s)
         self._section_15_action_checklist(md, s)
+        self._section_16_learning_memory(md, s)
 
         return md.build()
 
@@ -542,6 +546,55 @@ class SystemExportEngine:
         md.blank()
         md.p("---")
         md.p("_End of report — FTD-025A Export Engine v1.0_")
+
+    # ── Section 16: Learning Memory (FTD-030B) ───────────────────────────────
+
+    def _section_16_learning_memory(self, md: _MarkdownBuilder, s: SystemSnapshot):
+        md.h2("16. Learning Memory (FTD-030B)")
+        lm = s.learning_memory or {}
+
+        if not lm:
+            md.p("_Learning memory data not available._")
+            return
+
+        enabled        = lm.get("enabled", False)
+        total_records  = lm.get("total_records", 0)
+        formed         = lm.get("formed_patterns", 0)
+        total_patterns = lm.get("total_patterns", 0)
+        cycle_count    = lm.get("cycle_count", 0)
+        neg_mem        = lm.get("negative_memory", {})
+
+        md.kv_table([
+            ("Status",           "ACTIVE" if enabled else "DISABLED"),
+            ("Memory Records",   str(total_records)),
+            ("Total Patterns",   str(total_patterns)),
+            ("Formed Patterns",  str(formed)),
+            ("Cycles Processed", str(cycle_count)),
+            ("Negative Memory (Permanent)", str(neg_mem.get("permanent", 0))),
+            ("Negative Memory (Temporary)", str(neg_mem.get("temporary", 0))),
+        ])
+
+        top_patterns = lm.get("top_patterns", [])
+        if top_patterns:
+            md.h3("Top Patterns (by Confidence)")
+            rows = []
+            for p in top_patterns[:5]:
+                key = p.get("key", {})
+                rows.append([
+                    p.get("pattern_id", "—"),
+                    key.get("parameter", "—"),
+                    key.get("direction", "—"),
+                    f"{key.get('regime','—')}/{key.get('volatility','—')}",
+                    str(p.get("samples", 0)),
+                    f"{p.get('confidence', 0):.1f}",
+                ])
+            md.table(
+                ["Pattern ID", "Parameter", "Direction", "Regime/Volatility",
+                 "Samples", "Confidence"],
+                rows,
+            )
+
+        md.blank()
 
     # ── Diagnostic logic (sections 14 & 15) ──────────────────────────────────
 

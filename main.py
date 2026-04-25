@@ -2301,6 +2301,11 @@ async def get_full_system_report():
         gate_status       = _safe(lambda: global_gate_controller.snapshot()
                                   if "global_gate_controller" in globals() else {}, {}),
         ai_brain_state    = ai_brain_state,
+        learning_memory   = _safe(
+            lambda: __import__("core.learning_memory",
+                               fromlist=["learning_memory_orchestrator"]
+                               ).learning_memory_orchestrator.summary(), {}
+        ),
     )
 
     zip_bytes = system_export_engine.build_full_report(snapshot)
@@ -3216,6 +3221,72 @@ async def websocket_endpoint(ws: WebSocket):
         if ws in _ws_clients:
             _ws_clients.remove(ws)
         logger.info(f"[WS] Client disconnected. Total: {len(_ws_clients)}")
+
+
+# ── FTD-030B: Learning Memory Layer ──────────────────────────────────────────
+
+@app.get("/api/learning-memory/summary")
+async def learning_memory_summary():
+    """FTD-030B — Full learning memory state: patterns formed, negative memory, cycle stats."""
+    from core.learning_memory import learning_memory_orchestrator
+    return learning_memory_orchestrator.summary()
+
+
+@app.get("/api/learning-memory/patterns")
+async def learning_memory_patterns(n: int = 10):
+    """FTD-030B — Top N formed patterns by confidence (leaderboard)."""
+    from core.learning_memory import learning_memory_orchestrator
+    return {
+        "patterns": learning_memory_orchestrator.pattern_leaderboard(n),
+        "phase": "030B",
+    }
+
+
+@app.get("/api/learning-memory/failed-patterns")
+async def learning_memory_failed_patterns(n: int = 10):
+    """FTD-030B — Bottom N patterns by confidence (failed patterns)."""
+    from core.learning_memory import learning_memory_orchestrator
+    return {
+        "failed_patterns": learning_memory_orchestrator.failed_patterns(n),
+        "phase": "030B",
+    }
+
+
+@app.get("/api/learning-memory/negative-memory")
+async def learning_memory_negative():
+    """FTD-030B — Current negative memory blacklist (temporary + permanent bans)."""
+    from core.learning_memory import learning_memory_orchestrator
+    return {
+        "negative_memory":  learning_memory_orchestrator.negative_memory_list(),
+        "counts":           learning_memory_orchestrator._neg_memory.count(),
+        "phase": "030B",
+    }
+
+
+@app.get("/api/learning-memory/log")
+async def learning_memory_log(n: int = 20):
+    """FTD-030B — Recent memory store records (last N entries)."""
+    from core.learning_memory import learning_memory_orchestrator
+    return {
+        "records": learning_memory_orchestrator.recent_memory_log(n),
+        "phase":   "030B",
+    }
+
+
+@app.post("/api/learning-memory/enable")
+async def learning_memory_enable():
+    """FTD-030B — Enable learning memory layer."""
+    from core.learning_memory import learning_memory_orchestrator
+    learning_memory_orchestrator.enable()
+    return {"status": "enabled", "phase": "030B"}
+
+
+@app.post("/api/learning-memory/disable")
+async def learning_memory_disable():
+    """FTD-030B — Disable learning memory layer (memory is read-only)."""
+    from core.learning_memory import learning_memory_orchestrator
+    learning_memory_orchestrator.disable()
+    return {"status": "disabled", "phase": "030B"}
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
