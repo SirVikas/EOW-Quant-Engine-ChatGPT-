@@ -25,7 +25,10 @@ from config import cfg
 
 
 # Absolute floors — cannot be overridden by any tier
-_SCORE_FLOOR   = 0.45
+# qFTD-032: score floor lowered 0.45→0.40. At 0.45 both TIER_1 and TIER_2
+# resolve to the same effective min (max(0.45, T1_SCORE=0.44)=0.45) making
+# TIER_1 meaningless. Floor 0.40 lets TIER_1 provide real relaxation.
+_SCORE_FLOOR   = 0.40
 _VOL_MULT_FLOOR = 0.20
 
 

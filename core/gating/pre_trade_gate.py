@@ -96,7 +96,13 @@ class PreTradeGate:
             return self._result(False, reason)
 
         # Step 3 — Indicator readiness
-        if cfg.PTG_REQUIRE_INDICATORS and not indicator_ok:
+        # qFTD-032: use GlobalGate's own _ind_ready verdict rather than the
+        # caller-supplied indicator_ok. During BOOT_GRACE GlobalGate sets
+        # _ind_ready=True unconditionally; if we instead checked the caller's
+        # guard.ok (actual per-symbol readiness = False at boot) we were
+        # double-blocking trades that GlobalGate had already authorised.
+        _ind_ok_effective = gate_status.get("_ind_ready", indicator_ok)
+        if cfg.PTG_REQUIRE_INDICATORS and not _ind_ok_effective:
             reason = "INDICATORS_NOT_READY"
             gate_logger.blocked(reason=reason, context=ctx)
             return self._result(False, reason)
