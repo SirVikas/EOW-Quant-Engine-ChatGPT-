@@ -46,6 +46,7 @@ class TradeFlowMonitor:
         self._signal_ts: Deque[float] = deque()
         self._skip_ts:   Deque[float] = deque()
         self._skip_reasons: Dict[str, int] = defaultdict(int)
+        self._boot_ts: float = time.time()   # qFTD-032: track session start for anti-idle
         self._last_trade_ts: float = 0.0
         logger.info(
             f"[FLOW-MONITOR] Phase 5.1 activated | "
@@ -76,9 +77,14 @@ class TradeFlowMonitor:
     # ── Querying ──────────────────────────────────────────────────────────────
 
     def minutes_since_last_trade(self) -> float:
-        """Minutes elapsed since the last trade (0.0 if no trades yet this session)."""
+        """Minutes elapsed since the last trade.
+        Uses session boot time when no trade has occurred yet so the Trade
+        Activator can relax volume/score filters even before the first trade.
+        """
         if self._last_trade_ts == 0.0:
-            return 0.0
+            # qFTD-032: returning 0 here caused a permanent NORMAL-tier deadlock —
+            # Trade Activator never relaxed because it always saw 0 minutes idle.
+            return (time.time() - self._boot_ts) / 60.0
         return (time.time() - self._last_trade_ts) / 60.0
 
     def get_stats(self) -> FlowStats:

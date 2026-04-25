@@ -157,8 +157,8 @@ _boot_replay_count: int = 0      # qFTD-010: trades replayed from DataLake at bo
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
-SYMBOL_COOLDOWN_SEC = 300         # 5 minutes per symbol (was 30 — shorter window = faster learning)
-MAX_TRADES_PER_HOUR = 12          # absolute cap across all symbols
+SYMBOL_COOLDOWN_SEC = 120         # qFTD-032: 300→120s — 2 min cooldown per symbol unlocks more pairs per hour
+MAX_TRADES_PER_HOUR = 20          # qFTD-032: 12→20 — multi-currency system needs higher throughput
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens

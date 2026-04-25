@@ -165,17 +165,20 @@ class EngineConfig(BaseSettings):
 
     # ── Phase 5.1: Activation + Exploration Control ──────────────────────────
     # Trade Activator — prevents system freeze by relaxing filters
-    ACTIVATOR_T1_MIN: int = 30           # Minutes of no trade → Tier 1 relaxation
-    ACTIVATOR_T2_MIN: int = 60           # Minutes of no trade → Tier 2 relaxation
-    ACTIVATOR_T3_MIN: int = 90           # Minutes of no trade → Tier 3 relaxation
-    ACTIVATOR_T1_VOL_MULT: float = 0.60  # Volume threshold multiplier at Tier 1
-    ACTIVATOR_T2_VOL_MULT: float = 0.40  # Volume threshold multiplier at Tier 2
-    ACTIVATOR_T3_VOL_MULT: float = 0.30  # Volume threshold multiplier at Tier 3
+    # qFTD-032: tiers tightened from 30/60/90 → 10/20/30 min. A live multi-currency
+    # system must relax within minutes, not hours, to capture market windows.
+    ACTIVATOR_T1_MIN: int = 10           # Minutes of no trade → Tier 1 relaxation (was 30)
+    ACTIVATOR_T2_MIN: int = 20           # Minutes of no trade → Tier 2 relaxation (was 60)
+    ACTIVATOR_T3_MIN: int = 30           # Minutes of no trade → Tier 3 relaxation (was 90)
+    ACTIVATOR_T1_VOL_MULT: float = 0.50  # Volume threshold multiplier at Tier 1 (was 0.60)
+    ACTIVATOR_T2_VOL_MULT: float = 0.30  # Volume threshold multiplier at Tier 2 (was 0.40)
+    ACTIVATOR_T3_VOL_MULT: float = 0.20  # Volume threshold multiplier at Tier 3 (was 0.30, = floor)
     # qFTD-011-FIX: qFTD-011 lowered MIN_TRADE_SCORE 0.70→0.58 but these were never
     # updated. T1/T2 were 0.65/0.60 — both ABOVE the new base of 0.58, so the activator
     # was raising the bar after dry spells (backward). Fixed to relax below the base.
-    ACTIVATOR_T1_SCORE: float = 0.52     # qFTD-011-FIX: relax from base 0.58 → 0.52 after 30min dry spell
-    ACTIVATOR_T2_SCORE: float = 0.47     # qFTD-011-FIX: further relax → 0.47 after 60min (floor=0.45)
+    # qFTD-032: further relaxed to give more room for signals to pass at Tier 2/3.
+    ACTIVATOR_T1_SCORE: float = 0.50     # qFTD-032: relax from base 0.58 → 0.50 after 10min (was 0.52)
+    ACTIVATOR_T2_SCORE: float = 0.45     # qFTD-032: further relax → 0.45 after 20min (= floor)
 
     # Exploration Engine — learning trades
     # qFTD-008-EDGE: 0.10→0.05 — reduce exploration noise. Now that bootstrap deadlock
@@ -189,7 +192,7 @@ class EngineConfig(BaseSettings):
     EXPLORE_DAILY_LOSS_CAP: float = 0.02 # Max daily equity loss from exploration
 
     # Adaptive Filter Engine — dynamic threshold tuning
-    AF_RELAX_AFTER_MIN: int = 60         # Relax filters after N minutes without trade
+    AF_RELAX_AFTER_MIN: int = 20         # qFTD-032: 60→20 min — relax score faster on dry spells
     AF_TIGHTEN_AFTER_LOSSES: int = 3     # Tighten after N consecutive losses
     AF_RELAX_STEP: float = 0.05          # Score relaxation per step
     AF_TIGHTEN_STEP: float = 0.03        # qFTD-010: 0.05→0.03 — recalibrated for raised MIN_TRADE_SCORE=0.70

@@ -40,7 +40,7 @@ RISK_PCT_MIN        = 0.005   # 0.5% minimum risk per trade
 RISK_PCT_MAX        = 0.015   # 1.5% maximum risk per trade (increased for opportunity)
 MAX_DAILY_LOSS_PCT  = 0.050   # 5% of equity-at-day-start → halt (raised from 3%)
 MAX_DRAWDOWN_PCT    = 0.150   # 15% peak-to-trough → halt
-MAX_TRADES_PER_DAY  = 12      # daily trade cap (raised from 6)
+MAX_TRADES_PER_DAY  = 50      # qFTD-032: 12→50 — multi-currency system needs room to operate
 MAX_RISK_OF_RUIN    = 0.60    # RoR threshold for SIZE reduction only (not a trade block)
 ROR_SIZE_REDUCTION  = 0.65    # reduce to 65% size when RoR is elevated
 
