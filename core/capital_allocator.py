@@ -127,7 +127,7 @@ class CapitalAllocator:
             "daily_risk_cap":   self.daily_risk_cap,
             "daily_risk_used":  round(self._daily_risk_used, 4),
             "daily_risk_remaining": round(
-                max(0.0, self._daily_risk_used), 4
+                max(0.0, self.daily_risk_cap - self._daily_risk_used), 4
             ),
             "score_bands": {f">{t:.2f}": f"{m}x" for t, m in _SCORE_BANDS},
             "module": "CAPITAL_ALLOCATOR",
