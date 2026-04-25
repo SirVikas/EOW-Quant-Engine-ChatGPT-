@@ -1,0 +1,332 @@
+# 🧾 qFTD-031 — PERFORMANCE OPTIMIZATION + LATENCY CONTROL (PRE-FTD CLARIFICATION)
+
+### Ref: qFTD-031-EOW-PERF-LATENCY (PRECISE DESIGN)
+### Ref-qFTD-031-EOW-PERF-LATENCY (PRECISE DESIGN)
+---
+
+# 🎯 PURPOSE
+
+Before building **FTD-031**, we must lock:
+
+```text id="obj"
+Where time is spent → What must be fast → What can be async → What must never block
+```
+
+👉 Goal:
+
+```text id="goal"
+Low latency + high throughput + zero instability
+```
+
+---
+
+# 🚨 WHY THIS qFTD IS CRITICAL
+
+```text id="why"
+Optimization without clarity = random tweaks + hidden bugs
+
+We must define:
+- Latency targets
+- Bottlenecks
+- Async boundaries
+- Safety constraints
+```
+
+---
+
+# 🧠 SECTION 1 — LATENCY TARGET (HARD METRIC)
+
+### Q1. Max acceptable latency per cycle?
+
+```text id="q1"
+A. < 50 ms (ultra-low latency)
+B. < 100 ms (recommended)
+C. < 250 ms
+D. No strict limit
+```
+
+---
+
+# 🧠 SECTION 2 — CRITICAL PATH IDENTIFICATION
+
+### Q2. कौन से components MUST be low-latency?
+
+```text id="q2"
+A. Signal pipeline
+B. Risk engine
+C. Self-correction loop (FTD-029)
+D. Memory application (FTD-030B)
+E. ALL of the above (recommended)
+```
+
+---
+
+# 🧠 SECTION 3 — NON-CRITICAL (ASYNC ELIGIBLE)
+
+### Q3. कौन से modules async हो सकते हैं?
+
+```text id="q3"
+A. Export engine (FTD-025A)
+B. Deep validation (FTD-028)
+C. Learning memory indexing
+D. Dashboard updates
+E. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 4 — CACHING STRATEGY
+
+### Q4. क्या cache करना है?
+
+```text id="q4"
+A. Pattern index (mandatory)
+B. Recent validation results
+C. Last signal state
+D. Config snapshot
+E. ALL of the above (recommended)
+```
+
+---
+
+# 🧠 SECTION 5 — CACHE INVALIDATION
+
+### Q5. Cache कब invalidate होगा?
+
+```text id="q5"
+A. New trade event
+B. Correction applied
+C. Config change
+D. Time-based TTL
+E. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 6 — PARALLELIZATION
+
+### Q6. कौन से tasks parallel चलेंगे?
+
+```text id="q6"
+A. Validation + memory update
+B. Dashboard + logging
+C. Multiple symbol processing
+D. ALL of the above (recommended)
+```
+
+---
+
+# 🧠 SECTION 7 — QUEUE / JOB SYSTEM
+
+### Q7. Background jobs कैसे manage होंगे?
+
+```text id="q7"
+A. Simple async tasks
+B. Priority queue (recommended)
+C. External worker (future)
+```
+
+---
+
+# 🧠 SECTION 8 — RATE LIMITING
+
+### Q8. System overload कैसे रोका जाएगा?
+
+```text id="q8"
+A. Max cycles per minute
+B. API rate limiting
+C. Dashboard refresh limit
+D. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 9 — MEMORY FOOTPRINT CONTROL
+
+### Q9. Memory usage कैसे control होगा?
+
+```text id="q9"
+A. Max patterns cap (mandatory)
+B. JSONL compaction
+C. Old records archiving
+D. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 10 — LOGGING OPTIMIZATION
+
+### Q10. Logging strategy?
+
+```text id="q10"
+A. Full logging (dev mode)
+B. Reduced logging (prod mode)
+C. Dynamic (recommended)
+```
+
+---
+
+# 🧠 SECTION 11 — FAIL-SAFE PERFORMANCE
+
+### Q11. अगर system slow हो जाए?
+
+```text id="q11"
+A. Skip non-critical modules
+B. Reduce frequency
+C. Enter safe mode
+D. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 12 — REAL-TIME vs BATCH
+
+### Q12. कौन real-time vs batch होगा?
+
+```text id="q12"
+Real-time:
+- Signal
+- Risk
+- Correction
+
+Batch:
+- Validation
+- Learning memory update
+- Export
+```
+
+---
+
+# 🧠 SECTION 13 — METRICS COLLECTION
+
+### Q13. क्या track करना है?
+
+```text id="q13"
+A. Cycle time
+B. Module latency
+C. Queue wait time
+D. CPU / memory usage
+E. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 14 — ALERTING (PERFORMANCE)
+
+### Q14. कब alert करना है?
+
+```text id="q14"
+A. Latency breach
+B. Queue backlog
+C. Memory spike
+D. ALL of the above
+```
+
+---
+
+# 🧠 SECTION 15 — CONFIG CONTROL
+
+### Q15. Performance tuning कहाँ से होगा?
+
+```text id="q15"
+A. config.py only (mandatory SSOT)
+```
+
+---
+
+# 🧠 SECTION 16 — SAFETY BOUNDARY
+
+### Q16. Optimization किन चीज़ों को affect नहीं करेगा?
+
+```text id="q16"
+- Risk engine logic
+- Hard limits
+- Validation correctness
+```
+
+---
+
+# 🧠 SECTION 17 — BENCHMARK BASELINE
+
+### Q17. Baseline define करना है?
+
+```text id="q17"
+A. Yes (mandatory)
+
+Example:
+- Current cycle time
+- Target cycle time
+```
+
+---
+
+# 🧠 SECTION 18 — LOAD SCENARIO
+
+### Q18. किस load के लिए optimize करना है?
+
+```text id="q18"
+A. Single symbol
+B. Multi-symbol (recommended)
+C. High-frequency scenario
+```
+
+---
+
+# 🧠 SECTION 19 — FUTURE SCALABILITY
+
+### Q19. System scale कैसे होगा?
+
+```text id="q19"
+A. Vertical (single machine)
+B. Horizontal (multi-worker future)
+C. Hybrid (recommended)
+```
+
+---
+
+# 🧠 SECTION 20 — TESTING REQUIREMENT
+
+### Q20. Performance test required?
+
+```text id="q20"
+A. Yes (mandatory)
+
+Include:
+- Stress test
+- Latency benchmark
+- Memory usage test
+```
+
+---
+
+# 🧠 FINAL CONFIRMATION
+
+```text id="final"
+All answers must be explicit
+No assumption allowed
+```
+
+---
+
+# 🚀 NEXT STEP
+
+👉 Developer को यह qFTD भेजें
+👉 उनसे **aFTD-031 (answers)** लें
+
+👉 उसके बाद:
+
+```text id="next"
+CREATE FTD-031 (Performance Optimization Layer)
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="line"
+Fast system अच्छा है
+
+लेकिन stable + predictable fast system ही powerful होता है
+```
+
+---
