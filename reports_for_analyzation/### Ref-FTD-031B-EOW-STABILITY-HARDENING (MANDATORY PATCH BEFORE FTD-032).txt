@@ -1,0 +1,343 @@
+# 🧾 FTD-031B — STABILITY HARDENING LAYER (BLACKBOX)
+
+### Ref: FTD-031B-EOW-STABILITY-HARDENING (MANDATORY PATCH BEFORE FTD-032)
+### Ref-FTD-031B-EOW-STABILITY-HARDENING (MANDATORY PATCH BEFORE FTD-032)
+
+---
+
+# 🎯 OBJECTIVE
+
+Eliminate **real-world instability risks** in FTD-031 by adding:
+
+```text id="obj"
+Consistency + Determinism + Backpressure + Safe Transitions
+```
+
+❗ No new features
+❗ No logic duplication
+❗ Only stabilization + safety reinforcement
+
+---
+
+# 🚨 SCOPE (LOCKED)
+
+```text id="scope"
+Patch ONLY:
+- cache_manager
+- async_task_queue
+- perf_guard
+- perf_monitor
+- rate_limiter
+- memory_manager
+```
+
+---
+
+# 🥇 PART 1 — CACHE VERSIONING (ANTI-STALE GUARANTEE)
+
+## 📁 core/performance/cache_manager.py
+
+### Add:
+
+```python id="c1"
+class CacheEntry:
+    def __init__(self, value, version, ts):
+        self.value = value
+        self.version = version
+        self.ts = ts
+```
+
+---
+
+### Global version tracker:
+
+```python id="c2"
+cache_version = 0
+```
+
+---
+
+### On invalidation trigger:
+
+```python id="c3"
+def invalidate_all():
+    global cache_version
+    cache_version += 1
+```
+
+---
+
+### On read:
+
+```python id="c4"
+def get(key):
+    entry = cache.get(key)
+    if entry and entry.version == cache_version:
+        return entry.value
+    return None  # reject stale
+```
+
+---
+
+# 🥈 PART 2 — ASYNC QUEUE BACKPRESSURE CONTROL
+
+## 📁 core/performance/async_task_queue.py
+
+---
+
+### Add limits:
+
+```python id="q1"
+MAX_QUEUE_SIZE = 500
+LOW_PRIORITY_DROP_THRESHOLD = 400
+```
+
+---
+
+### Enqueue logic:
+
+```python id="q2"
+if queue.size() > MAX_QUEUE_SIZE:
+    drop_low_priority_tasks()
+    alert("QUEUE_OVERFLOW")
+```
+
+---
+
+### Drop strategy:
+
+```python id="q3"
+def drop_low_priority_tasks():
+    remove tasks with priority == LOW
+```
+
+---
+
+### Add metric:
+
+```text id="q4"
+queue_backlog_size
+```
+
+---
+
+# 🥉 PART 3 — PERF GUARD HYSTERESIS (ANTI-FLAPPING)
+
+## 📁 core/performance/perf_guard.py
+
+---
+
+### Add:
+
+```python id="p1"
+STATE_COOLDOWN_SEC = 60
+last_transition_ts = 0
+```
+
+---
+
+### Transition logic:
+
+```python id="p2"
+if now - last_transition_ts < STATE_COOLDOWN_SEC:
+    return  # block rapid state flip
+```
+
+---
+
+### Require sustained condition:
+
+```python id="p3"
+if degraded_condition for N consecutive cycles:
+    transition_to(DEGRADED)
+```
+
+---
+
+# 🏁 PART 4 — BASELINE STABILITY LOCK
+
+## 📁 core/performance/perf_monitor.py
+
+---
+
+### Replace naive lock with:
+
+```python id="b1"
+MIN_STABLE_CYCLES = 20
+MAX_VARIANCE = 0.15
+```
+
+---
+
+### Lock condition:
+
+```python id="b2"
+if variance(cycle_times) < MAX_VARIANCE for MIN_STABLE_CYCLES:
+    lock_baseline()
+```
+
+---
+
+### Add manual reset:
+
+```text id="b3"
+POST /api/perf-baseline/reset
+```
+
+---
+
+# ⚙️ PART 5 — RATE LIMITER VISIBILITY + RETRY
+
+## 📁 core/performance/rate_limiter.py
+
+---
+
+### Add logging:
+
+```python id="r1"
+log("RATE_LIMIT_BLOCK", endpoint, timestamp)
+```
+
+---
+
+### Retry scheduling:
+
+```python id="r2"
+if blocked:
+    schedule_retry(after=1 second)
+```
+
+---
+
+### Metric:
+
+```text id="r3"
+blocked_requests_count
+```
+
+---
+
+# 🔁 PART 6 — MEMORY SOFT DELETE (CONSISTENCY SAFE)
+
+## 📁 core/performance/memory_manager.py
+
+---
+
+### Replace hard delete with:
+
+```python id="m1"
+record["deleted"] = True
+record["deleted_at"] = timestamp
+```
+
+---
+
+### Purge job:
+
+```python id="m2"
+def purge_old():
+    remove records where deleted=True and age > TTL
+```
+
+---
+
+### Prevent live conflict:
+
+```python id="m3"
+learning_engine ignores deleted records
+```
+
+---
+
+# 🧠 PART 7 — CROSS-MODULE CONSISTENCY CHECK
+
+## 📁 core/performance/perf_monitor.py
+
+---
+
+### Add validation:
+
+```python id="x1"
+assert cache_version_sync
+assert queue_not_stale
+assert memory_index_consistent
+```
+
+---
+
+# 🔌 PART 8 — API ADDITIONS
+
+## 📁 main.py
+
+---
+
+```text id="api"
+GET  /api/perf-health
+POST /api/perf-baseline/reset
+GET  /api/perf-queue-status
+```
+
+---
+
+# 🧪 PART 9 — TESTS
+
+## 📁 tests/test_perf_stability.py
+
+---
+
+```python id="t1"
+def test_cache_versioning():
+    assert stale_rejected
+
+def test_queue_overflow():
+    assert low_priority_dropped
+
+def test_guard_hysteresis():
+    assert no_flapping
+
+def test_baseline_lock():
+    assert stable_before_lock
+
+def test_rate_limit_retry():
+    assert retry_scheduled
+
+def test_soft_delete():
+    assert no_live_conflict
+```
+
+---
+
+# 🚨 FAILURE CONDITIONS
+
+```text id="fail"
+- stale cache used
+- queue overflow without drop
+- guard oscillation
+- baseline locked on noise
+- hard delete conflict
+```
+
+---
+
+# 🏁 FINAL DELIVERABLE
+
+Developer MUST provide:
+
+```text id="deliver"
+1. Stability patch integrated
+2. All tests passing
+3. Perf-health API working
+4. No regression in latency
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="final"
+FTD-031 made system fast
+
+FTD-031B makes system reliable
+```
+
+---
