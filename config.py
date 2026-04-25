@@ -52,6 +52,11 @@ class EngineConfig(BaseSettings):
     WIN_STREAK_SCALE_UP: int = 3           # Consecutive wins → scale up
     LOSS_STREAK_SCALE_DOWN: int = 2        # Consecutive losses → scale down
 
+    # ── Hard Limits (FTD-031C: SSOT — never hardcoded elsewhere) ────────────
+    MAX_LEVERAGE_CAP: float = 3.0          # Max exposure/equity ratio — immutable
+    KILL_SWITCH_THRESHOLD: float = 0.20    # Emergency stop threshold — immutable
+    MIN_EQUITY_FLOOR: float = 0.50         # Equity must never drop below 50% initial — immutable
+
     # ── Binance Fee Schedule ─────────────────────────────────────────────────
     MAKER_FEE: float = 0.0002             # 0.02%
     TAKER_FEE: float = 0.0004             # 0.04%
@@ -366,6 +371,13 @@ class EngineConfig(BaseSettings):
     P7B_EV_CC_BOOST: float = 1.50              # Proposed-risk multiplier for high-EV trades
     P7B_EV_CC_PENALTY: float = 0.70            # Proposed-risk multiplier for low-EV trades
 
+    # ── FTD-029: Correction Proposal — confidence-scaled change bounds ────────
+    CORRECTION_CONF_HIGH: float = 80.0              # Confidence >= this → high change bound
+    CORRECTION_CONF_MED: float = 60.0               # Confidence >= this → medium change bound
+    CORRECTION_MAX_CHANGE_HIGH: float = 0.15        # Max param change at high confidence
+    CORRECTION_MAX_CHANGE_MED: float = 0.10         # Max param change at medium confidence
+    CORRECTION_MAX_CHANGE_LOW: float = 0.05         # Max param change at low confidence
+
     # ── FTD-030: Autonomous Background Intelligence Loop ──────────────────────
     AUTO_INTELLIGENCE_ENABLED: bool = True          # Master switch for autonomous loop
     AUTO_INTELLIGENCE_INTERVAL_MIN: float = 5.0     # Minutes between correction cycles
@@ -426,6 +438,9 @@ class EngineConfig(BaseSettings):
         "deep_validation",
         "learning_engine",
     ]
+
+    # ── FTD-031C: Diagnostics (disabled by default — developer use only) ──────
+    DIAGNOSTICS_ENDPOINT_ENABLED: bool = False      # Enable /api/diagnostics/* endpoints
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

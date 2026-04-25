@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
-"""Pipeline break forensic probe for Phase 6.6/7A gating stack.
+"""
+FTD-031C — Pipeline Break Forensic Probe
 
-Runs a controlled in-process probe and prints evidence required by incident triage.
+CLASSIFICATION: Diagnostic Tool (NOT core system)
+
+ISOLATION RULES (FTD-031C mandatory):
+  ✔ Manual trigger only — never auto-executed
+  ✔ NOT part of main execution loop
+  ✔ NOT imported by any core module
+  ✔ Does NOT modify system state
+  ✔ Does NOT affect latency or performance
+
+USAGE:
+  python tools/diagnostics/pipeline_break_forensics.py
+  OR via /api/diagnostics/pipeline-break-forensics (disabled by default in cfg)
+
+PURPOSE: debugging, pipeline break analysis, developer support
 """
 from __future__ import annotations
 
@@ -9,7 +23,7 @@ from collections import Counter
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -21,6 +35,12 @@ from core.profit.scan_controller import scan_controller
 
 
 def run_probe(cycles: int = 100) -> dict:
+    """
+    Run a controlled in-process probe of the Phase 6.6/7A gating stack.
+
+    Returns evidence dict required by incident triage.
+    Does NOT modify any system state — read-only diagnostic.
+    """
     gate_reason_counts: Counter[str] = Counter()
     scan_reason_counts: Counter[str] = Counter()
     gate_open = 0
