@@ -1,0 +1,215 @@
+🧾 qFTD-033R — COST + EXECUTION + ALPHA (REFINEMENT)
+📌 Context Snapshot (आपके दिए डेटा से)
+PF = 0.369 ❌
+Win Rate ≈ 49% (okay)
+Avg Loss >> Avg Win ❌
+Fees = 25% gross profit ❌
+Rejection Rate = 100% ❌
+Dominant Block = PRE_TRADE_GATE (LOW_SCORE)
+
+👉 इसका मतलब:
+
+System:
+✔ signals बना रहा है
+✔ visibility आ गई है
+❌ execution नहीं हो रहा
+❌ cost बहुत heavy है
+❌ RR खराब है
+🎯 PURPOSE
+अब goal है:
+✔ system को trade कराना (controlled)
+✔ cost-aware profitability enforce करना
+✔ alpha improve करना
+✔ over-blocking remove करना
+🔶 SECTION A — EXECUTION UNBLOCKING (CRITICAL)
+Q1. क्या 100% rejection acceptable है?
+
+A) No — system must trade
+B) Yes (only perfect trades)
+
+👉 Recommended: A
+
+Q2. LOW_SCORE threshold क्या करना है?
+
+Current issue:
+
+PRE_TRADE_GATE (LOW_SCORE) = dominant block
+
+Options:
+
+A) Reduce threshold (e.g., 0.58 → 0.44)
+B) Dynamic threshold (tier-based)
+C) Exploration override
+
+👉 Recommended:
+
+B + C (tier + exploration)
+Q3. Exploration mode कितनी aggressive हो?
+
+A) 10% trades
+B) 25% trades
+C) Full relaxed
+
+👉 Recommended: B (controlled)
+
+🔶 SECTION B — COST ENGINE CALIBRATION
+Q4. Cost model कितना strict हो?
+
+A) Strict (reject if net ≤ 0)
+B) Moderate (allow small edge)
+C) Exploration bypass
+
+👉 Recommended:
+
+Production: A
+Exploration: C (tagged trades)
+Q5. Fees impact threshold?
+Fees = 25% of gross profit ❌
+
+👉 Action:
+
+A) Reject high-fee trades
+B) Reduce size
+C) Adaptive
+
+👉 Recommended: C
+
+Q6. Slippage model tuning?
+
+A) Fixed
+B) ATR-based
+C) Dynamic liquidity
+
+👉 Recommended: B (already aligned)
+
+🔶 SECTION C — ALPHA ENGINE TUNING
+Q7. Alpha formula सही है?
+alpha = net_edge × confidence × regime
+
+👉 Add:
+
+× RR factor
+× drawdown penalty
+
+👉 Confirm:
+
+A) Keep current
+B) Upgrade formula
+
+👉 Recommended: B
+
+Q8. RR imbalance fix?
+Avg Loss >> Avg Win ❌
+
+👉 Strategy:
+
+A) Tight SL
+B) Increase TP
+C) Both
+
+👉 Recommended: C
+
+🔶 SECTION D — LEARNING SYSTEM
+Q9. Learning aggressiveness?
+
+A) Conservative
+B) Moderate
+C) Aggressive (fast adaptation)
+
+👉 Recommended: B
+
+Q10. Blacklist rules?
+
+A) After 3 failures
+B) After cost-loss pattern
+C) Both
+
+👉 Recommended: C
+
+🔶 SECTION E — REPORT VALIDATION
+Q11. Execution trace visible है?
+
+✔ Yes (implemented)
+
+👉 Need upgrade:
+
+✔ % rejection by gate
+✔ top 3 failure reasons
+✔ symbol-level breakdown
+Q12. Cost reporting sufficient है?
+
+👉 Need:
+
+✔ cost vs profit ratio
+✔ high-cost symbols list
+✔ cost-driven rejection %
+🔶 SECTION F — CONTROL SYSTEM
+Q13. Exploration guardrails?
+✔ max trades/day
+✔ max DD
+✔ reduced size
+
+👉 Confirm: enabled?
+
+Q14. Kill switch active?
+
+A) Yes
+B) No
+
+👉 MUST: A
+
+🔶 SECTION G — STRATEGIC DIRECTION
+Q15. System mode क्या होगा?
+
+A) Exploration-heavy
+B) Balanced
+C) Profit-first
+
+👉 Recommended:
+
+Phase 1: Exploration-heavy
+Phase 2: Balanced
+Phase 3: Profit-first
+🧠 FINAL CONFIG (RECOMMENDED)
+Execution:
+✔ threshold dynamic
+✔ exploration enabled (25%)
+
+Cost:
+✔ strict in production
+✔ relaxed in exploration
+
+Alpha:
+✔ RR-aware
+✔ cost-aware
+
+Learning:
+✔ pattern blacklist active
+
+Risk:
+✔ strict guardrails
+
+Report:
+✔ gate-wise breakdown
+✔ cost impact visible
+🚨 CRITICAL INSIGHT
+Problem अब signal का नहीं है
+
+Problem है:
+✔ over-filtering
+✔ cost pressure
+✔ RR imbalance
+🎯 NEXT STEP
+
+👉 इस qFTD को approve करें
+या modify करें
+
+उसके बाद मैं बनाऊँगा:
+
+🧾 FTD-033R — REFINEMENT PATCH (PINPOINT FIXES)
+🔥 FINAL LINE
+पहले system अंधा था
+
+अब system देख रहा है
+
+अब system को सही decision लेना सिखाना है
