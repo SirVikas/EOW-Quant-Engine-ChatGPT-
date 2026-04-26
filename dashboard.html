@@ -323,6 +323,30 @@ body.real-live-mode .topbar .btn {
   color: #fff !important;
 }
 body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A !important; }
+
+/* ── Performance Explorer ── */
+.upe-preset-btn {
+  font-family: var(--fm); font-size: 11px; font-weight: 600;
+  padding: 4px 11px; border-radius: 20px; cursor: pointer;
+  border: 1.5px solid var(--border); background: #fff; color: var(--muted);
+  transition: all .15s;
+}
+.upe-preset-btn:hover  { background: var(--sky); color: var(--c-blue); border-color: #90CDF4; }
+.upe-preset-btn.active { background: var(--c-blue); color: #fff; border-color: var(--c-blue); }
+#tab-perf .upe-filter-input {
+  font-family: var(--fm); font-size: 12px; padding: 5px 10px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  background: #fff; outline: none;
+}
+#tab-perf .upe-filter-input:focus { border-color: #90CDF4; }
+#tab-perf .upe-filter-select {
+  font-family: var(--ff); font-size: 12px; padding: 5px 10px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  background: #fff; outline: none; cursor: pointer;
+}
+.upe-insight { border-radius: 9px; padding: 10px 14px; margin-bottom: 8px; }
+.upe-insight-title { font-weight: 600; font-size: 11px; }
+.upe-insight-action { font-size: 11px; color: var(--text); margin-top: 4px; }
 </style>
 </head>
 
@@ -375,6 +399,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">🧠 Strategic Truth</button>
   <button class="tab-btn"        onclick="switchTab('combat')"   id="tab-btn-combat">🎮 Combat Controls</button>
   <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
+  <button class="tab-btn"        onclick="switchTab('perf')"     id="tab-btn-perf">📊 Performance</button>
 </nav>
 
 <!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
@@ -968,6 +993,194 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 </div><!-- /main combat -->
 </div><!-- /tab-combat -->
 
+<!-- ══ TAB: PERFORMANCE EXPLORER ════════════════════════════════════════════ -->
+<div id="tab-perf" class="tab-panel">
+<div class="main">
+
+  <!-- ── Control Panel ── -->
+  <div class="card sky" style="padding:16px 20px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
+      <div>
+        <div class="sec-hdr" style="margin:0 0 10px;">Performance Explorer</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="upe-preset-bar">
+          <button class="upe-preset-btn active" onclick="upeSwitchPreset('ALL')">ALL</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('365D')">365D</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('180D')">180D</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('100D')">100D</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('60D')">60D</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('20D')">20D</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('7D')">7D</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('3D')">3D</button>
+          <button class="upe-preset-btn" onclick="upeSwitchPreset('1D')">1D</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div>
+          <div class="label">Symbol</div>
+          <input id="upe-f-symbol" type="text" placeholder="e.g. BTCUSDT"
+                 class="upe-filter-input" style="width:120px;" oninput="upeApplyFilter()">
+        </div>
+        <div>
+          <div class="label">Strategy</div>
+          <input id="upe-f-strategy" type="text" placeholder="e.g. TF_EMA_RSI_v1"
+                 class="upe-filter-input" style="width:160px;" oninput="upeApplyFilter()">
+        </div>
+        <div>
+          <div class="label">Side</div>
+          <select id="upe-f-side" class="upe-filter-select" onchange="upeApplyFilter()">
+            <option value="">ALL</option>
+            <option value="LONG">LONG</option>
+            <option value="SHORT">SHORT</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Result</div>
+          <select id="upe-f-result" class="upe-filter-select" onchange="upeApplyFilter()">
+            <option value="">ALL</option>
+            <option value="win">WINS ONLY</option>
+            <option value="loss">LOSSES ONLY</option>
+          </select>
+        </div>
+        <button class="btn blue" onclick="upeRefresh()" style="align-self:flex-end;">↺ Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Summary Cards (8 metrics) ── -->
+  <div class="g4" id="upe-summary-cards">
+    <div class="card" id="upe-c-netpnl">
+      <div class="label">Net PnL</div>
+      <div class="big" id="upe-v-netpnl">—</div>
+      <div class="sub" id="upe-v-netpnl-sub">after all fees</div>
+    </div>
+    <div class="card" id="upe-c-wr">
+      <div class="label">Win Rate</div>
+      <div class="big" id="upe-v-wr">—</div>
+      <div class="sub" id="upe-v-wr-sub">wins / total</div>
+    </div>
+    <div class="card" id="upe-c-pf">
+      <div class="label">Profit Factor</div>
+      <div class="big" id="upe-v-pf">—</div>
+      <div class="sub">gross win / gross loss</div>
+    </div>
+    <div class="card" id="upe-c-dd">
+      <div class="label">Max Drawdown</div>
+      <div class="big" id="upe-v-dd">—</div>
+      <div class="sub">peak → trough</div>
+    </div>
+    <div class="card" id="upe-c-trades">
+      <div class="label">Total Trades</div>
+      <div class="big" id="upe-v-trades">—</div>
+      <div class="sub" id="upe-v-trades-sub">W / L</div>
+    </div>
+    <div class="card" id="upe-c-fees">
+      <div class="label">Total Fees</div>
+      <div class="big" id="upe-v-fees">—</div>
+      <div class="sub" id="upe-v-fees-sub">cost %</div>
+    </div>
+    <div class="card" id="upe-c-avgwin">
+      <div class="label">Avg Win</div>
+      <div class="big" id="upe-v-avgwin">—</div>
+      <div class="sub">per winning trade</div>
+    </div>
+    <div class="card" id="upe-c-avgloss">
+      <div class="label">Avg Loss</div>
+      <div class="big" id="upe-v-avgloss">—</div>
+      <div class="sub">per losing trade</div>
+    </div>
+  </div>
+
+  <!-- ── Insights + Breakdowns | Charts ── -->
+  <div class="g-main">
+
+    <!-- Left: Insights + Strategy/Regime breakdown -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <div class="card" style="padding:16px 18px;">
+        <div class="sec-hdr" style="margin:0 0 10px;">AI Insights</div>
+        <div id="upe-insights">
+          <div style="color:var(--muted);font-size:12px;padding:8px 0;">Switch to this tab to load insights.</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px;">
+        <div class="sec-hdr" style="margin:0 0 10px;">Strategy & Regime Breakdown</div>
+        <div id="upe-strat-table">
+          <div style="color:var(--muted);font-size:12px;">No data yet.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Equity Curve + Drawdown Charts -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <div class="card" style="padding:14px 18px;">
+        <div class="label">Equity Curve</div>
+        <div style="height:210px;position:relative;margin-top:6px;">
+          <canvas id="upe-equity-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="padding:14px 18px;">
+        <div class="label">Drawdown %</div>
+        <div style="height:160px;position:relative;margin-top:6px;">
+          <canvas id="upe-dd-chart"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Trade Table ── -->
+  <div class="card" style="padding:16px 18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="sec-hdr" style="margin:0;">Trade History</div>
+      <span id="upe-table-count" class="tag blue">— trades</span>
+    </div>
+    <div style="overflow-x:auto;max-height:420px;overflow-y:auto;">
+      <table class="bm-table" style="width:100%;font-size:11px;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Symbol</th>
+            <th>Side</th>
+            <th>Strategy</th>
+            <th>Regime</th>
+            <th>Net PnL</th>
+            <th>Fees</th>
+            <th>R</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="upe-trade-tbody">
+          <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;">
+            Switch to this tab to load trades.
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Export / Backup ── -->
+  <div class="card sage" style="padding:14px 20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="sec-hdr" style="margin:0 0 3px;">Export & Backup</div>
+        <div style="font-size:11px;color:var(--muted);">One-click export of currently filtered data</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="btn green" onclick="upeDownloadCSV()">⬇ CSV</button>
+        <button class="btn blue"  onclick="upeDownloadJSON()">⬇ JSON</button>
+        <button class="btn"       onclick="upeBackup()" id="upe-backup-btn">💾 Backup</button>
+        <span id="upe-backup-status" style="font-size:11px;color:var(--muted);"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-perf -->
+
 <!-- ══ TAB: REPORT ═══════════════════════════════════════════════════════════ -->
 <div id="tab-report" class="tab-panel">
 <div class="main">
@@ -1312,7 +1525,7 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['overview','dbo','combat','report'].forEach(t => {
+  ['overview','dbo','combat','report','perf'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
@@ -1335,6 +1548,9 @@ function switchTab(name) {
     refreshReport();
     loadAutoIntelligence();
     loadLearningMemory();
+  }
+  if (name === 'perf') {
+    loadPerfExplorer();
   }
 }
 
@@ -3063,6 +3279,353 @@ function initExecModeSelector() {
     .then(r => r.json())
     .then(d => _syncExecModeBadge(d.mode))
     .catch(() => {});
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// PERFORMANCE EXPLORER (FTD-UPE)
+// ════════════════════════════════════════════════════════════════════════════
+
+let _upePreset      = 'ALL';
+let _upeEquityChart = null;
+let _upeDDChart     = null;
+let _upeDebounce    = null;
+
+// ── Main loader ──────────────────────────────────────────────────────────────
+async function loadPerfExplorer() {
+  await Promise.all([
+    _upeFetchSummary(),
+    _upeFetchVisuals(),
+    _upeFetchTrades(),
+  ]);
+}
+
+async function _upeFetchSummary() {
+  const q = _upeQueryParams();
+  try {
+    const d = await fetch(API + '/api/perf-explorer/summary?preset=' + _upePreset + q,
+                          { signal: AbortSignal.timeout(8000) }).then(r => r.json());
+    _renderUpeSummary(d.summary, d.trade_count);
+    _renderUpeInsights(d.insights);
+    _renderUpeBreakdowns(d.summary);
+  } catch(e) {
+    const el = document.getElementById('upe-insights');
+    if (el) el.innerHTML = '<div class="upe-insight" style="background:var(--peach);"><div class="upe-insight-title" style="color:var(--c-red);">⚠ Could not load data — is the engine running?</div></div>';
+  }
+}
+
+async function _upeFetchVisuals() {
+  try {
+    const d = await fetch(API + '/api/perf-explorer/visuals?preset=' + _upePreset,
+                          { signal: AbortSignal.timeout(8000) }).then(r => r.json());
+    _renderUpeCharts(d);
+  } catch(e) { /* charts remain blank if engine offline */ }
+}
+
+async function _upeFetchTrades() {
+  const q = _upeQueryParams();
+  try {
+    const d = await fetch(API + '/api/perf-explorer/trades?preset=' + _upePreset + q + '&limit=500',
+                          { signal: AbortSignal.timeout(8000) }).then(r => r.json());
+    _renderUpeTable(d.trades, d.total);
+  } catch(e) { /* table remains blank */ }
+}
+
+// ── Query params from active filters ─────────────────────────────────────────
+function _upeQueryParams() {
+  const sym   = (document.getElementById('upe-f-symbol')   ?.value || '').trim();
+  const strat = (document.getElementById('upe-f-strategy') ?.value || '').trim();
+  const side  = document.getElementById('upe-f-side')      ?.value || '';
+  const res   = document.getElementById('upe-f-result')    ?.value || '';
+  let q = '';
+  if (sym)            q += '&symbol='   + encodeURIComponent(sym);
+  if (strat)          q += '&strategy=' + encodeURIComponent(strat);
+  if (side)           q += '&side='     + side;
+  if (res === 'win')  q += '&win_only=true';
+  if (res === 'loss') q += '&loss_only=true';
+  return q;
+}
+
+// ── Preset switching ──────────────────────────────────────────────────────────
+function upeSwitchPreset(p) {
+  _upePreset = p;
+  document.querySelectorAll('.upe-preset-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === p);
+  });
+  loadPerfExplorer();
+}
+
+// Debounced filter apply (300 ms) to avoid hammering the API on every keystroke
+function upeApplyFilter() {
+  clearTimeout(_upeDebounce);
+  _upeDebounce = setTimeout(() => loadPerfExplorer(), 320);
+}
+
+function upeRefresh() { loadPerfExplorer(); }
+
+// ── Render helpers ────────────────────────────────────────────────────────────
+
+function _upeSet(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function _upeColor(el, val, goodAbove, badBelow) {
+  if (!el) return;
+  el.style.color = val >= goodAbove ? 'var(--c-green)'
+                 : val <= badBelow  ? 'var(--c-red)'
+                 :                    'var(--c-amber)';
+}
+
+function _renderUpeSummary(s, count) {
+  if (!s) return;
+  const pnl = s.net_pnl || 0;
+
+  const pnlEl = document.getElementById('upe-v-netpnl');
+  const pnlCard = document.getElementById('upe-c-netpnl');
+  if (pnlEl) {
+    pnlEl.textContent  = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + ' U';
+    pnlEl.style.color  = pnl >= 0 ? 'var(--c-green)' : 'var(--c-red)';
+  }
+  if (pnlCard) pnlCard.style.background = pnl >= 0 ? 'var(--sage)' : 'var(--peach)';
+
+  const wr = s.win_rate || 0;
+  const wrEl = document.getElementById('upe-v-wr');
+  _upeColor(wrEl, wr, 55, 45);
+  _upeSet('upe-v-wr', wr.toFixed(1) + '%');
+  _upeSet('upe-v-wr-sub', (s.wins || 0) + ' wins / ' + (count || 0) + ' total');
+
+  const pf = s.profit_factor || 0;
+  const pfEl = document.getElementById('upe-v-pf');
+  const pfCard = document.getElementById('upe-c-pf');
+  _upeColor(pfEl, pf, 1.0, 0.7);
+  _upeSet('upe-v-pf', pf.toFixed(3));
+  if (pfCard) pfCard.style.background = pf >= 1.0 ? 'var(--sage)' : pf >= 0.7 ? 'var(--lem)' : 'var(--peach)';
+
+  _upeSet('upe-v-dd',   (s.max_drawdown || 0).toFixed(2) + '%');
+  _upeSet('upe-v-trades', String(count || 0));
+  _upeSet('upe-v-trades-sub', (s.wins || 0) + 'W  /  ' + (s.losses || 0) + 'L');
+  _upeSet('upe-v-fees',  (s.total_fees || 0).toFixed(4) + ' U');
+  _upeSet('upe-v-fees-sub', 'cost ' + (s.cost_pct || 0).toFixed(1) + '%  |  drag ' + (s.fee_drag || 0).toFixed(1) + '%');
+
+  const avgWinEl = document.getElementById('upe-v-avgwin');
+  if (avgWinEl) {
+    avgWinEl.textContent = (s.avg_win >= 0 ? '+' : '') + (s.avg_win || 0).toFixed(4) + ' U';
+    avgWinEl.style.color = 'var(--c-green)';
+  }
+  const avgLossEl = document.getElementById('upe-v-avgloss');
+  if (avgLossEl) {
+    avgLossEl.textContent = (s.avg_loss || 0).toFixed(4) + ' U';
+    avgLossEl.style.color = 'var(--c-red)';
+  }
+}
+
+function _renderUpeInsights(insights) {
+  const el = document.getElementById('upe-insights');
+  if (!el) return;
+  if (!insights || insights.length === 0) {
+    el.innerHTML = '<div class="upe-insight" style="background:var(--sage);"><div class="upe-insight-title" style="color:var(--c-green);">✅ No critical issues detected.</div></div>';
+    return;
+  }
+  const cfg = {
+    CRITICAL: ['var(--peach)', '#C53030', '🔴'],
+    WARNING:  ['var(--lem)',   '#7B6100', '🟡'],
+    INFO:     ['var(--sage)',  'var(--c-green)', '🟢'],
+  };
+  el.innerHTML = insights.map(i => {
+    const [bg, fg, icon] = cfg[i.severity] || cfg.INFO;
+    return `<div class="upe-insight" style="background:${bg};">
+      <div class="upe-insight-title" style="color:${fg};">${icon} [${i.severity}] ${i.description}</div>
+      <div class="upe-insight-action">→ ${i.action}</div>
+    </div>`;
+  }).join('');
+}
+
+function _renderUpeBreakdowns(s) {
+  const el = document.getElementById('upe-strat-table');
+  if (!el || !s) return;
+
+  const stratRows = Object.entries(s.by_strategy || {})
+    .sort((a, b) => a[1].net_pnl - b[1].net_pnl)
+    .map(([name, v]) => {
+      const c = v.net_pnl >= 0 ? 'var(--c-green)' : 'var(--c-red)';
+      const w = v.win_rate >= 55 ? 'var(--c-green)' : v.win_rate >= 50 ? 'var(--c-amber)' : 'var(--c-red)';
+      return `<tr>
+        <td style="font-family:var(--fm);font-size:10px;">${name}</td>
+        <td>${v.count}</td>
+        <td style="color:${w};">${v.win_rate}%</td>
+        <td style="color:${c};font-weight:600;">${v.net_pnl >= 0 ? '+' : ''}${v.net_pnl.toFixed(2)}</td>
+        <td style="color:var(--muted);">${v.fees.toFixed(3)}</td>
+      </tr>`;
+    }).join('');
+
+  const regRows = Object.entries(s.by_regime || {})
+    .sort((a, b) => a[1].net_pnl - b[1].net_pnl)
+    .map(([name, v]) => {
+      const c = v.net_pnl >= 0 ? 'var(--c-green)' : 'var(--c-red)';
+      const w = v.win_rate >= 55 ? 'var(--c-green)' : v.win_rate >= 50 ? 'var(--c-amber)' : 'var(--c-red)';
+      return `<tr>
+        <td>${name}</td>
+        <td>${v.count}</td>
+        <td style="color:${w};">${v.win_rate}%</td>
+        <td style="color:${c};font-weight:600;">${v.net_pnl >= 0 ? '+' : ''}${v.net_pnl.toFixed(2)}</td>
+      </tr>`;
+    }).join('');
+
+  el.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;">Strategies</div>
+    <table class="bm-table" style="font-size:11px;margin-top:0;">
+      <thead><tr><th>Strategy</th><th>Trades</th><th>WR%</th><th>Net PnL</th><th>Fees</th></tr></thead>
+      <tbody>${stratRows || '<tr><td colspan="5" style="color:var(--muted);text-align:center;">No data</td></tr>'}</tbody>
+    </table>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin:12px 0 5px;">Regimes</div>
+    <table class="bm-table" style="font-size:11px;margin-top:0;">
+      <thead><tr><th>Regime</th><th>Trades</th><th>WR%</th><th>Net PnL</th></tr></thead>
+      <tbody>${regRows || '<tr><td colspan="4" style="color:var(--muted);text-align:center;">No data</td></tr>'}</tbody>
+    </table>`;
+}
+
+function _renderUpeCharts(d) {
+  const eqCtx = document.getElementById('upe-equity-chart');
+  if (eqCtx) {
+    if (_upeEquityChart) { _upeEquityChart.destroy(); _upeEquityChart = null; }
+    const curve = d.equity_curve || [];
+    _upeEquityChart = new Chart(eqCtx, {
+      type: 'line',
+      data: {
+        labels: curve.map((_, i) => i),
+        datasets: [{
+          data: curve.map(p => p.equity),
+          borderColor: '#1D9E75', borderWidth: 1.8,
+          pointRadius: 0, fill: true, tension: 0.35,
+          backgroundColor: 'rgba(29,158,117,0.08)',
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false,
+            callbacks: { label: c => '$' + parseFloat(c.raw).toFixed(2) } },
+        },
+        scales: {
+          x: { display: false },
+          y: { display: true,
+               ticks: { font: { size: 9 }, callback: v => '$' + parseFloat(v).toFixed(0) },
+               grid: { color: 'rgba(0,0,0,0.04)' } },
+        },
+      },
+    });
+  }
+
+  const ddCtx = document.getElementById('upe-dd-chart');
+  if (ddCtx) {
+    if (_upeDDChart) { _upeDDChart.destroy(); _upeDDChart = null; }
+    const dds = d.drawdown_series || [];
+    _upeDDChart = new Chart(ddCtx, {
+      type: 'line',
+      data: {
+        labels: dds.map((_, i) => i),
+        datasets: [{
+          data: dds.map(p => p.drawdown_pct),
+          borderColor: '#E53E3E', borderWidth: 1.5,
+          pointRadius: 0, fill: true, tension: 0.35,
+          backgroundColor: 'rgba(229,62,62,0.08)',
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false,
+            callbacks: { label: c => parseFloat(c.raw).toFixed(2) + '%' } },
+        },
+        scales: {
+          x: { display: false },
+          y: { display: true,
+               ticks: { font: { size: 9 }, callback: v => v.toFixed(1) + '%' },
+               grid: { color: 'rgba(0,0,0,0.04)' } },
+        },
+      },
+    });
+  }
+}
+
+function _renderUpeTable(trades, total) {
+  const tbody = document.getElementById('upe-trade-tbody');
+  const cntEl = document.getElementById('upe-table-count');
+  if (cntEl) cntEl.textContent = (total || 0) + ' trades';
+  if (!tbody) return;
+  if (!trades || trades.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;">No trades for this filter.</td></tr>';
+    return;
+  }
+  // Show most-recent first
+  const rows = [...trades].reverse().slice(0, 500);
+  tbody.innerHTML = rows.map(t => {
+    const dt  = t.exit_ts
+      ? new Date(t.exit_ts).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
+      : '—';
+    const pnl = t.net_pnl || 0;
+    const fee = (t.fee_entry || 0) + (t.fee_exit || 0);
+    const rr  = t.r_multiple || 0;
+    const win = pnl > 0;
+    const pnlColor = pnl >= 0 ? 'var(--c-green)' : 'var(--c-red)';
+    const sideTag  = t.side === 'LONG'
+      ? '<span class="tag green" style="font-size:9px;">LONG</span>'
+      : '<span class="tag red"   style="font-size:9px;">SHORT</span>';
+    const resultTag = win
+      ? '<span class="tag green" style="font-size:9px;">WIN</span>'
+      : '<span class="tag red"   style="font-size:9px;">LOSS</span>';
+    return `<tr>
+      <td style="color:var(--muted);white-space:nowrap;font-size:10px;">${dt}</td>
+      <td style="font-family:var(--fm);font-weight:600;">${t.symbol || '—'}</td>
+      <td>${sideTag}</td>
+      <td style="font-family:var(--fm);font-size:10px;">${t.strategy_id || '—'}</td>
+      <td style="font-size:10px;color:var(--muted);">${t.regime || '—'}</td>
+      <td style="font-weight:600;color:${pnlColor};">${pnl >= 0 ? '+' : ''}${pnl.toFixed(4)}</td>
+      <td style="color:var(--muted);">${fee.toFixed(4)}</td>
+      <td style="color:${rr >= 0 ? 'var(--c-green)' : 'var(--c-red)'};">${rr.toFixed(3)}</td>
+      <td>${resultTag}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Export & Backup ───────────────────────────────────────────────────────────
+function upeDownloadCSV() {
+  const a = document.createElement('a');
+  a.href = API + '/api/perf-explorer/export/csv?preset=' + _upePreset;
+  a.download = 'trades_' + _upePreset + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function upeDownloadJSON() {
+  const a = document.createElement('a');
+  a.href = API + '/api/perf-explorer/export/json?preset=' + _upePreset;
+  a.download = 'report_' + _upePreset + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function upeBackup() {
+  const btn = document.getElementById('upe-backup-btn');
+  const st  = document.getElementById('upe-backup-status');
+  if (btn) btn.disabled = true;
+  if (st)  st.textContent = 'Saving…';
+  try {
+    const r = await fetch(API + '/api/perf-explorer/backup', {
+      method: 'POST', signal: AbortSignal.timeout(10000),
+    });
+    const d = await r.json();
+    if (st) st.textContent = d.ok ? `✅ ${d.trade_count} trades saved` : '❌ Failed';
+  } catch(e) {
+    if (st) st.textContent = '❌ Network error';
+  } finally {
+    if (btn) btn.disabled = false;
+    setTimeout(() => { if (st) st.textContent = ''; }, 4000);
+  }
 }
 
 function _syncExecModeBadge(mode) {

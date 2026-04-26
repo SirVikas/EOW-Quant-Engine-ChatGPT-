@@ -87,6 +87,16 @@ from core.gating import (                                         # Phase 6.6: h
     pre_trade_gate,
 )
 from core.data_health import data_health_monitor                  # qFTD-004: data freshness SSOT
+from core.performance_explorer import (                           # FTD-UPE: Universal Performance Explorer
+    TradeFilter        as _UPEFilter,
+    preset_filter      as _upe_preset_filter,
+    compute_summary    as _upe_compute_summary,
+    build_visual_data  as _upe_build_visual_data,
+    extract_insights   as _upe_extract_insights,
+    TradeRecord        as _UPERecord,
+    ExportEngine       as _UPEExport,
+    BackupManager      as _UPEBackup,
+)
 from core.orchestrator import (                                    # Phase 7A: execution orchestrator
     execution_orchestrator,
     TickContext,
@@ -3578,6 +3588,177 @@ async def learning_memory_heatmap():
         "heatmap": learning_memory_orchestrator.pattern_heatmap(),
         "phase": "030B",
     }
+
+
+# ── Performance Explorer API (FTD-UPE) ───────────────────────────────────────
+
+def _pnl_to_upe_records(trades: list) -> list:
+    """Convert pnl_calculator.TradeRecord list → UPE TradeRecord list."""
+    records = []
+    for t in trades:
+        d = asdict(t)
+        sym  = d.get("symbol") or ""
+        side = d.get("side")   or ""
+        if not sym or not side:
+            continue
+        try:
+            records.append(_UPERecord(
+                trade_id      = d.get("trade_id", ""),
+                symbol        = sym,
+                side          = side,
+                strategy_id   = d.get("strategy_id", "unknown"),
+                regime        = d.get("regime", "unknown"),
+                order_type    = d.get("order_type", "LIMIT"),
+                entry_price   = float(d.get("entry_price", 0)),
+                exit_price    = float(d.get("exit_price", 0)),
+                qty           = float(d.get("qty", 0)),
+                gross_pnl     = float(d.get("gross_pnl", 0)),
+                fee_entry     = float(d.get("fee_entry", 0)),
+                fee_exit      = float(d.get("fee_exit", 0)),
+                slippage_cost = float(d.get("slippage_cost", 0)),
+                net_pnl       = float(d.get("net_pnl", 0)),
+                net_pnl_pct   = float(d.get("net_pnl_pct", 0)),
+                r_multiple    = float(d.get("r_multiple", 0)),
+                entry_ts      = int(d.get("entry_ts", 0)),
+                exit_ts       = int(d.get("exit_ts", 0)),
+                mode          = d.get("mode", "PAPER"),
+            ))
+        except Exception:
+            pass
+    return records
+
+
+def _upe_build_filter(
+    preset:    str,
+    symbol:    str,
+    strategy:  str,
+    regime:    str,
+    side:      str,
+    win_only:  bool,
+    loss_only: bool,
+    rr_min,
+    rr_max,
+    pnl_min,
+    pnl_max,
+) -> _UPEFilter:
+    flt = _upe_preset_filter(preset)
+    if symbol:    flt.symbols    = [symbol]
+    if strategy:  flt.strategies = [strategy]
+    if regime:    flt.regimes    = [regime]
+    if side:      flt.sides      = [side]
+    if win_only:  flt.win_only   = True
+    if loss_only: flt.loss_only  = True
+    if rr_min  is not None: flt.rr_min  = rr_min
+    if rr_max  is not None: flt.rr_max  = rr_max
+    if pnl_min is not None: flt.pnl_min = pnl_min
+    if pnl_max is not None: flt.pnl_max = pnl_max
+    return flt
+
+
+@app.get("/api/perf-explorer/summary")
+async def upe_summary(
+    preset:    str   = "ALL",
+    symbol:    str   = "",
+    strategy:  str   = "",
+    regime:    str   = "",
+    side:      str   = "",
+    win_only:  bool  = False,
+    loss_only: bool  = False,
+    rr_min:    float = None,
+    rr_max:    float = None,
+    pnl_min:   float = None,
+    pnl_max:   float = None,
+):
+    """Performance Explorer — summary panel + AI insights for given preset/filter."""
+    records  = _pnl_to_upe_records(pnl_calc.trades)
+    flt      = _upe_build_filter(preset, symbol, strategy, regime, side,
+                                 win_only, loss_only, rr_min, rr_max, pnl_min, pnl_max)
+    filtered = flt.apply(records)
+    summary  = _upe_compute_summary(filtered, initial_capital=pnl_calc._initial_capital)
+    insights = _upe_extract_insights(summary, filtered)
+    return {
+        "preset":      preset,
+        "trade_count": len(filtered),
+        "summary":     asdict(summary),
+        "insights":    [asdict(i) for i in insights],
+    }
+
+
+@app.get("/api/perf-explorer/trades")
+async def upe_trades(
+    preset:    str   = "ALL",
+    symbol:    str   = "",
+    strategy:  str   = "",
+    regime:    str   = "",
+    side:      str   = "",
+    win_only:  bool  = False,
+    loss_only: bool  = False,
+    rr_min:    float = None,
+    rr_max:    float = None,
+    pnl_min:   float = None,
+    pnl_max:   float = None,
+    limit:     int   = 500,
+):
+    """Performance Explorer — filtered trade list."""
+    records  = _pnl_to_upe_records(pnl_calc.trades)
+    flt      = _upe_build_filter(preset, symbol, strategy, regime, side,
+                                 win_only, loss_only, rr_min, rr_max, pnl_min, pnl_max)
+    filtered = flt.apply(records)
+    return {
+        "total":  len(filtered),
+        "trades": [asdict(t) for t in filtered[-limit:]],
+    }
+
+
+@app.get("/api/perf-explorer/visuals")
+async def upe_visuals(preset: str = "ALL"):
+    """Performance Explorer — chart data (equity curve, drawdown series, histograms)."""
+    records  = _pnl_to_upe_records(pnl_calc.trades)
+    filtered = _upe_preset_filter(preset).apply(records)
+    visuals  = _upe_build_visual_data(filtered, initial_capital=pnl_calc._initial_capital)
+    return {
+        "equity_curve":    visuals.equity_curve[-300:],
+        "drawdown_series": visuals.drawdown_series[-300:],
+        "pnl_histogram":   visuals.pnl_histogram,
+        "win_loss_dist":   visuals.win_loss_dist,
+        "rr_distribution": visuals.rr_distribution,
+    }
+
+
+@app.get("/api/perf-explorer/export/csv")
+async def upe_export_csv(preset: str = "ALL"):
+    """Performance Explorer — download filtered trade list as CSV."""
+    from fastapi.responses import Response as _R
+    records  = _pnl_to_upe_records(pnl_calc.trades)
+    filtered = _upe_preset_filter(preset).apply(records)
+    return _R(
+        content    = _UPEExport.to_csv(filtered),
+        media_type = "text/csv",
+        headers    = {"Content-Disposition": f"attachment; filename=trades_{preset}.csv"},
+    )
+
+
+@app.get("/api/perf-explorer/export/json")
+async def upe_export_json(preset: str = "ALL"):
+    """Performance Explorer — download full report as JSON."""
+    from fastapi.responses import Response as _R
+    records  = _pnl_to_upe_records(pnl_calc.trades)
+    filtered = _upe_preset_filter(preset).apply(records)
+    summary  = _upe_compute_summary(filtered, initial_capital=pnl_calc._initial_capital)
+    return _R(
+        content    = _UPEExport.to_json(filtered, summary),
+        media_type = "application/json",
+        headers    = {"Content-Disposition": f"attachment; filename=report_{preset}.json"},
+    )
+
+
+@app.post("/api/perf-explorer/backup")
+async def upe_backup():
+    """Performance Explorer — trigger manual backup of trade history."""
+    records = _pnl_to_upe_records(pnl_calc.trades)
+    bm      = _UPEBackup("data/backups")
+    path    = bm.backup(records, label="manual")
+    return {"ok": True, "path": path, "trade_count": len(records)}
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
