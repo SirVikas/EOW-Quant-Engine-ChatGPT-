@@ -1,0 +1,376 @@
+# 🧾 FTD-025C — TRUTH ENGINE FIX (CONTRADICTION RESOLUTION LAYER)
+
+## 📌 Reference ID: FTD-025C-TRUTH-LAYER-V1
+## 📌 Reference ID-FTD-025C-TRUTH-LAYER-V1
+---
+
+# 🧠 CONTEXT
+
+FTD-025B (Unified Report v2) successfully delivers:
+
+✔ Structured reporting
+✔ Signal → trade visibility
+✔ Root cause + action plan sections
+
+❗ BUT critical flaw remains:
+
+```text
+Report is NOT always truthful
+```
+
+Examples observed:
+
+* Signals exist but trades = 0 → root cause = “none” ❌
+* Capital idle but “no missed opportunity” ❌
+* Session vs historical metrics mixed ❌
+* SLEEP_MODE present but ignored in diagnosis ❌
+
+---
+
+# 🎯 OBJECTIVE
+
+Create a **Truth Engine Layer** that ensures:
+
+```text
+✔ No contradictions
+✔ Root cause always detected
+✔ Data → logic → conclusion aligned
+✔ Report becomes decision-grade (not cosmetic)
+```
+
+---
+
+# 🏗️ ARCHITECTURE
+
+## 📁 NEW MODULE (MANDATORY)
+
+```text
+core/reporting/truth_engine.py
+```
+
+---
+
+# ⚙️ CORE COMPONENTS
+
+---
+
+## 1. 🔴 CONTRADICTION DETECTOR
+
+### Function:
+
+```python
+detect_contradictions(report_data) -> list[dict]
+```
+
+### MUST DETECT:
+
+```text
+✔ signals > 0 AND trades = 0
+✔ capital_idle > 70% AND trades = 0
+✔ rejection reasons exist BUT root cause = none
+✔ PF < 1 BUT system marked "normal"
+✔ session_trades = 0 BUT win_rate populated
+```
+
+---
+
+## 2. 🧠 ROOT CAUSE RESOLVER (REWRITE)
+
+### Function:
+
+```python
+resolve_root_cause(data, contradictions) -> dict
+```
+
+### LOGIC PRIORITY:
+
+```text
+1. GATING BLOCK (SLEEP_MODE, LOW_SCORE, RR_FAIL)
+2. SIGNAL QUALITY (low score distribution)
+3. RISK BLOCK (halt / DD)
+4. CAPITAL UNDERUTILIZATION
+5. TRUE NO-OPPORTUNITY
+```
+
+### EXAMPLE OUTPUT:
+
+```text
+PRIMARY:
+"Trade execution blocked by SLEEP_MODE despite active signal flow"
+
+SECONDARY:
+"Score threshold not met for majority of signals"
+```
+
+---
+
+## 3. 🔁 SIGNAL FLOW VALIDATOR
+
+### Function:
+
+```python
+validate_signal_flow(data) -> dict
+```
+
+### MUST OUTPUT:
+
+```text
+✔ % signals rejected
+✔ % signals passed
+✔ execution gap (signals → trades)
+✔ dominant rejection reason
+```
+
+---
+
+## 4. ⚖️ SESSION vs HISTORICAL SPLITTER
+
+### Function:
+
+```python
+split_metrics(data) -> dict
+```
+
+### REQUIRED:
+
+```text
+Session:
+- trades
+- PnL
+- win rate
+
+Historical:
+- total PnL
+- lifetime stats
+```
+
+❗ MUST NEVER MIX
+
+---
+
+## 5. 💰 CAPITAL REALITY CHECK
+
+### Function:
+
+```python
+analyze_capital_efficiency(data) -> dict
+```
+
+### MUST FIX:
+
+```text
+IF trades = 0 AND signals > 0:
+→ missed_opportunity = TRUE
+→ reason = gating/filtering
+```
+
+---
+
+## 6. 🚨 ALERT GENERATOR (UPGRADE)
+
+### Function:
+
+```python
+generate_alerts(data, contradictions) -> list
+```
+
+### NEW ALERT TYPES:
+
+```text
+✔ NO_TRADE_ALERT
+✔ SLEEP_MODE_BLOCK
+✔ SIGNAL_REJECTION_SPIKE
+✔ CAPITAL_IDLE_HIGH
+✔ CONTRADICTION_DETECTED
+```
+
+Each must include:
+
+```text
+cause + impact + fix
+```
+
+---
+
+## 7. 🧠 DECISION INTELLIGENCE FIX
+
+### Function:
+
+```python
+enhance_decision_reasoning(data, root_cause) -> dict
+```
+
+### MUST ADD:
+
+```text
+✔ WHY signals rejected
+✔ WHY no execution
+✔ WHAT condition missing
+✔ WHAT would trigger execution
+```
+
+---
+
+# 🔄 INTEGRATION WITH FTD-025B
+
+## 📁 Modify:
+
+```text
+core/reporting/unified_report_engine_v2.py
+```
+
+---
+
+## 🔁 PIPELINE UPDATE
+
+Before:
+
+```text
+collect_data → generate_report
+```
+
+After:
+
+```text
+collect_data
+→ truth_engine.process()
+→ corrected_data
+→ generate_report
+```
+
+---
+
+# 📊 SECTION-LEVEL FIXES
+
+---
+
+## 🔧 Executive Snapshot
+
+Replace with:
+
+```text
+System State: ACTIVE
+Trading Activity: BLOCKED (signals present but no execution)
+Key Problem: SLEEP_MODE blocking trades
+Immediate Action: Reduce threshold / wait for tier shift
+```
+
+---
+
+## 🔧 Signal Flow
+
+Add:
+
+```text
+Execution Gap: 13 signals → 0 trades
+Dominant Block: SLEEP_MODE (100%)
+```
+
+---
+
+## 🔧 Decision Intelligence
+
+Add:
+
+```text
+WHY:
+Signals present but rejected due to SLEEP_MODE gating
+```
+
+---
+
+## 🔧 Capital Efficiency
+
+Fix:
+
+```text
+Missed Opportunity:
+"Signals available but not executed due to gating"
+```
+
+---
+
+## 🔧 Root Cause (MANDATORY FIX)
+
+```text
+❌ NEVER allow "no root cause" if contradictions exist
+```
+
+---
+
+# 🧪 VERIFIER (MANDATORY UPDATE)
+
+## 📁 tests/test_unified_report_v2.py
+
+Add tests:
+
+```text
+✔ contradiction detection
+✔ root cause forced when signals>0 & trades=0
+✔ capital idle logic correctness
+✔ session/historical separation
+✔ alert generation correctness
+```
+
+---
+
+# 🚨 HARD RULES
+
+```text
+❌ No generic fallback text
+❌ No empty root cause
+❌ No contradictory sections
+
+✔ Every conclusion must match data
+✔ Every alert must be actionable
+✔ Every section must align with truth engine
+```
+
+---
+
+# 📦 OUTPUT GUARANTEE
+
+After FTD-025C:
+
+```text
+✔ Report never lies
+✔ Root cause always present
+✔ Contradictions eliminated
+✔ Developer gets exact fix direction
+```
+
+---
+
+# 🧠 FINAL PRINCIPLE
+
+```text
+Truth > Formatting
+Clarity > Completeness
+Actionability > Data volume
+```
+
+---
+
+# 🚀 EXPECTED RESULT
+
+Before:
+
+```text
+"System operating normally" ❌
+```
+
+After:
+
+```text
+"System blocked by SLEEP_MODE despite active signals" ✔
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+यह layer report को सुंदर नहीं बनाएगा
+
+यह उसे सच बोलने पर मजबूर करेगा
+```
