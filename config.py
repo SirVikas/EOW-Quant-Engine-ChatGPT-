@@ -131,6 +131,13 @@ class EngineConfig(BaseSettings):
     # qFTD-011: 0.10→0.15 — tighter cost ceiling was blocking small-notional valid trades.
     MAX_COST_FRACTION: float = 0.15      # qFTD-011: 0.10→0.15 — realistic fee ceiling
 
+    # ── qFTD-033: Cost-Aware Alpha Engine ────────────────────────────────────
+    COST_MIN_NET_EDGE_PCT: float = 0.001    # Q4:B — min 0.1% net edge (notional-relative)
+    COST_EXPLORE_LOSS_MAX_PCT: float = 0.0005  # Q7:A — exploration floor: max -0.05% edge
+    COST_HIGH_EDGE_FACTOR: float = 0.75    # Q11:C — adaptive size when edge is marginal
+    COST_SPREAD_EST_PCT: float = 0.0002    # Q3:A — bid-ask spread estimate 0.02%
+    COST_SLIPPAGE_MAX_PCT: float = 0.0010  # Q2:C — slippage cap 0.10%
+
     # Capital Allocator
     MAX_CAPITAL_PER_TRADE: float = 0.05  # Max 5% of equity per trade
     DAILY_RISK_CAP: float = 0.03         # Max 3% of equity risked per day
