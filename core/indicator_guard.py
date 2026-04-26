@@ -27,7 +27,7 @@ MIN_CANDLES        = 30     # minimum history before any signal is valid
 ADX_UNSTABLE_BELOW =  5.0  # hard block — pure noise
 ADX_WEAK_BELOW     = 10.0  # soft warning — low trend confidence
 ADX_CLAMP_ABOVE    = 60.0  # clamp ceiling (was 80 — tightened per MASTER-001)
-ATR_PCT_MIN        =  0.010 # Phase 3.1: 0.015→0.010% — stable large-caps (BTC/ETH) no longer blocked
+ATR_PCT_MIN        =  0.005 # qFTD-032-R4: 0.010→0.005% — BTCUSDT/BNBUSDT at 0.008-0.009% during quiet markets; strategy modules independently enforce volatility quality
 
 AdxQuality = Literal["STRONG", "WEAK", "UNSTABLE", "NOT_READY"]
 

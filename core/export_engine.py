@@ -304,7 +304,7 @@ class SystemExportEngine:
         md.kv_table([
             ("Signals / hour",    _fmt_num(tf.get("signals_per_hour"), 2)),
             ("Trades / hour",     _fmt_num(tf.get("trades_per_hour"),  2)),
-            ("Rejection Rate",    _fmt_pct(tf.get("rejection_rate", 0) * 100, 1)),
+            ("Rejection Rate",    _fmt_pct(tf.get("rejection_rate_pct", 0), 1)),
             ("Signals total",     str(tf.get("total_signals", 0))),
             ("Trades total",      str(tf.get("total_trades",  0))),
             ("Skips total",       str(tf.get("total_skips",   0))),

@@ -351,6 +351,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <span id="vault-live-badge" style="display:none;background:#9B2C2C;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.05em;animation:pulse 1.5s infinite;">⚡ REAL LIVE</span>
     <button class="btn" id="vault-btn" onclick="openVaultModal()" title="Dual-API Credential Vault — switch between Paper (testnet) and Real Live modes" style="border-color:#D6BCFA;background:#FAF5FF;color:#553C9A;">🔐 Vault</button>
     <button class="btn purple" onclick="exportState()">Export JSON</button>
+    <button class="btn" onclick="downloadUnifiedReportV2()" style="border-color:#2b6cb0;background:#ebf8ff;color:#2b6cb0;" title="FTD-025B: Unified Intelligent Report — cause-effect narrative">📊 Intelligent Report</button>
     <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
   </div>
 </div>
@@ -1524,6 +1525,25 @@ async function downloadFullSystemReport() {
     addThought('✅ Full system report downloaded: ' + fn, 'SYSTEM');
   } catch(e) {
     addThought('Full system report failed — ' + e.message, 'HALT');
+  }
+}
+
+// ── FTD-025B-URX-V2: Unified Intelligent Report button ───────────────────────
+async function downloadUnifiedReportV2() {
+  addThought('⏳ Building Unified Intelligent Report v2 (FTD-025B-URX-V2)…', 'SYSTEM');
+  try {
+    const r = await fetch(API+'/api/report/full-system-v2');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || ('unified_report_v2_'+Date.now()+'.md');
+    a.href = url; a.download = fn; a.click();
+    URL.revokeObjectURL(url);
+    addThought('✅ Intelligent Report downloaded: ' + fn, 'SYSTEM');
+  } catch(e) {
+    addThought('Intelligent Report failed — ' + e.message, 'HALT');
   }
 }
 

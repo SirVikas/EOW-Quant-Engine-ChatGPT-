@@ -115,12 +115,18 @@ class TradeFlowMonitor:
 
     def summary(self) -> dict:
         stats = self.get_stats()
+        # Window totals (after pruning): counts within rolling window
+        cutoff = time.time() - self._window_sec
+        self._prune(cutoff)
         return {
             "trades_per_hour":          stats.trades_per_hour,
             "signals_per_hour":         stats.signals_per_hour,
             "rejection_rate_pct":       round(stats.rejection_rate * 100, 1),
             "minutes_since_last_trade": stats.minutes_since_last_trade,
             "top_rejection_reasons":    stats.top_reasons,
+            "total_signals":            len(self._signal_ts),
+            "total_trades":             len(self._trade_ts),
+            "total_skips":              len(self._skip_ts),
             "window_min":               cfg.TFM_WINDOW_MIN,
             "module": "TRADE_FLOW_MONITOR",
             "phase":  5.1,

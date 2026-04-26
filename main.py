@@ -2297,6 +2297,83 @@ async def get_report_archive():
     )
 
 
+# ── FTD-025B-URX-V2: [ EXPORT INTELLIGENT REPORT ] ──────────────────────────
+
+@app.get("/api/report/full-system-v2")
+async def get_full_system_report_v2():
+    """
+    FTD-025B-URX-V2 Unified Report Engine — cause-effect narrative.
+    Returns a single Markdown file download.
+    """
+    from fastapi.responses import Response as _Response
+    from core.reporting.unified_report_engine_v2 import generate_full_report_v2
+
+    def _safe_v2(fn, default=None):
+        try:
+            return fn()
+        except Exception:
+            return default
+
+    _mins_idle = trade_flow_monitor.minutes_since_last_trade()
+    _ss        = pnl_calc.session_stats
+
+    _v2_ct = _safe_v2(
+        lambda: __import__("core.intelligence.suggestion_engine",
+                           fromlist=["suggestion_engine"]).suggestion_engine.detect(
+            profit_factor=_ss.get("profit_factor", 0.0),
+            fee_ratio=round(
+                _ss.get("total_fees_paid", 0.0)
+                / max(abs(_ss.get("total_net_pnl", 0.0)) + _ss.get("total_fees_paid", 0.0), 1e-9),
+                4,
+            ),
+            win_rate=_ss.get("win_rate", 0.0) / 100.0,
+            n_trades=len(pnl_calc.trades),
+            strategy_usage=strategy_engine.usage(),
+            regime_stable=True,
+        ), {}
+    )
+
+    data = {
+        "generated_at":   time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "trade_flow":     _safe_v2(trade_flow_monitor.summary, {}),
+        "mins_idle":      _mins_idle,
+        "thresholds":     _safe_v2(
+            lambda: dynamic_threshold_provider.summary(minutes_no_trade=_mins_idle), {}
+        ),
+        "session_stats":  _ss,
+        "capital":        _safe_v2(capital_allocator.summary, {}),
+        "risk":           _safe_v2(risk_ctrl.snapshot, {}),
+        "gate":           _safe_v2(
+            lambda: global_gate_controller.snapshot()
+            if "global_gate_controller" in globals() else {}, {}
+        ),
+        "errors":         _safe_v2(lambda: error_registry.recent(20), []),
+        "learning_memory": _safe_v2(
+            lambda: __import__("core.learning_memory",
+                               fromlist=["learning_memory_orchestrator"]
+                               ).learning_memory_orchestrator.summary(), {}
+        ),
+        "ct_scan":        _v2_ct,
+        "ai_brain":       _safe_v2(
+            lambda: __import__("core.meta.ai_brain",
+                               fromlist=["ai_brain"]).ai_brain.get_state(), {}
+        ),
+        "drawdown":       _safe_v2(drawdown_controller.summary, {}),
+        "activator":      _safe_v2(trade_activator.summary, {}),
+        "edge_engine":    _safe_v2(edge_engine.summary, {}),
+        "thoughts":       list(_thought_log)[-30:],
+    }
+
+    report_md = generate_full_report_v2(data)
+    filename  = f"unified_report_v2_{int(time.time())}.md"
+    _thought("📊 Unified Report v2 exported (FTD-025B-URX-V2)", "SYSTEM")
+    return _Response(
+        content=report_md.encode("utf-8"),
+        media_type="text/markdown",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 # ── FTD-025A: [ EXPORT FULL SYSTEM REPORT ] ──────────────────────────────────
 
 @app.get("/api/report/full-system")
@@ -2405,7 +2482,11 @@ async def get_full_system_report():
         regime            = _safe(lambda: regime_memory.summary()
                                   if hasattr(regime_memory, "summary") else {}, {}),
         ct_scan           = ct_scan,
-        dynamic_thresholds= _safe(dynamic_threshold_provider.summary, {}),
+        dynamic_thresholds= _safe(
+            lambda: dynamic_threshold_provider.summary(
+                minutes_no_trade=trade_flow_monitor.minutes_since_last_trade()
+            ), {}
+        ),
         streak            = _safe(streak_engine.summary, {}),
         capital_allocator = _safe(capital_allocator.summary, {}),
         error_registry    = _safe(lambda: error_registry.recent(50), []),
