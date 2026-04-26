@@ -205,9 +205,9 @@ class EngineConfig(BaseSettings):
     ACTIVATOR_T2_SCORE: float = 0.42     # qFTD-032-R3: 0.45→0.42 — TIER_2 effective floor = 0.42
 
     # Exploration Engine — learning trades
-    # EDP: 0.25→0.35 — policy mandates learning mode (more trades, data collection).
-    # Phase 1 is exploration-heavy; Phase 2/3 will pull back as alpha matures.
-    EXPLORE_RATE: float = 0.35           # EDP: 0.25→0.35 — learning mode exploration boost
+    # FIX: 0.35→0.10 — 35% exploration was amplifying losses; system must stabilise first.
+    # Exploration only justified when system has positive PF; reduced to minimum viable rate.
+    EXPLORE_RATE: float = 0.10           # FIX: 0.35→0.10 — learning mode capped to 10%
     EXPLORE_SIZE_MULT: float = 0.25      # Size multiplier for exploration trades
     # qFTD-008-EDGE: 0.45→0.60 — exploration quality bar raised to match new baseline.
     EXPLORE_SCORE_MIN: float = 0.60      # qFTD-008-EDGE: 0.45→0.60 — no low-quality exploration
@@ -346,7 +346,7 @@ class EngineConfig(BaseSettings):
     # Disables ALL blocking gates so the execution pipeline can be validated.
     # Set True to confirm trades execute; set False to restore normal logic.
     # NEVER leave True in production — this bypasses all risk/quality controls.
-    BYPASS_ALL_GATES: bool = Field(default=True, env="BYPASS_ALL_GATES")
+    BYPASS_ALL_GATES: bool = Field(default=False, env="BYPASS_ALL_GATES")
 
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine

@@ -22,9 +22,12 @@ from loguru import logger
 # ── Thresholds ────────────────────────────────────────────────────────────────
 PROFIT_FACTOR_MIN  = 1.0     # below this PF → reduce frequency
 FEE_RATIO_MAX      = 0.20    # 5× rule: fees must be < 20% of gross TP profit (projected profit ≥ 5× commission)
-FREQ_REDUCE_MULT   = 0.80    # gentle 20% reduction instead of 50% halving
-MIN_TRADES_FOR_PF  = 20      # mandate: 20 trades before PF gate activates
-MAX_CONSEC_LOSSES  = 8       # hard-stop only after 8 consecutive losses
+# FIX: 0.80→0.60 — 20% reduction was too gentle for PF=0.38; 40% reduction needed to cut losses faster.
+FREQ_REDUCE_MULT   = 0.60    # FIX: 0.80→0.60 — stronger frequency cut when system is losing
+# FIX: 20→10 — system lost 15% equity before gate activated; halved to catch issues earlier.
+MIN_TRADES_FOR_PF  = 10      # FIX: 20→10 — activate PF gate earlier to limit drawdown
+# FIX: 8→5 — 8 consecutive losses caused -$150 before hard stop; 5 losses is the new ceiling.
+MAX_CONSEC_LOSSES  = 5       # FIX: 8→5 — hard-stop after 5 consecutive losses
 
 
 class ProfitGuard:
