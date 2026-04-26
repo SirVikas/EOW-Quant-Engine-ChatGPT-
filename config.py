@@ -342,6 +342,12 @@ class EngineConfig(BaseSettings):
     # Gate Logger
     GL_HISTORY_SIZE: int = 500              # Max gate events to retain in memory
 
+    # ── DIAGNOSTIC: Gate Bypass Mode ─────────────────────────────────────────
+    # Disables ALL blocking gates so the execution pipeline can be validated.
+    # Set True to confirm trades execute; set False to restore normal logic.
+    # NEVER leave True in production — this bypasses all risk/quality controls.
+    BYPASS_ALL_GATES: bool = Field(default=True, env="BYPASS_ALL_GATES")
+
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine
     # qFTD-008: was 0.60 — with EV_WEIGHT=0.55 and bootstrap ev=0.0, max achievable

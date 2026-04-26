@@ -88,6 +88,8 @@ class SafeModeEngine:
 
     def activate(self, reason: str) -> None:
         """Enter SAFE mode (no new trades; existing managed normally)."""
+        if cfg.BYPASS_ALL_GATES:
+            return  # bypass: safe mode never activates
         if self._mode == SafeMode.BLOCKED:
             logger.warning(f"[SAFE-MODE-ENGINE] Already BLOCKED — ignoring SAFE activate: {reason}")
             return

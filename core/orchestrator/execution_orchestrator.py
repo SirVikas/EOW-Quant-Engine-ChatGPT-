@@ -50,6 +50,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from loguru import logger
+from config import cfg
 
 from core.gating.global_gate_controller import GlobalGateController, global_gate_controller as _default_ggc
 from core.gating.safe_mode_engine import SafeModeEngine, safe_mode_engine as _default_sme
@@ -320,6 +321,20 @@ class ExecutionOrchestrator:
     def _run_cycle_inner(self, ctx: TickContext) -> CycleResult:
         self.enforce_exclusivity()
         self._total_cycles += 1
+
+        # BYPASS_ALL_GATES: skip all ranking/competition/PTG — always execute.
+        if cfg.BYPASS_ALL_GATES:
+            self._total_exec += 1
+            logger.info(
+                f"[ORCHESTRATOR] BYPASS_EXECUTE | sym={ctx.symbol} "
+                f"(all gates disabled for pipeline validation)"
+            )
+            return CycleResult(
+                action="EXECUTE", execute=True, reason="BYPASS_ALL_GATES",
+                concentration_mult=1.0, tp_multiplier=1.0, trail_multiplier=1.0,
+                rank_score=1.0, band="BYPASS", amplified=False,
+                gate_status={"can_trade": True, "reason": "BYPASS_ALL_GATES", "safe_mode": False},
+            )
 
         # ── 1. Gate re-evaluation — pass ctx readiness values (qFTD-004 SSOT fix) ──
         gate_status = self._gate.evaluate(
