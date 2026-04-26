@@ -1,0 +1,411 @@
+# 🧾 FTD-034 — FINAL INTELLIGENCE LAYER (ZERO-GUESS, FILE-EXACT)
+
+## 📌 Reference ID: FTD-034-FINAL-INTEL-V2
+## 📌 Reference ID-FTD-034-FINAL-INTEL-V2
+---
+
+# 🧠 CONTEXT (LOCKED FROM LATEST REPORT)
+
+Ref: full_system_report_1777190918.md
+
+```text
+Signals > 0 AND Trades = 0  → 100% rejection
+Primary issue wrongly reported as “SYSTEM IN LOSS”
+Gate fields empty (—)
+AI Brain = MONITOR (incorrect)
+Learning = inactive
+score_min = 0.58 (blocking)
+```
+
+👉 Therefore:
+
+```text
+REAL PRIMARY ISSUE = NO_EXECUTION (NOT LOSS)
+```
+
+---
+
+# 🎯 OBJECTIVE
+
+```text
+✔ Force truth (no wrong diagnosis)
+✔ Inject execution visibility into report
+✔ Align AI brain with reality
+✔ Fix report contradictions
+✔ Enable decision-grade reporting
+```
+
+---
+
+# 🏗️ PIPELINE (FINAL)
+
+```text
+raw
+→ truth_engine.process()
+→ intelligence_layer.enrich()
+→ FINAL_INTEL.apply()   ← NEW (FTD-034)
+→ generate_report()
+```
+
+---
+
+# 🔴 PART 1 — FINAL INTELLIGENCE ENGINE (CORE)
+
+## 📁 CREATE FILE
+
+```text
+core/reporting/final_intelligence_engine.py
+```
+
+---
+
+## 🔧 FUNCTION
+
+```python
+def apply(data: dict) -> dict:
+```
+
+---
+
+## 🔴 RULE 1 — NO_EXECUTION OVERRIDE (MANDATORY)
+
+```python
+signals = data.get("signals_total", 0)
+trades = data.get("trades_total", 0)
+
+if signals > 0 and trades == 0:
+    data["primary_issue"] = "NO_EXECUTION"
+    data["primary_reason"] = "All signals blocked — 0 trades executed"
+    data["severity"] = "CRITICAL"
+```
+
+---
+
+## 🔴 RULE 2 — ROOT CAUSE PRIORITY FIX
+
+```python
+priority = [
+    "NO_EXECUTION",
+    "NEGATIVE_NET_EDGE",
+    "GATE_BLOCK",
+    "RISK_BLOCK",
+    "STRATEGY_WEAKNESS"
+]
+
+# ensure only ONE primary
+data["primary_issue"] = resolve_priority(data, priority)
+```
+
+---
+
+## 🔴 PART 2 — GATE TRACE INJECTION (MANDATORY)
+
+## 📁 MODIFY
+
+```text
+core/reporting/unified_report_engine_v2.py
+```
+
+---
+
+## 🔍 SEARCH
+
+```text
+## 13. Alerts
+```
+
+---
+
+## 🔁 REPLACE BLOCK WITH:
+
+```python
+gate_summary = data.get("gate_trace_summary", {})
+
+alerts_section = {
+    "can_trade": gate_summary.get("can_trade", False),
+    "reason": gate_summary.get("reason", "UNKNOWN"),
+    "dominant_block": gate_summary.get("top_3_failures", [])
+}
+
+data["alerts_enriched"] = alerts_section
+```
+
+---
+
+## 📌 EXPECTED OUTPUT
+
+```text
+Dominant Block: PRE_TRADE_GATE (LOW_SCORE)
+```
+
+---
+
+# 🔴 PART 3 — AI BRAIN SYNCHRONIZATION
+
+## 📁 MODIFY
+
+```text
+core/reporting/intelligence_layer.py
+```
+
+---
+
+## 🔍 SEARCH
+
+```python
+def explain_decision(...)
+```
+
+---
+
+## 🔁 ADD LOGIC
+
+```python
+if data.get("trades_total", 0) == 0 and data.get("signals_total", 0) > 0:
+    decision = "BLOCKED"
+    reason = "NO_EXECUTION — signals not passing gates"
+else:
+    decision = existing_decision
+```
+
+---
+
+## 📌 RESULT
+
+```text
+AI Decision: BLOCKED (instead of MONITOR)
+```
+
+---
+
+# 🔴 PART 4 — CONSISTENCY ENFORCEMENT
+
+## 📁 CREATE FILE
+
+```text
+core/reporting/consistency_engine.py
+```
+
+---
+
+## 🔧 FUNCTION
+
+```python
+def enforce(data: dict) -> dict:
+```
+
+---
+
+## 🔧 LOGIC
+
+```python
+# mismatch fix
+if data["primary_issue"] == "SYSTEM_IN_LOSS" and data["trades_total"] == 0:
+    data["primary_issue"] = "NO_EXECUTION"
+```
+
+---
+
+## 📌 RULE
+
+```text
+NO mismatch allowed between:
+✔ Signal Flow
+✔ Diagnosis
+✔ Alerts
+✔ AI Decision
+```
+
+---
+
+# 🔴 PART 5 — AUTO-TUNING OVERRIDE (CRITICAL)
+
+## 📁 MODIFY
+
+```text
+core/trade_activator.py  OR  config.py usage
+```
+
+---
+
+## 🔧 LOGIC
+
+```python
+if signals > 0 and trades == 0:
+    score_min = max(0.40, score_min - 0.10)
+```
+
+---
+
+## 📌 RESULT
+
+```text
+System will UNBLOCK itself
+```
+
+---
+
+# 🔴 PART 6 — LEARNING TRIGGER FIX
+
+## 📁 MODIFY
+
+```text
+core/learning_memory/learning_memory_orchestrator.py
+```
+
+---
+
+## 🔧 ADD
+
+```python
+if trades_total == 0:
+    exploration_boost = True
+```
+
+---
+
+---
+
+# 🔴 PART 7 — REPORT SECTION (FINAL DIAGNOSIS FIX)
+
+## 📁 MODIFY
+
+```text
+core/reporting/unified_report_engine_v2.py
+```
+
+---
+
+## 🔍 SEARCH
+
+```text
+## 14. Final Diagnosis
+```
+
+---
+
+## 🔁 REPLACE WITH:
+
+```python
+diagnosis = {
+    "PRIMARY": data.get("primary_issue"),
+    "DETAIL": data.get("primary_reason"),
+    "FIX": generate_action(data)
+}
+```
+
+---
+
+## 📌 OUTPUT
+
+```text
+PRIMARY: NO_EXECUTION
+DETAIL: Signals generated but blocked by PRE_TRADE_GATE (LOW_SCORE)
+FIX: Reduce score_min or allow exploration trades
+```
+
+---
+
+# 🔴 PART 8 — INTEGRATION (MANDATORY)
+
+## 📁 MODIFY
+
+```text
+core/reporting/unified_report_engine_v2.py
+```
+
+---
+
+## 🔍 SEARCH
+
+```python
+data = intelligence_layer.enrich(data)
+```
+
+---
+
+## 🔁 ADD BELOW:
+
+```python
+from core.reporting.final_intelligence_engine import apply as final_apply
+from core.reporting.consistency_engine import enforce
+
+data = final_apply(data)
+data = enforce(data)
+```
+
+---
+
+# 🔴 PART 9 — TESTS (MANDATORY)
+
+## 📁 CREATE
+
+```text
+tests/test_final_intelligence.py
+```
+
+---
+
+## 🔧 COVER:
+
+```text
+✔ signals>0 & trades=0 → NO_EXECUTION
+✔ wrong root cause corrected
+✔ AI decision corrected
+✔ gate trace injected
+✔ consistency enforced
+```
+
+---
+
+# 🚨 HARD RULES
+
+```text
+❌ Report कभी गलत primary issue नहीं देगा
+❌ AI brain reality से mismatch नहीं करेगा
+❌ Gate blank नहीं रहेगा
+
+✔ हर rejection का कारण visible
+✔ हर issue actionable
+✔ हर section consistent
+```
+
+---
+
+# 🧠 FINAL PRINCIPLE
+
+```text
+Truth > Logic > Decision > Action
+```
+
+---
+
+# 🚀 EXPECTED RESULT
+
+---
+
+## BEFORE:
+
+```text
+PRIMARY: SYSTEM IN LOSS ❌
+```
+
+---
+
+## AFTER:
+
+```text
+PRIMARY: NO_EXECUTION ✔
+DETAIL: Blocked by PRE_TRADE_GATE (LOW_SCORE)
+ACTION: Reduce threshold / enable exploration
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+अब system सिर्फ data नहीं दिखाएगा
+
+अब system सच्चाई मानेगा — और उसी के आधार पर निर्णय देगा
+```
