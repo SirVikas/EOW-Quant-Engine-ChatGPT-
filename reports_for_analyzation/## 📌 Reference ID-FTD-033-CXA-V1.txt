@@ -1,0 +1,397 @@
+# 🧾 FTD-033 — COST + EXECUTION + ALPHA ENGINE (FULL BLACKBOX)
+
+## 📌 Reference ID: FTD-033-CXA-V1
+## 📌 Reference ID-FTD-033-CXA-V1.txt
+---
+
+# 🧠 CONTEXT
+
+Current system status:
+
+* ✔ Signals generated (working)
+* ❌ Trades not executing (visibility + gating issue)
+* ❌ Profit negative (PF < 1.0)
+* ❌ Costs not integrated into decision
+* ❌ Execution pipeline opaque
+* ❌ Learning not yet effective
+
+---
+
+# 🎯 OBJECTIVE
+
+```text id="obj"
+Build a cost-aware, execution-transparent, alpha-generating system that:
+✔ Trades realistically (cost included)
+✔ Explains every rejection
+✔ Learns from outcomes
+✔ Optimizes toward net profitability
+```
+
+---
+
+# 🏗️ SYSTEM ARCHITECTURE
+
+```text id="arch"
+Signal → Cost Engine → Net Edge Filter → Gate Trace → Execution → Learning → Report
+```
+
+---
+
+# 🔴 PART 1 — COST ENGINE (MANDATORY CORE)
+
+## 📁 File
+
+core/cost/cost_engine.py
+
+---
+
+## 🔧 Responsibilities
+
+```text id="cost"
+✔ Fee calculation (entry + exit)
+✔ Slippage estimation (ATR आधारित)
+✔ Spread estimation
+✔ Total cost per trade
+✔ Cost % of notional
+```
+
+---
+
+## 🔢 API
+
+```python
+estimate_cost(symbol, price, size, volatility, spread) -> {
+    "fee": float,
+    "slippage": float,
+    "spread": float,
+    "total_cost": float,
+    "cost_pct": float
+}
+```
+
+---
+
+# 🔴 PART 2 — NET EDGE FILTER (CRITICAL DECISION LAYER)
+
+## 📁 File
+
+core/alpha/net_edge_engine.py
+
+---
+
+## 🔧 Logic
+
+```python
+expected_move = signal.expected_move_pct
+
+cost = cost_engine.estimate_cost(...)
+
+net_edge = expected_move - cost["cost_pct"]
+
+if net_edge < cfg.MIN_NET_EDGE:
+    reject(reason="NEGATIVE_NET_EDGE")
+```
+
+---
+
+## 📌 Config
+
+```text id="cfg"
+MIN_NET_EDGE = 0.10% (initial)
+EXPLORATION_ALLOW_NEGATIVE = True (small size only)
+```
+
+---
+
+# 🔴 PART 3 — EXECUTION TRACE ENGINE (VISIBILITY FIX)
+
+## 📁 File
+
+core/execution/execution_trace.py
+
+---
+
+## 🎯 PURPOSE
+
+```text id="trace"
+हर signal का पूरा journey record करना
+```
+
+---
+
+## 🔧 Output
+
+```json
+{
+  "symbol": "APEUSDT",
+  "signal": "LONG",
+  "score": 0.72,
+  "net_edge": 0.18,
+  "passed_filters": ["signal", "cost"],
+  "failed_at": "PRE_TRADE_GATE",
+  "reason": "LOW_SCORE",
+  "final_status": "REJECTED"
+}
+```
+
+---
+
+# 🔴 PART 4 — GATE VISIBILITY LAYER
+
+## 📁 File
+
+core/gating/gate_trace_engine.py
+
+---
+
+## 🔧 Track:
+
+```text id="gate"
+✔ GlobalGate
+✔ PreTradeGate
+✔ RiskGate
+✔ ExecutionGate
+```
+
+---
+
+## 📌 Output
+
+```text id="gate_out"
+Dominant Block: PRE_TRADE_GATE (LOW_SCORE)
+```
+
+---
+
+# 🔴 PART 5 — ALPHA ENGINE (CORE PROFIT LAYER)
+
+## 📁 File
+
+core/alpha/alpha_engine.py
+
+---
+
+## 🔧 Responsibilities
+
+```text id="alpha"
+✔ Cost-adjusted RR calculation
+✔ Trade selection optimization
+✔ Signal ranking (net edge आधारित)
+✔ Strategy filtering
+```
+
+---
+
+## 📌 Formula
+
+```text id="alpha_formula"
+Alpha Score = (Expected Move – Cost) × Confidence × Regime Weight
+```
+
+---
+
+# 🔴 PART 6 — EXPLORATION MODE (CONTROLLED BULK TRADING)
+
+## 📁 File
+
+core/alpha/exploration_controller.py
+
+---
+
+## 🔧 Rules
+
+```text id="explore"
+✔ Allow more trades
+✔ Allow low net edge (tagged)
+✔ Reduce size (0.25x)
+✔ Track separately
+```
+
+---
+
+# 🔴 PART 7 — LEARNING INTEGRATION (COST-AWARE)
+
+## 📁 File
+
+core/learning/cost_learning_adapter.py
+
+---
+
+## 🔧 Learn:
+
+```text id="learn"
+✔ कौनसे trades cost inefficient हैं
+✔ कौनसे symbols high slippage देते हैं
+✔ कौनसे patterns net negative हैं
+```
+
+---
+
+## 📌 Output
+
+```text id="learn_out"
+Pattern: "Low RR + High Fee" → confidence ↓
+```
+
+---
+
+# 🔴 PART 8 — REPORTING UPGRADE (MANDATORY)
+
+## MODIFY:
+
+core/reporting/unified_report_engine_v2.py
+
+---
+
+## 🔧 ADD SECTIONS
+
+---
+
+### 🆕 Execution Analysis
+
+```text id="exec"
+Execution Gap: 15 → 0
+Dominant Block: PRE_TRADE_GATE (LOW_SCORE)
+Top Rejection Reason: LOW_SCORE (80%)
+```
+
+---
+
+### 🆕 Cost Analysis
+
+```text id="cost_sec"
+Avg Cost per Trade: 0.42%
+Cost Impact: 25% of gross profit
+High-cost symbols: BTC, ETH
+```
+
+---
+
+### 🆕 Net Edge Summary
+
+```text id="net"
+Signals with positive net edge: 20%
+Rejected due to cost: 60%
+```
+
+---
+
+### 🆕 Gate Trace Summary
+
+```text id="gate_sec"
+GlobalGate: PASS
+PreTradeGate: FAIL (LOW_SCORE)
+RiskGate: PASS
+```
+
+---
+
+### 🆕 Developer Summary (UPGRADED)
+
+```text id="dev"
+Issue: No execution
+Cause: PreTradeGate blocking + low net edge
+Capital Idle: 100%
+Fix:
+- Reduce score threshold OR
+- Improve signal quality OR
+- Lower cost exposure
+```
+
+---
+
+# 🔴 PART 9 — CONFIG (MANDATORY ADDITIONS)
+
+## 📁 config.py
+
+```text id="config"
+MIN_NET_EDGE = 0.001
+MAX_COST_PCT = 0.005
+EXPLORATION_MODE = True
+EXPLORATION_SIZE_MULT = 0.25
+COST_AWARE_TRADING = True
+```
+
+---
+
+# 🔴 PART 10 — TESTS (MANDATORY)
+
+## 📁 tests/test_alpha_engine.py
+
+---
+
+## MUST COVER:
+
+```text id="tests"
+✔ cost reduces edge correctly
+✔ negative net edge → reject
+✔ exploration allows low edge (tagged)
+✔ execution trace populated
+✔ gate trace correct
+✔ report shows execution gap
+```
+
+---
+
+# 🚨 HARD RULES
+
+```text id="rules"
+❌ कोई trade बिना cost calculation नहीं
+❌ कोई rejection बिना reason नहीं
+❌ कोई report बिना execution explanation नहीं
+
+✔ Net PnL = real PnL
+✔ Every trade must justify cost
+✔ Every block must be visible
+```
+
+---
+
+# 🧠 FINAL PRINCIPLE
+
+```text id="principle"
+Signal ≠ Trade
+Trade ≠ Profit
+
+Profit = (Signal Quality – Cost) × Execution Quality
+```
+
+---
+
+# 🚀 EXPECTED OUTCOME
+
+---
+
+## BEFORE:
+
+```text id="before"
+Signals: 100
+Trades: 0
+Reason: UNKNOWN ❌
+```
+
+---
+
+## AFTER:
+
+```text id="after"
+Signals: 100
+Trades: 12
+Rejected: 88
+
+Reasons:
+- 50% LOW_SCORE
+- 25% NEGATIVE_NET_EDGE
+- 13% RISK_BLOCK
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="line"
+अब system सिर्फ signal नहीं देगा
+
+अब system यह भी बताएगा:
+कौनसा trade पैसा बनाएगा — और कौनसा पैसा खाएगा
+```
