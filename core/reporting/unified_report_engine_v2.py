@@ -713,6 +713,151 @@ def _s11_developer_export(d: dict) -> str:
     return _section("11. Developer Export", body)
 
 
+# ── FTD-033 Section builders ──────────────────────────────────────────────────
+
+def _s12_execution_analysis(d: dict) -> str:
+    """FTD-033 Part 3+4 — Execution gap and gate trace summary."""
+    et  = d.get("execution_trace", {})
+    gt  = d.get("gate_trace", {})
+
+    total    = et.get("total_signals", 0)
+    executed = et.get("executed", 0)
+    rejected = et.get("rejected", 0)
+    exec_rate = et.get("execution_rate_pct", 0.0)
+    dominant = et.get("dominant_block", gt.get("dominant_block", "N/A"))
+    top_rej  = et.get("top_rejection", "N/A")
+
+    reasons  = et.get("rejection_reasons", {})
+    gate_bd  = et.get("gate_breakdown", {})
+
+    rej_lines = "\n".join(
+        f"- {r}: {pct}%" for r, pct in list(reasons.items())[:5]
+    ) if reasons else "- None recorded"
+
+    gate_stats = gt.get("gate_stats", {})
+    gate_lines = "\n".join(
+        f"- {name}: PASS={s.get('pass', 0)} FAIL={s.get('fail', 0)} ({s.get('pass_pct', 0.0):.1f}% pass)"
+        for name, s in gate_stats.items()
+    ) if gate_stats else "- No gate data"
+
+    body = (
+        _table([
+            ("Signals Evaluated",  str(total)),
+            ("Executed",           str(executed)),
+            ("Rejected",           str(rejected)),
+            ("Execution Rate",     f"{exec_rate:.1f}%"),
+            ("Dominant Block",     dominant),
+            ("Top Rejection Reason", top_rej),
+        ])
+        + f"\n\n**Rejection Breakdown:**\n{rej_lines}"
+        + f"\n\n**Gate Status:**\n{gate_lines}"
+    )
+    return _section("12. Execution Analysis (FTD-033)", body)
+
+
+def _s13_cost_analysis(d: dict) -> str:
+    """FTD-033 Part 1+2 — Cost breakdown and net edge summary."""
+    ca  = d.get("cost_analysis", {})
+    ss  = d.get("session_stats", {})
+
+    n_trades       = _g(ss, "n_trades", default=0)
+    fees_paid      = _g(ss, "fees_paid", default=0.0)
+    gross_pnl      = _g(ss, "gross_pnl", default=None)
+    avg_cost       = ca.get("avg_cost_pct", 0.0)
+    high_cost_syms = ca.get("high_cost_symbols", [])
+
+    cost_impact = "N/A"
+    if gross_pnl and abs(gross_pnl) > 0:
+        cost_impact = f"{fees_paid / abs(gross_pnl) * 100:.1f}% of gross profit"
+
+    syms_str = ", ".join(high_cost_syms) if high_cost_syms else "None"
+
+    body = _table([
+        ("Avg Cost per Trade",   f"{avg_cost:.4f}%"),
+        ("Total Fees Paid",      f"{fees_paid:.4f} USDT"),
+        ("Cost Impact",          cost_impact),
+        ("High-Cost Symbols",    syms_str),
+        ("Trades Evaluated",     str(n_trades)),
+    ])
+    return _section("13. Cost Analysis (FTD-033)", body)
+
+
+def _s14_net_edge_summary(d: dict) -> str:
+    """FTD-033 Part 2+5 — Net edge distribution across evaluated signals."""
+    ne  = d.get("net_edge_summary", {})
+    cl  = d.get("cost_learning", {})
+
+    total_eval     = ne.get("total_evaluated", 0)
+    pos_edge_pct   = ne.get("positive_net_edge_pct", 0.0)
+    rej_cost_pct   = ne.get("rejected_due_to_cost_pct", 0.0)
+    avg_alpha      = ne.get("avg_alpha_score", 0.0)
+
+    strategy_rows  = ne.get("strategy_summary", {})
+    strat_lines = "\n".join(
+        f"- {k}: count={v.get('count', 0)} avg_alpha={v.get('avg_alpha', 0):.4f} approval={v.get('approval_rate_pct', 0):.1f}%"
+        for k, v in strategy_rows.items()
+    ) if strategy_rows else "- No data"
+
+    blacklisted    = cl.get("blacklisted_keys", [])
+    bl_str         = ", ".join(blacklisted) if blacklisted else "None"
+
+    body = (
+        _table([
+            ("Signals Evaluated",        str(total_eval)),
+            ("With Positive Net Edge",   f"{pos_edge_pct:.1f}%"),
+            ("Rejected Due to Cost",     f"{rej_cost_pct:.1f}%"),
+            ("Avg Alpha Score",          f"{avg_alpha:.4f}"),
+            ("Blacklisted Patterns",     bl_str),
+        ])
+        + f"\n\n**Strategy Net Edge:**\n{strat_lines}"
+    )
+    return _section("14. Net Edge Summary (FTD-033)", body)
+
+
+def _s15_developer_summary_ftd033(d: dict) -> str:
+    """FTD-033 Part 8 — Upgraded developer summary with execution root cause."""
+    et    = d.get("execution_trace",   {})
+    gt    = d.get("gate_trace",        {})
+    ca    = d.get("cost_analysis",     {})
+    ne    = d.get("net_edge_summary",  {})
+    ss    = d.get("session_stats",     {})
+    intel = d.get("_intel",            {})
+    cap_i = intel.get("capital",       {})
+
+    dominant_block   = et.get("dominant_block", gt.get("dominant_block", "N/A"))
+    dominant_reason  = gt.get("dominant_reason", "")
+    pos_edge_pct     = ne.get("positive_net_edge_pct", 0.0)
+    exec_rate        = et.get("execution_rate_pct", 0.0)
+    pf               = _g(ss, "profit_factor", default=0.0)
+    capital_idle_str = cap_i.get("capital_idle_pct_str", "N/A")
+
+    block_str = dominant_block
+    if dominant_reason:
+        block_str += f" ({dominant_reason})"
+
+    fix_lines = []
+    if exec_rate < 10 and dominant_block != "N/A":
+        fix_lines.append(f"Reduce score threshold OR improve signal quality (block: {block_str})")
+    if pos_edge_pct < 30:
+        fix_lines.append("Improve RR — fewer signals have positive net edge after costs")
+    if pf < 1.0:
+        fix_lines.append("Widen TP targets to ≥1.5R to recover profit factor above 1.0")
+    if not fix_lines:
+        fix_lines.append("Continue monitoring — no critical execution block detected")
+
+    body = (
+        f"**FTD-033 Developer Summary**\n\n"
+        f"- Issue: No execution / low execution rate\n"
+        f"- Cause: {block_str} dominates rejections\n"
+        f"- Capital Idle: {capital_idle_str}\n"
+        f"- Net Edge Coverage: {pos_edge_pct:.1f}% of signals have positive edge after costs\n"
+        f"- Execution Rate: {exec_rate:.1f}%\n"
+        f"- Fix:\n"
+        + "\n".join(f"  - {f}" for f in fix_lines)
+    )
+    return _section("15. Developer Summary (FTD-033)", body)
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def generate_full_report_v2(data: dict) -> str:
@@ -759,6 +904,11 @@ def generate_full_report_v2(data: dict) -> str:
         _s9_root_cause(data),
         _s10_action_plan(data),
         _s11_developer_export(data),
+        # FTD-033 sections
+        _s12_execution_analysis(data),
+        _s13_cost_analysis(data),
+        _s14_net_edge_summary(data),
+        _s15_developer_summary_ftd033(data),
     ]
 
     return header + "\n\n" + "\n\n".join(sections)
