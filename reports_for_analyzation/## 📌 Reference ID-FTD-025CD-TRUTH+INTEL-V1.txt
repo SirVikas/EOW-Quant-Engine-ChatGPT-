@@ -1,0 +1,391 @@
+# 🧾 FTD-025CD — UNIFIED REPORT TRUTH + INTELLIGENCE LAYER (FINAL)
+
+## 📌 Reference ID: FTD-025CD-TRUTH+INTEL-V1
+## 📌 Reference ID-FTD-025CD-TRUTH+INTEL-V1
+---
+
+# 🧠 CONTEXT
+
+Current system status:
+
+* FTD-025B (Unified Report v2) ✔ implemented
+* FTD-025C (Truth Engine) ✔ built but ❌ not fully wired
+* Report output ❌ still partially misleading
+* Intelligence depth ❌ shallow
+
+---
+
+# 🎯 OBJECTIVE
+
+Create a **fully truthful + intelligent + developer-grade report system**:
+
+```text id="goal"
+✔ No contradictions
+✔ Always correct root cause
+✔ Deep reasoning (WHY + WHAT NEXT)
+✔ Capital + execution intelligence
+✔ Fully actionable output
+```
+
+---
+
+# 🏗️ SCOPE (MERGED FTD-025C + FTD-025D)
+
+This FTD covers:
+
+```text id="scope"
+1. Truth Engine Wiring Fix (CRITICAL)
+2. Intelligence Depth Expansion
+3. Execution Insight Layer
+4. Capital + Learning Intelligence
+5. Alert & Developer Output Upgrade
+```
+
+---
+
+# 🔧 PART 1 — TRUTH ENGINE WIRING (MANDATORY FIX)
+
+---
+
+## 📁 File:
+
+```text id="file1"
+core/reporting/unified_report_engine_v2.py
+```
+
+---
+
+## 🔍 SEARCH:
+
+```text id="search1"
+generate_full_report_v2
+```
+
+---
+
+## ❗ REPLACE LOGIC
+
+### ❌ BEFORE:
+
+```python id="bad"
+data = collect_data()
+return generate_report(data)
+```
+
+---
+
+### ✅ AFTER (MANDATORY):
+
+```python id="good"
+raw_data = collect_data()
+
+from core.reporting.truth_engine import process as truth_process
+
+corrected_data = truth_process(raw_data)
+
+return generate_report(corrected_data)
+```
+
+---
+
+## 🔒 RULE:
+
+```text id="rule1"
+❌ NEVER use raw_data directly
+✔ ALWAYS pass corrected_data
+```
+
+---
+
+# 🔍 PART 2 — CONTRADICTION ENFORCEMENT
+
+---
+
+## ADD CHECK (inside report generation)
+
+```python id="contradiction"
+if data["signals_total"] > 0 and data["trades_total"] == 0:
+    data["execution_gap"] = f"{data['signals_total']} → 0"
+    data["primary_issue"] = "NO EXECUTION — signals blocked"
+```
+
+---
+
+# 🧠 PART 3 — INTELLIGENCE DEPTH LAYER (NEW)
+
+---
+
+## 📁 File:
+
+```text id="file2"
+core/reporting/intelligence_layer.py
+```
+
+---
+
+## 🔧 MODULES TO CREATE
+
+---
+
+## 1. 🔍 Execution Analyzer
+
+```python id="exec_analyzer"
+def analyze_execution(data):
+    return {
+        "execution_gap": ...,
+        "dominant_block": ...,
+        "pass_rate": ...,
+        "reject_rate": ...
+    }
+```
+
+---
+
+## 2. 🧠 Decision Explainer
+
+```python id="decision_explainer"
+def explain_decision(data):
+    return {
+        "why_no_trade": ...,
+        "missing_condition": ...,
+        "next_trigger": ...
+    }
+```
+
+---
+
+## 3. 💰 Capital Intelligence
+
+```python id="capital_intel"
+def capital_analysis(data):
+    return {
+        "capital_used": ...,
+        "capital_idle": ...,
+        "missed_opportunity": ...,
+        "reason": ...
+    }
+```
+
+---
+
+## 4. 🧬 Learning Intelligence
+
+```python id="learning_intel"
+def learning_analysis(data):
+    return {
+        "top_patterns": ...,
+        "failure_patterns": ...,
+        "confidence": ...
+    }
+```
+
+---
+
+## 5. 🚨 Alert Intelligence (ADVANCED)
+
+```python id="alert_intel"
+def enhanced_alerts(data):
+    return [
+        {
+            "type": "NO_EXECUTION",
+            "cause": "...",
+            "impact": "...",
+            "fix": "..."
+        }
+    ]
+```
+
+---
+
+# 🔄 PART 4 — PIPELINE INTEGRATION
+
+---
+
+## UPDATE FLOW:
+
+```text id="flow"
+collect_data
+→ truth_engine.process()
+→ intelligence_layer.enrich()
+→ generate_report
+```
+
+---
+
+## CODE:
+
+```python id="pipeline"
+raw = collect_data()
+
+truth = truth_process(raw)
+
+from core.reporting.intelligence_layer import enrich
+
+final_data = enrich(truth)
+
+return generate_report(final_data)
+```
+
+---
+
+# 📊 PART 5 — REPORT SECTION UPGRADES
+
+---
+
+## 🔧 Section 1 — Executive Snapshot
+
+```text id="s1"
+Trading Activity: BLOCKED
+Key Problem: Signals present but execution = 0
+Immediate Action: Reduce gating / wait for tier shift
+```
+
+---
+
+## 🔧 Section 3 — Signal Flow
+
+ADD:
+
+```text id="s3"
+Execution Gap: 137 → 0
+Dominant Block: LOW_SCORE / GATE
+Pass Rate: X%
+Reject Rate: Y%
+```
+
+---
+
+## 🔧 Section 7 — Decision Intelligence
+
+ADD:
+
+```text id="s7"
+WHY no trade:
+Signals rejected due to score < threshold
+
+WHAT needed:
+score ≥ 0.44 + RR ≥ threshold
+```
+
+---
+
+## 🔧 Section 11 — Capital
+
+ADD:
+
+```text id="s11"
+Capital Idle: 100%
+Missed Opportunity: YES
+Reason: Signals blocked
+```
+
+---
+
+## 🔧 Section 13 — Alerts
+
+MUST INCLUDE:
+
+```text id="s13"
+✔ NO_EXECUTION_ALERT
+✔ SIGNAL_BLOCK_ALERT
+✔ CONTRADICTION_ALERT
+```
+
+---
+
+## 🔧 Section 14 — Final Diagnosis (REWRITE)
+
+```text id="s14"
+PRIMARY:
+"No execution despite 137 signals — gating issue"
+
+SECONDARY:
+"Profitability issue (historical PF < 1.0)"
+```
+
+---
+
+# 🧪 PART 6 — TEST UPGRADE
+
+---
+
+## 📁 tests/test_unified_report_v2.py
+
+ADD:
+
+```text id="tests"
+✔ signals>0 & trades=0 → root cause must be execution
+✔ contradiction alert must exist
+✔ execution gap must exist
+✔ capital idle must trigger missed_opportunity
+✔ decision explanation must exist
+```
+
+---
+
+# 🚨 HARD RULES
+
+```text id="rules"
+❌ No generic diagnosis allowed
+❌ No missing root cause
+❌ No contradiction allowed
+
+✔ Every problem must map to a cause
+✔ Every cause must map to an action
+```
+
+---
+
+# 📦 OUTPUT IMPROVEMENT
+
+---
+
+## ADD:
+
+```text id="devblock"
+### Developer Summary
+
+- Issue: Execution blocked
+- Cause: Score threshold not met
+- Fix: Adjust threshold / improve signal quality
+```
+
+---
+
+# 🧠 FINAL PRINCIPLE
+
+```text id="principle"
+Truth → Insight → Decision → Action
+```
+
+---
+
+# 🚀 EXPECTED RESULT
+
+---
+
+## BEFORE:
+
+```text id="before"
+System in loss ❌
+```
+
+---
+
+## AFTER:
+
+```text id="after"
+137 signals generated
+0 trades executed
+Execution blocked by gating ✔
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="line"
+यह report अब सिर्फ data नहीं दिखाएगी
+
+यह system का सच बताएगी — और उसे कैसे ठीक करना है भी बताएगी
+```
