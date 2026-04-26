@@ -136,6 +136,19 @@ class GlobalGateController:
         self._total_evals += 1
         now = time.time()
 
+        # BYPASS_ALL_GATES: diagnostic mode — always allow trading.
+        if cfg.BYPASS_ALL_GATES:
+            result = {
+                "can_trade": True, "reason": "BYPASS_ALL_GATES", "safe_mode": False,
+                "_ws_score": 100.0, "_deploy_score": 100.0,
+                "_ind_ready": True, "_data_fresh": True,
+            }
+            self._last_result = result
+            self._last_ts = now
+            gate_logger.allowed()
+            self._sme.deactivate()
+            return result
+
         # qFTD-010: BOOTING grace — warmup noise must not activate safe mode.
         # During BOOTING, all conditions are unconditionally satisfied so that
         # run_cycle()'s internal gate re-evaluation does not block execution or

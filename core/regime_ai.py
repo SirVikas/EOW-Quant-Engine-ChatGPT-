@@ -27,6 +27,7 @@ from typing import Dict, List, Optional
 
 from loguru import logger
 
+from config import cfg
 from core.regime_detector import Regime
 
 
@@ -161,7 +162,9 @@ class RegimeAI:
 
         else:
             regime     = Regime.UNKNOWN
-            confidence = 0.0
+            # Use a minimal non-zero confidence so fallback logic can still trade.
+            # Confidence=0.0 caused permanent block_trade=True with no fallback escape.
+            confidence = 0.12
             notes      = f"ADX={adx:.1f} ambiguous (15–35 range, weak RSI slope={rsi_slope:.2f})"
 
         # Demote low-confidence results
@@ -228,6 +231,8 @@ class RegimeAI:
             confidence < MIN_CONFIDENCE_TRADE
             or stab_ticks < MIN_STABILITY_TICKS
         )
+        if cfg.BYPASS_ALL_GATES:
+            block_trade = False
         if block_trade:
             notes += (
                 f" | BLOCK(conf={confidence:.2f}<{MIN_CONFIDENCE_TRADE}"
