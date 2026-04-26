@@ -44,6 +44,7 @@ from core.signal_filter   import signal_filter
 from core.risk_engine     import risk_engine
 from core.deployability   import deployability_engine
 from core.trade_frequency    import trade_frequency      # FTD-REF-023
+from core.execution_drive_policy import execution_drive_policy  # EDP
 from core.execution_engine  import execution_engine     # FTD-REF-023
 from core.learning_engine   import learning_engine      # FTD-REF-023
 from core.edge_engine        import edge_engine         # FTD-REF-024
@@ -705,6 +706,7 @@ async def on_tick(tick: Tick):
                 logger.debug(f"[SIG] {sym} alpha → NONE (RR/score below threshold)")
 
         if sig and sig.signal != Signal.NONE:
+            execution_drive_policy.record_signal(sym)   # EDP: track signal activity
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
             logger.info(
                 f"[SCAN] Signal generated: {sig.signal.value} {sym} "
@@ -902,16 +904,32 @@ async def on_tick(tick: Tick):
                     base_conf=_score_result.score,
                 )
                 _decayed_conf = _decay_result.decayed_confidence
+                # EDP: apply no_execution_override (FTD-034) + drive-mode floor
+                _edp_status = execution_drive_policy.get_status()
+                _eff_score_min = trade_activator.no_execution_override(
+                    _eff_score_min, signals=1, trades=_edp_status.trades_1min,
+                )
+                _eff_score_min = execution_drive_policy.get_score_override(_eff_score_min)
                 if _decayed_conf < _eff_score_min:  # Phase 6: DTP + streak-adjusted
-                    _last_skip = {
-                        "ts": int(time.time() * 1000), "symbol": sym,
-                        "reason": f"DECAY_FILTER({_decay_result.reason})",
-                        "score": _decayed_conf,
-                        "score_min_used": _eff_score_min,
-                        "regime": regime.value, "strategy": strategy_type,
-                    }
-                    trade_flow_monitor.record_skip(sym, "DECAY_FILTER")
-                    return
+                    # EDP: bypass decay gate for strong signals (high score + high RR)
+                    if execution_drive_policy.should_force_execute(
+                        _score_result.score, sf_result.rr
+                    ):
+                        _thought(
+                            f"⚡ EDP FORCE {sym}: score={_score_result.score:.3f}"
+                            f" rr={sf_result.rr:.2f} — decay gate bypassed",
+                            "SIGNAL",
+                        )
+                    else:
+                        _last_skip = {
+                            "ts": int(time.time() * 1000), "symbol": sym,
+                            "reason": f"DECAY_FILTER({_decay_result.reason})",
+                            "score": _decayed_conf,
+                            "score_min_used": _eff_score_min,
+                            "regime": regime.value, "strategy": strategy_type,
+                        }
+                        trade_flow_monitor.record_skip(sym, "DECAY_FILTER")
+                        return
 
                 # ── Phase 4: RR Engine — enforce min Risk-Reward ──────────────
                 _atr_price = atr_pct * sig.entry_price / 100
@@ -1173,6 +1191,7 @@ async def on_tick(tick: Tick):
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
+                    execution_drive_policy.record_trade(sym)   # EDP: reset idle timer
                     # Phase 4: register with trade manager for lifecycle tracking
                     trade_manager.register(ManagedPosition(
                         symbol=sym, side=sig.signal.value,
@@ -1206,6 +1225,7 @@ async def on_tick(tick: Tick):
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
+                    execution_drive_policy.record_trade(sym)   # EDP: reset idle timer
                     # Phase 4: register with trade manager for lifecycle tracking
                     trade_manager.register(ManagedPosition(
                         symbol=sym, side=sig.signal.value,

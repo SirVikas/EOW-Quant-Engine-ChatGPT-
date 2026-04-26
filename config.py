@@ -186,11 +186,11 @@ class EngineConfig(BaseSettings):
 
     # ── Phase 5.1: Activation + Exploration Control ──────────────────────────
     # Trade Activator — prevents system freeze by relaxing filters
-    # qFTD-032: tiers tightened from 30/60/90 → 10/20/30 min. A live multi-currency
-    # system must relax within minutes, not hours, to capture market windows.
-    ACTIVATOR_T1_MIN: int = 10           # Minutes of no trade → Tier 1 relaxation (was 30)
-    ACTIVATOR_T2_MIN: int = 20           # Minutes of no trade → Tier 2 relaxation (was 60)
-    ACTIVATOR_T3_MIN: int = 30           # Minutes of no trade → Tier 3 relaxation (was 90)
+    # EDP: tiers tightened 10/20/30 → 3/7/15 min. Policy: system must be active
+    # every minute; relaxation must kick in within 3 min of inactivity.
+    ACTIVATOR_T1_MIN: int = 3            # EDP: 10→3 min — Tier 1 soft relax starts fast
+    ACTIVATOR_T2_MIN: int = 7            # EDP: 20→7 min — Tier 2 deeper relax
+    ACTIVATOR_T3_MIN: int = 15           # EDP: 30→15 min — Tier 3 max relax
     ACTIVATOR_T1_VOL_MULT: float = 0.50  # Volume threshold multiplier at Tier 1 (was 0.60)
     ACTIVATOR_T2_VOL_MULT: float = 0.30  # Volume threshold multiplier at Tier 2 (was 0.40)
     ACTIVATOR_T3_VOL_MULT: float = 0.20  # Volume threshold multiplier at Tier 3 (was 0.30, = floor)
@@ -205,18 +205,19 @@ class EngineConfig(BaseSettings):
     ACTIVATOR_T2_SCORE: float = 0.42     # qFTD-032-R3: 0.45→0.42 — TIER_2 effective floor = 0.42
 
     # Exploration Engine — learning trades
-    # qFTD-033R Q3: 0.05→0.25 — system must trade (100% rejection → controlled 25% exploration)
-    # Phase 1 is exploration-heavy to gather data; Phase 2/3 will pull back as alpha improves.
-    EXPLORE_RATE: float = 0.25           # qFTD-033R Q3: 0.05→0.25 — exploration-heavy Phase 1
+    # EDP: 0.25→0.35 — policy mandates learning mode (more trades, data collection).
+    # Phase 1 is exploration-heavy; Phase 2/3 will pull back as alpha matures.
+    EXPLORE_RATE: float = 0.35           # EDP: 0.25→0.35 — learning mode exploration boost
     EXPLORE_SIZE_MULT: float = 0.25      # Size multiplier for exploration trades
     # qFTD-008-EDGE: 0.45→0.60 — exploration quality bar raised to match new baseline.
     EXPLORE_SCORE_MIN: float = 0.60      # qFTD-008-EDGE: 0.45→0.60 — no low-quality exploration
     EXPLORE_EV_FLOOR: float = 0.50       # Max allowed EV negative fraction of est_risk
     EXPLORE_DAILY_LOSS_CAP: float = 0.02 # Max daily equity loss from exploration
-    EXPLORE_MAX_TRADES_PER_DAY: int = 20 # qFTD-033R Q13: hard daily cap on exploration trades
+    EXPLORE_MAX_TRADES_PER_DAY: int = 50 # EDP: 20→50 — learning mode needs more daily exploration
 
     # Adaptive Filter Engine — dynamic threshold tuning
-    AF_RELAX_AFTER_MIN: int = 20         # qFTD-032: 60→20 min — relax score faster on dry spells
+    # EDP: 20→5 min — adaptive filter must respond within minutes, not tens of minutes
+    AF_RELAX_AFTER_MIN: int = 5          # EDP: 20→5 min — rapid score relaxation on dry spells
     AF_TIGHTEN_AFTER_LOSSES: int = 3     # Tighten after N consecutive losses
     AF_RELAX_STEP: float = 0.05          # Score relaxation per step
     AF_TIGHTEN_STEP: float = 0.03        # qFTD-010: 0.05→0.03 — recalibrated for raised MIN_TRADE_SCORE=0.70
@@ -231,12 +232,21 @@ class EngineConfig(BaseSettings):
     SFG_HIGH_RR_FEE_MAX: float = 0.15   # qFTD-008-EDGE: 0.35→0.15 — high-RR still gets some slack
     SFG_NORMAL_FEE_MAX: float = 0.10    # qFTD-008-EDGE: 0.20→0.10 — aligned with MAX_COST_FRACTION
 
+    # ── Execution Drive Policy (EDP) ────────────────────────────────────────────
+    # Prevents system idle and forces execution when quality gates are too tight.
+    EDP_ENABLED: bool = True                # Master switch for EDP
+    EDP_IDLE_DETECTION_MIN: float = 1.0     # Declare DRIVE mode after this many minutes with no trades
+    EDP_FORCE_SCORE: float = 0.75           # Score threshold for force-execute (bypasses decay gate)
+    EDP_FORCE_RR: float = 2.0               # RR threshold for force-execute
+    EDP_DRIVE_SCORE_OVERRIDE: float = 0.40  # Score floor applied in DRIVE mode (= absolute floor)
+
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
 
     # FTD-008: Hard trade frequency caps (daily discipline)
-    MAX_TRADES_PER_HOUR: int = 3         # Hard ceiling per rolling 60-min window
-    MAX_TRADES_PER_DAY:  int = 10        # Hard ceiling per calendar day
+    # EDP: raised to support adaptive active-trading intent ($1/min target)
+    MAX_TRADES_PER_HOUR: int = 20        # EDP: 3→20 — aligned with main.py local constant
+    MAX_TRADES_PER_DAY:  int = 150       # EDP: 10→150 — active trading with $800 capital
 
     # ── Phase 6: Stability + Profit Consistency ───────────────────────────────
     # EV Confidence Engine — EV-tier-based sizing
