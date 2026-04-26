@@ -1,0 +1,362 @@
+# 🧾 FTD-025B — TRUE UNIFIED REPORT ENGINE (NEXT-GEN)
+
+## 📌 Reference ID: FTD-025B-URX-V2
+## 📌 Reference ID-FTD-025B-URX-V2
+---
+
+# 🧠 CONTEXT (WHAT EXISTS TODAY)
+
+Current system (FTD-014 → FTD-025A → FTD-026 stack) already provides:
+
+* Performance metrics ✔
+* Signal logs ✔
+* Decision trace ✔
+* AI Brain summary ✔
+* Risk + Capital state ✔
+* Suggestions (CT-Scan) ✔
+* Audit logs ✔
+
+❗ BUT:
+
+```text
+❌ No unified cause-effect story
+❌ No signal → trade → rejection chain
+❌ No reasoning clarity
+❌ Learning layer empty (not actionable)
+❌ Developer usability low
+```
+
+---
+
+# 🎯 OBJECTIVE
+
+Create a **single-click export** that delivers:
+
+```text
+SYSTEM → THINKING → DECISION → RESULT → ROOT CAUSE → ACTION
+```
+
+👉 readable by:
+
+* User
+* Developer
+* Auditor
+
+---
+
+# 🏗️ ARCHITECTURE (NEW MODULE)
+
+## 📁 File Path (MANDATORY)
+
+```
+core/reporting/unified_report_engine_v2.py
+```
+
+---
+
+# ⚙️ CORE DESIGN
+
+## 🔶 SECTION STRUCTURE (MANDATORY ORDER)
+
+---
+
+## 1. 🧾 Executive Snapshot (REWRITE)
+
+Replace current summary with:
+
+```text
+✔ System State (ACTIVE / BLOCKED / DEGRADED)
+✔ Trading Activity (ACTIVE / IDLE / FILTERED)
+✔ Profitability State (PROFIT / LOSS / UNSTABLE)
+✔ Key Problem (1 line)
+✔ Immediate Action (1 line)
+```
+
+---
+
+## 2. 🔁 Signal → Trade Flow (NEW CRITICAL BLOCK)
+
+```text
+Signals Generated → X
+Signals Passed Filters → Y
+Signals Rejected → Z
+Trades Executed → N
+```
+
+### MUST ADD:
+
+```text
+Top Rejection Reasons:
+- LOW_SCORE: 42%
+- LOW_VOL: 31%
+- RR_FAIL: 18%
+```
+
+---
+
+## 3. 🧠 Decision Intelligence (EXPANDED AI BRAIN)
+
+```text
+AI Decision: MONITOR / EXECUTE / BLOCK
+
+WHY:
+- regime = MEAN_REVERTING
+- confidence = 0.62
+- expected RR = 1.3
+- risk state = NORMAL
+```
+
+👉 MUST include:
+
+```text
+Alternative Action:
+"What system could have done instead"
+```
+
+---
+
+## 4. ⚖️ Risk Engine Behavior (NEW)
+
+```text
+Risk State: ACTIVE / PASSIVE / BLOCKING
+
+Actions Taken:
+- Size reduced? ✔
+- Trade blocked? ✔
+- Kill switch? ❌
+```
+
+---
+
+## 5. 💰 Capital Efficiency (NEW)
+
+```text
+Capital Used: X%
+Capital Idle: Y%
+
+Missed Opportunities:
+"Signals passed but not traded"
+```
+
+---
+
+## 6. 📊 Performance Reality (UPGRADE)
+
+Add:
+
+```text
+✔ Expectancy per trade
+✔ Fee impact %
+✔ Slippage impact
+✔ Edge consistency
+```
+
+---
+
+## 7. 🧬 Learning Memory (MANDATORY FIX)
+
+```text
+Top Patterns Learned:
+- Pattern A → win rate 62%
+- Pattern B → loss cluster
+
+Negative Memory:
+- Strategy X banned (3 failures)
+```
+
+👉 MUST NOT be empty
+
+---
+
+## 8. 🚨 Alert Intelligence (FIX)
+
+Replace empty alerts with:
+
+```text
+CRITICAL ALERTS:
+- System in loss
+- High fee drag
+- Trade inactivity
+
+Each alert MUST include:
+→ cause
+→ impact
+→ fix
+```
+
+---
+
+## 9. 🔍 Root Cause Analysis (REWRITE)
+
+Replace static diagnosis with:
+
+```text
+PRIMARY CAUSE:
+"Signal quality low due to regime instability"
+
+SECONDARY:
+"RR imbalance causing negative expectancy"
+```
+
+---
+
+## 10. 🧾 Action Plan (UPGRADE)
+
+```text
+IMMEDIATE:
+- Reduce trade frequency
+- Increase RR threshold
+
+SHORT TERM:
+- Improve signal scoring
+
+LONG TERM:
+- Implement adaptive regime model
+```
+
+---
+
+## 11. 📦 Developer Export Block (NEW)
+
+```text
+✔ Clean bullet summary
+✔ No raw logs
+✔ Structured explanation
+✔ Copy-paste ready
+```
+
+---
+
+# 🔄 DATA PIPELINE (MANDATORY)
+
+## MUST INTEGRATE:
+
+* trade_flow_monitor (signals, rejects)
+* pre_trade_gate (rejection reasons)
+* dynamic_threshold_provider
+* AI brain
+* capital allocator
+* learning_memory_orchestrator
+* audit_engine
+
+---
+
+# 🚨 CRITICAL RULES
+
+```text
+❌ No raw dump formatting
+❌ No empty sections allowed
+❌ No contradictions (signals vs trades)
+
+✔ Every section must answer WHY
+✔ Every metric must lead to action
+```
+
+---
+
+# 🧪 VERIFIER (MANDATORY FILE)
+
+## 📁 Path:
+
+```
+tests/test_unified_report_v2.py
+```
+
+## MUST TEST:
+
+```text
+✔ No empty sections
+✔ Signal count matches trade logic
+✔ Rejection reasons exist
+✔ Learning memory not empty
+✔ Root cause present
+✔ Action plan generated
+```
+
+---
+
+# 🔌 AUTO-WIRING (MANDATORY)
+
+## 📁 File:
+
+```
+core/reporting/__init__.py
+```
+
+```python
+from .unified_report_engine_v2 import generate_full_report_v2
+```
+
+---
+
+## 📁 main.py
+
+```python
+@app.get("/api/report/full-system-v2")
+def full_report_v2():
+    return generate_full_report_v2()
+```
+
+---
+
+# 🖥️ DASHBOARD INTEGRATION
+
+Button update:
+
+```text
+[ EXPORT INTELLIGENT REPORT ]
+```
+
+→ calls:
+
+```text
+/api/report/full-system-v2
+```
+
+---
+
+# 📊 OUTPUT FORMAT
+
+```text
+reports/unified_v2/<timestamp>/
+    ├── report.md
+    ├── summary.txt
+    ├── developer_note.txt
+```
+
+---
+
+# 🧠 FINAL DESIGN PRINCIPLE
+
+```text
+Data → Insight → Decision → Action
+```
+
+---
+
+# 🚀 EXPECTED RESULT
+
+Before:
+
+```text
+User confused
+Developer confused
+```
+
+After:
+
+```text
+✔ System explains itself
+✔ Developer knows exactly what to fix
+✔ User understands system health instantly
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+यह report system क्या कर रहा है नहीं बताएगी
+
+यह report बताएगी system ऐसा क्यों कर रहा है
+```
