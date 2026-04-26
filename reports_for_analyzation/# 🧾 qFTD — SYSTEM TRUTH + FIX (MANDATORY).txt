@@ -1,0 +1,164 @@
+# 🧾 qFTD — SYSTEM TRUTH + FIX (MANDATORY)
+
+---
+
+## 🎯 OBJECTIVE
+
+```text
+System halt हो गया है (drawdown breach)
+
+हमें यह समझना है:
+✔ क्यों loss हो रहा है
+✔ कौनसी strategy responsible है
+✔ कहाँ bug है
+✔ क्या fix करना है
+```
+
+---
+
+# 🔴 INSTRUCTION TO DEVELOPER (VERY IMPORTANT)
+
+```text
+यह सिर्फ Q&A task नहीं है
+
+👉 जहाँ भी bug / flaw मिले:
+✔ उसे identify करो
+✔ उसे FIX भी करो
+
+Half work allowed नहीं है
+```
+
+---
+
+# 🧠 SECTION 1 — HALT ANALYSIS
+
+```text
+1. Max drawdown कैसे breach हुआ?
+2. किस trades ने trigger किया?
+3. क्या halt सही समय पर लगा?
+4. क्या halt logic में कोई bug है?
+```
+
+---
+
+# 🧠 SECTION 2 — STRATEGY FAILURE
+
+```text
+1. कौनसी strategy सबसे ज्यादा loss दे रही है?
+2. क्या system उसे पहचान रहा है?
+3. क्या system ने उसे disable किया? अगर नहीं → क्यों?
+4. क्या strategy switching logic काम कर रहा है?
+```
+
+---
+
+# 🧠 SECTION 3 — COST ANALYSIS
+
+```text
+1. Fees कितनी % impact डाल रही है?
+2. क्या system fee-aware decision ले रहा है?
+3. क्या छोटे trades unnecessary execute हो रहे हैं?
+4. क्या cost filter correctly काम कर रहा है?
+```
+
+---
+
+# 🧠 SECTION 4 — RR & TRADE QUALITY
+
+```text
+1. Avg win vs avg loss क्यों imbalance है?
+2. क्या RR enforcement logic काम कर रहा है?
+3. क्या low RR trades block हो रहे हैं?
+4. क्या गलत trades pass हो रहे हैं?
+```
+
+---
+
+# 🧠 SECTION 5 — EXECUTION VALIDATION
+
+```text
+1. क्या कोई unwanted trades execute हुए?
+2. क्या rejection system सही काम कर रहा है?
+3. क्या कोई hidden bypass bug है?
+4. क्या filters correctly लागू हो रहे हैं?
+```
+
+---
+
+# 🧠 SECTION 6 — LEARNING SYSTEM
+
+```text
+1. क्या system past loss से सीख रहा है?
+2. क्या bad patterns detect हो रहे हैं?
+3. क्या system actions ले रहा है (disable / reduce)?
+4. अगर नहीं → क्यों?
+```
+
+---
+
+# 🧠 SECTION 7 — PERFORMANCE EXPLORER VALIDATION
+
+```text
+1. क्या data सही दिख रहा है?
+2. क्या calculations accurate हैं?
+3. क्या filters सही काम कर रहे हैं?
+4. क्या कोई mismatch / bug है?
+```
+
+---
+
+# 🧠 SECTION 8 — BUG SCAN (CRITICAL)
+
+```text
+पूरे system में scan करो:
+
+✔ logic bugs
+✔ calculation errors
+✔ wrong thresholds
+✔ missing conditions
+✔ unintended bypass
+
+👉 हर bug:
+→ identify करो
+→ FIX करो
+```
+
+---
+
+# 🧠 SECTION 9 — REQUIRED OUTPUT
+
+Developer deliver करे:
+
+```text
+✔ Root cause report
+✔ List of bugs found
+✔ Fixes applied (with explanation)
+✔ Updated behavior summary
+✔ क्या system अब safe है?
+```
+
+---
+
+# 🚨 FINAL RULE
+
+```text
+❌ केवल analysis नहीं
+✔ analysis + fix mandatory
+
+❌ assumptions नहीं
+✔ proof-based conclusion
+```
+
+---
+
+# 🔥 FINAL MESSAGE
+
+```text
+System halt हो चुका है
+
+अब:
+सिर्फ समझना नहीं
+सुधारना भी है
+
+Fix-first approach अपनाओ
+```
