@@ -37,9 +37,13 @@ from loguru import logger
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
 INVERSE_THRESHOLD      = 0.35   # only invert when WR < 35% (≈ PF < 0.54 at 1:1 RR)
-MIN_SAMPLES            = 20     # mandate: 20 fresh trades before inversion can activate
+# FIX: 20→30 — inverse mode was activating on too little data (20 trades).
+# With small samples, random variance looks like systematic failure and triggers
+# an incorrect signal flip. 30 trades gives a statistically meaningful sample.
+MIN_SAMPLES            = 30     # FIX: 20→30 — require more data before inversion activates
 ROLLING_WINDOW         = 50     # rolling window for win-rate calculation
-EQUITY_PROTECT_LOSSES  = 6      # consecutive losses → global CALIBRATE pause
+# FIX: 6→4 — consecutive loss protection now triggers sooner (aligned with profit_guard fix).
+EQUITY_PROTECT_LOSSES  = 4      # FIX: 6→4 — pause sooner when consecutive losses mount
 CALIBRATE_PAUSE_MIN    = 20     # minutes to pause before resuming NORMAL
 
 

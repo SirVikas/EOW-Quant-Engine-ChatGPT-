@@ -60,21 +60,24 @@ class ExplorationEngine:
 
     def should_explore(
         self,
-        symbol:   str,
-        score:    float,
-        equity:   float,
-        ev_ok:    bool     = False,
-        est_risk: float    = 0.0,
+        symbol:        str,
+        score:         float,
+        equity:        float,
+        ev_ok:         bool  = False,
+        est_risk:      float = 0.0,
+        system_pf:     float = 1.0,   # FIX: system profit factor — block exploration when losing
     ) -> ExploreResult:
         """
         Determine if this signal should be an exploration trade.
 
         Args:
-            symbol:   trading symbol (for logging)
-            score:    decayed confidence score (0–1)
-            equity:   current equity in USDT (for daily loss cap)
-            ev_ok:    True if EV gate already approved (exploration not needed)
-            est_risk: estimated trade risk in USDT (bounds negative EV tolerance)
+            symbol:     trading symbol (for logging)
+            score:      decayed confidence score (0–1)
+            equity:     current equity in USDT (for daily loss cap)
+            ev_ok:      True if EV gate already approved (exploration not needed)
+            est_risk:   estimated trade risk in USDT (bounds negative EV tolerance)
+            system_pf:  system-level profit factor — exploration blocked when PF < 0.8
+                        to prevent amplifying losses during drawdown phases
 
         Returns ExploreResult; is_exploration=True → take trade at 0.25× size.
         """
@@ -87,6 +90,16 @@ class ExplorationEngine:
                 is_exploration=False, size_mult=1.0,
                 daily_loss_used_pct=self._daily_loss_pct(equity),
                 reason="NOT_EXPLORE_SLOT",
+            )
+
+        # FIX: Block exploration when system is in active loss phase (PF < 0.8).
+        # Exploration adds lossy trades by design; doing so when already losing amplifies damage.
+        _PF_MIN_FOR_EXPLORE = 0.80
+        if system_pf < _PF_MIN_FOR_EXPLORE:
+            return ExploreResult(
+                is_exploration=False, size_mult=1.0,
+                daily_loss_used_pct=self._daily_loss_pct(equity),
+                reason=f"EXPLORE_BLOCKED_LOW_PF(pf={system_pf:.3f}<{_PF_MIN_FOR_EXPLORE})",
             )
 
         # If EV is already fine, normal trade wins — no need for exploration sizing

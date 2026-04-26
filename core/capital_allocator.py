@@ -120,15 +120,18 @@ class CapitalAllocator:
         self._reset_daily_if_needed()
         self._daily_risk_used += risk_usdt
 
-    def summary(self) -> dict:
+    def summary(self, equity: float = 0.0) -> dict:
         self._reset_daily_if_needed()
+        # FIX: daily_risk_remaining must be equity-relative, not a raw cap comparison.
+        # Use equity if provided, otherwise omit the remaining calculation.
+        daily_cap_usdt = equity * self.daily_risk_cap if equity > 0 else None
+        remaining = round(max(0.0, daily_cap_usdt - self._daily_risk_used), 4) if daily_cap_usdt is not None else None
         return {
-            "max_capital_pct":  self.max_capital_pct,
-            "daily_risk_cap":   self.daily_risk_cap,
-            "daily_risk_used":  round(self._daily_risk_used, 4),
-            "daily_risk_remaining": round(
-                max(0.0, self.daily_risk_cap - self._daily_risk_used), 4
-            ),
+            "max_capital_pct":        self.max_capital_pct,
+            "daily_risk_cap":         self.daily_risk_cap,
+            "daily_risk_used":        round(self._daily_risk_used, 4),
+            "daily_risk_cap_usdt":    round(daily_cap_usdt, 4) if daily_cap_usdt is not None else None,
+            "daily_risk_remaining":   remaining,
             "score_bands": {f">{t:.2f}": f"{m}x" for t, m in _SCORE_BANDS},
             "module": "CAPITAL_ALLOCATOR",
             "phase":  4,

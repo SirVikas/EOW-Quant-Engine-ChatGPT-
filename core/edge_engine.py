@@ -20,20 +20,25 @@ Trade Rejection via check_trade():
 """
 from __future__ import annotations
 
+import time
 from collections import deque
 from dataclasses import dataclass
-from typing import Dict, Deque, NamedTuple, Tuple
+from typing import Dict, Deque, NamedTuple, Optional, Tuple
 
 from loguru import logger
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-WINDOW_SIZE       = 50      # rolling trades per (regime, strategy) pair
-MIN_TRADES        = 20      # minimum before kill switch / booster activates
-EDGE_BOOST_THRESH = 0.15    # edge > this → boost position size
-EDGE_BOOST_MULT   = 1.25    # +25% size when edge is clearly positive
-MAX_EDGE_MULT     = 1.40    # hard cap on edge-driven boost
-EDGE_KILL_THRESH  = 0.0     # edge < 0 → disable strategy for that regime
+WINDOW_SIZE            = 50      # rolling trades per (regime, strategy) pair
+MIN_TRADES             = 20      # minimum before standard kill switch activates
+EDGE_BOOST_THRESH      = 0.15    # edge > this → boost position size
+EDGE_BOOST_MULT        = 1.25    # +25% size when edge is clearly positive
+MAX_EDGE_MULT          = 1.40    # hard cap on edge-driven boost
+EDGE_KILL_THRESH       = 0.0     # edge < 0 → disable strategy for that regime
+# Emergency early kill: if edge is catastrophically negative after just 5 trades,
+# do not wait for MIN_TRADES — kill immediately to prevent runaway losses.
+EMERGENCY_MIN_TRADES   = 5       # FIX: early kill sample floor
+EMERGENCY_KILL_THRESH  = -0.30   # FIX: edge below this at EMERGENCY_MIN_TRADES → kill
 
 
 class _TradeRecord(NamedTuple):
@@ -67,6 +72,8 @@ class EdgeEngine:
         self._history:  Dict[Tuple[str, str], Deque[_TradeRecord]] = {}
         # (regime, strategy_id) → kill-switch flag
         self._disabled: Dict[Tuple[str, str], bool] = {}
+        # (regime, strategy_id) → UTC timestamp of last kill event (for time-aware reporting)
+        self._kill_ts:  Dict[Tuple[str, str], Optional[float]] = {}
 
     # ── Public ────────────────────────────────────────────────────────────────
 
@@ -95,18 +102,40 @@ class EdgeEngine:
             self._disabled[key] = now_disabled
 
             if now_disabled and not was_disabled:
+                self._kill_ts[key] = time.time()
                 logger.warning(
                     f"[EDGE-ENG] KILL SWITCH ON  {strategy_id}@{regime}: "
                     f"edge={stats.edge:.4f} wr={stats.win_rate:.1%} "
-                    f"n={stats.n_trades}"
+                    f"n={stats.n_trades} ts={self._kill_ts[key]:.0f}"
                 )
             elif was_disabled and not now_disabled:
+                self._kill_ts.pop(key, None)
                 logger.info(
                     f"[EDGE-ENG] KILL SWITCH OFF {strategy_id}@{regime}: "
                     f"edge={stats.edge:.4f} (positive again)"
                 )
+        elif stats.n_trades >= EMERGENCY_MIN_TRADES and stats.edge < EMERGENCY_KILL_THRESH:
+            # Emergency early kill: catastrophic edge after minimal sample → disable immediately
+            self._disabled[key] = True
+            if not was_disabled:
+                self._kill_ts[key] = time.time()
+                logger.warning(
+                    f"[EDGE-ENG] EMERGENCY KILL {strategy_id}@{regime}: "
+                    f"edge={stats.edge:.4f} < {EMERGENCY_KILL_THRESH} "
+                    f"after only {stats.n_trades} trades — early termination "
+                    f"ts={self._kill_ts[key]:.0f}"
+                )
         else:
-            self._disabled[key] = False   # not enough data to decide
+            # Re-enable if edge has recovered above emergency threshold
+            if was_disabled and stats.n_trades < MIN_TRADES and stats.edge >= EMERGENCY_KILL_THRESH:
+                self._disabled[key] = False
+                self._kill_ts.pop(key, None)
+                logger.info(
+                    f"[EDGE-ENG] EMERGENCY KILL CLEARED {strategy_id}@{regime}: "
+                    f"edge={stats.edge:.4f} recovered above {EMERGENCY_KILL_THRESH}"
+                )
+            elif not was_disabled:
+                self._disabled[key] = False   # not enough data to decide
 
         logger.debug(
             f"[EDGE-ENG] {strategy_id}@{regime} "
@@ -161,19 +190,24 @@ class EdgeEngine:
         return [self._compute(k) for k in self._history]
 
     def summary(self) -> dict:
+        now = time.time()
         return {
-            "window_size":     WINDOW_SIZE,
-            "min_trades":      MIN_TRADES,
-            "edge_boost_at":   EDGE_BOOST_THRESH,
-            "edge_kill_at":    EDGE_KILL_THRESH,
-            "boost_mult":      EDGE_BOOST_MULT,
+            "window_size":          WINDOW_SIZE,
+            "min_trades":           MIN_TRADES,
+            "emergency_min_trades": EMERGENCY_MIN_TRADES,
+            "emergency_kill_at":    EMERGENCY_KILL_THRESH,
+            "edge_boost_at":        EDGE_BOOST_THRESH,
+            "edge_kill_at":         EDGE_KILL_THRESH,
+            "boost_mult":           EDGE_BOOST_MULT,
             "strategies": {
                 f"{r}@{s}": {
-                    "n_trades":  len(h),
-                    "edge":      round(self._compute((r, s)).edge,      4),
-                    "win_rate":  round(self._compute((r, s)).win_rate,  3),
-                    "size_mult": round(self._compute((r, s)).size_mult, 3),
-                    "disabled":  self._disabled.get((r, s), False),
+                    "n_trades":    len(h),
+                    "edge":        round(self._compute((r, s)).edge,      4),
+                    "win_rate":    round(self._compute((r, s)).win_rate,  3),
+                    "size_mult":   round(self._compute((r, s)).size_mult, 3),
+                    "disabled":    self._disabled.get((r, s), False),
+                    "kill_age_s":  round(now - self._kill_ts[(r, s)], 1)
+                                   if (r, s) in self._kill_ts else None,
                 }
                 for (r, s), h in self._history.items()
             },
