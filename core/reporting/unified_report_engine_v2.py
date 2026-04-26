@@ -15,6 +15,8 @@ from typing import Any
 
 from core.reporting.truth_engine import process as _truth_process
 from core.reporting.intelligence_layer import enrich as _intel_enrich
+from core.reporting.final_intelligence_engine import apply as _final_apply
+from core.reporting.consistency_engine import enforce as _consistency_enforce
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -200,6 +202,15 @@ def _s3_decision_intelligence(d: dict) -> str:
     tier     = thresh.get("tier",     "NORMAL")
     score_mn = thresh.get("score_min", 0.58)
     af_state = thresh.get("af_state", "NORMAL")
+
+    # FTD-034: override AI decision when all signals are blocked
+    if d.get("primary_issue") == "NO_EXECUTION":
+        decision = "BLOCKED"
+    else:
+        # also check via intel layer decision field
+        intel_dec = d.get("_intel", {}).get("decision", {}).get("decision")
+        if intel_dec:
+            decision = intel_dec
 
     # WHY reasoning — truth engine enhanced
     truth = d.get("_truth", {})
@@ -452,6 +463,23 @@ def _s8_alert_intelligence(d: dict) -> str:
                 f"  Fix: {a['fix']}"
                 for a in te_alerts
             ]
+
+        # FTD-034: inject gate trace dominant block info
+        ae = d.get("alerts_enriched", {})
+        dominant_blocks = ae.get("dominant_block", [])
+        if dominant_blocks:
+            block_strs = ", ".join(
+                f"{b.get('gate_reason', b)} ({b.get('pct', '')}%)"
+                if isinstance(b, dict) else str(b)
+                for b in dominant_blocks
+            )
+            formatted.append(
+                f"**GATE TRACE (FTD-034)**\n"
+                f"  Dominant Block: {block_strs}\n"
+                f"  can_trade: {ae.get('can_trade', '—')}\n"
+                f"  Reason: {ae.get('reason', '—')}"
+            )
+
         return _section("8. Alert Intelligence", "\n\n".join(formatted))
 
     # Fallback: original logic when truth engine is unavailable
@@ -530,6 +558,35 @@ def _s8_alert_intelligence(d: dict) -> str:
 def _s9_root_cause(d: dict) -> str:
     truth  = d.get("_truth", {})
     rc     = truth.get("root_cause", {})
+
+    # FTD-034: NO_EXECUTION always takes priority over any truth-engine diagnosis
+    if d.get("primary_issue") == "NO_EXECUTION":
+        ae        = d.get("alerts_enriched", {})
+        blocks    = ae.get("dominant_block", [])
+        block_str = (
+            ", ".join(
+                b.get("gate_reason", str(b)) if isinstance(b, dict) else str(b)
+                for b in blocks
+            )
+            if blocks else "PRE_TRADE_GATE"
+        )
+        primary_reason = d.get(
+            "primary_reason", "All signals blocked — 0 trades executed"
+        )
+        tf     = d.get("trade_flow", {})
+        thresh = d.get("thresholds", {})
+        score_mn = thresh.get("score_min", 0.58)
+        fix_msg  = (
+            f"Reduce score_min (currently {score_mn:.2f}) or enable exploration trades"
+        )
+        body = (
+            f"**PRIMARY CAUSE (FTD-034):**\n"
+            f"NO_EXECUTION — {primary_reason}\n\n"
+            f"**DETAIL:**\n"
+            f"Signals generated but blocked by {block_str}\n\n"
+            f"**FIX:**\n{fix_msg}"
+        )
+        return _section("9. Root Cause Analysis", body)
 
     if rc:
         primary  = rc["primary"]
@@ -880,6 +937,10 @@ def generate_full_report_v2(data: dict) -> str:
     data = _truth_process(data)
     # FTD-025CD: intelligence layer — execution / decision / capital / learning depth
     data = _intel_enrich(data)
+    # FTD-034: final intelligence — NO_EXECUTION override + gate trace injection
+    data = _final_apply(data)
+    # FTD-034: consistency enforcement — no mismatch between signal flow and diagnosis
+    data = _consistency_enforce(data)
 
     ts = data.get("generated_at", time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()))
 

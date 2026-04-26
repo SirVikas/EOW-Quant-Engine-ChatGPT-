@@ -109,6 +109,24 @@ class TradeActivator:
             active=False,
         )
 
+    def no_execution_override(
+        self, score_min: float, signals: int, trades: int
+    ) -> float:
+        """
+        FTD-034: Further lower score_min when signals exist but none execute.
+        Applies on top of any tier-based relaxation already in effect.
+        Floor is always respected (_SCORE_FLOOR = 0.40).
+        """
+        if signals > 0 and trades == 0:
+            adjusted = max(_SCORE_FLOOR, score_min - 0.10)
+            if adjusted < score_min:
+                logger.debug(
+                    f"[TRADE-ACTIVATOR][FTD-034] NO_EXECUTION override: "
+                    f"score_min {score_min:.2f} → {adjusted:.2f}"
+                )
+            return adjusted
+        return score_min
+
     def record_trade(self):
         """Reset the no-trade timer. Call immediately after a trade is placed."""
         self._last_trade_ts = time.time()

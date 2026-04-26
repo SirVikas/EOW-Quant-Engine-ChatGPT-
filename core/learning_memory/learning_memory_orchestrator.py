@@ -48,9 +48,10 @@ class LearningMemoryOrchestrator:
         self._indexer     = PatternIndexer(self._store, self._engine)
         self._explain     = ExplainabilityEngine()
 
-        self._enabled:       bool = True
-        self._last_prune_ts: float = 0.0
-        self._cycle_count:   int  = 0
+        self._enabled:           bool = True
+        self._last_prune_ts:     float = 0.0
+        self._cycle_count:       int  = 0
+        self._exploration_boost: bool = False  # FTD-034: set when system has 0 trades
 
         # Bootstrap pattern index from persisted store
         try:
@@ -243,6 +244,7 @@ class LearningMemoryOrchestrator:
             "cycle_count":         self._cycle_count,
             "top_patterns":        [p.to_dict() for p in top5],
             "snapshot_ts":         int(time.time() * 1000),
+            "exploration_boost":   self._exploration_boost,  # FTD-034
         }
 
     def pattern_leaderboard(self, n: int = 10) -> List[Dict[str, Any]]:
@@ -291,6 +293,22 @@ class LearningMemoryOrchestrator:
 
     def disable(self) -> None:
         self._enabled = False
+
+    # ── FTD-034: Exploration Boost ────────────────────────────────────────────
+
+    def set_exploration_boost(self, trades_total: int) -> None:
+        """
+        FTD-034: Enable exploration boost when the system has executed 0 trades.
+        Exploration boost signals downstream pattern consumers to prefer
+        broader sampling over conservative pattern-gating.
+        """
+        self._exploration_boost = (trades_total == 0)
+        if self._exploration_boost:
+            logger.info("[FTD-034][LEARNING] Exploration boost ACTIVE — 0 trades executed")
+
+    def is_exploration_boost(self) -> bool:
+        """Return True when exploration boost is active."""
+        return self._exploration_boost
 
 
 # ── Singleton ─────────────────────────────────────────────────────────────────

@@ -76,10 +76,24 @@ def explain_decision(data: dict) -> dict:
         or f"Signal passes all gates AND score ≥ {thresh.get('score_min', 0.58):.3f}"
     )
 
+    # FTD-034: AI decision must reflect execution reality
+    tf      = data.get("trade_flow", {})
+    signals = tf.get("total_signals", 0)
+    trades  = tf.get("total_trades",  0)
+
+    if signals > 0 and trades == 0:
+        decision        = "BLOCKED"
+        decision_reason = "NO_EXECUTION — signals not passing gates"
+    else:
+        decision        = "MONITOR"
+        decision_reason = ""
+
     return {
         "why_no_trade":      why_no_trade,
         "missing_condition": missing_condition,
         "next_trigger":      next_trigger,
+        "decision":          decision,
+        "decision_reason":   decision_reason,
     }
 
 
