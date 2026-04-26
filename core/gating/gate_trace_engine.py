@@ -164,12 +164,26 @@ class GateTraceEngine:
                 "pass_pct":   round(gate_pass[name] / evaluated * 100, 1) if evaluated else 0.0,
             }
 
+        # qFTD-033R Q11: top-3 failure reasons across all gates with %
+        all_reasons: dict[str, int] = {}
+        for t in traces:
+            for attr in ("global_gate", "pre_trade_gate", "risk_gate", "execution_gate"):
+                g: Optional[GateResult] = getattr(t, attr)
+                if g is not None and g.verdict == FAIL and g.reason:
+                    key = f"{g.gate}:{g.reason}"
+                    all_reasons[key] = all_reasons.get(key, 0) + 1
+        top_3_failures = [
+            {"gate_reason": k, "count": v, "pct": round(v / total * 100, 1)}
+            for k, v in sorted(all_reasons.items(), key=lambda x: -x[1])[:3]
+        ]
+
         return {
-            "total":          total,
-            "all_pass":       all_pass,
-            "dominant_block": dominant_block,
-            "dominant_reason": dominant_reason,
-            "gate_stats":     gate_stats,
+            "total":            total,
+            "all_pass":         all_pass,
+            "dominant_block":   dominant_block,
+            "dominant_reason":  dominant_reason,
+            "gate_stats":       gate_stats,
+            "top_3_failures":   top_3_failures,
         }
 
     def recent_rows(self, n: int = 20) -> list[dict]:

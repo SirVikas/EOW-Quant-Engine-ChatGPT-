@@ -141,6 +141,13 @@ class EngineConfig(BaseSettings):
     COST_AWARE_TRADING: bool = True        # Master switch — skip cost gate only in test envs
     EXPLORATION_MODE: bool = True          # Allow EXPLORE verdicts for marginal net edge signals
     MAX_COST_PCT: float = 0.005           # Flag symbols with round-trip cost > 0.5% notional
+    # qFTD-033R Q5:C — adaptive fee handling (cost > threshold% of TP → reduce size)
+    COST_HIGH_FEE_TP_PCT: float = 20.0    # cost_pct_of_tp > 20% → apply adaptive reduction
+    COST_ADAPTIVE_FEE_MULT: float = 0.65  # size factor when fee is high vs TP
+    # qFTD-033R Q7 — upgraded alpha formula factors
+    ALPHA_RR_BASELINE: float = 1.5        # RR baseline for rr_factor normalisation
+    ALPHA_RR_FACTOR_CAP: float = 2.0      # max rr_factor boost (prevents outlier over-sizing)
+    ALPHA_DD_PENALTY_MULT: float = 2.0    # drawdown penalty strength (0.08 DD → 16% alpha reduction)
 
     # Capital Allocator
     MAX_CAPITAL_PER_TRADE: float = 0.05  # Max 5% of equity per trade
@@ -198,15 +205,15 @@ class EngineConfig(BaseSettings):
     ACTIVATOR_T2_SCORE: float = 0.42     # qFTD-032-R3: 0.45→0.42 — TIER_2 effective floor = 0.42
 
     # Exploration Engine — learning trades
-    # qFTD-008-EDGE: 0.10→0.05 — reduce exploration noise. Now that bootstrap deadlock
-    # is fixed (qFTD-008), normal trades execute; exploration is a secondary learning
-    # mechanism, not a primary execution path. Half-rate reduces noise PnL drag.
-    EXPLORE_RATE: float = 0.05           # qFTD-008-EDGE: 0.10→0.05 — reduce noise, keep learning
+    # qFTD-033R Q3: 0.05→0.25 — system must trade (100% rejection → controlled 25% exploration)
+    # Phase 1 is exploration-heavy to gather data; Phase 2/3 will pull back as alpha improves.
+    EXPLORE_RATE: float = 0.25           # qFTD-033R Q3: 0.05→0.25 — exploration-heavy Phase 1
     EXPLORE_SIZE_MULT: float = 0.25      # Size multiplier for exploration trades
     # qFTD-008-EDGE: 0.45→0.60 — exploration quality bar raised to match new baseline.
     EXPLORE_SCORE_MIN: float = 0.60      # qFTD-008-EDGE: 0.45→0.60 — no low-quality exploration
     EXPLORE_EV_FLOOR: float = 0.50       # Max allowed EV negative fraction of est_risk
     EXPLORE_DAILY_LOSS_CAP: float = 0.02 # Max daily equity loss from exploration
+    EXPLORE_MAX_TRADES_PER_DAY: int = 20 # qFTD-033R Q13: hard daily cap on exploration trades
 
     # Adaptive Filter Engine — dynamic threshold tuning
     AF_RELAX_AFTER_MIN: int = 20         # qFTD-032: 60→20 min — relax score faster on dry spells
