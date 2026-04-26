@@ -1,0 +1,286 @@
+# 🧾 FTD — UNIVERSAL PERFORMANCE EXPLORER (FINAL)
+
+---
+
+# 🎯 OBJECTIVE (SIMPLE)
+
+```text id="obj1"
+User ko poori clarity mile:
+✔ kisi bhi time period ka performance
+✔ kisi bhi angle se analysis
+✔ simple + powerful system
+✔ data future learning mein bhi use ho
+```
+
+---
+
+# 🧠 CORE PRINCIPLE
+
+```text id="core1"
+“Full control + Simple view + Smart system”
+```
+
+---
+
+# 🏛️ DBO VALIDATION (SHORT)
+
+✔ Institutional systems → full data access
+✔ Research → flexible slicing improves decisions
+✔ Growth math → multi-period analysis mandatory
+✔ Risk model → drawdown visibility needed
+✔ Deployment → real + historical दोनों चाहिए
+
+👉 RESULT:
+
+```text id="dbo1"
+This feature = MUST HAVE ✔
+```
+
+---
+
+# 🔶 PART 1 — MASTER TRADE TABLE (BASE)
+
+## 📌 क्या दिखेगा
+
+```text id="tbl1"
+Date | Symbol | Strategy | Entry | Exit | PnL | Fees | Net | RR | Result
+```
+
+✔ हर trade visible
+✔ कोई hidden data नहीं
+
+---
+
+# 🔶 PART 2 — PRESET SYSTEM (IMPORTANT)
+
+## 🎯 Goal: 1-click analysis
+
+---
+
+## 📌 Presets (logical set)
+
+```text id="pre1"
+1D (today)
+3D (recent momentum)
+7D (weekly)
+20D (short-term cycle)
+60D (mid trend)
+100D (stability check)
+180D (half-year behavior)
+365D (yearly)
+ALL TIME
+```
+
+---
+
+## 📌 हर preset पर दिखे:
+
+```text id="pre2"
+✔ Net PnL (after fees)
+✔ Total trades
+✔ Total fees
+✔ Win rate
+✔ Profit factor
+✔ Avg win / loss
+✔ Max drawdown
+✔ Cost %
+```
+
+---
+
+# 🔶 PART 3 — CUSTOM FILTER (POWER)
+
+User choose कर सके:
+
+```text id="flt1"
+✔ Date range
+✔ Symbol
+✔ Strategy
+✔ Win / Loss
+✔ RR range
+✔ Profit range
+```
+
+---
+
+# 🔶 PART 4 — SUMMARY PANEL (AUTO)
+
+Filter के हिसाब से auto calculate:
+
+```text id="sum1"
+✔ Net PnL
+✔ Trades
+✔ Fees
+✔ Win rate
+✔ PF
+✔ Avg trade
+✔ Drawdown
+```
+
+---
+
+# 🔶 PART 5 — VISUALS (OPTIONAL BUT USEFUL)
+
+```text id="vis1"
+✔ Equity curve
+✔ Drawdown chart
+✔ Profit distribution
+```
+
+---
+
+# 🔶 PART 6 — EXPORT SYSTEM
+
+User कर सके:
+
+```text id="exp1"
+✔ CSV export
+✔ Excel export
+✔ JSON export
+✔ Full report export (PDF/MD)
+```
+
+---
+
+# 🔶 PART 7 — IMPORT SYSTEM
+
+User कर सके:
+
+```text id="imp1"
+✔ Previous data import
+✔ External trade logs import
+```
+
+---
+
+# 🔶 PART 8 — BACKUP / RESTORE
+
+```text id="bak1"
+✔ Auto backup (daily)
+✔ Manual backup
+✔ Restore from backup
+```
+
+---
+
+# 🔶 PART 9 — AUTO DATA USAGE (VERY IMPORTANT)
+
+## 🧠 System खुद सीखे
+
+Application use करे:
+
+```text id="ai1"
+✔ Past trades
+✔ Winning patterns
+✔ Losing patterns
+✔ Cost behavior
+```
+
+---
+
+## 📌 Use cases:
+
+```text id="ai2"
+✔ Bad strategy disable
+✔ Good strategy scale
+✔ High-cost symbols avoid
+✔ RR optimization
+```
+
+---
+
+# 🔶 PART 10 — USER EXPERIENCE (SIMPLE)
+
+## 🎯 Rule:
+
+```text id="ux1"
+Simple for beginner
+Powerful for advanced user
+```
+
+---
+
+## 📌 UI layout:
+
+```text id="ux2"
+Top → Presets
+Middle → Summary
+Bottom → Table
+Side → Filters
+```
+
+---
+
+# 🔶 PART 11 — DEVELOPER INSTRUCTION
+
+```text id="dev1"
+✔ System modular बनाओ
+✔ Multiple tabs allowed
+✔ Heavy data optimize करो
+✔ Fast loading जरूरी है
+```
+
+---
+
+## 📌 IMPORTANT
+
+```text id="dev2"
+❌ Over complex UI मत बनाओ
+✔ Clean + fast + clear बनाओ
+```
+
+---
+
+# 🔶 PART 12 — DATA INTEGRITY
+
+```text id="int1"
+✔ No fake data
+✔ Fees always included
+✔ Net PnL always primary
+```
+
+---
+
+# 🔶 PART 13 — FUTURE READY
+
+```text id="fut1"
+✔ AI learning ready
+✔ Strategy engine integration
+✔ Live + historical sync
+```
+
+---
+
+# 🚨 FINAL RULE
+
+```text id="rule1"
+User ko:
+✔ sab dikhe
+✔ clearly dikhe
+✔ easily samajh aaye
+```
+
+---
+
+# 🔥 FINAL MESSAGE TO DEVELOPER
+
+```text id="msg1"
+Ek aisa system banao:
+
+✔ jisme user kuch bhi dekh sake
+✔ jisme sab clear ho
+✔ jisme data future mein kaam aaye
+✔ jo simple bhi ho aur powerful bhi
+
+Sirf table nahi — decision system banao
+```
+
+---
+
+# 🏁 FINAL LINE
+
+```text id="line1"
+Data dekhna goal nahi hai
+
+Data se decision lena goal hai
+```
