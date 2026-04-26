@@ -427,3 +427,157 @@ def test_validate_signal_flow_execution_gap():
     assert sf["execution_gap"] == 13
     assert sf["dominant_block"] == "SLEEP_MODE"
     assert sf["dominant_count"] == 6
+
+
+# ── FTD-025CD: Intelligence Layer unit tests ──────────────────────────────────
+
+from core.reporting.intelligence_layer import (
+    analyze_execution,
+    explain_decision,
+    capital_analysis,
+    learning_analysis,
+    enhanced_alerts,
+    enrich,
+)
+
+
+def test_intelligence_layer_enrich_adds_intel_key():
+    data = truth_process(_minimal_data())
+    enriched = enrich(data)
+    assert "_intel" in enriched, "_intel key must exist after enrich()"
+    assert "execution" in enriched["_intel"]
+    assert "decision"  in enriched["_intel"]
+    assert "capital"   in enriched["_intel"]
+    assert "learning"  in enriched["_intel"]
+    assert "alerts"    in enriched["_intel"]
+
+
+def test_analyze_execution_gap_correct_for_sleep_mode():
+    data = truth_process(_sleep_mode_data())
+    result = analyze_execution(data)
+    assert result["has_gap"] is True
+    assert result["execution_gap"] == "13 → 0"
+    assert result["dominant_block"] == "SLEEP_MODE"
+
+
+def test_analyze_execution_no_gap_when_trades_exist():
+    data = truth_process(_minimal_data())
+    result = analyze_execution(data)
+    assert result["has_gap"] is False
+    assert result["execution_gap"] == "None"
+
+
+def test_explain_decision_returns_why_no_trade():
+    data = truth_process(_sleep_mode_data())
+    result = explain_decision(data)
+    assert result["why_no_trade"] is not None
+    assert len(result["why_no_trade"]) > 10
+    assert result["missing_condition"] is not None
+    assert result["next_trigger"] is not None
+
+
+def test_capital_analysis_missed_opportunity_when_blocked():
+    data = truth_process(_sleep_mode_data())
+    result = capital_analysis(data)
+    assert result["missed_opportunity"] is True
+    assert result["capital_idle"] > 0
+    assert "%" in result["capital_idle_pct_str"]
+
+
+def test_capital_analysis_no_missed_when_no_signals():
+    data = _minimal_data()
+    data["trade_flow"]["total_signals"] = 0
+    data["trade_flow"]["total_trades"]  = 0
+    data = truth_process(data)
+    result = capital_analysis(data)
+    assert result["missed_opportunity"] is False
+
+
+def test_learning_analysis_returns_valid_structure():
+    data = _minimal_data()
+    result = learning_analysis(data)
+    assert "top_patterns"     in result
+    assert "failure_patterns" in result
+    assert "confidence"       in result
+    assert isinstance(result["confidence"], float)
+
+
+def test_enhanced_alerts_has_no_execution_alert_when_signals_blocked():
+    data = truth_process(_sleep_mode_data())
+    alerts = enhanced_alerts(data)
+    types = {a["type"] for a in alerts}
+    assert "NO_TRADE_ALERT" in types or "NO_EXECUTION_ALERT" in types, (
+        "NO_EXECUTION or NO_TRADE alert must be present when signals>0 and trades=0"
+    )
+
+
+def test_enhanced_alerts_has_signal_block_alert():
+    data = truth_process(_sleep_mode_data())
+    alerts = enhanced_alerts(data)
+    types = {a["type"] for a in alerts}
+    assert "SIGNAL_REJECTION_SPIKE" in types or "SIGNAL_BLOCK_ALERT" in types, (
+        "SIGNAL_BLOCK alert must be present when rejection reasons exist and trades=0"
+    )
+
+
+def test_enhanced_alerts_has_contradiction_alert():
+    data = truth_process(_sleep_mode_data())
+    alerts = enhanced_alerts(data)
+    types = {a["type"] for a in alerts}
+    assert "CONTRADICTION_DETECTED" in types or "CONTRADICTION_ALERT" in types, (
+        "CONTRADICTION alert must be present when contradictions are detected"
+    )
+
+
+def test_enrich_sets_execution_gap_top_level_when_blocked():
+    data = truth_process(_sleep_mode_data())
+    enriched = enrich(data)
+    assert enriched.get("execution_gap") == "13 → 0", (
+        "top-level execution_gap must be '13 → 0' when signals=13 and trades=0"
+    )
+    assert enriched.get("primary_issue") == "NO EXECUTION — signals blocked"
+
+
+def test_enrich_does_not_inject_execution_gap_when_trades_normal():
+    data = truth_process(_minimal_data())
+    enriched = enrich(data)
+    assert "execution_gap" not in enriched or enriched.get("execution_gap") is None, (
+        "execution_gap must not be injected when trades are executing normally"
+    )
+
+
+def test_enrich_does_not_mutate_input():
+    data = truth_process(_sleep_mode_data())
+    original_keys = set(data.keys())
+    _ = enrich(data)
+    assert "_intel" not in data, "enrich() must not mutate the input dict"
+    assert set(data.keys()) == original_keys
+
+
+def test_report_shows_pass_rate_and_reject_rate():
+    data = _sleep_mode_data()
+    report = generate_full_report_v2(data)
+    assert "Pass Rate" in report,   "Signal Flow section must show Pass Rate"
+    assert "Reject Rate" in report, "Signal Flow section must show Reject Rate"
+
+
+def test_report_shows_what_needed_in_decision_section():
+    data = _sleep_mode_data()
+    report = generate_full_report_v2(data)
+    assert "WHAT NEEDED" in report, "Decision Intelligence section must contain WHAT NEEDED block"
+
+
+def test_report_shows_developer_summary():
+    data = _sleep_mode_data()
+    report = generate_full_report_v2(data)
+    assert "Developer Summary" in report, "Developer Export section must contain Developer Summary"
+    assert "- Issue:" in report
+    assert "- Fix:" in report
+
+
+def test_report_capital_idle_100_pct_when_signals_blocked():
+    data = _sleep_mode_data()
+    result = capital_analysis(truth_process(data))
+    assert result["capital_idle"] > 90.0, (
+        "Capital idle should be near 100% when no trades executed"
+    )

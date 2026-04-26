@@ -1,12 +1,12 @@
 """
-EOW Quant Engine — FTD-025B-URX-V2 + FTD-025C-TRUTH-LAYER-V1
-Unified Report Engine v2 with integrated Truth Engine.
+EOW Quant Engine — FTD-025B-URX-V2 + FTD-025C-TRUTH-LAYER-V1 + FTD-025CD-INTEL-V1
+Unified Report Engine v2 with integrated Truth Engine and Intelligence Layer.
 
 Produces a cause-effect narrative report:
   SYSTEM → THINKING → DECISION → RESULT → ROOT CAUSE → ACTION
 
 Every section answers WHY. No contradictions. No empty root cause.
-Pipeline: collect_data → truth_engine.process() → corrected_data → generate_report
+Pipeline: collect_data → truth_engine.process() → intelligence_layer.enrich() → generate_report
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ import time
 from typing import Any
 
 from core.reporting.truth_engine import process as _truth_process
+from core.reporting.intelligence_layer import enrich as _intel_enrich
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -150,11 +151,18 @@ def _s2_signal_flow(d: dict) -> str:
     dom_blk  = sf.get("dominant_block")
     dom_cnt  = sf.get("dominant_count", 0)
 
+    intel    = d.get("_intel", {})
+    exec_i   = intel.get("execution", {})
+    pass_r   = exec_i.get("pass_rate",   sf.get("pct_signals_passed",   0.0))
+    reject_r = exec_i.get("reject_rate", sf.get("pct_signals_rejected", 0.0))
+
     flow_rows = [
         ("Signals Generated (window)",  signals),
         ("Signals Passed → Traded",     trades),
         ("Signals Rejected",            skips),
-        ("Rejection Rate",              _pct(rej_rate)),
+        ("Pass Rate",                   _pct(pass_r)),
+        ("Reject Rate",                 _pct(reject_r)),
+        ("Rejection Rate (window %)",   _pct(rej_rate)),
         ("Mins Since Last Trade",       f"{tf.get('minutes_since_last_trade', 0):.1f}"),
         ("Signals / hour",              f"{tf.get('signals_per_hour', 0):.1f}"),
         ("Trades / hour",               f"{tf.get('trades_per_hour', 0):.2f}"),
@@ -231,6 +239,12 @@ def _s3_decision_intelligence(d: dict) -> str:
     else:
         alt_action = "Continue monitoring — system will execute on next qualifying setup"
 
+    # WHAT NEEDED — from intelligence layer
+    intel       = d.get("_intel", {})
+    dec_intel   = intel.get("decision", {})
+    missing_cond = dec_intel.get("missing_condition") or de.get("what_condition_missing") or "None"
+    next_trigger = dec_intel.get("next_trigger") or what_triggers or alt_action
+
     body = (
         _table([
             ("AI Decision", decision),
@@ -240,6 +254,10 @@ def _s3_decision_intelligence(d: dict) -> str:
             ("AF State",    af_state),
         ])
         + "\n\n**WHY:**\n" + _bullet(why_lines)
+        + "\n\n**WHAT NEEDED:**\n" + _bullet([
+            f"Missing condition: {missing_cond}",
+            f"Next trigger: {next_trigger}",
+        ])
         + "\n\n**Alternative Action:**\n" + alt_action
     )
     return _section("3. Decision Intelligence", body)
@@ -419,8 +437,9 @@ def _s7_learning_memory(d: dict) -> str:
 
 
 def _s8_alert_intelligence(d: dict) -> str:
-    truth    = d.get("_truth", {})
-    te_alerts = truth.get("alerts")
+    # Prefer intel layer alerts (guaranteed NO_EXECUTION / SIGNAL_BLOCK / CONTRADICTION)
+    intel = d.get("_intel", {})
+    te_alerts = intel.get("alerts") or d.get("_truth", {}).get("alerts")
 
     if te_alerts is not None:
         if not te_alerts:
@@ -653,8 +672,29 @@ def _s11_developer_export(d: dict) -> str:
         err_summary[key] = err_summary.get(key, 0) + 1
     top_errors = sorted(err_summary.items(), key=lambda x: -x[1])[:5]
 
+    # Developer Summary from intel layer
+    intel    = d.get("_intel", {})
+    exec_i   = intel.get("execution", {})
+    dec_i    = intel.get("decision",  {})
+    cap_i    = intel.get("capital",   {})
+
+    issue_str   = d.get("primary_issue", "None")
+    cause_str   = exec_i.get("dominant_block", "N/A") if exec_i.get("has_gap") else "N/A"
+    fix_str     = dec_i.get("next_trigger", "Continue monitoring")
+
+    dev_summary = (
+        f"**Developer Summary**\n\n"
+        f"- Issue:  {issue_str}\n"
+        f"- Cause:  {cause_str} dominant block"
+        + (f" ({exec_i.get('execution_gap', '')})" if exec_i.get("has_gap") else "")
+        + f"\n- Capital Idle:  {cap_i.get('capital_idle_pct_str', 'N/A')}"
+        + (" (missed opportunity)" if cap_i.get("missed_opportunity") else "")
+        + f"\n- Fix:    {fix_str}\n"
+    )
+
     body = (
-        f"```\n"
+        dev_summary
+        + f"\n```\n"
         f"Generated:       {ts}\n"
         f"Trades (total):  {n_trades}  |  PF: {pf:.3f}  |  WR: {_g(ss, 'win_rate', default=0):.1f}%\n"
         f"Gate:            can_trade={can_trade}  reason={gate_rsn}\n"
@@ -691,8 +731,10 @@ def generate_full_report_v2(data: dict) -> str:
     Returns:
         Formatted Markdown string with 11 sections.
     """
-    # FTD-025C: run truth engine before any section builds
+    # FTD-025C: truth engine — contradiction detection + root cause resolution
     data = _truth_process(data)
+    # FTD-025CD: intelligence layer — execution / decision / capital / learning depth
+    data = _intel_enrich(data)
 
     ts = data.get("generated_at", time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()))
 
@@ -701,7 +743,7 @@ def generate_full_report_v2(data: dict) -> str:
         f"_Generated: {ts}_  \n"
         f"_Engine: FTD-025B-URX-V2 — True Cause-Effect Narrative_\n\n"
         f"---\n\n"
-        f"> **Design principle:** Data → Insight → Decision → Action  \n"
+        f"> **Design principle:** Truth → Insight → Decision → Action  \n"
         f"> Every section answers WHY, not just WHAT."
     )
 
