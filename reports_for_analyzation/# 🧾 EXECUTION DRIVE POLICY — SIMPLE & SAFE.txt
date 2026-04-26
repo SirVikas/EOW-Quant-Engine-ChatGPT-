@@ -1,0 +1,193 @@
+# 🧾 EXECUTION DRIVE POLICY — SIMPLE & SAFE
+
+---
+
+## 🎯 GOAL (CLEAR)
+
+```text
+System को:
+✔ हर मिनट active रहना है
+✔ trades execute करने हैं
+✔ net profit (after cost) कमाना है
+```
+
+---
+
+# 🔹 PART 1 — NO DEAD SYSTEM RULE
+
+## 1. System idle नहीं रहेगा
+
+👉 अगर:
+
+* signals आ रहे हैं
+* लेकिन trades = 0
+
+👉 तो system को खुद:
+
+* filters loosen करने हैं
+* exploration बढ़ाना है
+
+---
+
+## 2. Minimum activity rule
+
+```text
+System को हर minute कुछ trades करने की कोशिश करनी है
+```
+
+👉 लेकिन:
+
+❌ blind trades नहीं
+✔ reasonable quality trades
+
+---
+
+# 🔹 PART 2 — PROFIT TARGET (SAFE VERSION)
+
+## 3. Target define करें
+
+Instead of hard forcing:
+
+```text
+10 trades/minute mandatory ❌
+```
+
+Use:
+
+```text
+✔ Target: $1 net profit per minute
+✔ Method: adaptive (market based)
+```
+
+---
+
+## 4. Capital usage rule
+
+```text
+Total capital ≈ $800
+```
+
+👉 System:
+
+* पूरा capital एक साथ नहीं लगाए
+* smart allocation करे
+
+---
+
+## 5. Trade sizing logic
+
+```text
+✔ high confidence → bigger size
+✔ low confidence → small size
+✔ exploration → very small size
+```
+
+---
+
+# 🔹 PART 3 — EXECUTION BOOST
+
+## 6. अगर system stuck है
+
+👉 automatically:
+
+* score threshold कम हो
+* exploration बढ़े
+* trades शुरू हों
+
+---
+
+## 7. Strong signals priority
+
+👉 अगर signal strong है:
+
+* high score
+* high RR
+
+👉 तो:
+
+```text
+force execute
+```
+
+---
+
+# 🔹 PART 4 — COST & PROFIT RULE
+
+## 8. हर trade के लिए rule
+
+```text
+Net Profit = profit – fees – slippage
+```
+
+👉 Only:
+
+```text
+Net > 0 ✔
+```
+
+---
+
+## 9. छोटे profit allowed हैं
+
+```text
+$0.05 / $0.10 trades भी allowed
+```
+
+👉 क्योंकि:
+
+```text
+multiple trades → cumulative profit
+```
+
+---
+
+# 🔹 PART 5 — LEARNING MODE
+
+## 10. Initial phase (important)
+
+👉 System को:
+
+```text
+✔ ज्यादा trades करने दो
+✔ data collect करने दो
+✔ सीखने दो
+```
+
+---
+
+# 🔹 PART 6 — FINAL CHECK
+
+Developer ensure करे:
+
+* ✔ trades शुरू हो गए
+* ✔ system idle नहीं
+* ✔ report सही है
+* ✔ losses uncontrolled नहीं
+* ✔ cost control में है
+
+---
+
+# 🚨 IMPORTANT RULE
+
+```text
+System को:
+✔ trade करना है
+✔ लेकिन blindly नहीं
+
+Profit = smart trades + cost control
+```
+
+---
+
+# 🔥 FINAL MESSAGE
+
+```text
+System अभी रुका हुआ है।
+
+उसे:
+1) चलाना है
+2) trades करवाने हैं
+3) profit की दिशा में ले जाना है
+
+Overforce नहीं करना — smart execution करना है।
+```
