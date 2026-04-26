@@ -1,5 +1,5 @@
 """
-Tests for FTD-025B-URX-V2: Unified Report Engine v2.
+Tests for FTD-025B-URX-V2 + FTD-025C-TRUTH-LAYER-V1: Unified Report Engine v2.
 
 Spec requirements (all must pass):
   ✔ No empty sections
@@ -8,9 +8,23 @@ Spec requirements (all must pass):
   ✔ Learning memory not empty
   ✔ Root cause present
   ✔ Action plan generated
+  ✔ [FTD-025C] Contradiction detection
+  ✔ [FTD-025C] Root cause forced when signals>0 & trades=0
+  ✔ [FTD-025C] Capital idle missed opportunity logic
+  ✔ [FTD-025C] Session/historical separation
+  ✔ [FTD-025C] Alert generation correctness
 """
 import pytest
 from core.reporting.unified_report_engine_v2 import generate_full_report_v2
+from core.reporting.truth_engine import (
+    detect_contradictions,
+    validate_signal_flow,
+    split_metrics,
+    analyze_capital_efficiency,
+    resolve_root_cause,
+    generate_alerts,
+    process as truth_process,
+)
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -239,3 +253,177 @@ def test_negative_memory_shows_warning():
     data["learning_memory"]["negative_memory_permanent"] = 2
     report = generate_full_report_v2(data)
     assert "banned" in report.lower() or "permanent" in report.lower()
+
+
+# ── FTD-025C: Truth Engine unit tests ────────────────────────────────────────
+
+def _sleep_mode_data(**overrides) -> dict:
+    """Data matching the live unified_report_v2_1777172458 scenario (SLEEP_MODE block)."""
+    base = _minimal_data()
+    base["trade_flow"].update({
+        "total_signals": 13,
+        "total_trades":  0,
+        "total_skips":   6,
+        "rejection_rate_pct": 100.0,
+        "signals_per_hour": 13.0,
+        "trades_per_hour":   0.0,
+        "minutes_since_last_trade": 0.6,
+        "top_rejection_reasons": {"SLEEP_MODE": 6},
+    })
+    base["mins_idle"] = 0.6
+    base["session_stats"].update({
+        "n_trades":        0,
+        "win_rate":       48.9,
+        "profit_factor":   0.37,
+        "avg_win_usdt":    1.24,
+        "avg_loss_usdt":  -3.20,
+        "total_net_pnl": -137.43,
+        "total_fees_paid": 45.77,
+    })
+    base.update(overrides)
+    return base
+
+
+def test_contradiction_signals_no_trades_detected():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    ids = [c["id"] for c in contradictions]
+    assert "SIGNALS_NO_TRADES" in ids, "SIGNALS_NO_TRADES contradiction must be detected"
+
+
+def test_contradiction_gating_block_invisible_detected():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    ids = [c["id"] for c in contradictions]
+    assert "GATING_BLOCK_INVISIBLE" in ids, "GATING_BLOCK_INVISIBLE contradiction must be detected"
+
+
+def test_contradiction_session_historical_mix_detected():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    ids = [c["id"] for c in contradictions]
+    assert "SESSION_HISTORICAL_MIX" in ids, (
+        "SESSION_HISTORICAL_MIX must be detected when n_trades=0 but win_rate populated"
+    )
+
+
+def test_root_cause_forced_when_signals_no_trades():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    rc = resolve_root_cause(data, contradictions)
+    assert rc["has_issue"] is True, "Root cause must flag an issue when signals>0 and trades=0"
+    assert "SLEEP_MODE" in rc["primary"], "Root cause must name SLEEP_MODE as the blocking cause"
+    assert "No critical root cause identified" not in rc["primary"]
+
+
+def test_root_cause_never_empty_with_contradictions():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    assert len(contradictions) > 0, "Contradictions must exist in sleep mode scenario"
+    rc = resolve_root_cause(data, contradictions)
+    assert rc["primary"] is not None and len(rc["primary"]) > 0
+
+
+def test_capital_idle_missed_opportunity_when_signals_blocked():
+    data = _sleep_mode_data()
+    result = analyze_capital_efficiency(data)
+    assert result["missed_opportunity"] is True, (
+        "missed_opportunity must be True when signals>0 but trades=0"
+    )
+    assert "SLEEP_MODE" in result["missed_reason"]
+
+
+def test_capital_idle_no_missed_when_no_signals():
+    data = _minimal_data()
+    data["trade_flow"]["total_signals"] = 0
+    data["trade_flow"]["total_trades"]  = 0
+    result = analyze_capital_efficiency(data)
+    assert result["missed_opportunity"] is False
+
+
+def test_session_historical_split_is_mixed():
+    data = _sleep_mode_data()
+    result = split_metrics(data)
+    assert result["is_mixed"] is True, (
+        "is_mixed must be True when session trades=0 but historical win_rate populated"
+    )
+    assert result["session"]["n_trades"] == 0
+    assert result["historical"]["win_rate"] == 48.9
+
+
+def test_session_historical_split_not_mixed_normal():
+    data = _minimal_data()
+    result = split_metrics(data)
+    assert result["is_mixed"] is False, "Normal scenario (trades=2) must not be mixed"
+
+
+def test_alert_no_trade_alert_generated_for_sleep_mode():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    alerts = generate_alerts(data, contradictions)
+    types = [a["type"] for a in alerts]
+    assert "NO_TRADE_ALERT" in types, "NO_TRADE_ALERT must be generated when trades=0 and signals>0"
+
+
+def test_alert_signal_rejection_spike_for_sleep_mode():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    alerts = generate_alerts(data, contradictions)
+    titles_combined = " ".join(a["title"] for a in alerts)
+    assert "SLEEP_MODE" in titles_combined
+
+
+def test_alert_contradiction_detected_for_mixed_metrics():
+    data = _sleep_mode_data()
+    contradictions = detect_contradictions(data)
+    alerts = generate_alerts(data, contradictions)
+    types = [a["type"] for a in alerts]
+    assert "CONTRADICTION_DETECTED" in types
+
+
+def test_report_shows_blocked_not_active_when_sleep_mode():
+    data = _sleep_mode_data()
+    report = generate_full_report_v2(data)
+    assert "BLOCKED" in report, (
+        "Executive snapshot must show BLOCKED (not ACTIVE) when SLEEP_MODE blocks all signals"
+    )
+    assert "SLEEP_MODE" in report
+
+
+def test_report_root_cause_names_sleep_mode():
+    data = _sleep_mode_data()
+    report = generate_full_report_v2(data)
+    assert "SLEEP_MODE" in report
+    assert "No critical root cause identified" not in report
+
+
+def test_report_capital_missed_opportunity_is_not_none():
+    data = _sleep_mode_data()
+    report = generate_full_report_v2(data)
+    assert "None — system actively trading or recently traded" not in report, (
+        "Missed Opportunity must not say 'None' when signals are blocked by SLEEP_MODE"
+    )
+
+
+def test_report_historical_stats_labeled_when_mixed():
+    data = _sleep_mode_data()
+    report = generate_full_report_v2(data)
+    assert "HISTORICAL" in report or "historical" in report.lower(), (
+        "Report must label stats as historical when session_trades=0 but stats are populated"
+    )
+
+
+def test_truth_process_does_not_mutate_original():
+    data = _sleep_mode_data()
+    original_keys = set(data.keys())
+    _ = truth_process(data)
+    assert "_truth" not in data, "truth_process must not mutate the original data dict"
+    assert set(data.keys()) == original_keys
+
+
+def test_validate_signal_flow_execution_gap():
+    data = _sleep_mode_data()
+    sf = validate_signal_flow(data)
+    assert sf["execution_gap"] == 13
+    assert sf["dominant_block"] == "SLEEP_MODE"
+    assert sf["dominant_count"] == 6

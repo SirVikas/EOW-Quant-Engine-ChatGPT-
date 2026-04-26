@@ -1,15 +1,19 @@
 """
-EOW Quant Engine — FTD-025B-URX-V2: Unified Report Engine v2
+EOW Quant Engine — FTD-025B-URX-V2 + FTD-025C-TRUTH-LAYER-V1
+Unified Report Engine v2 with integrated Truth Engine.
 
 Produces a cause-effect narrative report:
   SYSTEM → THINKING → DECISION → RESULT → ROOT CAUSE → ACTION
 
-Every section answers WHY. No empty sections. No raw dumps.
+Every section answers WHY. No contradictions. No empty root cause.
+Pipeline: collect_data → truth_engine.process() → corrected_data → generate_report
 """
 from __future__ import annotations
 
 import time
 from typing import Any
+
+from core.reporting.truth_engine import process as _truth_process
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -72,8 +76,15 @@ def _s1_executive_snapshot(d: dict) -> str:
     else:
         sys_state = "ACTIVE"
 
-    # Trading activity
-    if mins < 5:
+    # Trading activity — use truth engine to detect gating blocks
+    truth       = d.get("_truth", {})
+    cap_check   = truth.get("capital_check", {})
+    sig_flow    = truth.get("signal_flow", {})
+    dominant    = sig_flow.get("dominant_block")
+
+    if cap_check.get("missed_opportunity") and mins < 5:
+        trade_activity = f"BLOCKED ({dominant} — signals present, no execution)"
+    elif mins < 5:
         trade_activity = "ACTIVE"
     elif mins < 30:
         trade_activity = f"RECENT ({mins:.0f} min ago)"
@@ -88,13 +99,19 @@ def _s1_executive_snapshot(d: dict) -> str:
     else:
         profit_state = f"LOSS (PF={pf:.2f}, net={_money(pnl)})"
 
-    # Key problem
+    # Key problem — truth engine supersedes generic fallback
     avg_win  = _g(ss, "avg_win_usdt",  default=0.0)
     avg_loss = _g(ss, "avg_loss_usdt", default=0.0)
     fees     = _g(ss, "total_fees_paid", default=0.0)
     ratio    = abs(avg_loss / avg_win) if avg_win else 0.0
 
-    if pf < 1.0 and n_tr >= 10:
+    contradictions = truth.get("contradictions", [])
+    has_gating_block = any(c["id"] == "GATING_BLOCK_INVISIBLE" for c in contradictions)
+
+    if has_gating_block:
+        key_problem = f"All signals blocked by {dominant} — no execution despite active signal flow"
+        action = f"Investigate {dominant} condition; check threshold and tier configuration"
+    elif pf < 1.0 and n_tr >= 10:
         key_problem = (
             f"Avg loss ({_money(avg_loss)}) is {ratio:.1f}× avg win ({_money(avg_win)}); "
             f"fees {_money(fees)} consume {_pct(fees / max(abs(pnl) + fees, 1e-9) * 100)} of gross"
@@ -127,7 +144,13 @@ def _s2_signal_flow(d: dict) -> str:
     rej_rate = tf.get("rejection_rate_pct", 0.0)
     reasons  = tf.get("top_rejection_reasons", {})
 
-    flow_table = _table([
+    truth    = d.get("_truth", {})
+    sf       = truth.get("signal_flow", {})
+    exec_gap = sf.get("execution_gap", 0)
+    dom_blk  = sf.get("dominant_block")
+    dom_cnt  = sf.get("dominant_count", 0)
+
+    flow_rows = [
         ("Signals Generated (window)",  signals),
         ("Signals Passed → Traded",     trades),
         ("Signals Rejected",            skips),
@@ -135,7 +158,13 @@ def _s2_signal_flow(d: dict) -> str:
         ("Mins Since Last Trade",       f"{tf.get('minutes_since_last_trade', 0):.1f}"),
         ("Signals / hour",              f"{tf.get('signals_per_hour', 0):.1f}"),
         ("Trades / hour",               f"{tf.get('trades_per_hour', 0):.2f}"),
-    ])
+    ]
+    if exec_gap > 0:
+        flow_rows.append(("Execution Gap", f"{exec_gap} signal(s) → 0 trades"))
+    if dom_blk:
+        flow_rows.append(("Dominant Block", f"{dom_blk} ({dom_cnt} rejection(s))"))
+
+    flow_table = _table(flow_rows)
 
     if reasons:
         total_reasons = sum(reasons.values()) or 1
@@ -164,8 +193,18 @@ def _s3_decision_intelligence(d: dict) -> str:
     score_mn = thresh.get("score_min", 0.58)
     af_state = thresh.get("af_state", "NORMAL")
 
-    # WHY reasoning
+    # WHY reasoning — truth engine enhanced
+    truth = d.get("_truth", {})
+    de    = truth.get("decision_enhance", {})
+
     why_lines = []
+    if de.get("why_signals_rejected"):
+        why_lines.append(de["why_signals_rejected"])
+    if de.get("why_no_execution"):
+        why_lines.append(de["why_no_execution"])
+    if de.get("what_condition_missing"):
+        why_lines.append(f"Missing condition: {de['what_condition_missing']}")
+
     if pf < 1.0:
         why_lines.append(f"Profit factor {pf:.2f} < 1.0 — system in drawdown recovery posture")
     if wr < 45:
@@ -181,11 +220,14 @@ def _s3_decision_intelligence(d: dict) -> str:
     if not why_lines:
         why_lines.append("All systems nominal — monitoring for next qualifying setup")
 
-    # Alternative action
+    # Alternative action — include trigger condition from truth engine
+    what_triggers = de.get("what_triggers_execution")
     if pf < 1.0 and _g(ss, "n_trades", default=0) > 20:
         alt_action = "Pause new entries; review strategy DNA and RR structure before resuming"
     elif mins > 60:
         alt_action = "Consider forcing Alpha Engine scan cycle or manual signal injection"
+    elif what_triggers:
+        alt_action = f"Execution will resume when: {what_triggers}"
     else:
         alt_action = "Continue monitoring — system will execute on next qualifying setup"
 
@@ -260,8 +302,13 @@ def _s5_capital_efficiency(d: dict) -> str:
     capital_deployed_pct = abs(pnl + fees) / max(initial, 1) * 100
     capital_idle_pct     = 100.0 - min(capital_deployed_pct, 100.0)
 
-    # Missed opportunity description
-    if mins > 60:
+    # Missed opportunity — truth engine has definitive answer
+    truth     = d.get("_truth", {})
+    cap_check = truth.get("capital_check", {})
+
+    if cap_check.get("missed_opportunity"):
+        missed = cap_check["missed_reason"]
+    elif mins > 60:
         missed = (
             f"{mins:.0f} min idle at {thr.get('tier','?')} "
             f"(score_min={thr.get('score_min','?')}, vol_mult={thr.get('volume_multiplier','?')}×) — "
@@ -310,8 +357,18 @@ def _s6_performance_reality(d: dict) -> str:
         state = "DISABLED" if disabled else ("POSITIVE" if e > 0 else "NEGATIVE")
         edge_lines.append(f"- {strat}: edge={e:+.3f} wr={wr_s:.0%} n={n} [{state}]")
 
+    truth    = d.get("_truth", {})
+    split    = truth.get("split_metrics", {})
+    is_mixed = split.get("is_mixed", False)
+    hist_note = (
+        "\n\n> **Note (FTD-025C):** Session trades = 0. "
+        "Stats below are **HISTORICAL (lifetime)**, not current session."
+        if is_mixed else ""
+    )
+
     body = (
-        _table([
+        hist_note
+        + "\n\n" + _table([
             ("Expectancy / Trade",   _money(expectancy, signed=True)),
             ("Fee Impact",           _pct(fee_impact)),
             ("Fee per Trade (avg)",  _money(fee_per_trade)),
@@ -324,7 +381,7 @@ def _s6_performance_reality(d: dict) -> str:
         + "\n\n**Edge Consistency (strategy × regime):**\n"
         + (_bullet(edge_lines) if edge_lines else "_Not enough trades to measure edge (need ≥20 per strategy-regime)._")
     )
-    return _section("6. Performance Reality", body)
+    return _section("6. Performance Reality", body.lstrip("\n"))
 
 
 def _s7_learning_memory(d: dict) -> str:
@@ -362,19 +419,36 @@ def _s7_learning_memory(d: dict) -> str:
 
 
 def _s8_alert_intelligence(d: dict) -> str:
+    truth    = d.get("_truth", {})
+    te_alerts = truth.get("alerts")
+
+    if te_alerts is not None:
+        if not te_alerts:
+            formatted = ["No critical alerts — system operating within normal parameters."]
+        else:
+            formatted = [
+                f"**{a['title']}**\n"
+                f"  Cause: {a['cause']}\n"
+                f"  Impact: {a['impact']}\n"
+                f"  Fix: {a['fix']}"
+                for a in te_alerts
+            ]
+        return _section("8. Alert Intelligence", "\n\n".join(formatted))
+
+    # Fallback: original logic when truth engine is unavailable
     ss    = d.get("session_stats", {})
     tf    = d.get("trade_flow",    {})
     risk  = d.get("risk",          {})
     errors = d.get("errors",       [])
     mins  = d.get("mins_idle",     0.0)
 
-    pf       = _g(ss, "profit_factor", default=0.0)
-    avg_win  = _g(ss, "avg_win_usdt",  default=0.0)
-    avg_loss = _g(ss, "avg_loss_usdt", default=0.0)
+    pf       = _g(ss, "profit_factor",   default=0.0)
+    avg_win  = _g(ss, "avg_win_usdt",    default=0.0)
+    avg_loss = _g(ss, "avg_loss_usdt",   default=0.0)
     fees     = _g(ss, "total_fees_paid", default=0.0)
     pnl      = _g(ss, "total_net_pnl",   default=0.0)
-    n_trades = _g(ss, "n_trades",         default=0)
-    halted   = _g(risk, "halted",         default=False)
+    n_trades = _g(ss, "n_trades",        default=0)
+    halted   = _g(risk, "halted",        default=False)
     gross    = abs(pnl) + fees
 
     alerts = []
@@ -382,9 +456,9 @@ def _s8_alert_intelligence(d: dict) -> str:
     if halted:
         alerts.append(
             "**HALT ACTIVE**\n"
-            f"  Cause: Risk kill-switch triggered\n"
-            f"  Impact: Zero new trades until manually cleared\n"
-            f"  Fix: Resolve halt condition; call /api/risk/resume"
+            "  Cause: Risk kill-switch triggered\n"
+            "  Impact: Zero new trades until manually cleared\n"
+            "  Fix: Resolve halt condition; call /api/risk/resume"
         )
 
     if pf < 1.0 and n_trades >= 10:
@@ -414,7 +488,6 @@ def _s8_alert_intelligence(d: dict) -> str:
             f"  Fix: Check Alpha Engine signal quality; inspect top rejection reasons"
         )
 
-    # Count recurring error types
     err_counts: dict[str, int] = {}
     for e in errors:
         code = e.get("code", "UNKNOWN")
@@ -427,7 +500,7 @@ def _s8_alert_intelligence(d: dict) -> str:
                 f"  Impact: Affected symbols blocked from evaluation\n"
                 f"  Fix: Check ATR/ADX thresholds for affected symbol"
             )
-            break  # show only the top recurring error
+            break
 
     if not alerts:
         alerts.append("No critical alerts — system operating within normal parameters.")
@@ -436,20 +509,43 @@ def _s8_alert_intelligence(d: dict) -> str:
 
 
 def _s9_root_cause(d: dict) -> str:
-    ss    = d.get("session_stats", {})
-    tf    = d.get("trade_flow",    {})
-    errors = d.get("errors",       [])
-    mins  = d.get("mins_idle",     0.0)
-    thresh = d.get("thresholds",   {})
+    truth  = d.get("_truth", {})
+    rc     = truth.get("root_cause", {})
+
+    if rc:
+        primary  = rc["primary"]
+        sec_list = rc.get("secondary", [])
+
+        # Augment secondary with error patterns (these are not in truth engine)
+        errors = d.get("errors", [])
+        atr_errors = sum(1 for e in errors if "ATR_TOO_LOW" in e.get("extra", ""))
+        if atr_errors > 5:
+            sec_list = list(sec_list) + [
+                f"ATR_TOO_LOW filter blocking major pairs ({atr_errors} hits) — "
+                "large-cap pairs excluded during low-volatility windows"
+            ]
+        adx_errors = sum(1 for e in errors if "ADX_UNSTABLE" in e.get("extra", ""))
+        if adx_errors > 3:
+            sec_list = list(sec_list) + [f"ADX_UNSTABLE on range-bound pairs ({adx_errors} hits)"]
+
+        secondary = _bullet(sec_list) if sec_list else "_No significant secondary causes identified._"
+
+        body = f"**PRIMARY CAUSE:**\n{primary}\n\n**SECONDARY CAUSES:**\n{secondary}"
+        return _section("9. Root Cause Analysis", body)
+
+    # Fallback: original logic when truth engine unavailable
+    ss     = d.get("session_stats", {})
+    tf     = d.get("trade_flow",    {})
+    errors = d.get("errors",        [])
+    mins   = d.get("mins_idle",     0.0)
+    thresh = d.get("thresholds",    {})
 
     pf       = _g(ss, "profit_factor",  default=0.0)
-    wr       = _g(ss, "win_rate",       default=0.0)
     avg_win  = _g(ss, "avg_win_usdt",   default=0.0)
     avg_loss = _g(ss, "avg_loss_usdt",  default=0.0)
     n_trades = _g(ss, "n_trades",       default=0)
     reasons  = tf.get("top_rejection_reasons", {})
 
-    # Determine primary cause
     if pf < 1.0 and n_trades >= 10:
         ratio = abs(avg_loss / avg_win) if avg_win else 0
         primary = (
@@ -467,13 +563,11 @@ def _s9_root_cause(d: dict) -> str:
     else:
         primary = "**No critical root cause identified** — system operating normally."
 
-    # Secondary causes from top rejection reasons
     secondary_parts = []
     if reasons:
         top_reason, top_count = max(reasons.items(), key=lambda x: x[1])
         secondary_parts.append(f"Top skip reason `{top_reason}` ({top_count} times) blocking signal flow")
 
-    # Error-based secondary
     atr_errors = sum(1 for e in errors if "ATR_TOO_LOW" in e.get("extra", ""))
     if atr_errors > 5:
         secondary_parts.append(
@@ -583,7 +677,9 @@ def _s11_developer_export(d: dict) -> str:
 
 def generate_full_report_v2(data: dict) -> str:
     """
-    Generate the FTD-025B-URX-V2 Unified Report.
+    Generate the FTD-025B-URX-V2 + FTD-025C Unified Report.
+
+    Pipeline (FTD-025C): data → truth_engine.process() → corrected_data → sections
 
     Args:
         data: dict assembled by the caller (main.py endpoint).
@@ -595,6 +691,9 @@ def generate_full_report_v2(data: dict) -> str:
     Returns:
         Formatted Markdown string with 11 sections.
     """
+    # FTD-025C: run truth engine before any section builds
+    data = _truth_process(data)
+
     ts = data.get("generated_at", time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()))
 
     header = (
