@@ -22,19 +22,21 @@ from typing import Optional
 
 try:
     from config import cfg
-    _EXPLORATION_MODE     = getattr(cfg, "EXPLORATION_MODE",    True)
-    _EXPLORE_SIZE_MULT    = cfg.EXPLORE_SIZE_MULT
-    _EXPLORE_DAILY_LOSS   = cfg.EXPLORE_DAILY_LOSS_CAP
-    _EXPLORE_SCORE_MIN    = cfg.EXPLORE_SCORE_MIN
-    _MIN_NET_EDGE         = getattr(cfg, "COST_MIN_NET_EDGE_PCT", 0.001)
-    _EXPLORE_LOSS_MAX_PCT = getattr(cfg, "COST_EXPLORE_LOSS_MAX_PCT", 0.0005)
+    _EXPLORATION_MODE        = getattr(cfg, "EXPLORATION_MODE",           True)
+    _EXPLORE_SIZE_MULT       = cfg.EXPLORE_SIZE_MULT
+    _EXPLORE_DAILY_LOSS      = cfg.EXPLORE_DAILY_LOSS_CAP
+    _EXPLORE_SCORE_MIN       = cfg.EXPLORE_SCORE_MIN
+    _MIN_NET_EDGE            = getattr(cfg, "COST_MIN_NET_EDGE_PCT",       0.001)
+    _EXPLORE_LOSS_MAX_PCT    = getattr(cfg, "COST_EXPLORE_LOSS_MAX_PCT",   0.0005)
+    _EXPLORE_MAX_TRADES_DAY  = getattr(cfg, "EXPLORE_MAX_TRADES_PER_DAY",  20)
 except Exception:
-    _EXPLORATION_MODE     = True
-    _EXPLORE_SIZE_MULT    = 0.25
-    _EXPLORE_DAILY_LOSS   = 0.02
-    _EXPLORE_SCORE_MIN    = 0.60
-    _MIN_NET_EDGE         = 0.001
-    _EXPLORE_LOSS_MAX_PCT = 0.0005
+    _EXPLORATION_MODE        = True
+    _EXPLORE_SIZE_MULT       = 0.25
+    _EXPLORE_DAILY_LOSS      = 0.02
+    _EXPLORE_SCORE_MIN       = 0.60
+    _MIN_NET_EDGE            = 0.001
+    _EXPLORE_LOSS_MAX_PCT    = 0.0005
+    _EXPLORE_MAX_TRADES_DAY  = 20
 
 
 @dataclass
@@ -73,6 +75,7 @@ class ExplorationController:
 
     def __init__(self):
         self._daily_loss_usdt:  float = 0.0
+        self._daily_trade_count: int  = 0         # qFTD-033R Q13: max-trades guardrail
         self._current_day:      int   = int(time.time()) // 86400
         self._records:          list[ExploreTradeRecord] = []
         self._equity_ref:       float = 1000.0   # updated by caller
@@ -119,6 +122,14 @@ class ExplorationController:
                 daily_loss_used=self._daily_loss_usdt,
             )
 
+        # qFTD-033R Q13: max-trades-per-day guardrail
+        if self._daily_trade_count >= _EXPLORE_MAX_TRADES_DAY:
+            return ExploreDecision(
+                allow=False, size_mult=0.0, tagged=False,
+                reason=f"daily exploration trade limit reached ({self._daily_trade_count}/{_EXPLORE_MAX_TRADES_DAY})",
+                daily_loss_used=self._daily_loss_usdt,
+            )
+
         return ExploreDecision(
             allow=True,
             size_mult=_EXPLORE_SIZE_MULT,
@@ -129,8 +140,9 @@ class ExplorationController:
 
     def record_outcome(self, symbol: str, signal_type: str, net_edge_pct: float,
                        size_mult: float, pnl_usdt: float) -> None:
-        """Record trade outcome; update daily loss tracker."""
+        """Record trade outcome; update daily loss and trade-count trackers."""
         self._reset_day_if_needed()
+        self._daily_trade_count += 1    # qFTD-033R Q13: count every settled exploration trade
         if pnl_usdt < 0:
             self._daily_loss_usdt += abs(pnl_usdt)
         self._records.append(ExploreTradeRecord(
@@ -140,23 +152,26 @@ class ExplorationController:
         ))
 
     def summary(self) -> dict:
-        """Stats for reporting."""
+        """Stats for reporting (qFTD-033R Q13: guardrail fields added)."""
         self._reset_day_if_needed()
-        total    = len(self._records)
-        wins     = sum(1 for r in self._records if (r.actual_pnl or 0) > 0)
-        total_pnl = sum((r.actual_pnl or 0) for r in self._records)
+        total      = len(self._records)
+        wins       = sum(1 for r in self._records if (r.actual_pnl or 0) > 0)
+        total_pnl  = sum((r.actual_pnl or 0) for r in self._records)
         daily_cap_usdt = self._equity_ref * _EXPLORE_DAILY_LOSS
 
         return {
-            "enabled":          _EXPLORATION_MODE,
-            "total_trades":     total,
-            "win_count":        wins,
-            "win_rate_pct":     round(wins / total * 100, 1) if total else 0.0,
-            "total_pnl":        round(total_pnl, 4),
-            "daily_loss_used":  round(self._daily_loss_usdt, 4),
-            "daily_loss_cap":   round(daily_cap_usdt, 4),
-            "cap_remaining":    round(max(daily_cap_usdt - self._daily_loss_usdt, 0), 4),
-            "size_mult":        _EXPLORE_SIZE_MULT,
+            "enabled":              _EXPLORATION_MODE,
+            "total_trades":         total,
+            "win_count":            wins,
+            "win_rate_pct":         round(wins / total * 100, 1) if total else 0.0,
+            "total_pnl":            round(total_pnl, 4),
+            "daily_loss_used":      round(self._daily_loss_usdt, 4),
+            "daily_loss_cap":       round(daily_cap_usdt, 4),
+            "cap_remaining":        round(max(daily_cap_usdt - self._daily_loss_usdt, 0), 4),
+            "size_mult":            _EXPLORE_SIZE_MULT,
+            "daily_trade_count":    self._daily_trade_count,
+            "daily_trade_limit":    _EXPLORE_MAX_TRADES_DAY,
+            "daily_trades_remaining": max(_EXPLORE_MAX_TRADES_DAY - self._daily_trade_count, 0),
         }
 
     # ── Internal ──────────────────────────────────────────────────────────────
@@ -164,8 +179,9 @@ class ExplorationController:
     def _reset_day_if_needed(self) -> None:
         today = int(time.time()) // 86400
         if today != self._current_day:
-            self._daily_loss_usdt = 0.0
-            self._current_day     = today
+            self._daily_loss_usdt   = 0.0
+            self._daily_trade_count = 0    # qFTD-033R Q13: reset daily trade counter
+            self._current_day       = today
 
 
 # ── Singleton ─────────────────────────────────────────────────────────────────

@@ -34,23 +34,28 @@ try:
     _MAKER_FEE            = _cfg.cfg.MAKER_FEE
     _SLIPPAGE_EST         = _cfg.cfg.SLIPPAGE_EST
     _ATR_SLIPPAGE_MULT    = _cfg.cfg.ATR_SLIPPAGE_MULT
-    _COST_MIN_NET_EDGE_PCT    = getattr(_cfg.cfg, "COST_MIN_NET_EDGE_PCT",    0.001)
+    _COST_MIN_NET_EDGE_PCT     = getattr(_cfg.cfg, "COST_MIN_NET_EDGE_PCT",     0.001)
     _COST_EXPLORE_LOSS_MAX_PCT = getattr(_cfg.cfg, "COST_EXPLORE_LOSS_MAX_PCT", 0.0005)
-    _COST_HIGH_EDGE_FACTOR    = getattr(_cfg.cfg, "COST_HIGH_EDGE_FACTOR",    0.75)
-    _COST_SPREAD_EST_PCT      = getattr(_cfg.cfg, "COST_SPREAD_EST_PCT",      0.0002)
-    _COST_SLIPPAGE_MAX_PCT    = getattr(_cfg.cfg, "COST_SLIPPAGE_MAX_PCT",    0.0010)
-    _EXPLORE_SIZE_MULT        = _cfg.cfg.EXPLORE_SIZE_MULT
+    _COST_HIGH_EDGE_FACTOR     = getattr(_cfg.cfg, "COST_HIGH_EDGE_FACTOR",     0.75)
+    _COST_SPREAD_EST_PCT       = getattr(_cfg.cfg, "COST_SPREAD_EST_PCT",       0.0002)
+    _COST_SLIPPAGE_MAX_PCT     = getattr(_cfg.cfg, "COST_SLIPPAGE_MAX_PCT",     0.0010)
+    _EXPLORE_SIZE_MULT         = _cfg.cfg.EXPLORE_SIZE_MULT
+    # qFTD-033R Q5:C — adaptive fee handling
+    _COST_HIGH_FEE_TP_PCT      = getattr(_cfg.cfg, "COST_HIGH_FEE_TP_PCT",      20.0)
+    _COST_ADAPTIVE_FEE_MULT    = getattr(_cfg.cfg, "COST_ADAPTIVE_FEE_MULT",    0.65)
 except Exception:
-    _TAKER_FEE               = 0.0004
-    _MAKER_FEE               = 0.0002
-    _SLIPPAGE_EST            = 0.0003
-    _ATR_SLIPPAGE_MULT       = 0.10
-    _COST_MIN_NET_EDGE_PCT   = 0.001
+    _TAKER_FEE                 = 0.0004
+    _MAKER_FEE                 = 0.0002
+    _SLIPPAGE_EST              = 0.0003
+    _ATR_SLIPPAGE_MULT         = 0.10
+    _COST_MIN_NET_EDGE_PCT     = 0.001
     _COST_EXPLORE_LOSS_MAX_PCT = 0.0005
-    _COST_HIGH_EDGE_FACTOR   = 0.75
-    _COST_SPREAD_EST_PCT     = 0.0002
-    _COST_SLIPPAGE_MAX_PCT   = 0.0010
-    _EXPLORE_SIZE_MULT       = 0.25
+    _COST_HIGH_EDGE_FACTOR     = 0.75
+    _COST_SPREAD_EST_PCT       = 0.0002
+    _COST_SLIPPAGE_MAX_PCT     = 0.0010
+    _EXPLORE_SIZE_MULT         = 0.25
+    _COST_HIGH_FEE_TP_PCT      = 20.0
+    _COST_ADAPTIVE_FEE_MULT    = 0.65
 
 # ── Public constant aliases (for tests and callers) ───────────────────────────
 TAKER_FEE             = _TAKER_FEE
@@ -63,6 +68,8 @@ COST_HIGH_EDGE_FACTOR = _COST_HIGH_EDGE_FACTOR
 COST_SPREAD_EST_PCT   = _COST_SPREAD_EST_PCT
 COST_SLIPPAGE_MAX_PCT = _COST_SLIPPAGE_MAX_PCT
 EXPLORE_SIZE_MULT     = _EXPLORE_SIZE_MULT
+COST_HIGH_FEE_TP_PCT  = _COST_HIGH_FEE_TP_PCT
+COST_ADAPTIVE_FEE_MULT = _COST_ADAPTIVE_FEE_MULT
 
 
 # ── Verdict constants ─────────────────────────────────────────────────────────
@@ -251,6 +258,11 @@ def evaluate_net_edge(
     if has_min_edge:
         double_thresh = min_edge_pct * 2
         size_factor   = 1.0 if net_edge_pct >= double_thresh else COST_HIGH_EDGE_FACTOR
+
+        # qFTD-033R Q5:C — adaptive fee: reduce size when cost eats > threshold% of TP
+        if cb.cost_pct_of_tp > COST_HIGH_FEE_TP_PCT:
+            size_factor = min(size_factor, COST_ADAPTIVE_FEE_MULT)
+
         return NetEdgeResult(
             gross_edge           = round(gross_tp,       4),
             total_cost           = round(cb.total_cost,  4),

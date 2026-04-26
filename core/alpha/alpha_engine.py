@@ -1,5 +1,5 @@
 """
-EOW Quant Engine — FTD-033 Part 5: Alpha Engine (Cost-Adjusted)
+EOW Quant Engine — FTD-033 / qFTD-033R Part 5: Alpha Engine (Cost-Adjusted)
 
 Responsibilities:
   ✔ Cost-adjusted RR calculation
@@ -7,8 +7,11 @@ Responsibilities:
   ✔ Strategy filtering based on cost efficiency
   ✔ Per-symbol high-slippage tracking
 
-Formula:
-  Alpha Score = (Expected Move – Cost) × Confidence × Regime Weight
+Formula (qFTD-033R Q7 upgrade):
+  Alpha Score = net_edge_pct × confidence × regime_weight × rr_factor × dd_penalty
+
+  rr_factor   = min(cost_adjusted_rr / ALPHA_RR_BASELINE, ALPHA_RR_FACTOR_CAP)
+  dd_penalty  = max(1.0 − drawdown_pct × ALPHA_DD_PENALTY_MULT, 0.3)
 
 This layer sits after the signal scorer and before the execution gate.
 It does NOT replace strategies/alpha_engine.py (which generates raw signals)
@@ -25,11 +28,17 @@ from core.alpha.net_edge_engine import net_edge_engine, NetEdgeDecision
 
 try:
     from config import cfg
-    _EXPLORATION_MODE = getattr(cfg, "EXPLORATION_MODE", True)
-    _MAX_COST_PCT     = getattr(cfg, "MAX_COST_PCT", 0.005)
+    _EXPLORATION_MODE    = getattr(cfg, "EXPLORATION_MODE",      True)
+    _MAX_COST_PCT        = getattr(cfg, "MAX_COST_PCT",          0.005)
+    _ALPHA_RR_BASELINE   = getattr(cfg, "ALPHA_RR_BASELINE",     1.5)
+    _ALPHA_RR_FACTOR_CAP = getattr(cfg, "ALPHA_RR_FACTOR_CAP",   2.0)
+    _ALPHA_DD_PENALTY_MULT = getattr(cfg, "ALPHA_DD_PENALTY_MULT", 2.0)
 except Exception:
-    _EXPLORATION_MODE = True
-    _MAX_COST_PCT     = 0.005
+    _EXPLORATION_MODE      = True
+    _MAX_COST_PCT          = 0.005
+    _ALPHA_RR_BASELINE     = 1.5
+    _ALPHA_RR_FACTOR_CAP   = 2.0
+    _ALPHA_DD_PENALTY_MULT = 2.0
 
 
 @dataclass
@@ -42,11 +51,13 @@ class AlphaSignalEval:
     confidence:       float
     regime_weight:    float
     net_edge_decision: NetEdgeDecision
-    alpha_score:      float        # (net_edge_pct - cost_pct) × confidence × regime_weight
-    approved:         bool
-    exploration:      bool
-    size_factor:      float
-    rejection_reason: str = ""
+    alpha_score:      float        # net_edge_pct × confidence × regime_weight × rr_factor × dd_penalty
+    rr_factor:        float = 1.0  # qFTD-033R Q7: cost_adjusted_rr / rr_baseline (capped)
+    dd_penalty:       float = 1.0  # qFTD-033R Q7: drawdown dampener [0.3, 1.0]
+    approved:         bool  = False
+    exploration:      bool  = False
+    size_factor:      float = 0.0
+    rejection_reason: str   = ""
     timestamp:        float = field(default_factory=time.time)
 
 
@@ -93,6 +104,11 @@ class AlphaEngine:
             lambda: SymbolCostStats(symbol="")
         )
         self._recent_evals: deque[AlphaSignalEval] = deque(maxlen=500)
+        self._drawdown_pct: float = 0.0   # qFTD-033R Q7: current DD fraction (set by caller)
+
+    def set_drawdown(self, drawdown_pct: float) -> None:
+        """qFTD-033R Q7: inject current drawdown fraction (e.g. 0.08 for 8% DD)."""
+        self._drawdown_pct = max(0.0, float(drawdown_pct))
 
     # ── Core evaluation ───────────────────────────────────────────────────────
 
@@ -120,11 +136,21 @@ class AlphaEngine:
             side=side,
         )
 
-        # Alpha Score = (net_edge_pct) × confidence × regime_weight
-        # Negative net_edge → negative alpha_score (penalizes bad setups)
-        alpha_score = decision.net_edge_pct * confidence * regime_weight
+        # qFTD-033R Q7: RR factor — rewards high-RR setups, penalises low-RR
+        rr_baseline   = _ALPHA_RR_BASELINE
+        rr_factor     = min(
+            decision.cost_adjusted_rr / rr_baseline if rr_baseline > 0 else 1.0,
+            _ALPHA_RR_FACTOR_CAP,
+        )
+        rr_factor = max(rr_factor, 0.1)   # floor: never zero-out a good net_edge
 
-        approved   = decision.approved
+        # qFTD-033R Q7: drawdown penalty — dampen alpha when equity is in drawdown
+        dd_penalty = max(1.0 - self._drawdown_pct * _ALPHA_DD_PENALTY_MULT, 0.3)
+
+        # Upgraded formula: net_edge × confidence × regime × rr_factor × dd_penalty
+        alpha_score = decision.net_edge_pct * confidence * regime_weight * rr_factor * dd_penalty
+
+        approved    = decision.approved
         exploration = decision.exploration and _EXPLORATION_MODE
 
         # Track per-symbol cost stats
@@ -146,6 +172,8 @@ class AlphaEngine:
             regime_weight=regime_weight,
             net_edge_decision=decision,
             alpha_score=round(alpha_score, 4),
+            rr_factor=round(rr_factor, 3),
+            dd_penalty=round(dd_penalty, 3),
             approved=approved,
             exploration=exploration,
             size_factor=decision.size_factor if (approved or exploration) else 0.0,
@@ -182,15 +210,18 @@ class AlphaEngine:
         }
 
     def net_edge_summary(self) -> dict:
-        """Summary for the reporting section."""
+        """Summary for the reporting section (qFTD-033R Q11/Q12 upgrades included)."""
         evals = list(self._recent_evals)
         if not evals:
             return {
-                "total_evaluated":        0,
-                "positive_net_edge_pct":  0.0,
+                "total_evaluated":          0,
+                "positive_net_edge_pct":    0.0,
                 "rejected_due_to_cost_pct": 0.0,
-                "avg_alpha_score":        0.0,
-                "high_cost_symbols":      [],
+                "avg_alpha_score":          0.0,
+                "avg_rr_factor":            0.0,
+                "avg_dd_penalty":           0.0,
+                "high_cost_symbols":        [],
+                "symbol_breakdown":         {},
             }
 
         total    = len(evals)
@@ -200,14 +231,40 @@ class AlphaEngine:
             if not e.approved and not e.exploration
             and "EDGE" in e.net_edge_decision.verdict
         )
-        avg_alpha = sum(e.alpha_score for e in evals) / total
+        avg_alpha  = sum(e.alpha_score for e in evals) / total
+        avg_rr     = sum(e.rr_factor   for e in evals) / total
+        avg_dd_pen = sum(e.dd_penalty  for e in evals) / total
+
+        # Symbol-level cost/rejection breakdown (qFTD-033R Q11)
+        sym_stats: dict[str, dict] = {}
+        for e in evals:
+            s = sym_stats.setdefault(e.symbol, {"total": 0, "approved": 0, "rejected": 0, "total_cost_pct": 0.0})
+            s["total"] += 1
+            if e.approved or e.exploration:
+                s["approved"] += 1
+            else:
+                s["rejected"] += 1
+            s["total_cost_pct"] += e.net_edge_decision.raw_result.cost_breakdown.cost_pct_of_notional
+        symbol_breakdown = {
+            sym: {
+                "total":           v["total"],
+                "approved":        v["approved"],
+                "rejected":        v["rejected"],
+                "approval_pct":    round(v["approved"] / v["total"] * 100, 1),
+                "avg_cost_pct":    round(v["total_cost_pct"] / v["total"], 4),
+            }
+            for sym, v in sorted(sym_stats.items(), key=lambda x: -x[1]["total"])
+        }
 
         return {
             "total_evaluated":          total,
             "positive_net_edge_pct":    round(positive / total * 100, 1),
             "rejected_due_to_cost_pct": round(rejected_cost / total * 100, 1),
-            "avg_alpha_score":          round(avg_alpha, 4),
+            "avg_alpha_score":          round(avg_alpha,  4),
+            "avg_rr_factor":            round(avg_rr,     3),
+            "avg_dd_penalty":           round(avg_dd_pen, 3),
             "high_cost_symbols":        self.high_cost_symbols(),
+            "symbol_breakdown":         symbol_breakdown,
             "strategy_summary":         self.strategy_cost_summary(),
         }
 
