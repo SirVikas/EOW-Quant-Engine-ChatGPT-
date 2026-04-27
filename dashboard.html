@@ -347,6 +347,15 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 .upe-insight { border-radius: 9px; padding: 10px 14px; margin-bottom: 8px; }
 .upe-insight-title { font-weight: 600; font-size: 11px; }
 .upe-insight-action { font-size: 11px; color: var(--text); margin-top: 4px; }
+/* AEE state badges */
+.aee-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; letter-spacing:.04em; }
+.aee-ACTIVE   { background:#C6F6D5; color:#276749; }
+.aee-REDUCED  { background:#FEFCBF; color:#744210; }
+.aee-SCALING  { background:#BEE3F8; color:#2A4365; }
+.aee-DISABLED { background:#FED7D7; color:#C53030; }
+.aee-kpi { background:#fff; border:1px solid #F6AD55; border-radius:8px; padding:8px 14px; text-align:center; min-width:80px; }
+.aee-kpi-val { font-size:15px; font-weight:700; color:#C05621; }
+.aee-kpi-lbl { font-size:10px; color:var(--muted); margin-top:2px; }
 </style>
 </head>
 
@@ -1133,6 +1142,59 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     </div>
   </div>
 
+  <!-- ── FTD-037: Adaptive Edge Engine Panel ── -->
+  <div class="card" style="padding:16px 18px;background:#FFFAF0;border:1px solid #F6AD55;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;color:#C05621;">🔥 FTD-037 — Adaptive Edge Engine</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+          Live strategy ranking · auto-disable · auto-scale · time-aware scoring
+        </div>
+      </div>
+      <button onclick="loadAEE()" style="font-family:var(--fm);font-size:11px;padding:5px 14px;border-radius:6px;border:1px solid #C05621;background:#FFF5E6;color:#C05621;cursor:pointer;">↻ Refresh</button>
+    </div>
+
+    <!-- AEE summary row -->
+    <div id="aee-summary-row" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+    <!-- AEE strategy table -->
+    <div style="overflow-x:auto;">
+      <table class="bm-table" style="font-size:11px;">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Strategy</th>
+            <th>State</th>
+            <th>AEE Score</th>
+            <th>Weighted PF</th>
+            <th>Avg RR</th>
+            <th>Cost %</th>
+            <th>Win Rate</th>
+            <th>Streaks W/L</th>
+            <th>Size Mult</th>
+            <th>Trades</th>
+          </tr>
+        </thead>
+        <tbody id="aee-tbody">
+          <tr><td colspan="11" style="color:var(--muted);text-align:center;padding:16px;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Disable log (only visible when there are disabled strategies) -->
+    <div id="aee-disable-log" style="margin-top:12px;display:none;">
+      <div style="font-size:11px;font-weight:600;color:#C53030;margin-bottom:6px;">⛔ Disable Log</div>
+      <div id="aee-disable-log-body" style="font-size:11px;color:var(--text);"></div>
+    </div>
+
+    <!-- Formula explainer -->
+    <div style="margin-top:12px;font-size:10px;color:var(--muted);font-family:monospace;background:#FFF5E6;border-radius:6px;padding:8px 12px;">
+      AEE Score = 0.35×PF_score + 0.25×RR_score + 0.25×Cost_score + 0.15×Consistency
+      &nbsp;|&nbsp; Disable: PF &lt; 0.80 or edge &lt; 0 or loss_streak ≥ 7
+      &nbsp;|&nbsp; Scale: PF &gt; 1.20 + 3 wins
+    </div>
+  </div>
+
   <!-- ── Trade Table ── -->
   <div class="card" style="padding:16px 18px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -1559,6 +1621,7 @@ function switchTab(name) {
   }
   if (name === 'perf') {
     loadPerfExplorer();
+    loadAEE();
   }
 }
 
@@ -3297,6 +3360,95 @@ let _upePreset      = 'ALL';
 let _upeEquityChart = null;
 let _upeDDChart     = null;
 let _upeDebounce    = null;
+
+// ── FTD-037: Adaptive Edge Engine ────────────────────────────────────────────
+async function loadAEE() {
+  try {
+    const r = await fetch(API + '/api/aee/state', { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    _renderAEESummary(d);
+    _renderAEETable(d.strategies || []);
+    _renderAEEDisableLog(d.strategies || []);
+  } catch(e) {
+    const tb = document.getElementById('aee-tbody');
+    if (tb) tb.innerHTML = '<tr><td colspan="11" style="color:var(--muted);text-align:center;padding:16px;">Backend offline — AEE unavailable</td></tr>';
+  }
+}
+
+function _renderAEESummary(d) {
+  const row = document.getElementById('aee-summary-row');
+  if (!row) return;
+  const kpis = [
+    { label: 'Active',   val: (d.active   || []).length, color: '#276749' },
+    { label: 'Scaling',  val: (d.scaling  || []).length, color: '#2A4365' },
+    { label: 'Reduced',  val: (d.reduced  || []).length, color: '#744210' },
+    { label: 'Disabled', val: (d.disabled || []).length, color: '#C53030' },
+    { label: 'Top',      val: d.top_strategy || '—',     color: '#C05621' },
+    { label: 'Score',    val: d.top_score != null ? d.top_score.toFixed(3) : '—', color: '#C05621' },
+  ];
+  row.innerHTML = kpis.map(k =>
+    `<div class="aee-kpi">
+       <div class="aee-kpi-val" style="color:${k.color}">${k.val}</div>
+       <div class="aee-kpi-lbl">${k.label}</div>
+     </div>`
+  ).join('');
+}
+
+function _renderAEETable(strategies) {
+  const tb = document.getElementById('aee-tbody');
+  if (!tb) return;
+  if (!strategies.length) {
+    tb.innerHTML = '<tr><td colspan="11" style="color:var(--muted);text-align:center;padding:16px;">No data — trades needed to score strategies</td></tr>';
+    return;
+  }
+  const stateColor = { ACTIVE:'#276749', REDUCED:'#744210', SCALING:'#2A4365', DISABLED:'#C53030' };
+  const scoreBg = s => s >= 0.7 ? '#C6F6D5' : s >= 0.4 ? '#FEFCBF' : '#FED7D7';
+
+  tb.innerHTML = strategies.map(s => {
+    const stBadge = `<span class="aee-badge aee-${s.state}">${s.state}</span>`;
+    const scoreTd = `<span style="font-weight:700;color:${stateColor[s.state]||'#555'}">${s.aee_score.toFixed(3)}</span>`;
+    const wsBadge = s.win_streak  > 0 ? `<span style="color:#276749;font-weight:600">W${s.win_streak}</span>` : '';
+    const lsBadge = s.loss_streak > 0 ? `<span style="color:#C53030;font-weight:600">L${s.loss_streak}</span>` : '';
+    const multCol = s.size_mult === 0 ? '<span style="color:#C53030;font-weight:700">0× BLOCKED</span>'
+                  : s.size_mult < 1   ? `<span style="color:#744210">${s.size_mult}×</span>`
+                  : s.size_mult > 1   ? `<span style="color:#2A4365;font-weight:700">${s.size_mult}×</span>`
+                  :                     `${s.size_mult}×`;
+    return `<tr>
+      <td style="font-weight:700;color:var(--muted)">#${s.rank}</td>
+      <td style="font-weight:600">${s.strategy_id}</td>
+      <td>${stBadge}</td>
+      <td style="background:${scoreBg(s.aee_score)}">${scoreTd}</td>
+      <td style="color:${s.weighted_pf < 0.8 ? '#C53030' : s.weighted_pf > 1.2 ? '#276749' : '#333'}">${s.weighted_pf.toFixed(3)}</td>
+      <td>${s.weighted_rr.toFixed(3)}</td>
+      <td style="color:${s.cost_pct > 20 ? '#C53030' : '#333'}">${s.cost_pct.toFixed(1)}%</td>
+      <td style="color:${s.win_rate < 45 ? '#C53030' : s.win_rate > 55 ? '#276749' : '#333'}">${s.win_rate.toFixed(1)}%</td>
+      <td>${wsBadge}${wsBadge && lsBadge ? ' ' : ''}${lsBadge}${!wsBadge && !lsBadge ? '—' : ''}</td>
+      <td>${multCol}</td>
+      <td style="color:var(--muted)">${s.n_trades}</td>
+    </tr>`;
+  }).join('');
+}
+
+function _renderAEEDisableLog(strategies) {
+  const disabled = strategies.filter(s => s.state === 'DISABLED' && s.disable_log && s.disable_log.length);
+  const container = document.getElementById('aee-disable-log');
+  const body      = document.getElementById('aee-disable-log-body');
+  if (!container || !body) return;
+  if (!disabled.length) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  body.innerHTML = disabled.map(s =>
+    `<div style="margin-bottom:8px;">
+       <span style="font-weight:600;color:#C53030">${s.strategy_id}</span>
+       ${s.disable_log.slice(-3).reverse().map(ev => {
+         const d = new Date(ev.ts); const t = d.toLocaleTimeString();
+         return `<div style="margin-left:12px;color:var(--muted)">
+           [${t}] ${ev.reason} &nbsp; PF=${ev.pf} edge=${ev.edge}
+         </div>`;
+       }).join('')}
+     </div>`
+  ).join('');
+}
 
 // ── Main loader ──────────────────────────────────────────────────────────────
 async function loadPerfExplorer() {

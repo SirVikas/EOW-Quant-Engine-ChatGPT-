@@ -48,6 +48,7 @@ from core.execution_drive_policy import execution_drive_policy  # EDP
 from core.execution_engine  import execution_engine     # FTD-REF-023
 from core.learning_engine   import learning_engine      # FTD-REF-023
 from core.edge_engine        import edge_engine         # FTD-REF-024
+from core.adaptive_edge_engine import adaptive_edge_engine  # FTD-037
 from core.market_structure   import market_structure_detector  # FTD-REF-024
 from core.ws_truth_engine    import ws_truth_engine     # FTD-REF-025
 from core.error_registry     import error_registry      # FTD-REF-025
@@ -262,6 +263,17 @@ async def on_tick(tick: Tick):
             edge_engine.record(
                 regime=_trade_regime, strategy_id=_trade_strategy,
                 net_pnl=last_trade.net_pnl, r_mult=_r_mult,
+            )
+            # FTD-037: Adaptive Edge Engine — time-aware scoring + state machine
+            _gross_pnl  = getattr(last_trade, "gross_pnl", last_trade.net_pnl)
+            _fee_closed  = (getattr(last_trade, "fee_entry", 0.0)
+                           + getattr(last_trade, "fee_exit",  0.0))
+            adaptive_edge_engine.on_trade_closed(
+                strategy_id = _trade_strategy,
+                net_pnl     = last_trade.net_pnl,
+                r_multiple  = _r_mult,
+                gross_pnl   = _gross_pnl,
+                fee_total   = _fee_closed,
             )
             # FTD-REF-026: track strategy usage distribution
             _closed_strat_type = {
@@ -600,6 +612,17 @@ async def on_tick(tick: Tick):
             }
             return
 
+        # FTD-037: Adaptive Edge Engine kill switch (state-machine + cost filter)
+        _aee_ok, _aee_reason = adaptive_edge_engine.check_trade(strategy_type)
+        if not cfg.BYPASS_ALL_GATES and not _aee_ok:
+            error_registry.log("STRAT_037", symbol=sym, extra=_aee_reason)
+            _last_skip = {
+                "ts": int(time.time() * 1000), "symbol": sym,
+                "reason": _aee_reason, "regime": regime.value,
+                "strategy": strategy_type,
+            }
+            return
+
         # FTD-REF-023: get dry-spell relaxation factor before signal filter
         relax_factor = trade_frequency.get_relaxation_factor()
 
@@ -758,7 +781,11 @@ async def on_tick(tick: Tick):
             if sizing.qty <= 0:
                 return
             _edge_mult = edge_engine.get_size_multiplier(regime.value, strategy_type)
-            sizing.qty = sizing.qty * _edge_mult   # boost qty on strong positive edge
+            _aee_mult  = adaptive_edge_engine.get_size_mult(strategy_type)
+            # Combine: take the lower bound as a safety floor, then apply edge boost
+            # AEE SCALING (>1×) stacks with edge_engine boost; REDUCED (<1×) overrides
+            _final_mult = _aee_mult * _edge_mult if _aee_mult >= 1.0 else _aee_mult
+            sizing.qty  = sizing.qty * _final_mult
             # atr_pct already computed above from candle OHLC / regime_det
 
             # FTD-REF-023: realistic cost via execution_engine
@@ -3759,6 +3786,30 @@ async def upe_backup():
     bm      = _UPEBackup("data/backups")
     path    = bm.backup(records, label="manual")
     return {"ok": True, "path": path, "trade_count": len(records)}
+
+
+# ── FTD-037: Adaptive Edge Engine API ────────────────────────────────────────
+
+@app.get("/api/aee/state")
+async def aee_state():
+    """
+    FTD-037 — Full AEE state: all strategies ranked by AEE Score.
+    Returns: active / reduced / scaling / disabled lists + per-strategy
+    metrics (score, PF, RR, cost%, WR%, streaks, size_mult, disable_log).
+    """
+    return _sanitize(adaptive_edge_engine.summary())
+
+
+@app.get("/api/aee/strategy/{strategy_id}")
+async def aee_strategy_detail(strategy_id: str):
+    """
+    FTD-037 — Single strategy detail: full AEE stats + disable log.
+    Use strategy_id as it appears in trades (e.g. ALPHA_TCB_v1, MR_BB_RSI_v1).
+    """
+    stats = adaptive_edge_engine.get_stats(strategy_id)
+    if stats is None:
+        raise HTTPException(404, f"Strategy '{strategy_id}' not yet tracked by AEE")
+    return _sanitize(asdict(stats))
 
 
 # ── Master Report Bundle ──────────────────────────────────────────────────────
