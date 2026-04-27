@@ -42,10 +42,10 @@ _REGIME_RR: Dict[str, float] = {
     "UNKNOWN":              1.5,   # raised 1.4→1.5 — conservative until regime is known
 }
 _REGIME_CONF: Dict[str, float] = {
-    "TRENDING":             0.25,  # raised 0.20→0.25 — need conviction for trending entries
-    "MEAN_REVERTING":       0.20,  # raised 0.15→0.20 — MR in loss; require higher confidence
-    "VOLATILITY_EXPANSION": 0.25,  # raised 0.20→0.25 — VE needs confirmed breakout confidence
-    "UNKNOWN":              0.22,  # raised 0.18→0.22 — no free passes on unknown regime
+    "TRENDING":             0.15,  # lowered 0.25→0.15 — regime conf measures classification certainty, not trade quality; scorer handles quality
+    "MEAN_REVERTING":       0.15,  # lowered 0.20→0.15 — same rationale; adaptive_scorer is the quality gate
+    "VOLATILITY_EXPANSION": 0.20,  # kept higher — VE requires confirmed vol breakout
+    "UNKNOWN":              0.10,  # lowered 0.22→0.10 — UNKNOWN is now rare; absolute floor only
 }
 
 # ── Fixed thresholds (regime-independent) ─────────────────────────────────────

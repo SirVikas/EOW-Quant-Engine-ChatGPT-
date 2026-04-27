@@ -40,7 +40,7 @@ WEIGHTS: Dict[str, float] = {
 }
 
 # ── Decision thresholds ───────────────────────────────────────────────────────
-ADX_TRENDING_MIN      = 20.0
+ADX_TRENDING_MIN      = 17.0   # lowered 20→17 — captures early directional moves before full ADX breakout
 ADX_TRENDING_STRONG   = 35.0   # Phase 3.1: ADX ≥ 35 → TRENDING without RSI slope requirement
 ADX_MEAN_REV_MAX      = 15.0
 ATR_EXPANSION_THRESH  =  0.40
@@ -138,7 +138,7 @@ class RegimeAI:
             ))
             notes = f"ADX={adx:.1f}≥{ADX_TRENDING_STRONG} (strong trend — RSI slope bypassed)"
 
-        # Priority 2b: Normal trend — ADX ≥ 20 + RSI slope confirmation
+        # Priority 2b: Normal trend — ADX ≥ 17 + RSI slope confirmation
         elif adx >= ADX_TRENDING_MIN and abs(rsi_slope) >= abs(RSI_SLOPE_BULLISH):
             regime = Regime.TRENDING
             confidence = min(0.95, (
@@ -147,9 +147,22 @@ class RegimeAI:
                 WEIGHTS["atr_pct"]   * atr_s +
                 WEIGHTS["bb_width"]  * bb_s * 0.5
             ))
-            notes = f"ADX={adx:.1f}≥20 + RSI_slope={rsi_slope:.2f}"
+            notes = f"ADX={adx:.1f}≥{ADX_TRENDING_MIN} + RSI_slope={rsi_slope:.2f}"
 
-        # Priority 3: Mean Reverting
+        # Priority 2c: Weak trend — ADX ≥ 17 without strong RSI slope confirmation.
+        # Markets with ADX 17-20 are directional but not fully confirmed.
+        # Classify as TRENDING with reduced confidence to keep the engine trading.
+        elif adx >= ADX_TRENDING_MIN:
+            regime = Regime.TRENDING
+            confidence = min(0.50, max(0.25, (
+                WEIGHTS["adx"]       * adx_s * 0.80 +
+                WEIGHTS["rsi_slope"] * max(abs(rsi_s), 0.10) +
+                WEIGHTS["atr_pct"]   * atr_s +
+                WEIGHTS["bb_width"]  * bb_s * 0.50
+            )))
+            notes = f"ADX={adx:.1f}≥{ADX_TRENDING_MIN} weak-trend (RSI_slope={rsi_slope:.2f} unconfirmed)"
+
+        # Priority 3: Mean Reverting (ADX < 15)
         elif adx < ADX_MEAN_REV_MAX:
             regime = Regime.MEAN_REVERTING
             confidence = min(0.95, (
@@ -158,14 +171,19 @@ class RegimeAI:
                 WEIGHTS["atr_pct"]   * (1 - atr_s) +
                 WEIGHTS["rsi_slope"] * (1 - abs(rsi_s))
             ))
-            notes = f"ADX={adx:.1f}<15 → mean-reversion"
+            notes = f"ADX={adx:.1f}<{ADX_MEAN_REV_MAX} → mean-reversion"
 
         else:
-            regime     = Regime.UNKNOWN
-            # Use a minimal non-zero confidence so fallback logic can still trade.
-            # Confidence=0.0 caused permanent block_trade=True with no fallback escape.
-            confidence = 0.12
-            notes      = f"ADX={adx:.1f} ambiguous (15–35 range, weak RSI slope={rsi_slope:.2f})"
+            # ADX 15–17: ambiguous zone — default to MEAN_REVERTING with low confidence
+            # rather than UNKNOWN so the scorer can still evaluate the signal properly.
+            regime     = Regime.MEAN_REVERTING
+            confidence = min(0.40, max(0.20, (
+                WEIGHTS["adx"]       * (1 - adx_s) * 0.70 +
+                WEIGHTS["bb_width"]  * (1 - bb_s) +
+                WEIGHTS["atr_pct"]   * (1 - atr_s) +
+                WEIGHTS["rsi_slope"] * (1 - abs(rsi_s))
+            )))
+            notes = f"ADX={adx:.1f} in ambiguous 15–{ADX_TRENDING_MIN} zone → weak MEAN_REVERTING"
 
         # Demote low-confidence results
         if confidence < MIN_CONFIDENCE and regime != Regime.UNKNOWN:

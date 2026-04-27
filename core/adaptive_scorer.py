@@ -39,7 +39,7 @@ _REGIME_SCORE: Dict[str, float] = {
     "TRENDING":             1.00,
     "VOLATILITY_EXPANSION": 0.90,
     "MEAN_REVERTING":       0.70,
-    "UNKNOWN":              0.40,
+    "UNKNOWN":              0.55,  # raised 0.40→0.55 — mirrors trade_scorer; UNKNOWN is now rare
 }
 
 
