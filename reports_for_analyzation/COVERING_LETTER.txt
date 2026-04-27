@@ -1,0 +1,248 @@
+# 🔥 FTD-037 — ADAPTIVE EDGE ENGINE (REAL)
+
+## (Developer Guidance — Simple, Clear, Powerful)
+
+---
+
+# 🎯 OBJECTIVE
+
+```text id="g1"
+System ko aisa banana hai jo:
+✔ market ke saath adapt kare
+✔ khud edge identify kare
+✔ khud decision le
+✔ loss ko control kare
+✔ profit ko scale kare
+```
+
+---
+
+# 🧠 CORE PHILOSOPHY
+
+```text id="g2"
+“System strategy nahi banata
+System best strategy choose karta hai — dynamically”
+```
+
+---
+
+# 🔴 RULE #1 — SIMPLE RAKHO, SMART BANAO
+
+```text id="g3"
+❌ Over-complex system mat banao
+✔ Clear logic + fast execution + visible output
+```
+
+👉 Agar samajh nahi aayega → use nahi hoga
+👉 Agar slow hoga → kaam nahi karega
+
+---
+
+# 🟢 1. STRATEGY POOL (BASE)
+
+```text id="g4"
+✔ Multiple strategies already available rakho
+✔ Har strategy independent module ho
+✔ Koi bhi strategy permanently active nahi hogi
+```
+
+---
+
+# 🟢 2. LIVE PERFORMANCE TRACKING (CORE)
+
+हर strategy के लिए continuously track करो:
+
+```text id="g5"
+✔ Last N trades (20–50)
+✔ Profit Factor
+✔ Avg RR
+✔ Cost impact
+✔ Win/Loss streak
+```
+
+👉 यह REAL edge detection है
+
+---
+
+# 🟢 3. EDGE SCORE (MANDATORY)
+
+हर strategy को एक score दो:
+
+```text id="g6"
+Edge Score = function(PF, RR, Cost, Consistency)
+```
+
+👉 simple formula रखो
+👉 explainable होना चाहिए
+
+---
+
+# 🟢 4. AUTO SELECTION ENGINE
+
+```text id="g7"
+✔ Highest edge → highest priority
+✔ Low edge → reduce
+✔ Negative edge → disable
+```
+
+👉 कोई manual intervention नहीं
+
+---
+
+# 🟢 5. AUTO DISABLE (NO MERCY)
+
+```text id="g8"
+IF PF < 0.8
+→ strategy OFF
+
+IF edge < 0
+→ immediate kill
+```
+
+👉 capital बचाना पहले
+
+---
+
+# 🟢 6. AUTO SCALE
+
+```text id="g9"
+IF PF > 1.2 AND stable
+→ allocation increase
+
+IF improving
+→ gradual scale
+```
+
+---
+
+# 🟢 7. REGIME-AWARE LOGIC
+
+```text id="g10"
+✔ Trending → trend strategies
+✔ Ranging → mean reversion
+✔ High volatility → breakout
+```
+
+👉 regime detection already है → use करो
+
+---
+
+# 🟢 8. COST-AWARE FILTER (CRITICAL)
+
+```text id="g11"
+IF expected profit ≤ fees
+→ trade reject
+```
+
+👉 यही सबसे बड़ा hidden loss है
+
+---
+
+# 🟢 9. CONTROLLED EXPLORATION
+
+```text id="g12"
+✔ Max 10–15% trades exploration
+✔ बाकी capital safe logic पर
+```
+
+👉 new edge खोजने के लिए जरूरी है
+👉 लेकिन controlled
+
+---
+
+# 🟢 10. TIME-AWARE LEARNING
+
+```text id="g13"
+✔ Recent data ज्यादा weight
+✔ पुराना data कम weight
+```
+
+👉 market change होता है → system भी बदले
+
+---
+
+# 🟢 11. CLEAR VISIBILITY (IMPORTANT)
+
+User को दिखना चाहिए:
+
+```text id="g14"
+✔ कौनसी strategy active है
+✔ कौनसी disable है
+✔ क्यों disable हुई
+✔ किसमें profit आ रहा है
+```
+
+👉 black box नहीं होना चाहिए
+
+---
+
+# 🟢 12. FAST RESPONSE SYSTEM
+
+```text id="g15"
+✔ delay नहीं
+✔ slow learning नहीं
+✔ fast reaction
+```
+
+👉 market wait नहीं करता
+
+---
+
+# 🟢 13. FAIL-SAFE
+
+```text id="g16"
+IF system unstable
+→ reduce trading
+
+IF heavy loss
+→ pause / reset
+```
+
+---
+
+# 🟢 14. NO OVERFITTING
+
+```text id="g17"
+❌ हर छोटी win पर overreact मत करो
+✔ stable pattern confirm करो
+```
+
+---
+
+# 🔴 FINAL INSTRUCTION
+
+```text id="g18"
+यह system:
+✔ advanced होना चाहिए
+✔ लेकिन समझने में simple होना चाहिए
+
+User ko clarity mile:
+“System kya kar raha hai aur kyun”
+```
+
+---
+
+# 🔥 FINAL MESSAGE TO DEVELOPER
+
+```text id="g19"
+Ek aisa system banao:
+
+✔ jo market ke saath chale
+✔ jo galti ko turant roke
+✔ jo profit ko pakde
+✔ jo khud adapt kare
+
+Complex mat banao
+Powerful banao
+Clear banao
+```
+
+---
+
+# 🏁 FINAL LINE
+
+```text id="g20"
+Best system wo nahi jo sab janta hai
+
+Best system wo hai jo jaldi seekhta hai aur sahi decide karta hai
+```
