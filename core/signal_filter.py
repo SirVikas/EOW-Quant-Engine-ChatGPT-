@@ -36,16 +36,16 @@ from loguru import logger
 # ── Per-regime threshold table ────────────────────────────────────────────────
 # Keys must match Regime.value strings
 _REGIME_RR: Dict[str, float] = {
-    "TRENDING":             1.4,
-    "MEAN_REVERTING":       1.1,   # relaxed: high WR compensates lower R
-    "VOLATILITY_EXPANSION": 1.5,   # reduced from 1.6 (VE strategy RR ≈ 1.5)
-    "UNKNOWN":              1.4,   # matches TRENDING (TrendFollowing is UNKNOWN default)
+    "TRENDING":             1.5,   # raised 1.4→1.5 — enforce minimum positive expectancy
+    "MEAN_REVERTING":       1.5,   # raised 1.1→1.5 — MR was worst loss source; needs real RR
+    "VOLATILITY_EXPANSION": 1.8,   # raised 1.5→1.8 — VE setups justify higher RR targets
+    "UNKNOWN":              1.5,   # raised 1.4→1.5 — conservative until regime is known
 }
 _REGIME_CONF: Dict[str, float] = {
-    "TRENDING":             0.20,  # was 0.50 — allows adj_conf ~0.19 after pf_mult
-    "MEAN_REVERTING":       0.15,  # was 0.40
-    "VOLATILITY_EXPANSION": 0.20,  # was 0.50
-    "UNKNOWN":              0.18,  # was 0.45
+    "TRENDING":             0.25,  # raised 0.20→0.25 — need conviction for trending entries
+    "MEAN_REVERTING":       0.20,  # raised 0.15→0.20 — MR in loss; require higher confidence
+    "VOLATILITY_EXPANSION": 0.25,  # raised 0.20→0.25 — VE needs confirmed breakout confidence
+    "UNKNOWN":              0.22,  # raised 0.18→0.22 — no free passes on unknown regime
 }
 
 # ── Fixed thresholds (regime-independent) ─────────────────────────────────────
