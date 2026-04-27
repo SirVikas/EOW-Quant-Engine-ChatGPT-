@@ -356,6 +356,14 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 .aee-kpi { background:#fff; border:1px solid #F6AD55; border-radius:8px; padding:8px 14px; text-align:center; min-width:80px; }
 .aee-kpi-val { font-size:15px; font-weight:700; color:#C05621; }
 .aee-kpi-lbl { font-size:10px; color:var(--muted); margin-top:2px; }
+.cfe-kpi { background:#fff; border:1px solid #68D391; border-radius:8px; padding:8px 14px; text-align:center; min-width:80px; }
+.cfe-kpi-val { font-size:15px; font-weight:700; color:#276749; }
+.cfe-kpi-lbl { font-size:10px; color:var(--muted); margin-top:2px; }
+/* Stabilizer state badges */
+.stab-SMOOTH    { background:#C6F6D5; color:#276749; }
+.stab-VOLATILE  { background:#FEFCBF; color:#744210; }
+.stab-SPIKE     { background:#BEE3F8; color:#2A4365; }
+.stab-DEFENSIVE { background:#FED7D7; color:#C53030; }
 </style>
 </head>
 
@@ -1195,6 +1203,73 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     </div>
   </div>
 
+  <!-- ── FTD-038+039: Capital Flow Engine Panel ── -->
+  <div class="card" style="padding:16px 18px;background:#FFFFF0;border:1px solid #68D391;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="sec-hdr" style="margin:0;color:#276749;">💰 FTD-038+039 — Capital Allocation + Profit Stabilization</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+          AEE-rank priority · equity smoothness · capital protect mode
+        </div>
+      </div>
+      <button onclick="loadCFE()" style="font-family:var(--fm);font-size:11px;padding:5px 14px;border-radius:6px;border:1px solid #276749;background:#F0FFF4;color:#276749;cursor:pointer;">↻ Refresh</button>
+    </div>
+
+    <!-- CFE KPI row -->
+    <div id="cfe-kpi-row" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+    <!-- CFE allocation table + stabilizer side-by-side -->
+    <div style="display:grid;grid-template-columns:1fr 280px;gap:16px;align-items:start;">
+      <!-- Left: per-strategy allocation table -->
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#276749;margin-bottom:6px;">Strategy Capital Allocation</div>
+        <div style="overflow-x:auto;">
+          <table class="bm-table" style="font-size:11px;">
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>State</th>
+                <th>Rank</th>
+                <th>Priority ×</th>
+                <th>Alloc %</th>
+                <th>Capital USDT</th>
+                <th>Can Trade</th>
+              </tr>
+            </thead>
+            <tbody id="cfe-alloc-tbody">
+              <tr><td colspan="7" style="color:var(--muted);text-align:center;padding:12px;">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right: stabilizer + protect mode card -->
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#276749;margin-bottom:8px;">Profit Stabilizer (FTD-039)</div>
+        <div id="cfe-stabilizer-card" style="background:#fff;border:1px solid #C6F6D5;border-radius:8px;padding:12px;">
+          <div id="cfe-stab-state" style="font-size:16px;font-weight:700;color:#276749;margin-bottom:8px;">—</div>
+          <div id="cfe-stab-details" style="font-size:11px;color:var(--muted);line-height:1.7;"></div>
+        </div>
+        <div id="cfe-protect-card" style="background:#FED7D7;border:1px solid #FC8181;border-radius:8px;padding:10px;margin-top:8px;display:none;">
+          <div style="font-weight:700;color:#C53030;font-size:12px;">⛔ Capital Protect Mode</div>
+          <div id="cfe-protect-reason" style="font-size:11px;color:#742A2A;margin-top:4px;"></div>
+        </div>
+
+        <div style="margin-top:12px;font-size:10px;color:var(--muted);font-family:monospace;background:#F0FFF4;border-radius:6px;padding:8px;">
+          SMOOTH=1.00× | VOLATILE=0.85×<br>
+          SPIKE=0.75× | DEFENSIVE=0.60×<br>
+          rank1=1.25× | rank2=1.00× | rank3=0.75×
+        </div>
+      </div>
+    </div>
+
+    <!-- Allocation change log (auto-shows when changes exist) -->
+    <div id="cfe-alloc-log" style="margin-top:12px;display:none;">
+      <div style="font-size:11px;font-weight:600;color:#276749;margin-bottom:6px;">📋 Allocation Change Log</div>
+      <div id="cfe-alloc-log-body" style="font-size:11px;color:var(--text);"></div>
+    </div>
+  </div>
+
   <!-- ── Trade Table ── -->
   <div class="card" style="padding:16px 18px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -1622,6 +1697,7 @@ function switchTab(name) {
   if (name === 'perf') {
     loadPerfExplorer();
     loadAEE();
+    loadCFE();
   }
 }
 
@@ -3360,6 +3436,127 @@ let _upePreset      = 'ALL';
 let _upeEquityChart = null;
 let _upeDDChart     = null;
 let _upeDebounce    = null;
+
+// ── FTD-038+039: Capital Flow Engine ─────────────────────────────────────────
+async function loadCFE() {
+  try {
+    const [stateR, allocR] = await Promise.all([
+      fetch(API + '/api/capital-flow/state',       { signal: AbortSignal.timeout(8000) }),
+      fetch(API + '/api/capital-flow/allocations', { signal: AbortSignal.timeout(8000) }),
+    ]);
+    if (!stateR.ok || !allocR.ok) throw new Error('HTTP error');
+    const state = await stateR.json();
+    const alloc = await allocR.json();
+    _renderCFEKPIs(state, alloc);
+    _renderCFEAllocTable(alloc);
+    _renderCFEStabilizer(state);
+    _renderCFEAllocLog(state);
+  } catch(e) {
+    const tb = document.getElementById('cfe-alloc-tbody');
+    if (tb) tb.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:12px;">Backend offline — CFE unavailable</td></tr>';
+  }
+}
+
+function _renderCFEKPIs(state, alloc) {
+  const row = document.getElementById('cfe-kpi-row');
+  if (!row) return;
+  const stabColor = { SMOOTH:'#276749', VOLATILE:'#744210', SPIKE:'#2A4365', DEFENSIVE:'#C53030' };
+  const equity    = alloc.equity_usdt || 0;
+  const kpis = [
+    { label:'Active',    val: alloc.total_active   ?? '—', color:'#276749' },
+    { label:'Disabled',  val: alloc.total_disabled ?? '—', color:'#C53030' },
+    { label:'Stabilizer',val: state.stabilizer_state || '—', color: stabColor[state.stabilizer_state] || '#333' },
+    { label:'Stab ×',    val: state.stabilizer_mult  != null ? state.stabilizer_mult.toFixed(2)+'×' : '—', color:'#276749' },
+    { label:'Protect',   val: state.protect_mode ? '⛔ ON' : '✅ OFF', color: state.protect_mode ? '#C53030' : '#276749' },
+    { label:'Equity',    val: '$'+equity.toFixed(0), color:'#2A4365' },
+  ];
+  row.innerHTML = kpis.map(k =>
+    `<div class="cfe-kpi">
+       <div class="cfe-kpi-val" style="color:${k.color}">${k.val}</div>
+       <div class="cfe-kpi-lbl">${k.label}</div>
+     </div>`
+  ).join('');
+}
+
+function _renderCFEAllocTable(alloc) {
+  const tb     = document.getElementById('cfe-alloc-tbody');
+  if (!tb) return;
+  const items  = alloc.allocations || [];
+  const equity = alloc.equity_usdt || 0;
+  if (!items.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:12px;">No data — trades needed</td></tr>';
+    return;
+  }
+  const stateColor = { ACTIVE:'#276749', REDUCED:'#744210', SCALING:'#2A4365', DISABLED:'#C53030' };
+  tb.innerHTML = items.map(a => {
+    const capUsdt = a.alloc_pct > 0 ? (equity * a.alloc_pct / 100).toFixed(0) : '0';
+    const canBadge = a.can_trade
+      ? '<span style="color:#276749;font-weight:600">✅</span>'
+      : '<span style="color:#C53030;font-weight:600">⛔</span>';
+    const allocBar = a.alloc_pct > 0
+      ? `<div style="display:flex;align-items:center;gap:5px;">
+           <div style="width:${Math.min(a.alloc_pct*1.5,80)}px;height:8px;background:#68D391;border-radius:4px;"></div>
+           <span>${a.alloc_pct.toFixed(1)}%</span>
+         </div>`
+      : '<span style="color:var(--muted)">0%</span>';
+    return `<tr>
+      <td style="font-weight:600">${a.strategy_id}</td>
+      <td><span class="aee-badge aee-${a.aee_state}">${a.aee_state}</span></td>
+      <td style="color:var(--muted)">#${a.aee_rank}</td>
+      <td style="font-weight:600;color:${stateColor[a.aee_state]||'#333'}">${a.priority_mult.toFixed(2)}×</td>
+      <td>${allocBar}</td>
+      <td style="color:#2A4365">$${capUsdt}</td>
+      <td>${canBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+function _renderCFEStabilizer(state) {
+  const card    = document.getElementById('cfe-stabilizer-card');
+  const stLabel = document.getElementById('cfe-stab-state');
+  const stDet   = document.getElementById('cfe-stab-details');
+  const prCard  = document.getElementById('cfe-protect-card');
+  const prReas  = document.getElementById('cfe-protect-reason');
+  if (!card || !stLabel) return;
+
+  const stateClass = 'stab-' + (state.stabilizer_state || 'SMOOTH');
+  const icons = { SMOOTH:'✅', VOLATILE:'⚠️', SPIKE:'📈', DEFENSIVE:'🛡️' };
+  stLabel.className = 'aee-badge ' + stateClass;
+  stLabel.style.fontSize = '13px';
+  stLabel.textContent = (icons[state.stabilizer_state] || '') + ' ' + (state.stabilizer_state || '—');
+
+  const smoothness = state.equity_smoothness != null ? state.equity_smoothness.toFixed(3) : '—';
+  const recentPnl  = state.recent_pnl_sum    != null ? state.recent_pnl_sum.toFixed(2)    : '—';
+  if (stDet) stDet.innerHTML = `
+    Multiplier: <b>${state.stabilizer_mult != null ? state.stabilizer_mult.toFixed(2)+'×' : '—'}</b><br>
+    Equity CoV: <b>${smoothness}</b><br>
+    Recent PnL: <b>${recentPnl > 0 ? '+' : ''}${recentPnl} USDT</b>
+  `;
+
+  if (prCard) prCard.style.display = state.protect_mode ? 'block' : 'none';
+  if (prReas && state.protect_reason) prReas.textContent = state.protect_reason;
+}
+
+function _renderCFEAllocLog(state) {
+  const container = document.getElementById('cfe-alloc-log');
+  const body      = document.getElementById('cfe-alloc-log-body');
+  const log       = state.alloc_log || [];
+  if (!container || !body || !log.length) {
+    if (container) container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'block';
+  body.innerHTML = log.slice(-5).reverse().map(ev => {
+    const d = new Date(ev.ts); const t = d.toLocaleTimeString();
+    const dir = ev.new > ev.old ? '↑' : '↓';
+    const col = ev.new > ev.old ? '#276749' : '#C53030';
+    return `<div style="margin-bottom:4px;">
+      [${t}] <b>${ev.strategy}</b>:
+      <span style="color:${col};font-weight:600">${dir} ${ev.old.toFixed(2)}× → ${ev.new.toFixed(2)}×</span>
+      &nbsp;<span style="color:var(--muted)">${ev.reason}</span>
+    </div>`;
+  }).join('');
+}
 
 // ── FTD-037: Adaptive Edge Engine ────────────────────────────────────────────
 async function loadAEE() {

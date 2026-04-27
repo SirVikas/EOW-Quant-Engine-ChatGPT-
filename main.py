@@ -49,6 +49,7 @@ from core.execution_engine  import execution_engine     # FTD-REF-023
 from core.learning_engine   import learning_engine      # FTD-REF-023
 from core.edge_engine        import edge_engine         # FTD-REF-024
 from core.adaptive_edge_engine import adaptive_edge_engine  # FTD-037
+from core.capital_flow_engine  import capital_flow_engine   # FTD-038+039
 from core.market_structure   import market_structure_detector  # FTD-REF-024
 from core.ws_truth_engine    import ws_truth_engine     # FTD-REF-025
 from core.error_registry     import error_registry      # FTD-REF-025
@@ -274,6 +275,12 @@ async def on_tick(tick: Tick):
                 r_multiple  = _r_mult,
                 gross_pnl   = _gross_pnl,
                 fee_total   = _fee_closed,
+            )
+            # FTD-038+039: Capital Flow Engine — update priority + stabilizer
+            capital_flow_engine.on_trade(
+                strategy_id = _trade_strategy,
+                net_pnl     = last_trade.net_pnl,
+                equity      = scaler.equity,
             )
             # FTD-REF-026: track strategy usage distribution
             _closed_strat_type = {
@@ -1084,8 +1091,13 @@ async def on_tick(tick: Tick):
                 return
             # ── Phase 6: Capital Recovery Engine — smooth size restoration ──
             _recovery_result = capital_recovery_engine.check()
-            _combined_mult = round(
-                _alloc.size_multiplier * _dd_result.multiplier * _recovery_result.size_mult,
+            # FTD-038+039: priority (AEE rank) × stabilizer (equity smoothness)
+            _cfe_mult       = capital_flow_engine.get_combined_mult(strategy_type)
+            _combined_mult  = round(
+                _alloc.size_multiplier
+                * _dd_result.multiplier
+                * _recovery_result.size_mult
+                * _cfe_mult,
                 6,
             )
             if _recovery_result.state not in ("NORMAL", "FULLY_RECOVERED"):
@@ -3786,6 +3798,38 @@ async def upe_backup():
     bm      = _UPEBackup("data/backups")
     path    = bm.backup(records, label="manual")
     return {"ok": True, "path": path, "trade_count": len(records)}
+
+
+# ── FTD-038+039: Capital Flow Engine API ─────────────────────────────────────
+
+@app.get("/api/capital-flow/state")
+async def capital_flow_state():
+    """
+    FTD-038+039 — Full Capital Flow Engine state.
+    Returns: per-strategy allocation %, stabilizer state, capital protect mode,
+    equity smoothness, and allocation change log.
+    """
+    return _sanitize(capital_flow_engine.summary())
+
+
+@app.get("/api/capital-flow/allocations")
+async def capital_flow_allocations():
+    """
+    FTD-038 — Per-strategy capital allocation breakdown.
+    Shows: strategy → AEE state → rank → priority mult → allocation %.
+    DISABLED strategies show 0% allocation.
+    """
+    from dataclasses import asdict
+    allocs = capital_flow_engine.allocations()
+    equity = scaler.equity
+    return {
+        "equity_usdt":   round(equity, 2),
+        "total_active":  sum(1 for a in allocs if a.can_trade),
+        "total_disabled": sum(1 for a in allocs if not a.can_trade),
+        "allocations":   [asdict(a) for a in allocs],
+        "stabilizer_state": capital_flow_engine._stab_state,
+        "protect_mode":  capital_flow_engine._protect_mode,
+    }
 
 
 # ── FTD-037: Adaptive Edge Engine API ────────────────────────────────────────
