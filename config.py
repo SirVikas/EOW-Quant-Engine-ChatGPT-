@@ -273,6 +273,24 @@ class EngineConfig(BaseSettings):
     CRE_RECOVERY_SIZE_MIN: float = 0.70 # Minimum size during defensive/early recovery
     CRE_RECOVERY_STEP_PCT: float = 0.10 # Fraction of full recovery per step (unused directly)
 
+    # ── FTD-040: Consistency Engine ──────────────────────────────────────────
+    # Equity Volatility Control — rolling std-dev of equity returns
+    CE_EQUITY_VOL_WINDOW: int   = 20     # Rolling window size (equity return points)
+    CE_EQUITY_VOL_HIGH: float   = 0.015  # >1.5% std-dev → high volatility → brake size
+    CE_EQUITY_VOL_NORMAL: float = 0.008  # >0.8% std-dev → elevated → soft 10% brake
+    CE_EQUITY_VOL_HIGH_MULT: float = 0.75  # Size mult when equity volatility is high
+
+    # Profit Smoothing — consecutive-win brake (prevents over-excitement scaling)
+    CE_WIN_BRAKE_START: int    = 3       # Consecutive wins before brake engages
+    CE_WIN_BRAKE_PER_WIN: float = 0.05  # Size reduction per additional win beyond start
+    CE_WIN_BRAKE_MIN: float    = 0.70   # Floor for win-streak brake multiplier
+
+    # Trend vs Noise Filter
+    CE_NOISE_FILTER_MIN_TRADES: int = 3  # Min completed trades before hard vol brake
+
+    # Rolling per-trade DD analysis window
+    CE_ROLLING_DD_WINDOW: int = 10       # Last N trades tracked for pattern analysis
+
     # Exploration Guard — prevents exploration from causing uncontrolled damage
     EG_DAILY_LOSS_CAP_PCT: float = 0.02 # Disable exploration when daily loss ≥ 2%
 

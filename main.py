@@ -80,6 +80,7 @@ from core.ev_confidence        import ev_confidence_engine        # Phase 6: EV 
 from core.loss_cluster         import loss_cluster_controller     # Phase 6: loss circuit breaker
 from core.streak_engine        import streak_engine               # Phase 6: hot/cold detection
 from core.capital_recovery     import capital_recovery_engine     # Phase 6: recovery sizing
+from core.consistency_engine   import consistency_engine          # FTD-040: unified consistency
 from core.exploration_guard    import exploration_guard           # Phase 6: exploration gate
 from core.gating import (                                         # Phase 6.6: hard gating
     gate_logger,
@@ -282,6 +283,8 @@ async def on_tick(tick: Tick):
                 net_pnl     = last_trade.net_pnl,
                 equity      = scaler.equity,
             )
+            # FTD-040: Consistency Engine — feedback loop (post-trade state update)
+            consistency_engine.record_trade(last_trade.net_pnl)
             # FTD-REF-026: track strategy usage distribution
             _closed_strat_type = {
                 "TRENDING":             "TrendFollowing",
@@ -327,6 +330,7 @@ async def on_tick(tick: Tick):
     # Phase 5: keep drawdown controller in sync
     drawdown_controller.update_equity(scaler.equity)
     capital_recovery_engine.update_equity(scaler.equity)  # Phase 6
+    consistency_engine.update_equity(scaler.equity)       # FTD-040: equity volatility tracking
 
     # Phase 4: Trade Manager lifecycle update for managed open positions
     if trade_manager.is_managed(sym):
@@ -1107,6 +1111,34 @@ async def on_tick(tick: Tick):
                     f"size={_recovery_result.size_mult:.2f}×",
                     "SIGNAL",
                 )
+            # ── FTD-040: Consistency Engine — final unified consistency check ─
+            _ce_state = consistency_engine.evaluate(
+                consecutive_wins=_p52_cw,
+                consecutive_losses=_p52_cl,
+                dd_result=_dd_result,
+                recovery_result=_recovery_result,
+                lcc_result=_lcc_result,
+            )
+            if not cfg.BYPASS_ALL_GATES and not _ce_state.allowed:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": f"CE_PAUSED:{_ce_state.reason}",
+                    "regime": regime.value, "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, f"CE_PAUSED:{_ce_state.reason}")
+                _thought(
+                    f"🛑 CONSISTENCY_PAUSED {sym}: {_ce_state.reason}",
+                    "SIGNAL",
+                )
+                return
+            if _ce_state.size_mult < 1.0:
+                _combined_mult = round(_combined_mult * _ce_state.size_mult, 6)
+                _thought(
+                    f"🎯 CONSISTENCY {sym}: mode={_ce_state.mode} "
+                    f"ce_mult={_ce_state.size_mult:.2f}× "
+                    f"reason={_ce_state.reason}",
+                    "SIGNAL",
+                )
             # ── Phase 7A: Execution Orchestrator — full profit pipeline ─────
             # Receives the combined upstream multiplier and applies gate-aware
             # rank → compete → concentrate → pre-trade gate → amplify on top.
@@ -1527,6 +1559,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     )
     # Initialise drawdown controller with RESTORED equity (qFTD-009: not INITIAL_CAPITAL)
     drawdown_controller.update_equity(_final_equity)
+    # FTD-040: Seed consistency engine with restored equity baseline
+    consistency_engine.update_equity(_final_equity)
     # ── Phase 5.1: Activation + Exploration Control boot log ─────────────────
     _thought(
         f"🔓 Phase 5.1 Activation Layer online | "
@@ -1899,6 +1933,8 @@ async def get_status():
             "trade_manager":     trade_manager.summary(),
             "alpha_engine":      alpha_engine.summary(),
         },
+        # FTD-040: Consistency Engine quick-status
+        "consistency": consistency_engine.status(),
     }
 
 
@@ -2557,6 +2593,7 @@ async def get_full_system_report():
             ), {}
         ),
         streak            = _safe(streak_engine.summary, {}),
+        consistency       = _safe(consistency_engine.status, {}),
         capital_allocator = _safe(capital_allocator.summary, {}),
         error_registry    = _safe(lambda: error_registry.recent(50), []),
         healer            = heal,
@@ -2770,6 +2807,36 @@ async def get_ct_scan():
         regime_stable=True,
         n_trades=n_trades,
     )
+
+
+# ── FTD-040: Consistency Engine endpoint ─────────────────────────────────────
+
+@app.get("/api/consistency")
+async def get_consistency():
+    """
+    FTD-040 Consistency Engine — unified system stability status.
+
+    Returns:
+      equity_volatility_pct  — rolling std-dev of equity returns (%)
+      mode context           — what the engine would classify as current mode
+      configuration          — all CE_* thresholds for reference
+
+    For the live pre-trade ConsistencyState (mode + size_mult + reason), that
+    is computed per-trade signal and logged to the thought_log stream.
+    """
+    status = consistency_engine.status()
+    dd     = drawdown_controller.summary()
+    return {
+        "consistency":    status,
+        "drawdown":       dd,
+        "streak":         streak_engine.summary(),
+        "capital_recovery": capital_recovery_engine.summary(),
+        "loss_cluster":   loss_cluster_controller.summary(),
+        "description": (
+            "FTD-040 Consistency Engine: makes profit repeatable. "
+            "Tracks equity volatility, profit smoothing, and unified mode."
+        ),
+    }
 
 
 # ── FTD-026A: Layer integration endpoints ────────────────────────────────────
@@ -3984,6 +4051,7 @@ async def download_report_bundle():
             ), {}
         ),
         streak            = _safe(streak_engine.summary, {}),
+        consistency       = _safe(consistency_engine.status, {}),
         capital_allocator = _safe(capital_allocator.summary, {}),
         error_registry    = _safe(lambda: error_registry.recent(50), []),
         healer            = heal,
