@@ -3761,6 +3761,314 @@ async def upe_backup():
     return {"ok": True, "path": path, "trade_count": len(records)}
 
 
+# ── Master Report Bundle ──────────────────────────────────────────────────────
+
+@app.get("/api/reports/bundle")
+async def download_report_bundle():
+    """
+    One-click Master Report Bundle — assembles ALL report types into a
+    single ZIP file.
+
+    ZIP contents:
+      README.txt                    ← File guide
+      metadata.json                 ← Bundle summary (trades, PnL, PF, etc.)
+      01_system_state/
+        eow_state.json              ← Full engine state (DNA + trades + ratios)
+      02_reports/
+        full_system_report.md       ← FTD-025A: 15-section institutional report
+        full_system_report.pdf      ← FTD-025A: PDF version
+        unified_report_v2.md        ← FTD-025B: cause-effect narrative report
+      03_trade_archive/
+        trade_history.xlsx          ← XLSX (trade sheet + session summary + audit)
+        trade_report.pdf            ← PDF executive summary
+        trade_report.md             ← Markdown developer log
+      04_performance/
+        report_ALL.json + trades_ALL.csv
+        report_1D.json  + trades_1D.csv
+        report_7D.json  + trades_7D.csv
+        report_20D.json + trades_20D.csv
+    """
+    import zipfile
+    import io as _io
+    from fastapi.responses import StreamingResponse
+    from core.reporting.unified_report_engine_v2 import generate_full_report_v2
+
+    ts = int(time.time())
+
+    def _safe(fn, default=None):
+        try:
+            return fn()
+        except Exception:
+            return default
+
+    # ── Shared data collection (mirrors get_full_system_report) ──────────────
+    heal      = _safe(healer.snapshot, {})
+    lake_s    = _safe(data_lake.db_stats, {})
+    redis_ok  = any(
+        e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
+        for e in heal.get("recent_events", [])
+    )
+    sqlite_ok = lake_s.get("trades", -1) >= 0
+
+    trade_dicts = [
+        {k: getattr(t, k) for k in t.__dataclass_fields__}
+        for t in pnl_calc.trades
+    ]
+    _ss       = pnl_calc.session_stats
+    _n_trades = len(pnl_calc.trades)
+    _gross    = abs(_ss.get("total_net_pnl", 0.0)) + _ss.get("total_fees_paid", 0.0)
+    _fee_ratio = _ss.get("total_fees_paid", 0.0) / max(_gross, 1e-9)
+    _mins_idle = trade_flow_monitor.minutes_since_last_trade()
+
+    analytics = _sanitize(compute_full_analytics(
+        pnl_trades=[{"net_pnl": t.net_pnl, "r_multiple": t.r_multiple}
+                    for t in pnl_calc.trades],
+        initial_capital=pnl_calc._initial_capital,
+        session_stats=_ss,
+        healer_snapshot=heal,
+        lake_stats=lake_s,
+        genome_state=_safe(genome.export_state, {}),
+        redis_ok=redis_ok,
+        persistence_ok=(redis_ok or sqlite_ok),
+    ))
+    mode_info = await get_mode_info()
+
+    ct_scan = _safe(
+        lambda: __import__("core.intelligence.suggestion_engine",
+                           fromlist=["suggestion_engine"]).suggestion_engine.detect(
+            profit_factor=_ss.get("profit_factor", 0.0),
+            fee_ratio=round(_fee_ratio, 4),
+            win_rate=_ss.get("win_rate", 0.0) / 100.0,
+            n_trades=_n_trades,
+            strategy_usage=strategy_engine.usage(),
+            regime_stable=True,
+        ), {}
+    )
+    ai_brain_state = _safe(
+        lambda: __import__("core.meta.ai_brain",
+                           fromlist=["ai_brain"]).ai_brain.get_state(), {}
+    )
+
+    positions = []
+    try:
+        for sym, pos in risk_ctrl.positions.items():
+            positions.append({
+                "symbol":     sym,
+                "side":       getattr(pos, "side", ""),
+                "qty":        getattr(pos, "qty", 0.0),
+                "entry_px":   getattr(pos, "entry_px", 0.0),
+                "stop":       getattr(pos, "stop", 0.0),
+                "tp":         getattr(pos, "tp", 0.0),
+                "unrealised": getattr(pos, "unrealised_pnl", 0.0),
+            })
+    except Exception:
+        positions = []
+
+    # ── 2a. FTD-025A: full system report ZIP ─────────────────────────────────
+    sys_snapshot = SystemSnapshot(
+        session_stats     = _ss,
+        analytics         = analytics,
+        mode_info         = mode_info,
+        thoughts          = _thought_log,
+        last_skip         = _safe(lambda: getattr(trade_flow_monitor,
+                                                  "last_skip", lambda: {})(), {}),
+        trade_flow        = _safe(trade_flow_monitor.summary, {}),
+        risk_snapshot     = _safe(risk_ctrl.snapshot, {}),
+        positions         = positions,
+        drawdown          = _safe(drawdown_controller.summary, {}),
+        genome_state      = _safe(genome.export_state, {}),
+        learning          = _safe(learning_engine.summary, {}),
+        edge              = _safe(edge_engine.summary, {}),
+        strategy_usage    = _safe(strategy_engine.usage, {}),
+        regime            = _safe(lambda: regime_memory.summary()
+                                  if hasattr(regime_memory, "summary") else {}, {}),
+        ct_scan           = ct_scan,
+        dynamic_thresholds= _safe(
+            lambda: dynamic_threshold_provider.summary(
+                minutes_no_trade=_mins_idle
+            ), {}
+        ),
+        streak            = _safe(streak_engine.summary, {}),
+        capital_allocator = _safe(capital_allocator.summary, {}),
+        error_registry    = _safe(lambda: error_registry.recent(50), []),
+        healer            = heal,
+        halt_audit        = _safe(lambda: risk_ctrl.halt_audit()
+                                  if hasattr(risk_ctrl, "halt_audit") else {}, {}),
+        trades            = trade_dicts,
+        gate_status       = _safe(lambda: global_gate_controller.snapshot()
+                                  if "global_gate_controller" in globals() else {}, {}),
+        ai_brain_state    = ai_brain_state,
+        learning_memory   = _safe(
+            lambda: __import__("core.learning_memory",
+                               fromlist=["learning_memory_orchestrator"]
+                               ).learning_memory_orchestrator.summary(), {}
+        ),
+    )
+    system_zip_bytes = _safe(
+        lambda: system_export_engine.build_full_report(sys_snapshot), b""
+    )
+
+    # ── 2b. FTD-025B: Unified Report v2 (Markdown) ───────────────────────────
+    _v2_data = {
+        "generated_at":    time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "trade_flow":      _safe(trade_flow_monitor.summary, {}),
+        "mins_idle":       _mins_idle,
+        "thresholds":      _safe(
+            lambda: dynamic_threshold_provider.summary(minutes_no_trade=_mins_idle), {}
+        ),
+        "session_stats":   _ss,
+        "capital":         _safe(capital_allocator.summary, {}),
+        "risk":            _safe(risk_ctrl.snapshot, {}),
+        "gate":            _safe(
+            lambda: global_gate_controller.snapshot()
+            if "global_gate_controller" in globals() else {}, {}
+        ),
+        "errors":          _safe(lambda: error_registry.recent(20), []),
+        "learning_memory": _safe(
+            lambda: __import__("core.learning_memory",
+                               fromlist=["learning_memory_orchestrator"]
+                               ).learning_memory_orchestrator.summary(), {}
+        ),
+        "ct_scan":         ct_scan,
+        "ai_brain":        ai_brain_state,
+        "drawdown":        _safe(drawdown_controller.summary, {}),
+        "activator":       _safe(trade_activator.summary, {}),
+        "edge_engine":     _safe(edge_engine.summary, {}),
+        "thoughts":        list(_thought_log)[-30:],
+    }
+    unified_v2_md = _safe(
+        lambda: generate_full_report_v2(_v2_data), "# Unified report unavailable"
+    )
+
+    # ── 2c. Trade archive ZIP (XLSX + PDF + MD) ───────────────────────────────
+    archive_zip_bytes = _safe(
+        lambda: build_report_archive(
+            trades=trade_dicts,
+            stats=_ss,
+            mode_info=mode_info,
+            analytics=analytics,
+            thoughts=_thought_log,
+        ), b""
+    )
+
+    # ── 2d. Engine state JSON (ExportManager) ────────────────────────────────
+    state_json_str = "{}"
+    try:
+        state_path = exporter.export(label="bundle")
+        with open(state_path, "r", encoding="utf-8") as _f:
+            state_json_str = _f.read()
+    except Exception:
+        pass
+
+    # ── 2e. Performance Explorer — ALL / 1D / 7D / 20D ───────────────────────
+    upe_records  = _pnl_to_upe_records(pnl_calc.trades)
+    upe_presets  = ["ALL", "1D", "7D", "20D"]
+    upe_csvs:  dict = {}
+    upe_jsons: dict = {}
+    for _preset in upe_presets:
+        _filtered = _upe_preset_filter(_preset).apply(upe_records)
+        _summary  = _upe_compute_summary(
+            _filtered, initial_capital=pnl_calc._initial_capital
+        )
+        upe_csvs[_preset]  = _UPEExport.to_csv(_filtered)
+        upe_jsons[_preset] = _UPEExport.to_json(_filtered, _summary)
+
+    # ── 3. Assemble master ZIP ────────────────────────────────────────────────
+    buf = _io.BytesIO()
+    ts_str = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+
+        zf.writestr("README.txt", (
+            "EOW Quant Engine — Master Report Bundle\n"
+            "═══════════════════════════════════════\n"
+            f"Generated : {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}\n"
+            f"Engine    : EOW_QUANT_ENGINE_v1.0\n"
+            f"Trades    : {_n_trades}\n"
+            f"Net PnL   : {_ss.get('total_net_pnl', 0.0):.2f} USDT\n"
+            f"Win Rate  : {_ss.get('win_rate', 0.0):.1f}%\n"
+            f"PF        : {_ss.get('profit_factor', 0.0):.3f}\n\n"
+            "Folder Guide\n"
+            "────────────\n"
+            "01_system_state/  Full engine state JSON (DNA, trade history, portfolio ratios)\n"
+            "02_reports/       FTD-025A 15-section report (MD+PDF) + FTD-025B narrative (MD)\n"
+            "03_trade_archive/ Trade history XLSX + PDF executive summary + MD developer log\n"
+            "04_performance/   Performance Explorer reports for ALL / 1D / 7D / 20D presets\n"
+            "                  Each preset: report_<P>.json (summary) + trades_<P>.csv (raw)\n"
+        ))
+
+        zf.writestr("metadata.json", json.dumps({
+            "bundle_ts":        ts,
+            "bundle_date":      time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+            "engine_ver":       "EOW_QUANT_ENGINE_v1.0",
+            "trade_count":      _n_trades,
+            "net_pnl_usdt":     _ss.get("total_net_pnl", 0.0),
+            "win_rate_pct":     _ss.get("win_rate", 0.0),
+            "profit_factor":    _ss.get("profit_factor", 0.0),
+            "max_drawdown_pct": _ss.get("max_drawdown_pct", 0.0),
+            "sharpe_ratio":     _ss.get("sharpe_ratio", 0.0),
+            "total_fees_usdt":  _ss.get("total_fees_paid", 0.0),
+            "fee_drag_pct":     round(_fee_ratio * 100, 2),
+            "presets_included": upe_presets,
+        }, indent=2, default=str))
+
+        # 01_system_state/
+        zf.writestr("01_system_state/eow_state.json", state_json_str)
+
+        # 02_reports/ — extract MD + PDF from FTD-025A ZIP
+        if system_zip_bytes:
+            try:
+                with zipfile.ZipFile(_io.BytesIO(system_zip_bytes)) as _sub:
+                    for _name in _sub.namelist():
+                        _ext = _name.rsplit(".", 1)[-1].lower()
+                        _dst = f"02_reports/full_system_report.{_ext}"
+                        zf.writestr(_dst, _sub.read(_name))
+            except Exception:
+                zf.writestr("02_reports/full_system_report.md",
+                            "# Full system report generation failed")
+
+        zf.writestr("02_reports/unified_report_v2.md",
+                    unified_v2_md if isinstance(unified_v2_md, str)
+                    else "# Unified report unavailable")
+
+        # 03_trade_archive/ — extract XLSX + PDF + MD from archive ZIP
+        if archive_zip_bytes:
+            try:
+                with zipfile.ZipFile(_io.BytesIO(archive_zip_bytes)) as _sub:
+                    for _name in _sub.namelist():
+                        _ext = _name.rsplit(".", 1)[-1].lower()
+                        if _ext == "xlsx":
+                            _dst = "03_trade_archive/trade_history.xlsx"
+                        elif _ext == "pdf":
+                            _dst = "03_trade_archive/trade_report.pdf"
+                        else:
+                            _dst = "03_trade_archive/trade_report.md"
+                        zf.writestr(_dst, _sub.read(_name))
+            except Exception:
+                zf.writestr("03_trade_archive/trade_report.md",
+                            "# Trade archive generation failed")
+
+        # 04_performance/
+        for _preset in upe_presets:
+            zf.writestr(f"04_performance/report_{_preset}.json",
+                        upe_jsons[_preset])
+            zf.writestr(f"04_performance/trades_{_preset}.csv",
+                        upe_csvs[_preset])
+
+    buf.seek(0)
+    filename = f"eow_bundle_{ts}.zip"
+    _thought(
+        f"📦 Master Report Bundle downloaded → {filename} "
+        f"({_n_trades} trades, {len(buf.getvalue())//1024} KB)",
+        "SYSTEM"
+    )
+    return StreamingResponse(
+        iter([buf.getvalue()]),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
