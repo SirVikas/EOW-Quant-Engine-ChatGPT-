@@ -84,6 +84,7 @@ class SystemSnapshot:
     ct_scan:            Dict[str, Any] = None       # ct_scan_engine.scan()
     dynamic_thresholds: Dict[str, Any] = None       # dynamic_threshold_provider.summary()
     streak:             Dict[str, Any] = None       # streak_engine.summary()
+    consistency:        Dict[str, Any] = None       # consistency_engine.status() (FTD-040)
     capital_allocator:  Dict[str, Any] = None       # capital_allocator.summary()
 
     # 6. Audit / Alerts
