@@ -125,11 +125,12 @@ class EngineConfig(BaseSettings):
     MIN_RR_RATIO: float = 2.0            # raised 1.5→2.0 — quality gate; raw RR=4.0 safely clears this
 
     # Trade Scorer
-    # Lowered 0.65→0.55: current market ADX 17–19 yields max scores ~0.56 even in TRENDING regime.
-    # Threshold 0.65 was calibrated for ADX>25 markets; in sideways/transitional markets it
-    # causes 100% rejection. RR gate (2.0) + wider TP (10×ATR) enforce quality instead.
+    # Lowered 0.65→0.48: in quiet markets (ADX 17–19, low vol, flat RSI) realistic scores
+    # are 0.43–0.54; threshold 0.55 blocked ALL signals. Quality enforced by RR gate (≥2.0)
+    # and wider TP (10×ATR = 4.0× RR). A lower score-min + higher RR is superior to
+    # high score-min + no trades. Math: TRENDING+ADX18+1.5xVol+RSI0 → score≈0.47.
     # Score formula: regime(25%) + volume(20%) + adx(20%) + rsi_slope(15%) + vol_exp(10%) + cost(10%)
-    MIN_TRADE_SCORE: float = 0.55        # lowered 0.65→0.55 — quality maintained via RR gate, not score alone
+    MIN_TRADE_SCORE: float = 0.48        # lowered 0.55→0.48 — quiet-market floor; quality via RR gate
     # qFTD-011: 0.10→0.15 — tighter cost ceiling was blocking small-notional valid trades.
     MAX_COST_FRACTION: float = 0.15      # qFTD-011: 0.10→0.15 — realistic fee ceiling
 
@@ -175,7 +176,7 @@ class EngineConfig(BaseSettings):
     DECAY_FREQ_WINDOW_MIN: int = 30    # Signal frequency tracking window (minutes)
     DECAY_FREQ_MAX: int = 3            # Signals above this count trigger decay
     DECAY_PER_EXTRA: float = 0.10      # Confidence reduction per extra signal (10%)
-    DECAY_MIN_FACTOR: float = 0.70     # Minimum decay factor (max 30% reduction)
+    DECAY_MIN_FACTOR: float = 0.85     # raised 0.70→0.85 — less decay penalty; max 15% reduction so quiet-market signals still pass
 
     # Drawdown Controller
     DD_SOFT_CUT_AT: float = 0.05       # 5% DD → 0.75× size
@@ -196,15 +197,15 @@ class EngineConfig(BaseSettings):
     ACTIVATOR_T3_VOL_MULT: float = 0.20  # Volume threshold multiplier at Tier 3 (was 0.30, = floor)
     # Relaxed scores updated to align with new MIN_TRADE_SCORE=0.65.
     # Even in dry-spell relaxation, we stay above 0.53 to avoid junk trades.
-    ACTIVATOR_T1_SCORE: float = 0.57     # raised 0.44→0.57 — TIER_1 relax stays quality-aware
-    ACTIVATOR_T2_SCORE: float = 0.53     # raised 0.42→0.53 — TIER_2 deeper relax still filtered
+    ACTIVATOR_T1_SCORE: float = 0.44     # lowered 0.57→0.44 — below MIN_TRADE_SCORE=0.48 for genuine dry-spell relaxation
+    ACTIVATOR_T2_SCORE: float = 0.40     # lowered 0.53→0.40 — deeper relaxation; at the score floor
 
     # Exploration Engine — learning trades
     # Exploration cut to 3% — system is in loss. Exploration amplifies losses, not learning.
     EXPLORE_RATE: float = 0.03           # cut 0.10→0.03 — no exploration until PF > 1.0
     EXPLORE_SIZE_MULT: float = 0.25      # Size multiplier for exploration trades
     # qFTD-008-EDGE: 0.45→0.60 — exploration quality bar raised to match new baseline.
-    EXPLORE_SCORE_MIN: float = 0.60      # qFTD-008-EDGE: 0.45→0.60 — no low-quality exploration
+    EXPLORE_SCORE_MIN: float = 0.52      # lowered 0.60→0.52 — aligned with new MIN_TRADE_SCORE=0.48 baseline
     EXPLORE_EV_FLOOR: float = 0.50       # Max allowed EV negative fraction of est_risk
     EXPLORE_DAILY_LOSS_CAP: float = 0.02 # Max daily equity loss from exploration
     EXPLORE_MAX_TRADES_PER_DAY: int = 50 # EDP: 20→50 — learning mode needs more daily exploration
@@ -230,9 +231,9 @@ class EngineConfig(BaseSettings):
     # Prevents system idle and forces execution when quality gates are too tight.
     EDP_ENABLED: bool = True                # Master switch for EDP
     EDP_IDLE_DETECTION_MIN: float = 1.0     # Declare DRIVE mode after this many minutes with no trades
-    EDP_FORCE_SCORE: float = 0.80           # raised 0.75→0.80 — force-execute only elite signals
+    EDP_FORCE_SCORE: float = 0.58           # lowered 0.80→0.58 — reachable score; forces exec when score≥0.58 + RR≥2.0
     EDP_FORCE_RR: float = 2.0               # RR threshold for force-execute
-    EDP_DRIVE_SCORE_OVERRIDE: float = 0.55  # raised 0.40→0.55 — DRIVE mode still quality-filtered
+    EDP_DRIVE_SCORE_OVERRIDE: float = 0.46  # lowered 0.55→0.46 — DRIVE mode threshold below MIN_TRADE_SCORE to actually override
 
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
