@@ -49,7 +49,7 @@ class EngineConfig(BaseSettings):
 
     # ── Risk / Capital ───────────────────────────────────────────────────────
     INITIAL_CAPITAL: float = 1000.0        # USDT starting bankroll (paper)
-    MAX_RISK_PER_TRADE: float = 0.015      # 1.5% of equity per trade (larger size → lower fee drag)
+    MAX_RISK_PER_TRADE: float = 0.022      # 2.2% of equity per trade (larger notional → lower fee % drag)
     MAX_DRAWDOWN_HALT: float = 0.15        # Halt engine at 15% MDD
     KELLY_FRACTION: float = 0.25           # Conservative quarter-Kelly
     WIN_STREAK_SCALE_UP: int = 3           # Consecutive wins → scale up
@@ -66,20 +66,20 @@ class EngineConfig(BaseSettings):
     SLIPPAGE_EST: float = 0.0003          # 0.03% — realistic Binance futures slippage for major pairs
     VOL_BASELINE_ATR_PCT: float = 0.20    # Baseline ATR% for dynamic edge premium
     VOL_PREMIUM_MULT: float = 0.05        # Small linear premium on required_r per unit ATR above baseline
-    BASE_MIN_R: float = 1.10               # Fallback post-cost R threshold (was 1.20 — relaxed for more entries)
+    BASE_MIN_R: float = 1.50               # Minimum post-cost R — raised to enforce positive expectancy
     ATR_SLIPPAGE_MULT: float = 0.10       # Reduced from 0.20 — keeps per-trade ATR overhead proportionate
-    # Per-regime minimum R thresholds — relaxed for higher signal frequency
-    REGIME_MIN_R_TRENDING: float = 1.10        # was 1.20 — still captures strong trends
-    REGIME_MIN_R_MEAN_REVERTING: float = 1.05  # unchanged — high WR compensates
-    REGIME_MIN_R_VOLATILE: float = 1.05        # was 1.15 — breakouts move fast
+    # Per-regime minimum R thresholds — tuned for MAX PROFIT (PF-first)
+    REGIME_MIN_R_TRENDING: float = 1.50        # raised 1.10→1.50 — enforce decent RR in trend trades
+    REGIME_MIN_R_MEAN_REVERTING: float = 1.80  # raised 1.05→1.80 — MR caused most losses; needs wider TP
+    REGIME_MIN_R_VOLATILE: float = 1.50        # raised 1.05→1.50 — breakouts still move fast but need edge
 
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
-    BREAKEVEN_TRIGGER_R: float = 0.5      # Move SL to BE+cost after this profit milestone
-    SPEED_EXIT_TRIGGER_R: float = 1.0     # Enable speed-exit checks after this R
-    SPEED_EXIT_STALL_TICKS: int = 8       # Exit if no new peak/trough in N ticks after >1R
+    BREAKEVEN_TRIGGER_R: float = 1.20     # Move SL to BE+cost — raised 0.5→1.20 to let winners breathe
+    SPEED_EXIT_TRIGGER_R: float = 1.50    # Enable speed-exit — raised 1.0→1.50 to capture more upside
+    SPEED_EXIT_STALL_TICKS: int = 20      # Exit on stall — raised 8→20 to give trades room to develop
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
 
     # ── Genome Engine ────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ class EngineConfig(BaseSettings):
     GENOME_OOS_SPLIT_RATIO: float = 0.70       # 70% candles for training, 30% held-out OOS test
     GENOME_OOS_MIN_PF: float = 1.0             # OOS profit-factor floor
     GENOME_OVERFITTING_MAX_RATIO: float = 2.5  # Relaxed 2.0→2.5: avoid over-penalising good fits
-    GENOME_MIN_AVG_R: float = 0.20             # Relaxed 0.35→0.20: allow early-stage promotions
+    GENOME_MIN_AVG_R: float = 0.50             # raised 0.20→0.50: only promote DNA with meaningful avg R
 
     # ── Self-Healing ─────────────────────────────────────────────────────────
     HEAL_INTERVAL_SECONDS: int = 45       # Reduced 60→45: faster ping accumulation for Network score
@@ -124,10 +124,9 @@ class EngineConfig(BaseSettings):
     MIN_RR_RATIO: float = 1.5            # qFTD-011: 2.0→1.5 — revert overcorrection (raw RR = 3.0×)
 
     # Trade Scorer
-    # qFTD-011: reverted 0.70→0.58. Typical alpha signal scores ≈0.60 in TRENDING market
-    # with ADX=25 and vol_ratio=1.5 — the 0.70 bar was blocking ALL signals silently.
+    # Raised 0.58→0.65: quality-over-quantity filter. Fee drag is 25% — fewer, better trades.
     # Score formula: regime(25%) + volume(20%) + adx(20%) + rsi_slope(15%) + vol_exp(10%) + cost(10%)
-    MIN_TRADE_SCORE: float = 0.58        # qFTD-011: 0.70→0.58 — revert overcorrection
+    MIN_TRADE_SCORE: float = 0.65        # raised 0.58→0.65 — quality filter to reduce fee drag
     # qFTD-011: 0.10→0.15 — tighter cost ceiling was blocking small-notional valid trades.
     MAX_COST_FRACTION: float = 0.15      # qFTD-011: 0.10→0.15 — realistic fee ceiling
 
@@ -151,7 +150,7 @@ class EngineConfig(BaseSettings):
 
     # Capital Allocator
     MAX_CAPITAL_PER_TRADE: float = 0.05  # Max 5% of equity per trade
-    DAILY_RISK_CAP: float = 0.03         # Max 3% of equity risked per day
+    DAILY_RISK_CAP: float = 0.06         # raised 3%→6% — allow more high-quality trades per day
 
     # Trade Manager
     # qFTD-008-EDGE: 1.5→2.0 — partial TP milestone raised to match new MIN_RR_RATIO.
@@ -186,28 +185,21 @@ class EngineConfig(BaseSettings):
 
     # ── Phase 5.1: Activation + Exploration Control ──────────────────────────
     # Trade Activator — prevents system freeze by relaxing filters
-    # EDP: tiers tightened 10/20/30 → 3/7/15 min. Policy: system must be active
-    # every minute; relaxation must kick in within 3 min of inactivity.
-    ACTIVATOR_T1_MIN: int = 3            # EDP: 10→3 min — Tier 1 soft relax starts fast
-    ACTIVATOR_T2_MIN: int = 7            # EDP: 20→7 min — Tier 2 deeper relax
-    ACTIVATOR_T3_MIN: int = 15           # EDP: 30→15 min — Tier 3 max relax
+    # Patience raised — let quality signals come naturally, don't rush relaxation
+    ACTIVATOR_T1_MIN: int = 5            # raised 3→5 min — more patience before Tier 1 relax
+    ACTIVATOR_T2_MIN: int = 12           # raised 7→12 min — deeper relax takes longer
+    ACTIVATOR_T3_MIN: int = 25           # raised 15→25 min — max relax only after real dry spell
     ACTIVATOR_T1_VOL_MULT: float = 0.50  # Volume threshold multiplier at Tier 1 (was 0.60)
     ACTIVATOR_T2_VOL_MULT: float = 0.30  # Volume threshold multiplier at Tier 2 (was 0.40)
     ACTIVATOR_T3_VOL_MULT: float = 0.20  # Volume threshold multiplier at Tier 3 (was 0.30, = floor)
-    # qFTD-011-FIX: qFTD-011 lowered MIN_TRADE_SCORE 0.70→0.58 but these were never
-    # updated. T1/T2 were 0.65/0.60 — both ABOVE the new base of 0.58, so the activator
-    # was raising the bar after dry spells (backward). Fixed to relax below the base.
-    # qFTD-032: further relaxed to give more room for signals to pass at Tier 2/3.
-    # qFTD-032 R3: T1 score lowered 0.50→0.44. With _SCORE_FLOOR=0.40,
-    # TIER_1 effective = max(0.40, 0.44)=0.44. Signals scoring 0.45+ now
-    # pass at 10 min instead of waiting 20 min for TIER_2.
-    ACTIVATOR_T1_SCORE: float = 0.44     # qFTD-032-R3: 0.50→0.44 — TIER_1 effective floor = 0.44
-    ACTIVATOR_T2_SCORE: float = 0.42     # qFTD-032-R3: 0.45→0.42 — TIER_2 effective floor = 0.42
+    # Relaxed scores updated to align with new MIN_TRADE_SCORE=0.65.
+    # Even in dry-spell relaxation, we stay above 0.53 to avoid junk trades.
+    ACTIVATOR_T1_SCORE: float = 0.57     # raised 0.44→0.57 — TIER_1 relax stays quality-aware
+    ACTIVATOR_T2_SCORE: float = 0.53     # raised 0.42→0.53 — TIER_2 deeper relax still filtered
 
     # Exploration Engine — learning trades
-    # FIX: 0.35→0.10 — 35% exploration was amplifying losses; system must stabilise first.
-    # Exploration only justified when system has positive PF; reduced to minimum viable rate.
-    EXPLORE_RATE: float = 0.10           # FIX: 0.35→0.10 — learning mode capped to 10%
+    # Exploration cut to 3% — system is in loss. Exploration amplifies losses, not learning.
+    EXPLORE_RATE: float = 0.03           # cut 0.10→0.03 — no exploration until PF > 1.0
     EXPLORE_SIZE_MULT: float = 0.25      # Size multiplier for exploration trades
     # qFTD-008-EDGE: 0.45→0.60 — exploration quality bar raised to match new baseline.
     EXPLORE_SCORE_MIN: float = 0.60      # qFTD-008-EDGE: 0.45→0.60 — no low-quality exploration
@@ -236,17 +228,16 @@ class EngineConfig(BaseSettings):
     # Prevents system idle and forces execution when quality gates are too tight.
     EDP_ENABLED: bool = True                # Master switch for EDP
     EDP_IDLE_DETECTION_MIN: float = 1.0     # Declare DRIVE mode after this many minutes with no trades
-    EDP_FORCE_SCORE: float = 0.75           # Score threshold for force-execute (bypasses decay gate)
+    EDP_FORCE_SCORE: float = 0.80           # raised 0.75→0.80 — force-execute only elite signals
     EDP_FORCE_RR: float = 2.0               # RR threshold for force-execute
-    EDP_DRIVE_SCORE_OVERRIDE: float = 0.40  # Score floor applied in DRIVE mode (= absolute floor)
+    EDP_DRIVE_SCORE_OVERRIDE: float = 0.55  # raised 0.40→0.55 — DRIVE mode still quality-filtered
 
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
 
-    # FTD-008: Hard trade frequency caps (daily discipline)
-    # EDP: raised to support adaptive active-trading intent ($1/min target)
-    MAX_TRADES_PER_HOUR: int = 20        # EDP: 3→20 — aligned with main.py local constant
-    MAX_TRADES_PER_DAY:  int = 150       # EDP: 10→150 — active trading with $800 capital
+    # Trade frequency capped hard — fee drag was 25% at 150 trades/day
+    MAX_TRADES_PER_HOUR: int = 6         # cut 20→6 — quality over quantity; each trade costs fees
+    MAX_TRADES_PER_DAY:  int = 40        # cut 150→40 — 40 high-quality trades >> 150 junk trades
 
     # ── Phase 6: Stability + Profit Consistency ───────────────────────────────
     # EV Confidence Engine — EV-tier-based sizing
