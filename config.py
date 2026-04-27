@@ -77,9 +77,9 @@ class EngineConfig(BaseSettings):
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
-    BREAKEVEN_TRIGGER_R: float = 1.20     # Move SL to BE+cost — raised 0.5→1.20 to let winners breathe
-    SPEED_EXIT_TRIGGER_R: float = 1.50    # Enable speed-exit — raised 1.0→1.50 to capture more upside
-    SPEED_EXIT_STALL_TICKS: int = 20      # Exit on stall — raised 8→20 to give trades room to develop
+    BREAKEVEN_TRIGGER_R: float = 1.80     # raised 1.20→1.80 — let trades develop before locking in BE; 1.2R exits were capping winners too early
+    SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
+    SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
 
     # ── Genome Engine ────────────────────────────────────────────────────────
@@ -111,22 +111,25 @@ class EngineConfig(BaseSettings):
     EMA_TREND: int = 34                   # qFTD-011: 100→34 — Fibonacci macro filter; min_len 102→36 candles
     ATR_PERIOD: int = 14
     ATR_MULT_SL: float = 2.5              # Widened 1.5→2.5: survives 1-min noise, fewer premature SL hits
-    # Raw RR = ATR_MULT_TP / ATR_MULT_SL = 7.5/2.5 = 3.0× — well above MIN_RR_RATIO=1.5.
-    # qFTD-011: MIN_RR reverted 2.0→1.5; ATR_MULT_TP kept at 7.5 giving 3× raw RR.
-    ATR_MULT_TP: float = 7.5              # 3.0× raw RR (SL=2.5, TP=7.5 → RR=3.0)
+    # Raw RR = ATR_MULT_TP / ATR_MULT_SL = 10.0/2.5 = 4.0× — raised to fix avg_win/avg_loss imbalance.
+    # Historical realized RR was 0.83/1.84=0.45 (avg_win<<avg_loss). Wider TP target fixes this.
+    # With RR=4.0 and WIN_RATE≥30%, PF > 1.0 (positive expectancy).
+    ATR_MULT_TP: float = 10.0             # raised 7.5→10.0: RR=4.0× — wider TP lets winners run
     BB_PERIOD: int = 20
     BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
 
     # ── Phase 4: Profit Engine ───────────────────────────────────────────────
     # RR Engine
-    # qFTD-011: reverted 2.0→1.5. ATR_MULT_TP=7.5 already gives 3.0× raw RR so
-    # 2.0 minimum was double-gating; fee-adjusted RR at 7.5×ATR TP easily clears 1.5.
-    MIN_RR_RATIO: float = 1.5            # qFTD-011: 2.0→1.5 — revert overcorrection (raw RR = 3.0×)
+    # Raised 1.5→2.0. ATR_MULT_TP=10.0 gives 4.0× raw RR so min 2.0 is safe.
+    # Higher RR floor ensures only setups with real edge pass — fee drag needs RR≥2 to overcome.
+    MIN_RR_RATIO: float = 2.0            # raised 1.5→2.0 — quality gate; raw RR=4.0 safely clears this
 
     # Trade Scorer
-    # Raised 0.58→0.65: quality-over-quantity filter. Fee drag is 25% — fewer, better trades.
+    # Lowered 0.65→0.55: current market ADX 17–19 yields max scores ~0.56 even in TRENDING regime.
+    # Threshold 0.65 was calibrated for ADX>25 markets; in sideways/transitional markets it
+    # causes 100% rejection. RR gate (2.0) + wider TP (10×ATR) enforce quality instead.
     # Score formula: regime(25%) + volume(20%) + adx(20%) + rsi_slope(15%) + vol_exp(10%) + cost(10%)
-    MIN_TRADE_SCORE: float = 0.65        # raised 0.58→0.65 — quality filter to reduce fee drag
+    MIN_TRADE_SCORE: float = 0.55        # lowered 0.65→0.55 — quality maintained via RR gate, not score alone
     # qFTD-011: 0.10→0.15 — tighter cost ceiling was blocking small-notional valid trades.
     MAX_COST_FRACTION: float = 0.15      # qFTD-011: 0.10→0.15 — realistic fee ceiling
 
@@ -153,10 +156,9 @@ class EngineConfig(BaseSettings):
     DAILY_RISK_CAP: float = 0.06         # raised 3%→6% — allow more high-quality trades per day
 
     # Trade Manager
-    # qFTD-008-EDGE: 1.5→2.0 — partial TP milestone raised to match new MIN_RR_RATIO.
-    # Booking 50% at 1.5R when minimum RR is 2.0 is too early — it captures profit
-    # before the trade reaches its intended target, dragging down average R.
-    PARTIAL_TP_R: float = 2.0            # qFTD-008-EDGE: 1.5→2.0 — book 50% at min RR achieved
+    # Raised 2.0→3.0 — with TP at 4.0R, booking 50% at 3.0R preserves upside while locking gains.
+    # Previous 2.0R partial TP was dragging down avg win before the full TP move completed.
+    PARTIAL_TP_R: float = 3.0            # raised 2.0→3.0 — book 50% at 3.0R; TP target is now 4.0R
 
     # ── Phase 5: EV Engine + Adaptive Intelligence ───────────────────────────
     # EV Engine
