@@ -376,6 +376,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <button class="btn" id="vault-btn" onclick="openVaultModal()" title="Dual-API Credential Vault — switch between Paper (testnet) and Real Live modes" style="border-color:#D6BCFA;background:#FAF5FF;color:#553C9A;">🔐 Vault</button>
     <button class="btn purple" onclick="exportState()">Export JSON</button>
     <button class="btn" onclick="downloadUnifiedReportV2()" style="border-color:#2b6cb0;background:#ebf8ff;color:#2b6cb0;" title="FTD-025B: Unified Intelligent Report — cause-effect narrative">📊 Intelligent Report</button>
+    <button class="btn" id="bundle-btn" onclick="downloadBundleReport()" style="border-color:#276749;background:#F0FFF4;color:#276749;font-weight:700;" title="Download ALL reports in one ZIP — system state, full reports, trade archive, performance explorer">📦 Download All Reports</button>
     <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
   </div>
 </div>
@@ -1167,7 +1168,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div>
         <div class="sec-hdr" style="margin:0 0 3px;">Export & Backup</div>
-        <div style="font-size:11px;color:var(--muted);">One-click export of currently filtered data</div>
+        <div style="font-size:11px;color:var(--muted);">One-click export of filtered data or full engine bundle</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <button class="btn green" onclick="upeDownloadCSV()">⬇ CSV</button>
@@ -1175,6 +1176,13 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
         <button class="btn"       onclick="upeBackup()" id="upe-backup-btn">💾 Backup</button>
         <span id="upe-backup-status" style="font-size:11px;color:var(--muted);"></span>
       </div>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <button id="perf-bundle-btn" onclick="downloadBundleReport()" style="font-family:var(--fm);font-size:12px;font-weight:700;padding:8px 18px;border-radius:8px;border:2px solid #276749;background:#F0FFF4;color:#276749;cursor:pointer;display:flex;align-items:center;gap:6px;" title="Generates ALL reports (system state, full analysis, trade archive, performance explorer for ALL/1D/7D/20D presets) and downloads as a single ZIP file">
+        📦 Download All Reports (ZIP)
+      </button>
+      <span style="font-size:11px;color:var(--muted);">System state · Full reports (MD+PDF) · Trade archive (XLSX+PDF+MD) · Performance explorer (ALL / 1D / 7D / 20D)</span>
+      <span id="perf-bundle-status" style="font-size:11px;color:var(--muted);"></span>
     </div>
   </div>
 
@@ -3625,6 +3633,62 @@ async function upeBackup() {
   } finally {
     if (btn) btn.disabled = false;
     setTimeout(() => { if (st) st.textContent = ''; }, 4000);
+  }
+}
+
+// ── Master Report Bundle ──────────────────────────────────────────────────────
+async function downloadBundleReport() {
+  // Buttons in both the header and the Performance tab share this function.
+  const btns   = [
+    document.getElementById('bundle-btn'),
+    document.getElementById('perf-bundle-btn'),
+  ].filter(Boolean);
+  const status = document.getElementById('perf-bundle-status');
+
+  // Disable buttons + show loading state
+  btns.forEach(b => {
+    b.disabled = true;
+    b._origText = b.innerHTML;
+    b.innerHTML = b.id === 'perf-bundle-btn'
+      ? '⏳ Generating bundle…'
+      : '⏳ Generating…';
+    b.style.opacity = '0.7';
+  });
+  if (status) status.textContent = 'Building all reports — this may take 5–15 seconds…';
+
+  try {
+    const r = await fetch(API + '/api/reports/bundle', {
+      signal: AbortSignal.timeout(60000),   // 60s timeout — PDF generation can be slow
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    const blob = await r.blob();
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || ('eow_bundle_' + Date.now() + '.zip');
+
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = fn;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    if (status) {
+      const kb = Math.round(blob.size / 1024);
+      status.textContent = `✅ Downloaded: ${fn} (${kb} KB)`;
+    }
+  } catch(e) {
+    if (status) status.textContent = '❌ Bundle failed — check backend';
+    console.error('[Bundle]', e);
+  } finally {
+    btns.forEach(b => {
+      b.disabled   = false;
+      b.innerHTML  = b._origText || b.innerHTML;
+      b.style.opacity = '1';
+    });
+    setTimeout(() => { if (status) status.textContent = ''; }, 8000);
   }
 }
 
