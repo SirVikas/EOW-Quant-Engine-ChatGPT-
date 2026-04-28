@@ -581,7 +581,6 @@ async def on_tick(tick: Tick):
         # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
         _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
-        _bypass_all_gates = (cfg.BYPASS_ALL_GATES or _paper_speed)
         _vol_mult = thresholds.volume_multiplier
         if _paper_speed:
             # Aggressive paper throughput mode: relax sleep gate to its floor.
@@ -595,14 +594,14 @@ async def on_tick(tick: Tick):
                 "FILTER",
             )
             vol_active = True
-        if not _bypass_all_gates and not vol_active:
+        if not cfg.BYPASS_ALL_GATES and not vol_active:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
             trade_flow_monitor.record_skip(sym, vol_reason)
             return
 
         # Phase 3: Sector Correlation Guard — max 2 open positions from same sector.
         sector_ok, sector_reason = sector_guard.check(sym, risk_ctrl.positions)
-        if not _bypass_all_gates and not sector_ok:
+        if not cfg.BYPASS_ALL_GATES and not sector_ok:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": sector_reason, "regime": regime.value}
             return
 
@@ -612,7 +611,7 @@ async def on_tick(tick: Tick):
             if any(k in risk_reason for k in ("HALTED:", "MAX_DAILY_LOSS", "DAILY_TRADE_CAP")):
                 _thought(f"⚡ PAPER_SPEED bypass risk gate {sym}: {risk_reason}", "FILTER")
                 risk_allowed = True
-        if not _bypass_all_gates and not risk_allowed:
+        if not cfg.BYPASS_ALL_GATES and not risk_allowed:
             return   # daily risk limit reached
 
         # FTD-REF-024: market structure gate (LOW_VOL_TRAP / FAKE_BREAKOUT block)
@@ -620,7 +619,7 @@ async def on_tick(tick: Tick):
         ms_result = market_structure_detector.detect(
             adx=guard.adx, bb_width=_bb_width, atr_pct=guard.atr_pct,
         )
-        if not _bypass_all_gates and not ms_result.tradeable:
+        if not cfg.BYPASS_ALL_GATES and not ms_result.tradeable:
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
                 "reason": ms_result.block_reason, "regime": regime.value,
@@ -630,7 +629,7 @@ async def on_tick(tick: Tick):
 
         # FTD-REF-024: edge engine kill switch
         edge_allowed, edge_reason = edge_engine.check_trade(regime.value, strategy_type)
-        if not _bypass_all_gates and not edge_allowed:
+        if not cfg.BYPASS_ALL_GATES and not edge_allowed:
             error_registry.log("STRAT_002", symbol=sym, extra=edge_reason)  # FTD-REF-025
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
@@ -641,7 +640,7 @@ async def on_tick(tick: Tick):
 
         # FTD-037: Adaptive Edge Engine kill switch (state-machine + cost filter)
         _aee_ok, _aee_reason = adaptive_edge_engine.check_trade(strategy_type)
-        if not _bypass_all_gates and not _aee_ok:
+        if not cfg.BYPASS_ALL_GATES and not _aee_ok:
             error_registry.log("STRAT_037", symbol=sym, extra=_aee_reason)
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
@@ -668,7 +667,7 @@ async def on_tick(tick: Tick):
             )
 
         # FTD-REF-026: regime stability gate — block if conf <0.50 or <3 stable ticks
-        if not _bypass_all_gates and r_ai.block_trade:
+        if not cfg.BYPASS_ALL_GATES and r_ai.block_trade:
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
                 "reason": (
@@ -702,7 +701,7 @@ async def on_tick(tick: Tick):
             n_trades=_session_trade_count,
             consecutive_losses=_consecutive_losses,
         )
-        if not _bypass_all_gates and _pg_hard_stop:
+        if not cfg.BYPASS_ALL_GATES and _pg_hard_stop:
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
                 "reason": _pg_hard_reason, "regime": regime.value,
@@ -783,7 +782,7 @@ async def on_tick(tick: Tick):
                 stop_loss=sig.stop_loss,
                 take_profit=sig.take_profit,
             )
-            if not _bypass_all_gates and _inv.mode == TradeMode.CALIBRATE:
+            if not cfg.BYPASS_ALL_GATES and _inv.mode == TradeMode.CALIBRATE:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _inv.reason, "regime": regime.value,
@@ -826,7 +825,7 @@ async def on_tick(tick: Tick):
             _fee_reject, _fee_reason = execution_engine.should_reject_for_fees(
                 expected_gross_profit=_gross_tp, notional=notional,
             )
-            if not _bypass_all_gates and _fee_reject:
+            if not cfg.BYPASS_ALL_GATES and _fee_reject:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _fee_reason, "regime": regime.value,
@@ -836,7 +835,7 @@ async def on_tick(tick: Tick):
 
             # ── Phase 6: Loss Cluster Controller — gates ALL trades ──────────
             _lcc_result = loss_cluster_controller.check(consecutive_losses=_p52_cl)
-            if not _bypass_all_gates and not _lcc_result.ok:
+            if not cfg.BYPASS_ALL_GATES and not _lcc_result.ok:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _lcc_result.reason, "regime": regime.value,
@@ -887,7 +886,7 @@ async def on_tick(tick: Tick):
                 _pg_block, _pg_reason = profit_guard.check_fee_ratio(
                     gross_tp_profit=_gross_tp, fee_cost=cost_usdt,
                 )
-                if not _bypass_all_gates and _pg_block:
+                if not cfg.BYPASS_ALL_GATES and _pg_block:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": _pg_reason, "regime": regime.value,
@@ -907,7 +906,7 @@ async def on_tick(tick: Tick):
                     confidence=_adjusted_conf, regime=r_ai.regime.value,
                     relaxation_factor=relax_factor, expected_edge=_expected_edge,
                 )
-                if not _bypass_all_gates and not sf_result.ok:
+                if not cfg.BYPASS_ALL_GATES and not sf_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": sf_result.reason, "rr": sf_result.rr,
@@ -922,7 +921,7 @@ async def on_tick(tick: Tick):
                     rr=sf_result.rr, confidence=_adjusted_conf,
                     regime=("UNSTABLE" if r_ai.block_trade else r_ai.regime.value),
                 )
-                if not _bypass_all_gates and not strat_gate.ok:
+                if not cfg.BYPASS_ALL_GATES and not strat_gate.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": strat_gate.reason, "rr": sf_result.rr,
@@ -952,7 +951,7 @@ async def on_tick(tick: Tick):
                     vol_ratio=_vol_ratio, cost_fraction=_cost_frac_p5,
                     signal_side=sig.signal.value,
                 )
-                if not _bypass_all_gates and not _score_result.ok:
+                if not cfg.BYPASS_ALL_GATES and not _score_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": _score_result.reason,
@@ -974,7 +973,7 @@ async def on_tick(tick: Tick):
                     _eff_score_min, signals=1, trades=_edp_status.trades_1min,
                 )
                 _eff_score_min = execution_drive_policy.get_score_override(_eff_score_min)
-                if not _bypass_all_gates and _decayed_conf < _eff_score_min:  # Phase 6: DTP + streak-adjusted
+                if not cfg.BYPASS_ALL_GATES and _decayed_conf < _eff_score_min:  # Phase 6: DTP + streak-adjusted
                     # EDP: bypass decay gate for strong signals (high score + high RR)
                     if execution_drive_policy.should_force_execute(
                         _score_result.score, sf_result.rr
@@ -1002,7 +1001,7 @@ async def on_tick(tick: Tick):
                     stop_loss=sig.stop_loss, take_profit=sig.take_profit,
                     atr=_atr_price, atr_pct=atr_pct,
                 )
-                if not _bypass_all_gates and not _rr_result.ok:
+                if not cfg.BYPASS_ALL_GATES and not _rr_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": _rr_result.reason, "rr": _rr_result.rr,
@@ -1027,7 +1026,7 @@ async def on_tick(tick: Tick):
                     rr=_rr_result.rr, gross_tp=_gross_tp, fee_cost=cost_usdt,
                     normal_max_override=thresholds.fee_tolerance,  # dynamic
                 )
-                if not _bypass_all_gates and not _sfg_result.ok:
+                if not cfg.BYPASS_ALL_GATES and not _sfg_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": _sfg_result.reason, "regime": regime.value,
@@ -1046,7 +1045,7 @@ async def on_tick(tick: Tick):
                     drawdown=drawdown_controller.current_drawdown(),           # Phase 7B
                     regime_confidence=r_ai.confidence,                         # Phase 7B
                 )
-                if not _bypass_all_gates and not _ev_result.ok:
+                if not cfg.BYPASS_ALL_GATES and not _ev_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": _ev_result.reason,
@@ -1064,7 +1063,7 @@ async def on_tick(tick: Tick):
 
                 # ── Phase 6: EV Confidence Engine — tier-based size mult ──────
                 _evc_result = ev_confidence_engine.classify(_ev_result.ev)
-                if not _bypass_all_gates and not _evc_result.ok:
+                if not cfg.BYPASS_ALL_GATES and not _evc_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
                         "reason": _evc_result.reason, "regime": regime.value,
@@ -1087,7 +1086,7 @@ async def on_tick(tick: Tick):
             # ── Common path: Drawdown Controller + Capital Allocator ──────────
             # DrawdownController is always re-checked fresh (not from cached DTP)
             _dd_result = drawdown_controller.check()
-            if not _bypass_all_gates and not _dd_result.allowed:
+            if not cfg.BYPASS_ALL_GATES and not _dd_result.allowed:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _dd_result.reason, "regime": regime.value,
@@ -1101,7 +1100,7 @@ async def on_tick(tick: Tick):
                 equity=scaler.equity,
                 base_risk_usdt=sizing.usdt_risk,
             )
-            if not _bypass_all_gates and _alloc.size_multiplier <= 0:
+            if not cfg.BYPASS_ALL_GATES and _alloc.size_multiplier <= 0:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _alloc.reason, "regime": regime.value,
@@ -1135,7 +1134,7 @@ async def on_tick(tick: Tick):
                 recovery_result=_recovery_result,
                 lcc_result=_lcc_result,
             )
-            if not _bypass_all_gates and not _ce_state.allowed:
+            if not cfg.BYPASS_ALL_GATES and not _ce_state.allowed:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": f"CE_PAUSED:{_ce_state.reason}",
@@ -1168,7 +1167,7 @@ async def on_tick(tick: Tick):
             # qFTD-010 Design Change 2: execution gate — final lock before position open.
             # Scan ran fully (warm-up, learning engines, scoring) regardless of gate status.
             # Only actual position creation is blocked when execution is not allowed.
-            if not _bypass_all_gates and not _execution_allowed:
+            if not cfg.BYPASS_ALL_GATES and not _execution_allowed:
                 logger.info(
                     f"[SCAN] Signal rejected — execution locked: {_pre_gate.reason} "
                     f"| {sig.signal.value} {sym} score={_alloc_score:.3f}"
@@ -1230,7 +1229,7 @@ async def on_tick(tick: Tick):
                 regime=regime.value,   # Fix B: regime-specific RR threshold
                 minutes_no_trade=_tf_mins,  # qFTD-040: tiered required_r relaxation during dry spells
             )
-            if not _bypass_all_gates and not edge_ok:
+            if not cfg.BYPASS_ALL_GATES and not edge_ok:
                 rr_net = edge.get('rr_after_cost', 0)
                 rr_req = edge.get('required_r', 0)
                 _thought(
