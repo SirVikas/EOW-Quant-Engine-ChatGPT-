@@ -607,6 +607,10 @@ async def on_tick(tick: Tick):
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
         risk_allowed, risk_reason = risk_engine.check_new_trade()
+        if _paper_speed and not risk_allowed:
+            if any(k in risk_reason for k in ("HALTED:", "MAX_DAILY_LOSS", "DAILY_TRADE_CAP")):
+                _thought(f"⚡ PAPER_SPEED bypass risk gate {sym}: {risk_reason}", "FILTER")
+                risk_allowed = True
         if not cfg.BYPASS_ALL_GATES and not risk_allowed:
             return   # daily risk limit reached
 

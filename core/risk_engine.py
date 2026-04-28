@@ -33,7 +33,6 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from loguru import logger
-from config import cfg
 
 
 # ── Limits ────────────────────────────────────────────────────────────────────
@@ -100,9 +99,6 @@ class RiskEngine:
             f"day={today}"
         )
 
-    def _paper_speed_active(self) -> bool:
-        return (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
-
     def update_equity(self, current_equity: float):
         """
         Update current equity (call on every PnL snapshot).
@@ -115,7 +111,7 @@ class RiskEngine:
 
         # ── Tiered drawdown → size control (FTD-REF-024) ────────────────────
         dd_pct = self._drawdown_pct()
-        if dd_pct >= MAX_DRAWDOWN_PCT and not self._state.halted and not self._paper_speed_active():
+        if dd_pct >= MAX_DRAWDOWN_PCT and not self._state.halted:
             self._halt(f"MAX_DRAWDOWN({dd_pct:.1%}>={MAX_DRAWDOWN_PCT:.0%})")
         elif dd_pct >= SIZE_HALVE_AT_DD:
             # Tier 2: ≥10% DD → halve to 50%
@@ -141,7 +137,7 @@ class RiskEngine:
 
         # Daily loss check
         daily_loss_pct = self._daily_loss_pct()
-        if daily_loss_pct >= MAX_DAILY_LOSS_PCT and not self._state.halted and not self._paper_speed_active():
+        if daily_loss_pct >= MAX_DAILY_LOSS_PCT and not self._state.halted:
             self._halt(
                 f"MAX_DAILY_LOSS({daily_loss_pct:.1%}>={MAX_DAILY_LOSS_PCT:.0%})"
             )
@@ -177,15 +173,10 @@ class RiskEngine:
         RoR is ADVISORY only — it reduces position size but never blocks trading.
         This prevents a stale bad-sample from permanently locking the engine.
         """
-        _paper_speed = self._paper_speed_active()
-        if self._state.halted and not _paper_speed:
+        if self._state.halted:
             return False, f"HALTED: {self._state.halt_reason}"
-        if self._state.halted and _paper_speed:
-            logger.warning(
-                f"[RISK-ENG] PAPER_SPEED bypass halt: {self._state.halt_reason}"
-            )
 
-        if (not _paper_speed) and self._state.trades_today >= MAX_TRADES_PER_DAY:
+        if self._state.trades_today >= MAX_TRADES_PER_DAY:
             return False, f"DAILY_TRADE_CAP({self._state.trades_today}/{MAX_TRADES_PER_DAY})"
 
         daily_loss_pct = self._daily_loss_pct()
@@ -285,9 +276,7 @@ class RiskEngine:
             "limits": {
                 "max_daily_loss_pct": MAX_DAILY_LOSS_PCT * 100,
                 "max_drawdown_pct":   MAX_DRAWDOWN_PCT * 100,
-                "max_trades_per_day": ("UNLIMITED_PAPER_SPEED"
-                                       if (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
-                                       else MAX_TRADES_PER_DAY),
+                "max_trades_per_day": MAX_TRADES_PER_DAY,
                 "risk_pct_range":     [RISK_PCT_MIN * 100, RISK_PCT_MAX * 100],
                 "max_risk_of_ruin":  MAX_RISK_OF_RUIN,
             },

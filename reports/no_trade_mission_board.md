@@ -11,7 +11,7 @@ Resolve **No Trade Issue** and maximize opportunity capture in minimum time (PAP
 2. **Drawdown halt can fully freeze entries**
    - Screenshot shows max drawdown ~16.9% vs halt threshold 15%.
    - In normal mode this halts new entries by design.
-   - Action taken: PAPER speed mode now bypasses risk halt blocks (`MAX_DRAWDOWN`, `MAX_DAILY_LOSS`) to continue throughput testing.
+   - Action taken: PAPER speed mode now bypasses risk-gate rejections in the main loop (`HALTED`, `MAX_DAILY_LOSS`, `DAILY_TRADE_CAP`) to continue throughput testing.
 
 3. **Daily trade cap can limit stress throughput**
    - Action taken earlier: paper speed bypass in `check_new_trade` keeps throughput open.
@@ -20,7 +20,7 @@ Resolve **No Trade Issue** and maximize opportunity capture in minimum time (PAP
 - Throughput-oriented gate profile enabled.
 - Dry-spell required-R relaxation active.
 - Volume sleep no longer a hard blocker under paper speed.
-- Risk halts no longer freeze entries under paper speed.
+- Risk-gate halt/daily-loss/cap rejections no longer freeze entries under paper speed.
 
 ## Next pass (recommended)
 - Add per-gate live counters (blocked by: volume, regime, edge, risk).
