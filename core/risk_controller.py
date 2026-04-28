@@ -15,6 +15,12 @@ from config import cfg
 from core.pnl_calculator import PurePnLCalculator, TradeRecord
 from utils.capital_scaler import CapitalScaler
 
+# Dry-spell required-R relaxation knobs are kept local to avoid config merge churn.
+_R_RELAX_T1 = 0.15
+_R_RELAX_T2 = 0.35
+_R_RELAX_T3 = 0.60
+_R_FLOOR    = 1.05
+
 
 @dataclass
 class PendingLimitOrder:
@@ -116,14 +122,14 @@ class RiskController:
     def _dry_spell_r_relaxation(self, minutes_no_trade: float) -> float:
         """
         Return temporary required_r relaxation during trade dry spells.
-        Mirrors activator tiers but keeps a hard floor via cfg.RISK_R_FLOOR.
+        Mirrors activator tiers but keeps a hard floor via _R_FLOOR.
         """
         if minutes_no_trade >= cfg.ACTIVATOR_T3_MIN:
-            return cfg.RISK_R_RELAX_T3
+            return _R_RELAX_T3
         if minutes_no_trade >= cfg.ACTIVATOR_T2_MIN:
-            return cfg.RISK_R_RELAX_T2
+            return _R_RELAX_T2
         if minutes_no_trade >= cfg.ACTIVATOR_T1_MIN:
-            return cfg.RISK_R_RELAX_T1
+            return _R_RELAX_T1
         return 0.0
 
     # Regime → base minimum-R lookup (Fix B)
@@ -161,7 +167,7 @@ class RiskController:
         required_r behavior:
           1) Start with regime-aware base + volatility premium.
           2) During dry spells, apply tiered relaxation based on minutes_no_trade.
-          3) Never go below cfg.RISK_R_FLOOR (hard protection).
+          3) Never go below _R_FLOOR (hard protection).
         """
         if qty <= 0:
             return False, {"reason": "invalid_qty"}
@@ -183,7 +189,7 @@ class RiskController:
         base_r = self._regime_base_r(regime)
         required_r_raw = self.calculate_dynamic_edge(base_r, current_volatility)
         r_relax = self._dry_spell_r_relaxation(minutes_no_trade)
-        required_r = max(cfg.RISK_R_FLOOR, required_r_raw - r_relax)
+        required_r = max(_R_FLOOR, required_r_raw - r_relax)
         ok = (net_if_tp > 0) and (rr_after_cost >= required_r)
 
         return ok, {

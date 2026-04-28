@@ -72,13 +72,6 @@ class EngineConfig(BaseSettings):
     REGIME_MIN_R_TRENDING: float = 1.50        # enforce decent RR in trend trades
     REGIME_MIN_R_MEAN_REVERTING: float = 1.80  # MR stays stricter in normal mode (loss-heavy historically)
     REGIME_MIN_R_VOLATILE: float = 1.50        # breakouts still need meaningful post-cost edge
-    # qFTD-040: no-trade remediation without globally weakening quality gates.
-    # During dry spells, RiskController can temporarily reduce required_r.
-    RISK_R_RELAX_T1: float = 0.15              # applied when minutes_no_trade >= ACTIVATOR_T1_MIN
-    RISK_R_RELAX_T2: float = 0.35              # applied when minutes_no_trade >= ACTIVATOR_T2_MIN
-    RISK_R_RELAX_T3: float = 0.60              # applied when minutes_no_trade >= ACTIVATOR_T3_MIN
-    RISK_R_FLOOR: float = 1.05                 # never relax below this post-cost minimum R
-
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
