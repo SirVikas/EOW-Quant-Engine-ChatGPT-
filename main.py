@@ -580,9 +580,20 @@ async def on_tick(tick: Tick):
 
         # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
+        _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
+        _vol_mult = thresholds.volume_multiplier
+        if _paper_speed:
+            # Aggressive paper throughput mode: relax sleep gate to its floor.
+            _vol_mult = min(_vol_mult, 0.20)
         vol_active, vol_reason = volume_filter.is_active(
-            sym, vol_buf, vol_multiplier=thresholds.volume_multiplier,
+            sym, vol_buf, vol_multiplier=_vol_mult,
         )
+        if _paper_speed and not vol_active:
+            _thought(
+                f"⚡ PAPER_SPEED bypass {sym}: {vol_reason}",
+                "FILTER",
+            )
+            vol_active = True
         if not cfg.BYPASS_ALL_GATES and not vol_active:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
             trade_flow_monitor.record_skip(sym, vol_reason)
@@ -1212,6 +1223,7 @@ async def on_tick(tick: Tick):
                 qty=sizing.qty,
                 current_volatility=atr_pct,
                 regime=regime.value,   # Fix B: regime-specific RR threshold
+                minutes_no_trade=_tf_mins,  # qFTD-040: tiered required_r relaxation during dry spells
             )
             if not cfg.BYPASS_ALL_GATES and not edge_ok:
                 rr_net = edge.get('rr_after_cost', 0)
