@@ -52,3 +52,20 @@ def test_regime_base_r_defaults_match_documented_thresholds():
     assert rc._regime_base_r("TRENDING") == 1.50
     assert rc._regime_base_r("MEAN_REVERTING") == 1.80
     assert rc._regime_base_r("VOLATILITY_EXPANSION") == 1.50
+
+
+def test_required_r_relaxation_respects_hard_floor():
+    rc = _controller()
+    _, detail = rc.get_trade_decision(
+        side="LONG",
+        entry=100.0,
+        take_profit=102.0,
+        stop_loss=99.0,
+        qty=10.0,
+        current_volatility=0.20,
+        regime="MEAN_REVERTING",
+        minutes_no_trade=120.0,  # far beyond T3
+    )
+
+    assert detail["required_r_relax"] > 0
+    assert detail["required_r"] >= 1.05

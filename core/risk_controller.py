@@ -158,11 +158,10 @@ class RiskController:
         Evaluate whether a trade has enough post-cost edge to justify entry.
         Uses conservative taker fees + slippage + ATR-based slippage premium.
 
-        Fix B: required_r is now regime-aware:
-          TRENDING             → 1.20  (trends deliver large R, keep bar high)
-          MEAN_REVERTING       → 1.05  (high WR compensates smaller R per trade)
-          VOLATILITY_EXPANSION → 1.15  (breakouts fast, moderate bar)
-          UNKNOWN / fallback   → 1.20  (conservative default)
+        required_r behavior:
+          1) Start with regime-aware base + volatility premium.
+          2) During dry spells, apply tiered relaxation based on minutes_no_trade.
+          3) Never go below cfg.RISK_R_FLOOR (hard protection).
         """
         if qty <= 0:
             return False, {"reason": "invalid_qty"}
