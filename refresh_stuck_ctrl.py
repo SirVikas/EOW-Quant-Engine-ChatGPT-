@@ -73,6 +73,13 @@ def _is_key_down(vk_code: int) -> bool:
     return bool(USER32.GetAsyncKeyState(vk_code) & 0x8000)
 
 
+def _tap_ctrl() -> None:
+    """Optional tap to resync apps that track Ctrl transitions."""
+    _send_input_key(VK_LCONTROL, key_up=False)
+    time.sleep(0.01)
+    _send_input_key(VK_LCONTROL, key_up=True)
+
+
 def _release_once() -> Tuple[bool, str]:
     methods = []
 
@@ -85,6 +92,10 @@ def _release_once() -> Tuple[bool, str]:
     _key_event_fallback(VK_LCONTROL, key_up=True)
     _key_event_fallback(VK_RCONTROL, key_up=True)
     methods.append("keybd_event fallback")
+
+    # Optional tap to satisfy apps that need transition edges to clear stuck-state flags.
+    _tap_ctrl()
+    methods.append("Ctrl tap resync")
 
     return l_ok and r_ok, ", ".join(methods)
 
