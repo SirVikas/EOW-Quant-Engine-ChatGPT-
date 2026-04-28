@@ -764,6 +764,42 @@ async def on_tick(tick: Tick):
             else:
                 logger.debug(f"[SIG] {sym} alpha → NONE (RR/score below threshold)")
 
+        # PAPER_SPEED fallback injector:
+        # If both primary + alpha signals are NONE, synthesize a minimal
+        # momentum signal so the pipeline can execute and recover flow.
+        if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
+            _entry = closes[-1]
+            _mom_up = closes[-1] >= closes[-2]
+            _atr_px = max(
+                abs(closes[-1] - closes[-2]),
+                _entry * 0.001,                      # 0.10% floor
+                (_entry * atr_pct / 100.0),
+            )
+            _sl_dist = _atr_px * 1.5
+            _tp_dist = _atr_px * 2.5
+            if _mom_up:
+                _sl = _entry - _sl_dist
+                _tp = _entry + _tp_dist
+                _side = Signal.LONG
+            else:
+                _sl = _entry + _sl_dist
+                _tp = _entry - _tp_dist
+                _side = Signal.SHORT
+            sig = TradeSignal(
+                symbol=sym,
+                signal=_side,
+                entry_price=_entry,
+                stop_loss=_sl,
+                take_profit=_tp,
+                confidence=0.51,
+                strategy_id=f"{strategy_type}_PAPER_SPEED",
+                reason="PAPER_SPEED_FALLBACK(momentum micro-signal)",
+            )
+            _thought(
+                f"⚡ PAPER_SPEED fallback {sym}: {_side.value} entry={_entry:.4f}",
+                "SIGNAL",
+            )
+
         if sig and sig.signal != Signal.NONE:
             execution_drive_policy.record_signal(sym)   # EDP: track signal activity
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
