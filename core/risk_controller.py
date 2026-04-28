@@ -15,6 +15,12 @@ from config import cfg
 from core.pnl_calculator import PurePnLCalculator, TradeRecord
 from utils.capital_scaler import CapitalScaler
 
+# Dry-spell required-R relaxation knobs are kept local to avoid config merge churn.
+_R_RELAX_T1 = 0.15
+_R_RELAX_T2 = 0.35
+_R_RELAX_T3 = 0.60
+_R_FLOOR    = 1.05
+
 
 @dataclass
 class PendingLimitOrder:
@@ -113,6 +119,19 @@ class RiskController:
         volatility_premium = max(0.0, (current_volatility - baseline) / baseline) * cfg.VOL_PREMIUM_MULT
         return base_r + volatility_premium
 
+    def _dry_spell_r_relaxation(self, minutes_no_trade: float) -> float:
+        """
+        Return temporary required_r relaxation during trade dry spells.
+        Mirrors activator tiers but keeps a hard floor via _R_FLOOR.
+        """
+        if minutes_no_trade >= cfg.ACTIVATOR_T3_MIN:
+            return _R_RELAX_T3
+        if minutes_no_trade >= cfg.ACTIVATOR_T2_MIN:
+            return _R_RELAX_T2
+        if minutes_no_trade >= cfg.ACTIVATOR_T1_MIN:
+            return _R_RELAX_T1
+        return 0.0
+
     # Regime → base minimum-R lookup (Fix B)
     # Mean-reversion compensates lower R with higher win-rate; accept a tighter bar.
     _REGIME_BASE_R = {
@@ -139,16 +158,16 @@ class RiskController:
         qty: float,
         current_volatility: float,
         regime: str = "UNKNOWN",   # Fix B: receive live regime from on_tick
+        minutes_no_trade: float = 0.0,
     ) -> tuple[bool, dict]:
         """
         Evaluate whether a trade has enough post-cost edge to justify entry.
         Uses conservative taker fees + slippage + ATR-based slippage premium.
 
-        Fix B: required_r is now regime-aware:
-          TRENDING             → 1.20  (trends deliver large R, keep bar high)
-          MEAN_REVERTING       → 1.05  (high WR compensates smaller R per trade)
-          VOLATILITY_EXPANSION → 1.15  (breakouts fast, moderate bar)
-          UNKNOWN / fallback   → 1.20  (conservative default)
+        required_r behavior:
+          1) Start with regime-aware base + volatility premium.
+          2) During dry spells, apply tiered relaxation based on minutes_no_trade.
+          3) Never go below _R_FLOOR (hard protection).
         """
         if qty <= 0:
             return False, {"reason": "invalid_qty"}
@@ -168,7 +187,9 @@ class RiskController:
         net_if_tp = gross_tp - total_cost
         rr_after_cost = (net_if_tp / risk_usdt) if risk_usdt > 0 else 0.0
         base_r = self._regime_base_r(regime)
-        required_r = self.calculate_dynamic_edge(base_r, current_volatility)
+        required_r_raw = self.calculate_dynamic_edge(base_r, current_volatility)
+        r_relax = self._dry_spell_r_relaxation(minutes_no_trade)
+        required_r = max(_R_FLOOR, required_r_raw - r_relax)
         ok = (net_if_tp > 0) and (rr_after_cost >= required_r)
 
         return ok, {
@@ -182,8 +203,11 @@ class RiskController:
             "rr": rr,
             "rr_after_cost": rr_after_cost,
             "required_r": required_r,
+            "required_r_raw": required_r_raw,
+            "required_r_relax": r_relax,
             "base_r_used": base_r,
             "current_volatility": current_volatility,
+            "minutes_no_trade": minutes_no_trade,
         }
 
     def submit_limit_order(
