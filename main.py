@@ -580,9 +580,20 @@ async def on_tick(tick: Tick):
 
         # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
+        _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
+        _vol_mult = thresholds.volume_multiplier
+        if _paper_speed:
+            # Aggressive paper throughput mode: relax sleep gate to its floor.
+            _vol_mult = min(_vol_mult, 0.20)
         vol_active, vol_reason = volume_filter.is_active(
-            sym, vol_buf, vol_multiplier=thresholds.volume_multiplier,
+            sym, vol_buf, vol_multiplier=_vol_mult,
         )
+        if _paper_speed and not vol_active:
+            _thought(
+                f"⚡ PAPER_SPEED bypass {sym}: {vol_reason}",
+                "FILTER",
+            )
+            vol_active = True
         if not cfg.BYPASS_ALL_GATES and not vol_active:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
             trade_flow_monitor.record_skip(sym, vol_reason)
@@ -596,6 +607,10 @@ async def on_tick(tick: Tick):
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
         risk_allowed, risk_reason = risk_engine.check_new_trade()
+        if _paper_speed and not risk_allowed:
+            if any(k in risk_reason for k in ("HALTED:", "MAX_DAILY_LOSS", "DAILY_TRADE_CAP")):
+                _thought(f"⚡ PAPER_SPEED bypass risk gate {sym}: {risk_reason}", "FILTER")
+                risk_allowed = True
         if not cfg.BYPASS_ALL_GATES and not risk_allowed:
             return   # daily risk limit reached
 
@@ -748,6 +763,42 @@ async def on_tick(tick: Tick):
                 )
             else:
                 logger.debug(f"[SIG] {sym} alpha → NONE (RR/score below threshold)")
+
+        # PAPER_SPEED fallback injector:
+        # If both primary + alpha signals are NONE, synthesize a minimal
+        # momentum signal so the pipeline can execute and recover flow.
+        if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
+            _entry = closes[-1]
+            _mom_up = closes[-1] >= closes[-2]
+            _atr_px = max(
+                abs(closes[-1] - closes[-2]),
+                _entry * 0.001,                      # 0.10% floor
+                (_entry * atr_pct / 100.0),
+            )
+            _sl_dist = _atr_px * 1.5
+            _tp_dist = _atr_px * 2.5
+            if _mom_up:
+                _sl = _entry - _sl_dist
+                _tp = _entry + _tp_dist
+                _side = Signal.LONG
+            else:
+                _sl = _entry + _sl_dist
+                _tp = _entry - _tp_dist
+                _side = Signal.SHORT
+            sig = TradeSignal(
+                symbol=sym,
+                signal=_side,
+                entry_price=_entry,
+                stop_loss=_sl,
+                take_profit=_tp,
+                confidence=0.51,
+                strategy_id=f"{strategy_type}_PAPER_SPEED",
+                reason="PAPER_SPEED_FALLBACK(momentum micro-signal)",
+            )
+            _thought(
+                f"⚡ PAPER_SPEED fallback {sym}: {_side.value} entry={_entry:.4f}",
+                "SIGNAL",
+            )
 
         if sig and sig.signal != Signal.NONE:
             execution_drive_policy.record_signal(sym)   # EDP: track signal activity
@@ -1212,6 +1263,7 @@ async def on_tick(tick: Tick):
                 qty=sizing.qty,
                 current_volatility=atr_pct,
                 regime=regime.value,   # Fix B: regime-specific RR threshold
+                minutes_no_trade=_tf_mins,  # qFTD-040: tiered required_r relaxation during dry spells
             )
             if not cfg.BYPASS_ALL_GATES and not edge_ok:
                 rr_net = edge.get('rr_after_cost', 0)
@@ -1249,8 +1301,14 @@ async def on_tick(tick: Tick):
                 )
                 return
 
-            # Open position — use Limit Order when enabled (saves fees + slippage)
-            if cfg.USE_LIMIT_ORDERS:
+            # Open position — in PAPER_SPEED force market path to avoid pending-order dead time.
+            _use_limit_orders = cfg.USE_LIMIT_ORDERS and (not _paper_speed)
+            if cfg.USE_LIMIT_ORDERS and _paper_speed:
+                _thought(
+                    f"⚡ PAPER_SPEED market-fill override {sym}: USE_LIMIT_ORDERS bypassed",
+                    "TRADE",
+                )
+            if _use_limit_orders:
                 offset = sig.entry_price * (cfg.LIMIT_ENTRY_OFFSET_BPS / 10_000)
                 if sig.signal.value == "LONG":
                     limit_px = sig.entry_price - offset   # buy slightly below signal price
