@@ -69,9 +69,10 @@ class EngineConfig(BaseSettings):
     BASE_MIN_R: float = 1.50               # Minimum post-cost R — raised to enforce positive expectancy
     ATR_SLIPPAGE_MULT: float = 0.10       # Reduced from 0.20 — keeps per-trade ATR overhead proportionate
     # Per-regime minimum R thresholds — tuned for MAX PROFIT (PF-first)
-    REGIME_MIN_R_TRENDING: float = 1.50        # enforce decent RR in trend trades
-    REGIME_MIN_R_MEAN_REVERTING: float = 1.80  # MR stays stricter in normal mode (loss-heavy historically)
-    REGIME_MIN_R_VOLATILE: float = 1.50        # breakouts still need meaningful post-cost edge
+    REGIME_MIN_R_TRENDING: float = 1.50        # raised 1.10→1.50 — enforce decent RR in trend trades
+    REGIME_MIN_R_MEAN_REVERTING: float = 1.80  # raised 1.05→1.80 — MR caused most losses; needs wider TP
+    REGIME_MIN_R_VOLATILE: float = 1.50        # raised 1.05→1.50 — breakouts still move fast but need edge
+
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
