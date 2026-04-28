@@ -1,0 +1,87 @@
+
+D:\EOW Quant Engine V14.0(ChatGPT)\eow_quant_engine_FINAL_v2.2\eow_quant_engine>install_and_run.bat
+
+ ================================================
+  EOW QUANT ENGINE  v1.6  ÔÇö  Self-Evolving AI
+  Paper Trading Mode  |  Auto-Optimized DNA
+ ================================================
+
+ [OK] Python 3.12.10 ready
+ [..] Setting up environment...
+ [OK] Environment ready
+ [..] Installing packages (1-2 minutes on first run)...
+ [OK] All packages installed
+ [OK] Data folders ready
+ [OK] Config ready
+ [OK] Optimized strategy DNA ready
+
+ ================================================
+  Starting engine in PAPER mode...
+  Dashboard: http://127.0.0.1:8000
+
+  Browser mein khud khul jaayega.
+  Band karne ke liye: Ctrl+C dabayein
+ ================================================
+
+
+←[96m╔══════════════════════════════════════════════════════╗
+║          EOW QUANT ENGINE  —  v1.0                   ║
+║          Self-Evolving Multi-Asset Trading System     ║
+╚══════════════════════════════════════════════════════╝←[0m
+  Mode      : ←[92mPAPER←[0m
+  API       : ←[96mhttp://127.0.0.1:8000←[0m
+  Dashboard : ←[96mhttp://127.0.0.1:8000←[0m
+
+←[94m  System Checks:←[0m
+  ←[92m●←[0m Redis      : connected
+  ←[93m●←[0m Engine     : starting...2026-04-16 21:45:56.046 | INFO     | core.market_data:__init__:100 - [MDP] Streams → real Binance (public) | Execution → LIVE
+2026-04-16 21:45:56.069 | INFO     | main:_thought:125 - [CT-SCAN] 🚀 EOW Quant Engine booting…
+2026-04-16 21:45:56.069 | INFO     | main:_thought:125 - [CT-SCAN] Mode: PAPER | Capital: 1000.0 USDT
+2026-04-16 21:45:56.069 | SUCCESS  | core.genome_engine:load_persisted_dna:561 - [GENOME] DNA restored from disk (saved 29605935.9 min ago). Strategies: []
+2026-04-16 21:45:56.069 | INFO     | core.risk_engine:initialize:91 - [RISK-ENG] Initialized | equity=1000.00 day=2026-04-16
+2026-04-16 21:45:56.069 | DEBUG    | core.exchange.api_manager:_load_credentials:113 - [API-MGR] Credentials loaded from environment.
+2026-04-16 21:45:56.647 | INFO     | core.exchange.binance_client:connect:62 - [BINANCE] Connected (LIVE | READ_ONLY)
+..2026-04-16 21:45:58.692 | INFO     | core.bootstrap.api_loader:_print_boot_lines:86 - [BOOT] Redis: CONNECTED ✅ | WebSocket: STABLE ✅ | Indicators: VALIDATED ✅
+2026-04-16 21:45:58.692 | INFO     | core.bootstrap.api_loader:_print_boot_lines:91 - [BOOT] Strategy Engine: ACTIVE ✅ | Risk Engine: ACTIVE ✅ | Execution Mode: PAPER
+2026-04-16 21:45:58.734 | INFO     | core.bootstrap.api_loader:_print_boot_lines:96 - [BOOT] API: READ-ONLY ✅ | Deployability: IMPROVING (score accumulates during session)
+2026-04-16 21:45:58.740 | INFO     | core.genome_engine:start:183 - [GENOME] Engine started.
+2026-04-16 21:45:58.740 | INFO     | core.self_healing:start:76 - [HEAL] Self-Healing Protocol started.
+2026-04-16 21:45:58.747 | INFO     | core.data_lake:start:52 - [LAKE] SQLite data lake open → data/eow_lake.db
+2026-04-16 21:45:58.754 | INFO     | core.ws_stabilizer:start:107 - [WS-STAB] Watchdog started.
+2026-04-16 21:45:59.255 | SUCCESS  | core.pnl_calculator:replay_from_history:243 - [PNL] Session restored: 38 trades | Capital: 924.60 USDT (was 1000.00 USDT at start)
+2026-04-16 21:45:59.255 | INFO     | main:_thought:125 - [CT-SCAN] 📂 Session restored: 38 trades replayed from DataLake. Equity: 924.60 USDT
+2026-04-16 21:45:59.270 | INFO     | main:_thought:125 - [CT-SCAN] All subsystems online. Scanning markets…
+  ● Engine     : ready
+
+  Boot Status:
+    Redis: NOT_AVAILABLE ❌  |  WebSocket: DISCONNECTED ❌  |  Indicators: VALIDATED ✅
+    Strategy Engine: ACTIVE ✅  |  Risk Engine: ACTIVE ✅  |  Execution Mode: PAPER
+    API: READ-ONLY ✅  |  Deployability: NOT_READY (43/100)
+
+
+  API Endpoints:
+    GET   /api/status                    Engine health & mode
+    GET   /api/pnl                       Pure PnL stats & equity curve
+    GET   /api/market                    Live market snapshot
+    GET   /api/positions                 Open positions & risk state
+    GET   /api/genome                    Genome evolution log & active DNA
+    GET   /api/regime                    Market regime per symbol
+    GET   /api/thoughts                  CT-Scan AI thought log
+    GET   /api/health                    Self-heal watchdog status
+    POST  /api/mode/PAPER                Switch to Paper mode
+    POST  /api/mode/LIVE                 Switch to Live mode
+    POST  /api/export                    Export full JSON state
+    POST  /api/emergency-close           Close all positions
+    WS    /ws                            Real-time dashboard feed
+
+2026-04-16 21:45:59.504 | INFO     | utils.export_manager:import_dna:98 - [EXPORT] 📥 Imported DNA from D:\EOW Quant Engine V14.0(ChatGPT)\eow_quant_engine_FINAL_v2.2\eow_quant_engine\data\exports\optimized_dna.json: ['TrendFollowing', 'MeanReversion', 'VolatilityExpansion']
+2026-04-16 21:45:59.506 | INFO     | main:_thought:125 - [CT-SCAN] 📥 DNA imported from D:\EOW Quant Engine V14.0(ChatGPT)\eow_quant_engine_FINAL_v2.2\eow_quant_engine\data\exports\optimized_dna.json
+  ● DNA         : optimized parameters loaded
+  Engine is live. Press Ctrl+C to stop.
+
+  ● Dashboard  : opening browser → http://127.0.0.1:8000
+2026-04-16 21:46:01.120 | INFO     | core.market_data:start:113 - [MDP] Redis connected — pub/sub active.
+2026-04-16 21:46:03.085 | INFO     | main:websocket_endpoint:1514 - [WS] Client connected. Total: 1
+2026-04-16 21:46:03.437 | INFO     | core.market_data:start:120 - [MDP] Watching 23 symbols: ['BTCUSDT', 'ETHUSDT', 'BARDUSDT', 'SOLUSDT', 'XRPUSDT']…
+2026-04-16 21:46:04.673 | INFO     | core.market_data:_stream_loop:248 - [MDP] WebSocket connected.
+2026-04-16 21:46:04.743 | INFO     | core.ws_stabilizer:record_tick:92 - [WS-STAB] Stream healthy — backoff reset.

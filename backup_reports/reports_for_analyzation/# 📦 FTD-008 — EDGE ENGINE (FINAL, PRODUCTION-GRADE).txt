@@ -1,0 +1,359 @@
+# 📦 FTD-008 — EDGE ENGINE (FINAL, PRODUCTION-GRADE)
+
+### Ref: FTD-008-EOW-EDGE-CREATION-INSTITUTIONAL
+
+---
+
+# 🧠 0. CONTEXT (CRITICAL UNDERSTANDING)
+
+## ✅ Current System State
+
+* Pipeline stable ✔
+* Risk control strong ✔
+* Boot-safe architecture mostly working ✔
+* RR geometry fixed (≥2.0) ✔
+* Costs controlled ✔
+
+---
+
+## ❗ Core Problem
+
+```text
+System executes trades without proven edge
+```
+
+---
+
+## 🎯 OBJECTIVE
+
+Convert system into:
+
+```text
+LOW FREQUENCY + HIGH CONVICTION + POSITIVE EXPECTANCY ENGINE
+```
+
+---
+
+# 🚨 DESIGN CORRECTION (VERY IMPORTANT)
+
+❗ EV is NOT reliable in early stage (low trades)
+
+👉 Therefore:
+
+```text
+EV = SOFT FILTER (initially)
+Score + RR = HARD FILTER (always)
+```
+
+---
+
+# 🧩 1. EDGE FILTER (PRIMARY GATE — HARD)
+
+---
+
+## 📍 FILE: `/core/edge_filter.py` (NEW)
+
+```python
+def has_minimum_edge(signal):
+    return (
+        signal.score >= cfg.MIN_TRADE_SCORE and
+        signal.rr >= cfg.MIN_RR_RATIO
+    )
+```
+
+---
+
+## 📍 USAGE (MANDATORY)
+
+```python
+if not has_minimum_edge(signal):
+    print("[EDGE-BLOCK] score/RR insufficient")
+    return
+```
+
+---
+
+## ❗ RULE
+
+```text
+Score + RR = NON-NEGOTIABLE ENTRY CONDITION
+```
+
+---
+
+# 🧩 2. EV ENGINE (PHASED ACTIVATION)
+
+---
+
+## 📍 FILE: `/core/ev_engine.py`
+
+---
+
+### ➕ ADD:
+
+```python
+def is_ev_reliable(trade_count: int) -> bool:
+    return trade_count >= 30
+```
+
+---
+
+### ➕ MODIFY:
+
+```python
+def is_trade_allowed(ev: float, trade_count: int) -> bool:
+    if not is_ev_reliable(trade_count):
+        return True  # bootstrap phase
+    return ev > 0
+```
+
+---
+
+## 📍 USAGE
+
+```python
+if not ev_engine.is_trade_allowed(signal.ev, strategy.trade_count):
+    print(f"[EV-BLOCK] EV negative")
+    return
+```
+
+---
+
+## ❗ RULE
+
+| Phase      | EV Behavior |
+| ---------- | ----------- |
+| <30 trades | ignored     |
+| ≥30 trades | HARD FILTER |
+
+---
+
+---
+
+# 🧩 3. TRADE RANKING (MANDATORY SELECTION)
+
+---
+
+## 📍 FILE: `/core/trade_ranker.py` (NEW)
+
+```python
+def rank_trades(signals):
+    return sorted(
+        signals,
+        key=lambda s: (s.score, s.ev, s.rr),
+        reverse=True
+    )
+```
+
+---
+
+## 📍 USAGE
+
+```python
+ranked = rank_trades(valid_signals)
+best_trade = ranked[0]
+execute(best_trade)
+```
+
+---
+
+## ❗ RULE
+
+```text
+ONLY 1 TRADE PER CYCLE
+```
+
+---
+
+---
+
+# 🧩 4. EXPLORE ENGINE (STRICT CONTROL)
+
+---
+
+## 📍 FILE: `/core/explore_engine.py`
+
+---
+
+```python
+def allow_explore(system_state, trades_last_30m):
+    if system_state != "LIVE":
+        return False
+    if trades_last_30m > 0:
+        return False
+    return True
+```
+
+---
+
+## ❗ RULE
+
+```text
+Explore only when system is idle
+```
+
+---
+
+---
+
+# 🧩 5. GENOME ENGINE (CONTROLLED ACTIVATION)
+
+---
+
+## 📍 FILE: `/core/genome_engine.py`
+
+---
+
+```python
+def is_strategy_allowed(strategy):
+    return (
+        strategy.trades >= 30 and
+        strategy.oos_pf > 1.2
+    )
+```
+
+---
+
+## 📍 USAGE
+
+```python
+if not genome_engine.is_strategy_allowed(strategy):
+    continue
+```
+
+---
+
+## ❗ RULE
+
+```text
+Only proven strategies survive
+```
+
+---
+
+---
+
+# 🧩 6. TRADE FREQUENCY CONTROL
+
+---
+
+## 📍 FILE: `/config.py`
+
+```python
+MAX_TRADES_PER_HOUR = 3
+MAX_TRADES_PER_DAY = 10
+```
+
+---
+
+## 📍 FILE: `/core/trade_frequency.py`
+
+```python
+def can_trade(hour_count, day_count):
+    return (
+        hour_count < cfg.MAX_TRADES_PER_HOUR and
+        day_count < cfg.MAX_TRADES_PER_DAY
+    )
+```
+
+---
+
+---
+
+# 🧩 7. COST GUARD (FINAL CHECK)
+
+---
+
+## 📍 FILE: `/core/cost_guard.py`
+
+```python
+def is_cost_valid(expected_profit, cost):
+    return cost <= expected_profit * cfg.MAX_COST_FRACTION
+```
+
+---
+
+---
+
+# 🧩 8. FINAL EXECUTION PIPELINE
+
+---
+
+```text
+SCAN
+ → EDGE FILTER (score + RR)
+ → COST CHECK
+ → EV FILTER (conditional)
+ → RANKING
+ → SELECT TOP 1
+ → FREQUENCY CHECK
+ → EXECUTE
+```
+
+---
+
+---
+
+# 🧪 9. VERIFIER SCRIPT
+
+---
+
+## 📍 `/tests/verify_edge_engine.py`
+
+```python
+print("[VERIFY] Edge filter active")
+print("[VERIFY] EV phased logic active")
+print("[VERIFY] Ranking active")
+print("[VERIFY] Explore control active")
+print("[VERIFY] Genome filter active")
+```
+
+---
+
+---
+
+# 🚨 10. FAILURE CONDITIONS
+
+System MUST BLOCK if:
+
+* score < threshold but trade executed ❌
+* RR < 2.0 but trade executed ❌
+* multiple trades per cycle ❌
+* EV negative (after 30 trades) but trade executed ❌
+
+---
+
+---
+
+# 🧠 11. EXPECTED OUTCOME
+
+---
+
+## BEFORE
+
+```text
+Many trades
+Low quality
+Negative PF
+```
+
+---
+
+## AFTER
+
+```text
+Few trades
+High quality
+PF > 1.2
+Stable growth
+```
+
+---
+
+---
+
+# 🏁 FINAL PRINCIPLE
+
+“Capital flows only where edge is proven — not where signals are frequent.”
+
+---

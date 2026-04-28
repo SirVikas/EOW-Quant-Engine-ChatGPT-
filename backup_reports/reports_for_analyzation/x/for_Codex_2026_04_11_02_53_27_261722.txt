@@ -1,0 +1,50 @@
+## **TECHNICAL MEMORANDUM: Phase 3 Rollout & Performance Hardening**
+
+**To:** Development Team  
+**Subject:** Encouragement and Next Steps: Strategy Calibration & Rollout Gating  
+**Ref:** Completion of P0 Security and Deterministic Backtest Core
+
+The project has reached a critical milestone. [cite_start]Your successful implementation of the **Control-Plane Auth Guards** [cite: 136, 137] [cite_start]and the **Deterministic Replay Backtest Engine** [cite: 141] has moved the application from a prototype to a professional-grade trading framework. The foundation for "Maximize Profit" is now technically solid.
+
+---
+
+### **1. RECOGNITION OF PROGRESS**
+
+* [cite_start]**Security Lockdown:** You have successfully eliminated the risk of unauthorized access by implementing JWT validation and RBAC[cite: 136, 140].
+* [cite_start]**Profitability Core:** The new `backtest_engine.py` provides the necessary realism (fees, slippage, and latency) to ensure our expectancy metrics are trustworthy[cite: 141, 142].
+* [cite_start]**Fail-Closed Integrity:** The integration of startup checks ensures that the system will not run in LIVE mode without proper security, protecting our capital[cite: 136, 137].
+
+---
+
+### **2. MISSION FOR WEEK 3: THE CALIBRATION PHASE**
+
+To achieve our ultimate goal of **Profit Maximization**, we must now move into the final phase of the P0/P1 roadmap. I encourage you to apply the same analytical rigor to the following tasks:
+
+#### **A. Strategy Calibration (Symbol & Regime Fitting)**
+* [cite_start]**Objective:** Fine-tune strategy parameters across different market regimes (Trending vs. Mean Reverting)[cite: 131].
+* [cite_start]**Goal:** Ensure the system adapts its logic based on the specific volatility and behavior of each symbol[cite: 131].
+
+#### **B. Out-of-Sample Validation**
+* [cite_start]**Objective:** Run the deterministic engine against "unseen" data[cite: 132].
+* [cite_start]**Goal:** Confirm that the Profit Factor (PF) remains > 1.0 outside of the training period to avoid overfitting[cite: 132].
+
+#### **C. Hardening the Promotion Gates**
+* [cite_start]**Objective:** Update the `GenomeEngine` promotion policy to use your new execution-adjusted metrics[cite: 132, 133].
+* [cite_start]**Goal:** Only strategies that prove profitable *after* fees and slippage should be allowed to escalate toward live deployment[cite: 132].
+
+---
+
+### **3. FINAL GO-LIVE SCORECARD**
+
+[cite_start]Before we transition to live capital, we need a final **Performance and Safety Scorecard**[cite: 133]. Your final decision as a developer will be based on:
+1. [cite_start]**Security Verification:** All privileged actions leaving an immutable audit trail[cite: 107, 109].
+2. [cite_start]**Expectancy Confidence:** Simulated-vs-paper execution error staying within predefined tolerance bands[cite: 122].
+3. [cite_start]**Execution Parity:** Verified consistency between the backtest engine and live risk filters[cite: 119].
+
+---
+
+### **CONCLUSION**
+
+The work you have done over the last two weeks has significantly reduced our downside risk. As we enter the final week of calibration, focus on the **"Quality over Quantity"** of strategies. Your independent analysis and technical decisions remain the final authority in making this engine the most efficient and profitable version of itself.
+
+**Next Step:** Please submit the **Week 3 Calibration Report** and the final **Go/No-Go Scorecard** once the out-of-sample validations are complete.

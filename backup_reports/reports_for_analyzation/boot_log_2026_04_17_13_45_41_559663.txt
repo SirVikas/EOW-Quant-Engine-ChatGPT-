@@ -1,0 +1,152 @@
+
+D:\EOW Quant Engine V14.0(ChatGPT)\eow_quant_engine_FINAL_v2.2\eow_quant_engine>install_and_run.bat
+
+ ================================================
+  EOW QUANT ENGINE  v1.6  ÔÇö  Self-Evolving AI
+  Paper Trading Mode  |  Auto-Optimized DNA
+ ================================================
+
+ [OK] Python 3.12.10 ready
+ [..] Setting up environment...
+ [OK] Environment ready
+ [..] Installing packages (1-2 minutes on first run)...
+ [OK] All packages installed
+ [OK] Data folders ready
+ [OK] Config ready
+ [OK] Optimized strategy DNA ready
+
+ ================================================
+  Starting engine in PAPER mode...
+  Dashboard: http://127.0.0.1:8000
+
+  Browser mein khud khul jaayega.
+  Band karne ke liye: Ctrl+C dabayein
+ ================================================
+
+
+←[96m╔══════════════════════════════════════════════════════╗
+║          EOW QUANT ENGINE  —  v1.0                   ║
+║          Self-Evolving Multi-Asset Trading System     ║
+╚══════════════════════════════════════════════════════╝←[0m
+  Mode      : ←[92mPAPER←[0m
+  API       : ←[96mhttp://127.0.0.1:8000←[0m
+  Dashboard : ←[96mhttp://127.0.0.1:8000←[0m
+
+←[94m  System Checks:←[0m
+  ←[92m●←[0m Redis      : connected
+  ←[93m●←[0m Engine     : starting...2026-04-17 13:36:28.663 | INFO     | core.market_data:__init__:104 - [MDP] Streams → real Binance (public) | Execution → LIVE
+2026-04-17 13:36:28.682 | INFO     | main:_thought:128 - [CT-SCAN] 🚀 EOW Quant Engine booting…
+2026-04-17 13:36:28.684 | INFO     | main:_thought:128 - [CT-SCAN] Mode: PAPER | Capital: 1000.0 USDT
+2026-04-17 13:36:28.685 | SUCCESS  | core.genome_engine:load_persisted_dna:572 - [GENOME] DNA restored from disk (saved 0.0 min ago). Strategies: []
+2026-04-17 13:36:28.685 | INFO     | core.risk_engine:initialize:91 - [RISK-ENG] Initialized | equity=1000.00 day=2026-04-17
+2026-04-17 13:36:28.685 | DEBUG    | core.exchange.api_manager:_load_credentials:113 - [API-MGR] Credentials loaded from environment.
+2026-04-17 13:36:29.201 | INFO     | core.exchange.binance_client:connect:62 - [BINANCE] Connected (LIVE | READ_ONLY)
+2026-04-17 13:36:29.219 | INFO     | core.bootstrap.api_loader:_print_boot_lines:102 - [BOOT] Redis: CONNECTED ✅ | WebSocket: CONNECTING ❌ | Indicators: PENDING_RUNTIME_VALIDATION ❌
+2026-04-17 13:36:29.219 | INFO     | core.bootstrap.api_loader:_print_boot_lines:107 - [BOOT] Strategy Engine: ACTIVE ✅ | Risk Engine: ACTIVE ✅ | Execution Mode: PAPER
+2026-04-17 13:36:29.222 | INFO     | core.bootstrap.api_loader:_print_boot_lines:112 - [BOOT] API: READ-ONLY ✅ | Deployability: NOT_READY (0/100)
+2026-04-17 13:36:29.224 | INFO     | core.genome_engine:start:192 - [GENOME] Engine started.
+2026-04-17 13:36:29.224 | INFO     | core.self_healing:start:76 - [HEAL] Self-Healing Protocol started.
+2026-04-17 13:36:29.227 | INFO     | core.data_lake:start:52 - [LAKE] SQLite data lake open → data/eow_lake.db
+2026-04-17 13:36:29.227 | INFO     | core.ws_stabilizer:start:111 - [WS-STAB] Watchdog started.
+2026-04-17 13:36:29.240 | INFO     | core.market_data:start:117 - [MDP] Redis connected — pub/sub active.
+.2026-04-17 13:36:29.740 | SUCCESS  | core.pnl_calculator:replay_from_history:243 - [PNL] Session restored: 38 trades | Capital: 924.60 USDT (was 1000.00 USDT at start)
+2026-04-17 13:36:29.740 | INFO     | main:_thought:128 - [CT-SCAN] 📂 Session restored: 38 trades replayed from DataLake. Equity: 924.60 USDT
+2026-04-17 13:36:29.757 | INFO     | main:_thought:128 - [CT-SCAN] All subsystems online. Scanning markets…
+2026-04-17 13:36:29.930 | INFO     | core.market_data:start:124 - [MDP] Watching 30 symbols: ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'ORDIUSDT', 'XRPUSDT']…
+  ● Engine     : ready
+2026-04-17 13:36:31.101 | INFO     | core.candle_bootstrap:warmup:40 - [MDP] Candle warmup complete — seeded 30/30 symbols (failed=0).
+2026-04-17 13:36:32.147 | INFO     | core.market_data:_stream_loop:283 - [MDP] WebSocket connected.
+2026-04-17 13:36:32.263 | INFO     | core.ws_stabilizer:record_tick:96 - [WS-STAB] Stream healthy — backoff reset.
+2026-04-17 13:36:32.263 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] GIGGLEUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:32.409 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] NEIROUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:32.445 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] TSTUSDT initial → UNKNOWN (warming up)
+
+  Boot Status:
+    Redis: CONNECTED ✅  |  WebSocket: CONNECTED ✅  |  Indicators: WARMING_UP ✅
+    Strategy Engine: ACTIVE ✅  |  Risk Engine: ACTIVE ✅  |  Execution Mode: PAPER
+    API: READ-ONLY ✅  |  Deployability: NOT_READY (40/100)
+
+
+  API Endpoints:
+    GET   /api/status                    Engine health & mode
+    GET   /api/pnl                       Pure PnL stats & equity curve
+    GET   /api/market                    Live market snapshot
+    GET   /api/positions                 Open positions & risk state
+    GET   /api/genome                    Genome evolution log & active DNA
+    GET   /api/regime                    Market regime per symbol
+    GET   /api/thoughts                  CT-Scan AI thought log
+    GET   /api/health                    Self-heal watchdog status
+    POST  /api/mode/PAPER                Switch to Paper mode
+    POST  /api/mode/LIVE                 Switch to Live mode
+    POST  /api/export                    Export full JSON state
+    POST  /api/emergency-close           Close all positions
+    WS    /ws                            Real-time dashboard feed
+
+2026-04-17 13:36:32.499 | INFO     | utils.export_manager:import_dna:98 - [EXPORT] 📥 Imported DNA from D:\EOW Quant Engine V14.0(ChatGPT)\eow_quant_engine_FINAL_v2.2\eow_quant_engine\data\exports\optimized_dna.json: ['TrendFollowing', 'MeanReversion', 'VolatilityExpansion']
+2026-04-17 13:36:32.499 | INFO     | main:_thought:128 - [CT-SCAN] 📥 DNA imported from D:\EOW Quant Engine V14.0(ChatGPT)\eow_quant_engine_FINAL_v2.2\eow_quant_engine\data\exports\optimized_dna.json
+  ● DNA         : optimized parameters loaded
+  Engine is live. Press Ctrl+C to stop.
+
+2026-04-17 13:36:32.641 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] ETHUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:32.731 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] SIGNUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:32.751 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] TIAUSDT initial → UNKNOWN (warming up)
+  ● Dashboard  : opening browser → http://127.0.0.1:8000
+2026-04-17 13:36:33.132 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] PNUTUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:33.231 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] ORDIUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:33.437 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] TRXUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:33.441 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] BIOUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:33.500 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] BTCUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:34.160 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] 1000SATSUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:34.181 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] DOTUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:35.438 | INFO     | main:websocket_endpoint:1698 - [WS] Client connected. Total: 1
+2026-04-17 13:36:35.663 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] BNBUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:36.072 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] ARBUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:36.162 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] MOVRUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:36.348 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] SOLUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:36.366 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] LINKUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:36.481 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] SUIUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:36.577 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] ENAUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:36.814 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] TRUMPUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:37.012 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] BARDUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:37.252 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] ADAUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:38.986 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] AAVEUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:39.132 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] PENGUUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:41.779 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] XRPUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:42.332 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] AVAXUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:36:51.932 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] WLDUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:37:01.624 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] NEARUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:37:04.310 | DEBUG    | core.regime_debounce:push:64 - [REGIME-DB] FETUSDT initial → UNKNOWN (warming up)
+2026-04-17 13:37:29.553 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:37:29.553 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:37:29.770 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:37:29.773 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.
+2026-04-17 13:37:48.455 | INFO     | main:_thought:128 - [CT-SCAN] ⚡ Mode switched to PAPER
+2026-04-17 13:38:30.405 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:38:30.406 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:38:30.667 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:38:30.669 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.
+2026-04-17 13:39:31.332 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:39:31.332 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:39:31.577 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:39:31.578 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.
+2026-04-17 13:40:32.484 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:40:32.492 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:40:32.704 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:40:32.704 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.
+2026-04-17 13:41:29.195 | INFO     | core.genome_engine:_evolution_cycle:204 - [GENOME] Starting evolution cycle…
+2026-04-17 13:41:33.509 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:41:33.510 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:41:33.725 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:41:33.727 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.
+2026-04-17 13:42:34.924 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:42:34.926 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:42:35.222 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:42:35.226 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.
+2026-04-17 13:43:36.092 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:43:36.093 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:43:36.365 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:43:36.365 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.
+2026-04-17 13:44:37.200 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] BALANCE_SYNC: PAPER mode — skipped
+2026-04-17 13:44:37.208 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] WS_CHECK: Live — ticks flowing
+2026-04-17 13:44:37.457 | DEBUG    | core.self_healing:_log_event:244 - [HEAL] API_PING: OK
+2026-04-17 13:44:37.459 | DEBUG    | core.self_healing:_heal_cycle:97 - [HEAL] Cycle complete — 4/4 checks passed.

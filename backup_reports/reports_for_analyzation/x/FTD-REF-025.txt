@@ -1,0 +1,312 @@
+# 📦 FTD-REF-025 — WebSocket Stability + UI Truth Sync + Error Governance
+
+---
+
+# 🧠 1. CONTEXT
+
+Current issues (logs + UI + DATR analysis):
+
+❌ WebSocket DISCONNECTED (UI false signal)
+❌ Binance TCP resets (WinError 10054)
+❌ Tick starvation (No tick for 100s+)
+❌ UI & backend state mismatch
+❌ Error logs scattered (no structured reporting)
+❌ Default mode not aligned (Testnet vs API confusion)
+
+---
+
+# 🎯 2. OBJECTIVES
+
+✅ Real-time WebSocket stability
+✅ UI always shows TRUE system state
+✅ Centralized error tracking + explanation
+✅ Clean execution mode handling
+✅ Default mode = **PAPER API (MANDATORY)**
+
+---
+
+# 🛠️ 3. CORE IMPLEMENTATION
+
+---
+
+## 🧩 A. WEBSOCKET TRUTH ENGINE (NEW)
+
+📁 core/ws_truth_engine.py
+
+---
+
+### PURPOSE:
+
+Backend → UI truth sync (single source of truth)
+
+---
+
+### STATE MODEL:
+
+```python
+WS_CONNECTED
+WS_RECONNECTING
+WS_STALE
+WS_DOWN
+```
+
+---
+
+### LOGIC:
+
+```python
+if last_tick < 20s:
+    state = WS_CONNECTED
+
+elif last_tick < 60s:
+    state = WS_RECONNECTING
+
+elif reconnect_attempts < 3:
+    state = WS_STALE
+
+else:
+    state = WS_DOWN
+```
+
+---
+
+## 🔄 B. UI STATUS FIX (MANDATORY)
+
+📁 dashboard/api/ws_handler.py
+
+---
+
+### REMOVE:
+
+```text
+DISCONNECTED ❌
+```
+
+---
+
+### REPLACE WITH:
+
+| State        | UI              |
+| ------------ | --------------- |
+| CONNECTED    | 🟢 LIVE         |
+| RECONNECTING | 🟡 RECONNECTING |
+| STALE        | 🟠 DELAYED      |
+| DOWN         | 🔴 DISCONNECTED |
+
+---
+
+## ⚡ C. WEBSOCKET STABILIZER UPGRADE
+
+📁 core/ws_stabilizer.py
+
+---
+
+### ADD:
+
+```python
+MAX_BACKOFF = 3
+PING_INTERVAL = 15
+```
+
+---
+
+### FIX:
+
+```python
+if no_tick > 30s:
+    send_ping()
+
+if no_tick > 60s:
+    force_reconnect()
+```
+
+---
+
+## 🧠 D. ERROR GOVERNANCE ENGINE (NEW)
+
+📁 core/error_registry.py
+
+---
+
+### PURPOSE:
+
+All errors → structured + readable
+
+---
+
+### FORMAT:
+
+```python
+{
+  "code": "WS_001",
+  "type": "WebSocket",
+  "message": "No tick received",
+  "reason": "Market inactivity or connection drop",
+  "severity": "WARNING",
+  "auto_fix": "Reconnect triggered"
+}
+```
+
+---
+
+## 📊 E. ERROR MAPPING (MANDATORY)
+
+---
+
+### WS Errors:
+
+| Code   | Description       | Fix                |
+| ------ | ----------------- | ------------------ |
+| WS_001 | No tick > 30s     | Ping               |
+| WS_002 | No tick > 60s     | Reconnect          |
+| WS_003 | TCP Reset (10054) | Ignore + reconnect |
+
+---
+
+### DATA Errors:
+
+| Code     | Description       | Fix        |
+| -------- | ----------------- | ---------- |
+| DATA_001 | Missing candles   | Wait       |
+| DATA_002 | Indicator invalid | Skip trade |
+
+---
+
+### STRATEGY Errors:
+
+| Code      | Description    | Fix      |
+| --------- | -------------- | -------- |
+| STRAT_001 | UNKNOWN regime | fallback |
+| STRAT_002 | Edge < 0       | reject   |
+
+---
+
+---
+
+## 🧠 F. CENTRAL ERROR PANEL (UI)
+
+📁 dashboard/components/error_panel.py
+
+---
+
+### SHOW:
+
+* Error code
+* Meaning
+* Action taken
+
+---
+
+### EXAMPLE:
+
+```text
+WS_003 — Binance reset connection  
+→ Auto reconnect done
+```
+
+---
+
+---
+
+## ⚙️ G. DEFAULT MODE FIX (CRITICAL)
+
+📁 core/config.py
+
+---
+
+### SET:
+
+```python
+DEFAULT_MODE = "PAPER_API"
+```
+
+---
+
+---
+
+## 🔘 H. EXECUTION MODE CLEANUP
+
+📁 dashboard/ui_mode_selector.py
+
+---
+
+### FINAL OPTIONS:
+
+* TESTNET
+* PAPER API (DEFAULT ✅)
+* LIVE
+
+---
+
+### RULE:
+
+```python
+if no_selection:
+    mode = PAPER_API
+```
+
+---
+
+---
+
+## 🧪 4. TEST REQUIREMENTS
+
+📁 tests/test_ws_truth.py
+
+---
+
+### TEST:
+
+* WS reconnect logic
+* UI state sync
+* Error registry output
+* Default mode selection
+
+---
+
+---
+
+# 📊 5. SUCCESS CRITERIA
+
+| Check            | Expected       |
+| ---------------- | -------------- |
+| WebSocket UI     | Always correct |
+| False disconnect | ❌ removed      |
+| Reconnect        | < 2 sec        |
+| Errors           | Structured     |
+| Default mode     | PAPER API      |
+
+---
+
+---
+
+# 🚀 6. EXPECTED TRANSFORMATION
+
+---
+
+### BEFORE:
+
+❌ Fake disconnect alerts
+❌ Confusing logs
+❌ User panic
+
+---
+
+### AFTER:
+
+✅ Clear system state
+✅ Self-explained errors
+✅ Stable data flow
+
+---
+
+---
+
+# 🧠 FINAL RULE
+
+> “System को सिर्फ चलना नहीं है
+> System को सही दिखना भी है”
+
+---
+
+# 🏁 END — FTD-REF-025

@@ -1,0 +1,471 @@
+# 🧾 FTD-014B — AUTO + ON-DEMAND REPORTING SYSTEM (FULL IMPLEMENTATION)
+
+### Ref: FTD-014B-EOW-REPORTING-ENGINE (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Build a **complete institutional-grade reporting system** that:
+
+```text
+Captures truth automatically + Explains truth on demand
+```
+
+Covering:
+
+* Basic ✔
+* Advanced ✔
+* Technical ✔
+* Institutional ✔
+
+---
+
+# 🧠 CORE PRINCIPLE
+
+```text
+Auto Reports = Ground Truth Capture
+On-Demand Reports = Deep Intelligence & Decision Support
+```
+
+---
+
+# 📁 GLOBAL DIRECTORY STRUCTURE (MANDATORY)
+
+```text
+/reports/
+    /auto/
+        /trades/
+        /equity/
+        /signals/
+        /risk/
+        /strategy/
+        /system/
+        /latency/
+        /execution/
+    /on_demand/
+        /performance/
+        /monte_carlo/
+        /signal_analysis/
+        /strategy_diagnostics/
+        /risk_analysis/
+        /execution_analysis/
+        /regime/
+        /drawdown/
+        /audit/
+```
+
+---
+
+# 🥇 PART 1 — AUTO REPORTING ENGINE
+
+## 📌 DESIGN RULE
+
+```text
+NO MANUAL TRIGGER — ALWAYS RUNNING
+```
+
+---
+
+## 1. TRADE JOURNAL ENGINE
+
+📁 `/reports/auto/trades/eow_trades_YYYYMMDD.csv`
+
+### Trigger:
+
+* On trade open / close
+
+### Fields:
+
+* symbol, entry, exit, pnl, rr, fees, slippage, strategy_id
+
+---
+
+## 2. EQUITY ENGINE
+
+📁 `/reports/auto/equity/equity_curve.json`
+
+### Trigger:
+
+* Every 30 sec
+
+### Fields:
+
+* timestamp, equity, drawdown
+
+---
+
+## 3. SIGNAL AUDIT ENGINE (CRITICAL)
+
+📁 `/reports/auto/signals/signal_audit_YYYYMMDD.log`
+
+### Trigger:
+
+* Every signal attempt
+
+### Fields:
+
+```text
+RAW → FILTER → EDGE → SCORE → EV → EXECUTION
+```
+
+---
+
+## 4. RISK STATE ENGINE
+
+📁 `/reports/auto/risk/guard_state.json`
+
+### Trigger:
+
+* Every evaluation cycle
+
+### Fields:
+
+* PF, streak, DD, guard triggers, safe_mode
+
+---
+
+## 5. STRATEGY ROLLING ENGINE
+
+📁 `/reports/auto/strategy/rolling_metrics.json`
+
+### Trigger:
+
+* Every 10 trades
+
+---
+
+## 6. SYSTEM HEALTH ENGINE
+
+📁 `/reports/auto/system/system_health.log`
+
+### Fields:
+
+* CPU, RAM, API status, errors
+
+---
+
+## 7. LATENCY ENGINE
+
+📁 `/reports/auto/latency/latency_metrics.csv`
+
+### Fields:
+
+* tick→signal, signal→execution
+
+---
+
+## 8. EXECUTION ENGINE
+
+📁 `/reports/auto/execution/execution_log.csv`
+
+### Fields:
+
+* expected_price vs fill_price, slippage
+
+---
+
+## 9. DATA INTEGRITY ENGINE
+
+📁 `/reports/auto/system/data_integrity.log`
+
+---
+
+---
+
+# 🥈 PART 2 — ON-DEMAND REPORTING ENGINE
+
+## 📌 DESIGN RULE
+
+```text
+ONE CLICK → FULL REPORT GENERATED WITH TIMESTAMP
+```
+
+---
+
+## 1. PERFORMANCE REPORT
+
+📁 `/reports/on_demand/performance/performance_YYYYMMDD_HHMM.xlsx`
+
+* CAGR
+* Sharpe
+* Sortino
+* Equity
+
+---
+
+## 2. MONTE CARLO REPORT
+
+📁 `/reports/on_demand/monte_carlo/monte_YYYYMMDD.json`
+
+* 1000 simulations
+* survival probability
+
+---
+
+## 3. SIGNAL DROP-OFF REPORT (MOST CRITICAL)
+
+📁 `/reports/on_demand/signal_analysis/dropoff_YYYYMMDD.csv`
+
+---
+
+## 4. STRATEGY DIAGNOSTIC
+
+📁 `/reports/on_demand/strategy_diagnostics/diag_YYYYMMDD.txt`
+
+---
+
+## 5. EDGE DECAY REPORT
+
+📁 `/reports/on_demand/strategy_diagnostics/edge_decay.csv`
+
+---
+
+## 6. RISK STRESS TEST
+
+📁 `/reports/on_demand/risk_analysis/stress_YYYYMMDD.json`
+
+---
+
+## 7. EXECUTION ANALYSIS
+
+📁 `/reports/on_demand/execution_analysis/execution_YYYYMMDD.csv`
+
+---
+
+## 8. DRAWDOWN ANALYSIS
+
+📁 `/reports/on_demand/drawdown/dd_YYYYMMDD.csv`
+
+---
+
+## 9. REGIME PERFORMANCE
+
+📁 `/reports/on_demand/regime/regime_YYYYMMDD.csv`
+
+---
+
+## 10. FULL AUDIT EXPORT
+
+📁 `/reports/on_demand/audit/full_audit_YYYYMMDD.xlsx`
+
+---
+
+---
+
+# 🧠 PART 3 — CORE ENGINE IMPLEMENTATION
+
+---
+
+## 📁 NEW MODULE
+
+```text
+/core/reporting/reporting_engine.py
+```
+
+---
+
+## 🔧 FUNCTIONAL BLOCKS
+
+### 1. AUTO WRITER
+
+```python
+def write_auto_report(category, data):
+    path = resolve_path(category)
+    append_to_file(path, data)
+```
+
+---
+
+### 2. ON-DEMAND GENERATOR
+
+```python
+def generate_report(report_type):
+    data = collect_data(report_type)
+    file_path = create_timestamp_file(report_type)
+    save_report(file_path, data)
+```
+
+---
+
+### 3. PATH RESOLVER
+
+```python
+def resolve_path(category):
+    return f"/reports/auto/{category}/..."
+```
+
+---
+
+---
+
+# 🔌 PART 4 — INTEGRATION POINTS
+
+---
+
+## HOOK 1 — TRADE EXECUTION
+
+```text
+core/execution/*
+```
+
+→ call:
+
+```python
+reporting_engine.write_auto_report("trades", trade_data)
+```
+
+---
+
+## HOOK 2 — SIGNAL GENERATION
+
+```text
+scan_controller / alpha_engine
+```
+
+→ call:
+
+```python
+reporting_engine.write_auto_report("signals", signal_data)
+```
+
+---
+
+## HOOK 3 — RISK ENGINE
+
+```text
+risk_engine
+```
+
+→ call:
+
+```python
+reporting_engine.write_auto_report("risk", risk_state)
+```
+
+---
+
+## HOOK 4 — SYSTEM MONITOR
+
+---
+
+## HOOK 5 — LATENCY TRACKER
+
+---
+
+---
+
+# 🧪 PART 5 — VERIFIER SCRIPT (MANDATORY)
+
+📁 `/tests/test_reporting_engine.py`
+
+---
+
+### Tests:
+
+```python
+def test_trade_log_created():
+    assert file_exists("/reports/auto/trades/...")
+
+def test_signal_log_exists():
+    assert "[RAW]" in open(log)
+
+def test_on_demand_report():
+    generate_report("performance")
+    assert file_created()
+```
+
+---
+
+---
+
+# 🧠 PART 6 — DBO COMPLIANCE
+
+| Filter           | Covered              |
+| ---------------- | -------------------- |
+| 🌍 Institutional | performance + audit  |
+| 📚 CTA           | signal + rolling     |
+| 📈 Growth        | equity + compounding |
+| 🛡 Risk          | monte carlo + guard  |
+| ⚙ Deployability  | execution + latency  |
+
+---
+
+---
+
+# 🚨 MANDATORY RULES
+
+```text
+1. No silent failures
+2. Every report must be timestamped
+3. No overwrite — append or new file
+4. Logs must be human + machine readable
+5. UI must reflect report existence
+```
+
+---
+
+---
+
+# 🏁 FINAL SYSTEM STATE
+
+After implementation:
+
+```text
+System will:
+- Know what happened
+- Know why it happened
+- Know what to fix
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text
+Trading system powerful tab banta hai jab:
+
+Woh sirf trade nahi karta
+Woh apne har decision ka evidence store karta hai
+```
+
+---
+
+---
+
+# 🚀 NEXT STEP
+
+👉 Developer को यह पूरा FTD भेजें
+
+👉 उनसे मांगें:
+
+```text
+1. Full implementation
+2. Integration proof
+3. Sample generated reports
+4. Verifier output
+```
+
+---
+
+# 🧠 STRATEGIC NOTE
+
+अब आपका system evolve हो चुका है:
+
+```text
+Code → Engine → Intelligence → Audit System
+```
+
+---
+
+अगर अगला कदम चाहिए:
+
+👉 मैं बना सकता हूँ:
+
+```text
+FTD-015 — Live Monitoring Dashboard + Reporting UI
+```
+
+---
+
+Ready when you are 🚀
