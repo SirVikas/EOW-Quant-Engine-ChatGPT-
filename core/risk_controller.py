@@ -113,6 +113,19 @@ class RiskController:
         volatility_premium = max(0.0, (current_volatility - baseline) / baseline) * cfg.VOL_PREMIUM_MULT
         return base_r + volatility_premium
 
+    def _dry_spell_r_relaxation(self, minutes_no_trade: float) -> float:
+        """
+        Return temporary required_r relaxation during trade dry spells.
+        Mirrors activator tiers but keeps a hard floor via cfg.RISK_R_FLOOR.
+        """
+        if minutes_no_trade >= cfg.ACTIVATOR_T3_MIN:
+            return cfg.RISK_R_RELAX_T3
+        if minutes_no_trade >= cfg.ACTIVATOR_T2_MIN:
+            return cfg.RISK_R_RELAX_T2
+        if minutes_no_trade >= cfg.ACTIVATOR_T1_MIN:
+            return cfg.RISK_R_RELAX_T1
+        return 0.0
+
     # Regime → base minimum-R lookup (Fix B)
     # Mean-reversion compensates lower R with higher win-rate; accept a tighter bar.
     _REGIME_BASE_R = {
@@ -139,6 +152,7 @@ class RiskController:
         qty: float,
         current_volatility: float,
         regime: str = "UNKNOWN",   # Fix B: receive live regime from on_tick
+        minutes_no_trade: float = 0.0,
     ) -> tuple[bool, dict]:
         """
         Evaluate whether a trade has enough post-cost edge to justify entry.
@@ -168,7 +182,9 @@ class RiskController:
         net_if_tp = gross_tp - total_cost
         rr_after_cost = (net_if_tp / risk_usdt) if risk_usdt > 0 else 0.0
         base_r = self._regime_base_r(regime)
-        required_r = self.calculate_dynamic_edge(base_r, current_volatility)
+        required_r_raw = self.calculate_dynamic_edge(base_r, current_volatility)
+        r_relax = self._dry_spell_r_relaxation(minutes_no_trade)
+        required_r = max(cfg.RISK_R_FLOOR, required_r_raw - r_relax)
         ok = (net_if_tp > 0) and (rr_after_cost >= required_r)
 
         return ok, {
@@ -182,8 +198,11 @@ class RiskController:
             "rr": rr,
             "rr_after_cost": rr_after_cost,
             "required_r": required_r,
+            "required_r_raw": required_r_raw,
+            "required_r_relax": r_relax,
             "base_r_used": base_r,
             "current_volatility": current_volatility,
+            "minutes_no_trade": minutes_no_trade,
         }
 
     def submit_limit_order(

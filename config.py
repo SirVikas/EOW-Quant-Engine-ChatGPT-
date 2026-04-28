@@ -69,9 +69,15 @@ class EngineConfig(BaseSettings):
     BASE_MIN_R: float = 1.50               # Minimum post-cost R — raised to enforce positive expectancy
     ATR_SLIPPAGE_MULT: float = 0.10       # Reduced from 0.20 — keeps per-trade ATR overhead proportionate
     # Per-regime minimum R thresholds — tuned for MAX PROFIT (PF-first)
-    REGIME_MIN_R_TRENDING: float = 1.50        # raised 1.10→1.50 — enforce decent RR in trend trades
-    REGIME_MIN_R_MEAN_REVERTING: float = 1.80  # raised 1.05→1.80 — MR caused most losses; needs wider TP
-    REGIME_MIN_R_VOLATILE: float = 1.50        # raised 1.05→1.50 — breakouts still move fast but need edge
+    REGIME_MIN_R_TRENDING: float = 1.50        # enforce decent RR in trend trades
+    REGIME_MIN_R_MEAN_REVERTING: float = 1.80  # MR stays stricter in normal mode (loss-heavy historically)
+    REGIME_MIN_R_VOLATILE: float = 1.50        # breakouts still need meaningful post-cost edge
+    # qFTD-040: no-trade remediation without globally weakening quality gates.
+    # During dry spells, RiskController can temporarily reduce required_r.
+    RISK_R_RELAX_T1: float = 0.15              # applied when minutes_no_trade >= ACTIVATOR_T1_MIN
+    RISK_R_RELAX_T2: float = 0.35              # applied when minutes_no_trade >= ACTIVATOR_T2_MIN
+    RISK_R_RELAX_T3: float = 0.60              # applied when minutes_no_trade >= ACTIVATOR_T3_MIN
+    RISK_R_FLOOR: float = 1.05                 # never relax below this post-cost minimum R
 
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
