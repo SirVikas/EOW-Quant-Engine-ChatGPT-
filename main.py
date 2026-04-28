@@ -1212,6 +1212,7 @@ async def on_tick(tick: Tick):
                 qty=sizing.qty,
                 current_volatility=atr_pct,
                 regime=regime.value,   # Fix B: regime-specific RR threshold
+                minutes_no_trade=_tf_mins,  # qFTD-040: tiered required_r relaxation during dry spells
             )
             if not cfg.BYPASS_ALL_GATES and not edge_ok:
                 rr_net = edge.get('rr_after_cost', 0)
