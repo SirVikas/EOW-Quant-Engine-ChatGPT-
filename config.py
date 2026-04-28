@@ -27,6 +27,9 @@ class EngineConfig(BaseSettings):
 
     # ── Trading Mode ─────────────────────────────────────────────────────────
     TRADE_MODE: Literal["PAPER", "LIVE"] = Field(default="PAPER", env="TRADE_MODE")
+    # Emergency paper stress mode: prioritise trade throughput over quality gates.
+    PAPER_SPEED_MODE: bool = Field(default=True, env="PAPER_SPEED_MODE")
+    PAPER_TARGET_TRADES_PER_MIN: int = Field(default=20, env="PAPER_TARGET_TRADES_PER_MIN")
     # qFTD-007: FRESH = ignore prior trade history at boot (clean slate).
     # RESUME = replay DataLake trades to restore equity curve from last session.
     # Set env var BOOT_MODE=RESUME to re-enable session restore.
@@ -174,7 +177,7 @@ class EngineConfig(BaseSettings):
 
     # Confidence Decay Engine
     DECAY_FREQ_WINDOW_MIN: int = 30    # Signal frequency tracking window (minutes)
-    DECAY_FREQ_MAX: int = 3            # Signals above this count trigger decay
+    DECAY_FREQ_MAX: int = 200          # paper-speed mode baseline: allow very high signal frequency
     DECAY_PER_EXTRA: float = 0.10      # Confidence reduction per extra signal (10%)
     DECAY_MIN_FACTOR: float = 0.85     # raised 0.70→0.85 — less decay penalty; max 15% reduction so quiet-market signals still pass
 
@@ -239,8 +242,8 @@ class EngineConfig(BaseSettings):
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
 
     # Trade frequency capped hard — fee drag was 25% at 150 trades/day
-    MAX_TRADES_PER_HOUR: int = 6         # cut 20→6 — quality over quantity; each trade costs fees
-    MAX_TRADES_PER_DAY:  int = 40        # cut 150→40 — 40 high-quality trades >> 150 junk trades
+    MAX_TRADES_PER_HOUR: int = 1200      # paper-speed mode: 20 trades/min × 60
+    MAX_TRADES_PER_DAY:  int = 28800     # paper-speed mode: 20 trades/min × 24h
 
     # ── Phase 6: Stability + Profit Consistency ───────────────────────────────
     # EV Confidence Engine — EV-tier-based sizing
@@ -395,7 +398,7 @@ class EngineConfig(BaseSettings):
     EA_TRAIL_BOOST_MULT: float = 1.20     # Trailing SL aggressiveness multiplier
 
     # Trade Competition Engine — select best N trades per cycle
-    TCE_MAX_CONCURRENT: int = 3           # Maximum trades accepted per cycle
+    TCE_MAX_CONCURRENT: int = 20          # paper-speed mode: allow high parallel order intake
     TCE_MIN_RANK_GAP: float = 0.05        # Minimum rank difference to prefer one over another
 
     # Edge Memory Engine — remember what works

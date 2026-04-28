@@ -33,6 +33,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from loguru import logger
+from config import cfg
 
 
 # ── Limits ────────────────────────────────────────────────────────────────────
@@ -176,7 +177,8 @@ class RiskEngine:
         if self._state.halted:
             return False, f"HALTED: {self._state.halt_reason}"
 
-        if self._state.trades_today >= MAX_TRADES_PER_DAY:
+        _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
+        if (not _paper_speed) and self._state.trades_today >= MAX_TRADES_PER_DAY:
             return False, f"DAILY_TRADE_CAP({self._state.trades_today}/{MAX_TRADES_PER_DAY})"
 
         daily_loss_pct = self._daily_loss_pct()
@@ -276,7 +278,9 @@ class RiskEngine:
             "limits": {
                 "max_daily_loss_pct": MAX_DAILY_LOSS_PCT * 100,
                 "max_drawdown_pct":   MAX_DRAWDOWN_PCT * 100,
-                "max_trades_per_day": MAX_TRADES_PER_DAY,
+                "max_trades_per_day": ("UNLIMITED_PAPER_SPEED"
+                                       if (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
+                                       else MAX_TRADES_PER_DAY),
                 "risk_pct_range":     [RISK_PCT_MIN * 100, RISK_PCT_MAX * 100],
                 "max_risk_of_ruin":  MAX_RISK_OF_RUIN,
             },
