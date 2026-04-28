@@ -1265,8 +1265,14 @@ async def on_tick(tick: Tick):
                 )
                 return
 
-            # Open position — use Limit Order when enabled (saves fees + slippage)
-            if cfg.USE_LIMIT_ORDERS:
+            # Open position — in PAPER_SPEED force market path to avoid pending-order dead time.
+            _use_limit_orders = cfg.USE_LIMIT_ORDERS and (not _paper_speed)
+            if cfg.USE_LIMIT_ORDERS and _paper_speed:
+                _thought(
+                    f"⚡ PAPER_SPEED market-fill override {sym}: USE_LIMIT_ORDERS bypassed",
+                    "TRADE",
+                )
+            if _use_limit_orders:
                 offset = sig.entry_price * (cfg.LIMIT_ENTRY_OFFSET_BPS / 10_000)
                 if sig.signal.value == "LONG":
                     limit_px = sig.entry_price - offset   # buy slightly below signal price
