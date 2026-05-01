@@ -485,7 +485,8 @@ async def on_tick(tick: Tick):
     strategy = get_strategy(regime, dna)
 
     # 5. Generate signal (only if no open position + throttle checks)
-    if sym not in risk_ctrl.positions and not risk_ctrl.halted and not risk_ctrl.graceful_stop:
+    _halted_blocked = risk_ctrl.halted and not cfg.BYPASS_ALL_GATES
+    if sym not in risk_ctrl.positions and not _halted_blocked and not risk_ctrl.graceful_stop:
 
         # ── Throttle A: per-symbol cooldown (30 min between trades) ──────────
         last_ts = _last_trade_ts.get(sym, 0)

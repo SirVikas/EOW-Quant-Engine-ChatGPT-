@@ -66,13 +66,21 @@ class CapitalScaler:
 
         # ── Emergency Halt ─────────────────────────────────────────────────
         if drawdown >= cfg.MAX_DRAWDOWN_HALT:
-            logger.critical(f"[SCALER] ⛔ MDD {drawdown*100:.1f}% — ENGINE HALTED")
-            return SizingDecision(
-                symbol=symbol, usdt_risk=0, qty=0,
-                position_pct=0, method="HALT",
-                reason=f"MDD {drawdown*100:.1f}% ≥ halt threshold",
-                current_equity=equity, current_drawdown=drawdown,
-            )
+            if cfg.BYPASS_ALL_GATES:
+                # Paper / dev mode: reset peak so we don't stay permanently halted
+                self._peak = self._equity
+                drawdown = 0.0
+                logger.warning(
+                    f"[SCALER] MDD bypass: peak reset to {self._equity:.2f} (BYPASS_ALL_GATES)"
+                )
+            else:
+                logger.critical(f"[SCALER] ⛔ MDD {drawdown*100:.1f}% — ENGINE HALTED")
+                return SizingDecision(
+                    symbol=symbol, usdt_risk=0, qty=0,
+                    position_pct=0, method="HALT",
+                    reason=f"MDD {drawdown*100:.1f}% ≥ halt threshold",
+                    current_equity=equity, current_drawdown=drawdown,
+                )
 
         # ── Base Risk via Kelly ─────────────────────────────────────────────
         base_risk_pct = self._kelly_fraction()

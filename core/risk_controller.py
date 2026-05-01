@@ -416,6 +416,8 @@ class RiskController:
     # ── MDD Halt ────────────────────────────────────────────────────────────
 
     def _check_mdd_halt(self):
+        if cfg.BYPASS_ALL_GATES:
+            return  # never halt in bypass mode — paper trading / dev override
         dd = self.scaler.drawdown_pct / 100
         if dd >= cfg.MAX_DRAWDOWN_HALT and not self.halted:
             self.halted = True
