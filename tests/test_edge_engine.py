@@ -252,14 +252,15 @@ class TestMarketStructure:
         self.det = MarketStructureDetector()
 
     def test_low_vol_trap_detected(self):
-        r = self.det.detect(adx=25.0, bb_width=3.0, atr_pct=0.03)
+        # ATR_LOW_VOL_TRAP=0.010 — use atr_pct strictly below threshold
+        r = self.det.detect(adx=25.0, bb_width=3.0, atr_pct=0.005)
         assert r.structure == STRUCTURE_LOW_VOL_TRAP
         assert r.tradeable is False
         assert "LOW_VOL_TRAP" in r.block_reason
 
     def test_fake_breakout_detected(self):
-        # ADX in ambiguous zone (15-20), BB contracting, low ATR%
-        r = self.det.detect(adx=17.0, bb_width=2.0, atr_pct=0.10)
+        # ADX in ambiguous zone (15-20), BB contracting, ATR_FAKE_MAX=0.015 — use value below threshold
+        r = self.det.detect(adx=17.0, bb_width=2.0, atr_pct=0.010)
         assert r.structure == STRUCTURE_FAKE_BREAKOUT
         assert r.tradeable is False
 
@@ -281,7 +282,7 @@ class TestMarketStructure:
 
     def test_low_vol_trap_takes_priority_over_trend(self):
         """Even with strong ADX, low ATR% → LOW_VOL_TRAP."""
-        r = self.det.detect(adx=40.0, bb_width=6.0, atr_pct=0.02)
+        r = self.det.detect(adx=40.0, bb_width=6.0, atr_pct=0.005)
         assert r.structure == STRUCTURE_LOW_VOL_TRAP
 
     def test_confidence_in_range(self):

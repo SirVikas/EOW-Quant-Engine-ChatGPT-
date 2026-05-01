@@ -51,6 +51,7 @@ from core.market_structure   import market_structure_detector  # FTD-REF-024
 from core.ws_truth_engine    import ws_truth_engine     # FTD-REF-025
 from core.error_registry     import error_registry      # FTD-REF-025
 from core.strategy_engine    import strategy_engine     # FTD-REF-026
+from core.memory.memory_orchestrator import memory_orchestrator  # FTD-030B
 from core.profit_guard       import profit_guard        # FTD-REF-026
 from core.ct_scan_engine     import ct_scan_engine      # FTD-REF-026
 from core.inverse_engine     import inverse_engine, TradeMode  # A.I.E.
@@ -3171,6 +3172,91 @@ async def graceful_stop_engine(_auth=Depends(require_roles("operator", "admin"))
         "SYSTEM",
     )
     return {"state": "GRACEFUL_STOP", "open_positions": len(risk_ctrl.positions)}
+
+
+# ── FTD-030B: Learning Memory Engine ─────────────────────────────────────────
+
+@app.get("/api/memory/state")
+async def memory_state():
+    """Q18/Q19: Memory dashboard — all panels (valid_patterns, retention, negative_memory, etc.)."""
+    return memory_orchestrator.summary()
+
+
+@app.get("/api/memory/patterns")
+async def memory_patterns():
+    """Q17/Q18: Export all tracked patterns with ban status."""
+    return memory_orchestrator.patterns()
+
+
+@app.get("/api/memory/logs")
+async def memory_logs(n: int = 50):
+    """Q16-A: Recent JSONL memory entries (append-only log)."""
+    return memory_orchestrator.logs(n=n)
+
+
+@app.post("/api/memory/learn")
+async def memory_learn(body: dict, _auth=Depends(require_roles("operator", "admin"))):
+    """
+    Q12: Ingest a correction-cycle record into the memory engine.
+    Required fields: change_id, parameter, delta_pct, direction, value_before,
+                     value_after, pnl_delta, score_delta, rolled_back.
+    Optional: rollback_trigger, rationale, confidence, market_regime, volatility, symbol.
+    """
+    try:
+        result = memory_orchestrator.learn(
+            change_id=body["change_id"],
+            parameter=body["parameter"],
+            delta_pct=float(body["delta_pct"]),
+            direction=body["direction"],
+            value_before=float(body["value_before"]),
+            value_after=float(body["value_after"]),
+            pnl_delta=float(body["pnl_delta"]),
+            score_delta=float(body["score_delta"]),
+            rolled_back=bool(body["rolled_back"]),
+            rollback_trigger=body.get("rollback_trigger"),
+            rationale=body.get("rationale", ""),
+            confidence=float(body.get("confidence", 50.0)),
+            market_regime=body.get("market_regime", "UNKNOWN"),
+            volatility=float(body.get("volatility", 0.0)),
+            symbol=body.get("symbol", "PORTFOLIO"),
+        )
+        return result
+    except KeyError as exc:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail=f"Missing required field: {exc}")
+
+
+@app.get("/api/memory/suggestions")
+async def memory_suggestions(
+    total_trades: int = 0,
+    validation_score: float = 0.0,
+    regime_context: str = "UNKNOWN",
+    risk_halted: bool = False,
+    risk_violated: bool = False,
+    policy_ok: bool = True,
+):
+    """
+    Q7/Q8/Q20: Return memory-based parameter suggestions.
+    Gates: memory_ready + total_trades≥50 + validation_score≥70 + PolicyGuard.
+    """
+    from core.self_correction.correction_proposal import TUNABLE_PARAMS
+    current_params = {k: float(v[0] + v[1]) / 2.0 for k, v in TUNABLE_PARAMS.items()}
+    return memory_orchestrator.suggest(
+        current_params=current_params,
+        total_trades=total_trades,
+        validation_score=validation_score,
+        regime_context=regime_context,
+        risk_halted=risk_halted,
+        risk_violated=risk_violated,
+        policy_ok=policy_ok,
+    )
+
+
+@app.post("/api/memory/reset")
+async def memory_reset(_auth=Depends(require_roles("admin"))):
+    """Hard reset: clear all memory entries, patterns, negative memory, guard session."""
+    memory_orchestrator.reset()
+    return {"status": "RESET", "module": "MEMORY_ORCHESTRATOR", "phase": "030B"}
 
 
 # ── WebSocket (Real-time Dashboard Feed) ──────────────────────────────────────

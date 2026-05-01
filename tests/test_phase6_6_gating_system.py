@@ -119,6 +119,7 @@ def test_gate_activates_safe_mode_on_ws_failure(sme):
         ws_score_fn=lambda: 10.0,   # well below GGL_WS_MIN_SCORE=50
         safe_mode=sme,
     )
+    gate.set_system_state("LIVE")
     result = gate.evaluate()
     assert result["can_trade"] is False
     assert sme.mode == SafeMode.SAFE
@@ -130,6 +131,7 @@ def test_gate_activates_safe_mode_on_deploy_failure(sme):
         deploy_score_fn=lambda: 20.0,  # below GGL_DEPLOY_MIN_SCORE=70
         safe_mode=sme,
     )
+    gate.set_system_state("LIVE")
     result = gate.evaluate()
     assert result["can_trade"] is False
     assert sme.mode == SafeMode.SAFE
@@ -142,6 +144,7 @@ def test_gate_blocks_trade_on_data_not_fresh(sme):
         data_fresh_fn=lambda: False,
         safe_mode=sme,
     )
+    gate.set_system_state("LIVE")
     result = gate.evaluate()
     assert result["can_trade"] is False
     assert "DATA_NOT_FRESH" in result["reason"]
@@ -152,6 +155,7 @@ def test_gate_blocks_trade_on_indicators_not_ready(sme):
         indicator_ready_fn=lambda: False,
         safe_mode=sme,
     )
+    gate.set_system_state("LIVE")
     result = gate.evaluate()
     assert result["can_trade"] is False
     assert "INDICATOR_NOT_READY" in result["reason"]
@@ -165,6 +169,7 @@ def test_gate_allows_trade_when_all_clear(sme):
         deploy_score_fn=lambda: 100.0,
         safe_mode=sme,
     )
+    gate.set_system_state("LIVE")
     result = gate.evaluate()
     assert result["can_trade"] is True
     assert result["reason"] == "ALL_CLEAR"
@@ -322,6 +327,7 @@ def test_gate_evaluate_multiple_failures_pipe_delimited(sme):
         deploy_score_fn=lambda: 0.0,
         safe_mode=sme,
     )
+    gate.set_system_state("LIVE")
     result = gate.evaluate()
     assert result["can_trade"] is False
     parts = result["reason"].split(" | ")

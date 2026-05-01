@@ -223,10 +223,12 @@ def test_reset_authority_clears_registry():
 # ── C. Safe mode → no scan ────────────────────────────────────────────────────
 
 def test_gate_check_blocked_in_safe_mode():
+    # qFTD-010: scanning is ALWAYS ON — gate_check returns allowed=True even in safe_mode.
+    # Execution is blocked downstream by the ranker (not the scan layer).
     orc = _make_orc(GATE_SAFE)
     result = orc.gate_check(symbol="BTCUSDT", strategy="TrendFollowing")
-    assert result.allowed is False
-    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED")
+    assert result.allowed is True
+    assert result.action == "ALLOWED"
 
 
 def test_gate_check_blocked_when_can_trade_false():
@@ -237,10 +239,11 @@ def test_gate_check_blocked_when_can_trade_false():
 
 
 def test_run_cycle_gate_blocked_in_safe_mode():
+    # qFTD-010: scan proceeds but ranker blocks in safe_mode → RANK_REJECT
     orc = _make_orc(GATE_SAFE)
     result = orc.run_cycle(_ctx())
     assert result.execute is False
-    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED")
+    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED", "RANK_REJECT")
 
 
 def test_run_cycle_scan_blocked_returns_no_execute():

@@ -240,17 +240,17 @@ class TestFeeGuardDynamic(unittest.TestCase):
         self.assertTrue(r_relaxed.ok)
 
     def test_tight_override_rejects_previously_passing_trade(self):
-        # 18% fee/TP — passes cfg default 20%, blocked at 15%
-        r_default = self.sfg.check(rr=1.5, gross_tp=100.0, fee_cost=18.0)
-        r_tight = self.sfg.check(rr=1.5, gross_tp=100.0, fee_cost=18.0,
-                                  normal_max_override=0.15)
+        # 9% fee/TP — passes cfg default 10%, blocked at 7%
+        r_default = self.sfg.check(rr=1.5, gross_tp=100.0, fee_cost=9.0)
+        r_tight = self.sfg.check(rr=1.5, gross_tp=100.0, fee_cost=9.0,
+                                  normal_max_override=0.07)
         self.assertTrue(r_default.ok)
         self.assertFalse(r_tight.ok)
 
     def test_high_rr_uses_high_rr_max_not_override(self):
-        # 30% fee/TP with high-RR — high-RR max=35%, tight override=15%
+        # 12% fee/TP with high-RR — high-RR max=15%, tight override=7%
         rr = cfg.SFG_HIGH_RR_THRESHOLD + 1.0
-        r = self.sfg.check(rr=rr, gross_tp=100.0, fee_cost=30.0, normal_max_override=0.15)
+        r = self.sfg.check(rr=rr, gross_tp=100.0, fee_cost=12.0, normal_max_override=0.07)
         self.assertTrue(r.ok)
         self.assertTrue(r.high_rr)
         self.assertAlmostEqual(r.effective_max, cfg.SFG_HIGH_RR_FEE_MAX)
@@ -441,7 +441,7 @@ class TestPhase52EndToEnd(unittest.TestCase):
                     sfg_result=sfg_result)
 
     def test_healthy_signal_passes_all_gates(self):
-        r = self._run(vol_ratio=0.90, fee_cost=15.0, rr=2.0, score=0.70)
+        r = self._run(vol_ratio=0.90, fee_cost=9.0, rr=2.0, score=0.70)
         self.assertTrue(r["vol_active"])
         self.assertTrue(r["score_pass"])
         self.assertTrue(r["sfg_ok"])
@@ -461,7 +461,7 @@ class TestPhase52EndToEnd(unittest.TestCase):
             self.assertFalse(r_tighten["score_pass"])
 
     def test_high_rr_trade_passes_tight_fee_override(self):
-        r = self._run(rr=cfg.SFG_HIGH_RR_THRESHOLD + 1.0, fee_cost=30.0,
+        r = self._run(rr=cfg.SFG_HIGH_RR_THRESHOLD + 1.0, fee_cost=12.0,
                       vol_ratio=0.90, score=0.70)
         self.assertTrue(r["sfg_ok"])
         self.assertTrue(r["sfg_result"].high_rr)

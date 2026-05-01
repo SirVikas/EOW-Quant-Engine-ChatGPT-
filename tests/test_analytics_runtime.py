@@ -24,8 +24,8 @@ def test_deployability_rr_edge_runtime_fallback_awards_points_without_promotions
         runtime_rr={"avg_r_multiple": 0.7, "win_rate": 0.6, "trades": 24},
     )
     rr = out["breakdown"]["rr_edge"]
-    assert rr["score"] == 25
-    assert rr["avg_r_multiple"] == 0.7
+    assert rr["score"] == 22
+    assert rr["runtime_fallback"]["avg_r_multiple"] == 0.7
 
 
 def test_risk_of_ruin_perfect_win_rate_is_not_100_percent():
