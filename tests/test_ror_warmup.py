@@ -26,16 +26,17 @@ def test_compute_full_analytics_ignores_zero_r_trades_for_ror_win_rate():
 
 
 def test_compute_full_analytics_ror_active_after_sufficient_sample():
+    # min_valid_r_for_ror=60 and min_each_side=10 — provide 45 wins + 15 losses = 60 trades
     pnl_trades = (
-        [{"net_pnl": 10.0, "r_multiple": 1.0} for _ in range(14)]
-        + [{"net_pnl": -8.0, "r_multiple": -0.8} for _ in range(6)]
+        [{"net_pnl": 10.0, "r_multiple": 1.0} for _ in range(45)]
+        + [{"net_pnl": -8.0, "r_multiple": -0.8} for _ in range(15)]
     )
     out = compute_full_analytics(
         pnl_trades=pnl_trades,
         initial_capital=1000.0,
-        session_stats={"win_rate": 70.0, "max_drawdown_pct": 5.0, "sharpe_ratio": 0.5},
+        session_stats={"win_rate": 75.0, "max_drawdown_pct": 5.0, "sharpe_ratio": 0.5},
         healer_snapshot={"recent_events": [], "ws_stale_cycles": 0},
-        lake_stats={"trades": 20, "candles": 100},
+        lake_stats={"trades": 60, "candles": 300},
         genome_state={"promotion_log": [], "generation": 1},
         redis_ok=True,
         persistence_ok=True,

@@ -9,8 +9,8 @@ def test_profit_guard_hard_stop_requires_all_conditions():
 
     blocked, reason = pg.hard_stop_required(
         profit_factor=0.85,
-        n_trades=15,
-        consecutive_losses=4,
+        n_trades=20,
+        consecutive_losses=8,
     )
     assert blocked is True
     assert "PROFIT_GUARD_HARD_STOP" in reason

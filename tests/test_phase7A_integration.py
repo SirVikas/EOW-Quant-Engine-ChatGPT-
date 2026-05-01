@@ -129,11 +129,13 @@ def _high_quality_ctx(**overrides) -> TickContext:
 
 # ── 1–3: gate_check ──────────────────────────────────────────────────────────
 
-def test_gate_check_blocked_when_safe_mode():
+def test_gate_check_allowed_when_safe_mode():
+    # qFTD-010: scanning is ALWAYS ON — gate_check returns allowed=True even in safe_mode.
+    # Execution is blocked downstream by the ranker/concentrator (not the scan layer).
     orc = _make_orchestrator(GATE_SAFE)
     result = orc.gate_check(symbol="BTCUSDT", strategy="TrendFollowing")
-    assert result.allowed is False
-    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED")
+    assert result.allowed is True
+    assert result.action == "ALLOWED"
 
 
 def test_gate_check_blocked_when_can_trade_false():
@@ -163,10 +165,11 @@ def test_run_cycle_gate_blocked():
 
 
 def test_run_cycle_blocked_in_safe_mode():
+    # qFTD-010: scan proceeds, but ranker blocks on safe_mode → RANK_REJECT
     orc = _make_orchestrator(GATE_SAFE)
     result = orc.run_cycle(_ctx())
     assert result.execute is False
-    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED")
+    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED", "RANK_REJECT")
 
 
 # ── 6: Full pipeline runs when gate clear ─────────────────────────────────────
@@ -197,12 +200,12 @@ def test_run_cycle_rank_reject():
 # ── 8: Competition rejects when gate off ─────────────────────────────────────
 
 def test_run_cycle_competition_rejects_in_safe_mode():
+    # qFTD-010: scan always-on, but ranker blocks in safe_mode → RANK_REJECT
     orc = _make_orchestrator(GATE_SAFE)
     ctx = _high_quality_ctx()
     result = orc.run_cycle(ctx)
     assert result.execute is False
-    # Action could be GATE_BLOCKED or SCAN_BLOCKED (gate fires before competition)
-    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED", "COMPETITION_REJECT")
+    assert result.action in ("GATE_BLOCKED", "SCAN_BLOCKED", "RANK_REJECT", "COMPETITION_REJECT")
 
 
 # ── 9: Capital concentration fallback ────────────────────────────────────────

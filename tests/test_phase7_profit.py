@@ -258,7 +258,8 @@ class TestTradeCompetitionEngine:
         assert "C" in winner_ids
 
     def test_weak_trades_rejected(self):
-        candidates = [self._make("A", 0.90), self._make("B", 0.40)]
+        # TR_MIN_RANK_SCORE=0.30 — B with rank=0.20 is below threshold and must be rejected
+        candidates = [self._make("A", 0.90), self._make("B", 0.20)]
         result = self.engine.select(candidates)
         loser_ids = {l.signal_id for l in result.losers}
         assert "B" in loser_ids
@@ -294,10 +295,11 @@ class TestTradeCompetitionEngine:
         assert c2.cycle_id == c1.cycle_id + 1
 
     def test_all_below_threshold_all_rejected(self):
+        # TR_MIN_RANK_SCORE=0.30 — all ranks strictly below threshold
         candidates = [
-            self._make("A", 0.30),
-            self._make("B", 0.40),
-            self._make("C", 0.50),
+            self._make("A", 0.10),
+            self._make("B", 0.15),
+            self._make("C", 0.20),
         ]
         result = self.engine.select(candidates)
         assert len(result.winners) == 0

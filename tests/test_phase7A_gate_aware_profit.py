@@ -152,16 +152,18 @@ def test_permissions_safe_mode_disables_scanning(gac):
 
 # ── 6–9: ScanController ──────────────────────────────────────────────────────
 
-def test_scan_blocked_when_gate_blocked(sc):
+def test_scan_always_on_when_gate_blocked(sc):
+    # qFTD-010: signal generation ALWAYS ON — even when can_trade=False
     result = sc.can_scan(GATE_BLOCKED)
-    assert result.allowed is False
-    assert "NO_SCAN" in result.reason
+    assert result.allowed is True
+    assert result.reason == "SCAN_OK"
 
 
-def test_scan_blocked_in_safe_mode(sc):
+def test_scan_always_on_in_safe_mode(sc):
+    # qFTD-010: scanning continues in safe_mode; only execution is gated
     result = sc.can_scan(GATE_SAFE)
-    assert result.allowed is False
-    assert "SAFE_MODE" in result.reason
+    assert result.allowed is True
+    assert result.reason == "SCAN_OK"
 
 
 def test_scan_allowed_when_clear(sc):
@@ -170,12 +172,12 @@ def test_scan_allowed_when_clear(sc):
     assert result.reason == "SCAN_OK"
 
 
-def test_scan_block_reason_includes_gate_reason(sc):
+def test_scan_always_on_regardless_of_gate_reason(sc):
+    # qFTD-010: can_scan() is unconditional — reason is never propagated
     gate = _gate(can_trade=False, safe_mode=True, reason="DEPLOY_LOW")
     result = sc.can_scan(gate)
-    assert result.allowed is False
-    # reason should reference the gate's own reason or be a clear NO_SCAN signal
-    assert "DEPLOY_LOW" in result.reason or "NO_SCAN" in result.reason
+    assert result.allowed is True
+    assert result.reason == "SCAN_OK"
 
 
 # ── 10–13: GateAwareTradeRanker ──────────────────────────────────────────────
@@ -342,10 +344,11 @@ def test_amplifier_no_fire_when_conditions_not_met(amplifier):
 
 # ── 26–30: Full pipeline tests ────────────────────────────────────────────────
 
-def test_pipeline_halts_at_scan_when_gate_blocked(sc, ranker, competition):
+def test_pipeline_scan_proceeds_but_rank_blocks_when_gate_blocked(sc, ranker, competition):
+    # qFTD-010: scan is always-on; downstream modules (ranker/competition) block on gate
     scan = sc.can_scan(GATE_BLOCKED)
-    assert scan.allowed is False
-    # Ranker and competition also blocked
+    assert scan.allowed is True  # scan always proceeds
+    # Ranker and competition are still blocked (they check gate independently)
     r = ranker.rank(GATE_BLOCKED, ev=0.20, trade_score=0.80,
                     regime="TRENDING", strategy="TrendFollowing")
     assert r is None
@@ -353,9 +356,10 @@ def test_pipeline_halts_at_scan_when_gate_blocked(sc, ranker, competition):
     assert cr.winners == []
 
 
-def test_pipeline_halts_at_scan_in_safe_mode(sc, ranker, amplifier):
+def test_pipeline_scan_proceeds_but_amp_blocks_in_safe_mode(sc, ranker, amplifier):
+    # qFTD-010: scan is always-on in safe_mode; amplifier is still blocked
     scan = sc.can_scan(GATE_SAFE)
-    assert scan.allowed is False
+    assert scan.allowed is True  # scan always proceeds
     r = ranker.rank(GATE_SAFE, ev=0.25, trade_score=0.85,
                     regime="TRENDING", strategy="TrendFollowing")
     assert r is None

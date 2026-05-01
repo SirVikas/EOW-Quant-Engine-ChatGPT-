@@ -234,13 +234,14 @@ class TestRegimeStabilityGate:
     )
 
     def test_block_trade_true_on_first_tick(self):
-        """First tick for a symbol always has stability_ticks=1 < 3 → blocked."""
+        """MIN_STABILITY_TICKS=1 — first tick satisfies stability; block depends on confidence."""
         ai = RegimeAI()
         res = ai.classify(
             adx=25, atr_pct=0.30, bb_width=3.5,
             closes=self._TRENDING_CLOSES, symbol="BTCUSDT",
         )
-        assert res.block_trade is True
+        # With MIN_STABILITY_TICKS=1, stability is met on tick 1; confidence=0.455 > 0.10
+        assert res.block_trade is False
         assert res.stability_ticks == 1
 
     def test_block_trade_false_after_three_stable_ticks(self):
@@ -275,13 +276,13 @@ class TestRegimeStabilityGate:
         for _ in range(3):
             ai._stability_ticks["SYM"] = 3
             ai._last_regime_str["SYM"] = "TRENDING"
-        # Force a result with low confidence
+        # Force a result with very low confidence — below MIN_CONFIDENCE_TRADE=0.10
         res = RegimeAiResult(
             regime=__import__("core.regime_detector", fromlist=["Regime"]).Regime.TRENDING,
-            confidence=0.40,  # below MIN_CONFIDENCE_TRADE (0.50)
+            confidence=0.05,  # below MIN_CONFIDENCE_TRADE (0.10)
             adx_score=0.5, atr_score=0.3, bb_score=0.4, rsi_score=0.1,
         )
-        # block_trade logic: confidence < 0.50 → True
+        # block_trade logic: confidence < 0.10 → True
         assert res.confidence < MIN_CONFIDENCE_TRADE
 
     def test_stability_ticks_field_in_result(self):
