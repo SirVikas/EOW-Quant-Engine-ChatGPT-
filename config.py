@@ -36,10 +36,10 @@ class EngineConfig(BaseSettings):
     BOOT_MODE: Literal["FRESH", "RESUME"] = Field(default="FRESH", env="BOOT_MODE")
     # qFTD-007-v2: seconds after boot during which gate failures do NOT trigger safe mode.
     # Engine transitions BOOTING→LIVE when indicator_validator.is_ready() OR elapsed≥grace.
-    # qFTD-032-R3: 120→900s. Grace must cover the full indicator warmup window
-    # (IV_MIN_CANDLES=14 → ~14 min). Setting grace to 900s (15 min) ensures
-    # there is no dead zone between grace expiry and indicator readiness.
-    STARTUP_GRACE_SECONDS: float = Field(default=900.0, env="STARTUP_GRACE_SECONDS")
+    # With BYPASS_ALL_GATES=True the gate always passes regardless of BOOTING/LIVE state.
+    # CandleBootstrapper seeds 120 candles at startup so indicators are warm < 60s;
+    # 120s grace is sufficient and avoids a 15-min trade blackout.
+    STARTUP_GRACE_SECONDS: float = Field(default=120.0, env="STARTUP_GRACE_SECONDS")
     AUTH_ENABLED: bool = Field(default=False, env="AUTH_ENABLED")
     # Comma-separated origins, e.g. "http://localhost:8000,https://ops.example.com"
     ALLOWED_ORIGINS: str = Field(default="http://localhost:8000", env="ALLOWED_ORIGINS")
