@@ -302,9 +302,10 @@ class EngineConfig(BaseSettings):
 
     # Indicator Validator
     # qFTD-032-R3: candle requirements reduced to align with STARTUP_GRACE (900s=15min).
-    # ADX_PERIOD=14 → 14 candles is the minimum valid computation window.
-    # This avoids a dead zone where grace expires before indicators are ready.
-    IV_MIN_CANDLES: int = 14               # qFTD-032-R3: 20→14 — aligns with ADX_PERIOD
+    # RSI(14) requires period+1=15 candles minimum; IV_MIN_CANDLES must match to avoid
+    # the coarse gate (_ind_ok_coarse = n>=14) passing while the full validator fails
+    # (rsi_warmup: 14 < 15). At 14 candles: coarse=True but iv_result.ok=False → mismatch.
+    IV_MIN_CANDLES: int = 15               # qFTD-fix: 14→15 — RSI(14) needs period+1=15
     IV_RSI_MIN_CANDLES: int = 15           # RSI needs at least RSI_PERIOD+1 candles
     IV_ADX_MIN_CANDLES: int = 14           # qFTD-032-R3: 20→14 — ADX_PERIOD=14, functional at period
     IV_ATR_MIN_CANDLES: int = 14           # qFTD-032-R3: 15→14 — ATR_PERIOD=14
@@ -328,8 +329,10 @@ class EngineConfig(BaseSettings):
 
     # Safe Mode Controller
     SMC_RESUME_AFTER_MIN: float = 5.0      # Auto-resume safe mode check interval (minutes)
-    # FTD-REF-055: 75→47 — safe mode can exit once WS+Risk healthy (warmup-safe)
-    SMC_MIN_SCORE_RESUME: float = 47.0     # Deployability score needed to exit safe mode (was 75.0)
+    # FTD-REF-055: 75→47→44 — must be < BDE_MIN_SCORE (45.0) so safe mode can exit during
+    # warmup when indicators not ready. Max warmup score = ws×0.25+risk×0.20 = 45.0;
+    # setting 47.0 > 45.0 caused permanent deadlock (score-based recovery impossible).
+    SMC_MIN_SCORE_RESUME: float = 44.0     # Deployability score needed to exit safe mode (was 47.0)
 
     # ── Phase 6.6: Hard Gating + Safety Enforcement ───────────────────────────
     # Global Gate Controller — master trading permission authority
@@ -341,7 +344,7 @@ class EngineConfig(BaseSettings):
 
     # Hard Start Validator — pre-boot stop gate
     HSV_EXIT_ON_FAIL: bool = False          # True = sys.exit(1) on failure (set True for prod)
-    HSV_MIN_CANDLES_BOOT: int = 20          # FTD-REF-055: 30→20 — aligned with IV_MIN_CANDLES
+    HSV_MIN_CANDLES_BOOT: int = 20          # FTD-REF-055: 30→20 — boot hard-stop; higher than IV_MIN_CANDLES(15) intentional
 
     # Safe Mode Enforcer — runtime auto-protection
     # FTD-REF-055: triggers only on genuine WS/risk failures, not boot warmup

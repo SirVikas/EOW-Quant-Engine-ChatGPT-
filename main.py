@@ -516,7 +516,7 @@ async def on_tick(tick: Tick):
         atr_pct        = regime_atr_pct if regime_atr_pct > 0 else candle_atr_pct
         raw_adx        = getattr(r_state, "adx", 0.0)
         guard          = indicator_guard.validate(
-            symbol=sym, n_candles=len(buf), adx=raw_adx, atr_pct=atr_pct,
+            symbol=sym, n_candles=_n_candles, adx=raw_adx, atr_pct=atr_pct,
         )
         if not guard.ok:
             error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025

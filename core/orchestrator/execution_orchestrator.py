@@ -267,8 +267,8 @@ class ExecutionOrchestrator:
 
         if not gate_status["can_trade"]:
             reason = gate_status.get("reason", "GATE_BLOCKED")
-            if activate_safe_mode:
-                self._sme.activate(reason)
+            # GlobalGateController.evaluate() already activates safe mode internally;
+            # do not call self._sme.activate() here to avoid duplicate activations.
             logger.warning(
                 f"[ORCHESTRATOR] GATE BLOCKED — no scan | sym={symbol} reason={reason}"
             )
@@ -344,7 +344,7 @@ class ExecutionOrchestrator:
 
         if not gate_status["can_trade"]:
             reason = gate_status.get("reason", "GATE_BLOCKED")
-            self._sme.activate(reason)
+            # GlobalGateController.evaluate() already activates safe mode internally.
             logger.warning(
                 f"[ORCHESTRATOR] BLOCKED in run_cycle | sym={ctx.symbol} reason={reason}"
             )

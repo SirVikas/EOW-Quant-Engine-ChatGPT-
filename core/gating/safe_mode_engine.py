@@ -97,6 +97,10 @@ class SafeModeEngine:
         self._mode = SafeMode.SAFE
         if prev != SafeMode.SAFE:
             self._activated_at = time.time()
+            # Reset throttle so the FIRST recovery check after activation is never throttled.
+            # Without this, BOOTING-grace calls to check_recovery() (which set _last_resume_check)
+            # would delay post-activation recovery by up to SMC_RESUME_AFTER_MIN minutes.
+            self._last_resume_check = 0.0
             gate_logger.safe_mode(reason=reason, detail=f"prev={prev.value}")
             logger.error(f"[SAFE-MODE-ENGINE] SAFE MODE ACTIVATED | reason={reason}")
         else:
