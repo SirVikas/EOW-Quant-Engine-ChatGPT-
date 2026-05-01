@@ -448,12 +448,17 @@ async def on_tick(tick: Tick):
     # candle_buf already computed above (before gate check)
     data_gate = strategy_engine.evaluate_data_sufficiency(len(candle_buf))
     if data_gate != "OK":
-        error_registry.log("DATA_001", symbol=sym, extra=f"candles={len(candle_buf)}")  # FTD-REF-025
-        _last_skip = {
-            "ts": int(time.time() * 1000), "symbol": sym,
-            "reason": f"{data_gate}({len(candle_buf)})",
-        }
-        return
+        if cfg.BYPASS_ALL_GATES and len(candle_buf) >= 2:
+            # BYPASS_ALL_GATES: skip candle-count warmup gate so paper trades start
+            # as soon as 2 candles exist. Signal quality enforced by lean_gate only.
+            logger.debug(f"[BYPASS] {sym} data gate bypassed ({data_gate} candles={len(candle_buf)})")
+        else:
+            error_registry.log("DATA_001", symbol=sym, extra=f"candles={len(candle_buf)}")  # FTD-REF-025
+            _last_skip = {
+                "ts": int(time.time() * 1000), "symbol": sym,
+                "reason": f"{data_gate}({len(candle_buf)})",
+            }
+            return
 
     # 2b. Performance debounce: avoid repeated heavy regime/signal passes
     # for the same symbol within sub-second windows.
@@ -521,8 +526,22 @@ async def on_tick(tick: Tick):
             symbol=sym, n_candles=_n_candles, adx=raw_adx, atr_pct=atr_pct,
         )
         if not guard.ok:
-            error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
-            return   # insufficient candles / unstable ADX / near-zero ATR
+            if cfg.BYPASS_ALL_GATES:
+                # BYPASS_ALL_GATES: substitute floor values so the pipeline can
+                # generate signals during paper warmup before full indicator readiness.
+                # Soft ADX=15 (WEAK but tradeable), soft ATR=0.01% (above lean_gate floor).
+                from core.indicator_guard import GuardResult
+                _guard_block_reason = guard.reason
+                _soft_adx = max(raw_adx if raw_adx is not None else 0.0, 15.0)
+                _soft_atr = max(atr_pct, 0.01)
+                guard = GuardResult(ok=True, adx=_soft_adx, atr_pct=_soft_atr, adx_quality="WEAK")
+                logger.debug(
+                    f"[BYPASS] {sym} indicator guard bypassed ({_guard_block_reason}) "
+                    f"→ soft adx={_soft_adx:.1f} atr={_soft_atr:.4f}%"
+                )
+            else:
+                error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
+                return   # insufficient candles / unstable ADX / near-zero ATR
 
         # Phase 2: Hard-lock MeanReversion when ADX > 25 (strong trend regardless of regime label).
         if strategy_type == "MeanReversion" and raw_adx > 25.0:

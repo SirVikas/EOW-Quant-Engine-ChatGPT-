@@ -112,16 +112,19 @@ class LeanGate:
             )
 
         # ── Gate 3: Fee economy ───────────────────────────────────────────────
-        round_trip_fee = notional * (cfg.TAKER_FEE * 2)
-        gross_tp       = tp_dist * (notional / entry) if entry > 0 else 0.0
-        if gross_tp > 0:
-            fee_ratio = round_trip_fee / gross_tp
-            if fee_ratio > MAX_FEE_RATIO:
-                return LeanResult(
-                    execute=False,
-                    reason=f"FEE_HEAVY({fee_ratio*100:.1f}%>{MAX_FEE_RATIO*100:.0f}%)",
-                    rr=rr, sl_dist_pct=sl_dist_pct,
-                )
+        # Skipped in BYPASS_ALL_GATES mode: fee quality is a signal-selection
+        # concern; with bypass active the engine prioritises trade throughput.
+        if not cfg.BYPASS_ALL_GATES:
+            round_trip_fee = notional * (cfg.TAKER_FEE * 2)
+            gross_tp       = tp_dist * (notional / entry) if entry > 0 else 0.0
+            if gross_tp > 0:
+                fee_ratio = round_trip_fee / gross_tp
+                if fee_ratio > MAX_FEE_RATIO:
+                    return LeanResult(
+                        execute=False,
+                        reason=f"FEE_HEAVY({fee_ratio*100:.1f}%>{MAX_FEE_RATIO*100:.0f}%)",
+                        rr=rr, sl_dist_pct=sl_dist_pct,
+                    )
 
         # ── Gate 4: Loss streak ───────────────────────────────────────────────
         if consecutive_losses >= MAX_CONSEC_LOSSES:
