@@ -1,0 +1,25 @@
+{
+  "exported_at": "2026-05-01T06:11:01Z",
+  "summary": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "net_pnl": 0.0,
+    "gross_pnl": 0.0,
+    "total_fees": 0.0,
+    "total_slippage": 0.0,
+    "profit_factor": 0.0,
+    "avg_win": 0.0,
+    "avg_loss": 0.0,
+    "avg_rr": 0.0,
+    "max_drawdown": 0.0,
+    "sharpe": 0.0,
+    "cost_pct": 0.0,
+    "fee_drag": 0.0,
+    "by_strategy": {},
+    "by_regime": {},
+    "by_symbol": {}
+  },
+  "trades": []
+}
