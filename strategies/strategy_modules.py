@@ -35,7 +35,7 @@ class TradeSignal:
 # Minimum ATR% to even consider a trade.
 # Stablecoins: ATR% ≈ 0.002–0.05%  → blocked
 # Real coins:  ATR% ≈ 0.1%+        → allowed
-MIN_ATR_PCT = 0.015  # Phase 3.1: 0.03→0.015% — aligned with indicator_guard; stablecoins still blocked
+MIN_ATR_PCT = 0.05   # raised 0.015→0.05: SL_dist = ATR*2.5; at 0.015% SL is only 0.04% — sub-tick noise on BTC/XRP
 
 # ── Shared Indicator Helpers ─────────────────────────────────────────────────
 

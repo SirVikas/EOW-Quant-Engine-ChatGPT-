@@ -53,7 +53,7 @@ class TradeManager:
 
     def __init__(self):
         self._positions: Dict[str, ManagedPosition] = {}
-        self.be_r            = 1.0                        # move to breakeven at 1R
+        self.be_r            = cfg.BREAKEVEN_TRIGGER_R     # move to breakeven (cfg-controlled; was hardcoded 1.0)
         self.partial_tp_r    = cfg.PARTIAL_TP_R           # partial exit at 1.5R
         self.trail_atr_mult  = cfg.ATR_MULT_SL * 0.7     # tighter trail after BE
         self.be_epsilon      = cfg.BREAKEVEN_EPSILON_USDT
@@ -105,7 +105,7 @@ class TradeManager:
                 pos.peak_price = pos.entry_price
             pos.peak_price = min(pos.peak_price, current_price)
 
-        # 1. Move SL to break-even at 1R (one-time)
+        # 1. Move SL to break-even at BREAKEVEN_TRIGGER_R (one-time)
         if not pos.breakeven_set and r_mult >= self.be_r:
             be_price = (pos.entry_price + self.be_epsilon
                         if pos.side == "LONG"

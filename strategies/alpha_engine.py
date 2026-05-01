@@ -22,7 +22,7 @@ from typing import List, Optional
 from loguru import logger
 
 from config import cfg
-from strategies.strategy_modules import Signal, TradeSignal, _ema, _rsi, _atr
+from strategies.strategy_modules import Signal, TradeSignal, _ema, _rsi, _atr, MIN_ATR_PCT
 from core.rr_engine import rr_engine
 from core.trade_scorer import trade_scorer
 
@@ -75,6 +75,8 @@ class TrendContinuationBreakout:
         price = closes[-1]
         atr   = _atr(highs, lows, closes, self.atr_period)
         if atr <= 0 or price <= 0:
+            return None
+        if atr / price * 100 < MIN_ATR_PCT:
             return None
 
         recent_high = max(highs[-self.lookback - 1:-1])
@@ -174,7 +176,7 @@ class PullbackEntryInTrend:
         rsi        = _rsi(closes, self.rsi_period)
         rsi_prev   = _rsi(closes[:-1], self.rsi_period) if len(closes) > self.rsi_period + 1 else rsi
         atr        = _atr(highs, lows, closes, self.atr_period)
-        if atr <= 0 or ema_fast <= 0 or price <= 0:
+        if atr <= 0 or ema_fast <= 0 or price <= 0 or atr / price * 100 < MIN_ATR_PCT:
             return None
 
         ema_dist_pct = abs(price - ema_fast) / ema_fast * 100
@@ -267,6 +269,8 @@ class VolatilitySqueezeEntry:
         price = closes[-1]
         atr   = _atr(highs, lows, closes, self.atr_period)
         if atr <= 0 or price <= 0:
+            return None
+        if atr / price * 100 < MIN_ATR_PCT:
             return None
 
         def _bb_width(price_slice: List[float]) -> float:
