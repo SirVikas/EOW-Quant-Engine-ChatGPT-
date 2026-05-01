@@ -15,6 +15,7 @@ without any concentration enhancement.
 from __future__ import annotations
 
 from loguru import logger
+from config import cfg
 
 from core.capital_concentrator import (
     CapitalConcentrator,
@@ -93,13 +94,21 @@ class GateAwareCapitalConcentrator:
             )
             return _safe_fallback(base_risk_usdt, upstream_mult)
 
-        return self._base.concentrate(
+        result = self._base.concentrate(
             rank_score=rank_score,
             equity=equity,
             base_risk_usdt=base_risk_usdt,
             upstream_mult=upstream_mult,
             ev=ev,
         )
+        # PAPER_SPEED forensic fix:
+        # In stress mode, low rank should not hard-stop execution flow.
+        if (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE and not result.ok):
+            logger.debug(
+                f"[PROFIT-CONCENTRATOR] PAPER_SPEED fallback — bypass reject: {result.reason}"
+            )
+            return _safe_fallback(base_risk_usdt, upstream_mult)
+        return result
 
     def record_risk_used(self, risk_usdt: float) -> None:
         self._base.record_risk_used(risk_usdt)

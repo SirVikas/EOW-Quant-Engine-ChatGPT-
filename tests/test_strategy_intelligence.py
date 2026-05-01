@@ -183,12 +183,14 @@ class TestSignalFilter:
         assert "LOW_RR" in r.reason
 
     def test_low_atr_blocked(self):
-        r = self._good(atr_pct=0.05)
+        # MIN_ATR_PCT=0.010 — use a value strictly below the threshold
+        r = self._good(atr_pct=0.005)
         assert r.ok is False
         assert "LOW_ATR" in r.reason
 
     def test_low_confidence_blocked(self):
-        r = self._good(confidence=0.45)
+        # UNKNOWN min_conf=0.18 — use a value strictly below the threshold
+        r = self._good(confidence=0.15)
         assert r.ok is False
         assert "LOW_CONFIDENCE" in r.reason
 
@@ -254,9 +256,9 @@ class TestRiskEngine:
         assert "DAILY_TRADE_CAP" in reason
 
     def test_daily_loss_halt(self):
-        # Lose 3.5% of starting equity
-        self.re.record_trade_result(-350.0)
-        self.re.update_equity(9650.0)
+        # MAX_DAILY_LOSS_PCT=5% → lose 5.1% (510 USDT of 10k equity) to trigger halt
+        self.re.record_trade_result(-510.0)
+        self.re.update_equity(9490.0)
         ok, reason = self.re.check_new_trade()
         assert ok is False
         assert "DAILY_LOSS" in reason or self.re.halted
@@ -279,9 +281,10 @@ class TestRiskEngine:
         assert self.re.size_multiplier == 1.0
 
     def test_compute_risk_usdt_respects_multiplier(self):
+        # RISK_PCT_MAX=1.5% (raised from 1%). Expected: 10000 × 0.015 × 0.5 = 75
         self.re._state.size_multiplier = 0.5
         risk = self.re.compute_risk_usdt(10_000.0)
-        assert risk == pytest.approx(10_000.0 * 0.01 * 0.5, rel=0.01)
+        assert risk == pytest.approx(10_000.0 * 0.015 * 0.5, rel=0.01)
 
     def test_snapshot_structure(self):
         s = self.re.snapshot()

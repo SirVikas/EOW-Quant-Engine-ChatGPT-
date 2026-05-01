@@ -14,6 +14,7 @@ Interface:
 """
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 
 from loguru import logger
@@ -45,6 +46,8 @@ class ScanController:
         logger.info("[SCAN-CTRL] Phase 7A activated — signal generation ALWAYS ON (qFTD-010)")
         self._total_blocked: int = 0
         self._total_allowed: int = 0
+        self._last_heartbeat_log_ts: float = 0.0
+        self._heartbeat_log_interval_sec: float = 5.0
 
     def can_scan(self, gate_status: dict) -> ScanDecision:
         """
@@ -61,10 +64,13 @@ class ScanController:
             ScanDecision(allowed=True, reason="SCAN_OK") unconditionally.
         """
         self._total_allowed += 1
-        logger.debug(
-            f"[SCAN-CTRL] Heartbeat — scanning active "
-            f"(can_trade={gate_status.get('can_trade')}, safe_mode={gate_status.get('safe_mode')})"
-        )
+        now = time.time()
+        if now - self._last_heartbeat_log_ts >= self._heartbeat_log_interval_sec:
+            logger.debug(
+                f"[SCAN-CTRL] Heartbeat — scanning active "
+                f"(can_trade={gate_status.get('can_trade')}, safe_mode={gate_status.get('safe_mode')})"
+            )
+            self._last_heartbeat_log_ts = now
         return _SCAN_OK
 
     def enforce_no_scan(self, gate_status: dict) -> None:

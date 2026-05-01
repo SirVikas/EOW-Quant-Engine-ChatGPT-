@@ -89,8 +89,8 @@ def test_weak_score_blocked_by_trade_scorer_gate():
     that gate lives in trade_scorer.py.  This test proves the upstream config floor.
     """
     from config import cfg
-    assert cfg.MIN_TRADE_SCORE == 0.60, (
-        f"MIN_TRADE_SCORE must be 0.60, got {cfg.MIN_TRADE_SCORE}. "
+    assert cfg.MIN_TRADE_SCORE == 0.58, (
+        f"MIN_TRADE_SCORE must be 0.58, got {cfg.MIN_TRADE_SCORE}. "
         "Score floor is the first defence against weak signals."
     )
     # Even if it slips through, show what rank it would produce

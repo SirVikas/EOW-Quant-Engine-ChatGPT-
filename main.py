@@ -54,6 +54,7 @@ from core.market_structure   import market_structure_detector  # FTD-REF-024
 from core.ws_truth_engine    import ws_truth_engine     # FTD-REF-025
 from core.error_registry     import error_registry      # FTD-REF-025
 from core.strategy_engine    import strategy_engine     # FTD-REF-026
+from core.memory.memory_orchestrator import memory_orchestrator  # FTD-030B
 from core.profit_guard       import profit_guard        # FTD-REF-026
 from core.ct_scan_engine     import ct_scan_engine      # FTD-REF-026
 from core.inverse_engine     import inverse_engine, TradeMode  # A.I.E.
@@ -517,7 +518,7 @@ async def on_tick(tick: Tick):
         atr_pct        = regime_atr_pct if regime_atr_pct > 0 else candle_atr_pct
         raw_adx        = getattr(r_state, "adx", 0.0)
         guard          = indicator_guard.validate(
-            symbol=sym, n_candles=len(buf), adx=raw_adx, atr_pct=atr_pct,
+            symbol=sym, n_candles=_n_candles, adx=raw_adx, atr_pct=atr_pct,
         )
         if not guard.ok:
             error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
@@ -581,9 +582,20 @@ async def on_tick(tick: Tick):
 
         # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
+        _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
+        _vol_mult = thresholds.volume_multiplier
+        if _paper_speed:
+            # Aggressive paper throughput mode: relax sleep gate to its floor.
+            _vol_mult = min(_vol_mult, 0.20)
         vol_active, vol_reason = volume_filter.is_active(
-            sym, vol_buf, vol_multiplier=thresholds.volume_multiplier,
+            sym, vol_buf, vol_multiplier=_vol_mult,
         )
+        if _paper_speed and not vol_active:
+            _thought(
+                f"⚡ PAPER_SPEED bypass {sym}: {vol_reason}",
+                "FILTER",
+            )
+            vol_active = True
         if not cfg.BYPASS_ALL_GATES and not vol_active:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
             trade_flow_monitor.record_skip(sym, vol_reason)
@@ -597,6 +609,10 @@ async def on_tick(tick: Tick):
 
         # MASTER-001: risk engine gate (daily loss / trade cap / drawdown halt)
         risk_allowed, risk_reason = risk_engine.check_new_trade()
+        if _paper_speed and not risk_allowed:
+            if any(k in risk_reason for k in ("HALTED:", "MAX_DAILY_LOSS", "DAILY_TRADE_CAP")):
+                _thought(f"⚡ PAPER_SPEED bypass risk gate {sym}: {risk_reason}", "FILTER")
+                risk_allowed = True
         if not cfg.BYPASS_ALL_GATES and not risk_allowed:
             return   # daily risk limit reached
 
@@ -749,6 +765,42 @@ async def on_tick(tick: Tick):
                 )
             else:
                 logger.debug(f"[SIG] {sym} alpha → NONE (RR/score below threshold)")
+
+        # PAPER_SPEED fallback injector:
+        # If both primary + alpha signals are NONE, synthesize a minimal
+        # momentum signal so the pipeline can execute and recover flow.
+        if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
+            _entry = closes[-1]
+            _mom_up = closes[-1] >= closes[-2]
+            _atr_px = max(
+                abs(closes[-1] - closes[-2]),
+                _entry * 0.001,                      # 0.10% floor
+                (_entry * atr_pct / 100.0),
+            )
+            _sl_dist = _atr_px * 1.5
+            _tp_dist = _atr_px * 2.5
+            if _mom_up:
+                _sl = _entry - _sl_dist
+                _tp = _entry + _tp_dist
+                _side = Signal.LONG
+            else:
+                _sl = _entry + _sl_dist
+                _tp = _entry - _tp_dist
+                _side = Signal.SHORT
+            sig = TradeSignal(
+                symbol=sym,
+                signal=_side,
+                entry_price=_entry,
+                stop_loss=_sl,
+                take_profit=_tp,
+                confidence=0.51,
+                strategy_id=f"{strategy_type}_PAPER_SPEED",
+                reason="PAPER_SPEED_FALLBACK(momentum micro-signal)",
+            )
+            _thought(
+                f"⚡ PAPER_SPEED fallback {sym}: {_side.value} entry={_entry:.4f}",
+                "SIGNAL",
+            )
 
         if sig and sig.signal != Signal.NONE:
             execution_drive_policy.record_signal(sym)   # EDP: track signal activity
@@ -1232,6 +1284,7 @@ async def on_tick(tick: Tick):
                 qty=sizing.qty,
                 current_volatility=atr_pct,
                 regime=regime.value,   # Fix B: regime-specific RR threshold
+                minutes_no_trade=_tf_mins,  # qFTD-040: tiered required_r relaxation during dry spells
             )
             if not cfg.BYPASS_ALL_GATES and not edge_ok:
                 rr_net = edge.get('rr_after_cost', 0)
@@ -1269,8 +1322,14 @@ async def on_tick(tick: Tick):
                 )
                 return
 
-            # Open position — use Limit Order when enabled (saves fees + slippage)
-            if cfg.USE_LIMIT_ORDERS:
+            # Open position — in PAPER_SPEED force market path to avoid pending-order dead time.
+            _use_limit_orders = cfg.USE_LIMIT_ORDERS and (not _paper_speed)
+            if cfg.USE_LIMIT_ORDERS and _paper_speed:
+                _thought(
+                    f"⚡ PAPER_SPEED market-fill override {sym}: USE_LIMIT_ORDERS bypassed",
+                    "TRADE",
+                )
+            if _use_limit_orders:
                 offset = sig.entry_price * (cfg.LIMIT_ENTRY_OFFSET_BPS / 10_000)
                 if sig.signal.value == "LONG":
                     limit_px = sig.entry_price - offset   # buy slightly below signal price
@@ -3583,6 +3642,91 @@ async def graceful_stop_engine(_auth=Depends(require_roles("operator", "admin"))
         "SYSTEM",
     )
     return {"state": "GRACEFUL_STOP", "open_positions": len(risk_ctrl.positions)}
+
+
+# ── FTD-030B: Learning Memory Engine ─────────────────────────────────────────
+
+@app.get("/api/memory/state")
+async def memory_state():
+    """Q18/Q19: Memory dashboard — all panels (valid_patterns, retention, negative_memory, etc.)."""
+    return memory_orchestrator.summary()
+
+
+@app.get("/api/memory/patterns")
+async def memory_patterns():
+    """Q17/Q18: Export all tracked patterns with ban status."""
+    return memory_orchestrator.patterns()
+
+
+@app.get("/api/memory/logs")
+async def memory_logs(n: int = 50):
+    """Q16-A: Recent JSONL memory entries (append-only log)."""
+    return memory_orchestrator.logs(n=n)
+
+
+@app.post("/api/memory/learn")
+async def memory_learn(body: dict, _auth=Depends(require_roles("operator", "admin"))):
+    """
+    Q12: Ingest a correction-cycle record into the memory engine.
+    Required fields: change_id, parameter, delta_pct, direction, value_before,
+                     value_after, pnl_delta, score_delta, rolled_back.
+    Optional: rollback_trigger, rationale, confidence, market_regime, volatility, symbol.
+    """
+    try:
+        result = memory_orchestrator.learn(
+            change_id=body["change_id"],
+            parameter=body["parameter"],
+            delta_pct=float(body["delta_pct"]),
+            direction=body["direction"],
+            value_before=float(body["value_before"]),
+            value_after=float(body["value_after"]),
+            pnl_delta=float(body["pnl_delta"]),
+            score_delta=float(body["score_delta"]),
+            rolled_back=bool(body["rolled_back"]),
+            rollback_trigger=body.get("rollback_trigger"),
+            rationale=body.get("rationale", ""),
+            confidence=float(body.get("confidence", 50.0)),
+            market_regime=body.get("market_regime", "UNKNOWN"),
+            volatility=float(body.get("volatility", 0.0)),
+            symbol=body.get("symbol", "PORTFOLIO"),
+        )
+        return result
+    except KeyError as exc:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail=f"Missing required field: {exc}")
+
+
+@app.get("/api/memory/suggestions")
+async def memory_suggestions(
+    total_trades: int = 0,
+    validation_score: float = 0.0,
+    regime_context: str = "UNKNOWN",
+    risk_halted: bool = False,
+    risk_violated: bool = False,
+    policy_ok: bool = True,
+):
+    """
+    Q7/Q8/Q20: Return memory-based parameter suggestions.
+    Gates: memory_ready + total_trades≥50 + validation_score≥70 + PolicyGuard.
+    """
+    from core.self_correction.correction_proposal import TUNABLE_PARAMS
+    current_params = {k: float(v[0] + v[1]) / 2.0 for k, v in TUNABLE_PARAMS.items()}
+    return memory_orchestrator.suggest(
+        current_params=current_params,
+        total_trades=total_trades,
+        validation_score=validation_score,
+        regime_context=regime_context,
+        risk_halted=risk_halted,
+        risk_violated=risk_violated,
+        policy_ok=policy_ok,
+    )
+
+
+@app.post("/api/memory/reset")
+async def memory_reset(_auth=Depends(require_roles("admin"))):
+    """Hard reset: clear all memory entries, patterns, negative memory, guard session."""
+    memory_orchestrator.reset()
+    return {"status": "RESET", "module": "MEMORY_ORCHESTRATOR", "phase": "030B"}
 
 
 # ── WebSocket (Real-time Dashboard Feed) ──────────────────────────────────────

@@ -1,0 +1,326 @@
+# 🧾 FTD-014C — MISSING REPORTING COMPLETION LAYER (PROPERLY ARCHITECTED)
+
+### Ref: FTD-014C-EOW-INTELLIGENCE-REPORTING (BLACKBOX)
+
+---
+
+# 🎯 OBJECTIVE
+
+Upgrade reporting from **data collection → decision intelligence system**
+
+```text id="y3xk0v"
+FTD-014B = WHAT happened
+FTD-014C = WHY it happened + WHAT to do next
+```
+
+---
+
+# 🧠 CORE ARCHITECTURE (NON-NEGOTIABLE)
+
+```text id="6y2l2o"
+Layer 1 → RAW DATA (FTD-014B) ❌ DO NOT MODIFY
+Layer 2 → DERIVED ANALYTICS (NEW)
+Layer 3 → DECISION INTELLIGENCE (NEW)
+```
+
+---
+
+# 🚨 RULES (MANDATORY)
+
+```text id="h1nqv7"
+1. NO duplicate storage of raw data
+2. ALL reports must derive from existing logs
+3. EVERY report must answer a decision question
+4. EVERY report must be timestamped
+5. NO heavy computation in live loop
+```
+
+---
+
+# 📁 NEW DIRECTORY STRUCTURE
+
+```text id="h3c2kp"
+/reports/intelligence/
+    /derived/
+    /decision/
+    /diagnostics/
+```
+
+---
+
+# 🥇 PART 1 — DERIVED ANALYTICS ENGINE
+
+## 📁 MODULE:
+
+```text id="q2c7pe"
+/core/reporting/derived_engine.py
+```
+
+---
+
+## 🔧 FUNCTION:
+
+```python id="1p6b7n"
+def compute_derived_metrics():
+    trades = load("/reports/auto/trades/")
+    equity = load("/reports/auto/equity/")
+    signals = load("/reports/auto/signals/")
+```
+
+---
+
+## 📊 DERIVED REPORTS (MANDATORY)
+
+---
+
+### 1. EXPECTANCY DISTRIBUTION
+
+📁 `/reports/intelligence/derived/expectancy_YYYYMMDD.json`
+
+```text id="4fxc3n"
+mean, variance, distribution
+```
+
+---
+
+### 2. EDGE STABILITY REPORT
+
+📁 `/reports/intelligence/derived/edge_stability.json`
+
+---
+
+### 3. KELLY SIZING REPORT
+
+📁 `/reports/intelligence/derived/kelly.json`
+
+---
+
+### 4. CORRELATION MATRIX
+
+📁 `/reports/intelligence/derived/correlation.csv`
+
+---
+
+### 5. DRAWDOWN RECOVERY
+
+📁 `/reports/intelligence/derived/recovery_time.json`
+
+---
+
+### 6. TAIL RISK (VaR / CVaR)
+
+📁 `/reports/intelligence/derived/tail_risk.json`
+
+---
+
+---
+
+# 🥈 PART 2 — DECISION INTELLIGENCE ENGINE (CORE)
+
+## 📁 MODULE:
+
+```text id="qqm3z1"
+/core/reporting/decision_engine.py
+```
+
+---
+
+## 🎯 PURPOSE:
+
+```text id="k5q8cb"
+Answer:
+- Why no trade?
+- Why trade failed?
+- What should be done next?
+```
+
+---
+
+## 📊 REPORTS
+
+---
+
+### 🔥 1. DECISION TRACE REPORT (MOST IMPORTANT)
+
+📁 `/reports/intelligence/decision/decision_trace_YYYYMMDD.txt`
+
+---
+
+### Logic:
+
+```python id="2s4e8v"
+trace = {
+  "signal": present/absent,
+  "filter": pass/fail,
+  "edge": pass/fail,
+  "execution": pass/fail,
+}
+```
+
+---
+
+### 🔥 2. MISSED OPPORTUNITY REPORT
+
+📁 `/reports/intelligence/decision/missed_opportunity.csv`
+
+---
+
+### 🔥 3. PIPELINE TRACE REPORT
+
+📁 `/reports/intelligence/decision/pipeline_trace.log`
+
+```text id="ct9n7k"
+Tick → Indicator → Signal → Filter → Execution
+```
+
+---
+
+### 4. SIGNAL SURVIVAL REPORT
+
+---
+
+### 5. STRATEGY FAILURE REPORT
+
+---
+
+---
+
+# 🥉 PART 3 — DIAGNOSTIC ENGINE
+
+## 📁 MODULE:
+
+```text id="ow0rl6"
+/core/reporting/diagnostic_engine.py
+```
+
+---
+
+## 📊 REPORTS
+
+---
+
+### 1. ANOMALY DETECTION
+
+📁 `/reports/intelligence/diagnostics/anomaly.json`
+
+---
+
+### 2. BACKTEST vs LIVE
+
+---
+
+### 3. CONFIG CHANGE IMPACT
+
+---
+
+### 4. USER ACTION LOG ANALYSIS
+
+---
+
+---
+
+# 🔌 PART 4 — INTEGRATION (STRICT)
+
+---
+
+## HOOK 1 — SIGNAL AUDIT READER
+
+```python id="0ml3hx"
+signals = read_auto("signals")
+```
+
+---
+
+## HOOK 2 — TRADE READER
+
+---
+
+## HOOK 3 — RISK STATE
+
+---
+
+## HOOK 4 — EXECUTION
+
+---
+
+---
+
+# 🧪 PART 5 — VERIFIER SCRIPT
+
+📁 `/tests/test_intelligence_reporting.py`
+
+---
+
+### TESTS:
+
+```python id="g6jz2d"
+def test_expectancy():
+    assert expectancy > 0 or < 0
+
+def test_decision_trace():
+    assert "signal" in report
+
+def test_pipeline_trace():
+    assert "Tick" in log
+```
+
+---
+
+---
+
+# 🧠 PART 6 — DBO COMPLIANCE
+
+| Filter           | Covered          |
+| ---------------- | ---------------- |
+| 🌍 Institutional | decision trace ✔ |
+| 📚 CTA           | edge stability ✔ |
+| 📈 Growth        | kelly ✔          |
+| 🛡 Risk          | tail risk ✔      |
+| ⚙ Deployability  | pipeline trace ✔ |
+
+---
+
+---
+
+# 🚀 PART 7 — EXECUTION MODE
+
+## AUTO:
+
+```text id="zw8coo"
+Derived reports → every 10 trades
+```
+
+---
+
+## ON-DEMAND:
+
+```text id="96y08c"
+Decision reports → user click
+```
+
+---
+
+---
+
+# 🏁 FINAL STATE
+
+After FTD-014C:
+
+```text id="gk2p8k"
+System will:
+- Detect problems
+- Explain problems
+- Suggest actions
+```
+
+---
+
+# 🔥 FINAL LINE
+
+```text id="bdrs1x"
+Yeh system ab sirf trader nahi rahega
+
+Yeh ek analyst + risk manager + decision engine ban jayega
+```
+
+---

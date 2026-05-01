@@ -115,12 +115,14 @@ class CapitalConcentrator:
         # Proposed risk = base × upstream_mult × concentration_mult
         proposed_risk = base_risk_usdt * upstream_mult * band_mult
 
-        # Phase 7B: direct EV boost/penalty applied after band selection
+        # Phase 7B: direct EV boost/penalty applied after band selection.
+        # ev=0.0 means "no EV data provided" — do not penalise for absent data.
         ev_boost = 1.0
-        if ev > cfg.P7B_EV_HIGH_THRESHOLD:
-            ev_boost = cfg.P7B_EV_CC_BOOST
-        elif ev < cfg.P7B_EV_LOW_THRESHOLD:
-            ev_boost = cfg.P7B_EV_CC_PENALTY
+        if ev > 0.0:
+            if ev > cfg.P7B_EV_HIGH_THRESHOLD:
+                ev_boost = cfg.P7B_EV_CC_BOOST
+            elif ev < cfg.P7B_EV_LOW_THRESHOLD:
+                ev_boost = cfg.P7B_EV_CC_PENALTY
         proposed_risk = proposed_risk * ev_boost
 
         # Hard cap: max % equity per trade

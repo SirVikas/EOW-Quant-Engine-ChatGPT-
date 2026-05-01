@@ -100,8 +100,8 @@ class IndicatorGuard:
                 f"[IND-GUARD] {symbol} ADX={clamped_adx:.1f} < {ADX_WEAK_BELOW} → WEAK"
             )
 
-        # 6. ATR% floor — skip illiquid / stalled bars
-        if atr_pct < ATR_PCT_MIN:
+        # 6. ATR% floor — skip illiquid / stalled bars (at-or-below minimum = blocked)
+        if atr_pct <= ATR_PCT_MIN:
             return GuardResult(
                 ok=False,
                 reason=f"ATR_TOO_LOW({atr_pct:.4f}%<{ATR_PCT_MIN}%)",

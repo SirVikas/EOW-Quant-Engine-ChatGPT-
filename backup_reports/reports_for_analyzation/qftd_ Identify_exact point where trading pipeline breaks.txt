@@ -1,0 +1,304 @@
+# 🧠 OBJECTIVE
+
+> Identify **exact point where trading pipeline breaks**
+>
+> * Provide **complete end-to-end execution flow proof**
+
+---
+
+# 💣 CRITICAL INSTRUCTION (MANDATORY)
+
+Developer MUST:
+
+1. **Full pipeline trace दे (start → end)**
+2. **हर stage का status बताए (PASS / BLOCK / SKIPPED)**
+3. **EXACT break-point identify करे**
+4. **Code + logs evidence दे**
+
+---
+
+# 🧩 SECTION 1 — FULL TRADING PIPELINE (COMPLETE FLOW)
+
+### Q1.1
+
+Complete pipeline diagram दें:
+
+```text
+Market Data
+→ Indicator Engine
+→ Strategy Engine
+→ Signal Generation
+→ Filters (EV / RR / Confidence)
+→ Global Gate
+→ Safe Mode Check
+→ Scan Controller
+→ Trade Ranker
+→ Competition Engine
+→ Capital Allocator
+→ Pre-Trade Gate
+→ Execution Engine
+→ Position Open
+→ Exit Engine
+→ PnL Record
+```
+
+---
+
+### Q1.2
+
+हर stage का status दें:
+
+| Stage             | Status | Evidence |
+| ----------------- | ------ | -------- |
+| Market Data       | ?      |          |
+| Indicators Ready  | ?      |          |
+| Strategy Running  | ?      |          |
+| Signals Generated | ?      |          |
+| Filters Applied   | ?      |          |
+| Gate Open         | ?      |          |
+| Safe Mode         | ?      |          |
+| Scan Allowed      | ?      |          |
+| Trades Ranked     | ?      |          |
+| Execution Called  | ?      |          |
+
+---
+
+---
+
+# 🔍 SECTION 2 — SIGNAL GENERATION CHECK
+
+### Q2.1
+
+क्या strategies signals generate कर रही हैं?
+
+👉 Provide:
+
+* last 100 cycles में कितने signals बने
+* strategy-wise count
+
+---
+
+### Q2.2
+
+अगर signals नहीं बन रहे:
+
+👉 reason identify करें:
+
+* indicators not ready?
+* conditions too strict?
+* regime filter block?
+
+---
+
+---
+
+# 🔍 SECTION 3 — FILTER BLOCKAGE ANALYSIS
+
+### Q3.1
+
+Signals reject कहाँ हो रहे हैं?
+
+| Filter            | Reject Count |
+| ----------------- | ------------ |
+| EV Filter         | ?            |
+| RR Filter         | ?            |
+| Confidence Filter | ?            |
+
+---
+
+### Q3.2
+
+Top rejection reason क्या है?
+
+👉 exact log दें
+
+---
+
+---
+
+# 🔍 SECTION 4 — GATE ANALYSIS
+
+### Q4.1
+
+Gate कितनी बार open हुआ?
+
+```text
+Total cycles: ?
+Gate open: ?
+Gate blocked: ?
+```
+
+---
+
+### Q4.2
+
+Gate block reasons distribution:
+
+| Reason              | Count |
+| ------------------- | ----- |
+| DATA_NOT_READY      | ?     |
+| INDICATOR_NOT_READY | ?     |
+| DEPLOY_LOW          | ?     |
+
+---
+
+---
+
+# 🔍 SECTION 5 — SAFE MODE IMPACT
+
+### Q5.1
+
+Safe mode कितनी बार active है?
+
+---
+
+### Q5.2
+
+Safe mode के कारण:
+
+* scanning blocked?
+* execution blocked?
+
+---
+
+---
+
+# 🔍 SECTION 6 — SCAN CONTROLLER CHECK
+
+### Q6.1
+
+क्या scan_controller correctly काम कर रहा है?
+
+👉 Provide:
+
+* scan attempts
+* blocked scans
+
+---
+
+### Q6.2
+
+क्या safe mode में scanning हो रही है?
+
+👉 YES / NO (with log)
+
+---
+
+---
+
+# 🔍 SECTION 7 — PROFIT ENGINE FLOW
+
+### Q7.1
+
+क्या ये modules execute हो रहे हैं?
+
+| Module             | Called? |
+| ------------------ | ------- |
+| Trade Ranker       | ?       |
+| Competition Engine | ?       |
+| Capital Allocator  | ?       |
+
+---
+
+---
+
+# 🔍 SECTION 8 — PRE-TRADE GATE
+
+### Q8.1
+
+क्या trades execution से पहले reject हो रहे हैं?
+
+👉 Provide:
+
+* rejection count
+* reasons
+
+---
+
+---
+
+# 🔍 SECTION 9 — EXECUTION ENGINE
+
+### Q9.1
+
+क्या execution engine call हो रहा है?
+
+👉 YES / NO
+
+---
+
+### Q9.2
+
+अगर NO:
+
+👉 exact break-point बताओ
+
+---
+
+---
+
+# 🔍 SECTION 10 — LIVE TRACE (MANDATORY)
+
+### Q10.1
+
+एक FULL cycle trace दें:
+
+```text
+Cycle start
+→ Data status
+→ Indicators
+→ Strategy
+→ Signal
+→ Filter
+→ Gate
+→ Execution
+```
+
+---
+
+### Q10.2
+
+यह cycle कहाँ रुक रहा है?
+
+👉 exact line/function बताओ
+
+---
+
+---
+
+# 🔍 SECTION 11 — BREAKPOINT IDENTIFICATION (MOST IMPORTANT)
+
+### Q11.1
+
+👉 FINAL ANSWER:
+
+```text
+SYSTEM BREAKS AT:
+<module / function / condition>
+```
+
+---
+
+### Q11.2
+
+👉 Root cause explain करें:
+
+* config issue
+* logic issue
+* wiring issue
+
+---
+
+---
+
+# 🔥 FINAL INSTRUCTION
+
+> ❗ “Do NOT guess — PROVE where pipeline stops”
+
+---
+
+# 💣 WARNING
+
+> “जब तक break-point पता नहीं — कोई भी FTD useless होगा”
+
+---

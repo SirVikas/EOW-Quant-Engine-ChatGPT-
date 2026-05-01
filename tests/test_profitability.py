@@ -322,8 +322,8 @@ class TestSignalFilterAdaptive:
         assert res.ok
 
     def test_unknown_regime_higher_rr_required(self):
-        """UNKNOWN min_rr=1.8 — signal with RR=1.5 should fail."""
-        res = self._ok_signal("UNKNOWN", rr_ratio=1.5, confidence=0.65)
+        """UNKNOWN min_rr=1.4 (matches TRENDING default) — signal with RR=1.2 should fail."""
+        res = self._ok_signal("UNKNOWN", rr_ratio=1.2, confidence=0.65)
         assert not res.ok
         assert "LOW_RR" in res.reason
 

@@ -1,0 +1,179 @@
+Summary
+
+    मैंने एक reproducible forensic probe जोड़ा (scripts/pipeline_break_forensics.py) जो 100-cycle gate/scan/orchestrator flow चलाकर exact blockage निकालता है।
+
+    Probe output को snapshot किया (pipeline_break_forensics_output.txt) — इसमें 100/100 cycles gate-blocked, safe mode active, scan blocked, और run_cycle भी GATE_BLOCKED दिखा रहा है।
+
+    DB snapshot निकाला (pipeline_db_snapshot.txt) जिससे साबित है कि execution historically हुआ था (116 trades; latest 2026-04-19 UTC), यानी engine complete dead नहीं है — current break runtime gate chain में है।
+
+SECTION 1 — FULL TRADING PIPELINE (COMPLETE FLOW)
+Q1.1 Pipeline Diagram (with current observed stop)
+
+Market Data
+→ Indicator Engine
+→ Strategy Engine
+→ Signal Generation
+→ Filters (EV / RR / Confidence)
+→ Global Gate
+→ Safe Mode Check
+→ Scan Controller
+→ Trade Ranker
+→ Competition Engine
+→ Capital Allocator
+→ Pre-Trade Gate
+→ Execution Engine
+→ Position Open
+→ Exit Engine
+→ PnL Record
+
+Current observed break in probe path:
+Global Gate / Safe Mode / Scan stage पर stop, strategy+filters path तक पहुंचने से पहले।
+Q1.2 Stage Status
+Stage	Status	Evidence
+Market Data	PASS*	Historical trades मौजूद हैं (engine ने past में full flow run किया)।
+Indicators Ready	BLOCK	Gate reason has INDICATOR_NOT_READY.
+Strategy Running	SKIPPED	main.on_tick में pre-gate fail होने पर immediate return, strategy stage से पहले।
+Signals Generated	SKIPPED	Gate fail से signal generation block।
+Filters Applied	SKIPPED	Filter chain signal के बाद आती है; यहां पहुंच ही नहीं रहा।
+Gate Open	BLOCK	0/100 gate open; 100 blocked।
+Safe Mode	BLOCK	Safe mode = SAFE, can_trade=False。
+Scan Allowed	BLOCK	0 allowed, 100 blocked; NO_SCAN:GATE_BLOCKED。
+Trades Ranked	SKIPPED	Orchestrator gate-blocked before ranking path।
+Execution Called	NO (current probe)	sample_run_cycle.execute=False, action GATE_BLOCKED。
+SECTION 2 — SIGNAL GENERATION CHECK
+Q2.1 Last 100 cycles signal count
+
+    Total signals: 0
+
+    Strategy-wise: 0 for all (because pre-gate blocks before strategy evaluation).
+
+Q2.2 Why no signals?
+
+    Primary reason: INDICATOR_NOT_READY | DATA_NOT_FRESH gate failure。
+
+    Code-level reason: pre-gate return before regime/strategy/signal path。
+
+SECTION 3 — FILTER BLOCKAGE ANALYSIS
+Q3.1 Filter reject counts (in this 100-cycle probe)
+Filter	Reject Count
+EV Filter	0 (not reached)
+RR Filter	0 (not reached)
+Confidence Filter	0 (not reached)
+
+Evidence: gate return happens before filter section in on_tick flow.
+Q3.2 Top rejection reason
+
+    INDICATOR_NOT_READY | DATA_NOT_FRESH (top gate-block reason).
+
+SECTION 4 — GATE ANALYSIS
+Q4.1 Counts
+
+    Total cycles: 100
+
+    Gate open: 0
+
+    Gate blocked: 100
+
+Q4.2 Block reasons distribution
+Reason	Count
+DATA_NOT_READY	0 (exact key not emitted)
+INDICATOR_NOT_READY	201 (gate logger aggregate)
+DEPLOY_LOW	0
+
+Source: gate logger summary / by_reason map.
+(Observed exact runtime key is DATA_NOT_FRESH, not DATA_NOT_READY.)
+SECTION 5 — SAFE MODE IMPACT
+Q5.1 Safe mode active count
+
+    Safe mode active: Yes (mode=SAFE, can_trade=False).
+
+Q5.2 Safe mode impact
+
+    New trade scanning/execution blocked through gate chain (NO_SCAN:GATE_BLOCKED, run_cycle: GATE_BLOCKED).
+
+SECTION 6 — SCAN CONTROLLER CHECK
+Q6.1 Scan controller behavior
+
+    Scan attempts: 100
+
+    Blocked scans: 100
+
+    Allowed scans: 0
+
+Q6.2 Safe mode में scanning?
+
+    NO (effective behavior): scanning blocked via gate-down (NO_SCAN:GATE_BLOCKED).
+
+SECTION 7 — PROFIT ENGINE FLOW
+Q7.1 Modules executed?
+Module	Called?
+Trade Ranker	NO (current probe)
+Competition Engine	NO
+Capital Allocator	NO
+
+Reason: orchestrator returns at gate re-check before rank/compete/concentrate चरण।
+SECTION 8 — PRE-TRADE GATE
+Q8.1 Pre-trade rejects before execution?
+
+    Current 100-cycle probe में pre-trade gate stage तक पहुंचा ही नहीं (upstream gate block).
+
+    Rejection count at this stage (probe): 0 reachable / N/A due upstream block.
+
+SECTION 9 — EXECUTION ENGINE
+Q9.1 Execution engine call?
+
+    Current probe: NO (execute=False, action=GATE_BLOCKED).
+
+Q9.2 Exact break-point
+
+    ExecutionOrchestrator.gate_check() and run_cycle() both block when GlobalGateController.evaluate() returns can_trade=False.
+
+    main.on_tick() exits immediately on this pre-gate fail.
+
+SECTION 10 — LIVE TRACE (MANDATORY)
+Q10.1 One full cycle trace (observed)
+
+Cycle start
+→ Data status: DATA_NOT_FRESH
+→ Indicators: INDICATOR_NOT_READY
+→ Strategy: SKIPPED
+→ Signal: SKIPPED
+→ Filter: SKIPPED
+→ Gate: BLOCKED
+→ Execution: NOT CALLED
+
+Evidence from probe summary and code ordering.
+Q10.2 Cycle कहाँ रुकता है?
+
+    main.py::on_tick line 323 (_pre_gate = execution_orchestrator.gate_check(symbol=sym))
+
+    then line 324–326 (if not _pre_gate.allowed: ... return)
+
+SECTION 11 — BREAKPOINT IDENTIFICATION (MOST IMPORTANT)
+Q11.1 FINAL ANSWER
+
+SYSTEM BREAKS AT:
+main.on_tick() pre-gate return path
+→ execution_orchestrator.gate_check()
+→ GlobalGateController.evaluate() returns can_trade=False
+(reason: INDICATOR_NOT_READY | DATA_NOT_FRESH)
+
+Q11.2 Root cause type
+
+    Primary: wiring/readiness-state issue (indicator/data health not ready at gate evaluation time).
+
+    Not strategy logic (strategy path reached ही नहीं रही in blocked cycles).
+
+Historical sanity check (important)
+
+    Execution pipeline previously worked (116 trades recorded; latest trade 2026-04-19 UTC), so issue is “current gate state blockage”, not total absence of execution code path.
+
+Testing
+
+    ✅ LOGURU_LEVEL=ERROR python scripts/pipeline_break_forensics.py > pipeline_break_forensics_output.txt
+
+    ✅ python - <<'PY' ... > pipeline_db_snapshot.txt (SQLite trade snapshot extraction)
+
+    ✅ git status --short
+
+    ✅ git commit -m "Add pipeline break forensics probe and evidence snapshots"

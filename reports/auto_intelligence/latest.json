@@ -1,1 +1,35 @@
-{"phase":"030","status":"no_cycle_run_yet"}
+{
+  "cycle_num": 12,
+  "ts_start": 1777391918578,
+  "ts_end": 1777391918582,
+  "phase": "COMPLETE",
+  "meta_score": 85.0,
+  "blocked": false,
+  "block_reason": "",
+  "correction_verdict": "BLOCKED",
+  "applied_count": 0,
+  "rollback_count": 0,
+  "validation": {
+    "ftd028_meta": {
+      "system_score": 85.0,
+      "stability_score": 100.0,
+      "confidence_score": 85.68
+    },
+    "meta_score": 85.0
+  },
+  "correction": {
+    "cycle_id": "75ffaebc",
+    "module": "CORRECTION_ORCHESTRATOR",
+    "phase": "029",
+    "verdict": "BLOCKED",
+    "code": "AI_BRAIN_SCORE_LOW",
+    "detail": "AI_BRAIN_SCORE_LOW: 35.7 < 70.0 (Q7)",
+    "applied": [],
+    "blocked": [],
+    "ts": 1777391918582,
+    "blocking_reasons": [
+      "AI_BRAIN_SCORE_LOW: 35.7 < 70.0 (Q7)"
+    ]
+  },
+  "post_check": {}
+}

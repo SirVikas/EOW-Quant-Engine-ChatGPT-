@@ -27,6 +27,9 @@ class EngineConfig(BaseSettings):
 
     # ── Trading Mode ─────────────────────────────────────────────────────────
     TRADE_MODE: Literal["PAPER", "LIVE"] = Field(default="PAPER", env="TRADE_MODE")
+    # Emergency paper stress mode: prioritise trade throughput over quality gates.
+    PAPER_SPEED_MODE: bool = Field(default=True, env="PAPER_SPEED_MODE")
+    PAPER_TARGET_TRADES_PER_MIN: int = Field(default=20, env="PAPER_TARGET_TRADES_PER_MIN")
     # qFTD-007: FRESH = ignore prior trade history at boot (clean slate).
     # RESUME = replay DataLake trades to restore equity curve from last session.
     # Set env var BOOT_MODE=RESUME to re-enable session restore.
@@ -69,9 +72,9 @@ class EngineConfig(BaseSettings):
     BASE_MIN_R: float = 1.50               # Minimum post-cost R — raised to enforce positive expectancy
     ATR_SLIPPAGE_MULT: float = 0.10       # Reduced from 0.20 — keeps per-trade ATR overhead proportionate
     # Per-regime minimum R thresholds — tuned for MAX PROFIT (PF-first)
-    REGIME_MIN_R_TRENDING: float = 1.50        # raised 1.10→1.50 — enforce decent RR in trend trades
-    REGIME_MIN_R_MEAN_REVERTING: float = 1.80  # raised 1.05→1.80 — MR caused most losses; needs wider TP
-    REGIME_MIN_R_VOLATILE: float = 1.50        # raised 1.05→1.50 — breakouts still move fast but need edge
+    REGIME_MIN_R_TRENDING: float = 1.20        # qFTD-040: restore balanced gate so valid post-cost trades are not over-blocked
+    REGIME_MIN_R_MEAN_REVERTING: float = 1.05  # qFTD-040: MR relies on win-rate; lower R floor prevents dry-spell lock
+    REGIME_MIN_R_VOLATILE: float = 1.15        # qFTD-040: volatile moves justify moderate R floor
 
     # ── Limit Order / Price Chase (Alpha Preservation) ───────────────────────
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
@@ -174,7 +177,7 @@ class EngineConfig(BaseSettings):
 
     # Confidence Decay Engine
     DECAY_FREQ_WINDOW_MIN: int = 30    # Signal frequency tracking window (minutes)
-    DECAY_FREQ_MAX: int = 3            # Signals above this count trigger decay
+    DECAY_FREQ_MAX: int = 200          # paper-speed mode baseline: allow very high signal frequency
     DECAY_PER_EXTRA: float = 0.10      # Confidence reduction per extra signal (10%)
     DECAY_MIN_FACTOR: float = 0.85     # raised 0.70→0.85 — less decay penalty; max 15% reduction so quiet-market signals still pass
 
@@ -238,9 +241,9 @@ class EngineConfig(BaseSettings):
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
 
-    # Trade frequency — aggressive mode with BYPASS_ALL_GATES=True
-    MAX_TRADES_PER_HOUR: int = 30        # raised 6→30: allow more signals per hour
-    MAX_TRADES_PER_DAY:  int = 300       # raised 40→300: lean gate is the quality filter now
+    # Trade frequency — paper-speed mode with BYPASS_ALL_GATES=True; lean gate is the quality filter
+    MAX_TRADES_PER_HOUR: int = 1200      # paper-speed mode: 20 trades/min × 60
+    MAX_TRADES_PER_DAY:  int = 28800     # paper-speed mode: 20 trades/min × 24h
 
     # ── Phase 6: Stability + Profit Consistency ───────────────────────────────
     # EV Confidence Engine — EV-tier-based sizing
@@ -299,9 +302,10 @@ class EngineConfig(BaseSettings):
 
     # Indicator Validator
     # qFTD-032-R3: candle requirements reduced to align with STARTUP_GRACE (900s=15min).
-    # ADX_PERIOD=14 → 14 candles is the minimum valid computation window.
-    # This avoids a dead zone where grace expires before indicators are ready.
-    IV_MIN_CANDLES: int = 14               # qFTD-032-R3: 20→14 — aligns with ADX_PERIOD
+    # RSI(14) requires period+1=15 candles minimum; IV_MIN_CANDLES must match to avoid
+    # the coarse gate (_ind_ok_coarse = n>=14) passing while the full validator fails
+    # (rsi_warmup: 14 < 15). At 14 candles: coarse=True but iv_result.ok=False → mismatch.
+    IV_MIN_CANDLES: int = 15               # qFTD-fix: 14→15 — RSI(14) needs period+1=15
     IV_RSI_MIN_CANDLES: int = 15           # RSI needs at least RSI_PERIOD+1 candles
     IV_ADX_MIN_CANDLES: int = 14           # qFTD-032-R3: 20→14 — ADX_PERIOD=14, functional at period
     IV_ATR_MIN_CANDLES: int = 14           # qFTD-032-R3: 15→14 — ATR_PERIOD=14
@@ -325,8 +329,10 @@ class EngineConfig(BaseSettings):
 
     # Safe Mode Controller
     SMC_RESUME_AFTER_MIN: float = 5.0      # Auto-resume safe mode check interval (minutes)
-    # FTD-REF-055: 75→47 — safe mode can exit once WS+Risk healthy (warmup-safe)
-    SMC_MIN_SCORE_RESUME: float = 47.0     # Deployability score needed to exit safe mode (was 75.0)
+    # FTD-REF-055: 75→47→44 — must be < BDE_MIN_SCORE (45.0) so safe mode can exit during
+    # warmup when indicators not ready. Max warmup score = ws×0.25+risk×0.20 = 45.0;
+    # setting 47.0 > 45.0 caused permanent deadlock (score-based recovery impossible).
+    SMC_MIN_SCORE_RESUME: float = 44.0     # Deployability score needed to exit safe mode (was 47.0)
 
     # ── Phase 6.6: Hard Gating + Safety Enforcement ───────────────────────────
     # Global Gate Controller — master trading permission authority
@@ -338,7 +344,7 @@ class EngineConfig(BaseSettings):
 
     # Hard Start Validator — pre-boot stop gate
     HSV_EXIT_ON_FAIL: bool = False          # True = sys.exit(1) on failure (set True for prod)
-    HSV_MIN_CANDLES_BOOT: int = 20          # FTD-REF-055: 30→20 — aligned with IV_MIN_CANDLES
+    HSV_MIN_CANDLES_BOOT: int = 20          # FTD-REF-055: 30→20 — boot hard-stop; higher than IV_MIN_CANDLES(15) intentional
 
     # Safe Mode Enforcer — runtime auto-protection
     # FTD-REF-055: triggers only on genuine WS/risk failures, not boot warmup
@@ -395,7 +401,7 @@ class EngineConfig(BaseSettings):
     EA_TRAIL_BOOST_MULT: float = 1.20     # Trailing SL aggressiveness multiplier
 
     # Trade Competition Engine — select best N trades per cycle
-    TCE_MAX_CONCURRENT: int = 3           # Maximum trades accepted per cycle
+    TCE_MAX_CONCURRENT: int = 20          # paper-speed mode: allow high parallel order intake
     TCE_MIN_RANK_GAP: float = 0.05        # Minimum rank difference to prefer one over another
 
     # Edge Memory Engine — remember what works

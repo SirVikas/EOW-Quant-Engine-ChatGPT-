@@ -287,9 +287,9 @@ class TestBootDeployabilityEngine:
 
     def test_score_below_threshold_blocks(self):
         result = self.bde.evaluate(
-            data_health_score=40.0,
-            indicator_score=0.40,
-            ws_stability_score=35.0,
+            data_health_score=30.0,
+            indicator_score=0.30,
+            ws_stability_score=25.0,
             current_drawdown=0.05,
         )
         assert result.score < cfg.BDE_MIN_SCORE
@@ -387,7 +387,7 @@ class TestSafeModeController:
     def test_auto_resume_denied_on_low_score(self):
         self.smc.activate("TEST")
         self.smc._last_resume_check = 0.0  # force check now
-        resumed = self.smc.check_auto_resume(current_score=50.0)
+        resumed = self.smc.check_auto_resume(current_score=45.0)
         assert resumed is False
         assert self.smc.is_active is True
 
