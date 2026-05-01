@@ -9,4 +9,4 @@
 **pre_score:** 70.0 | **post_score:** 68.0
 **final_state:** ROLLED_BACK
 **rollback_trigger:** PERF_DROP
-**applied_ts:** 1777067314520
+**applied_ts:** 1777645131907
