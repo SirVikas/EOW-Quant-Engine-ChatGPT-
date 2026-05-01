@@ -117,6 +117,7 @@ from core.performance import (                                                 #
     PRIORITY_LOW, PRIORITY_MEDIUM,
 )
 from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
+from core.lean_gate import lean_gate
 
 
 def _safe_num(v):
@@ -804,6 +805,25 @@ async def on_tick(tick: Tick):
             cost_usdt     = execution_engine.fee_for_notional(notional) * 2
             # Per-unit cost for signal_filter (which computes gross_tp per-unit as abs(tp-entry))
             cost_per_unit = cost_usdt / sizing.qty if sizing.qty > 0 else cost_usdt
+
+            # ── Lean Gate: 5 unconditional safety checks (no bootstrap dependency) ──
+            _lean = lean_gate.check(
+                entry=sig.entry_price,
+                stop_loss=sig.stop_loss,
+                take_profit=sig.take_profit,
+                notional=notional,
+                consecutive_losses=_consecutive_losses,
+                session_dd_pct=drawdown_controller.current_drawdown(),
+                side=sig.signal.value,
+            )
+            if not _lean.execute:
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _lean.reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, _lean.reason)
+                return
 
             # FTD-REF-024: fee-aware gate — reject if TP profit can't cover fees
             _gross_tp = abs(sig.take_profit - sig.entry_price) * sizing.qty
