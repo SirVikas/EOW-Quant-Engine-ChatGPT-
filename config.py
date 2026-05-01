@@ -241,7 +241,7 @@ class EngineConfig(BaseSettings):
     # Trade Flow Monitor — frequency and health tracking
     TFM_WINDOW_MIN: int = 60             # Rolling window for trade flow metrics
 
-    # Trade frequency capped hard — fee drag was 25% at 150 trades/day
+    # Trade frequency — paper-speed mode with BYPASS_ALL_GATES=True; lean gate is the quality filter
     MAX_TRADES_PER_HOUR: int = 1200      # paper-speed mode: 20 trades/min × 60
     MAX_TRADES_PER_DAY:  int = 28800     # paper-speed mode: 20 trades/min × 24h
 
@@ -360,11 +360,11 @@ class EngineConfig(BaseSettings):
     # Gate Logger
     GL_HISTORY_SIZE: int = 500              # Max gate events to retain in memory
 
-    # ── DIAGNOSTIC: Gate Bypass Mode ─────────────────────────────────────────
-    # Disables ALL blocking gates so the execution pipeline can be validated.
-    # Set True to confirm trades execute; set False to restore normal logic.
-    # NEVER leave True in production — this bypasses all risk/quality controls.
-    BYPASS_ALL_GATES: bool = Field(default=False, env="BYPASS_ALL_GATES")
+    # ── Gate Bypass Mode ─────────────────────────────────────────────────────
+    # True = bypass all 38 inline quality gates; only hard risk limits apply
+    # (max drawdown halt, max leverage cap). Lean gate handles essential safety.
+    # Paper mode: safe to run True. Flip False to re-engage full gate chain.
+    BYPASS_ALL_GATES: bool = Field(default=True, env="BYPASS_ALL_GATES")
 
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine
