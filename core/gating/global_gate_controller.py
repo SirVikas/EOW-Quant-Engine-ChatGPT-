@@ -263,6 +263,10 @@ class GlobalGateController:
             "phase":  "6.6",
         }
 
+    def snapshot(self) -> dict:
+        """Alias for summary() — required by main.py dashboard endpoints."""
+        return self.summary()
+
 
 # ── Production singleton (wired to Phase 6.5 singletons lazily) ──────────────
 
