@@ -1,0 +1,19 @@
+{
+  "bundle_ts": 1777708726,
+  "bundle_date": "2026-05-02 07:58:47 UTC",
+  "engine_ver": "EOW_QUANT_ENGINE_v1.0",
+  "trade_count": 357,
+  "net_pnl_usdt": -165.5718,
+  "win_rate_pct": 36.97,
+  "profit_factor": 0.364,
+  "max_drawdown_pct": 18.29,
+  "sharpe_ratio": -2.626,
+  "total_fees_usdt": 61.2534,
+  "fee_drag_pct": 27.0,
+  "presets_included": [
+    "ALL",
+    "1D",
+    "7D",
+    "20D"
+  ]
+}
