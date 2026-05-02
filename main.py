@@ -176,6 +176,18 @@ _boot_replay_count: int = 0      # qFTD-010: trades replayed from DataLake at bo
 SYMBOL_COOLDOWN_SEC = 300         # 5 min between trades per symbol — quality > quantity
 MAX_TRADES_PER_HOUR = 20          # hard ceiling across all symbols
 
+# Symbols with proven structural losses: fee_pct_of_gross_win > 100% (FEE_TOXIC) or
+# chronic net-pnl < -$14 per session (catastrophic losers from fee_drag_analysis).
+_SYMBOL_BLACKLIST: frozenset[str] = frozenset({
+    "BNBUSDT", "XRPUSDT", "CHIPUSDT", "PENGUUSDT", "PHBUSDT", "MOVEUSDT",   # FEE_TOXIC
+    "LINKUSDT", "GIGGLEUSDT", "AAVEUSDT", "AVNTUSDT", "AVAXUSDT",            # chronic losers
+})
+
+# UTC hours where historical net PnL is deeply negative (< -$5) across this session.
+# Hours 15–23 UTC cover US afternoon + evening + Asia open — all net losers.
+# Golden hours kept: 00-14 UTC (especially 07 and 14).
+_BLOCKED_UTC_HOURS: frozenset[int] = frozenset({15, 16, 17, 18, 19, 20, 21, 22, 23})
+
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens
 _last_symbol_eval_ms: dict = {}   # symbol → last strategy evaluation ts
@@ -504,6 +516,14 @@ async def on_tick(tick: Tick):
         if not sym.isascii():
             return
 
+        # ── Symbol blacklist: fee-toxic / chronic loss symbols ────────────────
+        if sym in _SYMBOL_BLACKLIST:
+            return
+
+        # ── Time filter: skip new entries during historically bad UTC hours ───
+        if time.gmtime().tm_hour in _BLOCKED_UTC_HOURS:
+            return
+
         # Use real 1-min candle OHLC for strategy indicators.
         # tick_buffers hold individual trade prices (noisy, many per second) — they
         # produce fake ATR ≈ 0.1% which causes undersized SL distances, oversized qty,
@@ -602,7 +622,9 @@ async def on_tick(tick: Tick):
 
         # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
-        _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
+        # PAPER_SPEED disabled: forensics show 21% WR (TF) and 10.7% WR (MR) — pure noise.
+        # Real strategies (TF_EMA_RSI_v1, MR_BB_RSI_v1) fire adequately without it.
+        _paper_speed = False
         _vol_mult = thresholds.volume_multiplier
         if _paper_speed:
             # Aggressive paper throughput mode: relax sleep gate to its floor.
