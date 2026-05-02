@@ -791,21 +791,27 @@ async def on_tick(tick: Tick):
         # momentum signal so the pipeline can execute and recover flow.
         if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
             _entry = closes[-1]
-            # SMA-20 trend direction — far more reliable than 2-candle noise.
-            # Single-bar momentum caused a win-rate death spiral (10% WR) because
-            # it fired contra-trend entries that AIE then inverted, doubling the error.
-            _trend_len = min(20, len(closes))
-            _sma20 = sum(closes[-_trend_len:]) / _trend_len
-            _trend_up = closes[-1] > _sma20
+            # SMA-50 trend direction (50-min context on 1-min candles).
+            # SMA-20 (previous) was noise — only 20 min of history. A pullback below
+            # 20-min SMA in a bull market fired SHORT signals → contra-trend losses.
+            # SMA-50 captures the actual trend direction reliably.
+            # Regime-aware: MEAN_REVERTING fades the SMA (price above = overextended
+            # → expect reversion DOWN), TRENDING follows the SMA direction.
+            _trend_len = min(50, len(closes))
+            _sma50     = sum(closes[-_trend_len:]) / _trend_len
+            _above_sma = closes[-1] > _sma50
+            if regime.value == "MEAN_REVERTING":
+                _trend_up = not _above_sma   # fade: above SMA → SHORT
+            else:
+                _trend_up = _above_sma       # trend-follow: above SMA → LONG
             _atr_px = max(
                 abs(closes[-1] - closes[-2]),
-                _entry * 0.002,                      # 0.20% floor (was 0.10%)
+                _entry * 0.002,                      # 0.20% floor
                 (_entry * atr_pct / 100.0),
             )
-            # Wider SL/TP: RR = 2.0 (was 1.67), larger notional per risk unit →
-            # fees become a smaller % of expected profit (was ~60%, now ~20%)
-            _sl_dist = _atr_px * 2.0   # was 1.5
-            _tp_dist = _atr_px * 4.0   # was 2.5
+            # RR = 2.0 — wide enough that fee_ratio ≈ 20% < 25% Gate-3 limit
+            _sl_dist = _atr_px * 2.0
+            _tp_dist = _atr_px * 4.0
             if _trend_up:
                 _sl = _entry - _sl_dist
                 _tp = _entry + _tp_dist
