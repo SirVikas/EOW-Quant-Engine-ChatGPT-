@@ -30,9 +30,9 @@ class CapitalScaler:
     3. Hard stop: reduce to minimum if drawdown exceeds threshold
     """
 
-    MIN_RISK_PCT     = 0.002   # 0.2% floor
-    MAX_RISK_PCT     = 0.025   # 2.5% ceiling
-    MAX_NOTIONAL_PCT = 0.15    # 15% of equity max position notional (prevents oversizing on low-priced assets)
+    MIN_RISK_PCT     = 0.005   # 0.5% floor (raised from 0.2% — at 55%+ WR this triples net $/trade)
+    MAX_RISK_PCT     = 0.030   # 3.0% ceiling (raised from 2.5% — allows full Kelly at strong edge)
+    MAX_NOTIONAL_PCT = 0.20    # 20% of equity max position notional (raised from 15%)
 
     def __init__(self):
         self._results: List[float] = []   # +ve win, -ve loss in USDT

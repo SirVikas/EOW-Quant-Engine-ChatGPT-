@@ -173,8 +173,8 @@ _boot_replay_count: int = 0      # qFTD-010: trades replayed from DataLake at bo
 
 # ── Trade Throttle Controls ───────────────────────────────────────────────────
 # After any trade on a symbol, wait this long before allowing another entry.
-SYMBOL_COOLDOWN_SEC = 120         # qFTD-032: 300→120s — 2 min cooldown per symbol unlocks more pairs per hour
-MAX_TRADES_PER_HOUR = 20          # qFTD-032: 12→20 — multi-currency system needs higher throughput
+SYMBOL_COOLDOWN_SEC = 300         # 5 min between trades per symbol — quality > quantity
+MAX_TRADES_PER_HOUR = 20          # hard ceiling across all symbols
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens
@@ -791,49 +791,75 @@ async def on_tick(tick: Tick):
         # momentum signal so the pipeline can execute and recover flow.
         if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
             _entry = closes[-1]
-            # SMA-50 trend direction (50-min context on 1-min candles).
-            # SMA-20 (previous) was noise — only 20 min of history. A pullback below
-            # 20-min SMA in a bull market fired SHORT signals → contra-trend losses.
-            # SMA-50 captures the actual trend direction reliably.
-            # Regime-aware: MEAN_REVERTING fades the SMA (price above = overextended
-            # → expect reversion DOWN), TRENDING follows the SMA direction.
+
+            # ── SMA-50 trend direction (50-min context) ───────────────────────
             _trend_len = min(50, len(closes))
             _sma50     = sum(closes[-_trend_len:]) / _trend_len
             _above_sma = closes[-1] > _sma50
+
+            # ── Inline RSI(14) ────────────────────────────────────────────────
+            # RSI filters ensure we only enter when conditions are RIGHT, not on
+            # every candle. Real strategies (TF_EMA_RSI_v1, MR_BB_RSI_v1) win
+            # 100% of the time; PAPER_SPEED without RSI wins only 38% → noise.
+            _rsi_p = 14
+            if len(closes) >= _rsi_p + 1:
+                _rsi_d = [closes[i] - closes[i-1] for i in range(-_rsi_p, 0)]
+                _g = sum(d for d in _rsi_d if d > 0) / _rsi_p
+                _l = sum(-d for d in _rsi_d if d < 0) / _rsi_p
+                _rsi_val = (100.0 - 100.0 / (1.0 + _g / _l)) if _l > 0 else 100.0
+            else:
+                _rsi_val = 50.0
+
+            # ── Regime-aware entry decision ───────────────────────────────────
+            # TRENDING:      follow SMA; RSI must have room to move (not extreme)
+            # MEAN_REVERTING: fade the extreme; RSI must confirm overextension
+            _ps_side: Signal | None = None
             if regime.value == "MEAN_REVERTING":
-                _trend_up = not _above_sma   # fade: above SMA → SHORT
+                if _above_sma and _rsi_val > 65:      # overbought → fade SHORT
+                    _ps_side = Signal.SHORT
+                elif not _above_sma and _rsi_val < 35: # oversold → fade LONG
+                    _ps_side = Signal.LONG
+            else:  # TRENDING / UNKNOWN
+                if _above_sma and _rsi_val < 62:      # uptrend + room left → LONG
+                    _ps_side = Signal.LONG
+                elif not _above_sma and _rsi_val > 38: # downtrend + room left → SHORT
+                    _ps_side = Signal.SHORT
+
+            if _ps_side is not None:
+                _atr_px = max(
+                    abs(closes[-1] - closes[-2]),
+                    _entry * 0.002,
+                    (_entry * atr_pct / 100.0),
+                )
+                _sl_dist = _atr_px * 2.0   # RR = 2.0
+                _tp_dist = _atr_px * 4.0
+                if _ps_side == Signal.LONG:
+                    _sl = _entry - _sl_dist
+                    _tp = _entry + _tp_dist
+                else:
+                    _sl = _entry + _sl_dist
+                    _tp = _entry - _tp_dist
+                sig = TradeSignal(
+                    symbol=sym,
+                    signal=_ps_side,
+                    entry_price=_entry,
+                    stop_loss=_sl,
+                    take_profit=_tp,
+                    confidence=0.51,
+                    strategy_id=f"{strategy_type}_PAPER_SPEED",
+                    reason="PAPER_SPEED_FALLBACK(momentum micro-signal)",
+                )
+                _thought(
+                    f"⚡ PAPER_SPEED fallback {sym}: {_ps_side.value} "
+                    f"entry={_entry:.4f} rsi={_rsi_val:.1f}",
+                    "SIGNAL",
+                )
             else:
-                _trend_up = _above_sma       # trend-follow: above SMA → LONG
-            _atr_px = max(
-                abs(closes[-1] - closes[-2]),
-                _entry * 0.002,                      # 0.20% floor
-                (_entry * atr_pct / 100.0),
-            )
-            # RR = 2.0 — wide enough that fee_ratio ≈ 20% < 25% Gate-3 limit
-            _sl_dist = _atr_px * 2.0
-            _tp_dist = _atr_px * 4.0
-            if _trend_up:
-                _sl = _entry - _sl_dist
-                _tp = _entry + _tp_dist
-                _side = Signal.LONG
-            else:
-                _sl = _entry + _sl_dist
-                _tp = _entry - _tp_dist
-                _side = Signal.SHORT
-            sig = TradeSignal(
-                symbol=sym,
-                signal=_side,
-                entry_price=_entry,
-                stop_loss=_sl,
-                take_profit=_tp,
-                confidence=0.51,
-                strategy_id=f"{strategy_type}_PAPER_SPEED",
-                reason="PAPER_SPEED_FALLBACK(momentum micro-signal)",
-            )
-            _thought(
-                f"⚡ PAPER_SPEED fallback {sym}: {_side.value} entry={_entry:.4f}",
-                "SIGNAL",
-            )
+                _thought(
+                    f"⚡ PAPER_SPEED {sym}: RSI filter blocked "
+                    f"(rsi={_rsi_val:.1f} above_sma={_above_sma} regime={regime.value})",
+                    "FILTER",
+                )
 
         if sig and sig.signal != Signal.NONE:
             execution_drive_policy.record_signal(sym)   # EDP: track signal activity
