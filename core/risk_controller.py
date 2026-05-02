@@ -309,8 +309,10 @@ class RiskController:
             if pos.trailing_sl and price > pos.peak_price:
                 pos.peak_price = price
                 pos.ticks_since_peak = 0
-                # Trail SL up: maintain same distance from peak
-                trail_dist     = pos.entry_price - pos.stop_loss
+                # Trail at 1.5× initial SL distance so winners run before getting stopped.
+                # 1× trail (old) exited at ~0R when price rose 1R then reversed; 1.5× gives
+                # trades room to develop toward TP before the trail triggers.
+                trail_dist     = (pos.entry_price - pos.initial_stop_loss) * 1.5
                 new_sl         = pos.peak_price - trail_dist
                 if new_sl > pos.stop_loss:
                     pos.stop_loss = new_sl
@@ -339,7 +341,7 @@ class RiskController:
             if pos.trailing_sl and price < pos.peak_price:
                 pos.peak_price = price
                 pos.ticks_since_peak = 0
-                trail_dist     = pos.stop_loss - pos.entry_price
+                trail_dist     = (pos.initial_stop_loss - pos.entry_price) * 1.5
                 new_sl         = pos.peak_price + trail_dist
                 if new_sl < pos.stop_loss:
                     pos.stop_loss = new_sl
