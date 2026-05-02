@@ -24,8 +24,8 @@ from config import cfg
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
 
-MIN_SL_DIST_PCT   = 0.05    # SL must be at least 0.05% from entry price
-MIN_RR            = 1.5     # minimum risk-reward ratio
+MIN_SL_DIST_PCT   = 0.15    # SL must be ≥ 0.15% from entry (raised from 0.05 — ultra-tight SLs are fee-eaten at any notional)
+MIN_RR            = 1.8     # minimum risk-reward ratio (raised from 1.5)
 MAX_FEE_RATIO     = 0.25    # fees must be < 25% of expected TP profit
 MAX_CONSEC_LOSSES = 6       # pause after this many consecutive session losses
 MAX_DAILY_DD_PCT  = 12.0    # hard stop: session equity down > 12%
@@ -61,7 +61,7 @@ class LeanGate:
         logger.info(
             f"[LEAN-GATE] activated | "
             f"min_sl={MIN_SL_DIST_PCT}% min_rr={MIN_RR} "
-            f"max_fee_ratio={MAX_FEE_RATIO} "
+            f"max_fee_ratio={MAX_FEE_RATIO} gate3=ALWAYS_ON "
             f"max_consec_loss={MAX_CONSEC_LOSSES} "
             f"max_daily_dd={MAX_DAILY_DD_PCT}%"
         )
@@ -112,19 +112,18 @@ class LeanGate:
             )
 
         # ── Gate 3: Fee economy ───────────────────────────────────────────────
-        # Skipped in BYPASS_ALL_GATES mode: fee quality is a signal-selection
-        # concern; with bypass active the engine prioritises trade throughput.
-        if not cfg.BYPASS_ALL_GATES:
-            round_trip_fee = notional * (cfg.TAKER_FEE * 2)
-            gross_tp       = tp_dist * (notional / entry) if entry > 0 else 0.0
-            if gross_tp > 0:
-                fee_ratio = round_trip_fee / gross_tp
-                if fee_ratio > MAX_FEE_RATIO:
-                    return LeanResult(
-                        execute=False,
-                        reason=f"FEE_HEAVY({fee_ratio*100:.1f}%>{MAX_FEE_RATIO*100:.0f}%)",
-                        rr=rr, sl_dist_pct=sl_dist_pct,
-                    )
+        # Always active. PAPER_SPEED SL widened to 2× ATR floor (0.2%+) so
+        # notional is large enough that fee_ratio ≈ 20% < 25% threshold.
+        round_trip_fee = notional * (cfg.TAKER_FEE * 2)
+        gross_tp       = tp_dist * (notional / entry) if entry > 0 else 0.0
+        if gross_tp > 0:
+            fee_ratio = round_trip_fee / gross_tp
+            if fee_ratio > MAX_FEE_RATIO:
+                return LeanResult(
+                    execute=False,
+                    reason=f"FEE_HEAVY({fee_ratio*100:.1f}%>{MAX_FEE_RATIO*100:.0f}%)",
+                    rr=rr, sl_dist_pct=sl_dist_pct,
+                )
 
         # ── Gate 4: Loss streak ───────────────────────────────────────────────
         if consecutive_losses >= MAX_CONSEC_LOSSES:
