@@ -177,20 +177,15 @@ SYMBOL_COOLDOWN_SEC = 300         # 5 min between trades per symbol — quality 
 MAX_TRADES_PER_HOUR = 20          # hard ceiling across all symbols
 
 # Symbols with proven structural losses: fee_pct_of_gross_win > 100% (FEE_TOXIC) or
-# chronic net-pnl < -$14 per session (catastrophic losers from fee_drag_analysis).
+# chronic net-pnl < -$12 per session (from fee_drag_analysis forensics).
 _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
     # FEE_TOXIC — fees exceed gross wins (fee_pct_of_gross_win > 100%)
     "BNBUSDT", "XRPUSDT", "CHIPUSDT", "PENGUUSDT", "PHBUSDT", "MOVEUSDT",  # report-1
     "PENDLEUSDT",                                                             # report-2
-    # Chronic net losers — net_pnl < -$12 per session despite OK fee verdict
+    # Chronic net losers — net_pnl < -$12 per session
     "LINKUSDT", "GIGGLEUSDT", "AAVEUSDT", "AVNTUSDT", "AVAXUSDT",          # report-1
     "SOLUSDT", "WLFIUSDT", "MEGAUSDT", "TRXUSDT",                          # report-2
 })
-
-# UTC hours where historical net PnL is deeply negative (< -$5) across this session.
-# Hours 15–23 UTC cover US afternoon + evening + Asia open — all net losers.
-# Golden hours kept: 00-14 UTC (especially 07 and 14).
-_BLOCKED_UTC_HOURS: frozenset[int] = frozenset({15, 16, 17, 18, 19, 20, 21, 22, 23})
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens
@@ -522,10 +517,6 @@ async def on_tick(tick: Tick):
 
         # ── Symbol blacklist: fee-toxic / chronic loss symbols ────────────────
         if sym in _SYMBOL_BLACKLIST:
-            return
-
-        # ── Time filter: skip new entries during historically bad UTC hours ───
-        if time.gmtime().tm_hour in _BLOCKED_UTC_HOURS:
             return
 
         # Use real 1-min candle OHLC for strategy indicators.
