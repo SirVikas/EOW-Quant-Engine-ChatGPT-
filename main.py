@@ -4157,6 +4157,333 @@ async def aee_strategy_detail(strategy_id: str):
     return _sanitize(asdict(stats))
 
 
+# ── Forensic Report Generator ─────────────────────────────────────────────────
+
+def _generate_forensic_reports(
+    trade_dicts: list,
+    session_stats: dict,
+    thoughts: list,
+    edge_summary: dict,
+) -> "dict[str, str]":
+    """
+    Generate 7 forensic analysis files included in 05_forensics/ of the bundle.
+    Each file targets a specific angle for diagnosing losses and reaching $1/min.
+
+    1. strategy_forensics.json   — per-strategy WR, PF, fees, verdict
+    2. exit_analysis.json        — how trades exit (SL/TP/TSL+/BE via r_multiple)
+    3. fee_drag_analysis.json    — fee breakdown by symbol
+    4. regime_performance.json   — WR/PF per market regime
+    5. hourly_performance.json   — performance by UTC hour (golden/avoid hours)
+    6. signal_funnel.json        — pipeline funnel from thought log
+    7. capital_efficiency.json   — gap analysis vs $1/min target
+    """
+    import collections as _col
+
+    def _exit_type(r: float) -> str:
+        if r >= 3.5:      return "TAKE_PROFIT"
+        if r > 0.05:      return "TRAILING_STOP_WIN"
+        if r > -0.05:     return "BREAKEVEN"
+        if r >= -1.15:    return "STOP_LOSS"
+        return "STOP_LOSS_SLIP"
+
+    def _pf(gp, gl):
+        return round(gp / max(gl, 1e-9), 3)
+
+    def _wr(wins, total):
+        return round(len(wins) / max(total, 1) * 100, 2)
+
+    files: dict = {}
+    n_total = len(trade_dicts)
+
+    # ── 1. Strategy Forensics ─────────────────────────────────────────────────
+    sg = _col.defaultdict(list)
+    for t in trade_dicts:
+        sg[t.get("strategy_id", "unknown")].append(t)
+
+    strats = []
+    for sid, tt in sorted(sg.items()):
+        wins   = [t for t in tt if t.get("net_pnl", 0) > 0]
+        losses = [t for t in tt if t.get("net_pnl", 0) <= 0]
+        gp = sum(t.get("net_pnl", 0) for t in wins)
+        gl = abs(sum(t.get("net_pnl", 0) for t in losses))
+        fees = sum(t.get("fee_entry", 0) + t.get("fee_exit", 0) for t in tt)
+        aw = gp / max(len(wins), 1)
+        al = gl / max(len(losses), 1)
+        pf = _pf(gp, gl)
+        strats.append({
+            "strategy_id":        sid,
+            "n_trades":           len(tt),
+            "win_rate_pct":       _wr(wins, len(tt)),
+            "profit_factor":      pf,
+            "net_pnl_usdt":       round(sum(t.get("net_pnl", 0) for t in tt), 4),
+            "avg_win_usdt":       round(aw, 4),
+            "avg_loss_usdt":      round(al, 4),
+            "actual_rr":          round(aw / max(al, 1e-9), 3),
+            "total_fees_usdt":    round(fees, 4),
+            "fee_pct_of_gp":      round(fees / max(gp, 1e-9) * 100, 1),
+            "avg_r_multiple":     round(sum(t.get("r_multiple", 0) for t in tt) / max(len(tt), 1), 3),
+            "verdict":            "ALPHA" if pf > 1.2 else "BREAKEVEN" if pf > 0.9 else "NOISE",
+        })
+    strats.sort(key=lambda x: x["profit_factor"], reverse=True)
+    best = next((s["strategy_id"] for s in strats if s["profit_factor"] > 1.0), None)
+    files["strategy_forensics.json"] = json.dumps({
+        "title":          "Strategy Forensics — Per-Strategy Performance Breakdown",
+        "generated_at":   time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "total_strategies": len(strats),
+        "best_strategy":  best or "NONE — all strategies losing",
+        "strategies":     strats,
+        "action": f"Keep: {best}. Kill rest until WR>50%" if best
+                  else "RSI filter + real strategies needed before any strategy is viable",
+    }, indent=2)
+
+    # ── 2. Exit Analysis ──────────────────────────────────────────────────────
+    eg = _col.defaultdict(list)
+    for t in trade_dicts:
+        eg[_exit_type(t.get("r_multiple", -1.0))].append(t)
+
+    exits = []
+    for etype, tt in sorted(eg.items(), key=lambda x: -len(x[1])):
+        pnls = [t.get("net_pnl", 0) for t in tt]
+        rs   = [t.get("r_multiple", 0) for t in tt]
+        exits.append({
+            "exit_type":      etype,
+            "count":          len(tt),
+            "pct_of_total":   round(len(tt) / max(n_total, 1) * 100, 1),
+            "total_pnl_usdt": round(sum(pnls), 4),
+            "avg_pnl_usdt":   round(sum(pnls) / max(len(pnls), 1), 4),
+            "avg_r_multiple": round(sum(rs) / max(len(rs), 1), 4),
+        })
+
+    sl_count  = sum(e["count"] for e in exits if "STOP_LOSS" in e["exit_type"])
+    win_count = sum(e["count"] for e in exits if e["exit_type"] in ("TAKE_PROFIT", "TRAILING_STOP_WIN"))
+    diagnosis = ("DIRECTION_WRONG — SL hit 2× more than TP. Fix signal direction."
+                 if sl_count > win_count * 2 else
+                 "TRAILING_STOP_TOO_TIGHT — wins closed before TP. Widen trailing."
+                 if win_count > sl_count * 0.8 else "BALANCED")
+    files["exit_analysis.json"] = json.dumps({
+        "title":            "Exit Analysis — How and Why Trades Close",
+        "generated_at":     time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "summary": {
+            "stop_loss_exits":      sl_count,
+            "profitable_exits":     win_count,
+            "sl_to_win_ratio":      round(sl_count / max(win_count, 1), 2),
+            "diagnosis":            diagnosis,
+        },
+        "by_exit_type":     exits,
+        "action": ("Improve entry direction — too many full SL hits."
+                   if sl_count > win_count * 2 else
+                   "Widen trailing stop — winners cut too early." if win_count > sl_count * 0.8
+                   else "Exit quality acceptable — focus on entry quality."),
+    }, indent=2)
+
+    # ── 3. Fee Drag Analysis ──────────────────────────────────────────────────
+    sym_g = _col.defaultdict(list)
+    for t in trade_dicts:
+        sym_g[t.get("symbol", "?")].append(t)
+
+    fee_rows = []
+    for sym, tt in sorted(sym_g.items()):
+        fees = sum(t.get("fee_entry", 0) + t.get("fee_exit", 0) for t in tt)
+        slip = sum(t.get("slippage_cost", 0) for t in tt)
+        gp   = sum(t.get("net_pnl", 0) for t in tt if t.get("net_pnl", 0) > 0)
+        np_  = sum(t.get("net_pnl", 0) for t in tt)
+        fee_rows.append({
+            "symbol":               sym,
+            "n_trades":             len(tt),
+            "total_fees_usdt":      round(fees, 4),
+            "total_slippage_usdt":  round(slip, 4),
+            "total_cost_usdt":      round(fees + slip, 4),
+            "net_pnl_usdt":         round(np_, 4),
+            "fee_per_trade_usdt":   round(fees / max(len(tt), 1), 4),
+            "fee_pct_of_gross_win": round(fees / max(gp, 1e-9) * 100, 1),
+            "verdict": ("FEE_TOXIC"  if fees > abs(np_) * 0.8 else
+                        "FEE_HEAVY"  if fees / max(gp, 1e-9) > 0.30 else "OK"),
+        })
+    fee_rows.sort(key=lambda x: x["total_fees_usdt"], reverse=True)
+    total_fees = sum(r["total_fees_usdt"] for r in fee_rows)
+    total_slip  = sum(r["total_slippage_usdt"] for r in fee_rows)
+    files["fee_drag_analysis.json"] = json.dumps({
+        "title":              "Fee Drag Analysis — Where Costs Are Eating Profit",
+        "generated_at":       time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "total_fees_usdt":    round(total_fees, 4),
+        "total_slippage_usdt": round(total_slip, 4),
+        "total_cost_usdt":    round(total_fees + total_slip, 4),
+        "toxic_symbols":      [r["symbol"] for r in fee_rows if r["verdict"] == "FEE_TOXIC"],
+        "by_symbol":          fee_rows,
+        "action": ("Remove toxic symbols: " + ", ".join(r["symbol"] for r in fee_rows[:3] if r["verdict"] != "OK")
+                   if any(r["verdict"] != "OK" for r in fee_rows[:3]) else "Fee profile acceptable."),
+    }, indent=2)
+
+    # ── 4. Regime Performance Matrix ──────────────────────────────────────────
+    rg = _col.defaultdict(list)
+    for t in trade_dicts:
+        rg[t.get("regime", "UNKNOWN")].append(t)
+
+    regimes = []
+    for regime, tt in sorted(rg.items()):
+        wins   = [t for t in tt if t.get("net_pnl", 0) > 0]
+        losses = [t for t in tt if t.get("net_pnl", 0) <= 0]
+        gp = sum(t.get("net_pnl", 0) for t in wins)
+        gl = abs(sum(t.get("net_pnl", 0) for t in losses))
+        dur_secs = [
+            (t.get("exit_ts", 0) - t.get("entry_ts", 0)) / 1000.0
+            for t in tt if t.get("exit_ts", 0) > t.get("entry_ts", 0)
+        ]
+        regimes.append({
+            "regime":           regime,
+            "n_trades":         len(tt),
+            "win_rate_pct":     _wr(wins, len(tt)),
+            "profit_factor":    _pf(gp, gl),
+            "net_pnl_usdt":     round(sum(t.get("net_pnl", 0) for t in tt), 4),
+            "avg_win_usdt":     round(gp / max(len(wins), 1), 4),
+            "avg_loss_usdt":    round(gl / max(len(losses), 1), 4),
+            "avg_duration_sec": round(sum(dur_secs) / max(len(dur_secs), 1), 1),
+            "verdict":          "TRADE_HERE" if _pf(gp, gl) > 1.0 else "AVOID",
+        })
+    regimes.sort(key=lambda x: x["profit_factor"], reverse=True)
+    files["regime_performance_matrix.json"] = json.dumps({
+        "title":        "Regime Performance Matrix — Which Market State Is Profitable",
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "best_regime":  regimes[0]["regime"] if regimes else "N/A",
+        "regimes":      regimes,
+        "action": (f"Focus on {regimes[0]['regime']} regime — highest PF."
+                   if regimes and regimes[0]["profit_factor"] > 1.0
+                   else "All regimes losing — signal quality must improve first."),
+    }, indent=2)
+
+    # ── 5. Hourly Performance ─────────────────────────────────────────────────
+    hg = _col.defaultdict(list)
+    for t in trade_dicts:
+        ets = t.get("entry_ts", 0)
+        if ets > 0:
+            h = int((ets // 1000) % 86400 // 3600)
+            hg[h].append(t)
+
+    hours = []
+    for h, tt in sorted(hg.items()):
+        wins = [t for t in tt if t.get("net_pnl", 0) > 0]
+        net  = sum(t.get("net_pnl", 0) for t in tt)
+        hours.append({
+            "hour_utc":       h,
+            "label":          f"{h:02d}:00-{h:02d}:59 UTC",
+            "n_trades":       len(tt),
+            "win_rate_pct":   _wr(wins, len(tt)),
+            "net_pnl_usdt":   round(net, 4),
+            "avg_pnl_usdt":   round(net / max(len(tt), 1), 4),
+            "verdict":        ("GOLDEN_HOUR" if net > 1.0 else
+                               "AVOID_HOUR"  if net < -3.0 else "NEUTRAL"),
+        })
+    golden = [h["label"] for h in sorted(hours, key=lambda x: -x["net_pnl_usdt"])[:3]
+              if h["net_pnl_usdt"] > 0]
+    avoid  = [h["label"] for h in sorted(hours, key=lambda x: x["net_pnl_usdt"])[:3]
+              if h["net_pnl_usdt"] < 0]
+    files["hourly_performance.json"] = json.dumps({
+        "title":         "Hourly Performance — Golden Hours vs Avoid Hours (UTC)",
+        "generated_at":  time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "golden_hours":  golden,
+        "avoid_hours":   avoid,
+        "by_hour":       hours,
+        "action": (f"Trade more in: {', '.join(golden[:2])}. "
+                   f"Reduce activity in: {', '.join(avoid[:2])}.") if golden or avoid
+                  else "Insufficient data for hourly analysis.",
+    }, indent=2)
+
+    # ── 6. Signal Pipeline Funnel ─────────────────────────────────────────────
+    tlog = [str(t.get("msg", "")) for t in list(thoughts)]
+    def _cnt(kw): return sum(1 for m in tlog if kw in m)
+
+    signals_gen  = _cnt("🔔 Signal")
+    trades_open  = _cnt("✅ Opened")
+    rsi_blocked  = _cnt("RSI filter blocked")
+    aie_suppress = _cnt("AIE INVERSE suppressed")
+    fee_blocked  = _cnt("FEE_HEAVY")
+    sl_blocked   = _cnt("SL_TOO_TIGHT")
+    rr_blocked   = _cnt("RR_LOW")
+    dd_blocked   = _cnt("DAILY_DD")
+    streak_block = _cnt("LOSS_STREAK")
+
+    files["signal_funnel.json"] = json.dumps({
+        "title":         "Signal Pipeline Funnel — Where Trade Ideas Are Filtered",
+        "generated_at":  time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "note":          "Based on last 30 thought-log entries (rolling window)",
+        "funnel": {
+            "1_signals_generated":         signals_gen,
+            "2_rsi_filter_blocked":        rsi_blocked,
+            "3_aie_inversions_suppressed": aie_suppress,
+            "4_lean_gate_fee_blocked":     fee_blocked,
+            "4_lean_gate_sl_blocked":      sl_blocked,
+            "4_lean_gate_rr_blocked":      rr_blocked,
+            "4_lean_gate_dd_blocked":      dd_blocked,
+            "4_lean_gate_streak_blocked":  streak_block,
+            "5_trades_executed":           trades_open,
+        },
+        "conversion_rate_pct": round(trades_open / max(signals_gen, 1) * 100, 1),
+        "session_trades_total":    n_total,
+        "session_win_rate_pct":    session_stats.get("win_rate", 0.0),
+        "session_profit_factor":   session_stats.get("profit_factor", 0.0),
+        "biggest_blocker": max(
+            [("RSI_FILTER", rsi_blocked), ("FEE_GATE", fee_blocked),
+             ("SL_GATE", sl_blocked), ("RR_GATE", rr_blocked)],
+            key=lambda x: x[1]
+        )[0] if any([rsi_blocked, fee_blocked, sl_blocked, rr_blocked]) else "NONE",
+    }, indent=2)
+
+    # ── 7. Capital Efficiency — Path to $1/min ────────────────────────────────
+    wins_all   = [t for t in trade_dicts if t.get("net_pnl", 0) > 0]
+    losses_all = [t for t in trade_dicts if t.get("net_pnl", 0) <= 0]
+    gp_all     = sum(t.get("net_pnl", 0) for t in wins_all)
+    gl_all     = abs(sum(t.get("net_pnl", 0) for t in losses_all))
+    aw_all     = gp_all / max(len(wins_all), 1)
+    al_all     = gl_all / max(len(losses_all), 1)
+    wf         = session_stats.get("win_rate", 0.0) / 100.0
+    current_ev = wf * aw_all - (1 - wf) * al_all
+
+    # What WR is needed at current avg_win/avg_loss to break even?
+    be_wr = al_all / max(aw_all + al_all, 1e-9)
+
+    # $1/min target: assume 10 trades/hr after RSI filter
+    assumed_freq = 10.0 / 60.0  # trades per minute
+    target_ev_per_trade = 1.0 / max(assumed_freq, 1e-9)
+
+    # What WR at current avg_win/avg_loss achieves $1/min?
+    needed_wf = (target_ev_per_trade + al_all) / max(aw_all + al_all, 1e-9)
+
+    files["capital_efficiency.json"] = json.dumps({
+        "title":          "Capital Efficiency — Gap Analysis vs $1/min Target",
+        "generated_at":   time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "current_state": {
+            "win_rate_pct":          round(wf * 100, 2),
+            "avg_win_usdt":          round(aw_all, 4),
+            "avg_loss_usdt":         round(al_all, 4),
+            "actual_rr":             round(aw_all / max(al_all, 1e-9), 3),
+            "expected_value_per_trade_usdt": round(current_ev, 4),
+            "breakeven_win_rate_pct": round(be_wr * 100, 1),
+            "net_per_minute_usdt":   round(current_ev * assumed_freq * 60, 4),
+            "total_fees_usdt":       round(sum(t.get("fee_entry", 0) + t.get("fee_exit", 0) for t in trade_dicts), 4),
+        },
+        "target": {
+            "net_per_minute_usdt": 1.0,
+            "assumed_trades_per_hr": int(assumed_freq * 60),
+            "required_ev_per_trade_usdt": round(target_ev_per_trade, 4),
+            "required_win_rate_pct": round(min(needed_wf * 100, 99.9), 1),
+            "required_rr_at_50pct_wr": 2.0,
+        },
+        "gap": {
+            "current_per_min": round(current_ev * assumed_freq * 60, 4),
+            "gap_to_close":    round(1.0 - current_ev * assumed_freq * 60, 4),
+            "primary_lever":   ("WIN_RATE"  if wf < be_wr + 0.10 else
+                                "RISK_SIZE" if al_all < 3.0 else "TRADE_FREQUENCY"),
+            "roadmap": [
+                f"Step 1: RSI filter → target WR {round(be_wr*100+10, 0):.0f}%+ (currently {wf*100:.1f}%)",
+                f"Step 2: With WR {round(be_wr*100+12, 0):.0f}%, increase risk/trade from {al_all:.2f} to {al_all*3:.2f} USDT",
+                f"Step 3: Kelly sizing at 60% WR → auto-scales to ~$1/min",
+            ],
+        },
+    }, indent=2)
+
+    return files
+
+
 # ── Master Report Bundle ──────────────────────────────────────────────────────
 
 @app.get("/api/reports/bundle")
@@ -4183,6 +4510,14 @@ async def download_report_bundle():
         report_1D.json  + trades_1D.csv
         report_7D.json  + trades_7D.csv
         report_20D.json + trades_20D.csv
+      05_forensics/
+        strategy_forensics.json   ← per-strategy WR / PF / fees / verdict
+        exit_analysis.json        ← SL / TP / TSL+ / BE breakdown
+        fee_drag_analysis.json    ← fee burden per symbol
+        regime_performance.json   ← WR and PF by market regime
+        hourly_performance.json   ← golden hours vs avoid hours (UTC)
+        signal_funnel.json        ← pipeline funnel metrics
+        capital_efficiency.json   ← gap analysis vs $1/min + roadmap
     """
     import zipfile
     import io as _io
@@ -4392,6 +4727,14 @@ async def download_report_bundle():
             "03_trade_archive/ Trade history XLSX + PDF executive summary + MD developer log\n"
             "04_performance/   Performance Explorer reports for ALL / 1D / 7D / 20D presets\n"
             "                  Each preset: report_<P>.json (summary) + trades_<P>.csv (raw)\n"
+            "05_forensics/     Deep-dive forensic analysis (7 JSON files)\n"
+            "  strategy_forensics.json   Per-strategy WR, PF, fees, verdict\n"
+            "  exit_analysis.json        How trades exit: SL / TP / TSL+ / BE\n"
+            "  fee_drag_analysis.json    Fee burden per symbol (FEE_TOXIC verdicts)\n"
+            "  regime_performance.json   WR and PF split by market regime\n"
+            "  hourly_performance.json   Golden hours vs avoid hours (UTC)\n"
+            "  signal_funnel.json        Pipeline funnel: generated → gated → placed\n"
+            "  capital_efficiency.json   Gap analysis vs $1/min target + roadmap\n"
         ))
 
         zf.writestr("metadata.json", json.dumps({
@@ -4451,6 +4794,20 @@ async def download_report_bundle():
                         upe_jsons[_preset])
             zf.writestr(f"04_performance/trades_{_preset}.csv",
                         upe_csvs[_preset])
+
+        # 05_forensics/ — deep-dive analysis for max-profit optimisation
+        try:
+            _forensic_files = _generate_forensic_reports(
+                trade_dicts=trade_dicts,
+                session_stats=_ss,
+                thoughts=_thought_log,
+                edge_summary=_safe(edge_engine.summary, {}),
+            )
+            for _fname, _fcontent in _forensic_files.items():
+                zf.writestr(f"05_forensics/{_fname}", _fcontent)
+        except Exception as _fe:
+            zf.writestr("05_forensics/error.txt",
+                        f"Forensic generation failed: {_fe}\n")
 
     buf.seek(0)
     filename = f"eow_bundle_{ts}.zip"
