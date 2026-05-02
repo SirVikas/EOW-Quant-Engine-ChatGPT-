@@ -179,8 +179,12 @@ MAX_TRADES_PER_HOUR = 20          # hard ceiling across all symbols
 # Symbols with proven structural losses: fee_pct_of_gross_win > 100% (FEE_TOXIC) or
 # chronic net-pnl < -$14 per session (catastrophic losers from fee_drag_analysis).
 _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
-    "BNBUSDT", "XRPUSDT", "CHIPUSDT", "PENGUUSDT", "PHBUSDT", "MOVEUSDT",   # FEE_TOXIC
-    "LINKUSDT", "GIGGLEUSDT", "AAVEUSDT", "AVNTUSDT", "AVAXUSDT",            # chronic losers
+    # FEE_TOXIC — fees exceed gross wins (fee_pct_of_gross_win > 100%)
+    "BNBUSDT", "XRPUSDT", "CHIPUSDT", "PENGUUSDT", "PHBUSDT", "MOVEUSDT",  # report-1
+    "PENDLEUSDT",                                                             # report-2
+    # Chronic net losers — net_pnl < -$12 per session despite OK fee verdict
+    "LINKUSDT", "GIGGLEUSDT", "AAVEUSDT", "AVNTUSDT", "AVAXUSDT",          # report-1
+    "SOLUSDT", "WLFIUSDT", "MEGAUSDT", "TRXUSDT",                          # report-2
 })
 
 # UTC hours where historical net PnL is deeply negative (< -$5) across this session.
@@ -607,9 +611,13 @@ async def on_tick(tick: Tick):
         _streak_result = streak_engine.check(
             consecutive_wins=_p52_cw, consecutive_losses=_p52_cl,
         )
-        # Effective score_min = DTP base ± streak delta, floored at 0.40
+        # Effective score_min = DTP base ± streak delta, floored at 0.40.
+        # In BYPASS mode the COLD adjustment is zeroed out: consecutive losses create
+        # a death spiral (losses → +0.05/loss → eff_min 0.56→0.61→0.66 → no trades
+        # → miss the recovery signal → more losses). In production mode it stays on.
+        _streak_adj = 0.0 if cfg.BYPASS_ALL_GATES else _streak_result.score_adjustment
         _eff_score_min = max(0.40, round(
-            thresholds.score_min + _streak_result.score_adjustment, 4
+            thresholds.score_min + _streak_adj, 4
         ))
         if _streak_result.state != "NEUTRAL":
             _thought(
