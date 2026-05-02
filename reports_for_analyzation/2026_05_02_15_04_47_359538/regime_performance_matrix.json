@@ -1,0 +1,41 @@
+{
+  "title": "Regime Performance Matrix \u2014 Which Market State Is Profitable",
+  "generated_at": "2026-05-02 09:33:17 UTC",
+  "best_regime": "TRENDING",
+  "regimes": [
+    {
+      "regime": "TRENDING",
+      "n_trades": 245,
+      "win_rate_pct": 36.73,
+      "profit_factor": 0.4,
+      "net_pnl_usdt": -115.2273,
+      "avg_win_usdt": 0.8542,
+      "avg_loss_usdt": 1.2394,
+      "avg_duration_sec": 308.1,
+      "verdict": "AVOID"
+    },
+    {
+      "regime": "MEAN_REVERTING",
+      "n_trades": 119,
+      "win_rate_pct": 36.97,
+      "profit_factor": 0.304,
+      "net_pnl_usdt": -44.4584,
+      "avg_win_usdt": 0.4417,
+      "avg_loss_usdt": 0.8519,
+      "avg_duration_sec": 265.4,
+      "verdict": "AVOID"
+    },
+    {
+      "regime": "VOLATILITY_EXPANSION",
+      "n_trades": 2,
+      "win_rate_pct": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl_usdt": -9.7227,
+      "avg_win_usdt": 0.0,
+      "avg_loss_usdt": 4.8614,
+      "avg_duration_sec": 16.3,
+      "verdict": "AVOID"
+    }
+  ],
+  "action": "All regimes losing \u2014 signal quality must improve first."
+}
