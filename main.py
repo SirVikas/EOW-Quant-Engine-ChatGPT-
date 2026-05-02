@@ -791,15 +791,22 @@ async def on_tick(tick: Tick):
         # momentum signal so the pipeline can execute and recover flow.
         if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
             _entry = closes[-1]
-            _mom_up = closes[-1] >= closes[-2]
+            # SMA-20 trend direction — far more reliable than 2-candle noise.
+            # Single-bar momentum caused a win-rate death spiral (10% WR) because
+            # it fired contra-trend entries that AIE then inverted, doubling the error.
+            _trend_len = min(20, len(closes))
+            _sma20 = sum(closes[-_trend_len:]) / _trend_len
+            _trend_up = closes[-1] > _sma20
             _atr_px = max(
                 abs(closes[-1] - closes[-2]),
-                _entry * 0.001,                      # 0.10% floor
+                _entry * 0.002,                      # 0.20% floor (was 0.10%)
                 (_entry * atr_pct / 100.0),
             )
-            _sl_dist = _atr_px * 1.5
-            _tp_dist = _atr_px * 2.5
-            if _mom_up:
+            # Wider SL/TP: RR = 2.0 (was 1.67), larger notional per risk unit →
+            # fees become a smaller % of expected profit (was ~60%, now ~20%)
+            _sl_dist = _atr_px * 2.0   # was 1.5
+            _tp_dist = _atr_px * 4.0   # was 2.5
+            if _trend_up:
                 _sl = _entry - _sl_dist
                 _tp = _entry + _tp_dist
                 _side = Signal.LONG
@@ -848,17 +855,24 @@ async def on_tick(tick: Tick):
                 }
                 return
             if _inv.inverted:
-                sig = TradeSignal(
-                    symbol=sig.symbol,
-                    signal=Signal(_inv.final_signal),
-                    entry_price=_inv.entry_price,
-                    stop_loss=_inv.stop_loss,
-                    take_profit=_inv.take_profit,
-                    confidence=sig.confidence,
-                    strategy_id=sig.strategy_id + "_INV",
-                    reason=f"{sig.reason} | {_inv.reason}",
-                )
-                _thought(f"🔄 AIE INVERSE → {sig.signal.value} {sym}", "SIGNAL")
+                if cfg.BYPASS_ALL_GATES:
+                    # Suppress AIE inversion in bypass mode — bypass trades are
+                    # intentionally noisy; let AIE learn without contaminating
+                    # signal direction. Losses from inversion caused a win_rate
+                    # death-spiral (10% WR → AEE disabled → 0 trades).
+                    _thought(f"🔄 AIE INVERSE suppressed (bypass) {sym}", "SIGNAL")
+                else:
+                    sig = TradeSignal(
+                        symbol=sig.symbol,
+                        signal=Signal(_inv.final_signal),
+                        entry_price=_inv.entry_price,
+                        stop_loss=_inv.stop_loss,
+                        take_profit=_inv.take_profit,
+                        confidence=sig.confidence,
+                        strategy_id=sig.strategy_id + "_INV",
+                        reason=f"{sig.reason} | {_inv.reason}",
+                    )
+                    _thought(f"🔄 AIE INVERSE → {sig.signal.value} {sym}", "SIGNAL")
 
             # 6. Size the position (FTD-REF-024: apply edge booster multiplier)
             sizing = scaler.compute(sym, sig.entry_price, sig.stop_loss)
@@ -866,6 +880,10 @@ async def on_tick(tick: Tick):
                 return
             _edge_mult = edge_engine.get_size_multiplier(regime.value, strategy_type)
             _aee_mult  = adaptive_edge_engine.get_size_mult(strategy_type)
+            if cfg.BYPASS_ALL_GATES and _aee_mult == 0.0:
+                # AEE disabled → would zero out qty; in bypass mode keep trading
+                # so the engine can recover stats and re-enable the strategy
+                _aee_mult = 1.0
             # Combine: take the lower bound as a safety floor, then apply edge boost
             # AEE SCALING (>1×) stacks with edge_engine boost; REDUCED (<1×) overrides
             _final_mult = _aee_mult * _edge_mult if _aee_mult >= 1.0 else _aee_mult
