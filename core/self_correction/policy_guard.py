@@ -14,11 +14,12 @@ from core.self_correction.correction_proposal import HARD_LIMITS
 # ── Thresholds ────────────────────────────────────────────────────────────────
 MIN_TRADES            = 30
 MIN_SYSTEM_SCORE      = 70.0
-# Lowered 70→30: ai_brain_score = WR*100 - 10 (when PnL < 0).
-# At WR=37% the score is 27 — previously this blocked ALL corrections (circular
-# logic: bad performance → low score → corrections blocked → stays bad).
-# Corrections are most needed when performance is poor, not when it's good.
-MIN_AI_BRAIN_SCORE    = 30.0
+# Sniper Mode (FTD-SNP-001): raised 30→55. Corrections are only applied when
+# the system has enough signal quality to trust the direction. At WR<45% the
+# score is ~35; pausing corrections at that level prevents oscillation. The
+# reactive engine (FTD-REA-001) handles per-trade micro-adaptation in the
+# meantime — AIE macro corrections require higher confidence.
+MIN_AI_BRAIN_SCORE    = 55.0
 MIN_META_SCORE        = 70.0
 CRITICAL_BYPASS_SCORE = 50.0   # system_score < 50 → bypass cooldown (Q7 Part 7)
 

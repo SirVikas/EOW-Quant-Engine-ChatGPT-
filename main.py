@@ -190,7 +190,16 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
     "ADAUSDT",   # net -$8.05, fee_pct 150.3% (FEE_HEAVY)
     "ENAUSDT",   # net -$5.08, fee_pct 38.4%  (FEE_HEAVY, chronic loser)
     "SUIUSDT",   # net -$2.25, fee_pct 321.1% (FEE_HEAVY, fees dwarf wins)
+    # report-4 (2026-05-03 20:33): high trade count, negative net
+    "ORDIUSDT",  # 27 trades, net -$10.97, fee 52.9% of gross
+    "BABYUSDT",  # chronic loser confirmed across 2 sessions
 })
+
+# Sniper Mode (FTD-SNP-001): UTC hours where session data shows consistent losses.
+# Golden hours (always allowed): 07, 10, 14 UTC.
+# Avoid hours: 15-23 UTC except 17 (marginal) — worst: 18 UTC (-$27.38 single trade),
+# 22 UTC (-$28.08 total). BYPASS_ALL_GATES skips this gate in paper-speed mode.
+_AVOID_HOURS_UTC: frozenset[int] = frozenset({15, 16, 18, 19, 20, 21, 22, 23})
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens
@@ -551,6 +560,14 @@ async def on_tick(tick: Tick):
         if sym in _SYMBOL_BLACKLIST:
             return
 
+        # ── Sniper Mode hour gate (FTD-SNP-001): block statistically bad UTC hours ──
+        # Session forensics show consistent losses during 15-23 UTC (except 17).
+        # Golden hours: 07, 10, 14 UTC. Gate is skipped in BYPASS_ALL_GATES mode.
+        if not cfg.BYPASS_ALL_GATES:
+            _current_utc_hour = __import__("datetime").datetime.utcnow().hour
+            if _current_utc_hour in _AVOID_HOURS_UTC:
+                return
+
         # Use real 1-min candle OHLC for strategy indicators.
         # tick_buffers hold individual trade prices (noisy, many per second) — they
         # produce fake ATR ≈ 0.1% which causes undersized SL distances, oversized qty,
@@ -570,6 +587,9 @@ async def on_tick(tick: Tick):
         candle_atr_pct = ((candle.high - candle.low) / candle.close * 100) if candle.close > 0 else 0.0
         atr_pct        = regime_atr_pct if regime_atr_pct > 0 else candle_atr_pct
         raw_adx        = getattr(r_state, "adx", 0.0)
+        # FTD-SNP-001: update slow ATR EMA every candle for volatility gate
+        if atr_pct > 0:
+            reactive_evolution_engine._update_atr_ema(sym, atr_pct)
         guard          = indicator_guard.validate(
             symbol=sym, n_candles=_n_candles, adx=raw_adx, atr_pct=atr_pct,
         )
@@ -590,6 +610,18 @@ async def on_tick(tick: Tick):
             else:
                 error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
                 return   # insufficient candles / unstable ADX / near-zero ATR
+
+        # FTD-SNP-001: ATR volatility gate — block entry during spike volatility.
+        # reactive_evolution_engine tracks slow EMA of ATR%; if current ATR > 2×EMA → skip.
+        # Gate is skipped in BYPASS_ALL_GATES to avoid blocking paper-speed warmup.
+        if not cfg.BYPASS_ALL_GATES and reactive_evolution_engine.is_high_volatility(sym, atr_pct):
+            _last_skip = {
+                "ts": now_ms, "symbol": sym,
+                "reason": f"ATR_SPIKE(atr={atr_pct:.4f}%)",
+                "regime": regime.value, "strategy": strategy_type,
+            }
+            trade_flow_monitor.record_skip(sym, "ATR_SPIKE")
+            return
 
         # Phase 2: Hard-lock MeanReversion when ADX > 25 (strong trend regardless of regime label).
         if strategy_type == "MeanReversion" and raw_adx > 25.0:
@@ -1156,6 +1188,10 @@ async def on_tick(tick: Tick):
                     _eff_score_min, signals=1, trades=_edp_status.trades_1min,
                 )
                 _eff_score_min = execution_drive_policy.get_score_override(_eff_score_min)
+                # FTD-SNP-001: reactive fee-throttle — if symbol is fee-dragging, raise score floor
+                _re_score_override = reactive_evolution_engine.get_score_min_override(sym)
+                if _re_score_override is not None:
+                    _eff_score_min = max(_eff_score_min, _re_score_override)
                 if not cfg.BYPASS_ALL_GATES and _decayed_conf < _eff_score_min:  # Phase 6: DTP + streak-adjusted
                     # EDP: bypass decay gate for strong signals (high score + high RR)
                     if execution_drive_policy.should_force_execute(
@@ -3435,8 +3471,10 @@ async def get_evolution_status():
     ev_summary = evolution_tracker.summary()
     ev_summary["trajectory"] = trajectory
     ev_summary["session_trades"] = len(_session_trades)
-    # FTD-REA-001: include reactive micro-adjustment state
-    ev_summary["reactive_evolution"] = reactive_evolution_engine.summary()
+    # FTD-REA-001 / FTD-SNP-001: include reactive micro-adjustment state + fee efficiency
+    re_summary = reactive_evolution_engine.summary()
+    re_summary["fee_efficiency"] = reactive_evolution_engine.get_fee_efficiency(_session_trades)
+    ev_summary["reactive_evolution"] = re_summary
     return ev_summary
 
 

@@ -80,7 +80,7 @@ class EngineConfig(BaseSettings):
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
-    BREAKEVEN_TRIGGER_R: float = 1.80     # raised 1.20→1.80 — let trades develop before locking in BE; 1.2R exits were capping winners too early
+    BREAKEVEN_TRIGGER_R: float = 1.0      # Sniper Mode (FTD-SNP-001): lowered 1.80→1.0 — dynamic BE at 1x ATR profit locks in capital immediately; session data shows -$48 STOP_LOSS_SLIP is biggest loss driver
     SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
