@@ -48,7 +48,7 @@ class TrendContinuationBreakout:
 
     def __init__(self, dna: dict = None):
         d = dna or {}
-        self.adx_min    = float(d.get("adx_min",    25.0))
+        self.adx_min    = float(d.get("adx_min",    22.0))  # lowered 25→22: closes gap with REGIME_ADX_THRESHOLD=20; captures Sunday low-vol trends
         self.lookback   = int(d.get("lookback",     20))
         self.vol_spike  = float(d.get("vol_spike",  1.2))  # 1-min candles: 1.5 was too rare; 1.2 still confirms participation
         self.atr_period = int(d.get("atr_period",   cfg.ATR_PERIOD))
