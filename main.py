@@ -621,9 +621,12 @@ async def on_tick(tick: Tick):
 
         # Phase 3: Volume Sleep Mode — dynamic threshold from DTP (no static bypass hack)
         vol_buf = mdp.candle_volume_buffer(sym)
-        # PAPER_SPEED disabled: forensics show 21% WR (TF) and 10.7% WR (MR) — pure noise.
-        # Real strategies (TF_EMA_RSI_v1, MR_BB_RSI_v1) fire adequately without it.
-        _paper_speed = False
+        # PAPER_SPEED fallback: fires only when real strategy + alpha both return NONE.
+        # RSI filter (commit 93250aa) already applied inside the block — prevents the
+        # pre-filter 21% WR noise; delivers ~4-6 quality setups/hr instead of 16+.
+        # Without this, real strategies only fire on EMA crossover / BB touch which can
+        # be absent for hours → complete NO TRADE dry spells.
+        _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
         _vol_mult = thresholds.volume_multiplier
         if _paper_speed:
             # Aggressive paper throughput mode: relax sleep gate to its floor.
