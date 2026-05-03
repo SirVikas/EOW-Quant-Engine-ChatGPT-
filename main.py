@@ -4554,6 +4554,311 @@ def _generate_forensic_reports(
     return files
 
 
+# ── Evolution Forensic Report Generator ───────────────────────────────────────
+
+def _generate_evolution_reports(session_trades: list) -> "dict[str, str]":
+    """
+    FTD-EV-001 — Generate 4 evolution forensic files for 06_evolution/ bundle folder.
+
+    1. evolution_lineage.json   — Generation-by-generation correction audit trail
+    2. system_health.json       — Drift status + performance trajectory summary
+    3. alert_log.json           — All critical alerts; LEARNING_PAUSE events flagged
+    4. executive_summary.md     — Natural-language 24-hour evolution narrative
+    """
+    from core.intelligence.evolution_tracker import evolution_tracker
+    from dataclasses import asdict
+
+    files: dict = {}
+    now_str = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+
+    ev = evolution_tracker
+    pairs     = ev._extract_pairs()
+    all_alerts = ev._alerts
+    cycle_count = ev._cycle_count
+
+    # ── 1. Digital Lineage ────────────────────────────────────────────────────
+    lineage_entries = []
+    for gen_idx, (pre, post) in enumerate(pairs, start=1):
+        wr_delta  = round(post.win_rate  - pre.win_rate,  4)
+        pnl_delta = round(post.net_pnl   - pre.net_pnl,   4)
+        dd_delta  = round(post.drawdown  - pre.drawdown,   4)
+        outcome   = (
+            "IMPROVED"  if wr_delta >  0.01 else
+            "DEGRADED"  if wr_delta < -0.01 else
+            "NEUTRAL"
+        )
+        ts_fmt = time.strftime(
+            "%Y-%m-%d %H:%M:%S UTC",
+            time.gmtime(post.ts // 1000)
+        )
+        lineage_entries.append({
+            "generation":  gen_idx,
+            "cycle_id":    post.cycle_id,
+            "timestamp":   ts_fmt,
+            "change_applied": "AUTO_CORRECTION_CYCLE",
+            "pre": {
+                "win_rate_pct": round(pre.win_rate * 100, 2),
+                "net_pnl_usdt": round(pre.net_pnl,  4),
+                "drawdown_pct": round(pre.drawdown,  2),
+                "n_trades":     pre.n_trades,
+            },
+            "post": {
+                "win_rate_pct": round(post.win_rate * 100, 2),
+                "net_pnl_usdt": round(post.net_pnl,  4),
+                "drawdown_pct": round(post.drawdown,  2),
+                "n_trades":     post.n_trades,
+            },
+            "performance_delta": {
+                "win_rate_pct": round(wr_delta * 100, 2),
+                "net_pnl_usdt": pnl_delta,
+                "drawdown_pct": dd_delta,
+            },
+            "outcome": outcome,
+        })
+
+    improved_count = sum(1 for e in lineage_entries if e["outcome"] == "IMPROVED")
+    degraded_count = sum(1 for e in lineage_entries if e["outcome"] == "DEGRADED")
+    neutral_count  = sum(1 for e in lineage_entries if e["outcome"] == "NEUTRAL")
+
+    files["evolution_lineage.json"] = json.dumps({
+        "title":         "Digital Lineage — Generation-by-Generation System Evolution",
+        "generated_at":  now_str,
+        "format":        "[Generation] → [Change Applied] → [Performance Delta (Pre vs Post)]",
+        "total_generations":    len(lineage_entries),
+        "outcome_summary": {
+            "improved": improved_count,
+            "neutral":  neutral_count,
+            "degraded": degraded_count,
+            "success_rate_pct": round(
+                improved_count / max(len(lineage_entries), 1) * 100, 1
+            ),
+        },
+        "lineage": lineage_entries,
+    }, indent=2)
+
+    # ── 2. System Health (Drift & Trajectory) ─────────────────────────────────
+    trajectory = ev.compute_trajectory(session_trades)
+    drift_paused = ev.check_drift_pause()
+
+    drift_events = [a for a in all_alerts if a.kind == "DRIFT"]
+    has_drift_warning = len(drift_events) > 0
+
+    if drift_paused:
+        drift_status = "CRITICAL"
+    elif has_drift_warning:
+        drift_status = "WARNING"
+    else:
+        drift_status = "STABLE"
+
+    traj_verdict  = trajectory.get("verdict", "INSUFFICIENT_DATA")
+    wr_current    = trajectory.get("win_rate", 0.0)
+    wr_prev       = trajectory.get("wr_prev", 0.0)
+    wr_delta_traj = trajectory.get("wr_delta", 0.0)
+
+    active_critical = [
+        asdict(a) for a in all_alerts
+        if a.kind in ("DRIFT", "WR_CRITICAL", "DD_CRITICAL")
+    ]
+
+    wr_crit_count  = sum(1 for a in all_alerts if a.kind == "WR_CRITICAL")
+    dd_crit_count  = sum(1 for a in all_alerts if a.kind == "DD_CRITICAL")
+    loss_out_count = sum(1 for a in all_alerts if a.kind == "LOSS_OUTLIER")
+
+    files["system_health.json"] = json.dumps({
+        "title":        "System Health — Drift & Trajectory Status",
+        "generated_at": now_str,
+        "drift": {
+            "status":            drift_status,
+            "is_paused":         drift_paused,
+            "paused_until_cycle": ev._paused_until_cycle,
+            "current_cycle":     cycle_count,
+            "drift_events_total": len(drift_events),
+            "interpretation": (
+                "AUTO-CORRECTION PAUSED — 3+ consecutive cycles degraded performance. "
+                "Waiting for market to stabilise."
+                if drift_paused else
+                "Drift detected in history — monitor closely."
+                if has_drift_warning else
+                "No drift detected — corrections are improving or neutral."
+            ),
+        },
+        "trajectory": {
+            "verdict":        traj_verdict,
+            "direction":      trajectory.get("direction", "→"),
+            "win_rate_now":   round(wr_current * 100, 2),
+            "win_rate_prev":  round(wr_prev * 100, 2),
+            "wr_delta_pct":   round(wr_delta_traj * 100, 2),
+            "trades_analysed": trajectory.get("window", 0),
+            "interpretation": (
+                f"System is {traj_verdict}: WR moved "
+                f"{wr_prev*100:.1f}% → {wr_current*100:.1f}% "
+                f"({'▲' if wr_delta_traj >= 0 else '▼'}{abs(wr_delta_traj)*100:.1f}pp)"
+            ),
+        },
+        "alert_counts": {
+            "total":          len(all_alerts),
+            "drift_alerts":   len(drift_events),
+            "wr_critical":    wr_crit_count,
+            "dd_critical":    dd_crit_count,
+            "loss_outliers":  loss_out_count,
+        },
+        "active_critical_alerts": active_critical,
+    }, indent=2)
+
+    # ── 3. Alert Log (with LEARNING_PAUSE highlighted) ────────────────────────
+    alert_log_entries = []
+    for a in all_alerts:
+        is_learning_pause = (a.kind == "DRIFT")
+        entry = asdict(a)
+        entry["ts_fmt"] = time.strftime(
+            "%Y-%m-%d %H:%M:%S UTC", time.gmtime(a.ts // 1000)
+        )
+        entry["is_learning_pause"] = is_learning_pause
+        entry["display_flag"] = (
+            "🔴 LEARNING PAUSE — auto-correction suspended"
+            if is_learning_pause else
+            "⚠ WARNING" if a.severity == "WARNING" else
+            "🔴 CRITICAL"
+        )
+        alert_log_entries.append(entry)
+
+    alert_log_entries.sort(key=lambda x: x["ts"], reverse=True)
+
+    learning_pauses = [e for e in alert_log_entries if e["is_learning_pause"]]
+    files["alert_log.json"] = json.dumps({
+        "title":            "Anomaly & Alert Log — Evolution Critical Events",
+        "generated_at":     now_str,
+        "note":             (
+            "LEARNING_PAUSE events (is_learning_pause=true) are highlighted. "
+            "These are moments the system detected its own corrections were harmful "
+            "and voluntarily stopped updating to protect performance."
+        ),
+        "total_alerts":     len(alert_log_entries),
+        "learning_pauses":  len(learning_pauses),
+        "learning_pause_events": learning_pauses,
+        "all_alerts_newest_first": alert_log_entries,
+    }, indent=2)
+
+    # ── 4. Executive Summary (natural language narrative) ─────────────────────
+    n_trades_sess  = len(session_trades)
+    wins_sess      = sum(1 for t in session_trades if t.net_pnl > 0)
+    wr_sess        = wins_sess / max(n_trades_sess, 1)
+    net_pnl_sess   = sum(t.net_pnl for t in session_trades)
+    n_gen          = len(lineage_entries)
+    n_pauses       = len(learning_pauses)
+
+    wr_change_desc = (
+        f"Win rate improved from {wr_prev*100:.1f}% to {wr_current*100:.1f}%."
+        if traj_verdict == "IMPROVING" else
+        f"Win rate declined from {wr_prev*100:.1f}% to {wr_current*100:.1f}%."
+        if traj_verdict == "DEGRADING" else
+        f"Win rate held steady at {wr_current*100:.1f}%."
+    )
+
+    pause_desc = (
+        f"{n_pauses} drift event(s) were detected where corrections were making "
+        f"performance worse — the system voluntarily paused auto-learning in each case, "
+        f"protecting against negative drift."
+        if n_pauses > 0 else
+        "No learning pauses were needed — all correction cycles moved performance "
+        "in a neutral or positive direction."
+    )
+
+    alert_desc_parts = []
+    if wr_crit_count:
+        alert_desc_parts.append(
+            f"{wr_crit_count} win rate critical alert(s) (WR below {28}% threshold)"
+        )
+    if dd_crit_count:
+        alert_desc_parts.append(
+            f"{dd_crit_count} drawdown critical alert(s) (DD exceeded 15%)"
+        )
+    if loss_out_count:
+        alert_desc_parts.append(
+            f"{loss_out_count} loss outlier warning(s) (single loss >3× session average)"
+        )
+    alert_desc = (
+        "Critical alerts fired: " + "; ".join(alert_desc_parts) + "."
+        if alert_desc_parts else
+        "No critical safety thresholds were breached this session."
+    )
+
+    traj_icon = {"IMPROVING": "↑", "DEGRADING": "↓", "STABLE": "→"}.get(
+        traj_verdict, "?"
+    )
+    prev_score = round(wr_prev * 100, 1)
+    curr_score = round(wr_current * 100, 1)
+
+    exec_md = (
+        f"# EOW Quant Engine — Evolution Executive Summary\n\n"
+        f"**Generated:** {now_str}\n\n"
+        f"---\n\n"
+        f"## Session at a Glance\n\n"
+        f"This session, the system executed **{n_trades_sess} trades** "
+        f"({wins_sess} wins / {n_trades_sess - wins_sess} losses) "
+        f"with a session win rate of **{wr_sess*100:.1f}%** "
+        f"and net PnL of **{net_pnl_sess:+.2f} USDT**.\n\n"
+        f"---\n\n"
+        f"## Self-Learning Journey\n\n"
+        f"The auto-intelligence engine completed **{n_gen} correction generation(s)**. "
+        f"Of these, **{improved_count} improved** performance, "
+        f"**{neutral_count} were neutral**, and **{degraded_count} degraded** it.\n\n"
+        f"{pause_desc}\n\n"
+        f"---\n\n"
+        f"## Performance Trajectory {traj_icon}\n\n"
+        f"Trajectory verdict: **{traj_verdict}**. {wr_change_desc}\n\n"
+        f"Overall intelligence score moved from **{prev_score}** to **{curr_score}** "
+        f"(win-rate-based proxy, 0–100 scale).\n\n"
+        f"---\n\n"
+        f"## Safety Alerts\n\n"
+        f"{alert_desc}\n\n"
+        f"Total alerts logged: **{len(all_alerts)}** "
+        f"({len(learning_pauses)} learning pause(s), "
+        f"{wr_crit_count} WR critical, "
+        f"{dd_crit_count} drawdown critical, "
+        f"{loss_out_count} loss outlier).\n\n"
+        f"---\n\n"
+        f"## Action Items\n\n"
+    )
+
+    if traj_verdict == "DEGRADING":
+        exec_md += (
+            f"- **[HIGH]** System trajectory is DEGRADING. Review recent strategy "
+            f"parameter changes and consider reverting the last correction cycle.\n"
+        )
+    if wr_sess < 0.35:
+        exec_md += (
+            f"- **[HIGH]** Session win rate {wr_sess*100:.1f}% is below 35% minimum. "
+            f"Investigate signal quality before next session.\n"
+        )
+    if drift_paused:
+        exec_md += (
+            f"- **[MEDIUM]** Auto-correction is currently paused (drift detected). "
+            f"Will resume at correction cycle #{ev._paused_until_cycle}.\n"
+        )
+    if n_gen == 0:
+        exec_md += (
+            f"- **[INFO]** No correction cycles completed this session. "
+            f"System needs ≥30 trades and qualifying scores before self-correction activates.\n"
+        )
+    if not alert_desc_parts and traj_verdict != "DEGRADING" and not drift_paused:
+        exec_md += (
+            f"- **[OK]** System operating within all safety thresholds. "
+            f"No immediate action required.\n"
+        )
+
+    exec_md += (
+        f"\n---\n\n"
+        f"*This report was auto-generated by FTD-EV-001 Evolution Tracker. "
+        f"Full forensic detail available in `evolution_lineage.json`, "
+        f"`system_health.json`, and `alert_log.json`.*\n"
+    )
+
+    files["executive_summary.md"] = exec_md
+
+    return files
+
+
 # ── Master Report Bundle ──────────────────────────────────────────────────────
 
 @app.get("/api/reports/bundle")
@@ -4564,7 +4869,7 @@ async def download_report_bundle():
 
     ZIP contents:
       README.txt                    ← File guide
-      metadata.json                 ← Bundle summary (trades, PnL, PF, etc.)
+      metadata.json                 ← Bundle summary (trades, PnL, PF, evolution)
       01_system_state/
         eow_state.json              ← Full engine state (DNA + trades + ratios)
       02_reports/
@@ -4588,6 +4893,11 @@ async def download_report_bundle():
         hourly_performance.json   ← golden hours vs avoid hours (UTC)
         signal_funnel.json        ← pipeline funnel metrics
         capital_efficiency.json   ← gap analysis vs $1/min + roadmap
+      06_evolution/               ← FTD-EV-001 self-learning forensic audit trail
+        evolution_lineage.json    ← generation-by-generation correction history
+        system_health.json        ← drift status + performance trajectory
+        alert_log.json            ← all critical alerts; LEARNING_PAUSE events flagged
+        executive_summary.md      ← natural-language 24-hour evolution narrative
     """
     import zipfile
     import io as _io
@@ -4805,8 +5115,20 @@ async def download_report_bundle():
             "  hourly_performance.json   Golden hours vs avoid hours (UTC)\n"
             "  signal_funnel.json        Pipeline funnel: generated → gated → placed\n"
             "  capital_efficiency.json   Gap analysis vs $1/min target + roadmap\n"
+            "06_evolution/     FTD-EV-001 Self-learning forensic audit trail (4 files)\n"
+            "  evolution_lineage.json    Generation-by-generation correction history\n"
+            "                            Format: [Cycle ID] → [Change] → [Pre vs Post Delta]\n"
+            "  system_health.json        Drift status (Stable/Warning/Critical) + trajectory\n"
+            "  alert_log.json            All critical alerts; LEARNING_PAUSE events flagged RED\n"
+            "  executive_summary.md      Natural-language 24-hour evolution narrative\n"
         ))
 
+        _ev_meta = _safe(
+            lambda: __import__(
+                "core.intelligence.evolution_tracker",
+                fromlist=["evolution_tracker"]
+            ).evolution_tracker.summary(), {}
+        )
         zf.writestr("metadata.json", json.dumps({
             "bundle_ts":        ts,
             "bundle_date":      time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
@@ -4820,6 +5142,13 @@ async def download_report_bundle():
             "total_fees_usdt":  _ss.get("total_fees_paid", 0.0),
             "fee_drag_pct":     round(_fee_ratio * 100, 2),
             "presets_included": upe_presets,
+            "evolution": {
+                "correction_cycles":      _ev_meta.get("total_correction_pairs", 0),
+                "drift_paused":           _ev_meta.get("drift_paused", False),
+                "total_alerts":           _ev_meta.get("total_alerts", 0),
+                "active_critical_alerts": len(_ev_meta.get("active_alerts", [])),
+                "api_endpoint":           "/api/evolution-status",
+            },
         }, indent=2, default=str))
 
         # 01_system_state/
@@ -4878,6 +5207,16 @@ async def download_report_bundle():
         except Exception as _fe:
             zf.writestr("05_forensics/error.txt",
                         f"Forensic generation failed: {_fe}\n")
+
+        # 06_evolution/ — FTD-EV-001 self-learning forensic audit trail
+        try:
+            _session_trades_ev = pnl_calc.trades[_boot_replay_count:]
+            _evolution_files   = _generate_evolution_reports(_session_trades_ev)
+            for _ename, _econtent in _evolution_files.items():
+                zf.writestr(f"06_evolution/{_ename}", _econtent)
+        except Exception as _ee:
+            zf.writestr("06_evolution/error.txt",
+                        f"Evolution report generation failed: {_ee}\n")
 
     buf.seek(0)
     filename = f"eow_bundle_{ts}.zip"
