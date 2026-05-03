@@ -40,8 +40,12 @@ class ManagedPosition:
 
 
 # FTD-037: Time-based exit thresholds
-_TIME_EXIT_SECONDS = 12 * 60   # 12 one-minute candles
-_TIME_EXIT_MIN_R   = 0.20      # 0.5 ATR / ATR_MULT_SL(2.5) ≈ 0.2R; trade must show progress
+_TIME_EXIT_SECONDS = 8 * 60    # tightened 12→8 min: exit stalling trades faster, reducing fee drag
+_TIME_EXIT_MIN_R   = 0.15      # tightened 0.20→0.15R: earlier exit when momentum fails to develop
+
+# FTD-LOSS: Early trend-failure fast exit — fires when trending signal reverses immediately
+_FAST_FAIL_R       = -0.45     # if r_mult drops below -45% of risk within first 5 min, bail out
+_FAST_FAIL_SECONDS = 5 * 60   # 5-minute window for fast-fail check
 
 
 @dataclass
@@ -113,23 +117,42 @@ class TradeManager:
                 pos.peak_price = pos.entry_price
             pos.peak_price = min(pos.peak_price, current_price)
 
-        # FTD-037: Time-based exit — if a trade hasn't hit 0.5 ATR profit (≈0.2R)
-        # within 12 candles, it is stalling and accruing fee drag.  Exit at market.
-        # Only fires before breakeven is set — after BE the position is protected.
+        # FTD-LOSS: Fast-fail exit — when the trend reverses immediately after entry,
+        # exit before TIME_EXIT's 8-min window to cap early adverse momentum losses.
+        elapsed = time.time() - pos.open_ts if pos.open_ts > 0 else 0
         if (not pos.breakeven_set
                 and pos.open_ts > 0
-                and (time.time() - pos.open_ts) > _TIME_EXIT_SECONDS
-                and r_mult < _TIME_EXIT_MIN_R):
-            elapsed_min = (time.time() - pos.open_ts) / 60
+                and elapsed < _FAST_FAIL_SECONDS
+                and r_mult < _FAST_FAIL_R):
             action = ManagementAction(
                 action="TIME_EXIT",
                 reason=(
-                    f"Stale trade: {elapsed_min:.1f}min open, "
+                    f"Fast-fail: {elapsed/60:.1f}min open, "
+                    f"r={r_mult:.3f}<{_FAST_FAIL_R} — trend reversed early"
+                ),
+            )
+            logger.info(
+                f"[TRADE-MANAGER] {symbol} FAST_FAIL exit at {elapsed/60:.1f}min "
+                f"(r={r_mult:.3f})"
+            )
+            return action
+
+        # FTD-037: Time-based exit — if a trade hasn't made 0.15R progress
+        # within 8 candles, it is stalling and accruing fee drag.  Exit at market.
+        # Only fires before breakeven is set — after BE the position is protected.
+        if (not pos.breakeven_set
+                and pos.open_ts > 0
+                and elapsed > _TIME_EXIT_SECONDS
+                and r_mult < _TIME_EXIT_MIN_R):
+            action = ManagementAction(
+                action="TIME_EXIT",
+                reason=(
+                    f"Stale trade: {elapsed/60:.1f}min open, "
                     f"r={r_mult:.3f}<{_TIME_EXIT_MIN_R} — fee drag exit"
                 ),
             )
             logger.info(
-                f"[TRADE-MANAGER] {symbol} TIME_EXIT after {elapsed_min:.1f}min "
+                f"[TRADE-MANAGER] {symbol} TIME_EXIT after {elapsed/60:.1f}min "
                 f"(r={r_mult:.3f})"
             )
             return action
