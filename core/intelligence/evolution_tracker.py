@@ -87,6 +87,7 @@ class EvolutionTracker:
         self._alerts:    List[EvolutionAlert]     = []
         self._paused_until_cycle: int = 0          # cycle number when pause expires
         self._cycle_count: int = 0
+        self._reactive_log: List[Dict[str, Any]] = []  # FTD-REA-001 per-trade adjustments
 
         logger.info(
             f"[EV-001] Evolution Tracker online | "
@@ -136,8 +137,12 @@ class EvolutionTracker:
         self._persist()
 
     def check_drift_pause(self) -> bool:
-        """Return True if auto-correction should be paused due to drift."""
-        return self._cycle_count <= self._paused_until_cycle
+        """Return True if auto-correction should be paused due to drift.
+        Bug fix: 0 <= 0 was always True on fresh start, permanently blocking
+        self-learning before any cycle ran. Now only pauses when a real drift
+        event has set paused_until_cycle above zero AND cycles have started.
+        """
+        return self._cycle_count > 0 and self._cycle_count <= self._paused_until_cycle
 
     def _evaluate_drift(self, cycle_id: str) -> None:
         """Compare last DRIFT_WINDOW pre/post pairs. If all show degradation → DRIFT."""
@@ -317,6 +322,21 @@ class EvolutionTracker:
 
         return new_alerts
 
+    # ── FTD-REA-001: Reactive Adjustment Recording ───────────────────────────
+
+    def record_reactive_adjustment(self, adj: Dict[str, Any]) -> None:
+        """
+        Called by ReactiveEvolutionEngine after every per-trade micro-adjustment.
+        Stores the full before/after change record for forensic audit trail.
+        """
+        self._reactive_log.append(adj)
+        logger.debug(
+            f"[EV-001] REACTIVE adj recorded: "
+            f"{adj.get('symbol')} {adj.get('diagnosis')} "
+            f"pnl={adj.get('trade_pnl')} r={adj.get('r_multiple')}"
+        )
+        self._persist()
+
     # ── Summary & Persistence ─────────────────────────────────────────────────
 
     def summary(self) -> Dict[str, Any]:
@@ -336,6 +356,11 @@ class EvolutionTracker:
                                    else "NEUTRAL"),
             })
 
+        reactive_by_diagnosis: Dict[str, int] = {}
+        for r in self._reactive_log:
+            d = r.get("diagnosis", "UNKNOWN")
+            reactive_by_diagnosis[d] = reactive_by_diagnosis.get(d, 0) + 1
+
         return {
             "module":               self.MODULE,
             "total_correction_pairs": len(pairs),
@@ -347,6 +372,11 @@ class EvolutionTracker:
             "active_alerts":        [a for a in recent_alerts
                                      if a["kind"] in ("DRIFT", "WR_CRITICAL", "DD_CRITICAL")],
             "recent_alerts":        recent_alerts,
+            "reactive_adjustments": {
+                "total":          len(self._reactive_log),
+                "by_diagnosis":   reactive_by_diagnosis,
+                "recent":         self._reactive_log[-10:],
+            },
             "snapshot_ts":          int(time.time() * 1000),
         }
 
