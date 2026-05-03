@@ -177,14 +177,18 @@ SYMBOL_COOLDOWN_SEC = 300         # 5 min between trades per symbol — quality 
 MAX_TRADES_PER_HOUR = 20          # hard ceiling across all symbols
 
 # Symbols with proven structural losses: fee_pct_of_gross_win > 100% (FEE_TOXIC) or
-# chronic net-pnl < -$12 per session (from fee_drag_analysis forensics).
+# chronic net-pnl < -$5 per session (from fee_drag_analysis forensics).
 _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
     # FEE_TOXIC — fees exceed gross wins (fee_pct_of_gross_win > 100%)
     "BNBUSDT", "XRPUSDT", "CHIPUSDT", "PENGUUSDT", "PHBUSDT", "MOVEUSDT",  # report-1
     "PENDLEUSDT",                                                             # report-2
-    # Chronic net losers — net_pnl < -$12 per session
+    # Chronic net losers — net_pnl < -$12 per session (reports 1+2)
     "LINKUSDT", "GIGGLEUSDT", "AAVEUSDT", "AVNTUSDT", "AVAXUSDT",          # report-1
     "SOLUSDT", "WLFIUSDT", "MEGAUSDT", "TRXUSDT",                          # report-2
+    # report-3 (2026-05-03): fee_pct > 100% or net_pnl < -$5
+    "ADAUSDT",   # net -$8.05, fee_pct 150.3% (FEE_HEAVY)
+    "ENAUSDT",   # net -$5.08, fee_pct 38.4%  (FEE_HEAVY, chronic loser)
+    "SUIUSDT",   # net -$2.25, fee_pct 321.1% (FEE_HEAVY, fees dwarf wins)
 })
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
@@ -3162,7 +3166,17 @@ def _sc_build_state():
         "max_drawdown_pct": 0.15,
         "kill_switch_active": not gs.get("can_trade", True),
     })
-    meta_score     = 85.0 if contradiction["passed"] else 55.0
+    # Real performance-based meta_score (replaces binary 85/55 that was always 85
+    # when system was running — making corrections perpetually BLOCKED even during
+    # severe loss periods).
+    # Components: WR quality (40%), PnL direction (30%), DD health (30%).
+    _initial_cap = float(pnl_calc._initial_capital or 1000.0)
+    _wr_score    = min(100.0, win_rate * 200.0)          # 50% WR → 100, 37% → 74
+    _pnl_score   = max(0.0, min(100.0, 50.0 + total_pnl / max(_initial_cap, 1) * 500))
+    _dd_score    = max(0.0, 100.0 - dd_pct * 5.0)        # 0% DD → 100, 20% DD → 0
+    meta_score   = round(_wr_score * 0.40 + _pnl_score * 0.30 + _dd_score * 0.30, 1)
+    if not contradiction["passed"]:
+        meta_score = min(meta_score, 55.0)               # cap at 55 if contradictions found
     ai_brain_score = min(100.0, max(0.0, win_rate * 100.0 + (10.0 if total_pnl >= 0 else -10.0)))
 
     current_params = {
