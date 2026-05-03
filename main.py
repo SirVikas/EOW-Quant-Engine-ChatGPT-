@@ -195,10 +195,32 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
     "BABYUSDT",  # chronic loser confirmed across 2 sessions
 })
 
-# FTD-037: Strategy disable list — strategies confirmed NOISE in 20-unit ALL data.
-# Re-enable conditions noted inline. Paper-speed fallback for these is blocked.
-# TrendFollowing_PAPER_SPEED: 117 trades, PF 0.657, net -$16.20 (report-5 forensics).
-# Re-enable if backtesting shows PF ≥ 1.2 AND WR ≥ 55% over 30+ trades.
+# FTD-037: Strategy disable list — all strategies confirmed NOISE in 20-unit ALL data.
+# Blocking at strategy_id level is more surgical than blocking entire regime
+# (regime block kills MEAN_REVERTING opportunities in trending markets).
+# Re-enable condition for any strategy: PF ≥ 1.2 AND WR ≥ 45% over 30+ live trades.
+#
+# Evidence (ALL-period):
+#   TF_EMA_RSI_v1:            78 trades, PF 0.416, -$92.11, fee 55.4%
+#   MR_BB_RSI_v1:             89 trades, PF 0.363, -$37.97, fee 56.3%
+#   ALPHA_TCB_v1:             73 trades, PF 0.557, -$13.38, fee 22.5%
+#   ALPHA_PBE_v1:             30 trades, PF 0.479, -$3.20,  fee 50.7%
+#   VE_BREAKOUT_ATR_v1:        2 trades, PF 0.0,   -$9.72,  0% WR
+#   ALPHA_VSE_v1:              3 trades, PF 0.031, -$0.70,  fee 483%
+#   MR_BB_RSI_v1_INV:          4 trades, PF 0.018, -$1.09,  fee 720%
+#   TrendFollowing_PAPER_SPEED_INV: 4 trades, 0% WR, -$0.22
+_DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
+    "TF_EMA_RSI_v1",
+    "MR_BB_RSI_v1",
+    "ALPHA_TCB_v1",
+    "ALPHA_PBE_v1",
+    "VE_BREAKOUT_ATR_v1",
+    "ALPHA_VSE_v1",
+    "MR_BB_RSI_v1_INV",
+    "TrendFollowing_PAPER_SPEED_INV",
+    "TrendFollowing_PAPER_SPEED",   # 117 trades, PF 0.657, -$16.20
+})
+# Paper-speed fallback block (prevents synthesizing signals for bad strategy types)
 _DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({"TrendFollowing"})
 
 # Hour gate — enforced regardless of BYPASS_ALL_GATES (calendar filter, not data gate).
@@ -543,11 +565,12 @@ async def on_tick(tick: Tick):
     # FTD-REF-019: debounce — only log on genuine regime transitions
     regime_debounce.push(sym, regime, state=regime_det.state(sym))
 
-    # FTD-037: Regime hard block — enforced regardless of BYPASS_ALL_GATES.
-    # TRENDING: -$125.31 / 302 trades / no profitable strategy in ALL-period data.
-    # VOLATILITY_EXPANSION: -$9.72 / 2 trades / 0% WR / avg loss $4.86 (STOP_LOSS_SLIP source).
-    # Block completely until a strategy with PF ≥ 1.2 is proven in those regimes.
-    if regime.value in ("TRENDING", "VOLATILITY_EXPANSION"):
+    # FTD-037: VOLATILITY_EXPANSION hard block — 2 trades, 0% WR, avg loss $4.86.
+    # Primary STOP_LOSS_SLIP source. No profitable strategy exists here.
+    # TRENDING is NOT blocked at regime level — it is blocked at strategy_id level
+    # (_DISABLED_STRATEGY_IDS) to preserve MEAN_REVERTING opportunities that can
+    # occur in trending markets (contrarian pullbacks).
+    if regime.value == "VOLATILITY_EXPANSION":
         return
 
     # 4. Get appropriate strategy — UNKNOWN defaults to TrendFollowing during warmup
@@ -989,8 +1012,13 @@ async def on_tick(tick: Tick):
                 )
 
         if sig and sig.signal != Signal.NONE:
-            # FTD-037: Session strategy loss cap — mutes a strategy that has already
-            # blown past $20 loss this session (prevents TF_EMA_RSI_v1-style -$92 runs).
+            # FTD-037: Disabled strategy_id check — surgically blocks all NOISE strategies.
+            # More precise than regime blocking; allows good strategies in any regime.
+            if sig.strategy_id in _DISABLED_STRATEGY_IDS:
+                return
+
+            # FTD-037: Session strategy loss cap — catches any unlisted strategy that
+            # goes bad this session (prevents -$92 runaway on a single strategy_id).
             _strat_sess_pnl = _strategy_session_pnl.get(sig.strategy_id, 0.0)
             if _strat_sess_pnl < _STRATEGY_SESSION_LOSS_CAP:
                 logger.warning(
