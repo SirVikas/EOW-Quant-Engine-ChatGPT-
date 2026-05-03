@@ -1,0 +1,21 @@
+{
+  "title": "Signal Pipeline Funnel \u2014 Where Trade Ideas Are Filtered",
+  "generated_at": "2026-05-03 16:26:28 UTC",
+  "note": "Based on last 30 thought-log entries (rolling window)",
+  "funnel": {
+    "1_signals_generated": 46,
+    "2_rsi_filter_blocked": 101,
+    "3_aie_inversions_suppressed": 0,
+    "4_lean_gate_fee_blocked": 0,
+    "4_lean_gate_sl_blocked": 0,
+    "4_lean_gate_rr_blocked": 0,
+    "4_lean_gate_dd_blocked": 0,
+    "4_lean_gate_streak_blocked": 0,
+    "5_trades_executed": 4
+  },
+  "conversion_rate_pct": 8.7,
+  "session_trades_total": 441,
+  "session_win_rate_pct": 35.6,
+  "session_profit_factor": 0.482,
+  "biggest_blocker": "RSI_FILTER"
+}
