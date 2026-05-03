@@ -113,6 +113,7 @@ from utils.export_manager import ExportManager
 from utils.report_generator import build_report_archive
 from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
 from core.intelligence.auto_intelligence_engine import AutoIntelligenceEngine  # FTD-030
+from core.intelligence.reactive_evolution_engine import reactive_evolution_engine  # FTD-REA-001
 from core.performance import (                                                 # FTD-031
     perf_monitor, task_queue, perf_guard,
     PRIORITY_LOW, PRIORITY_MEDIUM,
@@ -302,6 +303,26 @@ async def on_tick(tick: Tick):
             )
             # FTD-040: Consistency Engine — feedback loop (post-trade state update)
             consistency_engine.record_trade(last_trade.net_pnl)
+            # FTD-REA-001: Reactive Evolution — immediate per-trade micro-adaptation
+            _gross_pnl_re   = getattr(last_trade, "gross_pnl", last_trade.net_pnl)
+            _fee_total_re   = (getattr(last_trade, "fee_entry", 0.0)
+                               + getattr(last_trade, "fee_exit",  0.0))
+            _atr_pct_re     = 0.0
+            try:
+                _re_state = regime_det.state(sym)
+                _atr_pct_re = getattr(_re_state, "atr_pct", 0.0) or 0.0
+            except Exception:
+                pass
+            reactive_evolution_engine.on_trade_closed(
+                symbol=sym,
+                strategy_id=_trade_strategy,
+                net_pnl=last_trade.net_pnl,
+                r_multiple=_r_mult,
+                gross_pnl=_gross_pnl_re,
+                fee_total=_fee_total_re,
+                atr_pct=_atr_pct_re,
+                side=_trade_direction if "_trade_direction" in dir() else "",
+            )
             # FTD-REF-026: track strategy usage distribution
             _closed_strat_type = {
                 "TRENDING":             "TrendFollowing",
@@ -497,10 +518,17 @@ async def on_tick(tick: Tick):
     }.get(regime.value, "TrendFollowing")
 
     dna      = genome.active_dna.get(strategy_type, {})
+    # FTD-REA-001: merge per-symbol reactive overrides (RSI bands, ATR multipliers)
+    _re_overrides = reactive_evolution_engine.get_overrides(sym)
+    if _re_overrides:
+        dna = {**dna, **_re_overrides}
     strategy = get_strategy(regime, dna)
 
     # 5. Generate signal (only if no open position + throttle checks)
     _halted_blocked = risk_ctrl.halted and not cfg.BYPASS_ALL_GATES
+    # FTD-REA-001: fee-toxic suppression — skip signal if reactive engine flagged symbol
+    if reactive_evolution_engine.is_suppressed(sym):
+        return
     if sym not in risk_ctrl.positions and not _halted_blocked and not risk_ctrl.graceful_stop:
 
         # ── Throttle A: per-symbol cooldown (30 min between trades) ──────────
@@ -3407,6 +3435,8 @@ async def get_evolution_status():
     ev_summary = evolution_tracker.summary()
     ev_summary["trajectory"] = trajectory
     ev_summary["session_trades"] = len(_session_trades)
+    # FTD-REA-001: include reactive micro-adjustment state
+    ev_summary["reactive_evolution"] = reactive_evolution_engine.summary()
     return ev_summary
 
 
