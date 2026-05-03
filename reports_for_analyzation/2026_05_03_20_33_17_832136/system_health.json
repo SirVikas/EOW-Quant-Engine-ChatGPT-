@@ -1,0 +1,29 @@
+{
+  "title": "System Health \u2014 Drift & Trajectory Status",
+  "generated_at": "2026-05-03 14:55:39 UTC",
+  "drift": {
+    "status": "STABLE",
+    "is_paused": false,
+    "paused_until_cycle": 0,
+    "current_cycle": 0,
+    "drift_events_total": 0,
+    "interpretation": "No drift detected \u2014 corrections are improving or neutral."
+  },
+  "trajectory": {
+    "verdict": "DEGRADING",
+    "direction": "\u2193",
+    "win_rate_now": 10.0,
+    "win_rate_prev": 30.0,
+    "wr_delta_pct": -20.0,
+    "trades_analysed": 20,
+    "interpretation": "System is DEGRADING: WR moved 30.0% \u2192 10.0% (\u25bc20.0pp)"
+  },
+  "alert_counts": {
+    "total": 0,
+    "drift_alerts": 0,
+    "wr_critical": 0,
+    "dd_critical": 0,
+    "loss_outliers": 0
+  },
+  "active_critical_alerts": []
+}
