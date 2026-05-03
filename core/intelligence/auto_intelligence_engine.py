@@ -26,6 +26,7 @@ from typing import Any, Callable, Dict, List, Optional
 from loguru import logger
 
 from config import cfg
+from core.intelligence.evolution_tracker import evolution_tracker
 
 
 # ── Cycle phases ──────────────────────────────────────────────────────────────
@@ -175,6 +176,13 @@ class AutoIntelligenceEngine:
         if self._daily_cycles >= self._max_daily:
             return self._skip(f"DAILY_CAP_REACHED({self._daily_cycles}/{self._max_daily})")
 
+        # ── FTD-EV-001: Drift pause gate ─────────────────────────────────────
+        if evolution_tracker.check_drift_pause():
+            return self._skip(
+                f"EV_DRIFT_PAUSE(cycle={evolution_tracker._cycle_count}/"
+                f"resume_at={evolution_tracker._paused_until_cycle})"
+            )
+
         # ── Run cycle ────────────────────────────────────────────────────────
         return self._do_full_cycle(now, n_trades)
 
@@ -225,6 +233,15 @@ class AutoIntelligenceEngine:
                 self._finalise(rec)
                 logger.warning(f"[FTD-030] Cycle #{self._cycle_num} blocked: {rec.block_reason}")
                 return rec.to_dict()
+
+            # FTD-EV-001: record pre-correction performance snapshot for drift detection
+            evolution_tracker.record_pre_correction(
+                cycle_id=str(self._cycle_num),
+                n_trades=n_trades,
+                win_rate=float(system_state.get("win_rate", 0.0) or 0.0),
+                net_pnl=float(system_state.get("total_pnl", 0.0) or 0.0),
+                drawdown=float(system_state.get("current_drawdown_pct", 0.0) or 0.0),
+            )
 
             # Step 2: FTD-029 correction
             rec.phase = PHASE_CORRECTING
@@ -302,6 +319,16 @@ class AutoIntelligenceEngine:
                 f"[FTD-030] Post-check cycle_id={cycle_id}: "
                 f"rollbacks={result.get('rollback_count', 0)} "
                 f"post_score={post_score:.1f}"
+            )
+
+            # FTD-EV-001: record post-correction snapshot; check drift
+            _n_post = int(system_state.get("total_trades", 0) or 0)
+            evolution_tracker.record_post_correction(
+                cycle_id=str(self._cycle_num),
+                n_trades=_n_post,
+                win_rate=float(system_state.get("win_rate", 0.0) or 0.0),
+                net_pnl=float(system_state.get("total_pnl", 0.0) or 0.0),
+                drawdown=float(system_state.get("current_drawdown_pct", 0.0) or 0.0),
             )
 
             # FTD-030B: feed cycle outcome into learning memory (orchestrator)
@@ -465,6 +492,7 @@ class AutoIntelligenceEngine:
             "last_run_ts":    int(self._last_run_ts * 1000) if self._last_run_ts else None,
             "pending_check":  self._pending_cycle_id is not None,
             "last_cycle":     last,
+            "evolution":      evolution_tracker.summary(),
         }
 
     def history(self, n: int = 20) -> List[Dict[str, Any]]:

@@ -3378,6 +3378,38 @@ async def reset_auto_intelligence_daily():
     return {"status": "daily_counter_reset", "phase": "030"}
 
 
+@app.get("/api/evolution-status")
+async def get_evolution_status():
+    """
+    FTD-EV-001 — System evolution monitoring dashboard.
+
+    Returns:
+      - Drift detection status (is auto-correction paused due to drift?)
+      - Performance trajectory (IMPROVING / STABLE / DEGRADING)
+      - Critical alerts (WR_CRITICAL, DRIFT, DD_CRITICAL, LOSS_OUTLIER)
+      - Correction history with before/after outcomes
+      - Trajectory computed from last 20 session trades
+    """
+    from core.intelligence.evolution_tracker import evolution_tracker
+
+    # Compute live trajectory from current session trades
+    _session_trades = pnl_calc.trades[_boot_replay_count:]
+    trajectory = evolution_tracker.compute_trajectory(_session_trades)
+
+    # Check critical alerts against current session state
+    _last_pnl = _session_trades[-1].net_pnl if _session_trades else None
+    evolution_tracker.check_critical_alerts(
+        recent_trades=_session_trades,
+        session_dd_pct=drawdown_controller.current_drawdown(),
+        last_trade_pnl=_last_pnl,
+    )
+
+    ev_summary = evolution_tracker.summary()
+    ev_summary["trajectory"] = trajectory
+    ev_summary["session_trades"] = len(_session_trades)
+    return ev_summary
+
+
 # ── FTD-028: Deep Intelligence Validation Layer ──────────────────────────────
 
 @app.post("/api/deep-validation/run")
