@@ -85,6 +85,13 @@ class EngineConfig(BaseSettings):
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
 
+    # ── Adaptive Mode Engine (tri-modal execution) ───────────────────────────
+    # Range Scalper — fires in MEAN_REVERTING regime; eliminates NO_TRADE_SESSION
+    RS_CVD_IMBAL_MIN: float = 0.60        # CVD imbalance floor (60% buy/sell concentration)
+    RS_MIN_BB_WIDTH: float  = 0.10        # Skip BB scalp when band width < 0.10% (flat market)
+    # VTP — Volatile Take-Profit (TREND_FOLLOW / SHORT_HUNT modes only)
+    VTP_EXIT_MIN_R: float   = 1.50        # VTP stall exit only fires after 1.5R profit captured
+
     # ── Genome Engine ────────────────────────────────────────────────────────
     GENOME_CYCLE_MINUTES: int = 3          # Reduced 5→3: faster evolution cycles
     GENOME_POPULATION: int = 20            # Shadow strategies per cycle
