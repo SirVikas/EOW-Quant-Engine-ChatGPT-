@@ -201,11 +201,18 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
 # Re-enable if backtesting shows PF ≥ 1.2 AND WR ≥ 55% over 30+ trades.
 _DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({"TrendFollowing"})
 
-# Sniper Mode (FTD-SNP-001): UTC hours where session data shows consistent losses.
-# Golden hours (always allowed): 07, 10, 14 UTC.
-# Avoid hours: 15-23 UTC except 17 (marginal) — worst: 18 UTC (-$27.38 single trade),
-# 22 UTC (-$28.08 total). BYPASS_ALL_GATES skips this gate in paper-speed mode.
-_AVOID_HOURS_UTC: frozenset[int] = frozenset({15, 16, 18, 19, 20, 21, 22, 23})
+# Hour gate — enforced regardless of BYPASS_ALL_GATES (calendar filter, not data gate).
+# Source: ALL-period hourly forensics across 20 sessions.
+# Golden hours (net positive): 07 (+$6.01), 10 (+$7.36), 14 (+$3.23).
+# Avoid hours (net negative with ≥10 trade sample): 03(-$4.53), 08(-$14.05),
+# 09(-$14.52), 11(-$12.05), 12(-$6.01), 15(-$13.57), 16(-$18.85), 17(-$13.02),
+# 18(-$27.38), 19(-$6.41), 20(-$4.78), 22(-$28.08), 23(-$11.58).
+_AVOID_HOURS_UTC: frozenset[int] = frozenset({3, 8, 9, 11, 12, 15, 16, 17, 18, 19, 20, 22, 23})
+
+# Session strategy loss cap — disable a strategy for the rest of the session
+# when it exceeds this loss. Prevents TF_EMA_RSI_v1-style -$92 catastrophes.
+_STRATEGY_SESSION_LOSS_CAP: float = -20.0
+_strategy_session_pnl: dict = {}  # strategy_id → session net pnl
 
 _last_trade_ts: dict = {}         # symbol → last trade close timestamp (ms)
 _trades_this_hour: list = []      # timestamps of recent trade opens
@@ -309,6 +316,10 @@ async def on_tick(tick: Tick):
                 r_multiple  = _r_mult,
                 gross_pnl   = _gross_pnl,
                 fee_total   = _fee_closed,
+            )
+            # FTD-037: Session strategy loss cap — track per-strategy net pnl this session
+            _strategy_session_pnl[_trade_strategy] = (
+                _strategy_session_pnl.get(_trade_strategy, 0.0) + last_trade.net_pnl
             )
             # FTD-038+039: Capital Flow Engine — update priority + stabilizer
             capital_flow_engine.on_trade(
@@ -532,6 +543,13 @@ async def on_tick(tick: Tick):
     # FTD-REF-019: debounce — only log on genuine regime transitions
     regime_debounce.push(sym, regime, state=regime_det.state(sym))
 
+    # FTD-037: Regime hard block — enforced regardless of BYPASS_ALL_GATES.
+    # TRENDING: -$125.31 / 302 trades / no profitable strategy in ALL-period data.
+    # VOLATILITY_EXPANSION: -$9.72 / 2 trades / 0% WR / avg loss $4.86 (STOP_LOSS_SLIP source).
+    # Block completely until a strategy with PF ≥ 1.2 is proven in those regimes.
+    if regime.value in ("TRENDING", "VOLATILITY_EXPANSION"):
+        return
+
     # 4. Get appropriate strategy — UNKNOWN defaults to TrendFollowing during warmup
     strategy_type = {
         "TRENDING":             "TrendFollowing",
@@ -574,13 +592,12 @@ async def on_tick(tick: Tick):
         if sym in _SYMBOL_BLACKLIST:
             return
 
-        # ── Sniper Mode hour gate (FTD-SNP-001): block statistically bad UTC hours ──
-        # Session forensics show consistent losses during 15-23 UTC (except 17).
-        # Golden hours: 07, 10, 14 UTC. Gate is skipped in BYPASS_ALL_GATES mode.
-        if not cfg.BYPASS_ALL_GATES:
-            _current_utc_hour = __import__("datetime").datetime.utcnow().hour
-            if _current_utc_hour in _AVOID_HOURS_UTC:
-                return
+        # ── Hour gate — calendar filter, always enforced (FTD-SNP-001) ──────────
+        # Not a data quality gate — not subject to BYPASS_ALL_GATES.
+        # Golden hours: 07, 10, 14 UTC. All others are either losing or marginal.
+        _current_utc_hour = __import__("datetime").datetime.utcnow().hour
+        if _current_utc_hour in _AVOID_HOURS_UTC:
+            return
 
         # Use real 1-min candle OHLC for strategy indicators.
         # tick_buffers hold individual trade prices (noisy, many per second) — they
@@ -625,10 +642,11 @@ async def on_tick(tick: Tick):
                 error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
                 return   # insufficient candles / unstable ADX / near-zero ATR
 
-        # FTD-SNP-001: ATR volatility gate — block entry during spike volatility.
-        # reactive_evolution_engine tracks slow EMA of ATR%; if current ATR > 2×EMA → skip.
-        # Gate is skipped in BYPASS_ALL_GATES to avoid blocking paper-speed warmup.
-        if not cfg.BYPASS_ALL_GATES and reactive_evolution_engine.is_high_volatility(sym, atr_pct):
+        # FTD-SNP-001: ATR volatility gate — always enforced (not a data quality gate).
+        # Blocks entries where current ATR > 2× slow EMA — high-volatility = STOP_LOSS_SLIP.
+        # ATR EMA needs a few candles to stabilise; is_high_volatility() returns False
+        # until the EMA is seeded, so paper warmup is safe.
+        if reactive_evolution_engine.is_high_volatility(sym, atr_pct):
             _last_skip = {
                 "ts": now_ms, "symbol": sym,
                 "reason": f"ATR_SPIKE(atr={atr_pct:.4f}%)",
@@ -688,10 +706,9 @@ async def on_tick(tick: Tick):
         _eff_score_min = max(0.40, round(
             thresholds.score_min + _streak_adj, 4
         ))
-        # FTD-037: TRENDING regime score premium — TRENDING is -$125.31 over 302 trades
-        # in ALL-period data; raise bar by 0.15 to admit only high-conviction signals.
-        if not cfg.BYPASS_ALL_GATES and regime.value == "TRENDING":
-            _eff_score_min = min(0.95, round(_eff_score_min + 0.15, 4))
+        # Note: TRENDING regime score boost removed — TRENDING is now hard-blocked
+        # before this point (regime hard block, line ~546). Code retained as comment
+        # for reference: was +0.15 to _eff_score_min when regime == TRENDING.
         if _streak_result.state != "NEUTRAL":
             _thought(
                 f"📈 STREAK {sym}: {_streak_result.state} "
@@ -972,6 +989,16 @@ async def on_tick(tick: Tick):
                 )
 
         if sig and sig.signal != Signal.NONE:
+            # FTD-037: Session strategy loss cap — mutes a strategy that has already
+            # blown past $20 loss this session (prevents TF_EMA_RSI_v1-style -$92 runs).
+            _strat_sess_pnl = _strategy_session_pnl.get(sig.strategy_id, 0.0)
+            if _strat_sess_pnl < _STRATEGY_SESSION_LOSS_CAP:
+                logger.warning(
+                    f"[FTD-037] {sig.strategy_id} session_pnl={_strat_sess_pnl:.2f} "
+                    f"< cap={_STRATEGY_SESSION_LOSS_CAP} — muted for session"
+                )
+                return
+
             execution_drive_policy.record_signal(sym)   # EDP: track signal activity
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
             logger.info(
