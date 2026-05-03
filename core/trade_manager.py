@@ -14,6 +14,7 @@ when the position closes.  Apply returned ManagementAction to risk_ctrl.
 """
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 
@@ -35,6 +36,12 @@ class ManagedPosition:
     partial_booked: bool  = False
     peak_price:     float = 0.0
     current_sl:     float = 0.0
+    open_ts:        float = 0.0   # unix timestamp when position was registered
+
+
+# FTD-037: Time-based exit thresholds
+_TIME_EXIT_SECONDS = 12 * 60   # 12 one-minute candles
+_TIME_EXIT_MIN_R   = 0.20      # 0.5 ATR / ATR_MULT_SL(2.5) ≈ 0.2R; trade must show progress
 
 
 @dataclass
@@ -69,6 +76,7 @@ class TradeManager:
         """Register a new position for lifecycle management."""
         pos.peak_price = pos.entry_price
         pos.current_sl = pos.stop_loss
+        pos.open_ts    = time.time()
         self._positions[pos.symbol] = pos
         logger.debug(
             f"[TRADE-MANAGER] Registered {pos.symbol} {pos.side} "
@@ -104,6 +112,27 @@ class TradeManager:
             if pos.peak_price == 0.0:
                 pos.peak_price = pos.entry_price
             pos.peak_price = min(pos.peak_price, current_price)
+
+        # FTD-037: Time-based exit — if a trade hasn't hit 0.5 ATR profit (≈0.2R)
+        # within 12 candles, it is stalling and accruing fee drag.  Exit at market.
+        # Only fires before breakeven is set — after BE the position is protected.
+        if (not pos.breakeven_set
+                and pos.open_ts > 0
+                and (time.time() - pos.open_ts) > _TIME_EXIT_SECONDS
+                and r_mult < _TIME_EXIT_MIN_R):
+            elapsed_min = (time.time() - pos.open_ts) / 60
+            action = ManagementAction(
+                action="TIME_EXIT",
+                reason=(
+                    f"Stale trade: {elapsed_min:.1f}min open, "
+                    f"r={r_mult:.3f}<{_TIME_EXIT_MIN_R} — fee drag exit"
+                ),
+            )
+            logger.info(
+                f"[TRADE-MANAGER] {symbol} TIME_EXIT after {elapsed_min:.1f}min "
+                f"(r={r_mult:.3f})"
+            )
+            return action
 
         # 1. Move SL to break-even at BREAKEVEN_TRIGGER_R (one-time)
         if not pos.breakeven_set and r_mult >= self.be_r:

@@ -195,6 +195,12 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
     "BABYUSDT",  # chronic loser confirmed across 2 sessions
 })
 
+# FTD-037: Strategy disable list — strategies confirmed NOISE in 20-unit ALL data.
+# Re-enable conditions noted inline. Paper-speed fallback for these is blocked.
+# TrendFollowing_PAPER_SPEED: 117 trades, PF 0.657, net -$16.20 (report-5 forensics).
+# Re-enable if backtesting shows PF ≥ 1.2 AND WR ≥ 55% over 30+ trades.
+_DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({"TrendFollowing"})
+
 # Sniper Mode (FTD-SNP-001): UTC hours where session data shows consistent losses.
 # Golden hours (always allowed): 07, 10, 14 UTC.
 # Avoid hours: 15-23 UTC except 17 (marginal) — worst: 18 UTC (-$27.38 single trade),
@@ -396,6 +402,14 @@ async def on_tick(tick: Tick):
                 _pos.stop_loss = _tm_action.new_sl
         elif _tm_action.action == "PARTIAL_TP":
             _thought(f"[TM] {sym} PARTIAL_TP {_tm_action.partial_qty:.6f} @ {price:.4f} ({_tm_action.reason})", "TRADE")
+        elif _tm_action.action == "TIME_EXIT":
+            # FTD-037: stale trade — force close by moving SL to current price.
+            # Next tick: risk_ctrl.on_price_update fires SL at ~market price.
+            _pos = risk_ctrl.positions.get(sym)
+            if _pos:
+                _pos.stop_loss = price
+                trade_manager.deregister(sym)
+                _thought(f"[TM] {sym} TIME_EXIT @ {price:.4f} ({_tm_action.reason})", "TRADE")
 
     # 2. Get candle data for strategy
     candle = mdp.latest_closed_candle(sym)
@@ -674,6 +688,10 @@ async def on_tick(tick: Tick):
         _eff_score_min = max(0.40, round(
             thresholds.score_min + _streak_adj, 4
         ))
+        # FTD-037: TRENDING regime score premium — TRENDING is -$125.31 over 302 trades
+        # in ALL-period data; raise bar by 0.15 to admit only high-conviction signals.
+        if not cfg.BYPASS_ALL_GATES and regime.value == "TRENDING":
+            _eff_score_min = min(0.95, round(_eff_score_min + 0.15, 4))
         if _streak_result.state != "NEUTRAL":
             _thought(
                 f"📈 STREAK {sym}: {_streak_result.state} "
@@ -877,6 +895,10 @@ async def on_tick(tick: Tick):
         # PAPER_SPEED fallback injector:
         # If both primary + alpha signals are NONE, synthesize a minimal
         # momentum signal so the pipeline can execute and recover flow.
+        # FTD-037: blocked for strategies in _DISABLED_PAPER_SPEED_STRATEGIES
+        # (TrendFollowing confirmed -$16.20 NOISE over 117 trades in ALL-period data).
+        if _paper_speed and strategy_type in _DISABLED_PAPER_SPEED_STRATEGIES:
+            sig = None  # suppress fallback entirely for this strategy
         if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
             _entry = closes[-1]
 
@@ -1007,6 +1029,16 @@ async def on_tick(tick: Tick):
             # Combine: take the lower bound as a safety floor, then apply edge boost
             # AEE SCALING (>1×) stacks with edge_engine boost; REDUCED (<1×) overrides
             _final_mult = _aee_mult * _edge_mult if _aee_mult >= 1.0 else _aee_mult
+            # FTD-037: regime-weighted capital allocation.
+            # ALL-period data: TRENDING -$125.31 / MEAN_REVERTING -$33.43.
+            # Reduce TRENDING risk by 40% to limit capital drain while keeping
+            # MEAN_REVERTING at full size (only profitable regime in 1D data).
+            _regime_risk_mult = {
+                "MEAN_REVERTING":      1.00,
+                "TRENDING":            0.60,
+                "VOLATILITY_EXPANSION": 0.50,
+            }.get(regime.value, 0.80)
+            _final_mult = _final_mult * _regime_risk_mult
             sizing.qty  = sizing.qty * _final_mult
             # atr_pct already computed above from candle OHLC / regime_det
 
