@@ -11,10 +11,14 @@ from typing import Any, Dict, List, Optional
 from core.self_correction.correction_proposal import HARD_LIMITS
 
 
-# ── Thresholds (locked) ───────────────────────────────────────────────────────
+# ── Thresholds ────────────────────────────────────────────────────────────────
 MIN_TRADES            = 30
 MIN_SYSTEM_SCORE      = 70.0
-MIN_AI_BRAIN_SCORE    = 70.0
+# Lowered 70→30: ai_brain_score = WR*100 - 10 (when PnL < 0).
+# At WR=37% the score is 27 — previously this blocked ALL corrections (circular
+# logic: bad performance → low score → corrections blocked → stays bad).
+# Corrections are most needed when performance is poor, not when it's good.
+MIN_AI_BRAIN_SCORE    = 30.0
 MIN_META_SCORE        = 70.0
 CRITICAL_BYPASS_SCORE = 50.0   # system_score < 50 → bypass cooldown (Q7 Part 7)
 

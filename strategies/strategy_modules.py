@@ -117,6 +117,7 @@ class TrendFollowingStrategy:
         slow_prev  = _ema(closes[:-1], self.ema_slow)
         trend_ema  = _ema(closes, self.ema_trend)   # macro trend anchor
         rsi        = _rsi(closes, self.rsi_period)
+        rsi_prev   = _rsi(closes[:-1], self.rsi_period)   # RSI one candle ago
         atr        = _atr(highs, lows, closes, self.atr_period)
         price      = closes[-1]
 
@@ -133,29 +134,36 @@ class TrendFollowingStrategy:
         bearish_cross = fast_prev > slow_prev and fast_now < slow_now
 
         # LONG: crossover upward AND in macro uptrend AND RSI building momentum
+        # RSI direction filter: RSI must be rising (momentum still building).
+        # Root cause of actual_rr=0.43: crossover fires AFTER momentum peaked;
+        # price reverses immediately. Requiring rsi > rsi_prev ensures we enter
+        # while momentum is still expanding, not already dying.
         if (bullish_cross
                 and price > trend_ema                      # macro uptrend filter
-                and self.RSI_LONG_MIN <= rsi <= self.rsi_ob):  # momentum zone
+                and self.RSI_LONG_MIN <= rsi <= self.rsi_ob   # momentum zone
+                and rsi > rsi_prev):                       # RSI still rising — not peaked
             return TradeSignal(
                 symbol=symbol, signal=Signal.LONG, entry_price=price,
                 stop_loss=price - atr * self.atr_sl,
                 take_profit=price + atr * self.atr_tp,
                 confidence=min(0.9, rsi / 100 + 0.3),
                 strategy_id=self.ID,
-                reason=f"EMA cross UP | trend↑ | RSI={rsi:.1f} | ATR={atr:.4f}",
+                reason=f"EMA cross UP | trend↑ | RSI={rsi:.1f}↑ | ATR={atr:.4f}",
             )
 
         # SHORT: crossover downward AND in macro downtrend AND RSI fading
+        # RSI direction filter: RSI must be falling (momentum still expanding short).
         if (bearish_cross
                 and price < trend_ema                       # macro downtrend filter
-                and self.rsi_os <= rsi <= self.RSI_SHORT_MAX):  # fading zone
+                and self.rsi_os <= rsi <= self.RSI_SHORT_MAX   # fading zone
+                and rsi < rsi_prev):                        # RSI still falling — not bottomed
             return TradeSignal(
                 symbol=symbol, signal=Signal.SHORT, entry_price=price,
                 stop_loss=price + atr * self.atr_sl,
                 take_profit=price - atr * self.atr_tp,
                 confidence=min(0.9, (100 - rsi) / 100 + 0.3),
                 strategy_id=self.ID,
-                reason=f"EMA cross DOWN | trend↓ | RSI={rsi:.1f} | ATR={atr:.4f}",
+                reason=f"EMA cross DOWN | trend↓ | RSI={rsi:.1f}↓ | ATR={atr:.4f}",
             )
         return None
 
@@ -276,12 +284,10 @@ class VolatilityExpansionStrategy:
         self, symbol: str, closes: List[float],
         highs: List[float], lows: List[float],
     ) -> Optional[TradeSignal]:
-        if len(closes) < self.lookback + self.atr_period + 2:
-            return None
-
-        price          = closes[-1]
-        period_high    = max(highs[-self.lookback - 1:-1])
-        period_low     = min(lows[-self.lookback - 1:-1])
+        # Forensics 2026-05-03: 2 trades, 0% WR, avg loss $4.86/trade.
+        # Breakout entries trigger at price extremes which are already exhausted.
+        # Disabled until a confirmed-breakout + retrace entry is designed.
+        return None
         atr            = _atr(highs, lows, closes, self.atr_period)
 
         # Volatility guard — VE strategy needs even more movement

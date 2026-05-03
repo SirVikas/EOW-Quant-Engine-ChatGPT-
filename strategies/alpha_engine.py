@@ -262,11 +262,10 @@ class VolatilitySqueezeEntry:
         avg_atr_pct: float,
         regime:      str,
     ) -> Optional[AlphaSignal]:
-        lookback_needed = self.bb_period * 2 + 20 + self.atr_period + 2
-        if len(closes) < lookback_needed:
-            return None
-
-        price = closes[-1]
+        # Forensics 2026-05-03: 3 trades, fee_pct_of_gp=483%, net -$0.70.
+        # Squeeze-expansion entries fire into low-liquidity moves; fees destroy profit.
+        # Disabled until a minimum notional / fee_ratio guard is integrated.
+        return None
         atr   = _atr(highs, lows, closes, self.atr_period)
         if atr <= 0 or price <= 0:
             return None
