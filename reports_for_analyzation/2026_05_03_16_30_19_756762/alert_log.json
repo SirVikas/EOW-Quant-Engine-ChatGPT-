@@ -1,0 +1,9 @@
+{
+  "title": "Anomaly & Alert Log \u2014 Evolution Critical Events",
+  "generated_at": "2026-05-03 10:57:43 UTC",
+  "note": "LEARNING_PAUSE events (is_learning_pause=true) are highlighted. These are moments the system detected its own corrections were harmful and voluntarily stopped updating to protect performance.",
+  "total_alerts": 0,
+  "learning_pauses": 0,
+  "learning_pause_events": [],
+  "all_alerts_newest_first": []
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Digital Lineage \u2014 Generation-by-Generation System Evolution",
+  "generated_at": "2026-05-03 10:57:43 UTC",
+  "format": "[Generation] \u2192 [Change Applied] \u2192 [Performance Delta (Pre vs Post)]",
+  "total_generations": 0,
+  "outcome_summary": {
+    "improved": 0,
+    "neutral": 0,
+    "degraded": 0,
+    "success_rate_pct": 0.0
+  },
+  "lineage": []
+}
