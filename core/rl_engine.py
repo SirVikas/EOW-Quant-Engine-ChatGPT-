@@ -126,6 +126,11 @@ class RLContextualBandit:
         self._total_updates: int   = 0
         self._total_blocked: int   = 0
         self._total_allowed: int   = 0
+        self._explore_trades: int  = 0   # trades allowed via RL_EXPLORE path
+        self._exploit_trades: int  = 0   # trades allowed via RL_TRADE path
+        self._boost_fires:    int  = 0   # times confidence_boost returned HIGH (1.25×)
+        self._floor_raises:   int  = 0   # times floor_delta raised floor (+0.05, bad context)
+        self._floor_lowers:   int  = 0   # times floor_delta lowered floor (-0.05, good context)
         self._init_ts:       float = time.time()
 
         logger.info(
@@ -162,11 +167,13 @@ class RLContextualBandit:
         # Always explore under-visited contexts
         if state.n_visits < MIN_VISITS_EXPLORE:
             self._total_allowed += 1
+            self._explore_trades += 1
             return True, f"RL_EXPLORE(visits={state.n_visits}<{MIN_VISITS_EXPLORE})"
 
         ucb = state.ucb_score(self._total_pulls, UCB_EXPLORE_COEFF)
         if ucb > floor:
             self._total_allowed += 1
+            self._exploit_trades += 1
             return True, (
                 f"RL_TRADE(q={state.q_value:+.3f} ucb={ucb:+.3f} "
                 f"wr={state.win_rate:.0%} n={state.n_visits})"
@@ -233,6 +240,7 @@ class RLContextualBandit:
 
         q = state.q_value
         if q > 0.50:
+            self._boost_fires += 1
             return CONFIDENCE_BOOST_HIGH
         if q < -0.30:
             return CONFIDENCE_BOOST_LOW
@@ -292,8 +300,10 @@ class RLContextualBandit:
 
         q = state.q_value
         if q > 0.50:
+            self._floor_lowers += 1
             return -0.05   # lower floor → more trades in winning context
         if q < -0.30:
+            self._floor_raises += 1
             return +0.05   # raise floor → tighter filter in losing context
         return 0.0
 
@@ -319,18 +329,37 @@ class RLContextualBandit:
         )
         return [
             {
-                "context":  s.context,
-                "q_value":  round(s.q_value, 4),
-                "win_rate": round(s.win_rate, 3),
-                "n_visits": s.n_visits,
+                "context":   s.context,
+                "q_value":   round(s.q_value, 4),
+                "ucb_bonus": round(s.ucb_bonus(self._total_pulls, UCB_EXPLORE_COEFF), 4),
+                "win_rate":  round(s.win_rate, 3),
+                "n_visits":  s.n_visits,
                 "total_pnl": round(s.total_pnl, 4),
             }
             for s in ranked[:n]
         ]
 
+    def bottom_contexts(self, n: int = 3) -> list:
+        """Return bottom-n visited contexts by Q-value (near-block candidates)."""
+        visited = [s for s in self._table.values() if s.n_visits >= MIN_VISITS_EXPLORE]
+        ranked  = sorted(visited, key=lambda s: s.q_value)
+        return [
+            {
+                "context":   s.context,
+                "q_value":   round(s.q_value, 4),
+                "ucb_score": round(s.ucb_score(self._total_pulls, UCB_EXPLORE_COEFF), 4),
+                "win_rate":  round(s.win_rate, 3),
+                "n_visits":  s.n_visits,
+                "total_pnl": round(s.total_pnl, 4),
+                "near_block": s.ucb_score(self._total_pulls, UCB_EXPLORE_COEFF) < ENTRY_EV_FLOOR + 0.20,
+            }
+            for s in ranked[:n]
+        ]
+
     def summary(self) -> dict:
-        total = len(self._table)
+        total      = len(self._table)
         profitable = sum(1 for s in self._table.values() if s.q_value > 0)
+        explored   = self._explore_trades + self._exploit_trades
         return {
             "module":          self.MODULE,
             "version":         self.VERSION,
@@ -343,8 +372,19 @@ class RLContextualBandit:
             "allow_rate":      round(
                 self._total_allowed / max(self._total_pulls, 1), 3
             ),
+            # ── Learning curve indicators ─────────────────────────────────────
+            "explore_trades":  self._explore_trades,
+            "exploit_trades":  self._exploit_trades,
+            "explore_ratio":   round(
+                self._explore_trades / max(explored, 1), 3
+            ),
+            "boost_fires":     self._boost_fires,    # times confidence ×1.25 activated
+            "floor_lowers":    self._floor_lowers,   # times score floor −0.05 (alpha context)
+            "floor_raises":    self._floor_raises,   # times score floor +0.05 (loss context)
+            # ─────────────────────────────────────────────────────────────────
             "uptime_min":      round((time.time() - self._init_ts) / 60, 1),
             "top_contexts":    self.top_contexts(5),
+            "bottom_contexts": self.bottom_contexts(3),
             "hyper": {
                 "learning_rate":    LEARNING_RATE,
                 "ev_floor":         ENTRY_EV_FLOOR,
