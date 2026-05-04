@@ -1343,6 +1343,15 @@ async def on_tick(tick: Tick):
                 _re_score_override = reactive_evolution_engine.get_score_min_override(sym)
                 if _re_score_override is not None:
                     _eff_score_min = max(_eff_score_min, _re_score_override)
+                # RL frequency scaling: lower floor in high-alpha contexts, raise in losing ones.
+                # Complements confidence_boost() — both sides of the gap move toward execution
+                # in contexts where Q-value confirms positive expected value (07h/10h/14h MR).
+                _rl_floor_delta = rl_engine.get_score_floor_delta(
+                    regime=regime.value,
+                    utc_hour=__import__("datetime").datetime.utcnow().hour,
+                    strategy=strategy_type,
+                )
+                _eff_score_min = max(0.40, round(_eff_score_min + _rl_floor_delta, 4))
                 if not cfg.BYPASS_ALL_GATES and _decayed_conf < _eff_score_min:  # Phase 6: DTP + streak-adjusted
                     # EDP: bypass decay gate for strong signals (high score + high RR)
                     if execution_drive_policy.should_force_execute(

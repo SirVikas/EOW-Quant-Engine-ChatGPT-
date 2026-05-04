@@ -265,6 +265,38 @@ class RLContextualBandit:
             return min(base_min_rr + 0.5, 3.5)   # losing context → tighten
         return base_min_rr
 
+    def get_score_floor_delta(
+        self,
+        regime:   str,
+        utc_hour: int,
+        strategy: str,
+    ) -> float:
+        """
+        Returns a delta to subtract from _eff_score_min (the score gate floor).
+
+        This is the second half of frequency scaling — confidence_boost() raises
+        the signal side; this lowers the threshold side for winning contexts:
+          • High-EV context (q > +0.50): lower floor by 0.05 → more trades pass
+          • Losing context (q < -0.30):  raise floor by 0.05 → tighter filter
+          • Neutral / unexplored:        no change (return 0.0)
+
+        Net effect: in 07h/10h/14h MEAN_REVERTING alpha contexts where Q climbs
+        positive, both the signal confidence and the acceptance threshold move
+        in the same direction — compounding the frequency lift for high-alpha setups.
+        """
+        ctx_key = make_context(regime, utc_hour, strategy)
+        state   = self._get_or_create(ctx_key)
+
+        if state.n_visits < MIN_VISITS_EXPLORE:
+            return 0.0   # no data yet — do not adjust threshold
+
+        q = state.q_value
+        if q > 0.50:
+            return -0.05   # lower floor → more trades in winning context
+        if q < -0.30:
+            return +0.05   # raise floor → tighter filter in losing context
+        return 0.0
+
     # ── Internal ──────────────────────────────────────────────────────────────
 
     def _get_or_create(self, ctx_key: str) -> ContextState:
