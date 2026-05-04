@@ -915,6 +915,93 @@ def _s15_developer_summary_ftd033(d: dict) -> str:
     return _section("15. Developer Summary (FTD-033)", body)
 
 
+def _s16_rl_intelligence(d: dict) -> str:
+    """Section 16 — RL Contextual Bandit Intelligence (learning curve visibility)."""
+    rl = d.get("rl_bandit", {})
+    if not rl:
+        return _section("16. RL Intelligence", "_RL engine data not available._")
+
+    explore   = rl.get("explore_trades",  0)
+    exploit   = rl.get("exploit_trades",  0)
+    total_all = rl.get("total_allowed",   0)
+    blocked   = rl.get("total_blocked",   0)
+    boost_f   = rl.get("boost_fires",     0)
+    floor_lo  = rl.get("floor_lowers",    0)
+    floor_hi  = rl.get("floor_raises",    0)
+    allow_r   = rl.get("allow_rate",      0.0)
+    ctx_total = rl.get("total_contexts",  0)
+    prof_pct  = rl.get("profitable_pct",  0.0)
+    uptime    = rl.get("uptime_min",      0.0)
+    explore_r = rl.get("explore_ratio",   0.0)
+
+    # ── Phase diagnosis ──────────────────────────────────────────────────────
+    if exploit == 0:
+        phase = "COLD_START (all trades via EXPLORE — no proven contexts yet)"
+    elif explore_r > 0.60:
+        phase = f"LEARNING ({explore_r:.0%} exploration — Q-values still forming)"
+    elif explore_r > 0.20:
+        phase = f"CONVERGING ({explore_r:.0%} exploration — alpha contexts emerging)"
+    else:
+        phase = f"EXPLOITING ({1-explore_r:.0%} exploitation — bandit locked onto alpha)"
+
+    overview = _table([
+        ("RL Phase",            phase),
+        ("Uptime",              f"{uptime:.1f} min"),
+        ("Total Contexts Seen", ctx_total),
+        ("Profitable Contexts", f"{prof_pct:.0%}"),
+        ("Allowed / Blocked",   f"{total_all} / {blocked}"),
+        ("Allow Rate",          f"{allow_r:.0%}"),
+        ("Explore Trades",      f"{explore} ({explore_r:.0%})"),
+        ("Exploit Trades",      f"{exploit} ({1-explore_r:.0%})"),
+        ("Confidence ×1.25 Fires", boost_f),
+        ("Score Floor −0.05 Fires", floor_lo),
+        ("Score Floor +0.05 Fires", floor_hi),
+    ])
+
+    # ── Contextual Scoreboard — top alpha contexts ───────────────────────────
+    top = rl.get("top_contexts", [])
+    if top:
+        top_lines = ["| Context | Q-Value | UCB Bonus | Win Rate | Trades | PnL |",
+                     "|---|---|---|---|---|---|"]
+        for c in top:
+            q    = c.get("q_value",   0.0)
+            ucb  = c.get("ucb_bonus", 0.0)
+            wr   = c.get("win_rate",  0.0)
+            n    = c.get("n_visits",  0)
+            pnl  = c.get("total_pnl", 0.0)
+            ctx  = c.get("context",   "?")
+            sign = "▲" if q > 0 else "▼"
+            top_lines.append(f"| {ctx} | {sign}{abs(q):.4f} | +{ucb:.4f} | {wr:.0%} | {n} | ${pnl:+.3f} |")
+        top_table = "\n".join(top_lines)
+    else:
+        top_table = "_No contexts with sufficient visits yet._"
+
+    # ── Near-block warning — bottom contexts ─────────────────────────────────
+    bot = rl.get("bottom_contexts", [])
+    if bot:
+        bot_lines = ["| Context | Q-Value | UCB Score | Win Rate | Trades | Near Block? |",
+                     "|---|---|---|---|---|---|"]
+        for c in bot:
+            q    = c.get("q_value",    0.0)
+            ucb  = c.get("ucb_score",  0.0)
+            wr   = c.get("win_rate",   0.0)
+            n    = c.get("n_visits",   0)
+            nb   = "⚠️ YES" if c.get("near_block") else "No"
+            ctx  = c.get("context",    "?")
+            bot_lines.append(f"| {ctx} | {q:+.4f} | {ucb:+.4f} | {wr:.0%} | {n} | {nb} |")
+        bot_table = "\n".join(bot_lines)
+        bot_section = f"\n\n**Near-Block Contexts (RL considering suppression):**\n\n{bot_table}"
+    else:
+        bot_section = ""
+
+    body = (
+        f"{overview}\n\n"
+        f"**Top Alpha Contexts (RL Exploiting):**\n\n{top_table}"
+        f"{bot_section}"
+    )
+    return _section("16. RL Intelligence (Contextual Bandit)", body)
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def generate_full_report_v2(data: dict) -> str:
@@ -970,6 +1057,8 @@ def generate_full_report_v2(data: dict) -> str:
         _s13_cost_analysis(data),
         _s14_net_edge_summary(data),
         _s15_developer_summary_ftd033(data),
+        # RL Intelligence — learning curve, contextual scoreboard, explore/exploit
+        _s16_rl_intelligence(data),
     ]
 
     return header + "\n\n" + "\n\n".join(sections)
