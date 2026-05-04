@@ -120,6 +120,7 @@ from core.performance import (                                                 #
 )
 from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 from core.lean_gate import lean_gate
+from core.rl_engine import rl_engine                              # RL Contextual Bandit
 
 
 def _safe_num(v):
@@ -398,6 +399,13 @@ async def on_tick(tick: Tick):
                 won=_trade_won, r_mult=_r_mult,
             )
             confidence_decay.reset(sym, _trade_strategy)  # fresh start after trade
+            # RL: update Q-value for this (regime, hour, strategy) context
+            rl_engine.update(
+                regime=_trade_regime,
+                utc_hour=__import__("datetime").datetime.utcnow().hour,
+                strategy=_closed_strat_type,
+                net_pnl=last_trade.net_pnl,
+            )
             # Phase 5.1: record exploration outcome + reset activator timer + flow monitor
             if _is_exploration_trade.pop(sym, False):
                 exploration_engine.record_result(sym, last_trade.net_pnl)
@@ -617,12 +625,17 @@ async def on_tick(tick: Tick):
 
         # ── Hour gate — calendar filter, always enforced (FTD-SNP-001) ──────────
         # Not a data quality gate — not subject to BYPASS_ALL_GATES.
-        # Golden hours: 07, 10, 14 UTC. All others are either losing or marginal.
+        # Golden hours: 07, 10, 14 UTC — only these have positive net PnL.
         _current_utc_hour = __import__("datetime").datetime.utcnow().hour
         if _current_utc_hour in _AVOID_HOURS_UTC:
+            # Calculate next allowed hour so the user knows when to expect trades.
+            _allowed_hours = sorted(set(range(24)) - _AVOID_HOURS_UTC)
+            _next_open = next((h for h in _allowed_hours if h > _current_utc_hour),
+                              _allowed_hours[0])
             _thought(
-                f"⏸ HOUR_GATE {sym}: hour={_current_utc_hour:02d}h UTC blocked "
-                f"(golden hours: 07, 10, 14 UTC)",
+                f"⏸ HOUR_GATE {sym}: {_current_utc_hour:02d}h UTC BLOCKED — "
+                f"next open: {_next_open:02d}h UTC | "
+                f"golden hours (positive PnL): 07h 10h 14h UTC",
                 "FILTER",
             )
             return
@@ -886,7 +899,13 @@ async def on_tick(tick: Tick):
             profit_factor=_pf_stats.get("profit_factor", 1.0),
             n_trades=_session_trade_count,
         )
-        _adjusted_conf = round(r_ai.confidence * _regime_weight * _pf_mult, 3)
+        # RL: apply learned confidence boost from contextual bandit
+        _rl_boost = rl_engine.confidence_boost(
+            regime=r_ai.regime.value,
+            utc_hour=__import__("datetime").datetime.utcnow().hour,
+            strategy=strategy_type,
+        )
+        _adjusted_conf = round(r_ai.confidence * _regime_weight * _pf_mult * _rl_boost, 3)
 
         # qFTD-011: diagnostic log before signal generation so we can see indicator
         # state at each candle close and confirm the pipeline is reaching this point.
@@ -999,8 +1018,12 @@ async def on_tick(tick: Tick):
                     _entry * 0.002,
                     (_entry * atr_pct / 100.0),
                 )
-                _sl_dist = _atr_px * 2.0   # RR = 2.0
-                _tp_dist = _atr_px * 4.0
+                # FIX: RR was 2.0 (SL=2×ATR, TP=4×ATR) which always failed
+                # LeanGate MIN_RR=2.5, silently blocking every paper_speed signal.
+                # SL=1.5×ATR, TP=4.5×ATR → RR=3.0 — clears the 2.5 threshold
+                # with margin while keeping SL tight enough for mean-reversion setups.
+                _sl_dist = _atr_px * 1.5   # RR = 3.0 (passes LeanGate MIN_RR=2.5)
+                _tp_dist = _atr_px * 4.5
                 if _ps_side == Signal.LONG:
                     _sl = _entry - _sl_dist
                     _tp = _entry + _tp_dist
@@ -1120,6 +1143,25 @@ async def on_tick(tick: Tick):
             cost_usdt     = execution_engine.fee_for_notional(notional) * 2
             # Per-unit cost for signal_filter (which computes gross_tp per-unit as abs(tp-entry))
             cost_per_unit = cost_usdt / sizing.qty if sizing.qty > 0 else cost_usdt
+
+            # ── RL Gate: contextual bandit soft-filter ──────────────────────────
+            # Blocks contexts that have consistently negative expected value
+            # (Q < ENTRY_EV_FLOOR) AND have been explored enough (n ≥ MIN_VISITS).
+            # New contexts always pass (exploration guaranteed).
+            _rl_ok, _rl_reason = rl_engine.should_trade(
+                regime=regime.value,
+                utc_hour=__import__("datetime").datetime.utcnow().hour,
+                strategy=strategy_type,
+            )
+            if not _rl_ok:
+                _thought(f"🤖 RL_GATE {sym}: {_rl_reason}", "FILTER")
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": _rl_reason, "regime": regime.value,
+                    "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, _rl_reason)
+                return
 
             # ── Lean Gate: 5 unconditional safety checks (no bootstrap dependency) ──
             _lean = lean_gate.check(
@@ -2787,6 +2829,7 @@ async def get_full_system_report_v2():
     data = {
         "generated_at":   time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
         "trade_flow":     _safe_v2(trade_flow_monitor.summary, {}),
+        "rl_bandit":      _safe_v2(rl_engine.summary, {}),
         "mins_idle":      _mins_idle,
         "thresholds":     _safe_v2(
             lambda: dynamic_threshold_provider.summary(minutes_no_trade=_mins_idle), {}
