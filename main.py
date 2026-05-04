@@ -1000,11 +1000,15 @@ async def on_tick(tick: Tick):
             # ── Regime-aware entry decision ───────────────────────────────────
             # TRENDING:      follow SMA; RSI must have room to move (not extreme)
             # MEAN_REVERTING: fade the extreme; RSI must confirm overextension
+            # FIX: 35/65 → 40/60 for MEAN_REVERTING — original thresholds too strict;
+            # RSI stays in 35-65 range during low-volatility ranging = zero signals.
+            # 40/60 still requires directional overextension vs SMA but fires ~3×
+            # more often, giving the RL engine sufficient data to converge.
             _ps_side: Signal | None = None
             if regime.value == "MEAN_REVERTING":
-                if _above_sma and _rsi_val > 65:      # overbought → fade SHORT
+                if _above_sma and _rsi_val > 60:      # overbought → fade SHORT
                     _ps_side = Signal.SHORT
-                elif not _above_sma and _rsi_val < 35: # oversold → fade LONG
+                elif not _above_sma and _rsi_val < 40: # oversold → fade LONG
                     _ps_side = Signal.LONG
             else:  # TRENDING / UNKNOWN
                 if _above_sma and _rsi_val < 62:      # uptrend + room left → LONG
@@ -5253,6 +5257,7 @@ async def download_report_bundle():
     _v2_data = {
         "generated_at":    time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
         "trade_flow":      _safe(trade_flow_monitor.summary, {}),
+        "rl_bandit":       _safe(rl_engine.summary, {}),
         "mins_idle":       _mins_idle,
         "thresholds":      _safe(
             lambda: dynamic_threshold_provider.summary(minutes_no_trade=_mins_idle), {}
@@ -5277,9 +5282,16 @@ async def download_report_bundle():
         "edge_engine":     _safe(edge_engine.summary, {}),
         "thoughts":        list(_thought_log)[-30:],
     }
-    unified_v2_md = _safe(
-        lambda: generate_full_report_v2(_v2_data), "# Unified report unavailable"
-    )
+    try:
+        unified_v2_md = generate_full_report_v2(_v2_data)
+    except Exception as _e:
+        import traceback as _tb
+        _err_trace = _tb.format_exc()
+        unified_v2_md = (
+            f"# Unified report error\n\n"
+            f"```\n{_err_trace}\n```\n"
+        )
+        logger.error(f"[BUNDLE] unified_report_v2 failed: {_e}")
 
     # ── 2c. Trade archive ZIP (XLSX + PDF + MD) ───────────────────────────────
     archive_zip_bytes = _safe(
