@@ -13,14 +13,15 @@ from core.self_correction.correction_proposal import HARD_LIMITS
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
 MIN_TRADES            = 30
-MIN_SYSTEM_SCORE      = 70.0
-# Sniper Mode (FTD-SNP-001): raised 30→55. Corrections are only applied when
-# the system has enough signal quality to trust the direction. At WR<45% the
-# score is ~35; pausing corrections at that level prevents oscillation. The
-# reactive engine (FTD-REA-001) handles per-trade micro-adaptation in the
-# meantime — AIE macro corrections require higher confidence.
+# FIX: 70→55 — at meta_score~58 the system needs corrections most; requiring 70
+# created a deadlock where corrections were only allowed when the system was
+# already healthy. Aligned with AUTO_INTELLIGENCE_MIN_SCORE (55) so AIE and
+# PolicyGuard use the same floor and corrections can fire during recovery.
+MIN_SYSTEM_SCORE      = 55.0
 MIN_AI_BRAIN_SCORE    = 55.0
-MIN_META_SCORE        = 70.0
+# FIX: 70→55 — same rationale as MIN_SYSTEM_SCORE above. Both map to the same
+# ftd028_meta.system_score value; dual 70-threshold was double-blocking corrections.
+MIN_META_SCORE        = 55.0
 CRITICAL_BYPASS_SCORE = 50.0   # system_score < 50 → bypass cooldown (Q7 Part 7)
 
 
