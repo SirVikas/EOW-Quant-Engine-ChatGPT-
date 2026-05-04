@@ -620,6 +620,11 @@ async def on_tick(tick: Tick):
         # Golden hours: 07, 10, 14 UTC. All others are either losing or marginal.
         _current_utc_hour = __import__("datetime").datetime.utcnow().hour
         if _current_utc_hour in _AVOID_HOURS_UTC:
+            _thought(
+                f"⏸ HOUR_GATE {sym}: hour={_current_utc_hour:02d}h UTC blocked "
+                f"(golden hours: 07, 10, 14 UTC)",
+                "FILTER",
+            )
             return
 
         # Use real 1-min candle OHLC for strategy indicators.
@@ -939,6 +944,19 @@ async def on_tick(tick: Tick):
         # (TrendFollowing confirmed -$16.20 NOISE over 117 trades in ALL-period data).
         if _paper_speed and strategy_type in _DISABLED_PAPER_SPEED_STRATEGIES:
             sig = None  # suppress fallback entirely for this strategy
+        # FIX: when a primary/alpha signal carries a disabled strategy_id, clear it
+        # so the paper_speed fallback can generate the {strategy_type}_PAPER_SPEED
+        # variant. MeanReversion_PAPER_SPEED is the only ALPHA-rated strategy
+        # (PF=1.485); blocking it because MR_BB_RSI_v1 returned a non-NONE signal
+        # prevented the sole profitable execution path. TrendFollowing is excluded
+        # because TrendFollowing_PAPER_SPEED is itself in _DISABLED_STRATEGY_IDS.
+        if (
+            _paper_speed
+            and sig and sig.signal != Signal.NONE
+            and sig.strategy_id in _DISABLED_STRATEGY_IDS
+            and strategy_type not in _DISABLED_PAPER_SPEED_STRATEGIES
+        ):
+            sig = None  # let paper_speed fallback generate the alpha-rated variant
         if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
             _entry = closes[-1]
 

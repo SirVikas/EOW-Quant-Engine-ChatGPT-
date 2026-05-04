@@ -22,12 +22,18 @@ from loguru import logger
 # ── Thresholds ────────────────────────────────────────────────────────────────
 PROFIT_FACTOR_MIN  = 1.0     # below this PF → reduce frequency
 FEE_RATIO_MAX      = 0.20    # 5× rule: fees must be < 20% of gross TP profit (projected profit ≥ 5× commission)
-# FIX: 0.80→0.60 — 20% reduction was too gentle for PF=0.38; 40% reduction needed to cut losses faster.
-FREQ_REDUCE_MULT   = 0.60    # FIX: 0.80→0.60 — stronger frequency cut when system is losing
-# FIX: 20→10 — system lost 15% equity before gate activated; halved to catch issues earlier.
-MIN_TRADES_FOR_PF  = 10      # FIX: 20→10 — activate PF gate earlier to limit drawdown
-# FIX: 8→5 — 8 consecutive losses caused -$150 before hard stop; 5 losses is the new ceiling.
-MAX_CONSEC_LOSSES  = 5       # FIX: 8→5 — hard-stop after 5 consecutive losses
+# FIX: 0.60→0.70 — 40% reduction was over-correcting: suppressed confidence so
+# hard that valid recovery signals couldn't clear the adjusted threshold.
+# 30% reduction still penalises losing runs while allowing the engine to trade
+# through and self-correct rather than halting entirely.
+FREQ_REDUCE_MULT   = 0.70    # FIX: 0.60→0.70 — less aggressive frequency cut
+# FIX: 10→15 — 10-trade sample is too small; a short cold streak immediately
+# activates the PF gate and blocks recovery trades. 15 gives a statistically
+# more reliable PF estimate before penalising.
+MIN_TRADES_FOR_PF  = 15      # FIX: 10→15 — more trades needed before PF gate activates
+# FIX: 5→6 — 5 consecutive losses triggered hard-stop too quickly during volatile
+# sessions; 6 provides a small buffer for streak recovery without allowing deep runs.
+MAX_CONSEC_LOSSES  = 6       # FIX: 5→6 — slight headroom before hard-stop
 
 
 class ProfitGuard:
