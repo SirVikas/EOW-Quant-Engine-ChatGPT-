@@ -1,0 +1,45 @@
+{
+  "title": "Exit Analysis \u2014 How and Why Trades Close",
+  "generated_at": "2026-05-04 03:48:50 UTC",
+  "summary": {
+    "stop_loss_exits": 157,
+    "profitable_exits": 98,
+    "sl_to_win_ratio": 1.6,
+    "diagnosis": "BALANCED"
+  },
+  "by_exit_type": [
+    {
+      "exit_type": "BREAKEVEN",
+      "count": 188,
+      "pct_of_total": 42.4,
+      "total_pnl_usdt": -8.8851,
+      "avg_pnl_usdt": -0.0473,
+      "avg_r_multiple": -0.0068
+    },
+    {
+      "exit_type": "STOP_LOSS",
+      "count": 149,
+      "pct_of_total": 33.6,
+      "total_pnl_usdt": -262.9501,
+      "avg_pnl_usdt": -1.7648,
+      "avg_r_multiple": -0.3313
+    },
+    {
+      "exit_type": "TRAILING_STOP_WIN",
+      "count": 98,
+      "pct_of_total": 22.1,
+      "total_pnl_usdt": 150.8336,
+      "avg_pnl_usdt": 1.5391,
+      "avg_r_multiple": 0.2484
+    },
+    {
+      "exit_type": "STOP_LOSS_SLIP",
+      "count": 8,
+      "pct_of_total": 1.8,
+      "total_pnl_usdt": -48.4693,
+      "avg_pnl_usdt": -6.0587,
+      "avg_r_multiple": -1.2743
+    }
+  ],
+  "action": "Exit quality acceptable \u2014 focus on entry quality."
+}
