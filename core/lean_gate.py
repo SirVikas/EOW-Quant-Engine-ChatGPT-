@@ -75,6 +75,7 @@ class LeanGate:
         consecutive_losses:  int,
         session_dd_pct:      float,
         side:                str = "",
+        bypass_risk_gates:   bool = False,
     ) -> LeanResult:
         """
         Run all five gates in order.  Returns on first failure.
@@ -87,6 +88,10 @@ class LeanGate:
             consecutive_losses:  number of consecutive losing trades this session
             session_dd_pct:      current session equity drawdown as a percentage
             side:                "LONG" or "SHORT" (optional, for logging)
+            bypass_risk_gates:   when True, skip Gates 4+5 (streak/drawdown) — use in
+                                 PAPER/BYPASS mode so RL can learn through loss cycles
+                                 without the engine halting on virtual capital drawdown.
+                                 Gates 1-3 (SL distance, RR, fee economy) always apply.
         """
         if entry <= 0:
             return LeanResult(execute=False, reason="ZERO_ENTRY")
@@ -126,7 +131,8 @@ class LeanGate:
                 )
 
         # ── Gate 4: Loss streak ───────────────────────────────────────────────
-        if consecutive_losses >= MAX_CONSEC_LOSSES:
+        # Bypassed in PAPER/BYPASS mode: virtual losses must not halt learning.
+        if not bypass_risk_gates and consecutive_losses >= MAX_CONSEC_LOSSES:
             return LeanResult(
                 execute=False,
                 reason=f"LOSS_STREAK({consecutive_losses}>={MAX_CONSEC_LOSSES})",
@@ -134,7 +140,8 @@ class LeanGate:
             )
 
         # ── Gate 5: Daily drawdown ────────────────────────────────────────────
-        if session_dd_pct >= MAX_DAILY_DD_PCT:
+        # Bypassed in PAPER/BYPASS mode: virtual drawdown must not halt learning.
+        if not bypass_risk_gates and session_dd_pct >= MAX_DAILY_DD_PCT:
             return LeanResult(
                 execute=False,
                 reason=f"DAILY_DD({session_dd_pct:.1f}%>={MAX_DAILY_DD_PCT}%)",

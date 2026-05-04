@@ -1163,7 +1163,10 @@ async def on_tick(tick: Tick):
                 trade_flow_monitor.record_skip(sym, _rl_reason)
                 return
 
-            # ── Lean Gate: 5 unconditional safety checks (no bootstrap dependency) ──
+            # ── Lean Gate: 5 checks; Gates 4+5 bypassed in PAPER/BYPASS mode ──
+            # In PAPER/BYPASS mode, virtual drawdown and streak must not halt
+            # the RL engine — it needs to trade through losses to learn.
+            # Gates 1-3 (SL distance, RR, fee economy) always apply.
             _lean = lean_gate.check(
                 entry=sig.entry_price,
                 stop_loss=sig.stop_loss,
@@ -1172,6 +1175,7 @@ async def on_tick(tick: Tick):
                 consecutive_losses=_consecutive_losses,
                 session_dd_pct=drawdown_controller.current_drawdown(),
                 side=sig.signal.value,
+                bypass_risk_gates=cfg.BYPASS_ALL_GATES,
             )
             if not _lean.execute:
                 _last_skip = {
