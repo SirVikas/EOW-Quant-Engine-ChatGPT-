@@ -1,0 +1,29 @@
+{
+  "title": "System Health \u2014 Drift & Trajectory Status",
+  "generated_at": "2026-05-04 12:08:43 UTC",
+  "drift": {
+    "status": "STABLE",
+    "is_paused": false,
+    "paused_until_cycle": 0,
+    "current_cycle": 0,
+    "drift_events_total": 0,
+    "interpretation": "No drift detected \u2014 corrections are improving or neutral."
+  },
+  "trajectory": {
+    "verdict": "INSUFFICIENT_DATA",
+    "direction": "\u2192",
+    "win_rate_now": 0.0,
+    "win_rate_prev": 0.0,
+    "wr_delta_pct": 0.0,
+    "trades_analysed": 0,
+    "interpretation": "System is INSUFFICIENT_DATA: WR moved 0.0% \u2192 0.0% (\u25b20.0pp)"
+  },
+  "alert_counts": {
+    "total": 0,
+    "drift_alerts": 0,
+    "wr_critical": 0,
+    "dd_critical": 0,
+    "loss_outliers": 0
+  },
+  "active_critical_alerts": []
+}
