@@ -628,11 +628,15 @@ async def on_tick(tick: Tick):
         if sym in _SYMBOL_BLACKLIST:
             return
 
-        # ── Hour gate — calendar filter, always enforced (FTD-SNP-001) ──────────
-        # Not a data quality gate — not subject to BYPASS_ALL_GATES.
-        # Golden hours: 07, 10, 14 UTC — only these have positive net PnL.
+        # ── Hour gate — calendar filter (FTD-SNP-001) ────────────────────────────
+        # In BYPASS_ALL_GATES mode the gate is disabled so RL can accumulate Q-value
+        # data across ALL hours (including the historically bad ones). The RL engine
+        # will converge to avoid bad-hour contexts itself once Q < ENTRY_EV_FLOOR.
+        # Without this, 17/24 hours are permanently dark to RL → context table is
+        # sparse → bandit explores fewer dimensions → slower convergence.
+        # In LIVE mode this gate remains active (historical -ve PnL hours are hard-blocked).
         _current_utc_hour = __import__("datetime").datetime.utcnow().hour
-        if _current_utc_hour in _AVOID_HOURS_UTC:
+        if not cfg.BYPASS_ALL_GATES and _current_utc_hour in _AVOID_HOURS_UTC:
             # Calculate next allowed hour so the user knows when to expect trades.
             _allowed_hours = sorted(set(range(24)) - _AVOID_HOURS_UTC)
             _next_open = next((h for h in _allowed_hours if h > _current_utc_hour),
@@ -1127,6 +1131,11 @@ async def on_tick(tick: Tick):
             # 6. Size the position (FTD-REF-024: apply edge booster multiplier)
             sizing = scaler.compute(sym, sig.entry_price, sig.stop_loss)
             if sizing.qty <= 0:
+                _thought(
+                    f"🚫 ZERO_QTY {sym}: {sizing.reason} "
+                    f"(equity={sizing.current_equity:.2f} method={sizing.method})",
+                    "FILTER",
+                )
                 return
             _edge_mult = edge_engine.get_size_multiplier(regime.value, strategy_type)
             _aee_mult  = adaptive_edge_engine.get_size_mult(strategy_type)
@@ -1190,6 +1199,11 @@ async def on_tick(tick: Tick):
                 bypass_risk_gates=cfg.BYPASS_ALL_GATES,
             )
             if not _lean.execute:
+                _thought(
+                    f"🚫 LEAN_GATE {sym}: {_lean.reason} "
+                    f"(rr={_lean.rr:.2f} sl={_lean.sl_dist_pct:.3f}%)",
+                    "FILTER",
+                )
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
                     "reason": _lean.reason, "regime": regime.value,
