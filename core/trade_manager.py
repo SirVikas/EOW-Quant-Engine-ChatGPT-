@@ -194,9 +194,13 @@ class TradeManager:
         # RANGE_SCALP uses a tighter BE trigger since TP is much smaller.
         be_trigger = _RANGE_BE_R if pos.exec_mode == "RANGE_SCALP" else self.be_r
         if not pos.breakeven_set and r_mult >= be_trigger:
-            be_price = (pos.entry_price + self.be_epsilon
+            # Cover round-trip fees + slippage so the BE exit truly breaks even net.
+            # Fixed epsilon ($0.05) was smaller than typical fees ($0.13-$0.23) causing
+            # all 210 "BREAKEVEN" exits to log a small loss (avg -$0.07, total -$14.72).
+            cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
+            be_price = (pos.entry_price + cost_per_unit
                         if pos.side == "LONG"
-                        else pos.entry_price - self.be_epsilon)
+                        else pos.entry_price - cost_per_unit)
             if ((pos.side == "LONG"  and be_price > pos.current_sl) or
                     (pos.side == "SHORT" and be_price < pos.current_sl)):
                 pos.current_sl    = be_price

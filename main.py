@@ -194,6 +194,8 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
     # report-4 (2026-05-03 20:33): high trade count, negative net
     "ORDIUSDT",  # 27 trades, net -$10.97, fee 52.9% of gross
     "BABYUSDT",  # chronic loser confirmed across 2 sessions
+    # report-5 (2026-05-05 08:25): ALL-period forensics, 502-trade dataset
+    "DASHUSDT",  # 8 trades, net -$5.43, fee 75.2% of gross (FEE_HEAVY); worst 1D at -$3.10
 })
 
 # FTD-037: Strategy disable list — all strategies confirmed NOISE in 20-unit ALL data.
@@ -225,12 +227,15 @@ _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
 _DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({"TrendFollowing"})
 
 # Hour gate — enforced regardless of BYPASS_ALL_GATES (calendar filter, not data gate).
-# Source: ALL-period hourly forensics across 20 sessions.
-# Golden hours (net positive): 07 (+$6.01), 10 (+$7.36), 14 (+$3.23).
-# Avoid hours (net negative with ≥10 trade sample): 03(-$4.53), 08(-$14.05),
-# 09(-$14.52), 11(-$12.05), 12(-$6.01), 15(-$13.57), 16(-$18.85), 17(-$13.02),
-# 18(-$27.38), 19(-$6.41), 20(-$4.78), 22(-$28.08), 23(-$11.58).
-_AVOID_HOURS_UTC: frozenset[int] = frozenset({3, 6, 8, 9, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22, 23})
+# Source: ALL-period hourly forensics across 502 trades (2026-05-05 session).
+# Golden hours (net positive, ≥19 trades): 04(+$2.60,n=31), 05(+$2.60,n=19),
+#   07(+$6.01,n=27), 10(+$1.73,n=26), 14(+$3.23,n=36).
+# Avoid hours (net negative with ≥10 trade sample): 02(-$4.44,n=20), 03(-$4.53,n=31),
+#   06(-$3.37,n=27), 08(-$14.05,n=24), 09(-$14.52,n=14), 11(-$12.05,n=31),
+#   12(-$6.01,n=38), 13(-$5.19,n=35), 15(-$13.57,n=30), 16(-$18.86,n=19),
+#   17(-$13.02,n=15), 18(-$27.38,n=1), 19(-$6.41,n=6), 20(-$4.78,n=4),
+#   21(-$1.43,n=20), 22(-$28.08,n=21), 23(-$11.58,n=13).
+_AVOID_HOURS_UTC: frozenset[int] = frozenset({2, 3, 6, 8, 9, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23})
 
 # Session strategy loss cap — disable a strategy for the rest of the session
 # when it exceeds this loss. Prevents TF_EMA_RSI_v1-style -$92 catastrophes.
@@ -683,11 +688,12 @@ async def on_tick(tick: Tick):
                 error_registry.log("DATA_002", symbol=sym, extra=guard.reason)  # FTD-REF-025
                 return   # insufficient candles / unstable ADX / near-zero ATR
 
-        # FTD-SNP-001: ATR volatility gate — always enforced (not a data quality gate).
-        # Blocks entries where current ATR > 2× slow EMA — high-volatility = STOP_LOSS_SLIP.
+        # FTD-SNP-001: ATR volatility gate — bypassed in BYPASS_ALL_GATES mode so RL engine
+        # gets continuous trade data in paper sessions. In live mode blocks entries where
+        # current ATR > 2× slow EMA — high-volatility = STOP_LOSS_SLIP risk.
         # ATR EMA needs a few candles to stabilise; is_high_volatility() returns False
         # until the EMA is seeded, so paper warmup is safe.
-        if reactive_evolution_engine.is_high_volatility(sym, atr_pct):
+        if not cfg.BYPASS_ALL_GATES and reactive_evolution_engine.is_high_volatility(sym, atr_pct):
             _last_skip = {
                 "ts": now_ms, "symbol": sym,
                 "reason": f"ATR_SPIKE(atr={atr_pct:.4f}%)",
