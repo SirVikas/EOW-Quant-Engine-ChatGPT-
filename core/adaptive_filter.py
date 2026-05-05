@@ -72,8 +72,17 @@ class AdaptiveFilterEngine:
 
         Returns AFResult with score_offset and final effective_score_min.
         """
+        # In BYPASS mode skip TIGHTEN: RL needs to trade through loss streaks to
+        # accumulate Q-value data. RELAX still applies so idle periods stay active.
+        # Without this, 5+ consecutive paper losses drive score_min to 0.56 which
+        # (combined with trace logging) created misleading "blocked" appearance even
+        # though the score check at the call-site was already BYPASS-guarded.
+        if cfg.BYPASS_ALL_GATES and consecutive_losses >= cfg.AF_TIGHTEN_AFTER_LOSSES:
+            # Fall through to RELAX check or NORMAL — do NOT tighten in bypass mode
+            pass
+
         # TIGHTEN takes priority — loss streak always overrides no-trade relaxation
-        if consecutive_losses >= cfg.AF_TIGHTEN_AFTER_LOSSES:
+        elif consecutive_losses >= cfg.AF_TIGHTEN_AFTER_LOSSES:
             extra  = consecutive_losses - cfg.AF_TIGHTEN_AFTER_LOSSES
             offset = min(cfg.AF_MAX_TIGHTEN, cfg.AF_TIGHTEN_STEP * (1 + extra))
             eff    = min(_SCORE_MIN_CEILING, cfg.MIN_TRADE_SCORE + offset)
