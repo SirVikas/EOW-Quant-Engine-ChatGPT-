@@ -230,7 +230,7 @@ _DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({"TrendFollowing"})
 # Avoid hours (net negative with ≥10 trade sample): 03(-$4.53), 08(-$14.05),
 # 09(-$14.52), 11(-$12.05), 12(-$6.01), 15(-$13.57), 16(-$18.85), 17(-$13.02),
 # 18(-$27.38), 19(-$6.41), 20(-$4.78), 22(-$28.08), 23(-$11.58).
-_AVOID_HOURS_UTC: frozenset[int] = frozenset({3, 8, 9, 11, 12, 15, 16, 17, 18, 19, 20, 22, 23})
+_AVOID_HOURS_UTC: frozenset[int] = frozenset({3, 6, 8, 9, 11, 12, 13, 15, 16, 17, 18, 19, 20, 22, 23})
 
 # Session strategy loss cap — disable a strategy for the rest of the session
 # when it exceeds this loss. Prevents TF_EMA_RSI_v1-style -$92 catastrophes.
@@ -1064,8 +1064,10 @@ async def on_tick(tick: Tick):
 
             # FTD-037: Session strategy loss cap — catches any unlisted strategy that
             # goes bad this session (prevents -$92 runaway on a single strategy_id).
+            # Bypassed in PAPER/BYPASS mode: RL needs to trade through losses to learn;
+            # muting the only active strategy here creates 0-trade dead zones.
             _strat_sess_pnl = _strategy_session_pnl.get(sig.strategy_id, 0.0)
-            if _strat_sess_pnl < _STRATEGY_SESSION_LOSS_CAP:
+            if not cfg.BYPASS_ALL_GATES and _strat_sess_pnl < _STRATEGY_SESSION_LOSS_CAP:
                 logger.warning(
                     f"[FTD-037] {sig.strategy_id} session_pnl={_strat_sess_pnl:.2f} "
                     f"< cap={_STRATEGY_SESSION_LOSS_CAP} — muted for session"

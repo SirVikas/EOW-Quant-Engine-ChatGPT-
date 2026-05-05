@@ -353,7 +353,7 @@ def _s5_capital_efficiency(d: dict) -> str:
         ("Capital Deployed",      _pct(capital_deployed_pct)),
         ("Capital Idle",          _pct(capital_idle_pct)),
         ("Daily Risk Used",       f"${daily_used:.2f}"),
-        ("Daily Risk Remaining",  f"${daily_rem * (equity if daily_rem < 1 else 1):.2f}" if daily_rem < 1 else f"{_pct(daily_rem * 100)} of equity"),
+        ("Daily Risk Remaining",  (f"${daily_rem * (equity if daily_rem < 1 else 1):.2f}" if daily_rem < 1 else f"{_pct(daily_rem * 100)} of equity") if daily_rem is not None else "N/A"),
         ("Daily Cap",             _pct(daily_cap_pct * 100)),
         ("Missed Opportunity",    missed),
     ])
