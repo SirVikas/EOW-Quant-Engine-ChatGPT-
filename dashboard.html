@@ -394,6 +394,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <button class="btn purple" onclick="exportState()">Export JSON</button>
     <button class="btn" onclick="downloadUnifiedReportV2()" style="border-color:#2b6cb0;background:#ebf8ff;color:#2b6cb0;" title="FTD-025B: Unified Intelligent Report — cause-effect narrative">📊 Intelligent Report</button>
     <button class="btn" id="bundle-btn" onclick="downloadBundleReport()" style="border-color:#276749;background:#F0FFF4;color:#276749;font-weight:700;" title="Download ALL reports in one ZIP — system state, full reports, trade archive, performance explorer">📦 Download All Reports</button>
+    <button class="btn" id="lpa-btn" onclick="downloadLiveProcess()" style="border-color:#6B46C1;background:#FAF5FF;color:#6B46C1;font-weight:700;" title="FTD-LPA: Live Process Access — snapshot runtime logs, RL Q-table, and trade execution logs at this exact moment">🔬 Live Process Snapshot</button>
     <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
   </div>
 </div>
@@ -4038,6 +4039,67 @@ async function downloadBundleReport() {
       b.style.opacity = '1';
     });
     setTimeout(() => { if (status) status.textContent = ''; }, 8000);
+  }
+}
+
+// ── FTD-LPA: Live Process Access snapshot ─────────────────────────────────
+async function downloadLiveProcess() {
+  const btn = document.getElementById('lpa-btn');
+  if (!btn) return;
+
+  // Loading state
+  btn.disabled   = true;
+  const origText = btn.innerHTML;
+  btn.innerHTML  = '⏳ Capturing snapshot…';
+  btn.style.opacity = '0.7';
+
+  try {
+    const r = await fetch(API + '/api/snapshot/live-process', {
+      signal: AbortSignal.timeout(45000),  // 45 s — generous for large log buffers
+    });
+    if (!r.ok) {
+      const errText = await r.text().catch(() => `HTTP ${r.status}`);
+      throw new Error(`HTTP ${r.status}: ${errText}`);
+    }
+
+    const blob = await r.blob();
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1]
+                 || ('eow_live_process_' + Date.now() + '.zip');
+
+    // Trigger browser download
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = fn;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Brief success indicator
+    btn.innerHTML    = '✅ Snapshot downloaded';
+    btn.style.color  = '#276749';
+    btn.style.borderColor = '#276749';
+    setTimeout(() => {
+      btn.innerHTML  = origText;
+      btn.style.color = '#6B46C1';
+      btn.style.borderColor = '#6B46C1';
+    }, 4000);
+
+  } catch (e) {
+    btn.innerHTML   = '❌ Snapshot failed';
+    btn.style.color = '#C53030';
+    btn.style.borderColor = '#C53030';
+    setTimeout(() => {
+      btn.innerHTML  = origText;
+      btn.style.color = '#6B46C1';
+      btn.style.borderColor = '#6B46C1';
+    }, 5000);
+    console.error('[LPA] Live Process Snapshot error:', e);
+  } finally {
+    btn.disabled      = false;
+    btn.style.opacity = '1';
   }
 }
 

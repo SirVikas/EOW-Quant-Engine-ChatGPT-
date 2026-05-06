@@ -121,6 +121,7 @@ from core.performance import (                                                 #
 from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 from core.lean_gate import lean_gate
 from core.rl_engine import rl_engine                              # RL Contextual Bandit
+from core.live_process_access import live_process_access          # FTD-LPA: runtime observability
 
 
 def _safe_num(v):
@@ -1833,6 +1834,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     mdp.set_regime_detector(regime_det)
     _thought("🚀 EOW Quant Engine booting…", "SYSTEM")
     _thought(f"Mode: {cfg.TRADE_MODE} | Capital: {cfg.INITIAL_CAPITAL} USDT", "SYSTEM")
+
+    # ── FTD-LPA: Live Process Access — register loguru sink immediately so ────
+    # boot logs are captured in the rolling buffer from the very first line.
+    live_process_access.register_log_sink()
 
     # ── FTD-014B: Function Registry startup validation ────────────────────────
     try:
@@ -5114,6 +5119,57 @@ def _generate_evolution_reports(session_trades: list) -> "dict[str, str]":
     return files
 
 
+# ── FTD-LPA: Live Process Snapshot ───────────────────────────────────────────
+
+@app.get("/api/snapshot/live-process")
+async def download_live_process_snapshot():
+    """
+    FTD-LPA: Dedicated Live Process Access snapshot.
+
+    On-demand export of all three live runtime artifact classes:
+      • Runtime log stream  — rolling loguru buffer (last 2 000 records)
+      • RL Q-table          — full in-memory contextual bandit state
+      • Trade execution log — in-memory PnL records + SQLite rows
+
+    Thread-safe, read-only, non-blocking.
+    The running trading simulation is NEVER interrupted.
+
+    Returns a ZIP archive (application/zip) downloadable from the dashboard.
+    """
+    from fastapi.responses import StreamingResponse
+    import asyncio as _asyncio
+
+    try:
+        # Build the package off the event loop to avoid blocking ticks
+        pkg_bytes = await _asyncio.to_thread(
+            live_process_access.build_package,
+            rl_engine,
+            pnl_calc,
+            data_lake,
+            list(_thought_log),   # pass a copy — snapshot is moment-in-time
+        )
+    except Exception as _exc:
+        logger.error(f"[LPA] Snapshot build failed: {_exc}")
+        raise HTTPException(status_code=500, detail=f"Snapshot failed: {_exc}")
+
+    ts_str   = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+    filename = f"eow_live_process_{ts_str}.zip"
+
+    _thought(
+        f"🔬 Live Process Snapshot downloaded → {filename} "
+        f"({len(pkg_bytes)//1024} KB | "
+        f"logs={len(live_process_access.snapshot_logs())} "
+        f"rl_contexts={len(getattr(rl_engine, '_table', {}))} "
+        f"trades={len(pnl_calc.trades)})",
+        "SYSTEM",
+    )
+    return StreamingResponse(
+        iter([pkg_bytes]),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 # ── Master Report Bundle ──────────────────────────────────────────────────────
 
 @app.get("/api/reports/bundle")
@@ -5384,6 +5440,13 @@ async def download_report_bundle():
             "  system_health.json        Drift status (Stable/Warning/Critical) + trajectory\n"
             "  alert_log.json            All critical alerts; LEARNING_PAUSE events flagged RED\n"
             "  executive_summary.md      Natural-language 24-hour evolution narrative\n"
+            "07_live_process/ FTD-LPA: Live Process Access runtime snapshot (5 files)\n"
+            "  *_MANIFEST.json           Package manifest + architecture / safety notes\n"
+            "  *_runtime_logs.json       All loguru log records captured since startup\n"
+            "  *_runtime_logs.txt        Human-readable plain-text log stream\n"
+            "  *_thought_log.json        Engine CT-Scan decision trace (last 500 entries)\n"
+            "  *_rl_qtable.json          Complete RL Q-table with all context states\n"
+            "  *_trade_logs.json         In-memory session trades + SQLite history\n"
         ))
 
         _ev_meta = _safe(
@@ -5480,6 +5543,26 @@ async def download_report_bundle():
         except Exception as _ee:
             zf.writestr("06_evolution/error.txt",
                         f"Evolution report generation failed: {_ee}\n")
+
+        # 07_live_process/ — FTD-LPA: runtime observability artifacts ────────
+        # Embedded in every bundle so recipients always have the full runtime
+        # state snapshot captured at the moment the bundle was downloaded.
+        try:
+            _lpa_zip_bytes = live_process_access.build_package(
+                rl_engine_instance=rl_engine,
+                pnl_calc_instance=pnl_calc,
+                data_lake_instance=data_lake,
+                thought_log=list(_thought_log),
+            )
+            # Merge the inner LPA ZIP entries into the outer bundle ZIP
+            with zipfile.ZipFile(_io.BytesIO(_lpa_zip_bytes)) as _lpa_sub:
+                for _lpa_name in _lpa_sub.namelist():
+                    zf.writestr(_lpa_name, _lpa_sub.read(_lpa_name))
+        except Exception as _lpa_err:
+            zf.writestr(
+                "07_live_process/error.txt",
+                f"Live Process snapshot failed: {_lpa_err}\n",
+            )
 
     buf.seek(0)
     filename = f"eow_bundle_{ts}.zip"
