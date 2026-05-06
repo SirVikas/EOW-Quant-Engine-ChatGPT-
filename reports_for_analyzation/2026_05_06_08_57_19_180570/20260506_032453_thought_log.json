@@ -1,0 +1,1247 @@
+{
+  "captured_at": "2026-05-06T03:24:53.775Z",
+  "snapshot_id": "ea2ab878-fea9-433d-bf5c-48e7d9dd6c83",
+  "total_entries": 248,
+  "entries": [
+    {
+      "ts": 1778036740170,
+      "level": "SYSTEM",
+      "msg": "\ud83d\ude80 EOW Quant Engine booting\u2026"
+    },
+    {
+      "ts": 1778036740170,
+      "level": "SYSTEM",
+      "msg": "Mode: PAPER | Capital: 1000.0 USDT"
+    },
+    {
+      "ts": 1778036740177,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udccb Function Registry loaded \u2014 81 functions registered"
+    },
+    {
+      "ts": 1778036741319,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udcc2 DataLake replay: 521 trades \u2192 equity=823.00 USDT"
+    },
+    {
+      "ts": 1778036741320,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udcc2 State restored: snapshot(823.00) validated vs replay(823.00)"
+    },
+    {
+      "ts": 1778036741322,
+      "level": "SYSTEM",
+      "msg": "\u26a1 Phase 4 Profit Engine online | rr_min=2.0 score_min=0.48 max_per_trade=5% daily_cap=6%"
+    },
+    {
+      "ts": 1778036741323,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 Phase 5 EV Engine online | ev_window=30 ev_min_trades=10 adaptive_lr=0.05 dd_stop=15%"
+    },
+    {
+      "ts": 1778036741323,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udd13 Phase 5.1 Activation Layer online | activator_tiers=T1@5min T2@12min T3@25min | explore_rate=3% smart_fee_rr\u22653.0:15%"
+    },
+    {
+      "ts": 1778036741324,
+      "level": "SYSTEM",
+      "msg": "Phase 6.6 Gate online | can_trade=True reason=BYPASS_ALL_GATES safe_mode=False"
+    },
+    {
+      "ts": 1778036741326,
+      "level": "SYSTEM",
+      "msg": "All subsystems online. Scanning markets\u2026"
+    },
+    {
+      "ts": 1778036741331,
+      "level": "SYSTEM",
+      "msg": "\u26a1 [FTD-031] Performance layer online | target=100.0ms cache_ttl_pattern=60.0s queue_workers=2"
+    },
+    {
+      "ts": 1778036748863,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=87.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036749279,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=39.1"
+    },
+    {
+      "ts": 1778036749346,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=88.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036749761,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udce5 DNA imported from D:\\EOW Quant Engine V17.0(ChatGPT)_INVERSE_LOGIC\\eow_quant_engine_FINAL_v2.2\\eow_quant_engine\\data\\exports\\optimized_dna.json"
+    },
+    {
+      "ts": 1778036750167,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=64.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036755729,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=83.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036756803,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ICPUSDT: RSI filter blocked (rsi=42.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036757599,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=49.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036760185,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TRUMPUSDT: RSI filter blocked (rsi=82.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036760649,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0201 rsi=40.0"
+    },
+    {
+      "ts": 1778036761292,
+      "level": "SYSTEM",
+      "msg": "\u26a1 Mode switched to PAPER"
+    },
+    {
+      "ts": 1778036818911,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=79.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036818958,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=81.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036819006,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=40.4"
+    },
+    {
+      "ts": 1778036819139,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=45.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036823281,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ICPUSDT: RSI filter blocked (rsi=40.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036823435,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LUNCUSDT: LONG entry=0.0001 rsi=38.2"
+    },
+    {
+      "ts": 1778036823436,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG LUNCUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778036823464,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator LUNCUSDT: score=0.369 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=1478629.177147"
+    },
+    {
+      "ts": 1778036823465,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override LUNCUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778036823485,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG LUNCUSDT qty=1478629.177147 risk=12.35U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778036825127,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3880 rsi=57.1"
+    },
+    {
+      "ts": 1778036825497,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TSTUSDT: RSI filter blocked (rsi=47.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036827545,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=67.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036853854,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udce6 Master Report Bundle downloaded \u2192 eow_bundle_1778036851.zip (521 trades, 622 KB)"
+    },
+    {
+      "ts": 1778036879142,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=50.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036879487,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=43.5"
+    },
+    {
+      "ts": 1778036879529,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=79.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036879636,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=45.2"
+    },
+    {
+      "ts": 1778036879884,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3890 rsi=57.1"
+    },
+    {
+      "ts": 1778036880502,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=77.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036881099,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass LTCUSDT: SLEEP_MODE(vol=23=7%_of_avg=319,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778036881106,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.6300 rsi=57.1"
+    },
+    {
+      "ts": 1778036882744,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ICPUSDT: LONG entry=2.6950 rsi=36.7"
+    },
+    {
+      "ts": 1778036882745,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG ICPUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778036882762,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator ICPUSDT: score=0.494 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=61.076438"
+    },
+    {
+      "ts": 1778036882763,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override ICPUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778036882768,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG ICPUSDT qty=61.076438 risk=12.35U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778036892247,
+      "level": "TRADE",
+      "msg": "[TM] ICPUSDT TIME_EXIT @ 2.6910 (Fast-fail: 0.2min r=-0.535<-0.45)"
+    },
+    {
+      "ts": 1778036892257,
+      "level": "TRADE",
+      "msg": "Position closed [SL] ICPUSDT @ 2.691"
+    },
+    {
+      "ts": 1778036897717,
+      "level": "TRADE",
+      "msg": "[TM] LUNCUSDT TIME_EXIT @ 0.0001 (Fast-fail: 1.2min r=-0.454<-0.45)"
+    },
+    {
+      "ts": 1778036897730,
+      "level": "TRADE",
+      "msg": "Position closed [SL] LUNCUSDT @ 0.0001111"
+    },
+    {
+      "ts": 1778036940669,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=63.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036940713,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout DOGSUSDT score=0.706 rr=4.00"
+    },
+    {
+      "ts": 1778036940713,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=40.4"
+    },
+    {
+      "ts": 1778036940749,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=47.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036940982,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=63.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778036942879,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=44.9"
+    },
+    {
+      "ts": 1778036947821,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.6400 rsi=53.8"
+    },
+    {
+      "ts": 1778036951362,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3860 rsi=40.0"
+    },
+    {
+      "ts": 1778036999159,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=58.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778036999263,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2369.2000 rsi=54.9"
+    },
+    {
+      "ts": 1778036999528,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=40.4"
+    },
+    {
+      "ts": 1778036999617,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81370.6600 rsi=57.4"
+    },
+    {
+      "ts": 1778037000267,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.6400 rsi=53.8"
+    },
+    {
+      "ts": 1778037001972,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udd2c Live Process Snapshot downloaded \u2192 eow_live_process_20260506_031001.zip (156 KB | logs=2000 rl_contexts=3 trades=523)"
+    },
+    {
+      "ts": 1778037009795,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=43.3"
+    },
+    {
+      "ts": 1778037013668,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass TRUMPUSDT: SLEEP_MODE(vol=152=8%_of_avg=1819,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037013674,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3860 rsi=36.8"
+    },
+    {
+      "ts": 1778037041389,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #1: meta_score=56.1 verdict=BLOCKED"
+    },
+    {
+      "ts": 1778037058933,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81392.6700 rsi=51.5"
+    },
+    {
+      "ts": 1778037059013,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.6500 rsi=55.6"
+    },
+    {
+      "ts": 1778037059090,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=34.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037059381,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: SHORT entry=2.0250 rsi=63.2"
+    },
+    {
+      "ts": 1778037059381,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT TONUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778037059386,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator TONUSDT: score=0.324 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=81.182707"
+    },
+    {
+      "ts": 1778037059386,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override TONUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778037059388,
+      "level": "TRADE",
+      "msg": "\u2705 Opened SHORT TONUSDT qty=81.182707 risk=4.11U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778037059432,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0201 rsi=47.9"
+    },
+    {
+      "ts": 1778037060768,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ETHUSDT score=0.482 rr=5.00"
+    },
+    {
+      "ts": 1778037060775,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2369.1000 rsi=44.9"
+    },
+    {
+      "ts": 1778037102436,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3900 rsi=47.8"
+    },
+    {
+      "ts": 1778037118848,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2369.1200 rsi=45.5"
+    },
+    {
+      "ts": 1778037118864,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81400.0000 rsi=55.1"
+    },
+    {
+      "ts": 1778037122028,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.6400 rsi=60.0"
+    },
+    {
+      "ts": 1778037129936,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=35.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037137358,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass TRUMPUSDT: SLEEP_MODE(vol=113=6%_of_avg=1980,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037137364,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3900 rsi=50.0"
+    },
+    {
+      "ts": 1778037137537,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass TSTUSDT: SLEEP_MODE(vol=23104=7%_of_avg=340139,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037137543,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0201 rsi=42.6"
+    },
+    {
+      "ts": 1778037181560,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81417.8200 rsi=60.1"
+    },
+    {
+      "ts": 1778037181884,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=39.5"
+    },
+    {
+      "ts": 1778037183319,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2369.7200 rsi=49.8"
+    },
+    {
+      "ts": 1778037184224,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=41.4"
+    },
+    {
+      "ts": 1778037186648,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=62.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778037187632,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass TRUMPUSDT: SLEEP_MODE(vol=20=1%_of_avg=1891,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037187663,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3900 rsi=52.4"
+    },
+    {
+      "ts": 1778037238869,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037238889,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81415.9700 rsi=55.2"
+    },
+    {
+      "ts": 1778037239598,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP DOGSUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037239603,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=32.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037239663,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037239674,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LUNCUSDT: LONG entry=0.0001 rsi=34.3"
+    },
+    {
+      "ts": 1778037239676,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG LUNCUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778037239680,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator LUNCUSDT: score=0.255 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=1477176.586848"
+    },
+    {
+      "ts": 1778037239680,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override LUNCUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778037239682,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG LUNCUSDT qty=1477176.586848 risk=4.11U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778037240276,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037240282,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2369.6600 rsi=45.5"
+    },
+    {
+      "ts": 1778037240697,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037240713,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.6200 rsi=52.4"
+    },
+    {
+      "ts": 1778037242123,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TSTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037242124,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass TSTUSDT: SLEEP_MODE(vol=8082=2%_of_avg=336666,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037242139,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=46.3"
+    },
+    {
+      "ts": 1778037243068,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037243075,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ICPUSDT: SHORT entry=2.6960 rsi=40.3"
+    },
+    {
+      "ts": 1778037249937,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TRUMPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037249940,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass TRUMPUSDT: SLEEP_MODE(vol=87=5%_of_avg=1895,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037249958,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3890 rsi=47.6"
+    },
+    {
+      "ts": 1778037275789,
+      "level": "TRADE",
+      "msg": "[TM] LUNCUSDT TIME_EXIT @ 0.0001 (Fast-fail: 0.6min r=-0.458<-0.45)"
+    },
+    {
+      "ts": 1778037276160,
+      "level": "TRADE",
+      "msg": "Position closed [SL] LUNCUSDT @ 0.00011109"
+    },
+    {
+      "ts": 1778037304822,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037304840,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2368.3800 rsi=42.7"
+    },
+    {
+      "ts": 1778037304881,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037304892,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81410.0100 rsi=56.3"
+    },
+    {
+      "ts": 1778037305264,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TRUMPUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037305268,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3890 rsi=50.0"
+    },
+    {
+      "ts": 1778037305292,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK DOGSUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037305302,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=25.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037305519,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037305541,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.5900 rsi=40.9"
+    },
+    {
+      "ts": 1778037307137,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TSTUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037307142,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TSTUSDT: RSI filter blocked (rsi=34.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037315663,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037315672,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ICPUSDT: SHORT entry=2.6930 rsi=39.7"
+    },
+    {
+      "ts": 1778037341439,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #2: meta_score=55.0 verdict=BLOCKED"
+    },
+    {
+      "ts": 1778037359024,
+      "level": "TRADE",
+      "msg": "[TM] TONUSDT BE: SL\u21922.0222 (R=1.04\u22651.0 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1778037364889,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TSTUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037364893,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TSTUSDT: RSI filter blocked (rsi=27.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037364959,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037364997,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ICPUSDT: SHORT entry=2.6980 rsi=49.2"
+    },
+    {
+      "ts": 1778037365168,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037365189,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2369.6200 rsi=46.9"
+    },
+    {
+      "ts": 1778037366871,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK DOGSUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037366936,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=30.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037367555,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037367575,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81419.8700 rsi=55.3"
+    },
+    {
+      "ts": 1778037368293,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037368302,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.5700 rsi=37.5"
+    },
+    {
+      "ts": 1778037392985,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TRUMPUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778037392993,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3870 rsi=45.5"
+    },
+    {
+      "ts": 1778037419125,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] TONUSDT @ 2.005"
+    },
+    {
+      "ts": 1778037420916,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81389.8900 rsi=44.1"
+    },
+    {
+      "ts": 1778037421337,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2368.9300 rsi=36.1"
+    },
+    {
+      "ts": 1778037421683,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=21.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037422112,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass LTCUSDT: SLEEP_MODE(vol=28=9%_of_avg=333,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037422127,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.5700 rsi=28.6"
+    },
+    {
+      "ts": 1778037422440,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ICPUSDT score=0.632 rr=5.00"
+    },
+    {
+      "ts": 1778037422441,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ICPUSDT: SHORT entry=2.7020 rsi=57.1"
+    },
+    {
+      "ts": 1778037422946,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TSTUSDT: RSI filter blocked (rsi=30.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037423566,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: LONG entry=2.3860 rsi=43.5"
+    },
+    {
+      "ts": 1778037478976,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ICPUSDT: RSI filter blocked (rsi=59.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037479065,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81369.3400 rsi=37.2"
+    },
+    {
+      "ts": 1778037479681,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TSTUSDT: RSI filter blocked (rsi=34.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037480242,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2368.4700 rsi=34.5"
+    },
+    {
+      "ts": 1778037481186,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=32.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037482722,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.5500 rsi=15.0"
+    },
+    {
+      "ts": 1778037486030,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TRUMPUSDT: RSI filter blocked (rsi=38.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037539029,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ICPUSDT: SHORT entry=2.7190 rsi=60.9"
+    },
+    {
+      "ts": 1778037539030,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT ICPUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778037539037,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator ICPUSDT: score=0.504 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=60.525500"
+    },
+    {
+      "ts": 1778037539046,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override ICPUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778037539048,
+      "level": "TRADE",
+      "msg": "\u2705 Opened SHORT ICPUSDT qty=60.525500 risk=12.34U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778037539186,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2369.4300 rsi=34.7"
+    },
+    {
+      "ts": 1778037539679,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=29.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037539747,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81389.9900 rsi=37.4"
+    },
+    {
+      "ts": 1778037540046,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TRUMPUSDT: RSI filter blocked (rsi=35.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037541115,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=41.8"
+    },
+    {
+      "ts": 1778037541607,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LTCUSDT: LONG entry=56.5600 rsi=15.0"
+    },
+    {
+      "ts": 1778037599127,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2370.3900 rsi=39.1"
+    },
+    {
+      "ts": 1778037599391,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037599518,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LUNCUSDT: SHORT entry=0.0001 rsi=50.0"
+    },
+    {
+      "ts": 1778037599661,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81409.9900 rsi=38.8"
+    },
+    {
+      "ts": 1778037600128,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=44.6"
+    },
+    {
+      "ts": 1778037604413,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=22.7 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037631599,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TRUMPUSDT score=0.565 rr=5.00"
+    },
+    {
+      "ts": 1778037631600,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TRUMPUSDT: RSI filter blocked (rsi=40.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037641438,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #3: meta_score=56.3 verdict=BLOCKED"
+    },
+    {
+      "ts": 1778037659121,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=45.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037659157,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=27.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037659331,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=40.0"
+    },
+    {
+      "ts": 1778037659752,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81430.0700 rsi=48.5"
+    },
+    {
+      "ts": 1778037659908,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TRUMPUSDT: RSI filter blocked (rsi=56.3 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037661079,
+      "level": "TRADE",
+      "msg": "[TM] ICPUSDT BE: SL\u21922.7152 (R=1.00\u22651.0 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1778037662196,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0200 rsi=40.4"
+    },
+    {
+      "ts": 1778037662502,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry LUNCUSDT score=0.620 rr=5.00"
+    },
+    {
+      "ts": 1778037662512,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LUNCUSDT: SHORT entry=0.0001 rsi=62.1"
+    },
+    {
+      "ts": 1778037718817,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81453.8300 rsi=53.4"
+    },
+    {
+      "ts": 1778037719130,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass TSTUSDT: SLEEP_MODE(vol=18242=6%_of_avg=305022,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778037719139,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TSTUSDT: SHORT entry=0.0199 rsi=46.0"
+    },
+    {
+      "ts": 1778037719315,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037719320,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=55.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037719396,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP DOGSUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037719405,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback DOGSUSDT: SHORT entry=0.0001 rsi=40.0"
+    },
+    {
+      "ts": 1778037722189,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037722199,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=42.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037722411,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037722417,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=31.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037722930,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TRUMPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037723023,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TRUMPUSDT: RSI filter blocked (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037780700,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037780708,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=50.5 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037780879,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037780894,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2370.7700 rsi=55.6"
+    },
+    {
+      "ts": 1778037780964,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037780988,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=68.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778037781272,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037781284,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=31.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037781403,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TSTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037781418,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout TSTUSDT score=0.824 rr=5.00"
+    },
+    {
+      "ts": 1778037781418,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TSTUSDT: RSI filter blocked (rsi=30.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037781807,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP DOGSUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037781834,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout DOGSUSDT score=0.872 rr=4.00"
+    },
+    {
+      "ts": 1778037781835,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=30.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037782403,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037782417,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=58.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037799767,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TRUMPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037799783,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TRUMPUSDT: SHORT entry=2.3900 rsi=64.3"
+    },
+    {
+      "ts": 1778037799783,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT TRUMPUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778037799797,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator TRUMPUSDT: score=0.396 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=68.857253"
+    },
+    {
+      "ts": 1778037799800,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override TRUMPUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778037799803,
+      "level": "TRADE",
+      "msg": "\u2705 Opened SHORT TRUMPUSDT qty=68.857253 risk=12.34U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778037838819,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037838832,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=75.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778037839380,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TSTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037839388,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TSTUSDT: RSI filter blocked (rsi=27.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037839456,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037839467,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI filter blocked (rsi=35.3 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037839505,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037839520,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=51.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037839534,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037839541,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=62.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778037839799,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037839806,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=43.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778037840207,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP DOGSUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778037840221,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED DOGSUSDT: RSI filter blocked (rsi=22.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778037884277,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udcca Unified Report v2 exported (FTD-025B-URX-V2)"
+    }
+  ]
+}

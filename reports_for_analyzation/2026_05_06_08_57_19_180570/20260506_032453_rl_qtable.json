@@ -1,0 +1,115 @@
+{
+  "captured_at": "2026-05-06T03:24:53.818Z",
+  "total_contexts": 4,
+  "meta": {
+    "module": "RL_CONTEXTUAL_BANDIT",
+    "version": "1.0",
+    "total_contexts": 4,
+    "profitable_pct": 0.25,
+    "total_pulls": 6,
+    "total_updates": 4,
+    "total_allowed": 6,
+    "total_blocked": 0,
+    "allow_rate": 1.0,
+    "explore_trades": 4,
+    "exploit_trades": 2,
+    "explore_ratio": 0.667,
+    "boost_fires": 0,
+    "floor_lowers": 0,
+    "floor_raises": 0,
+    "uptime_min": 19.2,
+    "top_contexts": [
+      {
+        "context": "MEAN_REVERTING|ASIA|MeanReversion",
+        "q_value": 0.0126,
+        "ucb_bonus": 1.0039,
+        "win_rate": 0.25,
+        "n_visits": 4,
+        "total_pnl": -0.1608
+      },
+      {
+        "context": "TRENDING|ASIA|TrendFollowing",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      },
+      {
+        "context": "TRENDING|ASIA|MeanReversion",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      },
+      {
+        "context": "VOLATILITY_EXPANSION|ASIA|TrendFollowing",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      }
+    ],
+    "bottom_contexts": [
+      {
+        "context": "MEAN_REVERTING|ASIA|MeanReversion",
+        "q_value": 0.0126,
+        "ucb_score": 1.0165,
+        "win_rate": 0.25,
+        "n_visits": 4,
+        "total_pnl": -0.1608,
+        "near_block": false
+      }
+    ],
+    "hyper": {
+      "learning_rate": 0.1,
+      "ev_floor": -0.3,
+      "ucb_coeff": 1.5,
+      "min_visits": 3
+    }
+  },
+  "contexts": [
+    {
+      "context_key": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 4,
+      "q_value": 0.0126,
+      "ucb_score": 1.0165,
+      "win_rate": 0.25,
+      "n_wins": 1,
+      "total_pnl": -0.1608,
+      "last_ts": 1778037419146
+    },
+    {
+      "context_key": "TRENDING|ASIA|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "TRENDING|ASIA|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|ASIA|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    }
+  ]
+}
