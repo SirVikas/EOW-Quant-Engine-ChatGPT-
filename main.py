@@ -5122,7 +5122,7 @@ def _generate_evolution_reports(session_trades: list) -> "dict[str, str]":
 # ── FTD-LPA: Live Process Snapshot ───────────────────────────────────────────
 
 @app.get("/api/snapshot/live-process")
-async def download_live_process_snapshot():
+async def download_live_process_snapshot(_auth=Depends(require_roles("operator", "admin"))):
     """
     FTD-LPA: Dedicated Live Process Access snapshot.
 
@@ -5147,6 +5147,7 @@ async def download_live_process_snapshot():
             pnl_calc,
             data_lake,
             list(_thought_log),   # pass a copy — snapshot is moment-in-time
+            _boot_ts,
         )
     except Exception as _exc:
         logger.error(f"[LPA] Snapshot build failed: {_exc}")
@@ -5553,6 +5554,7 @@ async def download_report_bundle():
                 pnl_calc_instance=pnl_calc,
                 data_lake_instance=data_lake,
                 thought_log=list(_thought_log),
+                boot_ts=_boot_ts,
             )
             # Merge the inner LPA ZIP entries into the outer bundle ZIP
             with zipfile.ZipFile(_io.BytesIO(_lpa_zip_bytes)) as _lpa_sub:
