@@ -534,18 +534,194 @@ _section("TEST 8 — status() introspection")
 
 eng = LiveProcessAccessEngine()
 s = eng.status()
-required_keys = {"module", "version", "sink_registered", "sink_id", "log_buffer_len", "log_buffer_max"}
+required_keys = {
+    "module", "version", "sink_registered", "sink_id",
+    "log_buffer_len", "log_buffer_max",
+    "max_message_len", "max_trade_export", "max_bundle_mb",
+}
 missing = required_keys - set(s.keys())
 if not missing:
-    _ok("status() contains all required keys")
+    _ok("status() contains all required keys (including v1.1 additions)")
 else:
     _fail("status() missing keys", str(missing))
 
 assert s["log_buffer_max"] == 2_000
 _ok("log_buffer_max == 2 000 (as documented)")
 
+assert s["max_message_len"] == 2_048
+_ok("max_message_len == 2 048 (B5 truncation cap)")
+
+assert s["max_trade_export"] == 500
+_ok("max_trade_export == 500 (B1 export ceiling)")
+
+assert s["max_bundle_mb"] == 50
+_ok("max_bundle_mb == 50 (B1 package ceiling)")
+
 assert s["module"] == "LIVE_PROCESS_ACCESS"
 _ok("module identifier correct")
+
+assert s["version"] == "1.1"
+_ok("version == '1.1' (v1.1 build)")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TEST 10 — v1.1 hardening: truncation, metadata enrichment, SHA256, ceiling
+# ═══════════════════════════════════════════════════════════════════════════════
+_section("TEST 10 — v1.1 Hardening (B1–B5)")
+
+import core.live_process_access as _lpa_mod
+import uuid as _uuid_mod
+
+# B5 — Message truncation at _MAX_MESSAGE_LEN
+_trunc_sink = _LogSink(maxlen=10)
+long_msg = "X" * (_lpa_mod._MAX_MESSAGE_LEN + 100)
+
+class _LongMsgRec:
+    class _FakeLevel:
+        name = "DEBUG"
+    record = {
+        "time": _FakeTime(), "level": _FakeLevel(), "module": "trunc",
+        "function": "fn", "line": 1, "message": long_msg,
+    }
+
+_trunc_sink.write(_LongMsgRec())
+_snap = _trunc_sink.snapshot()
+if _snap and len(_snap[0]["message"]) == _lpa_mod._MAX_MESSAGE_LEN and _snap[0]["truncated"] is True:
+    _ok(f"B5: Long messages truncated to {_lpa_mod._MAX_MESSAGE_LEN} chars, truncated=True")
+else:
+    _fail("B5: Message truncation", f"len={len(_snap[0]['message']) if _snap else 'empty'} truncated={_snap[0].get('truncated') if _snap else '?'}")
+
+# Short message — truncated must be False
+short_msg = "short"
+
+class _ShortMsgRec:
+    class _FakeLevel:
+        name = "DEBUG"
+    record = {
+        "time": _FakeTime(), "level": _FakeLevel(), "module": "trunc",
+        "function": "fn", "line": 2, "message": short_msg,
+    }
+
+_trunc_sink.write(_ShortMsgRec())
+_snap2 = _trunc_sink.snapshot()
+last_entry = _snap2[-1]
+if last_entry["message"] == "short" and last_entry["truncated"] is False:
+    _ok("B5: Short messages not truncated, truncated=False")
+else:
+    _fail("B5: Short message truncated flag", str(last_entry))
+
+# B3 — snapshot_id (UUID) and generated_at in manifest
+eng_v11 = LiveProcessAccessEngine()
+pkg_v11 = eng_v11.build_package(
+    rl_engine_instance=FakeRLEngine(),
+    pnl_calc_instance=FakePnlCalc(),
+    data_lake_instance=FakeDataLake(),
+    thought_log=thought_log_sample,
+    boot_ts=time.time() - 300.0,   # 5 minutes uptime
+)
+
+with zipfile.ZipFile(io.BytesIO(pkg_v11)) as _zf:
+    _mf_name = next(n for n in _zf.namelist() if n.endswith("_MANIFEST.json"))
+    _manifest = json.loads(_zf.read(_mf_name))
+
+# snapshot_id — must be a valid UUID4
+try:
+    _uid = _uuid_mod.UUID(_manifest.get("snapshot_id", ""), version=4)
+    _ok("B3: snapshot_id is a valid UUID4")
+except (ValueError, AttributeError):
+    _fail("B3: snapshot_id", f"got: {_manifest.get('snapshot_id')!r}")
+
+# version == "1.1"
+if _manifest.get("version") == "1.1":
+    _ok("B3: manifest version == '1.1'")
+else:
+    _fail("B3: manifest version", f"got {_manifest.get('version')!r}")
+
+# generated_at present and ISO-8601
+_gat = _manifest.get("generated_at", "")
+if _gat.endswith("Z") and "T" in _gat:
+    _ok("B3: generated_at is ISO-8601 UTC timestamp")
+else:
+    _fail("B3: generated_at format", _gat)
+
+# runtime_uptime_sec — should be ~300s (we passed boot_ts 300s ago)
+_ups = _manifest.get("runtime_uptime_sec")
+if isinstance(_ups, (int, float)) and 290 <= _ups <= 310:
+    _ok(f"B3: runtime_uptime_sec ≈ 300s (got {_ups})")
+else:
+    _fail("B3: runtime_uptime_sec", f"got {_ups!r}")
+
+# runtime_uptime_sec when boot_ts=None → None
+_pkg_no_boot = eng_v11.build_package(
+    rl_engine_instance=FakeRLEngine(),
+    thought_log=[],
+)
+with zipfile.ZipFile(io.BytesIO(_pkg_no_boot)) as _zf2:
+    _mf2 = json.loads(_zf2.read(next(n for n in _zf2.namelist() if n.endswith("_MANIFEST.json"))))
+if _mf2.get("runtime_uptime_sec") is None:
+    _ok("B3: runtime_uptime_sec is None when boot_ts not provided")
+else:
+    _fail("B3: runtime_uptime_sec without boot_ts", str(_mf2.get("runtime_uptime_sec")))
+
+# B2 — artifact_sizes dict in manifest (all sizes > 0)
+_art_sizes = _manifest.get("artifact_sizes", {})
+if _art_sizes and all(isinstance(v, int) and v > 0 for v in _art_sizes.values()):
+    _ok(f"B2: artifact_sizes present with {len(_art_sizes)} entries, all > 0")
+else:
+    _fail("B2: artifact_sizes", str(_art_sizes))
+
+# B4 — sha256_hashes dict in manifest, all 64-char hex strings
+_hashes = _manifest.get("sha256_hashes", {})
+if _hashes and all(isinstance(v, str) and len(v) == 64 for v in _hashes.values()):
+    _ok(f"B4: sha256_hashes present with {len(_hashes)} entries, all 64-char hex")
+else:
+    _fail("B4: sha256_hashes", str({k: len(v) for k, v in _hashes.items()}))
+
+# B4 — CHECKSUMS.sha256 file present in ZIP
+with zipfile.ZipFile(io.BytesIO(pkg_v11)) as _zf3:
+    _cs_names = [n for n in _zf3.namelist() if n.endswith("_CHECKSUMS.sha256")]
+    if _cs_names:
+        _cs_content = _zf3.read(_cs_names[0]).decode("utf-8")
+        # Format: "<sha256hex>  <filename>" per line
+        _cs_lines = [l for l in _cs_content.strip().split("\n") if l]
+        if all(len(l.split("  ")) == 2 and len(l.split("  ")[0]) == 64 for l in _cs_lines):
+            _ok(f"B4: CHECKSUMS.sha256 present with {len(_cs_lines)} entries in standard format")
+        else:
+            _fail("B4: CHECKSUMS.sha256 format", _cs_content[:200])
+    else:
+        _fail("B4: CHECKSUMS.sha256 file missing from ZIP")
+
+# B1 — export_limits in manifest
+_exp_lim = _manifest.get("export_limits", {})
+_exp_keys = {"max_log_records", "max_message_len", "max_trade_records", "max_bundle_bytes"}
+if _exp_keys.issubset(set(_exp_lim.keys())):
+    _ok("B1: export_limits present with all required keys")
+else:
+    _fail("B1: export_limits missing keys", str(_exp_keys - set(_exp_lim.keys())))
+
+# B1 — Bundle ceiling: monkeypatch _MAX_BUNDLE_BYTES to 1 byte and expect ValueError
+_orig_ceiling = _lpa_mod._MAX_BUNDLE_BYTES
+_lpa_mod._MAX_BUNDLE_BYTES = 1  # force ceiling breach
+try:
+    _ceiling_eng = LiveProcessAccessEngine()
+    _ceiling_eng.build_package(thought_log=[])
+    _fail("B1: Bundle ceiling — expected ValueError, no exception raised")
+except ValueError as _ve:
+    if "ceiling" in str(_ve).lower() or "MB" in str(_ve):
+        _ok("B1: Bundle ceiling raises ValueError when exceeded")
+    else:
+        _fail("B1: ValueError raised but unexpected message", str(_ve))
+except Exception as _other:
+    _fail("B1: Bundle ceiling raised wrong exception type", f"{type(_other).__name__}: {_other}")
+finally:
+    _lpa_mod._MAX_BUNDLE_BYTES = _orig_ceiling   # restore
+
+# B3 — architecture block in manifest
+_arch = _manifest.get("architecture", {})
+if "extraction_mode" in _arch and _arch.get("extraction_mode") == "read-only":
+    _ok("B3: architecture block present with extraction_mode=read-only")
+else:
+    _fail("B3: architecture block", str(_arch))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
