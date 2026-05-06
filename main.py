@@ -197,6 +197,9 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
     "BABYUSDT",  # chronic loser confirmed across 2 sessions
     # report-5 (2026-05-05 08:25): ALL-period forensics, 502-trade dataset
     "DASHUSDT",  # 8 trades, net -$5.43, fee 75.2% of gross (FEE_HEAVY); worst 1D at -$3.10
+    # report-6 (2026-05-06 03:24): 525-trade dataset — no new structural additions.
+    # BIOUSDT/ETHUSDT/ORCAUSDT losses traced to TF_EMA_RSI_v1 (disabled); fee ratios OK.
+    # LUNCUSDT appears FEE_TOXIC in report but net_pnl = +$2.74 — profitable, not blocked.
 })
 
 # FTD-037: Strategy disable list — all strategies confirmed NOISE in 20-unit ALL data.
@@ -227,7 +230,8 @@ _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
 # Paper-speed fallback block (prevents synthesizing signals for bad strategy types)
 _DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({"TrendFollowing"})
 
-# Hour gate — enforced regardless of BYPASS_ALL_GATES (calendar filter, not data gate).
+# Hour gate — skipped in BYPASS_ALL_GATES mode so RL can accumulate data across all hours.
+# Enforced in LIVE mode only (calendar filter, not a data quality gate).
 # Source: ALL-period hourly forensics across 502 trades (2026-05-05 session).
 # Golden hours (net positive, ≥19 trades): 04(+$2.60,n=31), 05(+$2.60,n=19),
 #   07(+$6.01,n=27), 10(+$1.73,n=26), 14(+$3.23,n=36).
@@ -3126,6 +3130,69 @@ async def reset_engine(_auth=Depends(require_roles("admin"))):
         "previously_halted":  prev_halted,
         "open_positions":     len(risk_ctrl.positions),
         "ts":                 int(time.time() * 1000),
+    }
+
+
+@app.post("/api/reset-session")
+async def reset_session_state(_auth=Depends(require_roles("admin"))):
+    """
+    ADMIN: Full in-memory session reset — clean slate for a new learning cycle.
+
+    Clears:
+      • RL Q-table + pull counter     — bandit starts fresh exploration
+      • PnL trade list + capital      — session metrics reset to initial capital
+      • Strategy session PnL map      — loss-cap counters reset to zero
+      • CT-Scan thought log           — decision trace cleared
+      • Symbol timing caches          — cooldowns and debounce state cleared
+      • Exploration trade flags       — clears open exploration markers
+
+    Does NOT:
+      • Close open positions (risk_ctrl.positions untouched)
+      • Clear the SQLite database     — history is preserved for forensic reference
+      • Change halt / graceful_stop state
+      • Modify genome / DNA parameters
+
+    Race-condition note: this endpoint runs in the asyncio event loop while
+    _scan_market runs in to_thread(). Under GIL the dict.clear() calls are
+    effectively atomic, but call this endpoint only when the engine is idle
+    or has been gracefully stopped to avoid a mid-scan partial state.
+    """
+    # ── 1. RL Q-table ────────────────────────────────────────────────────────
+    rl_engine._table.clear()
+    rl_engine._total_pulls = 0
+
+    # ── 2. PnL calculator ────────────────────────────────────────────────────
+    pnl_calc.trades.clear()
+    pnl_calc.capital = pnl_calc._initial_capital
+
+    # ── 3. Strategy session loss-cap tracking ────────────────────────────────
+    _strategy_session_pnl.clear()
+
+    # ── 4. CT-Scan thought log ───────────────────────────────────────────────
+    _thought_log.clear()
+
+    # ── 5. Symbol timing and state caches ────────────────────────────────────
+    _last_trade_ts.clear()
+    _trades_this_hour.clear()
+    _last_processed_candle_ts.clear()
+    _last_symbol_eval_ms.clear()
+    _is_exploration_trade.clear()
+    _closed_trade_count[0] = 0
+
+    msg = (
+        "🔄 SESSION RESET — RL Q-table cleared (0 contexts), "
+        "PnL history cleared, strategy loss-cap counters reset, "
+        "thought log cleared. Fresh learning cycle started."
+    )
+    _thought(msg, "SYSTEM")
+    logger.info(f"[RESET-SESSION] Full session reset executed by admin.")
+
+    return {
+        "reset":               True,
+        "rl_table_contexts":   0,
+        "pnl_trades_cleared":  True,
+        "capital_restored_to": pnl_calc._initial_capital,
+        "ts":                  int(time.time() * 1000),
     }
 
 
