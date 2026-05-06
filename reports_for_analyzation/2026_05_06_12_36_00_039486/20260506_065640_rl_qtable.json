@@ -1,0 +1,173 @@
+{
+  "captured_at": "2026-05-06T06:56:40.926Z",
+  "total_contexts": 9,
+  "meta": {
+    "module": "RL_CONTEXTUAL_BANDIT",
+    "version": "1.0",
+    "total_contexts": 9,
+    "profitable_pct": 0.0,
+    "total_pulls": 277,
+    "total_updates": 10,
+    "total_allowed": 277,
+    "total_blocked": 0,
+    "allow_rate": 1.0,
+    "explore_trades": 82,
+    "exploit_trades": 195,
+    "explore_ratio": 0.296,
+    "boost_fires": 0,
+    "floor_lowers": 0,
+    "floor_raises": 0,
+    "uptime_min": 231.0,
+    "top_contexts": [
+      {
+        "context": "TRENDING|ASIA|TrendFollowing",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      },
+      {
+        "context": "TRENDING|ASIA|MeanReversion",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      },
+      {
+        "context": "VOLATILITY_EXPANSION|ASIA|TrendFollowing",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      },
+      {
+        "context": "VOLATILITY_EXPANSION|ASIA|MeanReversion",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      },
+      {
+        "context": "MEAN_REVERTING|LONDON|MeanReversion",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0
+      }
+    ],
+    "bottom_contexts": [
+      {
+        "context": "MEAN_REVERTING|ASIA|MeanReversion",
+        "q_value": -0.2526,
+        "ucb_score": 0.8723,
+        "win_rate": 0.2,
+        "n_visits": 10,
+        "total_pnl": -3.4239,
+        "near_block": false
+      }
+    ],
+    "hyper": {
+      "learning_rate": 0.1,
+      "ev_floor": -0.3,
+      "ucb_coeff": 1.5,
+      "min_visits": 3
+    }
+  },
+  "contexts": [
+    {
+      "context_key": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 10,
+      "q_value": -0.2526,
+      "ucb_score": 0.8723,
+      "win_rate": 0.2,
+      "n_wins": 2,
+      "total_pnl": -3.4239,
+      "last_ts": 1778038456082
+    },
+    {
+      "context_key": "TRENDING|ASIA|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "TRENDING|ASIA|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|ASIA|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|ASIA|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|LONDON|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "TRENDING|LONDON|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "TRENDING|LONDON|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    }
+  ]
+}
