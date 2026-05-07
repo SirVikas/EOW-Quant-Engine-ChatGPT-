@@ -1,5 +1,5 @@
 {
-  "saved_at": 1777344344453,
+  "saved_at": 1778131333191,
   "active_dna": {
     "TrendFollowing": {
       "strategy": "TF_EMA_RSI_v1",
@@ -20,7 +20,7 @@
       "rsi_period": 12,
       "rsi_ob": 67.109,
       "rsi_os": 35.804,
-      "atr_period": 13,
+      "atr_period": 12,
       "atr_sl": 2.5,
       "atr_tp": 5.435
     },
@@ -52,7 +52,7 @@
         "rsi_period": 12,
         "rsi_ob": 67.109,
         "rsi_os": 35.804,
-        "atr_period": 13,
+        "atr_period": 12,
         "atr_sl": 2.5,
         "atr_tp": 5.435
       }

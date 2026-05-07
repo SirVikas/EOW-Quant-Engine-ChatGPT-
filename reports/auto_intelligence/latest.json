@@ -1,35 +1,22 @@
 {
-  "cycle_num": 12,
-  "ts_start": 1777391918578,
-  "ts_end": 1777391918582,
-  "phase": "COMPLETE",
-  "meta_score": 85.0,
-  "blocked": false,
-  "block_reason": "",
-  "correction_verdict": "BLOCKED",
+  "cycle_num": 73,
+  "ts_start": 1778175789905,
+  "ts_end": 1778175789914,
+  "phase": "BLOCKED",
+  "meta_score": 54.3,
+  "blocked": true,
+  "block_reason": "META_SCORE_TOO_LOW(54.3<55.0)",
+  "correction_verdict": "\u2014",
   "applied_count": 0,
   "rollback_count": 0,
   "validation": {
     "ftd028_meta": {
-      "system_score": 85.0,
-      "stability_score": 100.0,
-      "confidence_score": 85.68
+      "system_score": 54.3,
+      "stability_score": 0.0,
+      "confidence_score": 70.85
     },
-    "meta_score": 85.0
+    "meta_score": 54.3
   },
-  "correction": {
-    "cycle_id": "75ffaebc",
-    "module": "CORRECTION_ORCHESTRATOR",
-    "phase": "029",
-    "verdict": "BLOCKED",
-    "code": "AI_BRAIN_SCORE_LOW",
-    "detail": "AI_BRAIN_SCORE_LOW: 35.7 < 70.0 (Q7)",
-    "applied": [],
-    "blocked": [],
-    "ts": 1777391918582,
-    "blocking_reasons": [
-      "AI_BRAIN_SCORE_LOW: 35.7 < 70.0 (Q7)"
-    ]
-  },
+  "correction": {},
   "post_check": {}
 }

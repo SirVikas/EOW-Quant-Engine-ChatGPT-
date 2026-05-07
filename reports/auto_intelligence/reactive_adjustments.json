@@ -1,0 +1,268 @@
+{
+  "module": "REACTIVE_EVOLUTION",
+  "total_adjustments": 34,
+  "symbols_tracked": 14,
+  "suppressed_symbols": [
+    "VIRTUALUSDT",
+    "DOGSUSDT",
+    "LUNCUSDT"
+  ],
+  "braked_symbols": [
+    "ICPUSDT",
+    "VANAUSDT",
+    "VIRTUALUSDT",
+    "ETHUSDT",
+    "ONDOUSDT",
+    "DOGSUSDT"
+  ],
+  "active_overrides": {
+    "ICPUSDT": {
+      "rsi_ob": 67.0,
+      "rsi_os": 33.0,
+      "atr_sl": 0.95,
+      "atr_tp": 2.08
+    },
+    "JTOUSDT": {
+      "atr_sl": 0.9,
+      "atr_tp": 2.16
+    },
+    "IOUSDT": {
+      "atr_sl": 0.9,
+      "atr_tp": 2.16
+    },
+    "BTCUSDT": {
+      "atr_sl": 0.9,
+      "atr_tp": 2.16
+    },
+    "VANAUSDT": {
+      "rsi_ob": 67.0,
+      "rsi_os": 33.0,
+      "atr_sl": 0.85,
+      "atr_tp": 2.24
+    },
+    "ETHUSDT": {
+      "rsi_ob": 67.0,
+      "rsi_os": 33.0,
+      "atr_sl": 0.9,
+      "atr_tp": 2.16
+    },
+    "NEARUSDT": {
+      "atr_sl": 0.95,
+      "atr_tp": 2.08
+    },
+    "ONDOUSDT": {
+      "rsi_ob": 67.0,
+      "rsi_os": 33.0,
+      "atr_sl": 0.85,
+      "atr_tp": 2.24
+    },
+    "FILUSDT": {
+      "atr_sl": 0.9,
+      "atr_tp": 2.16
+    },
+    "NOTUSDT": {
+      "atr_sl": 0.95,
+      "atr_tp": 2.08
+    },
+    "DUSDT": {
+      "atr_sl": 0.95,
+      "atr_tp": 2.08
+    }
+  },
+  "adjustments_by_category": {
+    "ENTRY_REFINEMENT": 21,
+    "EXPENSE_REDUCTION": 11,
+    "CAPITAL_PROTECTION": 2
+  },
+  "adjustments_by_diagnosis": {
+    "NORMAL_SL": 21,
+    "FEE_TOXIC": 11,
+    "VOLATILITY_SLIP": 2
+  },
+  "atr_ema_tracked": 15,
+  "recent_adjustments": [
+    {
+      "ts": 1778158499785,
+      "ts_fmt": "2026-05-07 12:54:59 UTC",
+      "symbol": "ETHUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.0884,
+      "r_multiple": -0.0884,
+      "diagnosis": "FEE_TOXIC",
+      "category": "EXPENSE_REDUCTION",
+      "changes": {
+        "suppressed_until": 1778159399.785562
+      },
+      "note": "Symbol suppressed for 15 min. Fee ratio 262.9% exceeds 50% threshold. Profit-centric: avoiding high-fee, low-gain pattern."
+    },
+    {
+      "ts": 1778160513034,
+      "ts_fmt": "2026-05-07 13:28:33 UTC",
+      "symbol": "VANAUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.4308,
+      "r_multiple": -0.4308,
+      "diagnosis": "NORMAL_SL",
+      "category": "ENTRY_REFINEMENT",
+      "changes": {
+        "atr_sl": {
+          "from": 0.95,
+          "to": 0.9
+        },
+        "atr_tp": {
+          "from": 2.08,
+          "to": 2.16
+        }
+      },
+      "note": "Micro-adjustment: sl 0.95\u21920.9 tp 2.08\u21922.16 RR=2.4x."
+    },
+    {
+      "ts": 1778160556007,
+      "ts_fmt": "2026-05-07 13:29:16 UTC",
+      "symbol": "ONDOUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.8931,
+      "r_multiple": -0.8931,
+      "diagnosis": "NORMAL_SL",
+      "category": "ENTRY_REFINEMENT",
+      "changes": {
+        "atr_sl": {
+          "from": 0.9,
+          "to": 0.85
+        },
+        "atr_tp": {
+          "from": 2.16,
+          "to": 2.24
+        }
+      },
+      "note": "Micro-adjustment: sl 0.9\u21920.85 tp 2.16\u21922.24 RR=2.64x."
+    },
+    {
+      "ts": 1778160820003,
+      "ts_fmt": "2026-05-07 13:33:40 UTC",
+      "symbol": "DOGSUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.0326,
+      "r_multiple": -0.0326,
+      "diagnosis": "FEE_TOXIC",
+      "category": "EXPENSE_REDUCTION",
+      "changes": {
+        "suppressed_until": 1778161720.0017745
+      },
+      "note": "Symbol suppressed for 15 min. Fee ratio 66.7% exceeds 50% threshold. Profit-centric: avoiding high-fee, low-gain pattern."
+    },
+    {
+      "ts": 1778160889360,
+      "ts_fmt": "2026-05-07 13:34:49 UTC",
+      "symbol": "LUNCUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.0035,
+      "r_multiple": -0.0035,
+      "diagnosis": "FEE_TOXIC",
+      "category": "EXPENSE_REDUCTION",
+      "changes": {
+        "suppressed_until": 1778161789.3607075
+      },
+      "note": "Symbol suppressed for 15 min. Fee ratio 58.0% exceeds 50% threshold. Profit-centric: avoiding high-fee, low-gain pattern."
+    },
+    {
+      "ts": 1778161056869,
+      "ts_fmt": "2026-05-07 13:37:36 UTC",
+      "symbol": "VIRTUALUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.0162,
+      "r_multiple": -0.0162,
+      "diagnosis": "FEE_TOXIC",
+      "category": "EXPENSE_REDUCTION",
+      "changes": {
+        "suppressed_until": 1778161956.8692243
+      },
+      "note": "Symbol suppressed for 15 min. Fee ratio 61.5% exceeds 50% threshold. Profit-centric: avoiding high-fee, low-gain pattern."
+    },
+    {
+      "ts": 1778161063719,
+      "ts_fmt": "2026-05-07 13:37:43 UTC",
+      "symbol": "ETHUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.4049,
+      "r_multiple": -0.4049,
+      "diagnosis": "NORMAL_SL",
+      "category": "ENTRY_REFINEMENT",
+      "changes": {
+        "atr_sl": {
+          "from": 0.95,
+          "to": 0.9
+        },
+        "atr_tp": {
+          "from": 2.08,
+          "to": 2.16
+        }
+      },
+      "note": "Micro-adjustment: sl 0.95\u21920.9 tp 2.08\u21922.16 RR=2.4x."
+    },
+    {
+      "ts": 1778161097564,
+      "ts_fmt": "2026-05-07 13:38:17 UTC",
+      "symbol": "FILUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.3374,
+      "r_multiple": -0.3374,
+      "diagnosis": "NORMAL_SL",
+      "category": "ENTRY_REFINEMENT",
+      "changes": {
+        "atr_sl": {
+          "from": 0.95,
+          "to": 0.9
+        },
+        "atr_tp": {
+          "from": 2.08,
+          "to": 2.16
+        }
+      },
+      "note": "Micro-adjustment: sl 0.95\u21920.9 tp 2.08\u21922.16 RR=2.4x."
+    },
+    {
+      "ts": 1778161109586,
+      "ts_fmt": "2026-05-07 13:38:29 UTC",
+      "symbol": "DUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.6937,
+      "r_multiple": -0.6937,
+      "diagnosis": "NORMAL_SL",
+      "category": "ENTRY_REFINEMENT",
+      "changes": {
+        "atr_sl": {
+          "from": 1.0,
+          "to": 0.95
+        },
+        "atr_tp": {
+          "from": 2.0,
+          "to": 2.08
+        }
+      },
+      "note": "Micro-adjustment: sl 1.0\u21920.95 tp 2.0\u21922.08 RR=2.19x."
+    },
+    {
+      "ts": 1778161145852,
+      "ts_fmt": "2026-05-07 13:39:05 UTC",
+      "symbol": "VANAUSDT",
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "trade_pnl": -0.5323,
+      "r_multiple": -0.5323,
+      "diagnosis": "NORMAL_SL",
+      "category": "ENTRY_REFINEMENT",
+      "changes": {
+        "atr_sl": {
+          "from": 0.9,
+          "to": 0.85
+        },
+        "atr_tp": {
+          "from": 2.16,
+          "to": 2.24
+        }
+      },
+      "note": "Micro-adjustment: sl 0.9\u21920.85 tp 2.16\u21922.24 RR=2.64x."
+    }
+  ],
+  "snapshot_ts": 1778161145852
+}
