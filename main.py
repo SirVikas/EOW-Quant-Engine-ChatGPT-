@@ -410,11 +410,14 @@ async def on_tick(tick: Tick):
             )
             confidence_decay.reset(sym, _trade_strategy)  # fresh start after trade
             # RL: update Q-value for this (regime, hour, strategy) context
+            # fee_cost + r_multiple enable multi-factor reward shaping (FTD-RL-EVOLUTION)
             rl_engine.update(
                 regime=_trade_regime,
                 utc_hour=__import__("datetime").datetime.utcnow().hour,
                 strategy=_closed_strat_type,
                 net_pnl=last_trade.net_pnl,
+                fee_cost=_trade_cost,
+                r_multiple=_r_mult,
             )
             # Phase 5.1: record exploration outcome + reset activator timer + flow monitor
             if _is_exploration_trade.pop(sym, False):
