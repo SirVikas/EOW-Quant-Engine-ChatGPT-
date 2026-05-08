@@ -3,3 +3,4 @@ raw/*.json
 compressed/*.json
 latest/*.json
 sync_queue/*.json
+escalations/*.json
