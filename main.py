@@ -122,6 +122,8 @@ from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
 from core.lean_gate import lean_gate
 from core.rl_engine import rl_engine                              # RL Contextual Bandit
 from core.live_process_access import live_process_access          # FTD-LPA: runtime observability
+from core.observability.orchestrator import obs_orchestrator, OBS_TICK_INTERVAL_SECS  # FTD-053-GAIA Phase 6
+from core.observability.snapshot_builder import build_raw_snapshot                    # FTD-053-GAIA Phase 6
 
 
 def _safe_num(v):
@@ -2132,6 +2134,40 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     logger.info(
         f"[FTD-030] Auto-intelligence loop started | "
         f"interval={cfg.AUTO_INTELLIGENCE_INTERVAL_MIN}min"
+    )
+
+    # ── FTD-053-GAIA Phase 6: Observability Orchestrator loop ────────────────
+    async def _obs_orchestrator_loop():
+        """Runs every OBS_TICK_INTERVAL_SECS. Feeds full pipeline non-blockingly."""
+        await asyncio.sleep(OBS_TICK_INTERVAL_SECS)   # skip first tick at cold boot
+        while True:
+            try:
+                raw = build_raw_snapshot(
+                    rl_engine         = rl_engine,
+                    pnl_calc          = pnl_calc,
+                    risk_ctrl         = risk_ctrl,
+                    trade_flow_monitor= trade_flow_monitor,
+                    learning_engine   = learning_engine,
+                    regime_det        = regime_det,
+                    boot_ts           = _boot_ts,
+                    error_count       = len(error_registry.recent(1)),
+                )
+                result = await asyncio.to_thread(obs_orchestrator.tick, raw)
+                if result:
+                    logger.debug(
+                        f"[FTD-053] obs tick={result.tick_id} "
+                        f"anomalies={result.anomaly_count} "
+                        f"worst={result.worst_severity} "
+                        f"dt={result.duration_ms}ms"
+                    )
+            except Exception as exc:
+                logger.warning(f"[FTD-053] Orchestrator loop error: {exc}")
+            await asyncio.sleep(OBS_TICK_INTERVAL_SECS)
+
+    tasks.append(asyncio.create_task(_obs_orchestrator_loop()))
+    logger.info(
+        f"[FTD-053] Observability orchestrator loop started | "
+        f"interval={OBS_TICK_INTERVAL_SECS}s"
     )
 
     # ── FTD-031: Performance Optimization Layer ───────────────────────────────
