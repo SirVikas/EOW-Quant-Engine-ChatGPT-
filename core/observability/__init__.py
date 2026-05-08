@@ -9,6 +9,7 @@ Phase 1: intelligence_compressor, report_lifecycle_engine
 Phase 2: delta_reporter, anomaly_detector
 Phase 3: github_sync_engine
 Phase 4: ai_summary_engine, strategic_feed
+Phase 5: event_bus, escalation_engine
 """
 from core.observability.intelligence_compressor import intelligence_compressor, IntelligenceCompressor
 from core.observability.report_lifecycle_engine import report_lifecycle_engine, ReportLifecycleEngine
@@ -17,6 +18,8 @@ from core.observability.anomaly_detector import anomaly_detector, AnomalyDetecto
 from core.observability.github_sync_engine import github_sync_engine, GitHubSyncEngine
 from core.observability.ai_summary_engine import ai_summary_engine, AISummaryEngine
 from core.observability.strategic_feed import strategic_feed, StrategicFeed
+from core.observability.event_bus import event_bus, EventBus
+from core.observability.escalation_engine import escalation_engine, EscalationEngine
 
 __all__ = [
     "intelligence_compressor",
@@ -33,4 +36,8 @@ __all__ = [
     "AISummaryEngine",
     "strategic_feed",
     "StrategicFeed",
+    "event_bus",
+    "EventBus",
+    "escalation_engine",
+    "EscalationEngine",
 ]
