@@ -1,0 +1,4 @@
+# Runtime-generated observability report files — not source-controlled
+raw/*.json
+compressed/*.json
+latest/*.json
