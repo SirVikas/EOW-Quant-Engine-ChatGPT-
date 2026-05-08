@@ -5277,6 +5277,196 @@ async def download_live_process_snapshot(_auth=Depends(require_roles("operator",
     )
 
 
+# ── FTD-053-GAIA Phase 7: Observability API ──────────────────────────────────
+#
+# Eight read-only endpoints that expose the full Phases 1-6 pipeline to the
+# operator during the FTD-054 stabilization window.  No new adaptive logic —
+# purely surfacing data that already exists inside the observability stack.
+#
+
+from core.observability.anomaly_detector   import anomaly_detector as _obs_ad
+from core.observability.escalation_engine  import escalation_engine as _obs_ee
+from core.observability.event_bus          import event_bus as _obs_eb
+from core.observability.strategic_feed     import strategic_feed as _obs_sf
+from core.observability.ai_summary_engine  import ai_summary_engine as _obs_se
+from core.observability.github_sync_engine import github_sync_engine as _obs_gse
+from core.observability.report_lifecycle_engine import report_lifecycle_engine as _obs_rle
+from core.observability.delta_reporter     import delta_reporter as _obs_dr
+
+
+def _obs_health_status(orch_stats: dict) -> dict:
+    """Derive pipeline health from orchestrator stats."""
+    now_ms       = int(time.time() * 1000)
+    last_tick    = orch_stats.get("last_tick_ts", 0)
+    total_ticks  = orch_stats.get("total_ticks", 0)
+    age_secs     = round((now_ms - last_tick) / 1000, 1) if last_tick else None
+    interval     = orch_stats.get("tick_interval_secs", 120)
+
+    if total_ticks == 0:
+        health = "COLD"
+    elif age_secs is not None and age_secs > interval * 3:
+        health = "STALE"
+    elif orch_stats.get("total_errors", 0) > orch_stats.get("total_ticks", 1) * 0.25:
+        health = "DEGRADED"
+    else:
+        health = "HEALTHY"
+
+    total = max(total_ticks, 1)
+    return {
+        "status":          health,
+        "total_ticks":     total_ticks,
+        "age_secs":        age_secs,
+        "tick_interval_secs": interval,
+        "dedup_ratio":     round(orch_stats.get("total_deduped", 0) / total, 3),
+        "anomaly_rate":    round(orch_stats.get("total_anomalies", 0) / total, 2),
+        "escalation_rate": round(orch_stats.get("total_escalations", 0) / total, 3),
+        "sync_rate":       round(orch_stats.get("total_syncs", 0) / total, 3),
+        "last_tick_ms":    orch_stats.get("last_tick_ms", 0),
+    }
+
+
+@app.get("/api/observability/status")
+async def obs_status():
+    """
+    FTD-053-GAIA Phase 7: Full observability pipeline status.
+    Aggregates stats from all six phases plus a computed health indicator.
+    """
+    try:
+        orch = obs_orchestrator.stats()
+        return _sanitize({
+            "health":         _obs_health_status(orch),
+            "orchestrator":   orch,
+            "anomaly_engine": _obs_ad.stats(),
+            "escalation":     _obs_ee.stats(),
+            "event_bus":      _obs_eb.status(),
+            "strategic_feed": _obs_sf.status(),
+            "summary_engine": _obs_se.stats(),
+            "sync_engine":    _obs_gse.status(),
+            "lifecycle":      _obs_rle.status(),
+            "delta_reporter": _obs_dr.stats(),
+        })
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observability/health")
+async def obs_health():
+    """
+    FTD-053-GAIA Phase 7: Compact pipeline health check.
+    Returns HEALTHY / STALE / DEGRADED / COLD plus key operational metrics.
+    """
+    try:
+        return _sanitize(_obs_health_status(obs_orchestrator.stats()))
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observability/anomalies")
+async def obs_anomalies(limit: int = 30, min_severity: str = "LOW"):
+    """
+    FTD-053-GAIA Phase 7: Active anomalies and recent anomaly history.
+    Query param min_severity: LOW | MEDIUM | HIGH | CRITICAL (default LOW).
+    """
+    try:
+        return _sanitize({
+            "active_summary": _obs_ad.get_active_summary(),
+            "recent_history": _obs_ad.get_history(limit=limit, min_severity=min_severity),
+            "stats":          _obs_ad.stats(),
+        })
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observability/escalations")
+async def obs_escalations(limit: int = 20):
+    """
+    FTD-053-GAIA Phase 7: Active escalations and recent escalation history.
+    """
+    try:
+        return _sanitize({
+            "active":  _obs_ee.get_active_escalations(),
+            "history": _obs_ee.get_history(limit=limit),
+            "stats":   _obs_ee.stats(),
+        })
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observability/escalation/{esc_id}/acknowledge")
+async def obs_acknowledge_escalation(esc_id: str, reason: str = ""):
+    """
+    FTD-053-GAIA Phase 7: Human override — acknowledge an active escalation.
+    Suppresses re-escalation for the same trigger for ACK_SUPPRESS_SECS.
+    """
+    try:
+        ok = _obs_ee.acknowledge(esc_id, reason=reason or "operator-ack")
+        return {"acknowledged": ok, "escalation_id": esc_id}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observability/feeds")
+async def obs_feeds():
+    """
+    FTD-053-GAIA Phase 7: Strategic intelligence feeds (all five channels).
+    Each feed includes signal_strength, headline, and last refresh timestamp.
+    """
+    try:
+        sf_status = _obs_sf.status()
+        feeds_raw = sf_status.get("feeds", {})
+        return _sanitize({
+            "feeds":             feeds_raw,
+            "max_signal_strength": sf_status.get("max_signal_strength", 0.0),
+            "last_refresh_ts":   sf_status.get("last_refresh_ts", 0),
+            "total_refreshes":   sf_status.get("total_refreshes", 0),
+        })
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observability/summary")
+async def obs_summary():
+    """
+    FTD-053-GAIA Phase 7: Latest AI strategic intelligence summary.
+    Returns the most recently generated summary from the pipeline, or a
+    cold-start notice if the orchestrator has not yet ticked.
+    """
+    try:
+        last = _obs_se.get_last_summary()
+        if last is None:
+            return {"status": "COLD_START", "message": "No summary generated yet"}
+        return _sanitize(last)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observability/events")
+async def obs_events(limit: int = 30):
+    """
+    FTD-053-GAIA Phase 7: Recent event bus events (key names only, no payload values).
+    Useful for diagnosing event flow density and handler health.
+    """
+    try:
+        return _sanitize({
+            "recent_events": _obs_eb.recent_events(limit=limit),
+            "bus_status":    _obs_eb.status(),
+        })
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observability/sync")
+async def obs_sync():
+    """
+    FTD-053-GAIA Phase 7: GitHub sync engine status.
+    Shows pending batch, last sync timestamp, and governance counters.
+    """
+    try:
+        return _sanitize(_obs_gse.status())
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 # ── Master Report Bundle ──────────────────────────────────────────────────────
 
 @app.get("/api/reports/bundle")

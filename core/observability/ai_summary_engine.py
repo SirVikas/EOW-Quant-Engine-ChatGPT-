@@ -125,7 +125,8 @@ class AISummaryEngine:
 
     def __init__(self) -> None:
         self._stats            = SummaryStats()
-        self._prev_regime:     Optional[str] = None
+        self._prev_regime:     Optional[str]       = None
+        self._last_summary:    Optional[Dict[str, Any]] = None   # cached for API access
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -171,7 +172,7 @@ class AISummaryEngine:
             self._prev_regime = ctx.get("regime")
             self._update_stats(priority, now_ms)
 
-            return {
+            result = {
                 "module":                self.MODULE,
                 "version":               self.VERSION,
                 "summary_ts":            now_ms,
@@ -187,6 +188,8 @@ class AISummaryEngine:
                 "directives":            directives,
                 "directive_count":       len(directives),
             }
+            self._last_summary = result
+            return result
 
         except Exception as exc:
             logger.warning(f"[{self.MODULE}] generate_summary error: {exc}")
@@ -196,6 +199,10 @@ class AISummaryEngine:
                 "priority": PRI_MONITORING,
                 "summary_ts": int(time.time() * 1000),
             }
+
+    def get_last_summary(self) -> Optional[Dict[str, Any]]:
+        """Return the most recently generated summary, or None if none yet produced."""
+        return self._last_summary
 
     def stats(self) -> Dict[str, Any]:
         s = self._stats
