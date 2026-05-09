@@ -20,7 +20,7 @@ from pathlib import Path
 from loguru import logger
 import orjson
 
-from config import cfg, parse_allowed_origins
+from config import cfg, parse_allowed_origins, APP_VERSION
 from core.market_data    import MarketDataProvider, Tick
 from core.pnl_calculator import PurePnLCalculator, TradeRecord
 from core.genome_engine  import GenomeEngine
@@ -2119,7 +2119,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
                 # 2. QPR report archive
                 stats    = pnl_calc.session_stats
                 trades   = [asdict(t) for t in pnl_calc.trades]
-                mode_info = {"trade_mode": cfg.TRADE_MODE, "engine_ver": "EOW_v1.0"}
+                mode_info = {"trade_mode": cfg.TRADE_MODE, "engine_ver": f"EOW_v{APP_VERSION}"}
                 analytics = {}
                 archive  = build_report_archive(trades, stats, mode_info, analytics, _thought_log)
                 ts_tag   = int(time.time())
@@ -2251,7 +2251,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 app = FastAPI(
     title="EOW Quant Engine",
     description="Self-evolving autonomous multi-asset trading engine",
-    version="1.0.0",
+    version=APP_VERSION,
     lifespan=lifespan,
 )
 
@@ -2459,6 +2459,11 @@ async def get_status():
         # FTD-040: Consistency Engine quick-status
         "consistency": consistency_engine.status(),
     }
+
+
+@app.get("/api/version")
+async def get_version():
+    return {"version": APP_VERSION, "engine": f"EOW_QUANT_ENGINE_v{APP_VERSION}"}
 
 
 @app.get("/api/pnl")
@@ -5759,7 +5764,7 @@ async def download_report_bundle():
             "EOW Quant Engine — Master Report Bundle\n"
             "═══════════════════════════════════════\n"
             f"Generated : {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}\n"
-            f"Engine    : EOW_QUANT_ENGINE_v1.0\n"
+            f"Engine    : EOW_QUANT_ENGINE_v{APP_VERSION}\n"
             f"Trades    : {_n_trades}\n"
             f"Net PnL   : {_ss.get('total_net_pnl', 0.0):.2f} USDT\n"
             f"Win Rate  : {_ss.get('win_rate', 0.0):.1f}%\n"
@@ -5803,7 +5808,7 @@ async def download_report_bundle():
         zf.writestr("metadata.json", json.dumps({
             "bundle_ts":        ts,
             "bundle_date":      time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
-            "engine_ver":       "EOW_QUANT_ENGINE_v1.0",
+            "engine_ver":       f"EOW_QUANT_ENGINE_v{APP_VERSION}",
             "trade_count":      _n_trades,
             "net_pnl_usdt":     _ss.get("total_net_pnl", 0.0),
             "win_rate_pct":     _ss.get("win_rate", 0.0),

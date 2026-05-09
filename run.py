@@ -19,6 +19,7 @@ import threading
 import webbrowser
 import urllib.request
 from pathlib import Path
+from config import APP_VERSION
 
 # ── Config ────────────────────────────────────────────────────────────────────
 HOST        = "0.0.0.0"
@@ -46,7 +47,7 @@ NC = "\033[0m"    # reset
 def banner():
     print(f"""
 {C}╔══════════════════════════════════════════════════════╗
-║          EOW QUANT ENGINE  —  v1.0                   ║
+║          EOW QUANT ENGINE  —  v{APP_VERSION:<22}║
 ║          Self-Evolving Multi-Asset Trading System     ║
 ╚══════════════════════════════════════════════════════╝{NC}
   Mode      : {G if MODE == 'PAPER' else R}{MODE}{NC}

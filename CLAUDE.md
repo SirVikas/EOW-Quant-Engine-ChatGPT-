@@ -56,3 +56,15 @@ proceeding.
 - Always commit with descriptive messages referencing the feature/fix
 - Push only after tests pass
 - Never force-push without explicit user confirmation
+
+---
+
+## Application Versioning — Single Source of Truth
+
+The application version lives in **one place only**: `APP_VERSION` in `config.py`.
+
+- The dashboard reads the version from `/api/version` (fetch on page load) and displays it automatically.
+- All report bundles, QPR archives, metadata.json, and FastAPI's own `version=` read from `APP_VERSION`.
+- **Do NOT maintain separate version strings** in dashboard.html, run.py banners, or any other file.
+
+When making a significant change, update `APP_VERSION` in `config.py`. Everything else updates automatically.
