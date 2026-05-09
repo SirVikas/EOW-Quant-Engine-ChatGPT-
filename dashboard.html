@@ -380,7 +380,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     </div>
     <div>
       <div style="font-size:15px;font-weight:600;letter-spacing:-.01em;">EOW Quant Engine</div>
-      <div style="font-size:10px;color:var(--muted);">Self-Evolving Multi-Asset System — v1.0</div>
+      <div id="app-version-label" style="font-size:10px;color:var(--muted);">Self-Evolving Multi-Asset System — v1.0</div>
     </div>
   </div>
 
@@ -3400,6 +3400,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // MASTER-001: wire execution mode radio buttons
   initExecModeSelector();
+
+  // Fetch application version from API — single source of truth
+  fetch(API + '/api/version')
+    .then(r => r.json())
+    .then(d => {
+      const el = document.getElementById('app-version-label');
+      if (el && d.version) el.textContent = `Self-Evolving Multi-Asset System — v${d.version}`;
+    })
+    .catch(() => {});
 });
 
 // ── MASTER-001: Execution Mode Selector ──────────────────────────────────────

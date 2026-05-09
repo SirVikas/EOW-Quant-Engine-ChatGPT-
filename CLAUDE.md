@@ -59,14 +59,12 @@ proceeding.
 
 ---
 
-## Dashboard / UI Versioning Rule
+## Application Versioning — Single Source of Truth
 
-**Every time any dashboard file is modified, update its version string AND add the current date and time.**
+The application version lives in **one place only**: `APP_VERSION` in `config.py`.
 
-This applies to all frontend/dashboard files (HTML, JS, CSS, Jinja templates, API version fields, report headers, etc.).
+- The dashboard reads the version from `/api/version` (fetch on page load) and displays it automatically.
+- All report bundles, QPR archives, metadata.json, and FastAPI's own `version=` read from `APP_VERSION`.
+- **Do NOT maintain separate version strings** in dashboard.html, run.py banners, or any other file.
 
-Format: `v<major>.<minor>.<patch> — YYYY-MM-DD HH:MM`
-
-Example: `v2.1.4 — 2026-05-09 14:32`
-
-This rule is non-negotiable — a change without a version bump+timestamp is an incomplete change.
+When making a significant change, update `APP_VERSION` in `config.py`. Everything else updates automatically.
