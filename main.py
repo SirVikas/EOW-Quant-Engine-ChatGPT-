@@ -1025,20 +1025,30 @@ async def on_tick(tick: Tick):
             else:
                 _rsi_val = 50.0
 
+            # ── Previous-period RSI — crash guard for MEAN_REVERTING entries ──
+            # FTD-054-PHOENIX Phase 2: prevents entering on a first-touch RSI
+            # extreme that is still in free-fall. Evidence: NEARUSDT RSI 68→29
+            # in one candle (trend crash) fast-failed immediately; NILUSDT RSI
+            # oscillated 43→33→29 across multiple candles (genuine mean reversion)
+            # and is profitable. Requiring prev-period also in extreme zone blocks
+            # the crash entry while preserving the oscillation entry.
+            _rsi_prev: float = _rsi_val  # default: treat as stable if not enough data
+            if len(closes) >= _rsi_p + 2:
+                _rsi_d_prev = [closes[i] - closes[i-1] for i in range(-_rsi_p - 1, -1)]
+                _g_p = sum(d for d in _rsi_d_prev if d > 0) / _rsi_p
+                _l_p = sum(-d for d in _rsi_d_prev if d < 0) / _rsi_p
+                _rsi_prev = (100.0 - 100.0 / (1.0 + _g_p / _l_p)) if _l_p > 0 else 100.0
+
             # ── Regime-aware entry decision ───────────────────────────────────
             # TRENDING:      follow SMA direction; RSI must be in pullback range
             # MEAN_REVERTING: fade the extreme; RSI must confirm true overextension
-            # FTD-054-PHOENIX: tightened from 60/40 → 70/30 (MEAN_REVERTING) and
-            # from <62/>38 → ≤48/≥52 (TRENDING). The wide 60/40 / <62/>38 bands
-            # fired on 62% of candles producing noise-dominant PAPER_SPEED trades
-            # (MeanReversion_PAPER_SPEED: 352 trades, 18.75% WR, PF=0.636, -$51).
-            # Tighter thresholds require genuine overextension / genuine pullback,
-            # reducing trade count ~60% while improving average signal quality.
+            # Phase 1: tightened from 60/40 → 70/30 (MR), <62/>38 → ≤48/≥52 (TR)
+            # Phase 2: MEAN_REVERTING requires stable RSI extreme (prev also in zone)
             _ps_side: Signal | None = None
             if regime.value == "MEAN_REVERTING":
-                if _above_sma and _rsi_val > 70:      # true overbought → fade SHORT
+                if _above_sma and _rsi_val > 70 and _rsi_prev > 65:
                     _ps_side = Signal.SHORT
-                elif not _above_sma and _rsi_val < 30: # true oversold → fade LONG
+                elif not _above_sma and _rsi_val < 30 and _rsi_prev < 35:
                     _ps_side = Signal.LONG
             else:  # TRENDING / UNKNOWN
                 if _above_sma and _rsi_val <= 48:     # uptrend pullback → LONG
@@ -1080,11 +1090,29 @@ async def on_tick(tick: Tick):
                     "SIGNAL",
                 )
             else:
-                _thought(
-                    f"⚡ PAPER_SPEED {sym}: RSI filter blocked "
-                    f"(rsi={_rsi_val:.1f} above_sma={_above_sma} regime={regime.value})",
-                    "FILTER",
-                )
+                # Distinguish crash-guard rejections from normal level-based blocks
+                if (regime.value == "MEAN_REVERTING"
+                        and not _above_sma and _rsi_val < 30 and _rsi_prev >= 35):
+                    _thought(
+                        f"⚡ PAPER_SPEED {sym}: RSI_CRASH_GUARD blocked LONG "
+                        f"(rsi={_rsi_val:.1f} prev={_rsi_prev:.1f}≥35, "
+                        f"need prev<35 — first-touch crash, not established reversal)",
+                        "FILTER",
+                    )
+                elif (regime.value == "MEAN_REVERTING"
+                        and _above_sma and _rsi_val > 70 and _rsi_prev <= 65):
+                    _thought(
+                        f"⚡ PAPER_SPEED {sym}: RSI_CRASH_GUARD blocked SHORT "
+                        f"(rsi={_rsi_val:.1f} prev={_rsi_prev:.1f}≤65, "
+                        f"need prev>65 — first-touch spike, not established reversal)",
+                        "FILTER",
+                    )
+                else:
+                    _thought(
+                        f"⚡ PAPER_SPEED {sym}: RSI filter blocked "
+                        f"(rsi={_rsi_val:.1f} above_sma={_above_sma} regime={regime.value})",
+                        "FILTER",
+                    )
 
         if sig and sig.signal != Signal.NONE:
             # FTD-037: Disabled strategy_id check — surgically blocks all NOISE strategies.
@@ -1544,6 +1572,16 @@ async def on_tick(tick: Tick):
                 * _cfe_mult,
                 6,
             )
+            # FTD-054-PHOENIX: surface allocator zero in bypass mode — previously
+            # silent, making sub-threshold scores (0.246–0.339) look like normal
+            # trades. The allocator correctly rates them as below min band (<0.60)
+            # but bypass overrides via orchestrator BYPASS band.
+            if cfg.BYPASS_ALL_GATES and _combined_mult == 0.0:
+                _thought(
+                    f"⚠️ ALLOC_ZERO {sym}: score={_alloc_score:.3f} below min "
+                    f"allocator band [bypass=active, orchestrator BYPASS override]",
+                    "SIGNAL",
+                )
             if _recovery_result.state not in ("NORMAL", "FULLY_RECOVERED"):
                 _thought(
                     f"🔄 RECOVERY {sym}: state={_recovery_result.state} "
