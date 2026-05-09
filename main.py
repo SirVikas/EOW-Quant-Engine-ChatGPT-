@@ -3855,6 +3855,56 @@ async def get_evolution_status():
     return ev_summary
 
 
+# ── FTD-055-ATHENA: RL Learning Intelligence Live Feed ───────────────────────
+
+@app.get("/api/rl-intelligence")
+async def get_rl_intelligence():
+    """
+    FTD-055-ATHENA — Institutional-grade live RL learning intelligence.
+
+    Returns `get_evolution_state()` enriched with context differentiation
+    evidence, alpha discovery, policy evolution metrics, and the current
+    learning verdict.  Equivalent to the rl_intelligence.json report file
+    but served as a live endpoint with no bundle download required.
+    """
+    _session_trades = pnl_calc.trades[_boot_replay_count:]
+    _trade_dicts: "list[dict]" = []
+    for _t in _session_trades:
+        try:
+            _trade_dicts.append(_t.__dict__ if hasattr(_t, "__dict__") else dict(_t))
+        except Exception:
+            pass
+
+    try:
+        _files = _generate_rl_intelligence_reports(
+            trade_dicts=_trade_dicts,
+            session_start_idx=0,
+        )
+        import json as _json
+        _payload = _json.loads(_files.get("rl_intelligence.json", "{}"))
+    except Exception as _err:
+        _payload = {"error": str(_err), "verdict": "UNAVAILABLE"}
+
+    # Augment with live Q-table snapshot for context map
+    _ctx_map: "dict[str, dict]" = {}
+    try:
+        for _k, _ctx in rl_engine._table.items():
+            _ctx_map[_k] = {
+                "q":       round(_ctx.q_value, 4),
+                "visits":  _ctx.n_visits,
+                "wins":    _ctx.n_wins,
+                "wr":      round(_ctx.win_rate * 100, 1),
+                "pnl":     round(_ctx.total_pnl, 4),
+                "mature":  _ctx.maturity_score >= 1.0,
+            }
+    except Exception:
+        pass
+
+    _payload["live_context_map"] = _ctx_map
+    _payload["session_trades"]   = len(_session_trades)
+    return _payload
+
+
 # ── FTD-028: Deep Intelligence Validation Layer ──────────────────────────────
 
 @app.post("/api/deep-validation/run")
@@ -5322,6 +5372,324 @@ def _generate_evolution_reports(session_trades: list) -> "dict[str, str]":
     return files
 
 
+# ── FTD-055-ATHENA: RL Intelligence & Trade Quality Evolution Reports ─────────
+
+def _generate_rl_intelligence_reports(
+    trade_dicts: list,
+    session_start_idx: int,
+) -> "dict[str, str]":
+    """
+    FTD-055-ATHENA — Two institutional-grade RL observability files.
+
+    1. rl_intelligence.json         — Evidence-based verdict: Is the RL actually learning?
+                                      Context coverage, alpha discovery, convergence estimate,
+                                      strategy coverage, session intelligence, policy evolution.
+    2. trade_quality_evolution.json — Are later trades smarter than earlier trades?
+                                      Rolling 20-trade windows, early vs late comparison,
+                                      regime-stratified evolution, directional trend verdict.
+    """
+    import collections as _col
+    now_str = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+    files: dict = {}
+
+    # ── 1. RL Intelligence Report ─────────────────────────────────────────────
+    evo_state     = rl_engine.get_evolution_state()
+    rl_sum        = rl_engine.summary()
+    uptime_min    = max(evo_state.get("uptime_min", 1), 0.01)
+    counters      = evo_state.get("counters", {})
+    dynamics      = evo_state.get("learning_dynamics", {})
+    maturity      = evo_state.get("context_maturity", {})
+    quality       = evo_state.get("quality_distribution", {})
+    session_intel = evo_state.get("session_intelligence", {})
+    evo_score     = evo_state.get("intelligence_score", 0)
+
+    # Context coverage analysis — direct table inspection
+    all_ctx       = list(rl_engine._table.values())
+    visited_ctx   = [c for c in all_ctx if c.n_visits >= 3]
+    unvisited_ctx = [c.context for c in all_ctx if c.n_visits == 0]
+    total_ctx     = len(all_ctx)
+    coverage_pct  = round(len(visited_ctx) / max(total_ctx, 1) * 100, 1)
+
+    # Alpha discovery (Q > 0, min 3 visits)
+    alpha_contexts = sorted(
+        [
+            {
+                "context":       c.context,
+                "q_value":       round(c.q_value, 4),
+                "win_rate_pct":  round(c.win_rate * 100, 1),
+                "n_visits":      c.n_visits,
+                "total_pnl":     round(c.total_pnl, 4),
+                "maturity_score": round(c.maturity_score, 3),
+                "significance":  (
+                    "MATURE"    if c.n_visits >= 50 else
+                    "DEVELOPING" if c.n_visits >= 20 else
+                    "EARLY"     if c.n_visits >= 5  else
+                    "LOW_N"
+                ),
+            }
+            for c in all_ctx if c.q_value > 0 and c.n_visits >= 3
+        ],
+        key=lambda x: x["q_value"], reverse=True,
+    )
+    toxic_contexts = rl_engine.get_toxic_contexts()
+
+    # Contextual differentiation evidence — same regime different session → different Q
+    session_buckets: dict = {}
+    for c in all_ctx:
+        parts = c.context.split("|")
+        if len(parts) >= 2 and c.n_visits >= 3:
+            sess = parts[1]
+            session_buckets.setdefault(sess, []).append({
+                "context": c.context,
+                "q": round(c.q_value, 4),
+                "wr_pct": round(c.win_rate * 100, 1),
+                "n": c.n_visits,
+                "pnl": round(c.total_pnl, 4),
+            })
+    for sess in session_buckets:
+        session_buckets[sess].sort(key=lambda x: x["q"], reverse=True)
+
+    # Strategy coverage map
+    strat_coverage: dict = {}
+    for c in all_ctx:
+        parts = c.context.split("|")
+        if len(parts) < 3:
+            continue
+        strat = parts[2]
+        entry = strat_coverage.setdefault(
+            strat, {"visited_contexts": 0, "total_contexts": 0, "avg_q": 0.0, "_qs": []}
+        )
+        entry["total_contexts"] += 1
+        if c.n_visits >= 3:
+            entry["visited_contexts"] += 1
+            entry["_qs"].append(c.q_value)
+    for strat, entry in strat_coverage.items():
+        entry["avg_q"]        = round(sum(entry["_qs"]) / max(len(entry["_qs"]), 1), 4)
+        entry["coverage_pct"] = round(
+            entry["visited_contexts"] / max(entry["total_contexts"], 1) * 100, 1
+        )
+        del entry["_qs"]
+
+    # Learning velocity
+    total_updates  = counters.get("total_updates", 0)
+    total_pulls    = counters.get("total_pulls",   0)
+    updates_pm     = round(total_updates / uptime_min, 3)
+    explore_ratio  = round(dynamics.get("explore_ratio", 0.0), 3)
+    avg_q_velocity = round(dynamics.get("avg_q_velocity", 0.0), 4)
+
+    # Convergence estimate for the best-explored context
+    max_visits = max((c.n_visits for c in all_ctx), default=0)
+    gap_to_mature = max(0, 50 - max_visits)
+    proj_min = round(gap_to_mature / updates_pm, 0) if updates_pm > 0 else None
+
+    # Verdict
+    if total_ctx == 0 or max_visits < 3:
+        verdict = "COLD_START"
+        verdict_detail = "No context has reached 3 visits yet — learning has not started."
+    elif alpha_contexts and toxic_contexts:
+        verdict = "LEARNING_CONFIRMED_WITH_DIFFERENTIATION"
+        verdict_detail = (
+            f"Confirmed: {len(alpha_contexts)} profitable context(s) AND "
+            f"{len(toxic_contexts)} toxic context(s). RL is correctly differentiating "
+            f"between good and bad trading contexts."
+        )
+    elif alpha_contexts:
+        verdict = "LEARNING_CONFIRMED"
+        verdict_detail = (
+            f"{len(alpha_contexts)} profitable context(s) discovered. "
+            f"RL is identifying exploitable structure."
+        )
+    elif toxic_contexts:
+        verdict = "LEARNING_ACTIVE_NO_ALPHA"
+        verdict_detail = (
+            f"RL correctly flagged {len(toxic_contexts)} toxic context(s). "
+            f"No profitable contexts yet — signal quality is the limiting factor, not the RL."
+        )
+    elif updates_pm < 0.01:
+        verdict = "STAGNANT"
+        verdict_detail = "Learning rate < 0.01 updates/min — trade volume too low."
+    else:
+        verdict = "ACCUMULATING"
+        verdict_detail = "RL is accumulating data. Verdict pending sufficient context visits."
+
+    files["rl_intelligence.json"] = json.dumps({
+        "title":          "RL Learning Intelligence — Contextual Bandit Evolution (FTD-055-ATHENA)",
+        "generated_at":   now_str,
+        "verdict":        verdict,
+        "verdict_detail": verdict_detail,
+        "intelligence_score": evo_score,
+        "learning_velocity": {
+            "updates_per_min":   updates_pm,
+            "updates_per_hour":  round(updates_pm * 60, 1),
+            "total_updates":     total_updates,
+            "total_pulls":       total_pulls,
+            "avg_q_velocity":    avg_q_velocity,
+            "uptime_min":        round(uptime_min, 1),
+        },
+        "context_coverage": {
+            "total_contexts_seen":    total_ctx,
+            "contexts_visited_3plus": len(visited_ctx),
+            "contexts_unvisited":     len(unvisited_ctx),
+            "coverage_pct":           coverage_pct,
+            "exploration_status": (
+                "EXHAUSTED"  if coverage_pct >= 90 else
+                "MATURE"     if coverage_pct >= 60 else
+                "DEVELOPING" if coverage_pct >= 30 else
+                "EARLY_PHASE"
+            ),
+            "unvisited_contexts": unvisited_ctx[:10],
+        },
+        "alpha_discovery": {
+            "profitable_contexts": alpha_contexts,
+            "toxic_contexts":      toxic_contexts,
+            "differentiation_by_session": session_buckets,
+        },
+        "strategy_coverage":  strat_coverage,
+        "convergence_estimate": {
+            "max_visits_any_context":               max_visits,
+            "visits_for_full_maturity":             50,
+            "visits_needed_top_context":            gap_to_mature,
+            "updates_per_min":                      updates_pm,
+            "projected_minutes_to_mature_top_ctx":  proj_min,
+            "note": (
+                "50 visits → LR=0.07 (stable), Q-values reliable for policy decisions."
+            ),
+        },
+        "maturity_distribution": maturity,
+        "quality_distribution":  quality,
+        "session_intelligence":  session_intel,
+        "policy_evolution": {
+            "allow_rate":       round(counters.get("total_allowed", 0) / max(total_pulls, 1), 3),
+            "explore_ratio":    explore_ratio,
+            "toxic_block_rate": round(
+                counters.get("toxic_blocks", 0) / max(total_pulls, 1), 3
+            ),
+            "floor_raise_rate": round(
+                counters.get("floor_raises", 0) / max(total_updates, 1), 3
+            ),
+            "floor_lower_rate": round(
+                counters.get("floor_lowers", 0) / max(total_updates, 1), 3
+            ),
+            "boost_fire_rate":  round(
+                counters.get("boost_fires", 0) / max(total_updates, 1), 3
+            ),
+        },
+        "hyperparameters": rl_sum.get("hyper", {}),
+    }, indent=2, default=str)
+
+    # ── 2. Trade Quality Evolution ─────────────────────────────────────────────
+    # Session-only trades (exclude boot-replay history)
+    session_dicts = trade_dicts[session_start_idx:]
+    n_sess        = len(session_dicts)
+
+    def _stats(window: list) -> dict:
+        if not window:
+            return {"n": 0, "wr_pct": 0.0, "pf": 0.0, "avg_pnl": 0.0, "ev": 0.0}
+        wins   = [t for t in window if t.get("net_pnl", 0) > 0]
+        losses = [t for t in window if t.get("net_pnl", 0) <= 0]
+        gp     = sum(t.get("net_pnl", 0) for t in wins)
+        gl     = abs(sum(t.get("net_pnl", 0) for t in losses))
+        n      = len(window)
+        aw     = gp / max(len(wins), 1)
+        al     = gl / max(len(losses), 1)
+        return {
+            "n":       n,
+            "wr_pct":  round(len(wins) / n * 100, 1),
+            "pf":      round(gp / max(gl, 1e-9), 3),
+            "avg_pnl": round(sum(t.get("net_pnl", 0) for t in window) / n, 4),
+            "ev":      round((len(wins) / n * aw) - (len(losses) / n * al), 4),
+        }
+
+    # Rolling 20-trade windows
+    win_sz   = 20
+    rolling  = []
+    for i in range(0, n_sess - win_sz + 1, win_sz):
+        s = _stats(session_dicts[i:i + win_sz])
+        s["window_start"] = i + 1
+        s["window_end"]   = i + win_sz
+        rolling.append(s)
+
+    # Early vs late (first 50% vs second 50%)
+    if n_sess >= 10:
+        mid         = n_sess // 2
+        early       = _stats(session_dicts[:mid])
+        late        = _stats(session_dicts[mid:])
+        wr_delta    = round(late["wr_pct"] - early["wr_pct"], 1)
+        pf_delta    = round(late["pf"] - early["pf"], 3)
+        trend       = (
+            "IMPROVING"  if wr_delta >  5.0 else
+            "DEGRADING"  if wr_delta < -5.0 else
+            "FLAT"
+        )
+        interp = (
+            f"Win rate {'improved' if wr_delta >= 0 else 'declined'} by "
+            f"{abs(wr_delta):.1f}pp in the second half. "
+            + ("RL is producing better entries." if wr_delta > 5
+               else "No measurable improvement yet — need more session volume."
+               if abs(wr_delta) <= 5
+               else "Performance declining — check RL context or signal quality.")
+        )
+    else:
+        early = late = {}
+        wr_delta = pf_delta = 0.0
+        trend    = "INSUFFICIENT_DATA"
+        interp   = f"Only {n_sess} session trades — need ≥10 for meaningful comparison."
+
+    # Regime-stratified early vs late
+    regime_buckets: dict = _col.defaultdict(list)
+    for t in session_dicts:
+        regime_buckets[t.get("regime", "UNKNOWN")].append(t)
+
+    regime_evo: dict = {}
+    for reg, rt in regime_buckets.items():
+        if len(rt) < 5:
+            continue
+        mid_r = len(rt) // 2
+        e_r   = _stats(rt[:mid_r])
+        l_r   = _stats(rt[mid_r:])
+        regime_evo[reg] = {
+            "total_trades":  len(rt),
+            "early_wr_pct":  e_r["wr_pct"],
+            "late_wr_pct":   l_r["wr_pct"],
+            "wr_delta_pct":  round(l_r["wr_pct"] - e_r["wr_pct"], 1),
+            "early_pf":      e_r["pf"],
+            "late_pf":       l_r["pf"],
+            "trend": (
+                "IMPROVING" if l_r["wr_pct"] > e_r["wr_pct"] + 5 else
+                "DEGRADING" if l_r["wr_pct"] < e_r["wr_pct"] - 5 else
+                "FLAT"
+            ),
+        }
+
+    files["trade_quality_evolution.json"] = json.dumps({
+        "title":         "Trade Quality Evolution — Are Later Trades Smarter? (FTD-055-ATHENA)",
+        "generated_at":  now_str,
+        "session_trades": n_sess,
+        "verdict":       trend,
+        "overall_session": _stats(session_dicts),
+        "early_vs_late": {
+            "early_half":      early,
+            "late_half":       late,
+            "wr_delta_pct":    wr_delta,
+            "pf_delta":        pf_delta,
+            "trend":           trend,
+            "interpretation":  interp,
+        },
+        "rolling_windows": rolling,
+        "regime_evolution": regime_evo,
+        "action": (
+            "Positive trajectory — RL is improving signal selection." if trend == "IMPROVING" else
+            "Performance degrading — RL may be overfitting or market conditions shifted."
+            if trend == "DEGRADING" else
+            f"Insufficient data ({n_sess} session trades — need ≥10)."
+            if trend == "INSUFFICIENT_DATA" else
+            "Performance stable — no improvement trend yet. More session volume needed."
+        ),
+    }, indent=2, default=str)
+
+    return files
+
+
 # ── FTD-LPA: Live Process Snapshot ───────────────────────────────────────────
 
 @app.get("/api/snapshot/live-process")
@@ -5841,6 +6209,13 @@ async def download_report_bundle():
             "  *_thought_log.json        Engine CT-Scan decision trace (last 500 entries)\n"
             "  *_rl_qtable.json          Complete RL Q-table with all context states\n"
             "  *_trade_logs.json         In-memory session trades + SQLite history\n"
+            "08_rl_intelligence/ FTD-055-ATHENA: Institutional RL learning analysis (2 files)\n"
+            "  rl_intelligence.json      Evidence-based verdict: Is the RL actually learning?\n"
+            "                            Verdict / intelligence_score / context coverage /\n"
+            "                            alpha discovery / differentiation / policy evolution\n"
+            "  trade_quality_evolution.json  Are later trades smarter than earlier trades?\n"
+            "                            Early vs late session win-rate, rolling windows,\n"
+            "                            regime evolution trends\n"
         ))
 
         _ev_meta = _safe(
@@ -5937,6 +6312,20 @@ async def download_report_bundle():
         except Exception as _ee:
             zf.writestr("06_evolution/error.txt",
                         f"Evolution report generation failed: {_ee}\n")
+
+        # 08_rl_intelligence/ — FTD-055-ATHENA: institutional RL learning analysis
+        try:
+            _rl_intel_files = _generate_rl_intelligence_reports(
+                trade_dicts=trade_dicts,
+                session_start_idx=_boot_replay_count,
+            )
+            for _rif, _ric in _rl_intel_files.items():
+                zf.writestr(f"08_rl_intelligence/{_rif}", _ric)
+        except Exception as _rie:
+            zf.writestr(
+                "08_rl_intelligence/error.txt",
+                f"RL intelligence report generation failed: {_rie}\n",
+            )
 
         # 07_live_process/ — FTD-LPA: runtime observability artifacts ────────
         # Embedded in every bundle so recipients always have the full runtime
