@@ -331,6 +331,9 @@ class RLContextualBandit:
         self._floor_raises:   int   = 0   # times score floor raised
         self._toxic_blocks:   int   = 0   # trades blocked via toxic flag
         self._init_ts:        float = time.time()
+        # Active save path — bound by load_state() when a custom path is given,
+        # defaults to the global constant so all auto-saves are consistent.
+        self._state_path: pathlib.Path = _QTABLE_STATE_PATH
 
         # Restore cross-session knowledge so learning is not wiped on restart
         _loaded = self.load_state()
@@ -352,7 +355,7 @@ class RLContextualBandit:
         are session-level statistics for report metrics only.  The Q-table
         and toxic set are the learned knowledge that must survive restarts.
         """
-        target = path or _QTABLE_STATE_PATH
+        target = path or self._state_path
         try:
             payload = {
                 "version":  self.VERSION,
@@ -382,7 +385,9 @@ class RLContextualBandit:
         Load persisted Q-table from disk.  Returns True if successfully loaded.
         Silently no-ops when no state file exists (normal cold-start).
         """
-        target = path or _QTABLE_STATE_PATH
+        target = path or self._state_path
+        if path is not None:
+            self._state_path = path   # bind so auto-saves go to the same file
         if not target.exists():
             return False
         try:
