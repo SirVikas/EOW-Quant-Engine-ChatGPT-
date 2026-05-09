@@ -67,4 +67,18 @@ The application version lives in **one place only**: `APP_VERSION` in `config.py
 - All report bundles, QPR archives, metadata.json, and FastAPI's own `version=` read from `APP_VERSION`.
 - **Do NOT maintain separate version strings** in dashboard.html, run.py banners, or any other file.
 
-When making a significant change, update `APP_VERSION` in `config.py`. Everything else updates automatically.
+### When to bump `APP_VERSION`
+
+Evaluate on every meaningful commit. Use semantic versioning (`MAJOR.MINOR.PATCH`):
+
+| Bump | When |
+|------|------|
+| **PATCH** (`x.x.+1`) | Bug fix, observability fix, non-breaking correction, threshold tweak |
+| **MINOR** (`x.+1.0`) | New feature, new subsystem, new API endpoint, behavior enhancement |
+| **MAJOR** (`+1.0.0`) | Architectural overhaul, RL/learning redesign, incompatible behavior change, governance redesign |
+
+**Rule**: If the change affects forensic traceability (report bundles, QPR archives, thought logs), bump at minimum PATCH so reports are traceable to the correct engine build.
+
+**Rule**: Claude must evaluate the bump on every commit that modifies `main.py`, `core/`, or `strategies/`. If no bump is needed, that is an explicit decision — not an omission.
+
+Only `config.APP_VERSION` is ever updated. Everything downstream inherits automatically.
