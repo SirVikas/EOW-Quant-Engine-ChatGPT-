@@ -1230,7 +1230,18 @@ async def on_tick(tick: Tick):
                     "strategy": strategy_type,
                 }
                 trade_flow_monitor.record_skip(sym, _rl_reason)
-                return
+                # FTD-054-PHOENIX: RL TOXIC hard-block must be bypassed in paper/learning
+                # mode. After 21 trades at WR=9.5%, Q=-0.3163 crossed the EV floor (-0.3)
+                # → TOXIC → permanent block → zero new updates → Q can never recover.
+                # Same pattern as the LCC fix: gate the hard stop behind BYPASS_ALL_GATES
+                # so the learning engine can accumulate data and escape the toxic context.
+                if not cfg.BYPASS_ALL_GATES:
+                    return
+                _thought(
+                    f"⚡ RL_OVERRIDE {sym}: TOXIC context {regime.value}|{strategy_type} "
+                    f"[bypass=active, learning continues]",
+                    "SIGNAL",
+                )
 
             # ── Lean Gate: 5 checks; Gates 4+5 bypassed in PAPER/BYPASS mode ──
             # In PAPER/BYPASS mode, virtual drawdown and streak must not halt
