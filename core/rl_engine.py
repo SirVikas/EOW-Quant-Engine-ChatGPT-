@@ -44,13 +44,18 @@ Anti-cheating / realism guarantees:
 """
 from __future__ import annotations
 
+import json
 import math
+import pathlib
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple
 
 from loguru import logger
 
+
+# Default path for cross-session Q-table persistence
+_QTABLE_STATE_PATH = pathlib.Path("data/rl_qtable_state.json")
 
 # ── Adaptive learning rates by context maturity ───────────────────────────────
 
@@ -327,12 +332,82 @@ class RLContextualBandit:
         self._toxic_blocks:   int   = 0   # trades blocked via toxic flag
         self._init_ts:        float = time.time()
 
+        # Restore cross-session knowledge so learning is not wiped on restart
+        _loaded = self.load_state()
         logger.info(
             f"[RL-ENGINE] Contextual Bandit v{self.VERSION} online | "
             f"adaptive_lr=[{LR_STABLE}-{LR_FAST}] ev_floor={ENTRY_EV_FLOOR} "
             f"ucb_coeff={UCB_EXPLORE_COEFF} decay={DECAY_PER_DAY}/day "
-            f"bootstrap_dampen={BOOTSTRAP_DAMPEN} toxic_q<{TOXIC_Q_THRESH}"
+            f"bootstrap_dampen={BOOTSTRAP_DAMPEN} toxic_q<{TOXIC_Q_THRESH} "
+            f"restored={'yes' if _loaded else 'cold-start'}"
         )
+
+    # ── Persistence ───────────────────────────────────────────────────────────
+
+    def save_state(self, path: Optional[pathlib.Path] = None) -> None:
+        """
+        Persist Q-table and toxic context set to disk.
+
+        Counters (_total_pulls etc.) are intentionally NOT persisted — they
+        are session-level statistics for report metrics only.  The Q-table
+        and toxic set are the learned knowledge that must survive restarts.
+        """
+        target = path or _QTABLE_STATE_PATH
+        try:
+            payload = {
+                "version":  self.VERSION,
+                "saved_at": int(time.time() * 1000),
+                "toxic_contexts": list(self._toxic_contexts),
+                "table": {
+                    k: {
+                        "context":   s.context,
+                        "q_value":   s.q_value,
+                        "n_visits":  s.n_visits,
+                        "n_wins":    s.n_wins,
+                        "total_pnl": s.total_pnl,
+                        "last_ts":   s.last_ts,
+                        "last_q":    s.last_q,
+                        "bootstrap": s.bootstrap,
+                    }
+                    for k, s in self._table.items()
+                },
+            }
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(json.dumps(payload, indent=2))
+        except Exception as _e:
+            logger.warning(f"[RL-ENGINE] save_state failed: {_e}")
+
+    def load_state(self, path: Optional[pathlib.Path] = None) -> bool:
+        """
+        Load persisted Q-table from disk.  Returns True if successfully loaded.
+        Silently no-ops when no state file exists (normal cold-start).
+        """
+        target = path or _QTABLE_STATE_PATH
+        if not target.exists():
+            return False
+        try:
+            payload = json.loads(target.read_text())
+            for k, v in payload.get("table", {}).items():
+                self._table[k] = ContextState(
+                    context   = v["context"],
+                    q_value   = float(v["q_value"]),
+                    n_visits  = int(v["n_visits"]),
+                    n_wins    = int(v["n_wins"]),
+                    total_pnl = float(v["total_pnl"]),
+                    last_ts   = int(v["last_ts"]),
+                    last_q    = float(v["last_q"]),
+                    bootstrap = float(v.get("bootstrap", 0.0)),
+                )
+            self._toxic_contexts = set(payload.get("toxic_contexts", []))
+            logger.info(
+                f"[RL-ENGINE] State restored from {target} — "
+                f"{len(self._table)} contexts, "
+                f"{len(self._toxic_contexts)} toxic"
+            )
+            return True
+        except Exception as _e:
+            logger.warning(f"[RL-ENGINE] load_state failed: {_e}")
+            return False
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -439,6 +514,9 @@ class RLContextualBandit:
 
         # Step 5: Toxic context check
         self._check_toxic(ctx_key, state)
+
+        # Persist updated knowledge so restarts don't wipe learning
+        self.save_state()
 
         logger.debug(
             f"[RL-ENGINE] update ctx={ctx_key} "
