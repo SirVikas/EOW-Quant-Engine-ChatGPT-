@@ -56,3 +56,17 @@ proceeding.
 - Always commit with descriptive messages referencing the feature/fix
 - Push only after tests pass
 - Never force-push without explicit user confirmation
+
+---
+
+## Dashboard / UI Versioning Rule
+
+**Every time any dashboard file is modified, update its version string AND add the current date and time.**
+
+This applies to all frontend/dashboard files (HTML, JS, CSS, Jinja templates, API version fields, report headers, etc.).
+
+Format: `v<major>.<minor>.<patch> — YYYY-MM-DD HH:MM`
+
+Example: `v2.1.4 — 2026-05-09 14:32`
+
+This rule is non-negotiable — a change without a version bump+timestamp is an incomplete change.
