@@ -1,28 +1,22 @@
 """
 EOW Quant Engine — Adaptive Inverse Engine  (A.I.E.)
 
-A strategy is a reliable contra-indicator only when it is *significantly and
-consistently* wrong — not merely average.  A 44% win-rate with a 2:1 RR is
-actually profitable (0.44×2 − 0.56×1 = +0.32R per trade).  Only flip when
-the system is demonstrably worse than random and improving nothing.
+FTD-054-PHOENIX: INVERSE and CALIBRATE logic permanently disabled.
 
-Design principles (root-cause corrected):
-  1. Default state is NORMAL — never block trading due to insufficient data.
-  2. NO_TRADE zone is removed.  A 40–60% WR strategy should keep trading;
-     the RR ratio is what determines profitability, not WR alone.
-  3. INVERSE only activates when WR < INVERSE_THRESHOLD (≤ 35%) after
-     MIN_SAMPLES (≥ 30) fresh trades from the current (fixed) system.
-  4. Historical trades from broken sessions are NOT fed in at startup —
-     old fake-ATR losses are not representative of the fixed engine.
+Forensic finding: with only ~7 RL updates and 28% WR driven by PAPER_SPEED
+noise, activating CALIBRATE (global 20-min pause) or INVERSE (signal flip)
+adds a second confounding variable on top of already-incorrect base signals.
+The engine needs authentic learning data first; adaptive contra-logic requires
+a statistically valid WR baseline (≥30 trades, proper signal quality).
+Until that baseline exists, always return NORMAL — let the RL engine and
+clean PAPER_SPEED signals accumulate the data needed to make this decision.
 
-Per-strategy mode state machine (minimum MIN_SAMPLES fresh trades required):
-  NORMAL    default / WR ≥ INVERSE_THRESHOLD  → trade as generated
-  INVERSE   WR < INVERSE_THRESHOLD (≤ 35%)    → flip direction + mirror SL/TP
-  CALIBRATE consecutive losses ≥ EQUITY_PROTECT_LOSSES → global pause
-
-Signal inversion preserves RR by mirroring SL/TP distances around entry:
-  Original LONG  entry=P, sl=P−d, tp=P+D  →  SHORT  sl=P+d, tp=P−D  (RR=D/d ✓)
-  Original SHORT entry=P, sl=P+d, tp=P−D  →  LONG   sl=P−d, tp=P+D  (RR=D/d ✓)
+Design principles:
+  1. Default state is NORMAL — always.
+  2. INVERSE and CALIBRATE modes are preserved in the enum/dataclass for
+     API compatibility but _mode() never emits them.
+  3. record() still tracks per-strategy outcomes and direction outcomes for
+     future re-enablement once signal quality is validated.
 """
 from __future__ import annotations
 
@@ -120,12 +114,9 @@ class InverseEngine:
         else:
             streak = self._consec_losses.get(strategy_id, 0) + 1
             self._consec_losses[strategy_id] = streak
-            if streak >= EQUITY_PROTECT_LOSSES:
-                self._calibrate_until = time.time() + CALIBRATE_PAUSE_MIN * 60
-                logger.warning(
-                    f"[AIE] ⛔ Equity Protector — {strategy_id} hit "
-                    f"{streak} consecutive losses → {CALIBRATE_PAUSE_MIN}min pause."
-                )
+            # FTD-054-PHOENIX: CALIBRATE trigger removed — global 20-min pauses
+            # compound with PAPER_SPEED noise to starve RL of learning data.
+            # Streak tracking is kept for future re-enablement.
 
     def _direction_inverted(self, strategy_id: str, signal: str) -> bool:
         """True when the last DIRECTION_LOOKBACK trades in this direction had ≥ DIRECTION_FAIL_RATE failures."""
@@ -212,18 +203,10 @@ class InverseEngine:
         return sum(h) / len(h) if h else 1.0
 
     def _mode(self, strategy_id: str) -> TradeMode:
-        if time.time() < self._calibrate_until:
-            return TradeMode.CALIBRATE
-
-        outcomes = self._outcomes.get(strategy_id, [])
-        if len(outcomes) < MIN_SAMPLES:
-            return TradeMode.NORMAL   # not enough fresh data — keep trading
-
-        return (
-            TradeMode.INVERSE
-            if self._win_rate(strategy_id) < INVERSE_THRESHOLD
-            else TradeMode.NORMAL
-        )
+        # FTD-054-PHOENIX: always NORMAL until signal quality baseline is established.
+        # INVERSE and CALIBRATE re-activation requires: ≥30 clean trades, validated
+        # PAPER_SPEED quality, and RL convergence beyond 7 lifetime updates.
+        return TradeMode.NORMAL
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

@@ -854,6 +854,15 @@ async def on_tick(tick: Tick):
                 "strategy": strategy_type,
             }
             return
+        # FTD-054-PHOENIX: surface AEE kill state in bypass mode — previously silent,
+        # causing the 246-min dry spell to appear as RSI_FILTER in the signal funnel
+        # when the real cause was EDGE_ENGINE_KILL on the dominant PAPER_SPEED strategy.
+        if cfg.BYPASS_ALL_GATES and not _aee_ok:
+            _thought(
+                f"⚠️ AEE_KILL {sym} [{strategy_type}]: {_aee_reason} "
+                f"[bypass=active, trade_allowed, size_restored_to_1.0x]",
+                "SIGNAL",
+            )
 
         # FTD-REF-023: get dry-spell relaxation factor before signal filter
         relax_factor = trade_frequency.get_relaxation_factor()
@@ -985,10 +994,9 @@ async def on_tick(tick: Tick):
             sig = None  # suppress fallback entirely for this strategy
         # FIX: when a primary/alpha signal carries a disabled strategy_id, clear it
         # so the paper_speed fallback can generate the {strategy_type}_PAPER_SPEED
-        # variant. MeanReversion_PAPER_SPEED is the only ALPHA-rated strategy
-        # (PF=1.485); blocking it because MR_BB_RSI_v1 returned a non-NONE signal
-        # prevented the sole profitable execution path. TrendFollowing is excluded
-        # because TrendFollowing_PAPER_SPEED is itself in _DISABLED_STRATEGY_IDS.
+        # variant. TrendFollowing is excluded because TrendFollowing_PAPER_SPEED is
+        # itself in _DISABLED_STRATEGY_IDS. MeanReversion_PAPER_SPEED RSI thresholds
+        # were tightened (FTD-054-PHOENIX) to reduce noise dominance (was 60/40, now 70/30).
         if (
             _paper_speed
             and sig and sig.signal != Signal.NONE
@@ -1018,22 +1026,24 @@ async def on_tick(tick: Tick):
                 _rsi_val = 50.0
 
             # ── Regime-aware entry decision ───────────────────────────────────
-            # TRENDING:      follow SMA; RSI must have room to move (not extreme)
-            # MEAN_REVERTING: fade the extreme; RSI must confirm overextension
-            # FIX: 35/65 → 40/60 for MEAN_REVERTING — original thresholds too strict;
-            # RSI stays in 35-65 range during low-volatility ranging = zero signals.
-            # 40/60 still requires directional overextension vs SMA but fires ~3×
-            # more often, giving the RL engine sufficient data to converge.
+            # TRENDING:      follow SMA direction; RSI must be in pullback range
+            # MEAN_REVERTING: fade the extreme; RSI must confirm true overextension
+            # FTD-054-PHOENIX: tightened from 60/40 → 70/30 (MEAN_REVERTING) and
+            # from <62/>38 → ≤48/≥52 (TRENDING). The wide 60/40 / <62/>38 bands
+            # fired on 62% of candles producing noise-dominant PAPER_SPEED trades
+            # (MeanReversion_PAPER_SPEED: 352 trades, 18.75% WR, PF=0.636, -$51).
+            # Tighter thresholds require genuine overextension / genuine pullback,
+            # reducing trade count ~60% while improving average signal quality.
             _ps_side: Signal | None = None
             if regime.value == "MEAN_REVERTING":
-                if _above_sma and _rsi_val > 60:      # overbought → fade SHORT
+                if _above_sma and _rsi_val > 70:      # true overbought → fade SHORT
                     _ps_side = Signal.SHORT
-                elif not _above_sma and _rsi_val < 40: # oversold → fade LONG
+                elif not _above_sma and _rsi_val < 30: # true oversold → fade LONG
                     _ps_side = Signal.LONG
             else:  # TRENDING / UNKNOWN
-                if _above_sma and _rsi_val < 62:      # uptrend + room left → LONG
+                if _above_sma and _rsi_val <= 48:     # uptrend pullback → LONG
                     _ps_side = Signal.LONG
-                elif not _above_sma and _rsi_val > 38: # downtrend + room left → SHORT
+                elif not _above_sma and _rsi_val >= 52: # downtrend bounce → SHORT
                     _ps_side = Signal.SHORT
 
             if _ps_side is not None:
