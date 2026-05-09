@@ -1,0 +1,26 @@
+{
+  "bundle_ts": 1778311554,
+  "bundle_date": "2026-05-09 07:25:58 UTC",
+  "engine_ver": "EOW_QUANT_ENGINE_v1.1.0",
+  "trade_count": 777,
+  "net_pnl_usdt": -235.9887,
+  "win_rate_pct": 27.67,
+  "profit_factor": 0.491,
+  "max_drawdown_pct": 25.19,
+  "sharpe_ratio": -2.244,
+  "total_fees_usdt": 109.3052,
+  "fee_drag_pct": 31.66,
+  "presets_included": [
+    "ALL",
+    "1D",
+    "7D",
+    "20D"
+  ],
+  "evolution": {
+    "correction_cycles": 0,
+    "drift_paused": false,
+    "total_alerts": 0,
+    "active_critical_alerts": 0,
+    "api_endpoint": "/api/evolution-status"
+  }
+}
