@@ -1,0 +1,233 @@
+{
+  "title": "Hourly Performance \u2014 Golden Hours vs Avoid Hours (UTC)",
+  "generated_at": "2026-05-09 02:27:54 UTC",
+  "golden_hours": [
+    "10:00-10:59 UTC",
+    "04:00-04:59 UTC",
+    "14:00-14:59 UTC"
+  ],
+  "avoid_hours": [
+    "18:00-18:59 UTC",
+    "22:00-22:59 UTC",
+    "16:00-16:59 UTC"
+  ],
+  "by_hour": [
+    {
+      "hour_utc": 0,
+      "label": "00:00-00:59 UTC",
+      "n_trades": 13,
+      "win_rate_pct": 69.23,
+      "net_pnl_usdt": -1.2727,
+      "avg_pnl_usdt": -0.0979,
+      "verdict": "NEUTRAL"
+    },
+    {
+      "hour_utc": 1,
+      "label": "01:00-01:59 UTC",
+      "n_trades": 1,
+      "win_rate_pct": 100.0,
+      "net_pnl_usdt": 0.0823,
+      "avg_pnl_usdt": 0.0823,
+      "verdict": "NEUTRAL"
+    },
+    {
+      "hour_utc": 2,
+      "label": "02:00-02:59 UTC",
+      "n_trades": 30,
+      "win_rate_pct": 20.0,
+      "net_pnl_usdt": -8.8635,
+      "avg_pnl_usdt": -0.2955,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 3,
+      "label": "03:00-03:59 UTC",
+      "n_trades": 41,
+      "win_rate_pct": 14.63,
+      "net_pnl_usdt": -7.9542,
+      "avg_pnl_usdt": -0.194,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 4,
+      "label": "04:00-04:59 UTC",
+      "n_trades": 31,
+      "win_rate_pct": 29.03,
+      "net_pnl_usdt": 2.5988,
+      "avg_pnl_usdt": 0.0838,
+      "verdict": "GOLDEN_HOUR"
+    },
+    {
+      "hour_utc": 5,
+      "label": "05:00-05:59 UTC",
+      "n_trades": 34,
+      "win_rate_pct": 23.53,
+      "net_pnl_usdt": -3.3487,
+      "avg_pnl_usdt": -0.0985,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 6,
+      "label": "06:00-06:59 UTC",
+      "n_trades": 56,
+      "win_rate_pct": 25.0,
+      "net_pnl_usdt": -9.2566,
+      "avg_pnl_usdt": -0.1653,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 7,
+      "label": "07:00-07:59 UTC",
+      "n_trades": 57,
+      "win_rate_pct": 31.58,
+      "net_pnl_usdt": -0.2903,
+      "avg_pnl_usdt": -0.0051,
+      "verdict": "NEUTRAL"
+    },
+    {
+      "hour_utc": 8,
+      "label": "08:00-08:59 UTC",
+      "n_trades": 35,
+      "win_rate_pct": 20.0,
+      "net_pnl_usdt": -17.6682,
+      "avg_pnl_usdt": -0.5048,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 9,
+      "label": "09:00-09:59 UTC",
+      "n_trades": 14,
+      "win_rate_pct": 35.71,
+      "net_pnl_usdt": -14.5227,
+      "avg_pnl_usdt": -1.0373,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 10,
+      "label": "10:00-10:59 UTC",
+      "n_trades": 42,
+      "win_rate_pct": 35.71,
+      "net_pnl_usdt": 3.8863,
+      "avg_pnl_usdt": 0.0925,
+      "verdict": "GOLDEN_HOUR"
+    },
+    {
+      "hour_utc": 11,
+      "label": "11:00-11:59 UTC",
+      "n_trades": 61,
+      "win_rate_pct": 32.79,
+      "net_pnl_usdt": -20.7691,
+      "avg_pnl_usdt": -0.3405,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 12,
+      "label": "12:00-12:59 UTC",
+      "n_trades": 71,
+      "win_rate_pct": 28.17,
+      "net_pnl_usdt": -1.987,
+      "avg_pnl_usdt": -0.028,
+      "verdict": "NEUTRAL"
+    },
+    {
+      "hour_utc": 13,
+      "label": "13:00-13:59 UTC",
+      "n_trades": 49,
+      "win_rate_pct": 20.41,
+      "net_pnl_usdt": -9.6676,
+      "avg_pnl_usdt": -0.1973,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 14,
+      "label": "14:00-14:59 UTC",
+      "n_trades": 40,
+      "win_rate_pct": 42.5,
+      "net_pnl_usdt": 0.675,
+      "avg_pnl_usdt": 0.0169,
+      "verdict": "NEUTRAL"
+    },
+    {
+      "hour_utc": 15,
+      "label": "15:00-15:59 UTC",
+      "n_trades": 31,
+      "win_rate_pct": 38.71,
+      "net_pnl_usdt": -14.3612,
+      "avg_pnl_usdt": -0.4633,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 16,
+      "label": "16:00-16:59 UTC",
+      "n_trades": 25,
+      "win_rate_pct": 36.0,
+      "net_pnl_usdt": -21.4873,
+      "avg_pnl_usdt": -0.8595,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 17,
+      "label": "17:00-17:59 UTC",
+      "n_trades": 27,
+      "win_rate_pct": 37.04,
+      "net_pnl_usdt": -16.7505,
+      "avg_pnl_usdt": -0.6204,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 18,
+      "label": "18:00-18:59 UTC",
+      "n_trades": 21,
+      "win_rate_pct": 23.81,
+      "net_pnl_usdt": -30.7472,
+      "avg_pnl_usdt": -1.4642,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 19,
+      "label": "19:00-19:59 UTC",
+      "n_trades": 13,
+      "win_rate_pct": 15.38,
+      "net_pnl_usdt": -7.5523,
+      "avg_pnl_usdt": -0.5809,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 20,
+      "label": "20:00-20:59 UTC",
+      "n_trades": 11,
+      "win_rate_pct": 0.0,
+      "net_pnl_usdt": -8.2879,
+      "avg_pnl_usdt": -0.7534,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 21,
+      "label": "21:00-21:59 UTC",
+      "n_trades": 20,
+      "win_rate_pct": 20.0,
+      "net_pnl_usdt": -1.4325,
+      "avg_pnl_usdt": -0.0716,
+      "verdict": "NEUTRAL"
+    },
+    {
+      "hour_utc": 22,
+      "label": "22:00-22:59 UTC",
+      "n_trades": 21,
+      "win_rate_pct": 19.05,
+      "net_pnl_usdt": -28.081,
+      "avg_pnl_usdt": -1.3372,
+      "verdict": "AVOID_HOUR"
+    },
+    {
+      "hour_utc": 23,
+      "label": "23:00-23:59 UTC",
+      "n_trades": 13,
+      "win_rate_pct": 23.08,
+      "net_pnl_usdt": -11.5839,
+      "avg_pnl_usdt": -0.8911,
+      "verdict": "AVOID_HOUR"
+    }
+  ],
+  "action": "Trade more in: 10:00-10:59 UTC, 04:00-04:59 UTC. Reduce activity in: 18:00-18:59 UTC, 22:00-22:59 UTC."
+}
