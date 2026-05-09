@@ -1283,10 +1283,20 @@ async def on_tick(tick: Tick):
                 }
                 trade_flow_monitor.record_skip(sym, _lcc_result.reason)
                 return
-            if _lcc_result.size_mult < 1.0:
+            # FTD-054-PHOENIX: LCC size reduction must also be gated by BYPASS_ALL_GATES.
+            # Previously, size_mult=0.0 (PAUSED) silently zeroed sizing.qty even in bypass
+            # mode, causing a 90+ minute trade drought after 5+ consecutive session losses.
+            # In bypass mode the RL engine needs trades to learn; LCC pause defeats that.
+            if not cfg.BYPASS_ALL_GATES and _lcc_result.size_mult < 1.0:
                 sizing.qty = round(sizing.qty * _lcc_result.size_mult, 8)
                 if sizing.qty <= 0:
                     return
+            if cfg.BYPASS_ALL_GATES and _lcc_result.size_mult < 1.0:
+                _thought(
+                    f"⚡ LCC_OVERRIDE {sym}: state={_lcc_result.state} "
+                    f"cl={_p52_cl} [bypass=active, size not reduced]",
+                    "SIGNAL",
+                )
 
             # ── Phase 5.2 + 6: Exploration Hard Injection (guarded) ──────────
             # ExplorationGuard pre-checks daily loss cap before slot allocation.
@@ -1671,6 +1681,11 @@ async def on_tick(tick: Tick):
             # Apply orchestrator concentration multiplier (folds in upstream_mult + band boost)
             sizing.qty = round(sizing.qty * _cycle.concentration_mult, 8)
             if sizing.qty <= 0:
+                _thought(
+                    f"🚫 ZERO_QTY_ORCH {sym}: conc_mult={_cycle.concentration_mult:.4f} "
+                    f"zeroed qty (upstream_mult={_combined_mult:.2f}×)",
+                    "FILTER",
+                )
                 return
             _thought(
                 f"💰 Orchestrator {sym}: score={_alloc_score:.3f} "
@@ -4884,37 +4899,55 @@ def _generate_forensic_reports(
     signals_gen  = _cnt("🔔 Signal")
     trades_open  = _cnt("✅ Opened")
     rsi_blocked  = _cnt("RSI filter blocked")
+    rsi_crash_g  = _cnt("RSI_CRASH_GUARD")
     aie_suppress = _cnt("AIE INVERSE suppressed")
     fee_blocked  = _cnt("FEE_HEAVY")
     sl_blocked   = _cnt("SL_TOO_TIGHT")
     rr_blocked   = _cnt("RR_LOW")
     dd_blocked   = _cnt("DAILY_DD")
     streak_block = _cnt("LOSS_STREAK")
+    lcc_blocked  = _cnt("LCC_OVERRIDE") + _cnt("LCC_PAUSED") + _cnt("LCC_REDUCING")
+    zero_qty     = _cnt("ZERO_QTY")
+    rl_blocked   = _cnt("RL_GATE")
+    alloc_zero   = _cnt("ALLOC_ZERO")
 
+    all_blockers = [
+        ("RSI_FILTER",     rsi_blocked),
+        ("RSI_CRASH_GUARD", rsi_crash_g),
+        ("FEE_GATE",       fee_blocked),
+        ("SL_GATE",        sl_blocked),
+        ("RR_GATE",        rr_blocked),
+        ("LCC",            lcc_blocked),
+        ("ZERO_QTY",       zero_qty),
+        ("RL_GATE",        rl_blocked),
+        ("ALLOC_ZERO",     alloc_zero),
+    ]
     files["signal_funnel.json"] = json.dumps({
         "title":         "Signal Pipeline Funnel — Where Trade Ideas Are Filtered",
         "generated_at":  time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
-        "note":          "Based on last 30 thought-log entries (rolling window)",
+        "note":          "Scans entire rolling thought-log (not limited to 30 entries)",
         "funnel": {
             "1_signals_generated":         signals_gen,
             "2_rsi_filter_blocked":        rsi_blocked,
+            "2_rsi_crash_guard_blocked":   rsi_crash_g,
             "3_aie_inversions_suppressed": aie_suppress,
             "4_lean_gate_fee_blocked":     fee_blocked,
             "4_lean_gate_sl_blocked":      sl_blocked,
             "4_lean_gate_rr_blocked":      rr_blocked,
             "4_lean_gate_dd_blocked":      dd_blocked,
             "4_lean_gate_streak_blocked":  streak_block,
+            "4_lcc_blocked":               lcc_blocked,
+            "4_rl_gate_blocked":           rl_blocked,
+            "4_zero_qty_killed":           zero_qty,
+            "4_alloc_zero_override":       alloc_zero,
             "5_trades_executed":           trades_open,
         },
         "conversion_rate_pct": round(trades_open / max(signals_gen, 1) * 100, 1),
         "session_trades_total":    n_total,
         "session_win_rate_pct":    session_stats.get("win_rate", 0.0),
         "session_profit_factor":   session_stats.get("profit_factor", 0.0),
-        "biggest_blocker": max(
-            [("RSI_FILTER", rsi_blocked), ("FEE_GATE", fee_blocked),
-             ("SL_GATE", sl_blocked), ("RR_GATE", rr_blocked)],
-            key=lambda x: x[1]
-        )[0] if any([rsi_blocked, fee_blocked, sl_blocked, rr_blocked]) else "NONE",
+        "biggest_blocker": max(all_blockers, key=lambda x: x[1])[0]
+                           if any(v for _, v in all_blockers) else "NONE",
     }, indent=2)
 
     # ── 7. Capital Efficiency — Path to $1/min ────────────────────────────────
