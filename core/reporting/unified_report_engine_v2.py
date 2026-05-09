@@ -1020,6 +1020,12 @@ def generate_full_report_v2(data: dict) -> str:
     Returns:
         Formatted Markdown string with 11 sections.
     """
+    # pnl_calculator.py uses "total_trades" but every section here looks for
+    # "n_trades".  Backfill the alias so stats are never silently zero.
+    _ss = data.get("session_stats", {})
+    if isinstance(_ss, dict) and _ss.get("n_trades", 0) == 0 and _ss.get("total_trades", 0) > 0:
+        data = {**data, "session_stats": {**_ss, "n_trades": _ss["total_trades"]}}
+
     # FTD-025C: truth engine — contradiction detection + root cause resolution
     data = _truth_process(data)
     # FTD-025CD: intelligence layer — execution / decision / capital / learning depth
