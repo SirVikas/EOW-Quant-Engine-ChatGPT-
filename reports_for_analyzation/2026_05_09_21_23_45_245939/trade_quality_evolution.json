@@ -1,0 +1,46 @@
+{
+  "title": "Trade Quality Evolution \u2014 Are Later Trades Smarter? (FTD-055-ATHENA)",
+  "generated_at": "2026-05-09 15:46:07 UTC",
+  "session_trades": 17,
+  "verdict": "DEGRADING",
+  "overall_session": {
+    "n": 17,
+    "wr_pct": 17.6,
+    "pf": 0.174,
+    "avg_pnl": -0.2464,
+    "ev": -0.2464
+  },
+  "early_vs_late": {
+    "early_half": {
+      "n": 8,
+      "wr_pct": 25.0,
+      "pf": 0.305,
+      "avg_pnl": -0.2002,
+      "ev": -0.2002
+    },
+    "late_half": {
+      "n": 9,
+      "wr_pct": 11.1,
+      "pf": 0.065,
+      "avg_pnl": -0.2875,
+      "ev": -0.2875
+    },
+    "wr_delta_pct": -13.9,
+    "pf_delta": -0.24,
+    "trend": "DEGRADING",
+    "interpretation": "Win rate declined by 13.9pp in the second half. Performance declining \u2014 check RL context or signal quality."
+  },
+  "rolling_windows": [],
+  "regime_evolution": {
+    "MEAN_REVERTING": {
+      "total_trades": 17,
+      "early_wr_pct": 25.0,
+      "late_wr_pct": 11.1,
+      "wr_delta_pct": -13.9,
+      "early_pf": 0.305,
+      "late_pf": 0.065,
+      "trend": "DEGRADING"
+    }
+  },
+  "action": "Performance degrading \u2014 RL may be overfitting or market conditions shifted."
+}
