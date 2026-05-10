@@ -1,0 +1,2507 @@
+{
+  "captured_at": "2026-05-10T16:47:38.940Z",
+  "snapshot_id": "ee7b61bb-0e31-4d8d-8438-0b8a17332f47",
+  "total_entries": 500,
+  "entries": [
+    {
+      "ts": 1778429940260,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778429940261,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=4 score_adj=+0.05 \u2192 eff_min=0.400"
+    },
+    {
+      "ts": 1778429940278,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ONDOUSDT score=0.515 rr=5.00"
+    },
+    {
+      "ts": 1778429940278,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: LONG entry=0.4175 rsi=36.4"
+    },
+    {
+      "ts": 1778429940296,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778429940297,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=4 score_adj=+0.05 \u2192 eff_min=0.400"
+    },
+    {
+      "ts": 1778429940311,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=32.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778429940339,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778429940341,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=4 score_adj=+0.05 \u2192 eff_min=0.400"
+    },
+    {
+      "ts": 1778429940357,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81349.5700 rsi=40.7"
+    },
+    {
+      "ts": 1778429940561,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778429940563,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=4 score_adj=+0.05 \u2192 eff_min=0.400"
+    },
+    {
+      "ts": 1778429940576,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=56.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778429940640,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778429940642,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=4 score_adj=+0.05 \u2192 eff_min=0.400"
+    },
+    {
+      "ts": 1778429940650,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=26.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778429941339,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778429941340,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=4 score_adj=+0.05 \u2192 eff_min=0.400"
+    },
+    {
+      "ts": 1778429941348,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=49.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778429943691,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778429943691,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=4 score_adj=+0.05 \u2192 eff_min=0.400"
+    },
+    {
+      "ts": 1778429943691,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=2.4200 rsi=45.5"
+    },
+    {
+      "ts": 1778429945739,
+      "level": "TRADE",
+      "msg": "Position closed [SL] BIOUSDT @ 0.0541"
+    },
+    {
+      "ts": 1778429945879,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778429945888,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=43.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430000234,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430000246,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81357.8400 rsi=46.8"
+    },
+    {
+      "ts": 1778430000297,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430000307,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=24.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430000436,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430000451,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=50.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430000587,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430000595,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout SAHARAUSDT score=0.828 rr=5.00"
+    },
+    {
+      "ts": 1778430000596,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=68.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430000738,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430000751,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI filter blocked (rsi=52.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430000768,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430000779,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=56.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430000895,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430000905,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=39.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430004654,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430004673,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=39.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430059070,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #44: meta_score=48.4 verdict=\u2014"
+    },
+    {
+      "ts": 1778430060207,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430060207,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout TONUSDT score=0.714 rr=5.00"
+    },
+    {
+      "ts": 1778430060207,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=38.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430060305,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430060325,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81376.8500 rsi=43.4"
+    },
+    {
+      "ts": 1778430060409,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430060431,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=31.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430060571,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430060582,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=41.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430061270,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430061282,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=26.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430061329,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430061337,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=53.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430062690,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430062706,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=60.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430065845,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430065861,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI filter blocked (rsi=51.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430120204,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430120211,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=24.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430120322,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430120330,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=50.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430120397,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430120422,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81332.4400 rsi=39.0"
+    },
+    {
+      "ts": 1778430120555,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430120586,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=29.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430120872,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430120881,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=31.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430121463,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430121473,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=60.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430122096,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430122113,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ONDOUSDT score=0.505 rr=5.00"
+    },
+    {
+      "ts": 1778430122114,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: LONG entry=0.4178 rsi=44.8"
+    },
+    {
+      "ts": 1778430124410,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430124428,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=44.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430180393,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430180402,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI filter blocked (rsi=34.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430180618,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430180628,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=66.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430180689,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430180706,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81337.3700 rsi=39.4"
+    },
+    {
+      "ts": 1778430180782,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430180801,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=24.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430180858,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430180880,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=43.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430180926,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430180936,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=20.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430182959,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430182974,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=41.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430183454,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430183469,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ONDOUSDT score=0.490 rr=5.00"
+    },
+    {
+      "ts": 1778430183470,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: LONG entry=0.4184 rsi=44.8"
+    },
+    {
+      "ts": 1778430240163,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430240170,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2342.3400 rsi=25.4"
+    },
+    {
+      "ts": 1778430240172,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG ETHUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778430240182,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE ETHUSDT: state=PAUSED cl=5 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1778430240184,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO ETHUSDT: score=0.163 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1778430240185,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY ETHUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1778430240186,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator ETHUSDT: score=0.163 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.060305"
+    },
+    {
+      "ts": 1778430240187,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override ETHUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778430240188,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG ETHUSDT qty=0.060305 risk=3.53U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778430240336,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430240349,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=21.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430240457,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430240467,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_CRASH_GUARD blocked LONG (rsi=28.1 prev=39.4\u226535, need prev<35 \u2014 first-touch crash, not established reversal)"
+    },
+    {
+      "ts": 1778430240603,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430240615,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=46.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430240679,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430240696,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=50.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430240900,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430240915,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=26.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430241580,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430241589,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ONDOUSDT score=0.512 rr=5.00"
+    },
+    {
+      "ts": 1778430241590,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: LONG entry=0.4185 rsi=32.7"
+    },
+    {
+      "ts": 1778430245874,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430245875,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430245883,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=41.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430300644,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430300644,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430300665,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=81278.4500 rsi=23.6"
+    },
+    {
+      "ts": 1778430300666,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG BTCUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778430300670,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE BTCUSDT: state=PAUSED cl=5 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1778430300671,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO BTCUSDT: score=0.236 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1778430300672,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY BTCUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1778430300673,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator BTCUSDT: score=0.236 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.001738"
+    },
+    {
+      "ts": 1778430300674,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override BTCUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778430300676,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG BTCUSDT qty=0.001738 risk=3.53U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778430300928,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430300930,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430300937,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=49.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430301022,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430301023,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430301039,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=21.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430301254,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430301259,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430301266,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430301324,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430301325,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430301345,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback SAHARAUSDT: LONG entry=0.0365 rsi=43.4"
+    },
+    {
+      "ts": 1778430301494,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430301495,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430301503,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: LONG entry=0.4180 rsi=30.5"
+    },
+    {
+      "ts": 1778430303481,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430303482,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430303483,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass UNIUSDT: SLEEP_MODE(vol=656=8%_of_avg=7799,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778430303490,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=41.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430305682,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430305682,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430305691,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430359065,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #45: meta_score=48.4 verdict=\u2014"
+    },
+    {
+      "ts": 1778430360248,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430360250,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430360264,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=26.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430360520,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430360520,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430360520,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback SAHARAUSDT: LONG entry=0.0367 rsi=47.3"
+    },
+    {
+      "ts": 1778430360633,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430360634,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430360655,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ONDOUSDT score=0.495 rr=5.00"
+    },
+    {
+      "ts": 1778430360656,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: LONG entry=0.4184 rsi=35.5"
+    },
+    {
+      "ts": 1778430360851,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430360854,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430360876,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=18.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430361231,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430361233,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430361258,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=43.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430362962,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430362962,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430362978,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=43.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430363394,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430363394,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430363394,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430431535,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430431536,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430431543,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_CRASH_GUARD blocked SHORT (rsi=76.5 prev=43.9\u226465, need prev>65 \u2014 first-touch spike, not established reversal)"
+    },
+    {
+      "ts": 1778430431687,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430431688,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430431696,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=41.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430432466,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430432467,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430432493,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=49.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430433292,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430433293,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430433300,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=30.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430433405,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430433407,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430433417,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=25.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430433582,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430433582,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430433582,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI filter blocked (rsi=46.7 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430435894,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430435894,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430435919,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430486274,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430486275,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430486289,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI filter blocked (rsi=48.7 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430486307,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430486308,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430486321,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=25.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430486412,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430486413,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430486422,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: SHORT entry=4.0670 rsi=83.7"
+    },
+    {
+      "ts": 1778430486431,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT UNIUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778430486434,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) UNIUSDT"
+    },
+    {
+      "ts": 1778430486437,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE UNIUSDT: state=PAUSED cl=5 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1778430486439,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO UNIUSDT: score=0.180 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1778430486441,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY UNIUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1778430486442,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator UNIUSDT: score=0.180 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=34.732122"
+    },
+    {
+      "ts": 1778430486443,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override UNIUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778430486445,
+      "level": "TRADE",
+      "msg": "\u2705 Opened SHORT UNIUSDT qty=34.732122 risk=3.53U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778430486667,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430486667,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430486676,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=37.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430486696,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430486696,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430486718,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=55.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430487076,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430487096,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430487109,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry LAYERUSDT score=0.530 rr=4.00"
+    },
+    {
+      "ts": 1778430487109,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LAYERUSDT: SHORT entry=0.1266 rsi=58.7"
+    },
+    {
+      "ts": 1778430489232,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430489233,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430489249,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430540530,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430540531,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430540549,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430540625,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430540626,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430540629,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout LUNCUSDT score=0.631 rr=5.00"
+    },
+    {
+      "ts": 1778430540629,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=39.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430540789,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430540790,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430540807,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI filter blocked (rsi=48.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430541360,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430541362,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430541370,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=60.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430542128,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430542134,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430542156,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=45.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430542641,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430542642,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430542651,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=23.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430600648,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430600648,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430600673,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=25.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430600906,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430600906,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430600916,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=41.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430600953,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430600954,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430600977,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=56.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430601157,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430601158,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430601172,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI filter blocked (rsi=52.5 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430601437,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430601438,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430601465,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=40.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430604461,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778430604462,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778430604485,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430622061,
+      "level": "TRADE",
+      "msg": "[TM] UNIUSDT TIME_EXIT @ 4.0730 (Fast-fail: 2.3min r=-0.523<-0.45)"
+    },
+    {
+      "ts": 1778430622076,
+      "level": "TRADE",
+      "msg": "Position closed [SL] UNIUSDT @ 4.073"
+    },
+    {
+      "ts": 1778430659070,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #46: meta_score=48.3 verdict=\u2014"
+    },
+    {
+      "ts": 1778430660342,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430660347,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=44.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430660444,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430660453,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=27.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430660664,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430660672,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI filter blocked (rsi=65.3 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430660853,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430660870,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=59.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430661485,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430661497,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=34.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430661744,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430661755,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=40.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430720356,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430720371,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=46.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430720467,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430720480,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=62.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430720549,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430720562,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=37.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430720601,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430720610,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=30.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430720752,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430720764,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.4230 rsi=80.7"
+    },
+    {
+      "ts": 1778430720765,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT ONDOUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1778430720768,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) ONDOUSDT"
+    },
+    {
+      "ts": 1778430720782,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE ONDOUSDT: state=PAUSED cl=6 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1778430720784,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO ONDOUSDT: score=0.210 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1778430720785,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY ONDOUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1778430720787,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator ONDOUSDT: score=0.210 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=333.745345"
+    },
+    {
+      "ts": 1778430720787,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override ONDOUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1778430720789,
+      "level": "TRADE",
+      "msg": "\u2705 Opened SHORT ONDOUSDT qty=333.745345 risk=3.53U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1778430721228,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=6 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430721243,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=27.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430781016,
+      "level": "TRADE",
+      "msg": "[TM] BTCUSDT TIME_EXIT @ 81200.0100 (Stale: 8.0min r=-0.402<0.15)"
+    },
+    {
+      "ts": 1778430781397,
+      "level": "TRADE",
+      "msg": "Position closed [SL] BTCUSDT @ 81200.01"
+    },
+    {
+      "ts": 1778430783330,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430783345,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout SAHARAUSDT score=0.531 rr=4.00"
+    },
+    {
+      "ts": 1778430783346,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=62.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430783647,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430783656,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=34.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430784048,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430784056,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430784136,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430784151,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=29.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430787142,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430787162,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=44.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430788242,
+      "level": "TRADE",
+      "msg": "[TM] ONDOUSDT BE: SL\u21920.4224 (R=1.01\u22651.0 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1778430841190,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430841216,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=60.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430841691,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430841691,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=27.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430842352,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430842360,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=37.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430842651,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430842679,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry LAYERUSDT score=0.583 rr=4.00"
+    },
+    {
+      "ts": 1778430842679,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LAYERUSDT: SHORT entry=0.1265 rsi=58.3"
+    },
+    {
+      "ts": 1778430843195,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430843207,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=35.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430847387,
+      "level": "TRADE",
+      "msg": "Position closed [BE] ONDOUSDT @ 0.4225"
+    },
+    {
+      "ts": 1778430905800,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430905819,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=53.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430906160,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430906189,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=32.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430906445,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430906473,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=50.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430908845,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430908856,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=43.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430927918,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430927951,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=38.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430959081,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #47: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1778430964043,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430964050,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=66.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778430964593,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430964604,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=28.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430965765,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430965773,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=50.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778430965794,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430965803,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=35.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430966109,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430966129,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=46.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778430966169,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778430966178,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LAYERUSDT: SHORT entry=0.1264 rsi=52.3"
+    },
+    {
+      "ts": 1778431020720,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431020729,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=51.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431021110,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431021131,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=45.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431021932,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431021946,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=52.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431022199,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431022210,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=36.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431023149,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431023157,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry UNIUSDT score=0.690 rr=5.00"
+    },
+    {
+      "ts": 1778431023158,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=58.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431034925,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431034948,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=43.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431088787,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431088865,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=54.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431089011,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431089026,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=41.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431089129,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431089151,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=38.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431090046,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431090062,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=45.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431090161,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431090174,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=40.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431090608,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431090636,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=58.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431090935,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431090941,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=29.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431140298,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431140309,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=66.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431141243,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431141255,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=46.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431141336,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431141359,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=63.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431141843,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431141862,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=48.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431142431,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431142444,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=41.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431143790,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1778431143799,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=50.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431147672,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431147674,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431147694,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=47.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431157317,
+      "level": "TRADE",
+      "msg": "[TM] ETHUSDT BE: SL\u21922345.6193 (R=1.00\u22651.0 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1778431200161,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431200169,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431200188,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=48.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431200231,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431200232,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431200250,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: SHORT entry=81304.6000 rsi=56.9"
+    },
+    {
+      "ts": 1778431200686,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431200688,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431200703,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry SAHARAUSDT score=0.508 rr=4.00"
+    },
+    {
+      "ts": 1778431200703,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=56.3 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431201398,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431201399,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431201414,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=62.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431204924,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431204926,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431204941,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=50.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431204956,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431204956,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431204975,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BIOUSDT: SHORT entry=0.0541 rsi=56.2"
+    },
+    {
+      "ts": 1778431207833,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431207834,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431207849,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=41.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431259078,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #48: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1778431272762,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431272763,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431272775,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LUNCUSDT: SHORT entry=0.0001 rsi=52.7"
+    },
+    {
+      "ts": 1778431272889,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431272890,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431272904,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: SHORT entry=81315.1600 rsi=53.2"
+    },
+    {
+      "ts": 1778431272917,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431272918,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431272932,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431273796,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431273802,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431273810,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=51.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431274363,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431274363,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431274384,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=37.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431275417,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431275418,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431275431,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=4.0460 rsi=43.1"
+    },
+    {
+      "ts": 1778431284182,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431284182,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431284190,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass BIOUSDT: SLEEP_MODE(vol=24958=9%_of_avg=276213,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1778431284207,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BIOUSDT: SHORT entry=0.0541 rsi=60.0"
+    },
+    {
+      "ts": 1778431322325,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SAHARAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431322326,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SAHARAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431322338,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431322403,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LUNCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431322404,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LUNCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431322416,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LUNCUSDT: SHORT entry=0.0001 rsi=61.8"
+    },
+    {
+      "ts": 1778431322553,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431322554,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431322568,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431323422,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431323423,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431323438,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=46.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431325481,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LAYERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431325482,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LAYERUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431325495,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry LAYERUSDT score=0.548 rr=4.00"
+    },
+    {
+      "ts": 1778431325496,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LAYERUSDT: SHORT entry=0.1272 rsi=56.5"
+    },
+    {
+      "ts": 1778431326896,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431326897,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431326910,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry UNIUSDT score=0.484 rr=5.00"
+    },
+    {
+      "ts": 1778431326911,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=4.0520 rsi=42.6"
+    },
+    {
+      "ts": 1778431329601,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BIOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1778431329602,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BIOUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1778431329633,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=62.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431350286,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] ETHUSDT @ 2348.06"
+    },
+    {
+      "ts": 1778431381909,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=47.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431382363,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=4.0480 rsi=42.6"
+    },
+    {
+      "ts": 1778431382504,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: SHORT entry=81294.2800 rsi=52.7"
+    },
+    {
+      "ts": 1778431382995,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=70.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431384817,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=27.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431385059,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry LAYERUSDT score=0.543 rr=4.00"
+    },
+    {
+      "ts": 1778431385060,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LAYERUSDT: SHORT entry=0.1270 rsi=61.9"
+    },
+    {
+      "ts": 1778431386733,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BIOUSDT: SHORT entry=0.0541 rsi=62.5"
+    },
+    {
+      "ts": 1778431440283,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=42.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431440400,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: SHORT entry=81294.2900 rsi=57.0"
+    },
+    {
+      "ts": 1778431440633,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=27.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431440692,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout LUNCUSDT score=0.817 rr=5.00"
+    },
+    {
+      "ts": 1778431440692,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=81.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431440726,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BIOUSDT: SHORT entry=0.0541 rsi=62.5"
+    },
+    {
+      "ts": 1778431442019,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=51.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431442313,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry LAYERUSDT score=0.573 rr=4.00"
+    },
+    {
+      "ts": 1778431442315,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LAYERUSDT: SHORT entry=0.1267 rsi=60.5"
+    },
+    {
+      "ts": 1778431500511,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=45.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431501660,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=78.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431501715,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=54.5 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431503031,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=42.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431503262,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback LAYERUSDT: SHORT entry=0.1266 rsi=52.6"
+    },
+    {
+      "ts": 1778431503312,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry UNIUSDT score=0.540 rr=5.00"
+    },
+    {
+      "ts": 1778431503313,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=4.0480 rsi=39.8"
+    },
+    {
+      "ts": 1778431508355,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BIOUSDT: SHORT entry=0.0541 rsi=57.1"
+    },
+    {
+      "ts": 1778431559081,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #49: meta_score=48.3 verdict=\u2014"
+    },
+    {
+      "ts": 1778431561951,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=4.0680 rsi=47.8"
+    },
+    {
+      "ts": 1778431562353,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout TONUSDT score=0.879 rr=5.00"
+    },
+    {
+      "ts": 1778431562354,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=32.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431562404,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=46.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431562572,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI filter blocked (rsi=48.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431562807,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=46.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431565153,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=75.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431566654,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BIOUSDT: SHORT entry=0.0540 rsi=57.1"
+    },
+    {
+      "ts": 1778431629467,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: SHORT entry=81281.8400 rsi=66.2"
+    },
+    {
+      "ts": 1778431629694,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI filter blocked (rsi=48.7 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431630405,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI filter blocked (rsi=54.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431631307,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI filter blocked (rsi=48.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1778431634181,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LAYERUSDT: RSI filter blocked (rsi=55.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431634555,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LUNCUSDT: RSI filter blocked (rsi=83.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1778431642304,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BIOUSDT: RSI filter blocked (rsi=69.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1778431653835,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udcca Unified Report v2 exported (FTD-025B-URX-V2)"
+    }
+  ]
+}
