@@ -1,0 +1,110 @@
+{
+  "title": "Trade Quality Evolution \u2014 Are Later Trades Smarter? (FTD-055-ATHENA)",
+  "generated_at": "2026-05-10 12:17:12 UTC",
+  "session_trades": 159,
+  "verdict": "FLAT",
+  "overall_session": {
+    "n": 159,
+    "wr_pct": 17.0,
+    "pf": 0.341,
+    "avg_pnl": -0.1833,
+    "ev": -0.1833
+  },
+  "early_vs_late": {
+    "early_half": {
+      "n": 79,
+      "wr_pct": 17.7,
+      "pf": 0.283,
+      "avg_pnl": -0.2098,
+      "ev": -0.2098
+    },
+    "late_half": {
+      "n": 80,
+      "wr_pct": 16.2,
+      "pf": 0.404,
+      "avg_pnl": -0.1572,
+      "ev": -0.1572
+    },
+    "wr_delta_pct": -1.5,
+    "pf_delta": 0.121,
+    "trend": "FLAT",
+    "interpretation": "Win rate declined by 1.5pp in the second half. No measurable improvement yet \u2014 need more session volume."
+  },
+  "rolling_windows": [
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.085,
+      "avg_pnl": -0.3018,
+      "ev": -0.3018,
+      "window_start": 1,
+      "window_end": 20
+    },
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.075,
+      "avg_pnl": -0.344,
+      "ev": -0.344,
+      "window_start": 21,
+      "window_end": 40
+    },
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.285,
+      "avg_pnl": -0.1811,
+      "ev": -0.1811,
+      "window_start": 41,
+      "window_end": 60
+    },
+    {
+      "n": 20,
+      "wr_pct": 25.0,
+      "pf": 0.971,
+      "avg_pnl": -0.0059,
+      "ev": -0.0059,
+      "window_start": 61,
+      "window_end": 80
+    },
+    {
+      "n": 20,
+      "wr_pct": 20.0,
+      "pf": 0.502,
+      "avg_pnl": -0.1218,
+      "ev": -0.1218,
+      "window_start": 81,
+      "window_end": 100
+    },
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.547,
+      "avg_pnl": -0.1181,
+      "ev": -0.1181,
+      "window_start": 101,
+      "window_end": 120
+    },
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.25,
+      "avg_pnl": -0.1867,
+      "ev": -0.1867,
+      "window_start": 121,
+      "window_end": 140
+    }
+  ],
+  "regime_evolution": {
+    "MEAN_REVERTING": {
+      "total_trades": 159,
+      "early_wr_pct": 17.7,
+      "late_wr_pct": 16.2,
+      "wr_delta_pct": -1.5,
+      "early_pf": 0.283,
+      "late_pf": 0.404,
+      "trend": "FLAT"
+    }
+  },
+  "action": "Performance stable \u2014 no improvement trend yet. More session volume needed."
+}
