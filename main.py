@@ -5565,13 +5565,13 @@ def _generate_rl_intelligence_reports(
                 counters.get("toxic_blocks", 0) / max(total_pulls, 1), 3
             ),
             "floor_raise_rate": round(
-                counters.get("floor_raises", 0) / max(total_updates, 1), 3
+                counters.get("floor_raises", 0) / max(total_pulls, 1), 3
             ),
             "floor_lower_rate": round(
-                counters.get("floor_lowers", 0) / max(total_updates, 1), 3
+                counters.get("floor_lowers", 0) / max(total_pulls, 1), 3
             ),
             "boost_fire_rate":  round(
-                counters.get("boost_fires", 0) / max(total_updates, 1), 3
+                counters.get("boost_fires", 0) / max(total_pulls, 1), 3
             ),
         },
         "hyperparameters": rl_sum.get("hyper", {}),
