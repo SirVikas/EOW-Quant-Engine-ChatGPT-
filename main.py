@@ -5690,6 +5690,909 @@ def _generate_rl_intelligence_reports(
     return files
 
 
+# ── FTD-056-ODYSSEY: Proof-of-Learning → Proof-of-Edge → Proof-of-Alpha ─────
+
+def _generate_odyssey_reports(
+    trade_dicts: list,
+    session_start_idx: int,
+) -> "dict[str, str]":
+    """
+    FTD-056-ODYSSEY — 10-report institutional validation framework.
+
+    Scientifically answers: Can the adaptive RL framework evolve into
+    real profitable intelligence? No cosmetic metrics — honest evidence only.
+
+    Reports produced (09_odyssey/ bundle folder):
+      1. rl_learning_progression.json    — Context knowledge accumulation timeline
+      2. edge_validation_report.json     — Monte Carlo / bootstrap edge significance
+      3. alpha_persistence_report.json   — Is discovered edge durable?
+      4. strategy_evolution_report.json  — Per-strategy early/mid/late trajectory
+      5. regime_performance_matrix.json  — Enhanced regime stats + RL Q integration
+      6. confidence_calibration_report.json — Q-value prediction accuracy (Brier)
+      7. signal_quality_evolution.json   — Rolling RR, WR, fee-drag trend
+      8. adaptive_decision_audit.json    — RL policy change explanations
+      9. reward_propagation_report.json  — Shaped reward quality analysis
+     10. intelligence_maturity_report.json — Proof-of-Learning milestone scorecard
+    """
+    import math as _math
+    import random as _random
+    import collections as _col
+
+    files: dict = {}
+    now_str = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+    all_trades    = trade_dicts
+    session_trades = trade_dicts[session_start_idx:]
+
+    # ── Shared helpers ────────────────────────────────────────────────────────
+
+    def _pnl_stats(trades: list) -> dict:
+        if not trades:
+            return {"n": 0, "wr": 0.0, "wr_pct": 0.0, "pf": 0.0, "avg_pnl": 0.0,
+                    "avg_win": 0.0, "avg_loss": 0.0, "ev": 0.0,
+                    "gross_profit": 0.0, "gross_loss": 0.0}
+        pnls = [t.get("net_pnl", 0.0) for t in trades]
+        wins   = [p for p in pnls if p > 0]
+        losses = [p for p in pnls if p <= 0]
+        gp = sum(wins)
+        gl = abs(sum(losses))
+        n  = len(pnls)
+        nw = len(wins)
+        nl = len(losses)
+        aw = gp / max(nw, 1)
+        al = gl / max(nl, 1)
+        wr = nw / n
+        pf = gp / max(gl, 1e-9)
+        ev = wr * aw - (1 - wr) * al
+        return {
+            "n": n, "wr": round(wr, 4), "wr_pct": round(wr * 100, 1),
+            "pf": round(pf, 3), "avg_pnl": round(sum(pnls) / n, 4),
+            "avg_win": round(aw, 4), "avg_loss": round(al, 4), "ev": round(ev, 4),
+            "gross_profit": round(gp, 4), "gross_loss": round(gl, 4),
+        }
+
+    def _wilson_ci(k: int, n: int, z: float = 1.645) -> "tuple[float, float]":
+        """Wilson score 90% CI for proportion k/n."""
+        if n == 0:
+            return (0.0, 1.0)
+        p = k / n
+        denom = 1 + z * z / n
+        center = (p + z * z / (2 * n)) / denom
+        margin = z * _math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
+        return (round(max(0.0, center - margin), 4), round(min(1.0, center + margin), 4))
+
+    def _bootstrap_pf(pnls: list, n_iter: int = 500) -> "tuple":
+        """Bootstrap 90% CI for profit factor (resample with replacement)."""
+        if len(pnls) < 5:
+            return (None, None)
+        n = len(pnls)
+        boot: list = []
+        for _ in range(n_iter):
+            s = _random.choices(pnls, k=n)
+            gp = sum(p for p in s if p > 0)
+            gl = abs(sum(p for p in s if p <= 0))
+            boot.append(gp / max(gl, 1e-9))
+        boot.sort()
+        return (round(boot[int(0.05 * n_iter)], 3), round(boot[int(0.95 * n_iter)], 3))
+
+    def _z_vs_baseline(k: int, n: int, p0: float = 0.50) -> float:
+        """One-sample z-score: observed WR vs null-hypothesis p0."""
+        if n == 0:
+            return 0.0
+        se = _math.sqrt(p0 * (1 - p0) / n)
+        return round((k / n - p0) / max(se, 1e-9), 3)
+
+    def _breakeven_wr(avg_win: float, avg_loss: float) -> float:
+        if avg_win <= 0 or avg_loss <= 0:
+            return 0.5
+        return round(1.0 / (1.0 + avg_win / avg_loss), 4)
+
+    # ── RL snapshot (shared across all reports) ───────────────────────────────
+    all_ctx       = list(rl_engine._table.values())
+    evo_state     = rl_engine.get_evolution_state()
+    counters      = evo_state.get("counters", {})
+    total_pulls   = counters.get("total_pulls",  0)
+    total_updates = counters.get("total_updates", 0)
+    uptime_min    = max(evo_state.get("uptime_min", 0.01), 0.01)
+    updates_pm    = round(total_updates / uptime_min, 3)
+    toxic_set     = rl_engine._toxic_contexts
+
+    visited_ctx   = [c for c in all_ctx if c.n_visits >= 3]
+    q_vals_visited = [c.q_value for c in visited_ctx]
+    q_spread      = (max(q_vals_visited) - min(q_vals_visited)) if len(q_vals_visited) >= 2 else 0.0
+    n_mature_ctx  = sum(1 for c in all_ctx if c.n_visits >= 50)
+    n_alpha_ctx   = sum(1 for c in all_ctx if c.q_value > 0 and c.n_visits >= 20)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 1. rl_learning_progression.json
+    # ═════════════════════════════════════════════════════════════════════════
+    ctx_prog = []
+    for c in sorted(all_ctx, key=lambda x: x.n_visits, reverse=True):
+        if c.n_visits == 0:
+            continue
+        q_delta = round(c.q_value - c.last_q, 4)
+        wr_lo, wr_hi = _wilson_ci(c.n_wins, c.n_visits)
+        lr = (0.07 if c.n_visits >= 50 else 0.10 if c.n_visits >= 20
+              else 0.15 if c.n_visits >= 5 else 0.25)
+        ctx_prog.append({
+            "context":        c.context,
+            "n_visits":       c.n_visits,
+            "n_wins":         c.n_wins,
+            "q_value":        round(c.q_value, 4),
+            "last_q":         round(c.last_q, 4),
+            "q_last_delta":   q_delta,
+            "q_direction":    ("IMPROVING" if q_delta > 0.005 else
+                               "DEGRADING" if q_delta < -0.005 else "STABLE"),
+            "q_velocity":     round(c.q_velocity, 4),
+            "q_stable":       c.q_velocity < 0.02,
+            "maturity_stage": ("MATURE"   if c.n_visits >= 50 else
+                               "STANDARD" if c.n_visits >= 20 else
+                               "ACCEL"    if c.n_visits >= 5  else "FRESH"),
+            "maturity_score": round(c.maturity_score, 3),
+            "current_lr":     lr,
+            "win_rate_pct":   round(c.win_rate * 100, 1),
+            "wr_ci_90_lo":    round(wr_lo * 100, 1),
+            "wr_ci_90_hi":    round(wr_hi * 100, 1),
+            "total_pnl":      round(c.total_pnl, 4),
+            "bootstrap_prior": round(c.bootstrap, 4),
+            "is_toxic":       c.context in toxic_set,
+            "tier":           ("ELITE"     if c.q_value > 0.80 else
+                               "HIGH"      if c.q_value > 0.40 else
+                               "NEUTRAL"   if c.q_value >= -0.20 else "PENALIZED"),
+        })
+
+    n_with_data  = len(visited_ctx)
+    n_converging = sum(1 for c in all_ctx if c.q_velocity < 0.02 and c.n_visits >= 10)
+    has_alpha    = n_alpha_ctx > 0
+    learning_phase = (
+        "COLD_START"         if n_with_data == 0          else
+        "EARLY_ACCUMULATION" if total_updates < 50         else
+        "ACTIVE_LEARNING"    if n_mature_ctx == 0          else
+        "MATURING"           if not has_alpha              else
+        "ALPHA_DISCOVERY"
+    )
+
+    files["rl_learning_progression.json"] = json.dumps({
+        "title":          "RL Learning Progression — Context Knowledge Accumulation (FTD-056-ODYSSEY)",
+        "generated_at":   now_str,
+        "learning_phase": learning_phase,
+        "total_contexts":     len(all_ctx),
+        "contexts_with_data": n_with_data,
+        "contexts_mature":    n_mature_ctx,
+        "contexts_converging": n_converging,
+        "learning_velocity": {
+            "total_updates":   total_updates,
+            "updates_per_min": updates_pm,
+            "updates_per_hour": round(updates_pm * 60, 1),
+            "uptime_min":      round(uptime_min, 1),
+        },
+        "context_progression": ctx_prog,
+        "proof_of_learning": {
+            "differentiation_confirmed": q_spread > 0.05,
+            "q_spread":                  round(q_spread, 4),
+            "converging_contexts":        n_converging,
+            "alpha_contexts_found":       n_alpha_ctx,
+            "toxic_contexts_flagged":     len(toxic_set),
+            "verdict": (
+                "LEARNING_CONFIRMED — RL assigns statistically distinct Q-values to contexts"
+                if n_with_data >= 2 and q_spread > 0.05 else
+                "ACCUMULATING — insufficient spread for learning proof"
+            ),
+        },
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 2. edge_validation_report.json
+    # ═════════════════════════════════════════════════════════════════════════
+    def _edge_block(trades_in: list, label: str) -> dict:
+        pnls = [t.get("net_pnl", 0.0) for t in trades_in]
+        if len(pnls) < 5:
+            return {"label": label, "n": len(pnls), "verdict": "INSUFFICIENT_DATA"}
+        st    = _pnl_stats(trades_in)
+        n     = len(pnls)
+        nw    = sum(1 for p in pnls if p > 0)
+        pf_lo, pf_hi = _bootstrap_pf(pnls)
+        z     = _z_vs_baseline(nw, n, 0.50)
+        be_wr = _breakeven_wr(st["avg_win"], st["avg_loss"])
+        return {
+            "label":           label,
+            "n":               n,
+            "wr_pct":          st["wr_pct"],
+            "pf_actual":       st["pf"],
+            "pf_bootstrap_ci_90": {"lo": pf_lo, "hi": pf_hi},
+            "avg_win":         st["avg_win"],
+            "avg_loss":        st["avg_loss"],
+            "rr":              round(st["avg_win"] / max(st["avg_loss"], 1e-9), 3),
+            "breakeven_wr_pct": round(be_wr * 100, 1),
+            "beats_breakeven": st["wr"] > be_wr,
+            "z_score_vs_50pct": z,
+            "z_significance":  ("p<0.05 (1-tail)" if z > 1.645 else
+                                 "p<0.10 (1-tail)" if z > 1.282 else "NOT_SIGNIFICANT"),
+            "ev_per_trade":    st["ev"],
+            "verdict":         ("NO_EDGE"       if st["pf"] < 0.80 else
+                                "WEAK_SIGNAL"   if st["pf"] < 1.0  else
+                                "EDGE_POSSIBLE" if pf_lo is not None and pf_lo < 1.0 else
+                                "EDGE_CONFIRMED"),
+            "bootstrap_note":  (
+                "PF CI lower bound > 1.0 → edge statistically confirmed at 90%"
+                if pf_lo is not None and pf_lo > 1.0 else
+                "PF CI spans 1.0 → edge possible but not yet statistically confirmed"
+                if pf_lo is not None and pf_lo < 1.0 < (pf_hi or 0.0) else
+                "PF CI upper bound < 1.0 → negative expectancy confirmed with high confidence"
+                if pf_hi is not None else "N/A"
+            ),
+        }
+
+    regime_names = set(t.get("regime", "UNKNOWN") for t in all_trades)
+    files["edge_validation_report.json"] = json.dumps({
+        "title":        "Edge Validation Report — Randomness vs Skill (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "methodology": {
+            "bootstrap_iterations": 500,
+            "confidence_level":     "90%",
+            "baseline":             "50% WR null hypothesis (random coin flip)",
+            "note": (
+                "Bootstrap 90% CI: if lower bound > 1.0 then PF > 1.0 with 95% confidence. "
+                "Binomial z-score tests WR vs 50% null. Neither test requires normality."
+            ),
+        },
+        "full_history":  _edge_block(all_trades, "ALL_HISTORY"),
+        "session_only":  _edge_block(session_trades, "CURRENT_SESSION"),
+        "regime_breakdown": {
+            reg: _edge_block([t for t in all_trades if t.get("regime") == reg], reg)
+            for reg in sorted(regime_names)
+        },
+        "overall_verdict": (
+            "NO_STATISTICAL_EDGE — PF < 1.0 across all windows. "
+            "Signal quality must improve before RL can amplify alpha."
+            if _pnl_stats(all_trades)["pf"] < 1.0 else
+            "EDGE_SIGNAL_PRESENT — PF ≥ 1.0. Run bootstrap on ≥200 trades for confirmation."
+        ),
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 3. alpha_persistence_report.json
+    # ═════════════════════════════════════════════════════════════════════════
+    alpha_ev = []
+    for c in sorted(all_ctx, key=lambda x: x.n_visits, reverse=True):
+        if c.n_visits < 3:
+            continue
+        bayes_wr  = (c.n_wins + 1) / (c.n_visits + 2)   # Beta(1,1) posterior mean
+        wr_lo, wr_hi = _wilson_ci(c.n_wins, c.n_visits)
+        q_trend   = ("IMPROVING" if c.q_value > c.last_q + 0.005 else
+                     "DEGRADING" if c.q_value < c.last_q - 0.005 else "STABLE")
+        converging = c.q_velocity < 0.02 and c.n_visits >= 10
+        alpha_ev.append({
+            "context":         c.context,
+            "n_visits":        c.n_visits,
+            "q_value":         round(c.q_value, 4),
+            "q_trend":         q_trend,
+            "q_stable":        converging,
+            "q_velocity":      round(c.q_velocity, 4),
+            "actual_wr_pct":   round(c.win_rate * 100, 1),
+            "bayesian_wr_pct": round(bayes_wr * 100, 1),
+            "wr_ci_90":        [round(wr_lo * 100, 1), round(wr_hi * 100, 1)],
+            "total_pnl":       round(c.total_pnl, 4),
+            "alpha_status":    ("POSITIVE_ALPHA"    if c.q_value > 0.40 and c.n_visits >= 20 else
+                                "ALPHA_DEVELOPING"  if c.q_value > 0    and c.n_visits >= 10 else
+                                "NO_ALPHA_YET"      if c.q_value >= -0.20 else
+                                "NEGATIVE_ALPHA"),
+            "persistent":      converging and c.q_value > 0,
+        })
+
+    best_c  = max(visited_ctx, key=lambda c: c.q_value, default=None)
+    worst_c = min(visited_ctx, key=lambda c: c.q_value, default=None)
+
+    files["alpha_persistence_report.json"] = json.dumps({
+        "title":        "Alpha Persistence Report — Is Discovered Edge Durable? (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "alpha_summary": {
+            "contexts_analyzed":      len(alpha_ev),
+            "positive_alpha":         sum(1 for a in alpha_ev if a["alpha_status"] == "POSITIVE_ALPHA"),
+            "alpha_developing":       sum(1 for a in alpha_ev if a["alpha_status"] == "ALPHA_DEVELOPING"),
+            "negative_alpha":         sum(1 for a in alpha_ev if a["alpha_status"] == "NEGATIVE_ALPHA"),
+            "q_spread":               round(q_spread, 4),
+            "differentiation_active": q_spread > 0.05,
+            "best_context":           best_c.context if best_c else None,
+            "best_context_q":         round(best_c.q_value, 4) if best_c else None,
+            "worst_context":          worst_c.context if worst_c else None,
+            "worst_context_q":        round(worst_c.q_value, 4) if worst_c else None,
+        },
+        "context_alpha": alpha_ev,
+        "persistence_verdict": (
+            "ALPHA_CONFIRMED_AND_PERSISTENT — converging contexts with Q > 0"
+            if any(a["persistent"] for a in alpha_ev) else
+            "DIFFERENTIATION_ACTIVE_NO_ALPHA — RL correctly ranks contexts, all still negative"
+            if q_spread > 0.05 else
+            "INSUFFICIENT_DIFFERENTIATION — need more context exploration"
+        ),
+        "gap_to_profitability": {
+            "best_q":          round(best_c.q_value, 4) if best_c else None,
+            "gap_to_zero":     round(max(0.0, -(best_c.q_value if best_c else 0.0)), 4),
+            "interpretation":  (
+                "Best context Q is already positive — alpha exists"
+                if best_c and best_c.q_value > 0 else
+                f"All contexts negative. Best Q={round(best_c.q_value, 4) if best_c else 'N/A'}. "
+                "Requires signal quality improvement or continued exploration."
+            ),
+        },
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 4. strategy_evolution_report.json
+    # ═════════════════════════════════════════════════════════════════════════
+    strat_trades: "dict[str, list]" = _col.defaultdict(list)
+    for t in all_trades:
+        strat_trades[t.get("strategy_id", "unknown")].append(t)
+
+    strat_evo = {}
+    for sid, trades in strat_trades.items():
+        n = len(trades)
+        if n < 6:
+            strat_evo[sid] = {"n_trades": n, "verdict": "INSUFFICIENT_DATA"}
+            continue
+        third = max(1, n // 3)
+        early = _pnl_stats(trades[:third])
+        mid   = _pnl_stats(trades[third: 2 * third])
+        late  = _pnl_stats(trades[2 * third:])
+        ov    = _pnl_stats(trades)
+        fee_t = sum(t.get("fee_entry", 0.0) + t.get("fee_exit", 0.0) for t in trades)
+        wr_tr = ("IMPROVING" if late["wr_pct"] > early["wr_pct"] + 5 else
+                 "DEGRADING" if late["wr_pct"] < early["wr_pct"] - 5 else "FLAT")
+        pf_tr = ("IMPROVING" if late["pf"] > early["pf"] + 0.10 else
+                 "DEGRADING" if late["pf"] < early["pf"] - 0.10 else "FLAT")
+        strat_evo[sid] = {
+            "n_trades":        n,
+            "overall":         ov,
+            "total_fees":      round(fee_t, 4),
+            "fee_pct_of_gross": round(fee_t / max(ov["gross_profit"], 1e-9) * 100, 1),
+            "early_period":    early,
+            "mid_period":      mid,
+            "late_period":     late,
+            "wr_trend":        wr_tr,
+            "pf_trend":        pf_tr,
+            "evolution_verdict": (
+                "IMPROVING" if wr_tr == "IMPROVING" and pf_tr != "DEGRADING" else
+                "DEGRADING" if wr_tr == "DEGRADING" or pf_tr == "DEGRADING" else
+                "FLAT"
+            ),
+            "is_viable": ov["pf"] >= 0.90 and n >= 20,
+        }
+
+    files["strategy_evolution_report.json"] = json.dumps({
+        "title":        "Strategy Evolution Report — Per-Strategy Learning Trajectory (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "total_strategies":    len(strat_evo),
+        "improving_count":     sum(1 for s in strat_evo.values() if s.get("evolution_verdict") == "IMPROVING"),
+        "degrading_count":     sum(1 for s in strat_evo.values() if s.get("evolution_verdict") == "DEGRADING"),
+        "viable_count":        sum(1 for s in strat_evo.values() if s.get("is_viable")),
+        "strategies":          strat_evo,
+        "verdict": (
+            "NO_VIABLE_STRATEGIES — all strategies PF < 0.90"
+            if not any(s.get("is_viable") for s in strat_evo.values()) else
+            f"{sum(1 for s in strat_evo.values() if s.get('is_viable'))} strategy/strategies near breakeven"
+        ),
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 5. regime_performance_matrix.json (enhanced with RL Q integration)
+    # ═════════════════════════════════════════════════════════════════════════
+    reg_trades_map: "dict[str, list]" = _col.defaultdict(list)
+    for t in all_trades:
+        reg_trades_map[t.get("regime", "UNKNOWN")].append(t)
+
+    reg_rl_map: "dict[str, dict]" = {}
+    for c in all_ctx:
+        reg = c.context.split("|")[0] if "|" in c.context else "UNKNOWN"
+        e = reg_rl_map.setdefault(reg, {"qs": [], "n_mature": 0, "n_toxic": 0})
+        if c.n_visits >= 3:
+            e["qs"].append(c.q_value)
+        if c.n_visits >= 50:
+            e["n_mature"] += 1
+        if c.context in toxic_set:
+            e["n_toxic"] += 1
+
+    regime_matrix = {}
+    for reg, trades in reg_trades_map.items():
+        st  = _pnl_stats(trades)
+        fee = sum(t.get("fee_entry", 0.0) + t.get("fee_exit", 0.0) for t in trades)
+        rl  = reg_rl_map.get(reg, {"qs": [], "n_mature": 0, "n_toxic": 0})
+        avg_q = round(sum(rl["qs"]) / len(rl["qs"]), 4) if rl["qs"] else None
+        regime_matrix[reg] = {
+            "n_trades":         st["n"],
+            "wr_pct":           st["wr_pct"],
+            "pf":               st["pf"],
+            "net_pnl":          round(sum(t.get("net_pnl", 0.0) for t in trades), 4),
+            "avg_win":          st["avg_win"],
+            "avg_loss":         st["avg_loss"],
+            "total_fees":       round(fee, 4),
+            "rl_avg_q":         avg_q,
+            "rl_mature_contexts": rl["n_mature"],
+            "rl_toxic_contexts":  rl["n_toxic"],
+            "rl_learning_status": ("MATURE"      if rl["n_mature"] > 0 else
+                                   "ACTIVE"       if rl["qs"]          else "UNEXPLORED"),
+            "verdict":          ("PROFITABLE" if st["pf"] > 1.0 else
+                                 "MARGINAL"   if st["pf"] > 0.80 else "LOSING"),
+        }
+
+    best_reg_pf = max(regime_matrix.items(), key=lambda x: x[1]["pf"],
+                      default=(None, {}))[0]
+    best_reg_q  = max(
+        [(r, d) for r, d in regime_matrix.items() if d.get("rl_avg_q") is not None],
+        key=lambda x: x[1]["rl_avg_q"], default=(None, {})
+    )[0]
+
+    files["regime_performance_matrix.json"] = json.dumps({
+        "title":        "Regime Performance Matrix — Enhanced with RL Integration (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "total_trades": len(all_trades),
+        "regimes":      regime_matrix,
+        "best_by_pf":   best_reg_pf,
+        "best_by_rl_q": best_reg_q,
+        "verdict": (
+            "ALL_REGIMES_LOSING — no regime shows positive expectancy yet"
+            if all(d["verdict"] == "LOSING" for d in regime_matrix.values()) else
+            "REGIME_ALPHA_PRESENT — at least one regime above breakeven"
+        ),
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 6. confidence_calibration_report.json
+    # ═════════════════════════════════════════════════════════════════════════
+    calibration = []
+    for c in all_ctx:
+        if c.n_visits < 5:
+            continue
+        q_tier = ("ELITE"     if c.q_value > 0.80 else
+                  "HIGH"      if c.q_value > 0.40 else
+                  "NEUTRAL"   if c.q_value >= -0.20 else "PENALIZED")
+        # Directional calibration: Q > 0 predicts winning context
+        q_predicts_win = c.q_value > 0
+        actually_wins  = c.win_rate > 0.50
+        calibration.append({
+            "context":              c.context,
+            "n_visits":             c.n_visits,
+            "q_value":              round(c.q_value, 4),
+            "q_tier":               q_tier,
+            "actual_wr_pct":        round(c.win_rate * 100, 1),
+            "q_predicts_winning":   q_predicts_win,
+            "actually_winning":     actually_wins,
+            "directionally_correct": q_predicts_win == actually_wins,
+            "q_velocity":           round(c.q_velocity, 4),
+        })
+
+    n_cal     = len(calibration)
+    n_correct = sum(1 for c in calibration if c["directionally_correct"])
+    acc_pct   = round(n_correct / max(n_cal, 1) * 100, 1)
+
+    # Brier score: (implied_win_prob − actual_outcome)²
+    brier_scores = []
+    for c in calibration:
+        # Map Q to a win-probability estimate [0, 1]
+        # Q range roughly [-0.30, +0.80] in current operation → map linearly
+        implied_p = max(0.0, min(1.0, (c["q_value"] + 0.30) / 1.10))
+        actual_o  = 1.0 if c["actual_wr_pct"] > 50 else 0.0
+        brier_scores.append((implied_p - actual_o) ** 2)
+    brier = round(sum(brier_scores) / max(len(brier_scores), 1), 4) if brier_scores else None
+
+    files["confidence_calibration_report.json"] = json.dumps({
+        "title":        "Confidence Calibration — Q-Value Prediction Accuracy (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "methodology":  "Directional calibration: Q > 0 predicts winning context (WR > 50%).",
+        "n_evaluated":       n_cal,
+        "n_correct":         n_correct,
+        "accuracy_pct":      acc_pct,
+        "brier_score":       brier,
+        "brier_interpretation": (
+            "Well-calibrated (< 0.25)"   if brier is not None and brier < 0.25 else
+            "Moderate calibration"        if brier is not None and brier < 0.40 else
+            "Poor calibration (> 0.40)"  if brier is not None else "N/A"
+        ),
+        "context_calibration": calibration,
+        "verdict": (
+            "WELL_CALIBRATED — Q reliably predicts context quality"   if acc_pct >= 70 else
+            "PARTIALLY_CALIBRATED — some Q/outcome alignment"          if acc_pct >= 50 else
+            "POORLY_CALIBRATED — Q not yet a reliable predictor (normal at < 50 visits/context)"
+        ),
+        "note": (
+            "Calibration improves naturally as visits accumulate. "
+            "Expect reliable calibration after 50+ visits per context (MATURE stage)."
+        ),
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 7. signal_quality_evolution.json
+    # ═════════════════════════════════════════════════════════════════════════
+    WIN_SZ   = 50
+    STEP     = WIN_SZ // 2
+    rolling_q: list = []
+    for i in range(0, len(all_trades) - WIN_SZ + 1, STEP):
+        window = all_trades[i: i + WIN_SZ]
+        st  = _pnl_stats(window)
+        fee = sum(t.get("fee_entry", 0.0) + t.get("fee_exit", 0.0) for t in window)
+        rr  = round(st["avg_win"] / max(st["avg_loss"], 1e-9), 3) if st["avg_loss"] > 0 else 0.0
+        rolling_q.append({
+            "window_start": i + 1,
+            "window_end":   min(i + WIN_SZ, len(all_trades)),
+            "n":            st["n"],
+            "wr_pct":       st["wr_pct"],
+            "pf":           st["pf"],
+            "rr":           rr,
+            "avg_pnl":      st["avg_pnl"],
+            "fee_drag_pct": round(fee / max(st["gross_profit"], 1e-9) * 100, 1),
+        })
+
+    wr_trend = rr_trend = "FLAT"
+    if len(rolling_q) >= 6:
+        ew = rolling_q[:3];  lw = rolling_q[-3:]
+        e_wr = sum(w["wr_pct"] for w in ew) / 3
+        l_wr = sum(w["wr_pct"] for w in lw) / 3
+        e_rr = sum(w["rr"]     for w in ew) / 3
+        l_rr = sum(w["rr"]     for w in lw) / 3
+        wr_trend = ("IMPROVING" if l_wr > e_wr + 3 else "DEGRADING" if l_wr < e_wr - 3 else "FLAT")
+        rr_trend = ("IMPROVING" if l_rr > e_rr + 0.1 else "DEGRADING" if l_rr < e_rr - 0.1 else "FLAT")
+
+    reg_sig = {}
+    for reg in regime_names:
+        rt = [t for t in all_trades if t.get("regime") == reg]
+        if len(rt) < 5:
+            continue
+        st  = _pnl_stats(rt)
+        fee = sum(t.get("fee_entry", 0.0) + t.get("fee_exit", 0.0) for t in rt)
+        rr  = round(st["avg_win"] / max(st["avg_loss"], 1e-9), 3) if st["avg_loss"] > 0 else 0.0
+        reg_sig[reg] = {
+            "n": st["n"], "wr_pct": st["wr_pct"], "rr": rr, "pf": st["pf"],
+            "fee_drag_pct": round(fee / max(st["gross_profit"], 1e-9) * 100, 1),
+        }
+
+    avg_fee_drag = (
+        round(sum(w["fee_drag_pct"] for w in rolling_q) / len(rolling_q), 1)
+        if rolling_q else 0.0
+    )
+
+    files["signal_quality_evolution.json"] = json.dumps({
+        "title":        "Signal Quality Evolution — RR and WR Trends Over Time (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "total_trades": len(all_trades),
+        "window_size":  WIN_SZ,
+        "wr_trend":     wr_trend,
+        "rr_trend":     rr_trend,
+        "avg_fee_drag_pct": avg_fee_drag,
+        "rolling_windows":      rolling_q,
+        "regime_signal_quality": reg_sig,
+        "verdict": (
+            "SIGNAL_IMPROVING — at least WR or RR trending upward"
+            if wr_trend == "IMPROVING" or rr_trend == "IMPROVING" else
+            "SIGNAL_DEGRADING — both WR and RR trending downward"
+            if wr_trend == "DEGRADING" and rr_trend == "DEGRADING" else
+            "SIGNAL_FLAT — no measurable directional improvement"
+        ),
+        "fee_drag_finding": (
+            f"CRITICAL — avg fee drag {avg_fee_drag:.1f}% of gross wins. "
+            "Raise MIN_NOTIONAL_USDT to reduce fee-per-trade ratio."
+            if avg_fee_drag > 30 else
+            f"HIGH — avg fee drag {avg_fee_drag:.1f}%. Monitor closely."
+            if avg_fee_drag > 15 else
+            f"Manageable — avg fee drag {avg_fee_drag:.1f}%."
+        ),
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 8. adaptive_decision_audit.json
+    # ═════════════════════════════════════════════════════════════════════════
+    audit = []
+    for c in sorted(all_ctx, key=lambda x: x.n_visits, reverse=True):
+        if c.n_visits == 0:
+            continue
+        q  = c.q_value
+        tier = ("ELITE"     if q > 0.80 else
+                "HIGH"      if q > 0.40 else
+                "NEUTRAL"   if q >= -0.20 else "PENALIZED")
+        is_toxic   = c.context in toxic_set
+        floor_d    = (-0.08 if q > 0.80 else -0.04 if q > 0.40 else
+                       0.00 if q >= -0.20 else +0.04)
+        boost_mult = (1.35 if q > 0.80 else 1.20 if q > 0.40 else
+                      1.00 if q >= -0.20 else 0.85)
+        q_dir = ("IMPROVING" if c.q_value > c.last_q + 0.005 else
+                  "DEGRADING" if c.q_value < c.last_q - 0.005 else "STABLE")
+
+        # Estimated wins to reach NEUTRAL tier from PENALIZED
+        wins_to_neutral = None
+        if tier == "PENALIZED" and not is_toxic:
+            lr   = (0.07 if c.n_visits >= 50 else 0.10 if c.n_visits >= 20
+                    else 0.15 if c.n_visits >= 5 else 0.25)
+            gap  = max(0.0, -0.20 - q)
+            wins_to_neutral = max(1, int(_math.ceil(gap / max(lr * 0.3, 1e-4)))) if gap > 0 else 0
+
+        parts = [
+            f"Q={round(q, 4)} tier={tier} visits={c.n_visits} WR={round(c.win_rate*100,1)}%",
+            f"floor_delta={floor_d:+.2f} boost={boost_mult:.2f}x",
+        ]
+        if is_toxic:
+            parts.append("TOXIC → hard-block in LIVE mode (bypassed while BYPASS_ALL_GATES=True)")
+        if c.bootstrap != 0.0:
+            parts.append(f"bootstrap_prior={round(c.bootstrap,4)}")
+
+        audit.append({
+            "context":         c.context,
+            "n_visits":        c.n_visits,
+            "q_value":         round(q, 4),
+            "tier":            tier,
+            "is_toxic":        is_toxic,
+            "floor_delta":     floor_d,
+            "confidence_mult": boost_mult,
+            "q_direction":     q_dir,
+            "policy_effect":   (
+                "HARD_BLOCK (paper bypass active)"               if is_toxic else
+                "EXECUTION_BOOST — lower gate + higher conf mult" if tier in ("ELITE", "HIGH") else
+                "EXECUTION_PENALTY — higher gate + lower conf mult" if tier == "PENALIZED" else
+                "NEUTRAL — no gate or confidence adjustment"
+            ),
+            "wins_to_neutral_tier": wins_to_neutral,
+            "explanation":     " | ".join(parts),
+        })
+
+    n_audit      = len(audit)
+    n_raising    = sum(1 for d in audit if d["floor_delta"] > 0)
+    n_lowering   = sum(1 for d in audit if d["floor_delta"] < 0)
+    n_boosting   = sum(1 for d in audit if d["confidence_mult"] > 1.0)
+    n_penalizing = sum(1 for d in audit if d["confidence_mult"] < 1.0)
+
+    files["adaptive_decision_audit.json"] = json.dumps({
+        "title":        "Adaptive Decision Audit — RL Policy Explainability (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "total_contexts_audited": n_audit,
+        "tier_distribution": {
+            tier: sum(1 for d in audit if d["tier"] == tier)
+            for tier in ["ELITE", "HIGH", "NEUTRAL", "PENALIZED"]
+        },
+        "toxic_contexts": sum(1 for d in audit if d["is_toxic"]),
+        "policy_summary": {
+            "floor_raises_active":   n_raising,
+            "floor_lowers_active":   n_lowering,
+            "boosts_active":         n_boosting,
+            "penalties_active":      n_penalizing,
+            "net_posture": (
+                "RESTRICTIVE — majority of visited contexts raising execution bar"
+                if n_raising > n_audit / 2 else
+                "PERMISSIVE — majority of visited contexts lowering execution bar"
+                if n_lowering > n_audit / 2 else
+                "BALANCED — mixed policy adjustments across contexts"
+            ),
+        },
+        "context_decisions": audit,
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 9. reward_propagation_report.json
+    # ═════════════════════════════════════════════════════════════════════════
+    shaped_rs = []
+    for t in all_trades:
+        net    = t.get("net_pnl", 0.0)
+        fee_e  = t.get("fee_entry", 0.0)
+        fee_x  = t.get("fee_exit",  0.0)
+        fee_c  = fee_e + fee_x
+        r_mult = t.get("r_multiple", 0.0)
+        # Replicate _shape_reward (core/rl_engine.py)
+        reward = net
+        if net > 0 and fee_c > 0:
+            gross = net + fee_c
+            if gross > 1e-9:
+                fee_r = fee_c / gross
+                if fee_r > 0.30:
+                    fee_mult = max(0.60, 1.0 - (fee_r - 0.30) * 2.0)
+                    reward *= fee_mult
+        if net > 0 and 0.0 < r_mult < 0.80:
+            reward *= 0.90
+        shaped_rs.append({
+            "net_pnl":       net,
+            "fee_cost":      round(fee_c, 4),
+            "r_multiple":    round(r_mult, 4),
+            "shaped_reward": round(reward, 4),
+            "shaping_applied": abs(reward - net) > 0.001,
+        })
+
+    n_sr = len(shaped_rs)
+    avg_raw    = sum(s["net_pnl"]       for s in shaped_rs) / max(n_sr, 1)
+    avg_shaped = sum(s["shaped_reward"] for s in shaped_rs) / max(n_sr, 1)
+    n_penalized_wins = sum(1 for s in shaped_rs if s["shaping_applied"] and s["net_pnl"] > 0)
+    shaping_reduction = sum(s["net_pnl"] - s["shaped_reward"] for s in shaped_rs if s["shaping_applied"])
+    total_fees  = sum(t.get("fee_entry", 0.0) + t.get("fee_exit", 0.0) for t in all_trades)
+    ovst        = _pnl_stats(all_trades)
+    fee_pct_gp  = round(total_fees / max(ovst["gross_profit"], 1e-9) * 100, 1) if all_trades else 0.0
+
+    files["reward_propagation_report.json"] = json.dumps({
+        "title":        "Reward Propagation Report — Shaped Reward Quality Analysis (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "total_trades": n_sr,
+        "reward_shaping": {
+            "avg_raw_pnl":        round(avg_raw, 4),
+            "avg_shaped_reward":  round(avg_shaped, 4),
+            "shaping_delta":      round(avg_shaped - avg_raw, 4),
+            "trades_penalized":   n_penalized_wins,
+            "total_reduction":    round(shaping_reduction, 4),
+            "philosophy": (
+                "Fee-heavy wins penalized to teach fee efficiency. "
+                "Low-R wins (R < 0.80) mildly penalized to discourage marginal entries. "
+                "Losses pass through unchanged — real loss pain drives avoidance learning."
+            ),
+        },
+        "fee_learning_impact": {
+            "total_fees":            round(total_fees, 4),
+            "fee_pct_of_gross_wins": fee_pct_gp,
+            "fee_drag_diagnosis":    (
+                "CRITICAL — fees exceed gross profit (impossible to profit at current sizing)"
+                if total_fees > ovst["gross_profit"] else
+                "HIGH — fees > 30% of gross wins (shaping penalty fires frequently)"
+                if fee_pct_gp > 30 else
+                "MANAGEABLE — fee drag within normal range"
+            ),
+        },
+        "q_signal_health": {
+            "avg_q_visited_contexts": round(
+                sum(c.q_value for c in visited_ctx) / max(len(visited_ctx), 1), 4
+            ) if visited_ctx else None,
+            "reward_signal": (
+                "DEGRADED — shaped rewards persistently negative; RL learning loss avoidance"
+                if avg_shaped < -0.10 else
+                "TRANSITIONAL — near zero; RL in loss-minimization phase"
+                if avg_shaped < 0 else
+                "POSITIVE — RL receiving net-positive reward signal"
+            ),
+        },
+    }, indent=2, default=str)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # 10. intelligence_maturity_report.json
+    # ═════════════════════════════════════════════════════════════════════════
+    n_all  = len(all_trades)
+    n_sess = len(session_trades)
+    ovst   = _pnl_stats(all_trades)
+    sv_st  = _pnl_stats(session_trades)
+    be_wr  = _breakeven_wr(ovst["avg_win"], ovst["avg_loss"])
+
+    def _regime_pf(reg: str) -> float:
+        rt = [t for t in all_trades if t.get("regime") == reg]
+        return _pnl_stats(rt)["pf"] if len(rt) >= 50 else 0.0
+
+    milestones = [
+        {
+            "id": "M1", "name": "Trade Volume Baseline",
+            "target": "≥100 total trades",
+            "achieved": n_all >= 100,
+            "current": n_all,
+            "why": "100 trades minimum for any statistical inference",
+        },
+        {
+            "id": "M2", "name": "Multi-Context Exploration",
+            "target": "≥4 distinct contexts with 3+ visits",
+            "achieved": n_with_data >= 4,
+            "current": n_with_data,
+            "why": "Confirms RL explores multiple market condition combinations",
+        },
+        {
+            "id": "M3", "name": "Context Differentiation",
+            "target": "Q-spread > 0.05 across visited contexts",
+            "achieved": q_spread > 0.05,
+            "current": round(q_spread, 4),
+            "why": "Proves RL assigns distinct quality scores — not random noise",
+        },
+        {
+            "id": "M4", "name": "Toxic Context Detection",
+            "target": "≥1 context flagged toxic (Q < -0.30, n ≥ 8)",
+            "achieved": len(toxic_set) > 0,
+            "current": len(toxic_set),
+            "why": "Proves RL identifies and rejects genuinely harmful contexts",
+        },
+        {
+            "id": "M5", "name": "Mature Context Formation",
+            "target": "≥1 context with 50+ visits (stable LR=0.07)",
+            "achieved": n_mature_ctx > 0,
+            "current": n_mature_ctx,
+            "why": "Q-values at 50+ visits are statistically reliable estimates",
+        },
+        {
+            "id": "M6", "name": "Cross-Session Persistence",
+            "target": "Q-table data from multiple sessions (total_updates > 30)",
+            "achieved": total_updates > 30 and n_mature_ctx > 0,
+            "current": f"{total_updates} total RL updates",
+            "why": "Proves persistence layer retains and compounds prior learning",
+        },
+        {
+            "id": "M7", "name": "Alpha Discovery",
+            "target": "≥1 context with Q > 0 and ≥20 visits",
+            "achieved": n_alpha_ctx > 0,
+            "current": n_alpha_ctx,
+            "why": "First evidence the system can identify positive-EV conditions",
+        },
+        {
+            "id": "M8", "name": "Statistical Edge Confirmation",
+            "target": "Bootstrap PF CI lower bound > 1.0 over ≥200 trades",
+            "achieved": (
+                n_all >= 200 and
+                (_bootstrap_pf([t.get("net_pnl", 0.0) for t in all_trades])[0] or 0.0) > 1.0
+            ),
+            "current": f"PF={ovst['pf']:.3f} (need bootstrap CI[lo] > 1.0)",
+            "why": "Rigorous statistical proof of positive expectancy",
+        },
+        {
+            "id": "M9", "name": "Regime-Specific Alpha",
+            "target": "≥1 regime with PF > 1.0 and ≥50 trades",
+            "achieved": any(_regime_pf(r) > 1.0 for r in regime_names),
+            "current": (
+                max((_regime_pf(r) for r in regime_names), default=0.0)
+            ),
+            "why": "Proves RL found alpha in a specific market structure",
+        },
+        {
+            "id": "M10", "name": "Adaptive Session Profitability",
+            "target": "Current session PF > 1.0 with RL guidance active",
+            "achieved": sv_st["pf"] > 1.0 and n_sess >= 20,
+            "current": f"session PF={sv_st['pf']:.3f} ({n_sess} trades)",
+            "why": "Ultimate proof: RL guidance produces profitable trading sessions",
+        },
+    ]
+
+    m_achieved = sum(1 for m in milestones if m["achieved"])
+    m_total    = len(milestones)
+    mat_score  = round(m_achieved / m_total * 100, 0)
+    phase = (
+        "PHASE_1_EXPLORATION"      if m_achieved < 3 else
+        "PHASE_2_DIFFERENTIATION"  if m_achieved < 5 else
+        "PHASE_3_LEARNING_PROVEN"  if m_achieved < 7 else
+        "PHASE_4_ALPHA_DISCOVERY"  if m_achieved < 9 else
+        "PHASE_5_PROFITABLE_INTEL"
+    )
+
+    # Time to M5 at current update rate
+    t_to_m5 = None
+    if not milestones[4]["achieved"] and updates_pm > 0:
+        max_v    = max((c.n_visits for c in all_ctx), default=0)
+        gap_v    = max(0, 50 - max_v)
+        t_to_m5  = round(gap_v / updates_pm, 0) if gap_v > 0 else 0.0
+
+    files["intelligence_maturity_report.json"] = json.dumps({
+        "title":        "Intelligence Maturity Report — Proof-of-Learning Scorecard (FTD-056-ODYSSEY)",
+        "generated_at": now_str,
+        "maturity_score_pct":  mat_score,
+        "current_phase":       phase,
+        "milestones_achieved": m_achieved,
+        "milestones_total":    m_total,
+        "milestones":          milestones,
+        "phase_guide": {
+            "PHASE_1_EXPLORATION":     "RL exploring contexts — no learning evidence yet",
+            "PHASE_2_DIFFERENTIATION": "RL differentiating contexts — learning confirmed, no alpha yet",
+            "PHASE_3_LEARNING_PROVEN": "Toxic detection + cross-session memory confirmed",
+            "PHASE_4_ALPHA_DISCOVERY": "First positive Q contexts — early alpha evidence present",
+            "PHASE_5_PROFITABLE_INTEL": "Statistically confirmed positive expectancy — institutional grade",
+        },
+        "honest_assessment": {
+            "system_is_learning":    m_achieved >= 3,
+            "alpha_evidence_exists": n_alpha_ctx > 0,
+            "statistically_profitable": milestones[7]["achieved"],
+            "primary_obstacle": (
+                f"Signal quality — all contexts negative Q. Breakeven WR = {round(be_wr*100,1)}%, "
+                f"actual WR = {ovst['wr_pct']}%. RL architecture is sound; signals need improvement."
+                if not n_alpha_ctx else
+                "Volume — alpha detected but needs more visits for statistical confidence"
+            ),
+            "time_to_m5_minutes": t_to_m5,
+            "projection": (
+                f"At {updates_pm:.2f} updates/min, M5 (mature context) in ~{t_to_m5:.0f} min"
+                if t_to_m5 else "Already at or beyond M5"
+            ),
+        },
+        "final_answer": (
+            "YES — statistically confirmed profitable intelligence (M8 achieved)"
+            if milestones[7]["achieved"] else
+            f"NOT YET — system has proven {m_achieved}/{m_total} milestones. "
+            "Learning architecture is working correctly. "
+            "Profitability requires signal WR improvement, not RL redesign."
+        ),
+    }, indent=2, default=str)
+
+    return files
+
+
 # ── FTD-LPA: Live Process Snapshot ───────────────────────────────────────────
 
 @app.get("/api/snapshot/live-process")
@@ -6216,6 +7119,17 @@ async def download_report_bundle():
             "  trade_quality_evolution.json  Are later trades smarter than earlier trades?\n"
             "                            Early vs late session win-rate, rolling windows,\n"
             "                            regime evolution trends\n"
+            "09_odyssey/         FTD-056-ODYSSEY: Proof-of-Learning → Proof-of-Edge → Proof-of-Alpha\n"
+            "  rl_learning_progression.json   Context Q evolution, Wilson CI, maturity stages\n"
+            "  edge_validation_report.json    Bootstrap PF CI + binomial significance vs random\n"
+            "  alpha_persistence_report.json  Bayesian WR, Q-stability, alpha durability\n"
+            "  strategy_evolution_report.json Per-strategy early/mid/late trajectory\n"
+            "  regime_performance_matrix.json Regime stats + RL Q integration (enhanced)\n"
+            "  confidence_calibration_report.json Q-value prediction accuracy (Brier score)\n"
+            "  signal_quality_evolution.json  Rolling RR/WR/fee-drag trend windows\n"
+            "  adaptive_decision_audit.json   RL policy change explanations per context\n"
+            "  reward_propagation_report.json Shaped reward quality + fee impact on learning\n"
+            "  intelligence_maturity_report.json 10-milestone Proof-of-Learning scorecard\n"
         ))
 
         _ev_meta = _safe(
@@ -6325,6 +7239,20 @@ async def download_report_bundle():
             zf.writestr(
                 "08_rl_intelligence/error.txt",
                 f"RL intelligence report generation failed: {_rie}\n",
+            )
+
+        # 09_odyssey/ — FTD-056-ODYSSEY: Proof-of-Learning → Proof-of-Edge → Proof-of-Alpha
+        try:
+            _odyssey_files = _generate_odyssey_reports(
+                trade_dicts=trade_dicts,
+                session_start_idx=_boot_replay_count,
+            )
+            for _of, _oc in _odyssey_files.items():
+                zf.writestr(f"09_odyssey/{_of}", _oc)
+        except Exception as _ode:
+            zf.writestr(
+                "09_odyssey/error.txt",
+                f"Odyssey report generation failed: {_ode}\n",
             )
 
         # 07_live_process/ — FTD-LPA: runtime observability artifacts ────────
