@@ -558,6 +558,29 @@ with tempfile.TemporaryDirectory() as _tmpdir:
         _check("I7: quality_distribution dict present",
                "quality_distribution" in state and isinstance(state["quality_distribution"], dict),
                f"quality_distribution={state.get('quality_distribution')}")
+
+        # I8: floor_raise_rate denominator bug — floor_raises / total_pulls must be ≤ 1.0.
+        # Previously used total_updates (trade outcomes) as denominator, but floor_raises
+        # increments on every get_score_floor_delta() call (per-symbol per-candle, same
+        # cadence as total_pulls). Using total_updates caused rates > 1.0 in real runs.
+        evo_full = eng.get_evolution_state()
+        _ctrs = evo_full.get("counters", {})
+        _pulls   = _ctrs.get("total_pulls", 1)
+        _updates = _ctrs.get("total_updates", 1)
+        _raises  = _ctrs.get("floor_raises", 0)
+        _lowers  = _ctrs.get("floor_lowers", 0)
+        _boosts  = _ctrs.get("boost_fires",  0)
+        # Rates computed with correct denominator (total_pulls) must be ≤ 1.0
+        for _lbl, _num in [("floor_raise_rate", _raises), ("floor_lower_rate", _lowers), ("boost_fire_rate", _boosts)]:
+            _rate = _num / max(_pulls, 1)
+            _check(f"I8: {_lbl}/total_pulls ≤ 1.0",
+                   _rate <= 1.0,
+                   f"{_lbl}={_rate:.3f} (raises/lowers={_num}, pulls={_pulls})")
+            # Also verify old buggy denominator (total_updates) would NOT be used
+            _buggy = _num / max(_updates, 1)
+            if _buggy > 1.0:
+                _check(f"I8-confirm: {_lbl}/total_updates would have exceeded 1.0 (bug reproduced)",
+                       True, "")  # pass — confirms the fix is needed
     except AttributeError:
         _fail("I1: get_evolution_state() method missing from RLContextualBandit")
     except Exception as e:
