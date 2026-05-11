@@ -1,0 +1,56 @@
+{
+  "title": "Trade Quality Evolution \u2014 Are Later Trades Smarter? (FTD-055-ATHENA)",
+  "generated_at": "2026-05-11 07:07:49 UTC",
+  "session_trades": 20,
+  "verdict": "FLAT",
+  "overall_session": {
+    "n": 20,
+    "wr_pct": 0.0,
+    "pf": 0.0,
+    "avg_pnl": -0.3338,
+    "ev": -0.3338
+  },
+  "early_vs_late": {
+    "early_half": {
+      "n": 10,
+      "wr_pct": 0.0,
+      "pf": 0.0,
+      "avg_pnl": -0.3232,
+      "ev": -0.3232
+    },
+    "late_half": {
+      "n": 10,
+      "wr_pct": 0.0,
+      "pf": 0.0,
+      "avg_pnl": -0.3444,
+      "ev": -0.3444
+    },
+    "wr_delta_pct": 0.0,
+    "pf_delta": 0.0,
+    "trend": "FLAT",
+    "interpretation": "Win rate improved by 0.0pp in the second half. No measurable improvement yet \u2014 need more session volume."
+  },
+  "rolling_windows": [
+    {
+      "n": 20,
+      "wr_pct": 0.0,
+      "pf": 0.0,
+      "avg_pnl": -0.3338,
+      "ev": -0.3338,
+      "window_start": 1,
+      "window_end": 20
+    }
+  ],
+  "regime_evolution": {
+    "MEAN_REVERTING": {
+      "total_trades": 20,
+      "early_wr_pct": 0.0,
+      "late_wr_pct": 0.0,
+      "wr_delta_pct": 0.0,
+      "early_pf": 0.0,
+      "late_pf": 0.0,
+      "trend": "FLAT"
+    }
+  },
+  "action": "Performance stable \u2014 no improvement trend yet. More session volume needed."
+}

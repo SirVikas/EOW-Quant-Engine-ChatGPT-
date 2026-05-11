@@ -1,0 +1,106 @@
+{
+  "title": "Intelligence Maturity Report \u2014 Proof-of-Learning Scorecard (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-11 07:07:49 UTC",
+  "maturity_score_pct": 50.0,
+  "current_phase": "PHASE_3_LEARNING_PROVEN",
+  "milestones_achieved": 5,
+  "milestones_total": 10,
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Trade Volume Baseline",
+      "target": "\u2265100 total trades",
+      "achieved": true,
+      "current": 1156,
+      "why": "100 trades minimum for any statistical inference"
+    },
+    {
+      "id": "M2",
+      "name": "Multi-Context Exploration",
+      "target": "\u22654 distinct contexts with 3+ visits",
+      "achieved": true,
+      "current": 4,
+      "why": "Confirms RL explores multiple market condition combinations"
+    },
+    {
+      "id": "M3",
+      "name": "Context Differentiation",
+      "target": "Q-spread > 0.05 across visited contexts",
+      "achieved": true,
+      "current": 0.1341,
+      "why": "Proves RL assigns distinct quality scores \u2014 not random noise"
+    },
+    {
+      "id": "M4",
+      "name": "Toxic Context Detection",
+      "target": "\u22651 context flagged toxic (Q < -0.30, n \u2265 8)",
+      "achieved": true,
+      "current": 1,
+      "why": "Proves RL identifies and rejects genuinely harmful contexts"
+    },
+    {
+      "id": "M5",
+      "name": "Mature Context Formation",
+      "target": "\u22651 context with 50+ visits (stable LR=0.07)",
+      "achieved": true,
+      "current": 3,
+      "why": "Q-values at 50+ visits are statistically reliable estimates"
+    },
+    {
+      "id": "M6",
+      "name": "Cross-Session Persistence",
+      "target": "Q-table data from multiple sessions (total_updates > 30)",
+      "achieved": false,
+      "current": "20 total RL updates",
+      "why": "Proves persistence layer retains and compounds prior learning"
+    },
+    {
+      "id": "M7",
+      "name": "Alpha Discovery",
+      "target": "\u22651 context with Q > 0 and \u226520 visits",
+      "achieved": false,
+      "current": 0,
+      "why": "First evidence the system can identify positive-EV conditions"
+    },
+    {
+      "id": "M8",
+      "name": "Statistical Edge Confirmation",
+      "target": "Bootstrap PF CI lower bound > 1.0 over \u2265200 trades",
+      "achieved": false,
+      "current": "PF=0.455 (need bootstrap CI[lo] > 1.0)",
+      "why": "Rigorous statistical proof of positive expectancy"
+    },
+    {
+      "id": "M9",
+      "name": "Regime-Specific Alpha",
+      "target": "\u22651 regime with PF > 1.0 and \u226550 trades",
+      "achieved": false,
+      "current": 0.481,
+      "why": "Proves RL found alpha in a specific market structure"
+    },
+    {
+      "id": "M10",
+      "name": "Adaptive Session Profitability",
+      "target": "Current session PF > 1.0 with RL guidance active",
+      "achieved": false,
+      "current": "session PF=0.000 (20 trades)",
+      "why": "Ultimate proof: RL guidance produces profitable trading sessions"
+    }
+  ],
+  "phase_guide": {
+    "PHASE_1_EXPLORATION": "RL exploring contexts \u2014 no learning evidence yet",
+    "PHASE_2_DIFFERENTIATION": "RL differentiating contexts \u2014 learning confirmed, no alpha yet",
+    "PHASE_3_LEARNING_PROVEN": "Toxic detection + cross-session memory confirmed",
+    "PHASE_4_ALPHA_DISCOVERY": "First positive Q contexts \u2014 early alpha evidence present",
+    "PHASE_5_PROFITABLE_INTEL": "Statistically confirmed positive expectancy \u2014 institutional grade"
+  },
+  "honest_assessment": {
+    "system_is_learning": true,
+    "alpha_evidence_exists": false,
+    "statistically_profitable": false,
+    "primary_obstacle": "Signal quality \u2014 all contexts negative Q. Breakeven WR = 40.7%, actual WR = 23.8%. RL architecture is sound; signals need improvement.",
+    "time_to_m5_minutes": null,
+    "projection": "Already at or beyond M5"
+  },
+  "final_answer": "NOT YET \u2014 system has proven 5/10 milestones. Learning architecture is working correctly. Profitability requires signal WR improvement, not RL redesign."
+}

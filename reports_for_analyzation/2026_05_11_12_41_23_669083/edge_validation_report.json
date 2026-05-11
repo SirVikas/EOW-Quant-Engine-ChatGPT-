@@ -1,0 +1,98 @@
+{
+  "title": "Edge Validation Report \u2014 Randomness vs Skill (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-11 07:07:49 UTC",
+  "methodology": {
+    "bootstrap_iterations": 500,
+    "confidence_level": "90%",
+    "baseline": "50% WR null hypothesis (random coin flip)",
+    "note": "Bootstrap 90% CI: if lower bound > 1.0 then PF > 1.0 with 95% confidence. Binomial z-score tests WR vs 50% null. Neither test requires normality."
+  },
+  "full_history": {
+    "label": "ALL_HISTORY",
+    "n": 1156,
+    "wr_pct": 23.8,
+    "pf_actual": 0.455,
+    "pf_bootstrap_ci_90": {
+      "lo": 0.351,
+      "hi": 0.584
+    },
+    "avg_win": 0.9609,
+    "avg_loss": 0.6593,
+    "rr": 1.457,
+    "breakeven_wr_pct": 40.7,
+    "beats_breakeven": false,
+    "z_score_vs_50pct": -17.824,
+    "z_significance": "NOT_SIGNIFICANT",
+    "ev_per_trade": -0.2739,
+    "verdict": "NO_EDGE",
+    "bootstrap_note": "PF CI upper bound < 1.0 \u2192 negative expectancy confirmed with high confidence"
+  },
+  "session_only": {
+    "label": "CURRENT_SESSION",
+    "n": 20,
+    "wr_pct": 0.0,
+    "pf_actual": 0.0,
+    "pf_bootstrap_ci_90": {
+      "lo": 0.0,
+      "hi": 0.0
+    },
+    "avg_win": 0.0,
+    "avg_loss": 0.3338,
+    "rr": 0.0,
+    "breakeven_wr_pct": 50.0,
+    "beats_breakeven": false,
+    "z_score_vs_50pct": -4.472,
+    "z_significance": "NOT_SIGNIFICANT",
+    "ev_per_trade": -0.3338,
+    "verdict": "NO_EDGE",
+    "bootstrap_note": "PF CI upper bound < 1.0 \u2192 negative expectancy confirmed with high confidence"
+  },
+  "regime_breakdown": {
+    "MEAN_REVERTING": {
+      "label": "MEAN_REVERTING",
+      "n": 851,
+      "wr_pct": 20.0,
+      "pf_actual": 0.45,
+      "pf_bootstrap_ci_90": {
+        "lo": 0.333,
+        "hi": 0.58
+      },
+      "avg_win": 0.87,
+      "avg_loss": 0.483,
+      "rr": 1.801,
+      "breakeven_wr_pct": 35.7,
+      "beats_breakeven": false,
+      "z_score_vs_50pct": -17.517,
+      "z_significance": "NOT_SIGNIFICANT",
+      "ev_per_trade": -0.2127,
+      "verdict": "NO_EDGE",
+      "bootstrap_note": "PF CI upper bound < 1.0 \u2192 negative expectancy confirmed with high confidence"
+    },
+    "TRENDING": {
+      "label": "TRENDING",
+      "n": 303,
+      "wr_pct": 34.7,
+      "pf_actual": 0.481,
+      "pf_bootstrap_ci_90": {
+        "lo": 0.301,
+        "hi": 0.751
+      },
+      "avg_win": 1.1082,
+      "avg_loss": 1.2231,
+      "rr": 0.906,
+      "breakeven_wr_pct": 52.5,
+      "beats_breakeven": false,
+      "z_score_vs_50pct": -5.343,
+      "z_significance": "NOT_SIGNIFICANT",
+      "ev_per_trade": -0.4152,
+      "verdict": "NO_EDGE",
+      "bootstrap_note": "PF CI upper bound < 1.0 \u2192 negative expectancy confirmed with high confidence"
+    },
+    "VOLATILITY_EXPANSION": {
+      "label": "VOLATILITY_EXPANSION",
+      "n": 2,
+      "verdict": "INSUFFICIENT_DATA"
+    }
+  },
+  "overall_verdict": "NO_STATISTICAL_EDGE \u2014 PF < 1.0 across all windows. Signal quality must improve before RL can amplify alpha."
+}

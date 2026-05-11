@@ -1,0 +1,273 @@
+# EOW Quant Engine — Unified System Report v2
+
+_Generated: 2026-05-11 07:07:40 UTC_  
+_Engine: FTD-025B-URX-V2 — True Cause-Effect Narrative_
+
+---
+
+> **Design principle:** Truth → Insight → Decision → Action  
+> Every section answers WHY, not just WHAT.
+
+## 1. Executive Snapshot
+
+| Metric | Value |
+|---|---|
+| System State | ACTIVE |
+| Trading Activity | RECENT (6 min ago) |
+| Profitability | LOSS (PF=0.46, net=$-316.58) |
+| Key Problem | Avg loss ($-0.66) is 0.7× avg win ($0.96); fees $153.03 consume 32.6% of gross |
+| Immediate Action | Increase RR target to ≥2.0; reduce fee drag by raising min notional |
+
+## 2. Signal → Trade Flow
+
+| Metric | Value |
+|---|---|
+| Signals Generated (window) | 629 |
+| Signals Passed → Traded | 13 |
+| Signals Rejected | 4 |
+| Pass Rate | 2.1% |
+| Reject Rate | 0.6% |
+| Rejection Rate (window %) | 23.5% |
+| Mins Since Last Trade | 6.4 |
+| Signals / hour | 629.0 |
+| Trades / hour | 13.00 |
+| Execution Gap | 616 signal(s) → 0 trades |
+| Dominant Block | RL_TOXIC (4 rejection(s)) |
+
+**Top Rejection Reasons:**
+- RL_TOXIC: 4 (100%)
+
+## 3. Decision Intelligence
+
+| Metric | Value |
+|---|---|
+| AI Decision | MONITOR |
+| Mode | NORMAL |
+| Tier | TIER_1 |
+| Score Min | 0.430 |
+| AF State | RELAX |
+
+**WHY:**
+- Profit factor 0.46 < 1.0 — system in drawdown recovery posture
+- Win rate 23.8% below 45% — signal quality degraded
+- Trade Activator TIER_1 — filters relaxed (score_min=0.430)
+- Adaptive Filter RELAX — dry-spell triggered quality relaxation
+
+**WHAT NEEDED:**
+- Missing condition: None — all conditions met
+- Next trigger: Signal passes all gates AND score ≥ 0.430
+
+**Alternative Action:**
+Pause new entries; review strategy DNA and RR structure before resuming
+
+## 4. Risk Engine Behavior
+
+| Metric | Value |
+|---|---|
+| Risk State | ACTIVE |
+| Size Reduced? | No |
+| Trade Blocked? | No |
+| Kill Switch? | No |
+| Halt Reason | — |
+| DD State | NORMAL |
+| Current DD | 0.0% |
+| Max DD (session) | 0.0% |
+| Size Multiplier | 1.00× |
+| Gate Reason | ALL_CLEAR |
+
+## 5. Capital Efficiency
+
+| Metric | Value |
+|---|---|
+| Current Equity | $1000.00 |
+| Net PnL | $-316.58 |
+| Fees Paid | $153.03 |
+| Capital Deployed | 16.4% |
+| Capital Idle | 83.6% |
+| Daily Risk Used | $96.32 |
+| Daily Risk Remaining | N/A |
+| Daily Cap | 6.0% |
+| Missed Opportunity | None — system actively trading or recently traded |
+
+## 6. Performance Reality
+
+| Metric | Value |
+|---|---|
+| Expectancy / Trade | $-0.27 |
+| Fee Impact | 32.6% |
+| Fee per Trade (avg) | $0.13 |
+| Win Rate | 23.8% |
+| Avg Win | +$0.96 |
+| Avg Loss | $-0.66 |
+| Total Trades | 1156 |
+| Total Net PnL | $-316.58 |
+
+**Edge Consistency (strategy × regime):**
+- - MEAN_REVERTING@MeanReversion_PAPER_SPEED: edge=-0.334 wr=0% n=20 [DISABLED]
+
+## 7. Learning Memory
+
+| Metric | Value |
+|---|---|
+| Status | UNKNOWN |
+| Memory Records | 0 |
+| Total Patterns | 0 |
+| Formed Patterns | 0 |
+| Negative (Permanent) | 0 |
+| Negative (Temporary) | 0 |
+
+_No patterns formed yet — learning engine requires more trades. Pattern formation begins once per-strategy samples accumulate. No strategies are banned; all remain eligible._
+
+## 8. Alert Intelligence
+
+**RL_TOXIC BLOCK (4 rejection(s))**
+  Cause: RL_TOXIC gating all signals in current window
+  Impact: 4 trade opportunity(s) missed
+  Fix: Review RL_TOXIC conditions and threshold settings
+
+**LOW PROFIT FACTOR (0.46)**
+  Cause: Avg loss (-0.66) is 0.7× avg win (0.96)
+  Impact: Expected loss per cycle on current RR structure
+  Fix: Widen TP target; set rr_min ≥ 2.0; reject setups with RR < 2.0
+
+**HIGH FEE DRAG (33% of gross)**
+  Cause: Small-notional trades × maker/taker fee 0.1%
+  Impact: Fees consuming $153.03 of gross turnover
+  Fix: Increase MIN_NOTIONAL_USDT; reduce trade frequency
+
+**CONTRADICTION DETECTED (1 found)**
+  Cause: Logical inconsistencies: LOW_PF_MASKED
+  Impact: Report accuracy degraded without truth correction
+  Fix: Truth engine corrected data — report reflects resolved state
+
+## 9. Root Cause Analysis
+
+**PRIMARY CAUSE:**
+**Negative expectancy (PF=0.46)** — avg loss 0.7× avg win. Signal pipeline functioning; structural problem is insufficient reward-to-risk.
+
+**SECONDARY CAUSES:**
+- Avg loss (-0.66) > avg win (0.96) across 1156 trades
+
+## 10. Action Plan
+
+**IMMEDIATE (restart not required):**
+- Increase rr_min 1.5 → 2.0 in config.py (reject RR < 2.0 entries)
+- Reduce ACTIVATOR_T1_SCORE to 0.42 (allow borderline setups at TIER_1)
+
+**SHORT TERM (next session):**
+- Review Alpha Engine TrendBreakout RR — single trade data suggests poor setup quality
+- Add session PF circuit breaker: if session_pf < 0.5 after ≥20 trades → pause 30 min
+- Raise MIN_NOTIONAL_USDT to reduce fee drag per trade
+
+**LONG TERM (strategy evolution):**
+- Strategy DNA overhaul via genome evolution (Volatility Expansion showing 0 usage)
+- Implement regime stability filter: require regime stable ≥ 3 consecutive candles before entry
+- Build per-symbol expectancy tracking — remove symbols with PF < 0.8 after 20+ trades
+
+## 11. Developer Export
+
+**Developer Summary**
+
+- Issue:  UNKNOWN
+- Cause:  N/A dominant block
+- Capital Idle:  83.6%
+- Fix:    Signal passes all gates AND score ≥ 0.430
+
+```
+Generated:       2026-05-11 07:07:40 UTC
+Trades (total):  1156  |  PF: 0.455  |  WR: 23.8%
+Gate:            can_trade=True  reason=ALL_CLEAR
+Tier:            TIER_1  score_min=0.43  vol_mult=0.5×
+Idle:            6.4 min
+Signals/hr:      629.0  Skips(window):   4
+Top Errors:
+  DATA_001:candles=1: 1×
+  WS_001:gap=31.4s: 1×
+```
+
+## 12. Execution Analysis (FTD-033)
+
+| Metric | Value |
+|---|---|
+| Signals Evaluated | 0 |
+| Executed | 0 |
+| Rejected | 0 |
+| Execution Rate | 0.0% |
+| Dominant Block | N/A |
+| Top Rejection Reason | N/A |
+
+**Rejection Breakdown:**
+- None recorded
+
+**Gate Status:**
+- No gate data
+
+## 13. Cost Analysis (FTD-033)
+
+| Metric | Value |
+|---|---|
+| Avg Cost per Trade | 0.0000% |
+| Total Fees Paid | 0.0000 USDT |
+| Cost Impact | N/A |
+| High-Cost Symbols | None |
+| Trades Evaluated | 1156 |
+
+## 14. Net Edge Summary (FTD-033)
+
+| Metric | Value |
+|---|---|
+| Signals Evaluated | 0 |
+| With Positive Net Edge | 0.0% |
+| Rejected Due to Cost | 0.0% |
+| Avg Alpha Score | 0.0000 |
+| Blacklisted Patterns | None |
+
+**Strategy Net Edge:**
+- No data
+
+## 15. Developer Summary (FTD-033)
+
+**FTD-033 Developer Summary**
+
+- Issue: No execution / low execution rate
+- Cause: N/A dominates rejections
+- Capital Idle: 83.6%
+- Net Edge Coverage: 0.0% of signals have positive edge after costs
+- Execution Rate: 0.0%
+- Fix:
+  - Improve RR — fewer signals have positive net edge after costs
+  - Widen TP targets to ≥1.5R to recover profit factor above 1.0
+
+## 16. RL Intelligence (Contextual Bandit)
+
+| Metric | Value |
+|---|---|
+| RL Phase | EXPLOITING (100% exploitation — bandit locked onto alpha) |
+| Uptime | 104.5 min |
+| Total Contexts Seen | 21 |
+| Profitable Contexts | 0% |
+| Allowed / Blocked | 16 / 4 |
+| Allow Rate | 80% |
+| Explore Trades | 0 (0%) |
+| Exploit Trades | 16 (100%) |
+| Confidence ×1.25 Fires | 0 |
+| Score Floor −0.05 Fires | 0 |
+| Score Floor +0.05 Fires | 14 |
+
+**Top Alpha Contexts (RL Exploiting):**
+
+| Context | Q-Value | UCB Bonus | Win Rate | Trades | PnL |
+|---|---|---|---|---|---|
+| TRENDING|NY|TrendFollowing | ▼0.0000 | +inf | 0% | 0 | $+0.000 |
+| TRENDING|NY|MeanReversion | ▼0.0000 | +inf | 0% | 0 | $+0.000 |
+| VOLATILITY_EXPANSION|NY|TrendFollowing | ▼0.0000 | +inf | 0% | 0 | $+0.000 |
+| VOLATILITY_EXPANSION|NY|MeanReversion | ▼0.0000 | +inf | 0% | 0 | $+0.000 |
+| TRENDING|LATE|TrendFollowing | ▼0.0000 | +inf | 0% | 0 | $+0.000 |
+
+**Near-Block Contexts (RL considering suppression):**
+
+| Context | Q-Value | UCB Score | Win Rate | Trades | Near Block? |
+|---|---|---|---|---|---|
+| MEAN_REVERTING|LONDON|MeanReversion | -0.3213 | +0.1175 | 9% | 35 | No |
+| MEAN_REVERTING|NY|MeanReversion | -0.2739 | +0.0220 | 14% | 77 | No |
+| MEAN_REVERTING|LATE|MeanReversion | -0.2138 | +0.0326 | 17% | 111 | No |

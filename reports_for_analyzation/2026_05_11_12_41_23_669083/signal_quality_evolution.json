@@ -1,0 +1,479 @@
+{
+  "title": "Signal Quality Evolution \u2014 RR and WR Trends Over Time (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-11 07:07:49 UTC",
+  "total_trades": 1156,
+  "window_size": 50,
+  "wr_trend": "DEGRADING",
+  "rr_trend": "IMPROVING",
+  "avg_fee_drag_pct": 130.6,
+  "rolling_windows": [
+    {
+      "window_start": 1,
+      "window_end": 50,
+      "n": 50,
+      "wr_pct": 44.0,
+      "pf": 0.388,
+      "rr": 0.493,
+      "avg_pnl": -1.8424,
+      "fee_drag_pct": 57.3
+    },
+    {
+      "window_start": 26,
+      "window_end": 75,
+      "n": 50,
+      "wr_pct": 44.0,
+      "pf": 0.245,
+      "rr": 0.311,
+      "avg_pnl": -2.033,
+      "fee_drag_pct": 70.0
+    },
+    {
+      "window_start": 51,
+      "window_end": 100,
+      "n": 50,
+      "wr_pct": 56.0,
+      "pf": 0.312,
+      "rr": 0.245,
+      "avg_pnl": -0.8666,
+      "fee_drag_pct": 59.2
+    },
+    {
+      "window_start": 76,
+      "window_end": 125,
+      "n": 50,
+      "wr_pct": 48.0,
+      "pf": 0.665,
+      "rr": 0.721,
+      "avg_pnl": -0.0698,
+      "fee_drag_pct": 26.8
+    },
+    {
+      "window_start": 101,
+      "window_end": 150,
+      "n": 50,
+      "wr_pct": 46.0,
+      "pf": 0.711,
+      "rr": 0.835,
+      "avg_pnl": -0.0352,
+      "fee_drag_pct": 30.5
+    },
+    {
+      "window_start": 126,
+      "window_end": 175,
+      "n": 50,
+      "wr_pct": 46.0,
+      "pf": 1.127,
+      "rr": 1.322,
+      "avg_pnl": 0.0147,
+      "fee_drag_pct": 29.4
+    },
+    {
+      "window_start": 151,
+      "window_end": 200,
+      "n": 50,
+      "wr_pct": 42.0,
+      "pf": 0.767,
+      "rr": 1.059,
+      "avg_pnl": -0.0419,
+      "fee_drag_pct": 33.7
+    },
+    {
+      "window_start": 176,
+      "window_end": 225,
+      "n": 50,
+      "wr_pct": 46.0,
+      "pf": 0.518,
+      "rr": 0.609,
+      "avg_pnl": -0.0953,
+      "fee_drag_pct": 42.4
+    },
+    {
+      "window_start": 201,
+      "window_end": 250,
+      "n": 50,
+      "wr_pct": 34.0,
+      "pf": 0.188,
+      "rr": 0.364,
+      "avg_pnl": -0.2646,
+      "fee_drag_pct": 84.1
+    },
+    {
+      "window_start": 226,
+      "window_end": 275,
+      "n": 50,
+      "wr_pct": 16.0,
+      "pf": 0.094,
+      "rr": 0.492,
+      "avg_pnl": -0.2685,
+      "fee_drag_pct": 252.3
+    },
+    {
+      "window_start": 251,
+      "window_end": 300,
+      "n": 50,
+      "wr_pct": 14.0,
+      "pf": 0.239,
+      "rr": 1.466,
+      "avg_pnl": -0.0906,
+      "fee_drag_pct": 314.6
+    },
+    {
+      "window_start": 276,
+      "window_end": 325,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.108,
+      "rr": 0.433,
+      "avg_pnl": -0.1374,
+      "fee_drag_pct": 492.2
+    },
+    {
+      "window_start": 301,
+      "window_end": 350,
+      "n": 50,
+      "wr_pct": 26.0,
+      "pf": 0.122,
+      "rr": 0.348,
+      "avg_pnl": -0.1329,
+      "fee_drag_pct": 508.2
+    },
+    {
+      "window_start": 326,
+      "window_end": 375,
+      "n": 50,
+      "wr_pct": 28.0,
+      "pf": 0.641,
+      "rr": 1.647,
+      "avg_pnl": -0.1098,
+      "fee_drag_pct": 55.9
+    },
+    {
+      "window_start": 351,
+      "window_end": 400,
+      "n": 50,
+      "wr_pct": 32.0,
+      "pf": 1.24,
+      "rr": 2.635,
+      "avg_pnl": 0.1534,
+      "fee_drag_pct": 14.0
+    },
+    {
+      "window_start": 376,
+      "window_end": 425,
+      "n": 50,
+      "wr_pct": 36.0,
+      "pf": 1.238,
+      "rr": 2.2,
+      "avg_pnl": 0.1857,
+      "fee_drag_pct": 12.7
+    },
+    {
+      "window_start": 401,
+      "window_end": 450,
+      "n": 50,
+      "wr_pct": 24.0,
+      "pf": 0.642,
+      "rr": 2.034,
+      "avg_pnl": -0.276,
+      "fee_drag_pct": 24.9
+    },
+    {
+      "window_start": 426,
+      "window_end": 475,
+      "n": 50,
+      "wr_pct": 14.0,
+      "pf": 0.458,
+      "rr": 2.813,
+      "avg_pnl": -0.3878,
+      "fee_drag_pct": 36.6
+    },
+    {
+      "window_start": 451,
+      "window_end": 500,
+      "n": 50,
+      "wr_pct": 22.0,
+      "pf": 0.836,
+      "rr": 2.963,
+      "avg_pnl": -0.0808,
+      "fee_drag_pct": 28.9
+    },
+    {
+      "window_start": 476,
+      "window_end": 525,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.98,
+      "rr": 3.919,
+      "avg_pnl": -0.0086,
+      "fee_drag_pct": 29.1
+    },
+    {
+      "window_start": 501,
+      "window_end": 550,
+      "n": 50,
+      "wr_pct": 14.0,
+      "pf": 0.489,
+      "rr": 3.004,
+      "avg_pnl": -0.2389,
+      "fee_drag_pct": 53.5
+    },
+    {
+      "window_start": 526,
+      "window_end": 575,
+      "n": 50,
+      "wr_pct": 16.0,
+      "pf": 0.146,
+      "rr": 0.767,
+      "avg_pnl": -0.3271,
+      "fee_drag_pct": 212.2
+    },
+    {
+      "window_start": 551,
+      "window_end": 600,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.977,
+      "rr": 4.448,
+      "avg_pnl": -0.0076,
+      "fee_drag_pct": 36.5
+    },
+    {
+      "window_start": 576,
+      "window_end": 625,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 1.065,
+      "rr": 4.26,
+      "avg_pnl": 0.0234,
+      "fee_drag_pct": 30.0
+    },
+    {
+      "window_start": 601,
+      "window_end": 650,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.364,
+      "rr": 1.454,
+      "avg_pnl": -0.2764,
+      "fee_drag_pct": 74.7
+    },
+    {
+      "window_start": 626,
+      "window_end": 675,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.37,
+      "rr": 1.479,
+      "avg_pnl": -0.2494,
+      "fee_drag_pct": 80.1
+    },
+    {
+      "window_start": 651,
+      "window_end": 700,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.357,
+      "rr": 1.625,
+      "avg_pnl": -0.2425,
+      "fee_drag_pct": 81.4
+    },
+    {
+      "window_start": 676,
+      "window_end": 725,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.353,
+      "rr": 1.411,
+      "avg_pnl": -0.2449,
+      "fee_drag_pct": 81.5
+    },
+    {
+      "window_start": 701,
+      "window_end": 750,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.307,
+      "rr": 1.401,
+      "avg_pnl": -0.266,
+      "fee_drag_pct": 90.2
+    },
+    {
+      "window_start": 726,
+      "window_end": 775,
+      "n": 50,
+      "wr_pct": 8.0,
+      "pf": 0.102,
+      "rr": 1.171,
+      "avg_pnl": -0.364,
+      "fee_drag_pct": 246.3
+    },
+    {
+      "window_start": 751,
+      "window_end": 800,
+      "n": 50,
+      "wr_pct": 8.0,
+      "pf": 0.128,
+      "rr": 1.468,
+      "avg_pnl": -0.31,
+      "fee_drag_pct": 237.6
+    },
+    {
+      "window_start": 776,
+      "window_end": 825,
+      "n": 50,
+      "wr_pct": 14.0,
+      "pf": 0.342,
+      "rr": 2.1,
+      "avg_pnl": -0.2149,
+      "fee_drag_pct": 106.7
+    },
+    {
+      "window_start": 801,
+      "window_end": 850,
+      "n": 50,
+      "wr_pct": 16.0,
+      "pf": 0.347,
+      "rr": 1.821,
+      "avg_pnl": -0.2015,
+      "fee_drag_pct": 112.8
+    },
+    {
+      "window_start": 826,
+      "window_end": 875,
+      "n": 50,
+      "wr_pct": 14.0,
+      "pf": 0.148,
+      "rr": 0.909,
+      "avg_pnl": -0.2782,
+      "fee_drag_pct": 247.7
+    },
+    {
+      "window_start": 851,
+      "window_end": 900,
+      "n": 50,
+      "wr_pct": 12.0,
+      "pf": 0.058,
+      "rr": 0.425,
+      "avg_pnl": -0.3632,
+      "fee_drag_pct": 530.2
+    },
+    {
+      "window_start": 876,
+      "window_end": 925,
+      "n": 50,
+      "wr_pct": 12.0,
+      "pf": 0.121,
+      "rr": 0.885,
+      "avg_pnl": -0.2919,
+      "fee_drag_pct": 292.1
+    },
+    {
+      "window_start": 901,
+      "window_end": 950,
+      "n": 50,
+      "wr_pct": 16.0,
+      "pf": 0.445,
+      "rr": 2.337,
+      "avg_pnl": -0.1353,
+      "fee_drag_pct": 107.2
+    },
+    {
+      "window_start": 926,
+      "window_end": 975,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.697,
+      "rr": 2.79,
+      "avg_pnl": -0.072,
+      "fee_drag_pct": 69.9
+    },
+    {
+      "window_start": 951,
+      "window_end": 1000,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.528,
+      "rr": 2.114,
+      "avg_pnl": -0.1169,
+      "fee_drag_pct": 88.2
+    },
+    {
+      "window_start": 976,
+      "window_end": 1025,
+      "n": 50,
+      "wr_pct": 16.0,
+      "pf": 0.309,
+      "rr": 1.623,
+      "avg_pnl": -0.1884,
+      "fee_drag_pct": 133.8
+    },
+    {
+      "window_start": 1001,
+      "window_end": 1050,
+      "n": 50,
+      "wr_pct": 14.0,
+      "pf": 0.221,
+      "rr": 1.359,
+      "avg_pnl": -0.2347,
+      "fee_drag_pct": 167.8
+    },
+    {
+      "window_start": 1026,
+      "window_end": 1075,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.128,
+      "rr": 0.582,
+      "avg_pnl": -0.2671,
+      "fee_drag_pct": 289.0
+    },
+    {
+      "window_start": 1051,
+      "window_end": 1100,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.176,
+      "rr": 0.8,
+      "avg_pnl": -0.279,
+      "fee_drag_pct": 188.3
+    },
+    {
+      "window_start": 1076,
+      "window_end": 1125,
+      "n": 50,
+      "wr_pct": 16.0,
+      "pf": 0.487,
+      "rr": 2.558,
+      "avg_pnl": -0.1913,
+      "fee_drag_pct": 61.1
+    },
+    {
+      "window_start": 1101,
+      "window_end": 1150,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.588,
+      "rr": 2.679,
+      "avg_pnl": -0.14,
+      "fee_drag_pct": 55.4
+    }
+  ],
+  "regime_signal_quality": {
+    "MEAN_REVERTING": {
+      "n": 851,
+      "wr_pct": 20.0,
+      "rr": 1.801,
+      "pf": 0.45,
+      "fee_drag_pct": 66.7
+    },
+    "TRENDING": {
+      "n": 303,
+      "wr_pct": 34.7,
+      "rr": 0.906,
+      "pf": 0.481,
+      "fee_drag_pct": 46.7
+    }
+  },
+  "verdict": "SIGNAL_IMPROVING \u2014 at least WR or RR trending upward",
+  "fee_drag_finding": "CRITICAL \u2014 avg fee drag 130.6% of gross wins. Raise MIN_NOTIONAL_USDT to reduce fee-per-trade ratio."
+}

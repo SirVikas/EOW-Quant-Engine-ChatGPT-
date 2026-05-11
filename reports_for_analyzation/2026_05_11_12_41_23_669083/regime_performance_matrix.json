@@ -1,0 +1,52 @@
+{
+  "title": "Regime Performance Matrix \u2014 Enhanced with RL Integration (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-11 07:07:49 UTC",
+  "total_trades": 1156,
+  "regimes": {
+    "TRENDING": {
+      "n_trades": 303,
+      "wr_pct": 34.7,
+      "pf": 0.481,
+      "net_pnl": -125.8066,
+      "avg_win": 1.1082,
+      "avg_loss": 1.2231,
+      "total_fees": 54.3018,
+      "rl_avg_q": null,
+      "rl_mature_contexts": 0,
+      "rl_toxic_contexts": 0,
+      "rl_learning_status": "UNEXPLORED",
+      "verdict": "LOSING"
+    },
+    "MEAN_REVERTING": {
+      "n_trades": 851,
+      "wr_pct": 20.0,
+      "pf": 0.45,
+      "net_pnl": -181.0482,
+      "avg_win": 0.87,
+      "avg_loss": 0.483,
+      "total_fees": 98.619,
+      "rl_avg_q": -0.249,
+      "rl_mature_contexts": 3,
+      "rl_toxic_contexts": 1,
+      "rl_learning_status": "MATURE",
+      "verdict": "LOSING"
+    },
+    "VOLATILITY_EXPANSION": {
+      "n_trades": 2,
+      "wr_pct": 0.0,
+      "pf": 0.0,
+      "net_pnl": -9.7227,
+      "avg_win": 0.0,
+      "avg_loss": 4.8614,
+      "total_fees": 0.1071,
+      "rl_avg_q": null,
+      "rl_mature_contexts": 0,
+      "rl_toxic_contexts": 0,
+      "rl_learning_status": "UNEXPLORED",
+      "verdict": "LOSING"
+    }
+  },
+  "best_by_pf": "TRENDING",
+  "best_by_rl_q": "MEAN_REVERTING",
+  "verdict": "ALL_REGIMES_LOSING \u2014 no regime shows positive expectancy yet"
+}
