@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.3.0"
+APP_VERSION = "1.3.1"
 
 
 class EngineConfig(BaseSettings):
@@ -57,6 +57,7 @@ class EngineConfig(BaseSettings):
     # ── Risk / Capital ───────────────────────────────────────────────────────
     INITIAL_CAPITAL: float = 1000.0        # USDT starting bankroll (paper)
     MAX_RISK_PER_TRADE: float = 0.022      # 2.2% of equity per trade (larger notional → lower fee % drag)
+    MIN_NOTIONAL_USDT: float = 20.0        # FTD-056-ACT: minimum trade notional floor — prevents micro-trades where $0.008 fee eats disproportionate share of small wins
     MAX_DRAWDOWN_HALT: float = 0.15        # Halt engine at 15% MDD
     KELLY_FRACTION: float = 0.25           # Conservative quarter-Kelly
     WIN_STREAK_SCALE_UP: int = 3           # Consecutive wins → scale up
@@ -84,7 +85,7 @@ class EngineConfig(BaseSettings):
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
-    BREAKEVEN_TRIGGER_R: float = 1.0      # Sniper Mode (FTD-SNP-001): lowered 1.80→1.0 — dynamic BE at 1x ATR profit locks in capital immediately; session data shows -$48 STOP_LOSS_SLIP is biggest loss driver
+    BREAKEVEN_TRIGGER_R: float = 1.5      # FTD-056-ACT: raised 1.0→1.5 — BE at 1.0 was cutting avg_win to $0.994 vs theoretical 4.0R TP; profitable windows (PF=1.24) had avg_win=$3.03 — need more room for winners to run
     SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
@@ -118,8 +119,8 @@ class EngineConfig(BaseSettings):
 
     # ── Strategy Defaults (DNA) ──────────────────────────────────────────────
     RSI_PERIOD: int = 14
-    RSI_OVERSOLD: float = 35.0            # Raised 28→35: require more bearish momentum for SHORT
-    RSI_OVERBOUGHT: float = 65.0          # Lowered 72→65: require less overbought for LONG entry
+    RSI_OVERSOLD: float = 30.0            # FTD-056-ACT: tightened 35→30 — demand more extreme oversold to filter false MR LONG signals (WR was 17% vs 30% breakeven)
+    RSI_OVERBOUGHT: float = 70.0          # FTD-056-ACT: tightened 65→70 — demand more extreme overbought to filter false MR SHORT signals
     EMA_FAST: int = 12                    # Raised 8→12: reduce whipsaw noise
     EMA_SLOW: int = 21                    # qFTD-011: 50→21 — EMA50 needs 52 candles on 1-min; EMA21 fires after 23 min
     EMA_TREND: int = 34                   # qFTD-011: 100→34 — Fibonacci macro filter; min_len 102→36 candles
