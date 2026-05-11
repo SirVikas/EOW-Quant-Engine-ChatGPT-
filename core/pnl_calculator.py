@@ -163,6 +163,7 @@ class PurePnLCalculator:
             "capital":        round(self.capital, 4),
             "total_net_pnl":  round(total_net, 4),
             "total_trades":   len(self.trades),
+            "n_trades":       len(self.trades),
             "win_rate":       round(win_rate * 100, 2),
             "profit_factor":  round(profit_factor, 3),
             "avg_win_usdt":   round(avg_win, 4),
@@ -254,7 +255,7 @@ class PurePnLCalculator:
     def _empty_stats(self) -> dict:
         return {
             "capital": round(self.capital, 4),
-            "total_net_pnl": 0.0, "total_trades": 0,
+            "total_net_pnl": 0.0, "total_trades": 0, "n_trades": 0,
             "win_rate": 0.0, "profit_factor": 0.0,
             "avg_win_usdt": 0.0, "avg_loss_usdt": 0.0,
             "max_drawdown_pct": 0.0, "sharpe_ratio": 0.0,
