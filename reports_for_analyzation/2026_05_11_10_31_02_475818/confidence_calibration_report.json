@@ -1,0 +1,58 @@
+{
+  "title": "Confidence Calibration \u2014 Q-Value Prediction Accuracy (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-11 04:57:33 UTC",
+  "methodology": "Directional calibration: Q > 0 predicts winning context (WR > 50%).",
+  "n_evaluated": 4,
+  "n_correct": 4,
+  "accuracy_pct": 100.0,
+  "brier_score": 0.0087,
+  "brier_interpretation": "Well-calibrated (< 0.25)",
+  "context_calibration": [
+    {
+      "context": "MEAN_REVERTING|NY|MeanReversion",
+      "n_visits": 77,
+      "q_value": -0.2739,
+      "q_tier": "PENALIZED",
+      "actual_wr_pct": 14.3,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0069
+    },
+    {
+      "context": "MEAN_REVERTING|LATE|MeanReversion",
+      "n_visits": 111,
+      "q_value": -0.2138,
+      "q_tier": "PENALIZED",
+      "actual_wr_pct": 17.1,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0341
+    },
+    {
+      "context": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 78,
+      "q_value": -0.1227,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 20.5,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0074
+    },
+    {
+      "context": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 21,
+      "q_value": -0.2492,
+      "q_tier": "PENALIZED",
+      "actual_wr_pct": 14.3,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0137
+    }
+  ],
+  "verdict": "WELL_CALIBRATED \u2014 Q reliably predicts context quality",
+  "note": "Calibration improves naturally as visits accumulate. Expect reliable calibration after 50+ visits per context (MATURE stage)."
+}

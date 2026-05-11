@@ -1,0 +1,92 @@
+{
+  "title": "Alpha Persistence Report \u2014 Is Discovered Edge Durable? (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-11 04:57:33 UTC",
+  "alpha_summary": {
+    "contexts_analyzed": 4,
+    "positive_alpha": 0,
+    "alpha_developing": 0,
+    "negative_alpha": 3,
+    "q_spread": 0.1512,
+    "differentiation_active": true,
+    "best_context": "MEAN_REVERTING|ASIA|MeanReversion",
+    "best_context_q": -0.1227,
+    "worst_context": "MEAN_REVERTING|NY|MeanReversion",
+    "worst_context_q": -0.2739
+  },
+  "context_alpha": [
+    {
+      "context": "MEAN_REVERTING|LATE|MeanReversion",
+      "n_visits": 111,
+      "q_value": -0.2138,
+      "q_trend": "IMPROVING",
+      "q_stable": false,
+      "q_velocity": 0.0341,
+      "actual_wr_pct": 17.1,
+      "bayesian_wr_pct": 17.7,
+      "wr_ci_90": [
+        12.0,
+        23.8
+      ],
+      "total_pnl": -22.5084,
+      "alpha_status": "NEGATIVE_ALPHA",
+      "persistent": false
+    },
+    {
+      "context": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 78,
+      "q_value": -0.1227,
+      "q_trend": "DEGRADING",
+      "q_stable": true,
+      "q_velocity": 0.0074,
+      "actual_wr_pct": 20.5,
+      "bayesian_wr_pct": 21.2,
+      "wr_ci_90": [
+        14.0,
+        29.0
+      ],
+      "total_pnl": -7.986,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    },
+    {
+      "context": "MEAN_REVERTING|NY|MeanReversion",
+      "n_visits": 77,
+      "q_value": -0.2739,
+      "q_trend": "DEGRADING",
+      "q_stable": true,
+      "q_velocity": 0.0069,
+      "actual_wr_pct": 14.3,
+      "bayesian_wr_pct": 15.2,
+      "wr_ci_90": [
+        8.9,
+        22.1
+      ],
+      "total_pnl": -23.772,
+      "alpha_status": "NEGATIVE_ALPHA",
+      "persistent": false
+    },
+    {
+      "context": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 21,
+      "q_value": -0.2492,
+      "q_trend": "DEGRADING",
+      "q_stable": true,
+      "q_velocity": 0.0137,
+      "actual_wr_pct": 14.3,
+      "bayesian_wr_pct": 17.4,
+      "wr_ci_90": [
+        5.9,
+        30.9
+      ],
+      "total_pnl": -4.8243,
+      "alpha_status": "NEGATIVE_ALPHA",
+      "persistent": false
+    }
+  ],
+  "persistence_verdict": "DIFFERENTIATION_ACTIVE_NO_ALPHA \u2014 RL correctly ranks contexts, all still negative",
+  "gap_to_profitability": {
+    "best_q": -0.1227,
+    "gap_to_zero": 0.1227,
+    "interpretation": "All contexts negative. Best Q=-0.1227. Requires signal quality improvement or continued exploration."
+  }
+}
