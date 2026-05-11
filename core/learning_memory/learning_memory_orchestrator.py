@@ -237,6 +237,7 @@ class LearningMemoryOrchestrator:
             "module":              self.MODULE,
             "phase":               self.PHASE,
             "enabled":             self._enabled,
+            "status":              "ACTIVE" if self._enabled else "DISABLED",
             "total_records":       self._store.count(),
             "total_patterns":      len(all_pats),
             "formed_patterns":     len(formed),

@@ -2484,7 +2484,7 @@ async def get_status():
         "profit_engine": {
             "rr_engine":         rr_engine.summary(),
             "trade_scorer":      trade_scorer.summary(),
-            "capital_allocator": capital_allocator.summary(),
+            "capital_allocator": capital_allocator.summary(equity=pnl_calc.capital),
             "trade_manager":     trade_manager.summary(),
             "alpha_engine":      alpha_engine.summary(),
         },
@@ -3007,7 +3007,7 @@ async def get_full_system_report_v2():
             lambda: dynamic_threshold_provider.summary(minutes_no_trade=_mins_idle), {}
         ),
         "session_stats":  _ss,
-        "capital":        _safe_v2(capital_allocator.summary, {}),
+        "capital":        _safe_v2(lambda: capital_allocator.summary(equity=pnl_calc.capital), {}),
         "risk":           _safe_v2(risk_ctrl.snapshot, {}),
         "gate":           _safe_v2(
             lambda: global_gate_controller.snapshot()
@@ -3155,7 +3155,7 @@ async def get_full_system_report():
         ),
         streak            = _safe(streak_engine.summary, {}),
         consistency       = _safe(consistency_engine.status, {}),
-        capital_allocator = _safe(capital_allocator.summary, {}),
+        capital_allocator = _safe(lambda: capital_allocator.summary(equity=pnl_calc.capital), {}),
         error_registry    = _safe(lambda: error_registry.recent(50), []),
         healer            = heal,
         halt_audit        = _safe(lambda: risk_ctrl.halt_audit()
@@ -4791,7 +4791,7 @@ def _generate_forensic_reports(
             "avg_loss_usdt":      round(al, 4),
             "actual_rr":          round(aw / max(al, 1e-9), 3),
             "total_fees_usdt":    round(fees, 4),
-            "fee_pct_of_gp":      round(fees / max(gp, 1e-9) * 100, 1),
+            "fee_pct_of_gp":      round(fees / gp * 100, 1) if gp > 0 else None,
             "avg_r_multiple":     round(sum(t.get("r_multiple", 0) for t in tt) / max(len(tt), 1), 3),
             "verdict":            "ALPHA" if pf > 1.2 else "BREAKEVEN" if pf > 0.9 else "NOISE",
         })
@@ -4866,9 +4866,9 @@ def _generate_forensic_reports(
             "total_cost_usdt":      round(fees + slip, 4),
             "net_pnl_usdt":         round(np_, 4),
             "fee_per_trade_usdt":   round(fees / max(len(tt), 1), 4),
-            "fee_pct_of_gross_win": round(fees / max(gp, 1e-9) * 100, 1),
+            "fee_pct_of_gross_win": round(fees / gp * 100, 1) if gp > 0 else None,
             "verdict": ("FEE_TOXIC"  if fees > abs(np_) * 0.8 else
-                        "FEE_HEAVY"  if fees / max(gp, 1e-9) > 0.30 else "OK"),
+                        "FEE_HEAVY"  if (gp > 0 and fees / gp > 0.30) else "OK"),
         })
     fee_rows.sort(key=lambda x: x["total_fees_usdt"], reverse=True)
     total_fees = sum(r["total_fees_usdt"] for r in fee_rows)
@@ -6983,7 +6983,7 @@ async def download_report_bundle():
         ),
         streak            = _safe(streak_engine.summary, {}),
         consistency       = _safe(consistency_engine.status, {}),
-        capital_allocator = _safe(capital_allocator.summary, {}),
+        capital_allocator = _safe(lambda: capital_allocator.summary(equity=pnl_calc.capital), {}),
         error_registry    = _safe(lambda: error_registry.recent(50), []),
         healer            = heal,
         halt_audit        = _safe(lambda: risk_ctrl.halt_audit()
@@ -7012,7 +7012,7 @@ async def download_report_bundle():
             lambda: dynamic_threshold_provider.summary(minutes_no_trade=_mins_idle), {}
         ),
         "session_stats":   _ss,
-        "capital":         _safe(capital_allocator.summary, {}),
+        "capital":         _safe(lambda: capital_allocator.summary(equity=pnl_calc.capital), {}),
         "risk":            _safe(risk_ctrl.snapshot, {}),
         "gate":            _safe(
             lambda: global_gate_controller.snapshot()

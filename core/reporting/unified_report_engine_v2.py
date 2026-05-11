@@ -321,7 +321,7 @@ def _s5_capital_efficiency(d: dict) -> str:
     thr   = d.get("thresholds", {})
 
     initial     = _g(ss, "initial_capital", default=1000.0)
-    equity      = _g(ss, "final_equity",    default=initial)
+    equity      = _g(ss, "capital", default=_g(ss, "final_equity", default=initial))
     pnl         = _g(ss, "total_net_pnl",   default=0.0)
     fees        = _g(ss, "total_fees_paid", default=0.0)
     daily_used  = cap.get("daily_risk_used",      0.0)
