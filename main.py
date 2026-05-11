@@ -1205,6 +1205,12 @@ async def on_tick(tick: Tick):
             }.get(regime.value, 0.80)
             _final_mult = _final_mult * _regime_risk_mult
             sizing.qty  = sizing.qty * _final_mult
+            # FTD-056-ACT: enforce minimum notional floor so micro-trades don't produce
+            # disproportionate fee overhead (fee_drag was 132.3% avg across session)
+            if sig.entry_price > 0:
+                _notional_pre = sizing.qty * sig.entry_price
+                if _notional_pre < cfg.MIN_NOTIONAL_USDT:
+                    sizing.qty = cfg.MIN_NOTIONAL_USDT / sig.entry_price
             # atr_pct already computed above from candle OHLC / regime_det
 
             # FTD-REF-023: realistic cost via execution_engine
