@@ -1,0 +1,415 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         🦅 PRP-000                                         ║
+║              FULL PHOENIX ORCHESTRATION INDEX                              ║
+║        MASTER EXECUTION, SEQUENCING & RECONSTRUCTION GOVERNANCE            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+CLASSIFICATION:
+MASTER ORCHESTRATION GOVERNANCE
+
+PROGRAM:
+PHOENIX RECONSTRUCTION PROGRAM (PRP)
+
+PRIORITY:
+CRITICAL
+
+PURPOSE:
+This document acts as the:
+MASTER EXECUTION BRAIN
+for the entire PHOENIX reconstruction ecosystem.
+
+This PRP defines:
+
+- reconstruction sequencing
+- dependency hierarchy
+- execution discipline
+- stabilization checkpoints
+- integration governance
+- validation order
+- rollback philosophy
+- institutional reconstruction flow
+
+This document MUST govern all future PRP execution.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+I. CORE RECONSTRUCTION PRINCIPLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The EOW Quant Engine MUST NOT be treated as:
+
+- isolated scripts
+- disconnected indicators
+- random bug collections
+- independent adaptive modules
+
+The architecture MUST be treated as:
+
+ONE interconnected adaptive intelligence organism.
+
+All reconstruction work MUST follow:
+
+ROOT-CAUSE-FIRST RECONSTRUCTION
+
+NOT:
+surface-level patch repair.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+II. OFFICIAL RECONSTRUCTION PHILOSOPHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The mission is NOT:
+
+- maximize short-term profit
+- inflate win-rate artificially
+- optimize vanity metrics
+- create cosmetic profitability
+
+The mission IS:
+
+to create:
+
+a truthful,
+adaptive,
+economically survivable,
+institutionally governed,
+self-correcting alpha-discovery intelligence framework
+capable of surviving and evolving under realistic live-market conditions.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+III. OFFICIAL RECONSTRUCTION HIERARCHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DOCTRINE LAYER
+↓
+PRP-008
+CIVILIZATIONAL FORENSICS MASTER
+
+PURPOSE:
+Defines:
+- root-cause doctrine
+- survivability philosophy
+- recursive collapse analysis
+- ecosystem-level causality
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GOVERNANCE LAYER
+↓
+PRP-003
+ADAPTIVE STABILITY GOVERNANCE
+
+PURPOSE:
+Controls:
+- adaptive equilibrium
+- RL balance
+- stability governance
+- feedback-loop normalization
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EXECUTION LAYER
+↓
+PRP-001
+SIGNAL TRUTH RECONSTRUCTION
+
+PRP-002
+OPPORTUNITY ECOLOGY RECOVERY
+
+PRP-004
+ECONOMIC SURVIVABILITY ENGINE
+
+PRP-006
+ECOLOGICAL REGIME INTELLIGENCE
+
+PRP-005
+EVOLUTION ACTIVATION FRAMEWORK
+
+PRP-007
+IMMUNE & EMERGENCY GOVERNANCE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VALIDATION LAYER
+↓
+PRP-009
+INSTITUTIONAL VALIDATION LAYER
+
+PURPOSE:
+Validate:
+- survivability realism
+- adaptive integrity
+- signal legitimacy
+- governance stability
+- economic truth
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IV. MANDATORY EXECUTION ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-1
+PRP-001
+SIGNAL TRUTH RECONSTRUCTION
+
+RATIONALE:
+Weak signal truth poisons all downstream systems.
+
+PRIMARY OBJECTIVE:
+Improve:
+- directional legitimacy
+- asymmetry quality
+- predictive truth-density
+
+MANDATORY BEFORE NEXT PHASE:
+- telemetry validation
+- false-positive reduction
+- signal quality audit
+- regime sampling validation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-2
+PRP-002
+OPPORTUNITY ECOLOGY RECOVERY
+
+RATIONALE:
+Signal truth must stabilize BEFORE participation expansion.
+
+PRIMARY OBJECTIVE:
+Repair:
+- exploration collapse
+- participation starvation
+- signal suppression
+- defensive filtering behavior
+
+MANDATORY BEFORE NEXT PHASE:
+- participation stability
+- exploration telemetry
+- suppression audit
+- opportunity-density validation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-3
+PRP-003
+ADAPTIVE STABILITY GOVERNANCE
+
+RATIONALE:
+Participation recovery without stability governance creates chaos.
+
+PRIMARY OBJECTIVE:
+Prevent:
+- adaptive overreaction
+- RL imbalance
+- exploration runaway
+- instability oscillation
+
+MANDATORY BEFORE NEXT PHASE:
+- equilibrium telemetry
+- adaptive drift analysis
+- feedback-loop audit
+- stability verification
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-4
+PRP-004
+ECONOMIC SURVIVABILITY ENGINE
+
+RATIONALE:
+Even good signals fail under negative economics.
+
+PRIMARY OBJECTIVE:
+Optimize:
+- expectancy after fees
+- friction-adjusted survivability
+- drawdown efficiency
+- capital metabolism
+
+MANDATORY BEFORE NEXT PHASE:
+- expectancy validation
+- fee analysis
+- friction audit
+- survivability scoring
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-5
+PRP-006
+ECOLOGICAL REGIME INTELLIGENCE
+
+RATIONALE:
+The same intelligence cannot survive all environments identically.
+
+PRIMARY OBJECTIVE:
+Develop:
+- regime awareness
+- environmental adaptation
+- habitat survivability
+- ecological diversification
+
+MANDATORY BEFORE NEXT PHASE:
+- regime classification audit
+- environmental transition validation
+- regime stability testing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-6
+PRP-005
+EVOLUTION ACTIVATION FRAMEWORK
+
+RATIONALE:
+Evolution must activate ONLY after stable foundations exist.
+
+PRIMARY OBJECTIVE:
+Enable:
+- real adaptation
+- mutation lineage
+- operational learning
+- adaptive progression
+
+MANDATORY BEFORE NEXT PHASE:
+- mutation verification
+- adaptation persistence audit
+- lineage validation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-7
+PRP-007
+IMMUNE & EMERGENCY GOVERNANCE
+
+RATIONALE:
+Protection systems require mature observability first.
+
+PRIMARY OBJECTIVE:
+Develop:
+- emergency recognition
+- damage prevention
+- survivability intervention
+- adaptive protection activation
+
+MANDATORY BEFORE NEXT PHASE:
+- immune-trigger testing
+- emergency escalation validation
+- degradation detection audit
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PHASE-8
+PRP-009
+INSTITUTIONAL VALIDATION LAYER
+
+RATIONALE:
+Final architecture must prove survivability institutionally.
+
+PRIMARY OBJECTIVE:
+Validate:
+- realistic survivability
+- adaptive integrity
+- economic truth
+- operational robustness
+- long-term stability
+
+FINAL VALIDATION TARGET:
+INSTITUTION-GRADE LIVE-EQUIVALENT SURVIVABILITY.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+V. MANDATORY EXECUTION RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1)
+DO NOT implement all PRPs simultaneously.
+
+2)
+Each phase MUST stabilize BEFORE the next phase begins.
+
+3)
+All adaptive changes MUST remain auditable.
+
+4)
+Every reconstruction phase MUST expose telemetry.
+
+5)
+Every phase MUST include rollback safety.
+
+6)
+All implementations MUST preserve:
+realistic live-market simulation.
+
+7)
+Complexity without survivability gain is FORBIDDEN.
+
+8)
+All governance systems MUST remain operational,
+NOT cosmetic.
+
+9)
+Every adaptive override MUST be visible.
+
+10)
+All verifier infrastructure MUST remain active continuously.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VI. STRICTLY FORBIDDEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DO NOT:
+
+- artificially inflate profitability
+- optimize fake win-rates
+- overfit historical conditions
+- suppress observability
+- create theoretical intelligence without operational survivability
+- hide adaptive instability
+- prioritize trade frequency over expectancy
+- implement cosmetic reconstruction
+- create fake adaptive behavior
+- bypass institutional validation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VII. RECONSTRUCTION SUCCESS DEFINITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The reconstruction will be considered successful ONLY IF:
+
+the architecture becomes:
+
+- truthful
+- adaptive
+- economically survivable
+- regime-aware
+- stability-governed
+- operationally evolving
+- institutionally auditable
+- realistically profitable
+- robust under changing market conditions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VIII. FINAL INSTITUTIONAL DIRECTIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The architecture must NEVER again oscillate between:
+
+reckless overtrading
+↔
+fear-driven defensive paralysis
+
+The permanent institutional objective is:
+
+ADAPTIVE EQUILIBRIUM
++
+SURVIVABILITY TRUTH
++
+GENUINE ALPHA DISCOVERY
+
+The mission is NOT:
+to make the organism appear intelligent.
+
+The mission IS:
+to make the organism genuinely survivable under realistic live-market conditions.
+
+══════════════════════════════════════════════════════════════════════════════╗
+END OF PRP-000
+FULL PHOENIX ORCHESTRATION INDEX
+══════════════════════════════════════════════════════════════════════════════╝

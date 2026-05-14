@@ -1,0 +1,326 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🦅 PHOENIX RECONSTRUCTION PROGRAM (PRP)                 ║
+║                 MASTER INSTITUTIONAL RECONSTRUCTION MAPPING                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+CLASSIFICATION:
+INSTITUTIONAL RECONSTRUCTION GOVERNANCE
+
+PURPOSE:
+This document establishes the official institutional reconstruction
+identity, hierarchy, and orchestration structure for all PHOENIX
+reconstruction work going forward.
+
+This mapping replaces:
+random FTD sequencing,
+isolated patch mentality,
+and disconnected architectural remediation.
+
+The reconstruction program MUST now be treated as:
+
+ONE unified institutional reconstruction ecosystem.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+I. OFFICIAL PHOENIX RECONSTRUCTION PROGRAM (PRP)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-000
+FULL PHOENIX ORCHESTRATION INDEX
+
+PURPOSE:
+Master orchestration, dependency sequencing,
+execution governance, and reconstruction coordination.
+
+ROLE:
+Top-level control and institutional coordination layer.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-001
+SIGNAL TRUTH RECONSTRUCTION
+
+PURPOSE:
+Repair:
+- weak predictive legitimacy
+- low truth-density entries
+- false-positive opportunity structures
+- directional inaccuracy
+- asymmetry weakness
+
+PRIMARY TARGET:
+Truthful alpha discovery.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-002
+OPPORTUNITY ECOLOGY RECOVERY
+(Previously: FTD-057)
+
+PURPOSE:
+Repair:
+- participation collapse
+- exploration starvation
+- signal suppression
+- opportunity-density failure
+- defensive filtering behavior
+
+PRIMARY TARGET:
+Healthy adaptive participation ecology.
+
+CORE COMPONENTS:
+- adaptive RSI governance
+- signal density recovery
+- exploration recovery
+- alpha context memory
+- opportunity ecology reconstruction
+- participation balancing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-003
+ADAPTIVE STABILITY GOVERNANCE
+(Previously: FTD-058)
+
+PURPOSE:
+Prevent:
+- adaptive instability
+- RL imbalance
+- feedback-loop collapse
+- overcompensation behavior
+- suppression oscillation
+- uncontrolled exploration expansion
+
+PRIMARY TARGET:
+Adaptive equilibrium.
+
+CORE COMPONENTS:
+- adaptive stability governance
+- reward-balance analysis
+- alpha decay monitoring
+- exploration intelligence metrics
+- regime validation telemetry
+- filter interaction forensics
+- equilibrium preservation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-004
+ECONOMIC SURVIVABILITY ENGINE
+
+PURPOSE:
+Repair:
+- negative expectancy
+- friction-dominated behavior
+- fee leakage
+- weak economic metabolism
+- capital inefficiency
+
+PRIMARY TARGET:
+Realistic positive expectancy after:
+fees,
+slippage,
+spread,
+drawdown,
+and execution friction.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-005
+EVOLUTION ACTIVATION FRAMEWORK
+
+PURPOSE:
+Repair:
+- dormant adaptation
+- inactive mutation cycles
+- evolutionary stagnation
+- non-operational learning infrastructure
+
+PRIMARY TARGET:
+Real adaptive progression.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-006
+ECOLOGICAL REGIME INTELLIGENCE
+
+PURPOSE:
+Repair:
+- regime blindness
+- ecological confinement
+- poor environment adaptation
+- toxic habitat persistence
+
+PRIMARY TARGET:
+Environment-aware survivability intelligence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-007
+IMMUNE & EMERGENCY GOVERNANCE
+
+PURPOSE:
+Repair:
+- dormant protection systems
+- emergency underreaction
+- suffering normalization
+- survivability threat blindness
+
+PRIMARY TARGET:
+Early threat detection and adaptive protection activation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-008
+CIVILIZATIONAL FORENSICS MASTER
+(Previously: FTD-059)
+
+PURPOSE:
+Maintain:
+- root-cause doctrine
+- recursive collapse analysis
+- organism-level causality mapping
+- survivability philosophy
+- institutional reconstruction principles
+
+PRIMARY TARGET:
+Civilizational-level architectural coherence.
+
+CORE COMPONENTS:
+- recursive failure mapping
+- systemic causality analysis
+- survivability truth doctrine
+- ecosystem reconstruction philosophy
+- governance-survival alignment
+- adaptive civilization modeling
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-009
+INSTITUTIONAL VALIDATION LAYER
+
+PURPOSE:
+Build:
+- institutional-grade verifier infrastructure
+- survivability validation systems
+- adaptive integrity validation
+- governance verification
+- realism validation
+
+PRIMARY TARGET:
+Operational validation integrity.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRP-010
+FULL PHOENIX RECONSTRUCTION GOVERNANCE
+
+PURPOSE:
+Maintain:
+- reconstruction sequencing
+- institutional discipline
+- cross-program coordination
+- dependency governance
+- execution consistency
+
+PRIMARY TARGET:
+Long-term architectural stability.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+II. OFFICIAL PROGRAM HIERARCHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DOCTRINE LAYER:
+PRP-008
+Civilizational Forensics Master
+
+GOVERNANCE LAYER:
+PRP-003
+Adaptive Stability Governance
+
+EXECUTION LAYER:
+PRP-002
+Opportunity Ecology Recovery
+
+VALIDATION LAYER:
+PRP-009
+Institutional Validation Layer
+
+ORCHESTRATION LAYER:
+PRP-000 / PRP-010
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+III. OFFICIAL EXECUTION PHILOSOPHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The reconstruction MUST prioritize:
+
+1)
+Signal Truth
+
+2)
+Economic Survivability
+
+3)
+Regime Intelligence
+
+4)
+Adaptive Stability
+
+5)
+Evolution Activation
+
+6)
+Institutional Governance
+
+7)
+Long-Term Survivability
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IV. STRICTLY FORBIDDEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DO NOT:
+
+- apply cosmetic patching
+- optimize fake win-rates
+- inflate vanity metrics
+- suppress observability
+- fabricate survivability
+- introduce fake adaptive intelligence
+- prioritize complexity over truth
+- build theoretical systems without operational activation
+- overfit architecture behavior
+- treat the organism as isolated modules
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+V. FINAL INSTITUTIONAL DIRECTIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The architecture must now be treated as:
+
+ONE interconnected adaptive civilization organism.
+
+The mission is NOT:
+
+“make the application appear intelligent.”
+
+The mission IS:
+
+to build a truthful,
+adaptive,
+economically survivable,
+institutionally governed,
+self-correcting alpha-discovery intelligence framework
+capable of surviving and evolving under realistic live-market conditions.
+
+Permanent institutional objective:
+
+ADAPTIVE EQUILIBRIUM
++
+SURVIVABILITY TRUTH
++
+GENUINE ALPHA DISCOVERY
+
+══════════════════════════════════════════════════════════════════════════════╗
+END OF PHOENIX RECONSTRUCTION PROGRAM (PRP) MASTER MAPPING
+══════════════════════════════════════════════════════════════════════════════╝
