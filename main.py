@@ -7324,6 +7324,29 @@ async def download_report_bundle():
             "  adaptive_decision_audit.json   RL policy change explanations per context\n"
             "  reward_propagation_report.json Shaped reward quality + fee impact on learning\n"
             "  intelligence_maturity_report.json 10-milestone Proof-of-Learning scorecard\n"
+            "10_auto_intelligence/ FTD-030: Autonomous intelligence loop state\n"
+            "  state.json          Current engine state: cycles, verdicts, last correction\n"
+            "  history.json        Last 100 correction cycle records\n"
+            "11_learning_memory/ FTD-030B: Pattern memory, negative memory, heatmap\n"
+            "  summary.json        Full memory store state + activation stats\n"
+            "  patterns.json       Top 100 formed patterns by confidence (leaderboard)\n"
+            "  failed_patterns.json Bottom 100 failed patterns by confidence\n"
+            "  negative_memory.json Current negative-memory blacklist (avoid zones)\n"
+            "  heatmap.json        Regime × parameter confidence heatmap\n"
+            "  log.json            Last 200 memory store records (explainability log)\n"
+            "12_observability/   FTD-053-GAIA: Full pipeline observability snapshot\n"
+            "  status.json         All six observability phase stats + health score\n"
+            "  anomalies.json      Active anomalies + recent history (up to 100)\n"
+            "  escalations.json    Active escalations + history (up to 100)\n"
+            "  feeds.json          Five strategic intelligence feed channels\n"
+            "  ai_summary.json     Latest AI strategic intelligence summary\n"
+            "  events.json         Recent event bus events (up to 200)\n"
+            "  sync.json           GitHub sync engine status\n"
+            "13_system_diagnostics/ System health, audit trail, AI brain state\n"
+            "  ct_scan.json        FTD-REF-026: Full CT-Scan (HEALTHY/WARNING/CRITICAL)\n"
+            "  consistency.json    FTD-040: Consistency + drawdown + streak + recovery\n"
+            "  audit_log.json      FTD-022: Last 1000 structured audit events\n"
+            "  ai_brain.json       FTD-023: Aggregated AI brain intelligence state\n"
         ))
 
         _ev_meta = _safe(
@@ -7450,8 +7473,6 @@ async def download_report_bundle():
             )
 
         # 07_live_process/ — FTD-LPA: runtime observability artifacts ────────
-        # Embedded in every bundle so recipients always have the full runtime
-        # state snapshot captured at the moment the bundle was downloaded.
         try:
             _lpa_zip_bytes = live_process_access.build_package(
                 rl_engine_instance=rl_engine,
@@ -7460,15 +7481,147 @@ async def download_report_bundle():
                 thought_log=list(_thought_log),
                 boot_ts=_boot_ts,
             )
-            # Merge the inner LPA ZIP entries into the outer bundle ZIP
             with zipfile.ZipFile(_io.BytesIO(_lpa_zip_bytes)) as _lpa_sub:
                 for _lpa_name in _lpa_sub.namelist():
                     zf.writestr(_lpa_name, _lpa_sub.read(_lpa_name))
         except Exception as _lpa_err:
-            zf.writestr(
-                "07_live_process/error.txt",
-                f"Live Process snapshot failed: {_lpa_err}\n",
-            )
+            zf.writestr("07_live_process/error.txt",
+                        f"Live Process snapshot failed: {_lpa_err}\n")
+
+        # 10_auto_intelligence/ — FTD-030: auto-correction loop state ────────
+        try:
+            if _auto_intelligence is not None:
+                zf.writestr("10_auto_intelligence/state.json",
+                            json.dumps(_safe(_auto_intelligence.summary, {}),
+                                       indent=2, default=str))
+                zf.writestr("10_auto_intelligence/history.json",
+                            json.dumps({"history": _safe(lambda: _auto_intelligence.history(100), []),
+                                        "phase": "030"},
+                                       indent=2, default=str))
+            else:
+                zf.writestr("10_auto_intelligence/state.json",
+                            json.dumps({"status": "not_initialised"}, indent=2))
+        except Exception as _aie:
+            zf.writestr("10_auto_intelligence/error.txt", f"Failed: {_aie}\n")
+
+        # 11_learning_memory/ — FTD-030B: pattern memory & negative memory ──
+        try:
+            from core.learning_memory import learning_memory_orchestrator as _lmo
+            zf.writestr("11_learning_memory/summary.json",
+                        json.dumps(_safe(_lmo.summary, {}), indent=2, default=str))
+            zf.writestr("11_learning_memory/patterns.json",
+                        json.dumps({"patterns": _safe(lambda: _lmo.pattern_leaderboard(100), []),
+                                    "phase": "030B"},
+                                   indent=2, default=str))
+            zf.writestr("11_learning_memory/failed_patterns.json",
+                        json.dumps({"failed_patterns": _safe(lambda: _lmo.failed_patterns(100), []),
+                                    "phase": "030B"},
+                                   indent=2, default=str))
+            zf.writestr("11_learning_memory/negative_memory.json",
+                        json.dumps({"negative_memory": _safe(_lmo.negative_memory_list, []),
+                                    "phase": "030B"},
+                                   indent=2, default=str))
+            zf.writestr("11_learning_memory/heatmap.json",
+                        json.dumps({"heatmap": _safe(_lmo.pattern_heatmap, {}),
+                                    "phase": "030B"},
+                                   indent=2, default=str))
+            zf.writestr("11_learning_memory/log.json",
+                        json.dumps({"records": _safe(lambda: _lmo.recent_memory_log(200), []),
+                                    "phase": "030B"},
+                                   indent=2, default=str))
+        except Exception as _lme:
+            zf.writestr("11_learning_memory/error.txt", f"Failed: {_lme}\n")
+
+        # 12_observability/ — FTD-053-GAIA: pipeline observability state ─────
+        try:
+            _orch_st = _safe(obs_orchestrator.stats, {})
+            zf.writestr("12_observability/status.json",
+                        json.dumps(_sanitize({
+                            "health":         _obs_health_status(_orch_st),
+                            "orchestrator":   _orch_st,
+                            "anomaly_engine": _safe(_obs_ad.stats, {}),
+                            "escalation":     _safe(_obs_ee.stats, {}),
+                            "event_bus":      _safe(_obs_eb.status, {}),
+                            "strategic_feed": _safe(_obs_sf.status, {}),
+                            "summary_engine": _safe(_obs_se.stats, {}),
+                            "sync_engine":    _safe(_obs_gse.status, {}),
+                            "lifecycle":      _safe(_obs_rle.status, {}),
+                            "delta_reporter": _safe(_obs_dr.stats, {}),
+                        }), indent=2, default=str))
+            zf.writestr("12_observability/anomalies.json",
+                        json.dumps(_sanitize({
+                            "active_summary": _safe(_obs_ad.get_active_summary, {}),
+                            "recent_history": _safe(
+                                lambda: _obs_ad.get_history(limit=100, min_severity="LOW"), []),
+                            "stats": _safe(_obs_ad.stats, {}),
+                        }), indent=2, default=str))
+            zf.writestr("12_observability/escalations.json",
+                        json.dumps(_sanitize({
+                            "active":  _safe(_obs_ee.get_active_escalations, []),
+                            "history": _safe(lambda: _obs_ee.get_history(limit=100), []),
+                            "stats":   _safe(_obs_ee.stats, {}),
+                        }), indent=2, default=str))
+            _sf_st = _safe(_obs_sf.status, {})
+            zf.writestr("12_observability/feeds.json",
+                        json.dumps(_sanitize({
+                            "feeds":               _sf_st.get("feeds", {}),
+                            "max_signal_strength": _sf_st.get("max_signal_strength", 0.0),
+                            "last_refresh_ts":     _sf_st.get("last_refresh_ts", 0),
+                            "total_refreshes":     _sf_st.get("total_refreshes", 0),
+                        }), indent=2, default=str))
+            _ai_summ = _safe(_obs_se.get_last_summary, None)
+            zf.writestr("12_observability/ai_summary.json",
+                        json.dumps(_sanitize(
+                            _ai_summ if _ai_summ is not None
+                            else {"status": "COLD_START", "message": "No summary generated yet"}
+                        ), indent=2, default=str))
+            zf.writestr("12_observability/events.json",
+                        json.dumps(_sanitize({
+                            "recent_events": _safe(lambda: _obs_eb.recent_events(limit=200), []),
+                            "bus_status":    _safe(_obs_eb.status, {}),
+                        }), indent=2, default=str))
+            zf.writestr("12_observability/sync.json",
+                        json.dumps(_sanitize(_safe(_obs_gse.status, {})),
+                                   indent=2, default=str))
+        except Exception as _obe:
+            zf.writestr("12_observability/error.txt", f"Failed: {_obe}\n")
+
+        # 13_system_diagnostics/ — CT-Scan, consistency, audit log, AI brain ─
+        try:
+            _cts2   = pnl_calc.session_stats
+            _n_t2   = len(pnl_calc.trades)
+            _tf2    = _cts2.get("total_fees_paid", 0.0)
+            _tn2    = _cts2.get("total_net_pnl",   0.0)
+            _tsl2   = _cts2.get("total_slippage",  0.0)
+            _tg2    = abs(_tn2) + _tf2 + _tsl2
+            _fr2    = _tf2 / max(_tg2, 1e-9)
+            zf.writestr("13_system_diagnostics/ct_scan.json",
+                        json.dumps(_safe(lambda: ct_scan_engine.scan(
+                            profit_factor  = _cts2.get("profit_factor", 0.0),
+                            fee_ratio      = round(_fr2, 4),
+                            strategy_usage = strategy_engine.usage(),
+                            win_rate       = _cts2.get("win_rate", 0.0) / 100.0,
+                            regime_stable  = True,
+                            n_trades       = _n_t2,
+                        ), {}), indent=2, default=str))
+            zf.writestr("13_system_diagnostics/consistency.json",
+                        json.dumps({
+                            "consistency":      _safe(consistency_engine.status, {}),
+                            "drawdown":         _safe(drawdown_controller.summary, {}),
+                            "streak":           _safe(streak_engine.summary, {}),
+                            "capital_recovery": _safe(capital_recovery_engine.summary, {}),
+                            "loss_cluster":     _safe(loss_cluster_controller.summary, {}),
+                        }, indent=2, default=str))
+            from core.audit.audit_engine import audit_engine as _ae_b
+            zf.writestr("13_system_diagnostics/audit_log.json",
+                        json.dumps(_safe(lambda: _ae_b.get_log(limit=1000), []),
+                                   indent=2, default=str))
+            from core.meta.ai_brain import ai_brain as _ab_b
+            zf.writestr("13_system_diagnostics/ai_brain.json",
+                        json.dumps(_safe(_ab_b.get_state, {}),
+                                   indent=2, default=str))
+        except Exception as _dge:
+            zf.writestr("13_system_diagnostics/error.txt", f"Failed: {_dge}\n")
 
     buf.seek(0)
     filename = f"eow_bundle_{ts}.zip"
