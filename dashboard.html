@@ -364,6 +364,45 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 .stab-VOLATILE  { background:#FEFCBF; color:#744210; }
 .stab-SPIKE     { background:#BEE3F8; color:#2A4365; }
 .stab-DEFENSIVE { background:#FED7D7; color:#C53030; }
+
+/* ── FTD-060: Master Forensic Report Panels ─────────────────────────────── */
+.fp-overlay {
+  display:none; position:fixed; inset:0; z-index:9990;
+}
+.fp-panel {
+  position:fixed; top:58px; z-index:9999;
+  background:#fff; border:1.5px solid var(--border);
+  border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.16);
+  min-width:300px; max-width:340px;
+  max-height:calc(100vh - 80px); overflow-y:auto;
+  font-family:var(--fm);
+}
+.fp-hdr {
+  padding:12px 16px 8px; border-bottom:1px solid var(--border);
+  background:#F7FAFA; border-radius:12px 12px 0 0; position:sticky; top:0;
+}
+.fp-hdr-title  { font-size:13px; font-weight:700; color:#222; }
+.fp-hdr-sub    { font-size:10px; color:var(--muted); margin-top:2px; }
+.fp-grp-label  {
+  font-size:9px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.08em; color:var(--muted);
+  padding:8px 14px 3px; display:block;
+}
+.fp-row {
+  display:flex; align-items:center; gap:8px; width:100%;
+  padding:7px 14px; border:none; background:none; cursor:pointer;
+  text-align:left; border-radius:0; font-family:var(--fm);
+  font-size:12px; color:#333; transition:background .12s;
+}
+.fp-row:hover { background:#F0F4F8; }
+.fp-row-icon  { font-size:13px; min-width:18px; }
+.fp-row-label { flex:1; }
+.fp-row-tag   {
+  font-size:9px; padding:1px 6px; border-radius:8px;
+  background:#EDF2F7; color:#4A5568; white-space:nowrap;
+}
+.fp-divider   { border:none; border-top:1px solid #f0f0f0; margin:3px 0; }
+.fp-status    { font-size:10px; color:var(--muted); padding:4px 14px 8px; min-height:18px; }
 </style>
 </head>
 
@@ -391,10 +430,8 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <span class="tag" id="mode-badge" style="background:#C6F6D5;color:#276749;">● PAPER</span>
     <span id="vault-live-badge" style="display:none;background:#9B2C2C;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.05em;animation:pulse 1.5s infinite;">⚡ REAL LIVE</span>
     <button class="btn" id="vault-btn" onclick="openVaultModal()" title="Dual-API Credential Vault — switch between Paper (testnet) and Real Live modes" style="border-color:#D6BCFA;background:#FAF5FF;color:#553C9A;">🔐 Vault</button>
-    <button class="btn purple" onclick="exportState()">Export JSON</button>
-    <button class="btn" onclick="downloadUnifiedReportV2()" style="border-color:#2b6cb0;background:#ebf8ff;color:#2b6cb0;" title="FTD-025B: Unified Intelligent Report — cause-effect narrative">📊 Intelligent Report</button>
-    <button class="btn" id="bundle-btn" onclick="downloadBundleReport()" style="border-color:#276749;background:#F0FFF4;color:#276749;font-weight:700;" title="Download ALL reports in one ZIP — system state, full reports, trade archive, performance explorer">📦 Download All Reports</button>
-    <button class="btn" id="lpa-btn" onclick="downloadLiveProcess()" style="border-color:#6B46C1;background:#FAF5FF;color:#6B46C1;font-weight:700;" title="FTD-LPA: Live Process Access — snapshot runtime logs, RL Q-table, and trade execution logs at this exact moment">🔬 Live Process Snapshot</button>
+    <button class="btn" id="hist-btn" onclick="toggleHistPanel(event)" style="border-color:#2b6cb0;background:#ebf8ff;color:#2b6cb0;font-weight:700;" title="All historical forensic reports — archive, bundle, state export, live process snapshot">📂 History Reports</button>
+    <button class="btn" id="prp-btn"  onclick="togglePrpPanel(event)"  style="border-color:#553C9A;background:#FAF5FF;color:#553C9A;font-weight:700;" title="PRP-001 Signal Truth Reconstruction forensic intelligence reports">🔬 New Reports (PRP-001)</button>
     <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
   </div>
 </div>
@@ -1306,21 +1343,11 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div>
         <div class="sec-hdr" style="margin:0 0 3px;">Export & Backup</div>
-        <div style="font-size:11px;color:var(--muted);">One-click export of filtered data or full engine bundle</div>
+        <div style="font-size:11px;color:var(--muted);">All report exports are available via the master forensic buttons in the top bar</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <button class="btn green" onclick="upeDownloadCSV()">⬇ CSV</button>
-        <button class="btn blue"  onclick="upeDownloadJSON()">⬇ JSON</button>
-        <button class="btn"       onclick="upeBackup()" id="upe-backup-btn">💾 Backup</button>
-        <span id="upe-backup-status" style="font-size:11px;color:var(--muted);"></span>
+        <span style="font-size:12px;color:#2b6cb0;">📂 History Reports &nbsp;·&nbsp; 🔬 New Reports (PRP-001)</span>
       </div>
-    </div>
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <button id="perf-bundle-btn" onclick="downloadBundleReport()" style="font-family:var(--fm);font-size:12px;font-weight:700;padding:8px 18px;border-radius:8px;border:2px solid #276749;background:#F0FFF4;color:#276749;cursor:pointer;display:flex;align-items:center;gap:6px;" title="Generates ALL reports (system state, full analysis, trade archive, performance explorer for ALL/1D/7D/20D presets) and downloads as a single ZIP file">
-        📦 Download All Reports (ZIP)
-      </button>
-      <span style="font-size:11px;color:var(--muted);">System state · Full reports (MD+PDF) · Trade archive (XLSX+PDF+MD) · Performance explorer (ALL / 1D / 7D / 20D)</span>
-      <span id="perf-bundle-status" style="font-size:11px;color:var(--muted);"></span>
     </div>
   </div>
 
@@ -1339,10 +1366,8 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
           Opens as full HTML in a new tab — use browser Print → Save as PDF
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn purple" onclick="downloadFullSystemReport()" title="FTD-025A: Full 15-section institutional report (MD + PDF) in ZIP" style="font-weight:700;">📄 EXPORT FULL SYSTEM REPORT</button>
-        <button class="btn green" onclick="downloadArchive()" title="Download ZIP with XLSX + PDF + Markdown">⬇ Archive</button>
-        <button class="btn blue"  onclick="openReport()" title="Open full HTML report in new tab">Open HTML</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:11px;color:var(--muted);">Export via <strong>📂 History Reports</strong> in the top bar</span>
         <button class="btn" onclick="refreshReport()" style="font-size:10px;">Refresh</button>
       </div>
     </div>
@@ -3995,29 +4020,108 @@ async function upeBackup() {
   }
 }
 
+// ── FTD-060: Master Forensic Panel JS ────────────────────────────────────────
+
+function closeAllPanels() {
+  ['hist-panel','prp-panel','hist-overlay','prp-overlay'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function toggleHistPanel(evt) {
+  if (evt) evt.stopPropagation();
+  const panel   = document.getElementById('hist-panel');
+  const overlay = document.getElementById('hist-overlay');
+  const prpP    = document.getElementById('prp-panel');
+  const prpO    = document.getElementById('prp-overlay');
+  if (prpP)  prpP.style.display  = 'none';
+  if (prpO)  prpO.style.display  = 'none';
+  const open = panel.style.display === 'none' || !panel.style.display;
+  panel.style.display   = open ? 'block' : 'none';
+  overlay.style.display = open ? 'block' : 'none';
+}
+
+function togglePrpPanel(evt) {
+  if (evt) evt.stopPropagation();
+  const panel   = document.getElementById('prp-panel');
+  const overlay = document.getElementById('prp-overlay');
+  const histP   = document.getElementById('hist-panel');
+  const histO   = document.getElementById('hist-overlay');
+  if (histP) histP.style.display  = 'none';
+  if (histO) histO.style.display  = 'none';
+  const open = panel.style.display === 'none' || !panel.style.display;
+  panel.style.display   = open ? 'block' : 'none';
+  overlay.style.display = open ? 'block' : 'none';
+}
+
+function _setHistStatus(msg, ms) {
+  const el = document.getElementById('hist-status');
+  if (!el) return;
+  el.textContent = msg;
+  if (ms) setTimeout(() => { el.textContent = ''; }, ms);
+}
+
+async function histAction(type) {
+  closeAllPanels();
+  switch(type) {
+    case 'bundle':       downloadBundleReport(); break;
+    case 'full-system':  downloadFullSystemReport(); break;
+    case 'intelligent':  downloadUnifiedReportV2(); break;
+    case 'archive':      downloadArchive(); break;
+    case 'live-process': downloadLiveProcess(); break;
+    case 'view-html':    openReport(); break;
+    case 'export-json':  exportState(); break;
+    case 'csv':          upeDownloadCSV(); break;
+    case 'json-perf':    upeDownloadJSON(); break;
+    case 'backup':
+      _setHistStatus('Saving…');
+      try {
+        const r = await fetch(API + '/api/perf-explorer/backup', {
+          method:'POST', signal:AbortSignal.timeout(10000),
+        });
+        const d = await r.json();
+        addThought(d.ok ? `✅ Backup saved (${d.trade_count} trades)` : '❌ Backup failed', 'SYSTEM');
+      } catch(e) { addThought('❌ Backup error — backend offline', 'HALT'); }
+      break;
+  }
+}
+
+// Open a PRP-001 JSON endpoint in a new browser tab.
+function prpOpen(path) {
+  closeAllPanels();
+  window.open(API + path, '_blank');
+}
+
+// Reports 07-10 don't have dedicated endpoints; fetch from the full bundle and
+// extract the specific report, then display in a new tab.
+async function prpOpenFull(reportNum) {
+  closeAllPanels();
+  const statusEl = document.getElementById('prp-status');
+  if (statusEl) statusEl.textContent = `Loading report ${reportNum}…`;
+  try {
+    const r = await fetch(API + '/api/prp/001/reports');
+    const d = await r.json();
+    const key = Object.keys(d.reports || {}).find(k => k.startsWith(reportNum));
+    const payload = key ? { report: key, data: d.reports[key] } : d;
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    window.open(URL.createObjectURL(blob), '_blank');
+    if (statusEl) setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  } catch(e) {
+    addThought('PRP-001 report fetch failed — backend offline', 'HALT');
+    if (statusEl) statusEl.textContent = '';
+  }
+}
+
 // ── Master Report Bundle ──────────────────────────────────────────────────────
 async function downloadBundleReport() {
-  // Buttons in both the header and the Performance tab share this function.
-  const btns   = [
-    document.getElementById('bundle-btn'),
-    document.getElementById('perf-bundle-btn'),
-  ].filter(Boolean);
-  const status = document.getElementById('perf-bundle-status');
-
-  // Disable buttons + show loading state
-  btns.forEach(b => {
-    b.disabled = true;
-    b._origText = b.innerHTML;
-    b.innerHTML = b.id === 'perf-bundle-btn'
-      ? '⏳ Generating bundle…'
-      : '⏳ Generating…';
-    b.style.opacity = '0.7';
-  });
-  if (status) status.textContent = 'Building all reports — this may take 5–15 seconds…';
+  const status = document.getElementById('hist-status');
+  if (status) status.textContent = '⏳ Building all reports — this may take 5–15 seconds…';
+  addThought('⏳ Building master report bundle…', 'SYSTEM');
 
   try {
     const r = await fetch(API + '/api/reports/bundle', {
-      signal: AbortSignal.timeout(60000),   // 60s timeout — PDF generation can be slow
+      signal: AbortSignal.timeout(60000),
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
@@ -4027,40 +4131,27 @@ async function downloadBundleReport() {
 
     const url = URL.createObjectURL(blob);
     const a   = document.createElement('a');
-    a.href     = url;
-    a.download = fn;
+    a.href = url; a.download = fn;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    if (status) {
-      const kb = Math.round(blob.size / 1024);
-      status.textContent = `✅ Downloaded: ${fn} (${kb} KB)`;
-    }
+    const kb = Math.round(blob.size / 1024);
+    if (status) status.textContent = `✅ ${fn} (${kb} KB)`;
+    addThought(`✅ Bundle downloaded: ${fn} (${kb} KB)`, 'SYSTEM');
   } catch(e) {
     if (status) status.textContent = '❌ Bundle failed — check backend';
+    addThought('Bundle download failed — ' + e.message, 'HALT');
     console.error('[Bundle]', e);
   } finally {
-    btns.forEach(b => {
-      b.disabled   = false;
-      b.innerHTML  = b._origText || b.innerHTML;
-      b.style.opacity = '1';
-    });
     setTimeout(() => { if (status) status.textContent = ''; }, 8000);
   }
 }
 
 // ── FTD-LPA: Live Process Access snapshot ─────────────────────────────────
 async function downloadLiveProcess() {
-  const btn = document.getElementById('lpa-btn');
-  if (!btn) return;
-
-  // Loading state
-  btn.disabled   = true;
-  const origText = btn.innerHTML;
-  btn.innerHTML  = '⏳ Capturing snapshot…';
-  btn.style.opacity = '0.7';
+  addThought('⏳ Capturing live process snapshot…', 'SYSTEM');
 
   try {
     const r = await fetch(API + '/api/snapshot/live-process', {
@@ -4086,29 +4177,10 @@ async function downloadLiveProcess() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    // Brief success indicator
-    btn.innerHTML    = '✅ Snapshot downloaded';
-    btn.style.color  = '#276749';
-    btn.style.borderColor = '#276749';
-    setTimeout(() => {
-      btn.innerHTML  = origText;
-      btn.style.color = '#6B46C1';
-      btn.style.borderColor = '#6B46C1';
-    }, 4000);
-
+    addThought(`✅ Live process snapshot downloaded: ${fn}`, 'SYSTEM');
   } catch (e) {
-    btn.innerHTML   = '❌ Snapshot failed';
-    btn.style.color = '#C53030';
-    btn.style.borderColor = '#C53030';
-    setTimeout(() => {
-      btn.innerHTML  = origText;
-      btn.style.color = '#6B46C1';
-      btn.style.borderColor = '#6B46C1';
-    }, 5000);
+    addThought('❌ Live Process Snapshot failed — ' + e.message, 'HALT');
     console.error('[LPA] Live Process Snapshot error:', e);
-  } finally {
-    btn.disabled      = false;
-    btn.style.opacity = '1';
   }
 }
 
@@ -4168,5 +4240,152 @@ async function applyExecMode() {
   }
 }
 </script>
+
+<!-- ══ FTD-060: HISTORY REPORTS PANEL ════════════════════════════════════ -->
+<div class="fp-overlay" id="hist-overlay" onclick="closeAllPanels()"></div>
+<div class="fp-panel" id="hist-panel" style="display:none;right:16px;">
+  <div class="fp-hdr">
+    <div class="fp-hdr-title">📂 History Reports</div>
+    <div class="fp-hdr-sub">Historical forensic intelligence archive</div>
+  </div>
+
+  <span class="fp-grp-label">Master Bundle</span>
+  <button class="fp-row" onclick="histAction('bundle')">
+    <span class="fp-row-icon">📦</span>
+    <span class="fp-row-label">All Reports Bundle</span>
+    <span class="fp-row-tag">ZIP</span>
+  </button>
+
+  <hr class="fp-divider">
+  <span class="fp-grp-label">Forensic Reports</span>
+  <button class="fp-row" onclick="histAction('full-system')">
+    <span class="fp-row-icon">📄</span>
+    <span class="fp-row-label">Full System Report (FTD-025A)</span>
+    <span class="fp-row-tag">ZIP · MD+PDF</span>
+  </button>
+  <button class="fp-row" onclick="histAction('intelligent')">
+    <span class="fp-row-icon">📊</span>
+    <span class="fp-row-label">Intelligent Report (FTD-025B)</span>
+    <span class="fp-row-tag">MD</span>
+  </button>
+  <button class="fp-row" onclick="histAction('archive')">
+    <span class="fp-row-icon">📁</span>
+    <span class="fp-row-label">Trade Archive</span>
+    <span class="fp-row-tag">ZIP · XLSX+PDF+MD</span>
+  </button>
+
+  <hr class="fp-divider">
+  <span class="fp-grp-label">Live Intelligence</span>
+  <button class="fp-row" onclick="histAction('live-process')">
+    <span class="fp-row-icon">🔬</span>
+    <span class="fp-row-label">Live Process Snapshot</span>
+    <span class="fp-row-tag">ZIP · Runtime+RL+Logs</span>
+  </button>
+
+  <hr class="fp-divider">
+  <span class="fp-grp-label">Data Exports</span>
+  <button class="fp-row" onclick="histAction('view-html')">
+    <span class="fp-row-icon">📋</span>
+    <span class="fp-row-label">View HTML Report</span>
+    <span class="fp-row-tag">opens tab</span>
+  </button>
+  <button class="fp-row" onclick="histAction('export-json')">
+    <span class="fp-row-icon">💾</span>
+    <span class="fp-row-label">Export State JSON</span>
+    <span class="fp-row-tag">JSON</span>
+  </button>
+  <button class="fp-row" onclick="histAction('csv')">
+    <span class="fp-row-icon">⬇</span>
+    <span class="fp-row-label">Trade Data CSV</span>
+    <span class="fp-row-tag">CSV</span>
+  </button>
+  <button class="fp-row" onclick="histAction('json-perf')">
+    <span class="fp-row-icon">⬇</span>
+    <span class="fp-row-label">Trade Data JSON</span>
+    <span class="fp-row-tag">JSON</span>
+  </button>
+  <button class="fp-row" onclick="histAction('backup')">
+    <span class="fp-row-icon">💾</span>
+    <span class="fp-row-label">Backup Trades</span>
+    <span class="fp-row-tag">server-side</span>
+  </button>
+  <div class="fp-status" id="hist-status"></div>
+</div>
+
+<!-- ══ FTD-060: PRP-001 NEW REPORTS PANEL ════════════════════════════════ -->
+<div class="fp-overlay" id="prp-overlay" onclick="closeAllPanels()"></div>
+<div class="fp-panel" id="prp-panel" style="display:none;right:16px;">
+  <div class="fp-hdr">
+    <div class="fp-hdr-title">🔬 New Reports — PRP-001</div>
+    <div class="fp-hdr-sub">Signal Truth Reconstruction forensic intelligence</div>
+  </div>
+
+  <span class="fp-grp-label">Summary</span>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/summary')">
+    <span class="fp-row-icon">📊</span>
+    <span class="fp-row-label">Dashboard Summary</span>
+    <span class="fp-row-tag">JSON</span>
+  </button>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/reports')">
+    <span class="fp-row-icon">📋</span>
+    <span class="fp-row-label">All 10 Reports Bundle</span>
+    <span class="fp-row-tag">JSON</span>
+  </button>
+
+  <hr class="fp-divider">
+  <span class="fp-grp-label">Forensic Reports 01–05</span>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/signal-truth')">
+    <span class="fp-row-icon">01</span>
+    <span class="fp-row-label">Signal Truth Matrix</span>
+  </button>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/false-positives')">
+    <span class="fp-row-icon">02</span>
+    <span class="fp-row-label">False Positive Forensics</span>
+  </button>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/directional-legitimacy')">
+    <span class="fp-row-icon">03</span>
+    <span class="fp-row-label">Directional Legitimacy</span>
+  </button>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/asymmetry')">
+    <span class="fp-row-icon">04/06</span>
+    <span class="fp-row-label">Asymmetry & Divergence</span>
+  </button>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/context-quality')">
+    <span class="fp-row-icon">05</span>
+    <span class="fp-row-label">Context Quality Analysis</span>
+  </button>
+
+  <hr class="fp-divider">
+  <span class="fp-grp-label">Forensic Reports 07–10</span>
+  <button class="fp-row" onclick="prpOpenFull('07')">
+    <span class="fp-row-icon">07</span>
+    <span class="fp-row-label">Noise Participation Audit</span>
+    <span class="fp-row-tag">via bundle</span>
+  </button>
+  <button class="fp-row" onclick="prpOpenFull('08')">
+    <span class="fp-row-icon">08</span>
+    <span class="fp-row-label">Predictive Integrity Monitor</span>
+    <span class="fp-row-tag">via bundle</span>
+  </button>
+  <button class="fp-row" onclick="prpOpenFull('09')">
+    <span class="fp-row-icon">09</span>
+    <span class="fp-row-label">Regime Signal Validity</span>
+    <span class="fp-row-tag">via bundle</span>
+  </button>
+  <button class="fp-row" onclick="prpOpenFull('10')">
+    <span class="fp-row-icon">10</span>
+    <span class="fp-row-label">Truth Density Summary</span>
+    <span class="fp-row-tag">via bundle</span>
+  </button>
+
+  <hr class="fp-divider">
+  <span class="fp-grp-label">Signal Feed</span>
+  <button class="fp-row" onclick="prpOpen('/api/prp/001/recent-signals?n=50')">
+    <span class="fp-row-icon">📡</span>
+    <span class="fp-row-label">Recent Signals (50)</span>
+    <span class="fp-row-tag">JSON</span>
+  </button>
+  <div class="fp-status" id="prp-status"></div>
+</div>
 </body>
 </html>
