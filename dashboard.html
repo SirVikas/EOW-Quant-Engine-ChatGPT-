@@ -393,7 +393,8 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     <span id="vault-live-badge" style="display:none;background:#9B2C2C;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.05em;animation:pulse 1.5s infinite;">⚡ REAL LIVE</span>
     <button class="btn" id="vault-btn" onclick="openVaultModal()" title="Dual-API Credential Vault — switch between Paper (testnet) and Real Live modes" style="border-color:#D6BCFA;background:#FAF5FF;color:#553C9A;">🔐 Vault</button>
     <button class="btn" id="hist-btn" onclick="downloadBundleReport()" style="border-color:#2b6cb0;background:#ebf8ff;color:#2b6cb0;font-weight:700;" title="Download ALL historical forensic reports as a single ZIP">📂 History Reports</button>
-    <button class="btn" id="prp-btn"  onclick="downloadPrp001Bundle()" style="border-color:#553C9A;background:#FAF5FF;color:#553C9A;font-weight:700;" title="Download ALL PRP-001 Signal Truth forensic reports as a single ZIP">🔬 New Reports (PRP-001)</button>
+    <button class="btn" id="lpa-btn"  onclick="downloadLiveProcess()" style="border-color:#276749;background:#F0FFF4;color:#276749;font-weight:700;" title="Download Live Process Snapshot — runtime logs, RL Q-table, trade execution log">🔬 Live Snapshot</button>
+    <button class="btn" id="prp-btn"  onclick="downloadPrp001Bundle()" style="border-color:#553C9A;background:#FAF5FF;color:#553C9A;font-weight:700;" title="Download ALL PRP-001 Signal Truth forensic reports as a single ZIP">📡 PRP-001 Reports</button>
     <button class="btn red"   onclick="emergencyClose()">⚠ Close All</button>
   </div>
 </div>
@@ -4035,11 +4036,14 @@ async function downloadBundleReport() {
     console.error('[Bundle]', e);
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = '📂 History Reports'; }
+    // Note: Live Snapshot is also embedded inside this bundle under 07_live_process/
   }
 }
 
 // ── FTD-LPA: Live Process Access snapshot ─────────────────────────────────
 async function downloadLiveProcess() {
+  const btn = document.getElementById('lpa-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Capturing…'; }
   addThought('⏳ Capturing live process snapshot…', 'SYSTEM');
 
   try {
@@ -4070,6 +4074,8 @@ async function downloadLiveProcess() {
   } catch (e) {
     addThought('❌ Live Process Snapshot failed — ' + e.message, 'HALT');
     console.error('[LPA] Live Process Snapshot error:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '🔬 Live Snapshot'; }
   }
 }
 
