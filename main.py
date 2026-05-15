@@ -124,6 +124,11 @@ from core.rl_engine import rl_engine                              # RL Contextua
 from core.live_process_access import live_process_access          # FTD-LPA: runtime observability
 from core.observability.orchestrator import obs_orchestrator, OBS_TICK_INTERVAL_SECS  # FTD-053-GAIA Phase 6
 from core.observability.snapshot_builder import build_raw_snapshot                    # FTD-053-GAIA Phase 6
+from core.signal_truth.signal_truth_engine    import signal_truth_engine              # PRP-001
+from core.signal_truth.false_positive_forensics import false_positive_forensics       # PRP-001
+from core.signal_truth.directional_legitimacy  import directional_legitimacy         # PRP-001
+from core.signal_truth.context_quality_engine  import context_quality_engine         # PRP-001
+from core.signal_truth.asymmetry_validation    import asymmetry_validation           # PRP-001
 
 
 def _safe_num(v):
@@ -430,6 +435,63 @@ async def on_tick(tick: Tick):
             equity_snapshot.save(
                 equity=scaler.equity,
                 trade_count=len(pnl_calc.trades),
+            )
+            # PRP-001: record truth outcome for this signal
+            _exit_price = getattr(last_trade, "exit_price", price)
+            signal_truth_engine.record_outcome(
+                signal_id  = last_trade.trade_id,
+                net_pnl    = last_trade.net_pnl,
+                gross_pnl  = getattr(last_trade, "gross_pnl", last_trade.net_pnl),
+                exit_price = _exit_price,
+            )
+            context_quality_engine.record_outcome(
+                signal_id = last_trade.trade_id,
+                was_win   = last_trade.net_pnl > 0,
+                net_pnl   = last_trade.net_pnl,
+            )
+            false_positive_forensics.record_outcome(
+                signal_id  = last_trade.trade_id,
+                symbol     = last_trade.symbol,
+                regime     = _trade_regime,
+                strategy_id= _trade_strategy,
+                side       = getattr(last_trade, "side", ""),
+                confidence = getattr(last_trade, "confidence", 0.51),
+                rsi_val    = 0.0,   # RSI at signal time not stored on TradeRecord
+                utc_hour   = __import__("datetime").datetime.utcnow().hour,
+                net_pnl    = last_trade.net_pnl,
+                was_win    = last_trade.net_pnl > 0,
+            )
+            directional_legitimacy.record_outcome(
+                regime     = _trade_regime,
+                strategy_id= _trade_strategy,
+                side       = getattr(last_trade, "side", ""),
+                utc_hour   = __import__("datetime").datetime.utcnow().hour,
+                directionally_correct = _exit_price > last_trade.entry_price
+                    if getattr(last_trade, "side", "") == "BUY"
+                    else _exit_price < last_trade.entry_price,
+                net_pnl    = last_trade.net_pnl,
+            )
+            _rr_decl = 0.0
+            _rr_ach  = 0.0
+            try:
+                _sl_dist = abs(last_trade.entry_price - last_trade.stop_loss)
+                _tp_dist = abs(last_trade.take_profit - last_trade.entry_price)
+                _ex_dist = abs(_exit_price - last_trade.entry_price)
+                if _sl_dist > 0:
+                    _rr_decl = _tp_dist / _sl_dist
+                    _rr_ach  = _ex_dist / _sl_dist
+            except Exception:
+                pass
+            asymmetry_validation.record_outcome(
+                signal_id   = last_trade.trade_id,
+                symbol      = last_trade.symbol,
+                strategy_id = _trade_strategy,
+                regime      = _trade_regime,
+                confidence  = getattr(last_trade, "confidence", 0.51),
+                rr_declared = _rr_decl,
+                rr_achieved = _rr_ach,
+                was_win     = last_trade.net_pnl > 0,
+                net_pnl     = last_trade.net_pnl,
             )
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
@@ -1824,6 +1886,38 @@ async def on_tick(tick: Tick):
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
                     execution_drive_policy.record_trade(sym)   # EDP: reset idle timer
+                    # PRP-001: record signal context at trade open for truth tracking
+                    try:
+                        _re_state_st   = regime_det.state(sym)
+                        _atr_pct_st    = getattr(_re_state_st, "atr_pct", 0.0) or 0.0
+                        _cq_score      = context_quality_engine.score_signal(
+                            signal_id   = pos.position_id,
+                            regime      = regime.value,
+                            strategy_id = sig.strategy_id,
+                            side        = sig.signal.value,
+                            confidence  = sig.confidence,
+                            rsi_val     = _rsi_val if "_rsi_val" in dir() else 50.0,
+                            above_sma   = _above_sma if "_above_sma" in dir() else True,
+                            atr_pct     = _atr_pct_st,
+                        )
+                        signal_truth_engine.record_signal(
+                            signal_id    = pos.position_id,
+                            symbol       = sym,
+                            strategy_id  = sig.strategy_id,
+                            regime       = regime.value,
+                            side         = sig.signal.value,
+                            confidence   = sig.confidence,
+                            entry_price  = sig.entry_price,
+                            stop_loss    = sig.stop_loss,
+                            take_profit  = sig.take_profit,
+                            utc_hour     = __import__("datetime").datetime.utcnow().hour,
+                            rsi_val      = _rsi_val if "_rsi_val" in dir() else 50.0,
+                            above_sma    = _above_sma if "_above_sma" in dir() else True,
+                            atr_pct      = _atr_pct_st,
+                            context_score = _cq_score,
+                        )
+                    except Exception:
+                        pass
                     # Phase 4: register with trade manager for lifecycle tracking
                     trade_manager.register(ManagedPosition(
                         symbol=sym, side=sig.signal.value,
@@ -4499,6 +4593,58 @@ async def learning_memory_heatmap():
         "heatmap": learning_memory_orchestrator.pattern_heatmap(),
         "phase": "030B",
     }
+
+
+# ── PRP-001 Signal Truth API ──────────────────────────────────────────────────
+
+@app.get("/api/prp/001/summary")
+async def prp001_summary():
+    """PRP-001 — Signal Truth telemetry dashboard summary."""
+    from analytics.odyssey.signal_truth_reports import get_dashboard_summary
+    return get_dashboard_summary()
+
+
+@app.get("/api/prp/001/reports")
+async def prp001_reports():
+    """PRP-001 — All 10 forensic reports bundle."""
+    from analytics.odyssey.signal_truth_reports import generate_all_reports
+    return generate_all_reports()
+
+
+@app.get("/api/prp/001/signal-truth")
+async def prp001_signal_truth():
+    """PRP-001 — Signal truth matrix (report 01)."""
+    return signal_truth_engine.signal_truth_matrix()
+
+
+@app.get("/api/prp/001/false-positives")
+async def prp001_false_positives():
+    """PRP-001 — False positive clusters (report 02)."""
+    return false_positive_forensics.false_positive_clusters()
+
+
+@app.get("/api/prp/001/directional-legitimacy")
+async def prp001_directional_legit():
+    """PRP-001 — Directional legitimacy report (report 03)."""
+    return directional_legitimacy.directional_legitimacy_report()
+
+
+@app.get("/api/prp/001/asymmetry")
+async def prp001_asymmetry():
+    """PRP-001 — Asymmetry validation report (report 06)."""
+    return asymmetry_validation.asymmetry_validation_report()
+
+
+@app.get("/api/prp/001/context-quality")
+async def prp001_context_quality():
+    """PRP-001 — Context quality analysis (report 05)."""
+    return context_quality_engine.context_quality_analysis()
+
+
+@app.get("/api/prp/001/recent-signals")
+async def prp001_recent_signals(n: int = 30):
+    """PRP-001 — Recent signal records with outcomes."""
+    return {"signals": signal_truth_engine.recent_signals(n=n)}
 
 
 # ── Performance Explorer API (FTD-UPE) ───────────────────────────────────────
