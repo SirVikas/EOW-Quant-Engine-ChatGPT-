@@ -4647,7 +4647,49 @@ async def prp001_recent_signals(n: int = 30):
     return {"signals": signal_truth_engine.recent_signals(n=n)}
 
 
-# ── Performance Explorer API (FTD-UPE) ───────────────────────────────────────
+@app.get("/api/prp/001/download")
+async def prp001_download():
+    """PRP-001 — All forensic reports as a single downloadable ZIP."""
+    import zipfile, io as _io, json as _json
+    from fastapi.responses import StreamingResponse
+    from analytics.odyssey.signal_truth_reports import generate_all_reports, get_dashboard_summary
+
+    ts = int(time.time())
+    buf = _io.BytesIO()
+
+    reports = generate_all_reports()
+    summary = get_dashboard_summary()
+
+    files = {
+        "00_dashboard_summary.json":              summary,
+        "01_signal_truth_matrix.json":            signal_truth_engine.signal_truth_matrix(),
+        "02_false_positive_clusters.json":        false_positive_forensics.false_positive_clusters(),
+        "03_directional_legitimacy.json":         directional_legitimacy.directional_legitimacy_report(),
+        "04_confidence_reality_divergence.json":  asymmetry_validation.confidence_reality_divergence(),
+        "05_context_quality_analysis.json":       context_quality_engine.context_quality_analysis(),
+        "06_asymmetry_validation.json":           asymmetry_validation.asymmetry_validation_report(),
+        "07_noise_participation_audit.json":      false_positive_forensics.noise_participation_audit(),
+        "08_predictive_integrity_monitor.json":   signal_truth_engine.predictive_integrity_monitor(),
+        "09_regime_signal_validity.json":         directional_legitimacy.regime_signal_validity(),
+        "10_truth_density_summary.json":          signal_truth_engine.truth_density_summary(),
+        "recent_signals.json":                    {"signals": signal_truth_engine.recent_signals(n=50)},
+        "all_reports_bundle.json":                reports,
+    }
+
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for fname, data in files.items():
+            zf.writestr(fname, _json.dumps(data, indent=2, default=str))
+
+    buf.seek(0)
+    fn = f"prp001_forensic_reports_{ts}.zip"
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{fn}"'},
+    )
+
+
+
 
 def _pnl_to_upe_records(trades: list) -> list:
     """Convert pnl_calculator.TradeRecord list → UPE TradeRecord list."""
