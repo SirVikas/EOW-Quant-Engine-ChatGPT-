@@ -129,6 +129,11 @@ from core.signal_truth.false_positive_forensics import false_positive_forensics 
 from core.signal_truth.directional_legitimacy  import directional_legitimacy         # PRP-001
 from core.signal_truth.context_quality_engine  import context_quality_engine         # PRP-001
 from core.signal_truth.asymmetry_validation    import asymmetry_validation           # PRP-001
+from core.signal_ecology.opportunity_ecology   import opportunity_ecology              # PRP-002
+from core.signal_ecology.signal_density_engine import signal_density_engine           # PRP-002
+from core.signal_ecology.exploration_recovery  import exploration_recovery_governor   # PRP-002
+from core.signal_ecology.alpha_context_memory  import alpha_context_memory            # PRP-002
+from core.signal_ecology.adaptive_rsi_governor import adaptive_rsi_governor           # PRP-002
 
 
 def _safe_num(v):
@@ -491,6 +496,13 @@ async def on_tick(tick: Tick):
                 rr_declared = _rr_decl,
                 rr_achieved = _rr_ach,
                 was_win     = last_trade.net_pnl > 0,
+                net_pnl     = last_trade.net_pnl,
+            )
+            # PRP-002: update alpha context memory with trade outcome
+            opportunity_ecology.record_trade_outcome(
+                regime      = _trade_regime,
+                utc_hour    = __import__("datetime").datetime.utcnow().hour,
+                strategy_id = _trade_strategy,
                 net_pnl     = last_trade.net_pnl,
             )
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
@@ -1101,22 +1113,25 @@ async def on_tick(tick: Tick):
                 _l_p = sum(-d for d in _rsi_d_prev if d < 0) / _rsi_p
                 _rsi_prev = (100.0 - 100.0 / (1.0 + _g_p / _l_p)) if _l_p > 0 else 100.0
 
-            # ── Regime-aware entry decision ───────────────────────────────────
-            # TRENDING:      follow SMA direction; RSI must be in pullback range
-            # MEAN_REVERTING: fade the extreme; RSI must confirm true overextension
-            # Phase 1: tightened from 60/40 → 70/30 (MR), <62/>38 → ≤48/≥52 (TR)
-            # Phase 2: MEAN_REVERTING requires stable RSI extreme (prev also in zone)
-            _ps_side: Signal | None = None
-            if regime.value == "MEAN_REVERTING":
-                if _above_sma and _rsi_val > 70 and _rsi_prev > 65:
-                    _ps_side = Signal.SHORT
-                elif not _above_sma and _rsi_val < 30 and _rsi_prev < 35:
-                    _ps_side = Signal.LONG
-            else:  # TRENDING / UNKNOWN
-                if _above_sma and _rsi_val <= 48:     # uptrend pullback → LONG
-                    _ps_side = Signal.LONG
-                elif not _above_sma and _rsi_val >= 52: # downtrend bounce → SHORT
-                    _ps_side = Signal.SHORT
+            # ── PRP-002: adaptive RSI evaluation via OpportunityEcology ─────────
+            # Replaces hardcoded 70/30 / 48/52 bands. AdaptiveRSIGovernor starts
+            # at the same thresholds and widens them if survival rate drops below
+            # 10% (drought prevention). AlphaContextMemory blocks toxic contexts.
+            _ps_ec_dec = opportunity_ecology.evaluate_opportunity(
+                regime=regime.value,
+                rsi_val=_rsi_val,
+                rsi_prev=_rsi_prev,
+                above_sma=_above_sma,
+                utc_hour=__import__("datetime").datetime.utcnow().hour,
+                strategy_id=f"{strategy_type}_PAPER_SPEED",
+                symbol=sym,
+            )
+            _ps_side: Signal | None = (
+                Signal(_ps_ec_dec.rsi_side)
+                if _ps_ec_dec.approved and _ps_ec_dec.rsi_side
+                else None
+            )
+            _prp002_size_mult = _ps_ec_dec.size_multiplier if _ps_side is not None else 1.0
 
             if _ps_side is not None:
                 _atr_px = max(
@@ -1152,29 +1167,12 @@ async def on_tick(tick: Tick):
                     "SIGNAL",
                 )
             else:
-                # Distinguish crash-guard rejections from normal level-based blocks
-                if (regime.value == "MEAN_REVERTING"
-                        and not _above_sma and _rsi_val < 30 and _rsi_prev >= 35):
-                    _thought(
-                        f"⚡ PAPER_SPEED {sym}: RSI_CRASH_GUARD blocked LONG "
-                        f"(rsi={_rsi_val:.1f} prev={_rsi_prev:.1f}≥35, "
-                        f"need prev<35 — first-touch crash, not established reversal)",
-                        "FILTER",
-                    )
-                elif (regime.value == "MEAN_REVERTING"
-                        and _above_sma and _rsi_val > 70 and _rsi_prev <= 65):
-                    _thought(
-                        f"⚡ PAPER_SPEED {sym}: RSI_CRASH_GUARD blocked SHORT "
-                        f"(rsi={_rsi_val:.1f} prev={_rsi_prev:.1f}≤65, "
-                        f"need prev>65 — first-touch spike, not established reversal)",
-                        "FILTER",
-                    )
-                else:
-                    _thought(
-                        f"⚡ PAPER_SPEED {sym}: RSI filter blocked "
-                        f"(rsi={_rsi_val:.1f} above_sma={_above_sma} regime={regime.value})",
-                        "FILTER",
-                    )
+                _thought(
+                    f"⚡ PAPER_SPEED {sym}: "
+                    f"{_ps_ec_dec.rsi_block_reason or _ps_ec_dec.block_reason or 'RSI filter blocked'} "
+                    f"(rsi={_rsi_val:.1f} above_sma={_above_sma} regime={regime.value})",
+                    "FILTER",
+                )
 
         if sig and sig.signal != Signal.NONE:
             # FTD-037: Disabled strategy_id check — surgically blocks all NOISE strategies.
@@ -1195,6 +1193,17 @@ async def on_tick(tick: Tick):
                 return
 
             execution_drive_policy.record_signal(sym)   # EDP: track signal activity
+            # PRP-002: record primary signal pass; get ecology size multiplier.
+            # Paper_speed signals already set _prp002_size_mult via evaluate_opportunity().
+            # Primary strategy signals route through here — record density + get context boost.
+            _utc_hr_ec = __import__("datetime").datetime.utcnow().hour
+            if not sig.strategy_id.endswith("_PAPER_SPEED"):
+                signal_density_engine.record_pass(regime=regime.value, symbol=sym)
+                exploration_recovery_governor.on_signal_passed()
+                _ctx_amp = alpha_context_memory.get_amplification(
+                    regime=regime.value, utc_hour=_utc_hr_ec, strategy=strategy_type,
+                )
+                _prp002_size_mult = _ctx_amp["boost_mult"] if _ctx_amp["boost_mult"] > 0 else 1.0
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
             logger.info(
                 f"[SCAN] Signal generated: {sig.signal.value} {sym} "
@@ -1266,6 +1275,8 @@ async def on_tick(tick: Tick):
                 "VOLATILITY_EXPANSION": 0.50,
             }.get(regime.value, 0.80)
             _final_mult = _final_mult * _regime_risk_mult
+            # PRP-002: apply ecology size multiplier (recovery reduction or context boost)
+            _final_mult = _final_mult * _prp002_size_mult
             sizing.qty  = sizing.qty * _final_mult
             # FTD-056-ACT: enforce minimum notional floor so micro-trades don't produce
             # disproportionate fee overhead (fee_drag was 132.3% avg across session)
@@ -4689,6 +4700,97 @@ async def prp001_download():
     )
 
 
+
+
+# ── PRP-002 Signal Ecology API ────────────────────────────────────────────────
+
+@app.get("/api/prp/002/summary")
+async def prp002_summary():
+    """PRP-002 — Signal ecology telemetry snapshot."""
+    return opportunity_ecology.get_telemetry()
+
+
+@app.get("/api/prp/002/ecology")
+async def prp002_ecology():
+    """PRP-002 — Compact ecology snapshot (signals/hr, survival, drought, recovery)."""
+    return opportunity_ecology.ecology_snapshot()
+
+
+@app.get("/api/prp/002/density")
+async def prp002_density():
+    """PRP-002 — Signal density engine telemetry (flow health, block reasons)."""
+    return signal_density_engine.get_telemetry()
+
+
+@app.get("/api/prp/002/rsi-governor")
+async def prp002_rsi_governor():
+    """PRP-002 — Adaptive RSI Governor: current bands, survival rates, adapt log."""
+    return adaptive_rsi_governor.get_telemetry()
+
+
+@app.get("/api/prp/002/recovery")
+async def prp002_recovery():
+    """PRP-002 — Exploration Recovery Governor: active cycle, cycle history."""
+    return exploration_recovery_governor.get_telemetry()
+
+
+@app.get("/api/prp/002/context-memory")
+async def prp002_context_memory():
+    """PRP-002 — Alpha Context Memory: profitable/toxic contexts, boost counts."""
+    return alpha_context_memory.get_telemetry()
+
+
+@app.get("/api/prp/002/context-clusters")
+async def prp002_context_clusters(n: int = 20):
+    """PRP-002 — Alpha Context Memory: top-N contexts sorted by avg PnL."""
+    return {"clusters": alpha_context_memory.context_clusters(n=n)}
+
+
+@app.get("/api/prp/002/rsi-decisions")
+async def prp002_rsi_decisions(n: int = 50):
+    """PRP-002 — Recent RSI governor decisions (pass/block with band state)."""
+    return {"decisions": adaptive_rsi_governor.recent_decisions(n=n)}
+
+
+@app.get("/api/prp/002/recovery-history")
+async def prp002_recovery_history(n: int = 20):
+    """PRP-002 — Recent exploration recovery cycles."""
+    return {"cycles": exploration_recovery_governor.cycle_history(n=n)}
+
+
+@app.get("/api/prp/002/download")
+async def prp002_download():
+    """PRP-002 — All Signal Ecology reports as a single downloadable ZIP."""
+    import zipfile, io as _io, json as _json
+    from fastapi.responses import StreamingResponse
+
+    ts = int(time.time())
+    buf = _io.BytesIO()
+
+    files = {
+        "00_ecology_snapshot.json":    opportunity_ecology.ecology_snapshot(),
+        "01_full_telemetry.json":      opportunity_ecology.get_telemetry(),
+        "02_density_engine.json":      signal_density_engine.get_telemetry(),
+        "03_rsi_governor.json":        adaptive_rsi_governor.get_telemetry(),
+        "04_recovery_governor.json":   exploration_recovery_governor.get_telemetry(),
+        "05_context_memory.json":      alpha_context_memory.get_telemetry(),
+        "06_context_clusters.json":    {"clusters": alpha_context_memory.context_clusters(n=50)},
+        "07_rsi_decisions.json":       {"decisions": adaptive_rsi_governor.recent_decisions(n=100)},
+        "08_recovery_history.json":    {"cycles": exploration_recovery_governor.cycle_history(n=50)},
+        "09_block_reason_matrix.json": {"block_reasons": signal_density_engine.block_reason_matrix()},
+    }
+
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for fname, data in files.items():
+            zf.writestr(fname, _json.dumps(data, indent=2, default=str))
+
+    buf.seek(0)
+    fn = f"prp002_signal_ecology_{ts}.zip"
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{fn}"'},
+    )
 
 
 def _pnl_to_upe_records(trades: list) -> list:
