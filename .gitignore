@@ -10,3 +10,6 @@ dump.rdb
 
 # Data files (runtime-generated)
 data/
+
+# Learning memory runtime artifacts (modified every session)
+reports/learning_memory/pattern_index.json

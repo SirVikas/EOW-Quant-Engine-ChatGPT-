@@ -4649,8 +4649,8 @@ function _lioRenderPatterns(d) {
       <td>${p.direction === 'UP' ? '▲ LONG' : '▼ SHORT'}</td>
       <td>${p.samples}/20</td>
       <td>${wr}%</td>
-      <td style="color:${p.confidence>=70?'#68D391':'#ECC94B'}">${conf}%</td>
-      <td>${p.context_count}/3</td>
+      <td style="color:${p.confidence>=70?'var(--c-green)':'var(--c-amber)'}">${conf}%</td>
+      <td>${p.context_count >= 3 ? `<span style="color:var(--c-green);font-weight:600;">${p.context_count} ✓</span>` : `${p.context_count}/3`}</td>
       <td><span class="lio-stage lio-stage-${p.stage}">${p.stage}</span></td>
     `;
     tbody.appendChild(tr);
