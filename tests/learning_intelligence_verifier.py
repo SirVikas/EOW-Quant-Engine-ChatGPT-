@@ -359,8 +359,8 @@ if _MAIN.exists():
     _main_src = _MAIN.read_text(encoding="utf-8")
     check("J01 LIO boot log line present",
           "LEARNING_INTELLIGENCE_OBSERVATORY" in _main_src and "ACTIVE" in _main_src)
-    check("J02 8 LIO endpoints declared",
-          _main_src.count("/api/learning-intelligence/") >= 8)
+    check("J02 9 LIO endpoints declared",
+          _main_src.count("/api/learning-intelligence/") >= 9)
     check("J03 lio_summary endpoint",         "async def lio_summary" in _main_src)
     check("J04 lio_patterns endpoint",        "async def lio_patterns" in _main_src)
     check("J05 lio_negative_memory endpoint", "async def lio_negative_memory" in _main_src)
@@ -371,6 +371,41 @@ if _MAIN.exists():
     check("J10 lio_sovereign_readiness",      "async def lio_sovereign_readiness" in _main_src)
 else:
     check("J01–J10 main.py found", False, "file not found at " + str(_MAIN))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SECTION K — Alpha Discovery Observatory (§9)
+# ══════════════════════════════════════════════════════════════════════════════
+section("SECTION K — Alpha Discovery Observatory §9")
+
+if _MAIN.exists():
+    check("K01 lio_alpha_discovery endpoint declared",
+          "async def lio_alpha_discovery" in _main_src)
+    check("K02 /api/learning-intelligence/alpha-discovery route",
+          "/api/learning-intelligence/alpha-discovery" in _main_src)
+    check("K03 discovery_health field returned",
+          "discovery_health" in _main_src)
+    check("K04 pos_neg_ratio field returned",
+          "pos_neg_ratio" in _main_src)
+    check("K05 alpha_discovery_velocity field returned",
+          "alpha_discovery_velocity" in _main_src)
+    check("K06 session_intelligence passed through",
+          '"session_intelligence"' in _main_src)
+    check("K07 endpoints=9 in boot log",
+          "endpoints=9" in _main_src)
+else:
+    for i in range(1, 8):
+        check(f"K0{i} main.py found", False, "file not found")
+
+_DASH_SRC = (pathlib.Path(__file__).parent.parent / "dashboard.html").read_text(encoding="utf-8")
+check("K08 §9 section header present",           "§9 · Alpha Discovery Observatory" in _DASH_SRC)
+check("K09 lio-alpha-badge element",             "lio-alpha-badge" in _DASH_SRC)
+check("K10 lio-alpha-profitable-ctx element",    "lio-alpha-profitable-ctx" in _DASH_SRC)
+check("K11 lio-alpha-ratio element",             "lio-alpha-ratio" in _DASH_SRC)
+check("K12 lio-alpha-velocity element",          "lio-alpha-velocity" in _DASH_SRC)
+check("K13 lio-alpha-bar-pos element",           "lio-alpha-bar-pos" in _DASH_SRC)
+check("K14 _lioRenderAlpha function declared",   "_lioRenderAlpha" in _DASH_SRC)
+check("K15 alpha-discovery in loadLIO fetch",    "alpha-discovery" in _DASH_SRC)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
