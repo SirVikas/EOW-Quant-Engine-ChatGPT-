@@ -8166,7 +8166,7 @@ async def lio_sovereign_readiness():
     lmo   = learning_memory_orchestrator
     ste_t = signal_truth_engine.get_telemetry()
     eco_snap = opportunity_ecology.ecology_snapshot()
-    rl_t     = rl_engine.get_telemetry()
+    rl_t     = rl_engine.get_evolution_state()
     lmo_s    = lmo.summary()
 
     evaluated_signals = eco_snap.get("total_evaluated", 0)

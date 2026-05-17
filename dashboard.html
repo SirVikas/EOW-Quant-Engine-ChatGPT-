@@ -4674,11 +4674,12 @@ function _lioRenderNegMem(d) {
   entries.slice(0, 20).forEach(e => {
     const tr = document.createElement('tr');
     const parts = (e.key_str || '').split('|');
-    const label = parts.length >= 4 ? parts[2] + ' / ' + parts[3] : e.key_str;
+    const dir   = parts[4] ? ` <span style="opacity:.65;">${parts[4] === 'UP' ? '▲' : parts[4] === 'DOWN' ? '▼' : parts[4]}</span>` : '';
+    const label = parts.length >= 4 ? parts[2] + ' / ' + parts[3] + dir : e.key_str;
     const score = (e.score || 0).toFixed(2);
     tr.innerHTML = `
-      <td style="color:#CBD5E0;max-width:200px;overflow:hidden;text-overflow:ellipsis;" title="${e.key_str}">${label}</td>
-      <td style="color:#FC8181;">${e.rollbacks}</td>
+      <td style="color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;" title="${e.key_str}">${label}</td>
+      <td style="color:var(--c-red);">${e.rollbacks}</td>
       <td>${score}</td>
       <td><span class="lio-neg-status lio-neg-${e.status}">${e.status?.replace('_', ' ')}</span></td>
     `;
@@ -4828,7 +4829,7 @@ function _lioRenderSovereign(d) {
             <span class="lio-gate-label">${gate.label || key}</span>
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="lio-gate-val">${gate.current}</span>
-              <span style="color:#4A5568;font-size:10px;">/ ${gate.target}</span>
+              <span style="color:var(--muted);font-size:10px;">/ ${gate.target}</span>
               <span class="lio-gate-check">${pass ? '✅' : '❌'}</span>
             </div>
           </div>
@@ -4843,11 +4844,11 @@ function _lioRenderSovereign(d) {
   const total = d.total_gates ?? 4;
   container.innerHTML += `
     <div style="margin-top:10px;display:flex;align-items:center;gap:10px;">
-      <div style="flex:1;background:#1A202C;border-radius:4px;height:10px;overflow:hidden;">
-        <div style="height:10px;background:${passCount===total?'linear-gradient(90deg,#276749,#48BB78)':'linear-gradient(90deg,#2B6CB0,#63B3ED)'};
+      <div style="flex:1;background:#EDF2F7;border-radius:4px;height:10px;overflow:hidden;">
+        <div style="height:10px;background:${passCount===total?'linear-gradient(90deg,var(--c-green),#48BB78)':'linear-gradient(90deg,var(--c-blue),#63B3ED)'};
              border-radius:4px;width:${(passCount/total*100).toFixed(0)}%;transition:width .8s;"></div>
       </div>
-      <span style="font-size:11px;color:#A0AEC0;white-space:nowrap;">${passCount}/${total} gates</span>
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap;">${passCount}/${total} gates</span>
     </div>`;
 }
 </script>
