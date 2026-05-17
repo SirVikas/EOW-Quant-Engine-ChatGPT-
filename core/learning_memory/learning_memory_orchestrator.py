@@ -270,8 +270,9 @@ class LearningMemoryOrchestrator:
         """Regime × parameter → avg confidence heatmap (from PR #80 FTD-030B)."""
         buckets: dict = {}
         for pat in self._engine.all_patterns():
-            regime = getattr(pat, "regime", "UNKNOWN")
-            param  = getattr(pat, "parameter", "")
+            # PatternRecord stores fields in .key tuple; no .regime/.parameter attrs
+            regime = pat.key[0] if pat.key else "UNKNOWN"
+            param  = pat.key[3] if pat.key and len(pat.key) > 3 else ""
             conf   = getattr(pat, "confidence", 0.0)
             key = (regime, param)
             buckets.setdefault(key, []).append(conf)
