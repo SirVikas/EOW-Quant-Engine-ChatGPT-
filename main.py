@@ -2228,6 +2228,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     logger.info(f"[GLOBAL-GATE] {_gate_msg}")
 
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
+    logger.info(
+        "[LEARNING_INTELLIGENCE_OBSERVATORY] ACTIVE | endpoints=8 "
+        "| telemetry=LIVE | refresh=3s | mode=READ_ONLY_OBSERVATIONAL"
+    )
 
     # ── Pre-seed genome candle store after bootstrap completes ────────────────
     async def _seed_genome_from_bootstrap():
@@ -7762,6 +7766,466 @@ async def download_report_bundle():
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Entry Point ───────────────────────────────────────────────────────────────
+
+# Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
+# ── FTD-LIO: Learning Intelligence Observatory API ─────────────────────────
+
+@app.get("/api/learning-intelligence/summary")
+async def lio_summary():
+    """LIO — Learning heartbeat: state, record counts, activity metrics."""
+    from core.learning_memory import learning_memory_orchestrator
+    import time as _t
+    lmo   = learning_memory_orchestrator
+    bridge_t = trade_memory_bridge.get_telemetry()
+    lmo_s    = lmo.summary()
+    neg_counts = lmo._neg_memory.count()
+    total_rec  = lmo_s.get("total_records", 0)
+    formed     = lmo_s.get("formed_patterns", 0)
+    cycles     = lmo_s.get("cycle_count", 0)
+    neg_total  = neg_counts.get("total", 0)
+
+    # Derive heartbeat state
+    if cycles == 0 or total_rec == 0:
+        heartbeat = "DORMANT"
+    elif formed == 0:
+        heartbeat = "LEARNING"
+    elif neg_total > formed * 3:
+        heartbeat = "DEGRADED"
+    elif formed >= 10:
+        heartbeat = "SATURATED"
+    else:
+        heartbeat = "ACTIVE"
+
+    # Simple growth rate: records / max(1, cycles)
+    memory_growth_rate = round(total_rec / max(1, cycles), 3)
+    # Cognition activity score 0–100 based on formed/total patterns ratio
+    all_pats = lmo._engine.all_patterns()
+    total_patterns = len(all_pats)
+    cog_score = round(min(100.0, (formed / max(1, total_patterns)) * 100.0 + cycles * 0.5), 1)
+
+    return {
+        "heartbeat_state":       heartbeat,
+        "total_records":         total_rec,
+        "patterns_formed":       formed,
+        "total_patterns":        total_patterns,
+        "active_negative_memories": neg_total,
+        "permanent_bans":        neg_counts.get("permanent", 0),
+        "lmo_enabled":           lmo_s.get("enabled", True),
+        "lmo_cycle_count":       cycles,
+        "memory_growth_rate":    memory_growth_rate,
+        "cognition_activity_score": cog_score,
+        "bridge_total_recorded": bridge_t.get("total_recorded", 0),
+        "bridge_win_rate":       bridge_t.get("win_rate", 0.0),
+        "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/patterns")
+async def lio_patterns():
+    """LIO — Pattern crystallization grid: all patterns with stage classification."""
+    from core.learning_memory import learning_memory_orchestrator
+    lmo = learning_memory_orchestrator
+    neg_entries = {e["key_str"]: e for e in lmo._neg_memory.to_list()}
+    patterns = []
+    for pat in lmo._engine.all_patterns():
+        key      = pat.key  # (regime, volatility, instrument, strategy, direction)
+        key_str  = "|".join(str(k) for k in key)
+        neg_e    = neg_entries.get(key_str)
+        win_rate = round(pat.success / max(1, pat.samples), 4)
+        ctx_count = len(pat.contexts)
+
+        if neg_e and neg_e.get("permanent"):
+            stage = "BANNED"
+        elif neg_e and neg_e.get("score", 0) >= 0.10:
+            stage = "TOXIC"
+        elif pat.is_formed:
+            stage = "STABLE"
+        elif pat.samples >= 10:
+            stage = "FORMING"
+        else:
+            stage = "OBSERVED"
+
+        patterns.append({
+            "pattern_id":   pat.pattern_id,
+            "regime":       key[0],
+            "volatility":   key[1],
+            "instrument":   key[2],
+            "strategy":     key[3],
+            "direction":    key[4],
+            "samples":      pat.samples,
+            "success":      pat.success,
+            "confidence":   round(pat.confidence, 2),
+            "win_rate":     win_rate,
+            "context_count": ctx_count,
+            "contexts":     sorted(pat.contexts),
+            "is_formed":    pat.is_formed,
+            "stage":        stage,
+            "toxicity_score": round(neg_e["score"], 3) if neg_e else 0.0,
+            "rollbacks":    neg_e["rollbacks"] if neg_e else 0,
+            "created_at":   pat.created_at,
+        })
+
+    # Sort: STABLE first, then FORMING, OBSERVED, TOXIC, BANNED
+    stage_order = {"STABLE": 0, "FORMING": 1, "OBSERVED": 2, "TOXIC": 3, "BANNED": 4}
+    patterns.sort(key=lambda p: (stage_order.get(p["stage"], 5), -p["samples"]))
+
+    heatmap = lmo.pattern_heatmap()
+    return {
+        "total_patterns":  len(patterns),
+        "formed_patterns": sum(1 for p in patterns if p["is_formed"]),
+        "patterns":        patterns,
+        "heatmap":         heatmap,
+    }
+
+
+@app.get("/api/learning-intelligence/negative-memory")
+async def lio_negative_memory():
+    """LIO — Negative memory observatory: toxic patterns, bans, catastrophic events."""
+    from core.learning_memory import learning_memory_orchestrator
+    import time as _t
+    lmo     = learning_memory_orchestrator
+    entries = lmo._neg_memory.to_list()
+    counts  = lmo._neg_memory.count()
+
+    # Parse key_str back into components for display
+    enriched = []
+    for e in entries:
+        parts = e.get("key_str", "").split("|")
+        regime   = parts[0] if len(parts) > 0 else "UNKNOWN"
+        vol      = parts[1] if len(parts) > 1 else "UNKNOWN"
+        instr    = parts[2] if len(parts) > 2 else "UNKNOWN"
+        strategy = parts[3] if len(parts) > 3 else "UNKNOWN"
+        direction= parts[4] if len(parts) > 4 else "UNKNOWN"
+
+        if e.get("permanent"):
+            status = "PERMANENTLY_BANNED"
+        elif e.get("score", 0) >= 0.70:
+            status = "QUARANTINED"
+        elif e.get("score", 0) >= 0.30:
+            status = "TOXIC"
+        else:
+            status = "WARNING"
+
+        enriched.append({
+            **e,
+            "regime":    regime,
+            "volatility": vol,
+            "instrument": instr,
+            "strategy":  strategy,
+            "direction": direction,
+            "status":    status,
+        })
+
+    enriched.sort(key=lambda x: (0 if x.get("permanent") else 1, -x.get("rollbacks", 0)))
+
+    return {
+        "counts":               counts,
+        "entries":              enriched,
+        "catastrophic_threshold": -2.0,
+        "permanent_ban_after":  3,
+        "decay_rate":           0.90,
+        "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/ecology")
+async def lio_ecology():
+    """LIO — Ecology maturity: context diversity, signal density, survival."""
+    import time as _t
+    snap    = opportunity_ecology.ecology_snapshot()
+    full_t  = opportunity_ecology.get_telemetry()
+    ctx_mem = full_t.get("context_memory", {})
+    ste_t   = signal_truth_engine.get_telemetry()
+
+    total_ctx    = ctx_mem.get("total_contexts", 0)
+    profitable   = ctx_mem.get("profitable_count", 0)
+    toxic_ctx    = ctx_mem.get("toxic_count", 0)
+    immature_ctx = max(0, total_ctx - profitable - toxic_ctx)
+
+    density      = full_t.get("density_snapshot", {})
+    survival     = density.get("survival_rate", 0.0)
+    signals_hr   = density.get("signals_per_hr", 0.0)
+    truth_dens   = ste_t.get("truth_density", 0.0)
+
+    # Ecology health gate
+    if snap.get("is_starvation"):
+        eco_health = "STARVATION"
+    elif snap.get("is_drought"):
+        eco_health = "DROUGHT"
+    elif total_ctx < 5:
+        eco_health = "IMMATURE"
+    elif survival < 0.30:
+        eco_health = "COLLAPSING"
+    elif survival >= 0.60 and profitable >= 5:
+        eco_health = "MATURE"
+    else:
+        eco_health = "FORMING"
+
+    total_eval = snap.get("total_evaluated", 0)
+    mature_ctx = profitable  # profitable contexts == mature contexts
+
+    return {
+        "ecology_health":    eco_health,
+        "total_evaluated":   total_eval,
+        "total_approved":    snap.get("total_approved", 0),
+        "approval_rate":     snap.get("approval_rate", 0.0),
+        "total_contexts":    total_ctx,
+        "mature_contexts":   mature_ctx,
+        "immature_contexts": immature_ctx,
+        "toxic_contexts":    toxic_ctx,
+        "signals_per_hr":    signals_hr,
+        "survival_rate":     survival,
+        "truth_density":     truth_dens,
+        "is_drought":        snap.get("is_drought", False),
+        "is_starvation":     snap.get("is_starvation", False),
+        "rsi_blocked":       snap.get("rsi_blocked", 0),
+        "context_blocked":   snap.get("context_blocked", 0),
+        "recovery_trades":   snap.get("recovery_trades", 0),
+        "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/rl")
+async def lio_rl():
+    """LIO — RL intelligence observatory: Q-values, convergence, exploration."""
+    import time as _t
+    t = rl_engine.get_evolution_state()
+    cold_start = t.get("status") == "COLD_START"
+    ld = t.get("learning_dynamics", {})
+    avg_q     = ld.get("avg_q", 0.0)
+    q_vel     = ld.get("avg_q_velocity", 0.0)
+    explore_r = ld.get("explore_ratio", 1.0) if not cold_start else 1.0
+    toxic_cnt = ld.get("toxic_count", 0)
+    qd        = t.get("quality_distribution", {})
+    counters  = t.get("counters", {})
+    total_pulls = counters.get("total_pulls", 0) if not cold_start else rl_engine._total_pulls
+    intell_score = t.get("intelligence_score", 0.0)
+
+    # Derive brain status
+    if total_pulls == 0:
+        brain_status = "IDLE"
+    elif avg_q < -0.5:
+        brain_status = "NEGATIVE_CONVERGENCE"
+    elif explore_r > 0.6:
+        brain_status = "EXPLORING"
+    elif q_vel > 0.05 and explore_r > 0.2:
+        brain_status = "LEARNING"
+    elif q_vel < 0.01 and explore_r < 0.3 and avg_q > 0:
+        brain_status = "CONVERGING"
+    elif toxic_cnt > t.get("total_contexts", 1) * 0.4:
+        brain_status = "COLLAPSED"
+    else:
+        brain_status = "LEARNING"
+
+    # Derive convergence state
+    if total_pulls < 10:
+        convergence = "INITIALIZING"
+    elif avg_q > 0.3 and q_vel < 0.02:
+        convergence = "CONVERGED"
+    elif avg_q < -0.2:
+        convergence = "DIVERGING"
+    else:
+        convergence = "IN_PROGRESS"
+
+    profitable_pct = qd.get("profitable_pct", 0.0)
+    exploit_ratio  = round(1.0 - explore_r, 4)
+
+    return {
+        "brain_status":       brain_status,
+        "convergence_state":  convergence,
+        "intelligence_score": intell_score,
+        "avg_q":              avg_q,
+        "q_spread":           round(q_vel, 4),
+        "avg_q_velocity":     q_vel,
+        "explore_ratio":      explore_r,
+        "exploit_ratio":      exploit_ratio,
+        "toxic_count":        toxic_cnt,
+        "total_contexts":     t.get("total_contexts", 0),
+        "context_maturity":   t.get("context_maturity", {}),
+        "quality_distribution": qd,
+        "session_intelligence": t.get("session_intelligence", {}),
+        "counters":           counters,
+        "profitable_pct":     profitable_pct,
+        "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/topology")
+async def lio_topology():
+    """LIO — Learning topology map: profitable/toxic/neutral/unexplored zones."""
+    from core.learning_memory import learning_memory_orchestrator
+    import time as _t
+    lmo     = learning_memory_orchestrator
+    heatmap = lmo.pattern_heatmap()
+    neg_entries = {e["key_str"]: e for e in lmo._neg_memory.to_list()}
+
+    profitable, toxic, neutral, unexplored = [], [], [], []
+    for cell in heatmap:
+        regime    = cell.get("regime", "UNKNOWN")
+        parameter = cell.get("parameter", "UNKNOWN")
+        avg_conf  = cell.get("avg_conf", 0.0)
+        count     = cell.get("count", 0)
+        # Check if any key with this regime+parameter is banned
+        is_toxic = any(
+            e.get("permanent") or e.get("score", 0) >= 0.30
+            for k, e in neg_entries.items()
+            if k.startswith(regime) and parameter in k
+        )
+        zone_entry = {"regime": regime, "parameter": parameter,
+                      "avg_conf": avg_conf, "count": count}
+        if is_toxic:
+            toxic.append(zone_entry)
+        elif avg_conf >= 70:
+            profitable.append(zone_entry)
+        elif avg_conf >= 40:
+            neutral.append(zone_entry)
+        else:
+            unexplored.append(zone_entry)
+
+    return {
+        "zones": {
+            "profitable":  sorted(profitable, key=lambda x: -x["avg_conf"]),
+            "toxic":       toxic,
+            "neutral":     neutral,
+            "unexplored":  unexplored,
+        },
+        "heatmap": heatmap,
+        "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/cognition")
+async def lio_cognition():
+    """LIO — Cognitive compression: signal noise, repetition, compression health."""
+    from core.learning_memory import learning_memory_orchestrator
+    import time as _t
+    lmo    = learning_memory_orchestrator
+    ste_t  = signal_truth_engine.get_telemetry()
+    lmo_s  = lmo.summary()
+    eco_t  = opportunity_ecology.get_telemetry()
+
+    total_rec  = lmo_s.get("total_records", 0)
+    total_pats = len(lmo._engine.all_patterns())
+    formed     = lmo_s.get("formed_patterns", 0)
+    cycles     = lmo_s.get("cycle_count", 0)
+
+    # Signal noise ratio from truth engine (1 - truth_density)
+    truth_dens   = ste_t.get("truth_density", 0.0)
+    noise_ratio  = round(1.0 - truth_dens, 4) if truth_dens > 0 else 1.0
+
+    # Repeated signal loops: avg samples per pattern (high = repetitive)
+    avg_samples  = round(total_rec / max(1, total_pats), 2) if total_pats > 0 else 0.0
+
+    # Cognitive load: cycle_count relative to patterns formed
+    if cycles == 0:
+        cog_load = 0.0
+    else:
+        cog_load = round(min(1.0, formed / max(1, cycles / 20)), 4)
+
+    # Compression ratio: formed patterns / total patterns
+    compression_ratio = round(formed / max(1, total_pats), 4) if total_pats > 0 else 0.0
+
+    # Noise state
+    if noise_ratio < 0.25:
+        noise_state = "HEALTHY"
+    elif noise_ratio < 0.55:
+        noise_state = "NOISY"
+    elif noise_ratio < 0.80:
+        noise_state = "SATURATED"
+    else:
+        noise_state = "CRITICAL"
+
+    total_signals  = ste_t.get("total_signals", 0)
+    total_outcomes = ste_t.get("total_outcomes", 0)
+    suppressed     = eco_t.get("total_rsi_blocked", 0) + eco_t.get("total_ctx_blocked", 0)
+
+    return {
+        "noise_state":                 noise_state,
+        "signal_noise_ratio":          noise_ratio,
+        "truth_density":               truth_dens,
+        "repeated_signal_loops":       avg_samples,
+        "compressed_patterns":         formed,
+        "total_pattern_candidates":    total_pats,
+        "compression_ratio":           compression_ratio,
+        "cognitive_activity_load":     cog_load,
+        "suppressed_redundant_evals":  suppressed,
+        "total_signals":               total_signals,
+        "total_outcomes":              total_outcomes,
+        "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/sovereign-readiness")
+async def lio_sovereign_readiness():
+    """LIO — Sovereign governance readiness meter: all PRP-003A activation gates."""
+    from core.learning_memory import learning_memory_orchestrator
+    import time as _t
+    lmo   = learning_memory_orchestrator
+    ste_t = signal_truth_engine.get_telemetry()
+    eco_snap = opportunity_ecology.ecology_snapshot()
+    rl_t     = rl_engine.get_telemetry()
+    lmo_s    = lmo.summary()
+
+    evaluated_signals = eco_snap.get("total_evaluated", 0)
+    rl_ctx  = rl_t.get("context_maturity", {})
+    mature_ctx = rl_ctx.get("mature", 0)
+    truth_dens = ste_t.get("truth_density", 0.0)
+    eco_ctx_t  = opportunity_ecology.get_telemetry()
+    ctx_mem    = eco_ctx_t.get("context_memory", {})
+    profitable = ctx_mem.get("profitable_count", 0)
+    survival   = eco_ctx_t.get("density_snapshot", {}).get("survival_rate", 0.0)
+    eco_health_pass = (profitable >= 5 and survival >= 0.40
+                       and not eco_snap.get("is_starvation", False))
+
+    gates = {
+        "evaluated_signals": {
+            "current": evaluated_signals,
+            "target":  100,
+            "pass":    evaluated_signals >= 100,
+            "label":   "Signal Evaluation Volume",
+        },
+        "mature_contexts": {
+            "current": mature_ctx,
+            "target":  10,
+            "pass":    mature_ctx >= 10,
+            "label":   "RL Mature Context Count",
+        },
+        "truth_density": {
+            "current": round(truth_dens, 4),
+            "target":  0.0,
+            "pass":    truth_dens > 0,
+            "label":   "Signal Truth Density",
+        },
+        "ecology_health": {
+            "current": "PASS" if eco_health_pass else "FAIL",
+            "target":  "PASS",
+            "pass":    eco_health_pass,
+            "label":   "Ecology Health Gate",
+        },
+    }
+
+    pass_count = sum(1 for g in gates.values() if g["pass"])
+    total_gates = len(gates)
+
+    if pass_count == 0:
+        state = "NOT_READY"
+    elif pass_count == 1:
+        state = "ECOLOGY_FORMING"
+    elif pass_count in (2, 3):
+        state = "LEARNING_ACTIVE"
+    else:
+        state = "SOVEREIGN_READY"
+
+    return {
+        "state":       state,
+        "pass_count":  pass_count,
+        "total_gates": total_gates,
+        "gates":       gates,
+        "ts": int(_t.time() * 1000),
+    }
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────

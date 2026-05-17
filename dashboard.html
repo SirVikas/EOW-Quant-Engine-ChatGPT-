@@ -365,6 +365,112 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 .stab-SPIKE     { background:#BEE3F8; color:#2A4365; }
 .stab-DEFENSIVE { background:#FED7D7; color:#C53030; }
 
+
+/* ── LIO: Learning Intelligence Observatory ── */
+.lio-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.lio-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.lio-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+@media(max-width:900px){ .lio-grid,.lio-grid-3,.lio-grid-4 { grid-template-columns:1fr; } }
+
+.lio-card {
+  background:#0F1117; border:1px solid #2D3748; border-radius:10px;
+  padding:16px 18px; color:#E2E8F0;
+}
+.lio-card .hdr {
+  font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:#718096; margin-bottom:10px; display:flex; align-items:center; gap:6px;
+}
+.lio-card .hdr .dot { width:7px; height:7px; border-radius:50%; background:#4A5568; display:inline-block; }
+.lio-card .hdr .dot.green  { background:#48BB78; box-shadow:0 0 6px #48BB78; }
+.lio-card .hdr .dot.yellow { background:#ECC94B; box-shadow:0 0 6px #ECC94B; }
+.lio-card .hdr .dot.red    { background:#FC8181; box-shadow:0 0 6px #FC8181; }
+.lio-card .hdr .dot.blue   { background:#63B3ED; box-shadow:0 0 6px #63B3ED; }
+.lio-card .hdr .dot.pulse  { animation:liopulse 1.4s ease-in-out infinite; }
+@keyframes liopulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.3)} }
+
+.lio-big-val { font-size:28px; font-weight:700; color:#F7FAFC; line-height:1; }
+.lio-sub-val { font-size:13px; color:#A0AEC0; margin-top:4px; }
+.lio-label   { font-size:10px; color:#718096; text-transform:uppercase; letter-spacing:.07em; margin-top:8px; }
+
+.lio-state-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase;
+}
+.lio-state-DORMANT    { background:#1A202C; color:#718096; border:1px solid #4A5568; }
+.lio-state-LEARNING   { background:#1A365D; color:#63B3ED; border:1px solid #2B6CB0; }
+.lio-state-ACTIVE     { background:#1C4532; color:#68D391; border:1px solid #276749; }
+.lio-state-SATURATED  { background:#44337A; color:#D6BCFA; border:1px solid #6B46C1; }
+.lio-state-DEGRADED   { background:#742A2A; color:#FC8181; border:1px solid #C53030; }
+.lio-state-IDLE       { background:#1A202C; color:#718096; border:1px solid #4A5568; }
+.lio-state-EXPLORING  { background:#1A365D; color:#63B3ED; border:1px solid #2B6CB0; }
+.lio-state-CONVERGING { background:#1C4532; color:#68D391; border:1px solid #276749; }
+.lio-state-NEGATIVE_CONVERGENCE { background:#742A2A; color:#FC8181; border:1px solid #C53030; }
+.lio-state-COLLAPSED  { background:#742A2A; color:#FEB2B2; border:1px solid #9B2C2C; }
+.lio-state-NOT_READY  { background:#1A202C; color:#718096; border:1px solid #4A5568; }
+.lio-state-ECOLOGY_FORMING { background:#2D3748; color:#A0AEC0; border:1px solid #4A5568; }
+.lio-state-LEARNING_ACTIVE { background:#1A365D; color:#63B3ED; border:1px solid #2B6CB0; }
+.lio-state-SOVEREIGN_READY { background:#1C4532; color:#68D391; border:1px solid #276749; animation:liopulse 2s infinite; }
+
+.lio-progress-track { background:#2D3748; border-radius:4px; height:6px; overflow:hidden; margin-top:5px; }
+.lio-progress-fill  { height:6px; border-radius:4px; transition:width .6s ease; }
+.lio-prog-green  { background:linear-gradient(90deg,#276749,#48BB78); }
+.lio-prog-blue   { background:linear-gradient(90deg,#2B6CB0,#63B3ED); }
+.lio-prog-yellow { background:linear-gradient(90deg,#744210,#ECC94B); }
+.lio-prog-red    { background:linear-gradient(90deg,#9B2C2C,#FC8181); }
+
+.lio-table { width:100%; border-collapse:collapse; font-size:12px; }
+.lio-table th { color:#718096; text-transform:uppercase; font-size:10px; letter-spacing:.06em;
+  text-align:left; padding:5px 8px; border-bottom:1px solid #2D3748; }
+.lio-table td { padding:6px 8px; border-bottom:1px solid #1A202C; color:#CBD5E0; }
+.lio-table tr:hover td { background:#171D2A; }
+
+.lio-stage { display:inline-block; padding:2px 7px; border-radius:10px;
+  font-size:10px; font-weight:700; letter-spacing:.05em; }
+.lio-stage-OBSERVED { background:#1A202C; color:#718096; }
+.lio-stage-FORMING  { background:#1A365D; color:#63B3ED; }
+.lio-stage-STABLE   { background:#1C4532; color:#68D391; }
+.lio-stage-TOXIC    { background:#744210; color:#F6AD55; }
+.lio-stage-BANNED   { background:#742A2A; color:#FC8181; }
+
+.lio-neg-status { display:inline-block; padding:2px 7px; border-radius:10px;
+  font-size:10px; font-weight:700; }
+.lio-neg-WARNING          { background:#2D3748; color:#CBD5E0; }
+.lio-neg-TOXIC            { background:#744210; color:#F6AD55; }
+.lio-neg-QUARANTINED      { background:#652B19; color:#FBD38D; }
+.lio-neg-PERMANENTLY_BANNED { background:#742A2A; color:#FC8181; }
+
+.lio-gate-row { display:flex; align-items:center; justify-content:space-between;
+  padding:8px 0; border-bottom:1px solid #2D3748; }
+.lio-gate-row:last-child { border-bottom:none; }
+.lio-gate-label { font-size:12px; color:#A0AEC0; }
+.lio-gate-val   { font-size:12px; font-weight:700; color:#F7FAFC; }
+.lio-gate-pass  { color:#48BB78; }
+.lio-gate-fail  { color:#FC8181; }
+.lio-gate-check { font-size:14px; }
+
+.lio-heatmap-cell {
+  display:inline-flex; flex-direction:column; align-items:center;
+  justify-content:center; border-radius:6px; padding:6px 8px; font-size:10px;
+  font-weight:700; min-width:70px; text-align:center;
+  border:1px solid transparent;
+}
+.lio-zone-profitable { background:#1C4532; color:#68D391; border-color:#276749; }
+.lio-zone-neutral    { background:#2D3748; color:#A0AEC0; border-color:#4A5568; }
+.lio-zone-toxic      { background:#742A2A; color:#FC8181; border-color:#C53030; }
+.lio-zone-unexplored { background:#1A202C; color:#4A5568; border-color:#2D3748; }
+
+.lio-ring-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.lio-ring { width:80px; height:80px; }
+
+.lio-noise-meter { height:12px; border-radius:6px; overflow:hidden;
+  background:linear-gradient(90deg,#276749 0%,#ECC94B 50%,#C53030 100%);
+  position:relative; }
+.lio-noise-cursor { position:absolute; top:-4px; width:4px; height:20px;
+  background:#F7FAFC; border-radius:2px; box-shadow:0 0 6px #fff8;
+  transition:left .6s ease; }
+
+.lio-refresh-badge { font-size:10px; color:#4A5568; }
 </style>
 </head>
 
@@ -419,6 +525,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('combat')"   id="tab-btn-combat">🎮 Combat Controls</button>
   <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
   <button class="tab-btn"        onclick="switchTab('perf')"     id="tab-btn-perf">📊 Performance</button>
+  <button class="tab-btn"        onclick="switchTab('lio')"      id="tab-btn-lio">🧬 LIO</button>
 </nav>
 
 <!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
@@ -1479,6 +1586,279 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 </div><!-- /app -->
 
+<!-- ══ TAB: LIO ═══════════════════════════════════════════════════════════════ -->
+<div id="tab-lio" class="tab-panel">
+<div class="main" style="background:#080B12;min-height:100vh;padding:18px;">
+
+  <!-- Header bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#E2E8F0;letter-spacing:.04em;">
+        🧬 Learning Intelligence Observatory
+      </div>
+      <div style="font-size:11px;color:#4A5568;margin-top:3px;">
+        Read-only observational telemetry · LRN-001 pipeline · PRP-003A readiness
+        <span class="lio-refresh-badge" id="lio-last-refresh">· refreshing…</span>
+      </div>
+    </div>
+    <span id="lio-heartbeat-badge" class="lio-state-badge lio-state-DORMANT">— DORMANT</span>
+  </div>
+
+  <!-- ── S1: Learning Heartbeat ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§1 · Learning Heartbeat</div>
+  <div class="lio-grid-4" style="margin-bottom:14px;">
+    <div class="lio-card" title="Total memory records stored since boot. Formula: LMO store count. Each closed trade contributes one record.">
+      <div class="hdr"><span class="dot blue pulse" id="lio-hb-dot"></span>Total Records</div>
+      <div class="lio-big-val" id="lio-total-records">—</div>
+      <div class="lio-sub-val" id="lio-cycle-count">0 cycles</div>
+    </div>
+    <div class="lio-card" title="Patterns that have crystallized (≥20 samples, confidence≥70, 3+ UTC-hour contexts). Source: PatternEngine.formed_patterns()">
+      <div class="hdr"><span class="dot green" id="lio-pat-dot"></span>Formed Patterns</div>
+      <div class="lio-big-val" id="lio-formed-patterns">—</div>
+      <div class="lio-sub-val" id="lio-total-patterns">of — candidates</div>
+    </div>
+    <div class="lio-card" title="Active negative memory entries (temporary + permanent). 3 rollbacks = permanent ban. Source: NegativeMemory.count()">
+      <div class="hdr"><span class="dot red" id="lio-neg-dot"></span>Negative Memories</div>
+      <div class="lio-big-val" id="lio-neg-total">—</div>
+      <div class="lio-sub-val" id="lio-neg-perm">— permanent bans</div>
+    </div>
+    <div class="lio-card" title="Cognition activity score 0–100. Derived from formed/total pattern ratio and cycle count. Higher = more crystallized intelligence.">
+      <div class="hdr"><span class="dot yellow"></span>Cognition Score</div>
+      <div class="lio-big-val" id="lio-cog-score">—</div>
+      <div class="lio-sub-val" id="lio-growth-rate">Growth rate: —</div>
+    </div>
+  </div>
+
+  <!-- ── S2: Pattern Crystallization ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;margin-top:4px;">§2 · Pattern Crystallization Observatory</div>
+  <div class="lio-card" style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span class="hdr" style="margin:0;">All pattern candidates — lifecycle stage</span>
+      <span id="lio-pat-summary" style="font-size:11px;color:#718096;"></span>
+    </div>
+    <div id="lio-pattern-empty" style="color:#4A5568;font-size:12px;padding:18px 0;text-align:center;display:none;">
+      No patterns yet. Records accumulate → FORMING at 10 samples → STABLE at 20 + conf≥70 + 3 contexts.
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="lio-table" id="lio-pattern-table">
+        <thead>
+          <tr>
+            <th>Regime</th><th>Vol</th><th>Symbol</th><th>Strategy</th><th>Dir</th>
+            <th>Samples</th><th>WR%</th><th>Conf%</th><th>Contexts</th><th>Stage</th>
+          </tr>
+        </thead>
+        <tbody id="lio-pattern-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── S3: Negative Memory Observatory ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§3 · Negative Memory Observatory</div>
+  <div class="lio-grid" style="margin-bottom:14px;">
+    <div class="lio-card">
+      <div class="hdr"><span class="dot red"></span>Toxicity Heat Table</div>
+      <div id="lio-neg-empty" style="color:#4A5568;font-size:12px;padding:14px 0;text-align:center;display:none;">No toxic patterns recorded yet.</div>
+      <div style="overflow-x:auto;">
+        <table class="lio-table" id="lio-neg-table">
+          <thead><tr><th>Pattern</th><th>Losses</th><th>Score</th><th>Status</th></tr></thead>
+          <tbody id="lio-neg-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="lio-card" title="Negative memory decay: each cycle multiplies score by 0.90. Permanent bans (3+ rollbacks) never decay. Source: NegativeMemory">
+      <div class="hdr"><span class="dot red"></span>Memory Statistics</div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label">Permanent Bans</span>
+        <span class="lio-gate-val lio-gate-fail" id="lio-neg-perm-stat">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label">Temporary (Decaying)</span>
+        <span class="lio-gate-val" id="lio-neg-temp-stat">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label">Total Tracked</span>
+        <span class="lio-gate-val" id="lio-neg-total-stat">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label">Catastrophic Threshold</span>
+        <span class="lio-gate-val" style="color:#ECC94B;">net_pnl &lt; -$2.00</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label">Permanent Ban After</span>
+        <span class="lio-gate-val" style="color:#FC8181;">3 rollbacks</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label">Decay Rate / Cycle</span>
+        <span class="lio-gate-val" style="color:#A0AEC0;">0.90×</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S4: Ecology Maturity Observatory ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§4 · Ecology Maturity Observatory</div>
+  <div class="lio-grid-4" style="margin-bottom:14px;">
+    <div class="lio-card" title="Total signals evaluated by the PRP-002 OpportunityEcology pipeline. Source: ecology_snapshot().total_evaluated">
+      <div class="hdr"><span class="dot blue"></span>Total Evaluated</div>
+      <div class="lio-big-val" id="lio-eco-evaluated">—</div>
+      <div class="lio-sub-val">PRP-002 signal volume</div>
+    </div>
+    <div class="lio-card" title="Active trading contexts with profitable history (survival_rate, avg_pnl). Source: alpha_context_memory.profitable_count">
+      <div class="hdr"><span class="dot green"></span>Mature Contexts</div>
+      <div class="lio-big-val" id="lio-eco-mature">—</div>
+      <div class="lio-sub-val" id="lio-eco-immature">— immature</div>
+    </div>
+    <div class="lio-card" title="Fraction of signals surviving RSI + context filters. 0.60+ = healthy ecology. Source: signal_density_engine.survival_rate">
+      <div class="hdr"><span class="dot yellow"></span>Survival Rate</div>
+      <div class="lio-big-val" id="lio-eco-survival">—</div>
+      <div class="lio-sub-val" id="lio-eco-sph">— signals/hr</div>
+    </div>
+    <div class="lio-card" title="Signal Truth Density = outcomes_with_truth / total_outcomes. Non-zero confirms PRP-001 is recording outcomes. Source: SignalTruthEngine.truth_density()">
+      <div class="hdr"><span class="dot yellow"></span>Truth Density</div>
+      <div class="lio-big-val" id="lio-eco-truth">—</div>
+      <div class="lio-sub-val" id="lio-eco-health-badge">ecology: —</div>
+    </div>
+  </div>
+
+  <!-- ── S5: RL Intelligence Observatory ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§5 · RL Intelligence Observatory</div>
+  <div class="lio-grid" style="margin-bottom:14px;">
+    <div class="lio-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span class="hdr" style="margin:0;"><span class="dot blue pulse"></span>RL Brain Status</span>
+        <span id="lio-rl-brain-badge" class="lio-state-badge lio-state-IDLE">— IDLE</span>
+      </div>
+      <div class="lio-grid" style="gap:10px;">
+        <div>
+          <div class="lio-label" title="Average Q-value across all visited contexts. Positive = system expects net positive reward.">Avg Q-Value</div>
+          <div style="font-size:18px;font-weight:700;color:#63B3ED;" id="lio-rl-avgq">—</div>
+        </div>
+        <div>
+          <div class="lio-label" title="Intelligence score 0–100 derived from Q-value distribution, mature contexts, and non-toxic ratio.">Intelligence Score</div>
+          <div style="font-size:18px;font-weight:700;color:#68D391;" id="lio-rl-intel">—</div>
+        </div>
+        <div>
+          <div class="lio-label" title="Fraction of decisions using exploration (random) vs exploitation (learned). Lower = more confident.">Explore Ratio</div>
+          <div style="font-size:18px;font-weight:700;color:#ECC94B;" id="lio-rl-explore">—</div>
+        </div>
+        <div>
+          <div class="lio-label" title="Toxic contexts = contexts flagged as consistently negative. Source: rl_engine._toxic_contexts">Toxic Contexts</div>
+          <div style="font-size:18px;font-weight:700;color:#FC8181;" id="lio-rl-toxic">—</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="lio-label">Explore / Exploit balance</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <span style="font-size:10px;color:#718096;min-width:52px;" id="lio-rl-explore-pct">0%</span>
+          <div style="flex:1;background:#2D3748;border-radius:4px;height:8px;overflow:hidden;">
+            <div id="lio-rl-explore-bar" style="height:8px;background:linear-gradient(90deg,#2B6CB0,#63B3ED);border-radius:4px;transition:width .6s;width:100%;"></div>
+          </div>
+          <span style="font-size:10px;color:#718096;min-width:52px;text-align:right;" id="lio-rl-exploit-pct">0%</span>
+        </div>
+      </div>
+    </div>
+    <div class="lio-card" title="Q-value quality distribution: elite (>0.7), high, neutral, penalized (<0). Source: rl_engine quality_distribution">
+      <div class="hdr"><span class="dot blue"></span>Q-Value Distribution &amp; Session Intelligence</div>
+      <div id="lio-rl-quality" style="margin-bottom:10px;"></div>
+      <div class="hdr" style="margin-top:10px;"><span class="dot blue"></span>Session Intelligence</div>
+      <table class="lio-table" id="lio-rl-session-table" style="font-size:11px;">
+        <thead><tr><th>Session</th><th>Contexts</th><th>Avg Q</th><th>Profitable</th></tr></thead>
+        <tbody id="lio-rl-session-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── S6: Learning Topology Map ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§6 · Learning Topology Map</div>
+  <div class="lio-card" style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span class="hdr" style="margin:0;">Regime × Strategy Opportunity Geography</span>
+      <div style="display:flex;gap:8px;font-size:10px;">
+        <span style="background:#1C4532;color:#68D391;padding:2px 8px;border-radius:10px;">■ Profitable</span>
+        <span style="background:#2D3748;color:#A0AEC0;padding:2px 8px;border-radius:10px;">■ Neutral</span>
+        <span style="background:#742A2A;color:#FC8181;padding:2px 8px;border-radius:10px;">■ Toxic</span>
+        <span style="background:#1A202C;color:#4A5568;padding:2px 8px;border-radius:10px;">■ Unexplored</span>
+      </div>
+    </div>
+    <div id="lio-topology-empty" style="color:#4A5568;font-size:12px;padding:24px 0;text-align:center;display:none;">
+      Topology map forms as trades close and patterns accumulate.
+    </div>
+    <div id="lio-topology-grid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+
+  <!-- ── S7: Cognitive Compression Observatory ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§7 · Cognitive Compression Observatory</div>
+  <div class="lio-grid" style="margin-bottom:14px;">
+    <div class="lio-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <span class="hdr" style="margin:0;"><span class="dot yellow"></span>Signal Noise Meter</span>
+        <span id="lio-noise-badge" class="lio-state-badge lio-state-DORMANT">—</span>
+      </div>
+      <div style="position:relative;margin-bottom:18px;">
+        <div class="lio-noise-meter">
+          <div class="lio-noise-cursor" id="lio-noise-cursor" style="left:0%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:#4A5568;">
+          <span>HEALTHY</span><span>NOISY</span><span>SATURATED</span><span>CRITICAL</span>
+        </div>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label" title="1 - truth_density. High = many signals are noise.">Signal Noise Ratio</span>
+        <span class="lio-gate-val" id="lio-noise-ratio">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label" title="Fraction of pattern candidates that have crystallized to STABLE.">Compression Ratio</span>
+        <span class="lio-gate-val" id="lio-compression-ratio">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label" title="Average samples per pattern candidate (high = repetitive learning).">Avg Samples/Pattern</span>
+        <span class="lio-gate-val" id="lio-avg-samples">—</span>
+      </div>
+    </div>
+    <div class="lio-card">
+      <div class="hdr"><span class="dot yellow"></span>Activity Metrics</div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label" title="Total signals seen by SignalTruthEngine.">Total Signals</span>
+        <span class="lio-gate-val" id="lio-total-signals">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label" title="Signals with resolved outcome (truth recorded).">Resolved Outcomes</span>
+        <span class="lio-gate-val" id="lio-outcomes">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label" title="Signals suppressed by RSI or context filters (PRP-002).">Suppressed Evals</span>
+        <span class="lio-gate-val" id="lio-suppressed">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label" title="Cognitive activity load 0–1. High = system has high crystallization efficiency.">Cognitive Load</span>
+        <span class="lio-gate-val" id="lio-cog-load">—</span>
+      </div>
+      <div class="lio-gate-row">
+        <span class="lio-gate-label">Stable (Compressed) Patterns</span>
+        <span class="lio-gate-val lio-gate-pass" id="lio-compressed">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S8: Sovereign Readiness Meter ── -->
+  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§8 · Sovereign Governance Readiness</div>
+  <div class="lio-card" style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span class="hdr" style="margin:0;"><span class="dot" id="lio-sov-dot"></span>PRP-003A Activation Gate — MetaGovernanceSovereign</span>
+      <span id="lio-sov-badge" class="lio-state-badge lio-state-NOT_READY">NOT READY</span>
+    </div>
+    <div id="lio-sov-gates"></div>
+    <div style="margin-top:12px;padding:10px 12px;background:#0D1117;border-radius:8px;border-left:3px solid #2D3748;">
+      <div style="font-size:10px;color:#4A5568;line-height:1.7;">
+        <strong style="color:#718096;">SOVEREIGN_READY</strong> requires all 4 gates to pass simultaneously.
+        MetaGovernanceSovereign must NOT be activated until this meter reads SOVEREIGN_READY.
+        This is a read-only observational indicator — it does not activate anything automatically.
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-lio -->
+
 <!-- ══ VAULT MODAL ════════════════════════════════════════════════════════════ -->
 <div id="vault-overlay" onclick="closeVaultModal(event)">
   <div id="vault-modal" onclick="event.stopPropagation()">
@@ -1659,7 +2039,7 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['overview','dbo','combat','report','perf'].forEach(t => {
+  ['overview','dbo','combat','report','perf','lio'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
@@ -1687,6 +2067,9 @@ function switchTab(name) {
     loadPerfExplorer();
     loadAEE();
     loadCFE();
+  }
+  if (name === 'lio') {
+    loadLIO();
   }
 }
 
@@ -3377,6 +3760,9 @@ window.addEventListener('DOMContentLoaded', () => {
   // Mock update loop (runs always, no-op when useMock=false)
   setInterval(mockTick_, 2400);
 
+  // LIO: auto-refresh every 3s when tab is active
+  setInterval(() => { if (_activeTab === 'lio') loadLIO(); }, 3000);
+
   // Load vault status on boot (applies red theme if LIVE was active before refresh)
   loadVaultStatus();
 
@@ -4133,6 +4519,302 @@ async function applyExecMode() {
   } finally {
     btn.disabled = false;
   }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// LIO: Learning Intelligence Observatory
+// ════════════════════════════════════════════════════════════════════════════
+
+async function loadLIO() {
+  const BASE = API + '/api/learning-intelligence';
+  const safe = async (url) => {
+    try { const r = await fetch(url, {signal: AbortSignal.timeout(4000)}); return r.ok ? r.json() : null; }
+    catch { return null; }
+  };
+
+  const [summary, patterns, negMem, ecology, rl, topology, cognition, sov] = await Promise.all([
+    safe(BASE + '/summary'),
+    safe(BASE + '/patterns'),
+    safe(BASE + '/negative-memory'),
+    safe(BASE + '/ecology'),
+    safe(BASE + '/rl'),
+    safe(BASE + '/topology'),
+    safe(BASE + '/cognition'),
+    safe(BASE + '/sovereign-readiness'),
+  ]);
+
+  const ts = new Date().toLocaleTimeString();
+  const el = document.getElementById('lio-last-refresh');
+  if (el) el.textContent = '· last refresh ' + ts;
+
+  _lioRenderSummary(summary);
+  _lioRenderPatterns(patterns);
+  _lioRenderNegMem(negMem);
+  _lioRenderEcology(ecology);
+  _lioRenderRL(rl);
+  _lioRenderTopology(topology);
+  _lioRenderCognition(cognition);
+  _lioRenderSovereign(sov);
+}
+
+function _lioSet(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val ?? '—';
+}
+
+function _lioStateBadge(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const cls = 'lio-state-badge lio-state-' + (state || 'DORMANT');
+  el.className = cls;
+  el.textContent = state || '—';
+}
+
+function _lioRenderSummary(d) {
+  if (!d) return;
+  _lioStateBadge('lio-heartbeat-badge', d.heartbeat_state);
+  _lioSet('lio-total-records',    d.total_records ?? '—');
+  _lioSet('lio-cycle-count',      (d.lmo_cycle_count ?? '—') + ' cycles');
+  _lioSet('lio-formed-patterns',  d.patterns_formed ?? '—');
+  _lioSet('lio-total-patterns',   'of ' + (d.total_patterns ?? '—') + ' candidates');
+  _lioSet('lio-neg-total',        d.active_negative_memories ?? '—');
+  _lioSet('lio-neg-perm',         (d.permanent_bans ?? '—') + ' permanent bans');
+  _lioSet('lio-cog-score',        d.cognition_activity_score ?? '—');
+  _lioSet('lio-growth-rate',      'Growth rate: ' + (d.memory_growth_rate ?? '—') + '/cycle');
+
+  const dotHb = document.getElementById('lio-hb-dot');
+  if (dotHb) {
+    dotHb.className = 'dot pulse ' + (d.total_records > 0 ? 'blue' : '');
+  }
+  const dotPat = document.getElementById('lio-pat-dot');
+  if (dotPat) dotPat.className = 'dot ' + (d.patterns_formed > 0 ? 'green' : '');
+  const dotNeg = document.getElementById('lio-neg-dot');
+  if (dotNeg) dotNeg.className = 'dot ' + (d.active_negative_memories > 0 ? 'red' : '');
+}
+
+function _lioRenderPatterns(d) {
+  if (!d) return;
+  _lioSet('lio-pat-summary',
+    (d.formed_patterns ?? 0) + ' stable · ' + (d.total_patterns ?? 0) + ' total candidates');
+  const tbody = document.getElementById('lio-pattern-tbody');
+  const empty = document.getElementById('lio-pattern-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const pats = d.patterns || [];
+  if (pats.length === 0) { if (empty) empty.style.display='block'; return; }
+  if (empty) empty.style.display='none';
+  pats.forEach(p => {
+    const tr = document.createElement('tr');
+    const wr = (p.win_rate * 100).toFixed(1);
+    const conf = (p.confidence || 0).toFixed(1);
+    tr.innerHTML = `
+      <td>${p.regime}</td>
+      <td>${p.volatility}</td>
+      <td style="color:#63B3ED;">${p.instrument}</td>
+      <td style="color:#A0AEC0;">${p.strategy}</td>
+      <td>${p.direction === 'UP' ? '▲ LONG' : '▼ SHORT'}</td>
+      <td>${p.samples}/20</td>
+      <td>${wr}%</td>
+      <td style="color:${p.confidence>=70?'#68D391':'#ECC94B'}">${conf}%</td>
+      <td>${p.context_count}/3</td>
+      <td><span class="lio-stage lio-stage-${p.stage}">${p.stage}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function _lioRenderNegMem(d) {
+  if (!d) return;
+  const counts = d.counts || {};
+  _lioSet('lio-neg-perm-stat',  counts.permanent ?? '—');
+  _lioSet('lio-neg-temp-stat',  counts.temporary ?? '—');
+  _lioSet('lio-neg-total-stat', counts.total ?? '—');
+
+  const tbody = document.getElementById('lio-neg-tbody');
+  const empty = document.getElementById('lio-neg-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const entries = d.entries || [];
+  if (entries.length === 0) { if (empty) empty.style.display='block'; return; }
+  if (empty) empty.style.display='none';
+  entries.slice(0, 20).forEach(e => {
+    const tr = document.createElement('tr');
+    const parts = (e.key_str || '').split('|');
+    const label = parts.length >= 4 ? parts[2] + ' / ' + parts[3] : e.key_str;
+    const score = (e.score || 0).toFixed(2);
+    tr.innerHTML = `
+      <td style="color:#CBD5E0;max-width:200px;overflow:hidden;text-overflow:ellipsis;" title="${e.key_str}">${label}</td>
+      <td style="color:#FC8181;">${e.rollbacks}</td>
+      <td>${score}</td>
+      <td><span class="lio-neg-status lio-neg-${e.status}">${e.status?.replace('_', ' ')}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function _lioRenderEcology(d) {
+  if (!d) return;
+  _lioSet('lio-eco-evaluated', d.total_evaluated ?? '—');
+  _lioSet('lio-eco-mature',    d.mature_contexts ?? '—');
+  _lioSet('lio-eco-immature',  (d.immature_contexts ?? '—') + ' immature');
+  const surv = d.survival_rate != null ? (d.survival_rate * 100).toFixed(1) + '%' : '—';
+  _lioSet('lio-eco-survival',  surv);
+  _lioSet('lio-eco-sph',       (d.signals_per_hr ?? '—') + ' signals/hr');
+  const td = d.truth_density != null ? d.truth_density.toFixed(4) : '—';
+  _lioSet('lio-eco-truth',     td);
+  const healthEl = document.getElementById('lio-eco-health-badge');
+  if (healthEl) {
+    const col = d.ecology_health === 'MATURE' ? '#68D391'
+              : d.ecology_health === 'FORMING' ? '#63B3ED'
+              : d.ecology_health === 'STARVATION' || d.ecology_health === 'COLLAPSING' ? '#FC8181'
+              : '#ECC94B';
+    healthEl.innerHTML = `ecology: <strong style="color:${col}">${d.ecology_health || '—'}</strong>`;
+  }
+}
+
+function _lioRenderRL(d) {
+  if (!d) return;
+  _lioStateBadge('lio-rl-brain-badge', d.brain_status);
+  _lioSet('lio-rl-avgq',    d.avg_q != null ? d.avg_q.toFixed(4) : '—');
+  _lioSet('lio-rl-intel',   d.intelligence_score != null ? d.intelligence_score.toFixed(1) : '—');
+  const exploreR = d.explore_ratio != null ? d.explore_ratio : 1.0;
+  const exploitR = d.exploit_ratio != null ? d.exploit_ratio : 0.0;
+  _lioSet('lio-rl-explore', (exploreR * 100).toFixed(1) + '%');
+  _lioSet('lio-rl-toxic',   d.toxic_count ?? '—');
+  _lioSet('lio-rl-explore-pct', 'Exp: ' + (exploreR * 100).toFixed(0) + '%');
+  _lioSet('lio-rl-exploit-pct', 'Expl: ' + (exploitR * 100).toFixed(0) + '%');
+  const bar = document.getElementById('lio-rl-explore-bar');
+  if (bar) bar.style.width = (exploreR * 100).toFixed(1) + '%';
+
+  // Quality distribution
+  const qd = d.quality_distribution || {};
+  const qEl = document.getElementById('lio-rl-quality');
+  if (qEl) {
+    const total = (qd.elite||0) + (qd.high||0) + (qd.neutral||0) + (qd.penalized||0);
+    const pct = v => total ? ((v/total)*100).toFixed(1)+'%' : '0%';
+    qEl.innerHTML = `
+      <div style="display:flex;gap:4px;margin-bottom:5px;">
+        <div style="flex:${qd.elite||0};background:#276749;height:8px;border-radius:2px;" title="Elite: ${qd.elite}"></div>
+        <div style="flex:${qd.high||0};background:#2B6CB0;height:8px;border-radius:2px;" title="High: ${qd.high}"></div>
+        <div style="flex:${qd.neutral||0};background:#4A5568;height:8px;border-radius:2px;" title="Neutral: ${qd.neutral}"></div>
+        <div style="flex:${qd.penalized||0};background:#9B2C2C;height:8px;border-radius:2px;" title="Penalized: ${qd.penalized}"></div>
+      </div>
+      <div style="display:flex;gap:10px;font-size:10px;color:#718096;">
+        <span style="color:#68D391;">● Elite ${pct(qd.elite||0)}</span>
+        <span style="color:#63B3ED;">● High ${pct(qd.high||0)}</span>
+        <span style="color:#718096;">● Neutral ${pct(qd.neutral||0)}</span>
+        <span style="color:#FC8181;">● Penalized ${pct(qd.penalized||0)}</span>
+      </div>`;
+  }
+
+  // Session table
+  const sessData = d.session_intelligence || {};
+  const sTbody = document.getElementById('lio-rl-session-tbody');
+  if (sTbody) {
+    sTbody.innerHTML = '';
+    Object.entries(sessData).forEach(([sess, sv]) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${sess}</td><td>${sv.n_contexts||0}</td><td>${(sv.avg_q||0).toFixed(4)}</td><td style="color:#68D391;">${sv.profitable||0}</td>`;
+      sTbody.appendChild(tr);
+    });
+  }
+}
+
+function _lioRenderTopology(d) {
+  if (!d) return;
+  const grid = document.getElementById('lio-topology-grid');
+  const empty = document.getElementById('lio-topology-empty');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const zones = d.zones || {};
+  const all = [
+    ...(zones.profitable || []).map(z => ({...z, zone: 'profitable'})),
+    ...(zones.neutral    || []).map(z => ({...z, zone: 'neutral'})),
+    ...(zones.toxic      || []).map(z => ({...z, zone: 'toxic'})),
+    ...(zones.unexplored || []).map(z => ({...z, zone: 'unexplored'})),
+  ];
+  if (all.length === 0) { if (empty) empty.style.display='block'; return; }
+  if (empty) empty.style.display='none';
+  all.forEach(cell => {
+    const div = document.createElement('div');
+    div.className = 'lio-heatmap-cell lio-zone-' + cell.zone;
+    const conf = cell.avg_conf != null ? cell.avg_conf.toFixed(1) + '%' : '?%';
+    div.innerHTML = `<span style="font-size:10px;font-weight:600;">${cell.regime}</span>
+      <span style="font-size:9px;opacity:.8;">${cell.parameter}</span>
+      <span style="font-size:11px;">${conf}</span>
+      <span style="font-size:9px;opacity:.6;">${cell.count} obs</span>`;
+    div.title = `Regime: ${cell.regime}\nStrategy: ${cell.parameter}\nAvg Conf: ${conf}\nObservations: ${cell.count}\nZone: ${cell.zone.toUpperCase()}`;
+    grid.appendChild(div);
+  });
+}
+
+function _lioRenderCognition(d) {
+  if (!d) return;
+  _lioStateBadge('lio-noise-badge', d.noise_state);
+
+  const noiseRatio = d.signal_noise_ratio ?? 0;
+  const cursor = document.getElementById('lio-noise-cursor');
+  if (cursor) cursor.style.left = Math.min(95, noiseRatio * 100).toFixed(1) + '%';
+
+  _lioSet('lio-noise-ratio',        (noiseRatio * 100).toFixed(1) + '%');
+  _lioSet('lio-compression-ratio',  ((d.compression_ratio ?? 0) * 100).toFixed(1) + '%');
+  _lioSet('lio-avg-samples',        d.repeated_signal_loops ?? '—');
+  _lioSet('lio-total-signals',      d.total_signals ?? '—');
+  _lioSet('lio-outcomes',           d.total_outcomes ?? '—');
+  _lioSet('lio-suppressed',         d.suppressed_redundant_evals ?? '—');
+  _lioSet('lio-cog-load',           ((d.cognitive_activity_load ?? 0) * 100).toFixed(1) + '%');
+  _lioSet('lio-compressed',         d.compressed_patterns ?? '—');
+}
+
+function _lioRenderSovereign(d) {
+  if (!d) return;
+  _lioStateBadge('lio-sov-badge', d.state);
+
+  const dot = document.getElementById('lio-sov-dot');
+  if (dot) {
+    dot.className = 'dot' + (d.state === 'SOVEREIGN_READY' ? ' green pulse'
+                    : d.pass_count > 0 ? ' yellow' : '');
+  }
+
+  const container = document.getElementById('lio-sov-gates');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const gates = d.gates || {};
+  Object.entries(gates).forEach(([key, gate]) => {
+    const pass = gate.pass;
+    const pct  = typeof gate.current === 'number'
+                 ? Math.min(100, (gate.current / Math.max(gate.target, 0.0001)) * 100).toFixed(0)
+                 : (pass ? 100 : 0);
+    const barColor = pass ? 'lio-prog-green' : 'lio-prog-yellow';
+    container.innerHTML += `
+      <div class="lio-gate-row">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="lio-gate-label">${gate.label || key}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="lio-gate-val">${gate.current}</span>
+              <span style="color:#4A5568;font-size:10px;">/ ${gate.target}</span>
+              <span class="lio-gate-check">${pass ? '✅' : '❌'}</span>
+            </div>
+          </div>
+          <div class="lio-progress-track" style="margin-top:4px;">
+            <div class="lio-progress-fill ${barColor}" style="width:${pct}%;"></div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  const passCount = d.pass_count ?? 0;
+  const total = d.total_gates ?? 4;
+  container.innerHTML += `
+    <div style="margin-top:10px;display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;background:#1A202C;border-radius:4px;height:10px;overflow:hidden;">
+        <div style="height:10px;background:${passCount===total?'linear-gradient(90deg,#276749,#48BB78)':'linear-gradient(90deg,#2B6CB0,#63B3ED)'};
+             border-radius:4px;width:${(passCount/total*100).toFixed(0)}%;transition:width .8s;"></div>
+      </div>
+      <span style="font-size:11px;color:#A0AEC0;white-space:nowrap;">${passCount}/${total} gates</span>
+    </div>`;
 }
 </script>
 
