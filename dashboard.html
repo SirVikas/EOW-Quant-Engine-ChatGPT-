@@ -4818,7 +4818,7 @@ function _lioRenderSovereign(d) {
   const gates = d.gates || {};
   Object.entries(gates).forEach(([key, gate]) => {
     const pass = gate.pass;
-    const pct  = typeof gate.current === 'number'
+    const pct  = typeof gate.current === 'number' && typeof gate.target === 'number'
                  ? Math.min(100, (gate.current / Math.max(gate.target, 0.0001)) * 100).toFixed(0)
                  : (pass ? 100 : 0);
     const barColor = pass ? 'lio-prog-green' : 'lio-prog-yellow';

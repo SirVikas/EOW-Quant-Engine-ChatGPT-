@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from core.learning_memory.memory_store   import MemoryStore
 from core.learning_memory.pattern_engine import PatternEngine, PatternKey
+from core.learning_memory.confidence_updater import ConfidenceUpdater
 
 INDEX_PATH = "reports/learning_memory/pattern_index.json"
 
@@ -32,6 +33,10 @@ class PatternIndexer:
         records = self._store.load_all()
         for r in records:
             self._engine.ingest(r)
+        # Recompute confidence for all loaded patterns — ingest() only updates
+        # sample counts; ConfidenceUpdater was never called during replay.
+        # Use len(records) as cycle proxy so recency decay is proportional.
+        ConfidenceUpdater().update_all(self._engine.all_patterns(), len(records))
         self._save_index()
         return len(records)
 
