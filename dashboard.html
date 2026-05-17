@@ -367,110 +367,144 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 
 /* ── LIO: Learning Intelligence Observatory ── */
-.lio-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.lio-grid   { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .lio-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
 .lio-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
 @media(max-width:900px){ .lio-grid,.lio-grid-3,.lio-grid-4 { grid-template-columns:1fr; } }
 
+/* Cards: same radius, border and white background as existing .card */
 .lio-card {
-  background:#0F1117; border:1px solid #2D3748; border-radius:10px;
-  padding:16px 18px; color:#E2E8F0;
+  background:#fff; border:1px solid var(--border);
+  border-radius:var(--card-r); padding:14px 18px;
 }
 .lio-card .hdr {
-  font-size:10px; letter-spacing:.08em; text-transform:uppercase;
-  color:#718096; margin-bottom:10px; display:flex; align-items:center; gap:6px;
+  font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:6px;
 }
-.lio-card .hdr .dot { width:7px; height:7px; border-radius:50%; background:#4A5568; display:inline-block; }
-.lio-card .hdr .dot.green  { background:#48BB78; box-shadow:0 0 6px #48BB78; }
-.lio-card .hdr .dot.yellow { background:#ECC94B; box-shadow:0 0 6px #ECC94B; }
-.lio-card .hdr .dot.red    { background:#FC8181; box-shadow:0 0 6px #FC8181; }
-.lio-card .hdr .dot.blue   { background:#63B3ED; box-shadow:0 0 6px #63B3ED; }
-.lio-card .hdr .dot.pulse  { animation:liopulse 1.4s ease-in-out infinite; }
-@keyframes liopulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.3)} }
+/* Status dots use the same palette as the rest of the dashboard */
+.lio-card .hdr .dot {
+  width:7px; height:7px; border-radius:50%; background:#CBD5E0; display:inline-block;
+}
+.lio-card .hdr .dot.green  { background:var(--c-green); }
+.lio-card .hdr .dot.blue   { background:var(--c-blue);  }
+.lio-card .hdr .dot.red    { background:var(--c-red);   }
+.lio-card .hdr .dot.amber  { background:var(--c-amber); }
+.lio-card .hdr .dot.purple { background:var(--c-purple);}
+.lio-card .hdr .dot.pulse  { animation:pulse 1.4s ease-in-out infinite; }
 
-.lio-big-val { font-size:28px; font-weight:700; color:#F7FAFC; line-height:1; }
-.lio-sub-val { font-size:13px; color:#A0AEC0; margin-top:4px; }
-.lio-label   { font-size:10px; color:#718096; text-transform:uppercase; letter-spacing:.07em; margin-top:8px; }
+/* Numeric display — matches existing .big / .sub */
+.lio-big-val { font-size:24px; font-weight:600; color:var(--text); line-height:1; }
+.lio-sub-val { font-size:11px; color:var(--muted); margin-top:4px; }
+.lio-label   { font-size:10px; font-weight:600; color:var(--muted);
+               text-transform:uppercase; letter-spacing:.06em; margin-top:8px; }
 
+/* State badges — same .tag pill style already used across the dashboard */
 .lio-state-badge {
-  display:inline-flex; align-items:center; gap:5px;
-  padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700;
-  letter-spacing:.06em; text-transform:uppercase;
+  display:inline-flex; align-items:center;
+  padding:3px 10px; border-radius:20px; font-size:10px; font-weight:600;
+  letter-spacing:.05em; text-transform:uppercase;
 }
-.lio-state-DORMANT    { background:#1A202C; color:#718096; border:1px solid #4A5568; }
-.lio-state-LEARNING   { background:#1A365D; color:#63B3ED; border:1px solid #2B6CB0; }
-.lio-state-ACTIVE     { background:#1C4532; color:#68D391; border:1px solid #276749; }
-.lio-state-SATURATED  { background:#44337A; color:#D6BCFA; border:1px solid #6B46C1; }
-.lio-state-DEGRADED   { background:#742A2A; color:#FC8181; border:1px solid #C53030; }
-.lio-state-IDLE       { background:#1A202C; color:#718096; border:1px solid #4A5568; }
-.lio-state-EXPLORING  { background:#1A365D; color:#63B3ED; border:1px solid #2B6CB0; }
-.lio-state-CONVERGING { background:#1C4532; color:#68D391; border:1px solid #276749; }
-.lio-state-NEGATIVE_CONVERGENCE { background:#742A2A; color:#FC8181; border:1px solid #C53030; }
-.lio-state-COLLAPSED  { background:#742A2A; color:#FEB2B2; border:1px solid #9B2C2C; }
-.lio-state-NOT_READY  { background:#1A202C; color:#718096; border:1px solid #4A5568; }
-.lio-state-ECOLOGY_FORMING { background:#2D3748; color:#A0AEC0; border:1px solid #4A5568; }
-.lio-state-LEARNING_ACTIVE { background:#1A365D; color:#63B3ED; border:1px solid #2B6CB0; }
-.lio-state-SOVEREIGN_READY { background:#1C4532; color:#68D391; border:1px solid #276749; animation:liopulse 2s infinite; }
+.lio-state-DORMANT             { background:#EDF2F7; color:#718096; }
+.lio-state-LEARNING            { background:var(--sky);   color:var(--c-blue);   }
+.lio-state-ACTIVE              { background:var(--sage);  color:var(--c-green);  }
+.lio-state-SATURATED           { background:var(--lav);   color:var(--c-purple); }
+.lio-state-DEGRADED            { background:var(--peach); color:var(--c-red);    }
+.lio-state-IDLE                { background:#EDF2F7;      color:#718096;          }
+.lio-state-EXPLORING           { background:var(--sky);   color:var(--c-blue);   }
+.lio-state-LEARNING            { background:var(--sky);   color:var(--c-blue);   }
+.lio-state-CONVERGING          { background:var(--sage);  color:var(--c-green);  }
+.lio-state-NEGATIVE_CONVERGENCE{ background:var(--peach); color:var(--c-red);    }
+.lio-state-COLLAPSED           { background:var(--peach); color:var(--c-red);    }
+.lio-state-NOT_READY           { background:#EDF2F7;      color:#718096;          }
+.lio-state-ECOLOGY_FORMING     { background:var(--lem);   color:var(--c-amber);  }
+.lio-state-LEARNING_ACTIVE     { background:var(--sky);   color:var(--c-blue);   }
+.lio-state-SOVEREIGN_READY     { background:var(--sage);  color:var(--c-green); animation:pulse 2s infinite; }
+.lio-state-HEALTHY             { background:var(--sage);  color:var(--c-green);  }
+.lio-state-NOISY               { background:var(--lem);   color:var(--c-amber);  }
+.lio-state-SATURATED           { background:var(--lav);   color:var(--c-purple); }
+.lio-state-CRITICAL            { background:var(--peach); color:var(--c-red);    }
+.lio-state-INITIALIZING        { background:#EDF2F7;      color:#718096;          }
+.lio-state-CONVERGED           { background:var(--sage);  color:var(--c-green);  }
+.lio-state-IN_PROGRESS         { background:var(--sky);   color:var(--c-blue);   }
+.lio-state-DIVERGING           { background:var(--peach); color:var(--c-red);    }
 
-.lio-progress-track { background:#2D3748; border-radius:4px; height:6px; overflow:hidden; margin-top:5px; }
+/* Progress bars — same muted track, colored fills */
+.lio-progress-track { background:#EDF2F7; border-radius:4px; height:6px; overflow:hidden; margin-top:5px; }
 .lio-progress-fill  { height:6px; border-radius:4px; transition:width .6s ease; }
-.lio-prog-green  { background:linear-gradient(90deg,#276749,#48BB78); }
-.lio-prog-blue   { background:linear-gradient(90deg,#2B6CB0,#63B3ED); }
-.lio-prog-yellow { background:linear-gradient(90deg,#744210,#ECC94B); }
-.lio-prog-red    { background:linear-gradient(90deg,#9B2C2C,#FC8181); }
+.lio-prog-green  { background:linear-gradient(90deg,var(--c-green),#48BB78); }
+.lio-prog-blue   { background:linear-gradient(90deg,var(--c-blue), #63B3ED); }
+.lio-prog-yellow { background:linear-gradient(90deg,var(--c-amber),#ECC94B); }
+.lio-prog-red    { background:linear-gradient(90deg,var(--c-red),  #FC8181); }
 
+/* Tables — same light styling as existing dashboard tables */
 .lio-table { width:100%; border-collapse:collapse; font-size:12px; }
-.lio-table th { color:#718096; text-transform:uppercase; font-size:10px; letter-spacing:.06em;
-  text-align:left; padding:5px 8px; border-bottom:1px solid #2D3748; }
-.lio-table td { padding:6px 8px; border-bottom:1px solid #1A202C; color:#CBD5E0; }
-.lio-table tr:hover td { background:#171D2A; }
+.lio-table th {
+  color:var(--muted); text-transform:uppercase; font-size:10px; font-weight:600;
+  letter-spacing:.06em; text-align:left; padding:5px 8px;
+  border-bottom:1px solid var(--border);
+}
+.lio-table td { padding:6px 8px; border-bottom:1px solid rgba(0,0,0,.04); color:var(--text); }
+.lio-table tr:hover td { background:#F7FBFB; }
 
+/* Pattern stage pills — use existing .tag palette */
 .lio-stage { display:inline-block; padding:2px 7px; border-radius:10px;
-  font-size:10px; font-weight:700; letter-spacing:.05em; }
-.lio-stage-OBSERVED { background:#1A202C; color:#718096; }
-.lio-stage-FORMING  { background:#1A365D; color:#63B3ED; }
-.lio-stage-STABLE   { background:#1C4532; color:#68D391; }
-.lio-stage-TOXIC    { background:#744210; color:#F6AD55; }
-.lio-stage-BANNED   { background:#742A2A; color:#FC8181; }
+  font-size:10px; font-weight:600; letter-spacing:.04em; }
+.lio-stage-OBSERVED { background:#EDF2F7; color:#718096; }
+.lio-stage-FORMING  { background:var(--sky);   color:var(--c-blue);   }
+.lio-stage-STABLE   { background:var(--sage);  color:var(--c-green);  }
+.lio-stage-TOXIC    { background:var(--lem);   color:var(--c-amber);  }
+.lio-stage-BANNED   { background:var(--peach); color:var(--c-red);    }
 
+/* Negative memory status pills */
 .lio-neg-status { display:inline-block; padding:2px 7px; border-radius:10px;
-  font-size:10px; font-weight:700; }
-.lio-neg-WARNING          { background:#2D3748; color:#CBD5E0; }
-.lio-neg-TOXIC            { background:#744210; color:#F6AD55; }
-.lio-neg-QUARANTINED      { background:#652B19; color:#FBD38D; }
-.lio-neg-PERMANENTLY_BANNED { background:#742A2A; color:#FC8181; }
+  font-size:10px; font-weight:600; }
+.lio-neg-WARNING          { background:#EDF2F7;      color:#718096;          }
+.lio-neg-TOXIC            { background:var(--lem);   color:var(--c-amber);  }
+.lio-neg-QUARANTINED      { background:#FEEBC8;      color:#C05621;          }
+.lio-neg-PERMANENTLY_BANNED { background:var(--peach); color:var(--c-red);  }
 
-.lio-gate-row { display:flex; align-items:center; justify-content:space-between;
-  padding:8px 0; border-bottom:1px solid #2D3748; }
+/* Gate rows — same style as .genome-row */
+.lio-gate-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:7px 0; border-bottom:1px solid rgba(0,0,0,.05);
+}
 .lio-gate-row:last-child { border-bottom:none; }
-.lio-gate-label { font-size:12px; color:#A0AEC0; }
-.lio-gate-val   { font-size:12px; font-weight:700; color:#F7FAFC; }
-.lio-gate-pass  { color:#48BB78; }
-.lio-gate-fail  { color:#FC8181; }
+.lio-gate-label { font-size:12px; color:var(--muted); }
+.lio-gate-val   { font-size:12px; font-weight:600; color:var(--text); }
+.lio-gate-pass  { color:var(--c-green); }
+.lio-gate-fail  { color:var(--c-red);   }
 .lio-gate-check { font-size:14px; }
 
+/* Topology heatmap cells */
 .lio-heatmap-cell {
   display:inline-flex; flex-direction:column; align-items:center;
-  justify-content:center; border-radius:6px; padding:6px 8px; font-size:10px;
-  font-weight:700; min-width:70px; text-align:center;
-  border:1px solid transparent;
+  justify-content:center; border-radius:9px; padding:7px 10px;
+  font-size:10px; font-weight:600; min-width:76px; text-align:center;
+  border:1px solid var(--border);
 }
-.lio-zone-profitable { background:#1C4532; color:#68D391; border-color:#276749; }
-.lio-zone-neutral    { background:#2D3748; color:#A0AEC0; border-color:#4A5568; }
-.lio-zone-toxic      { background:#742A2A; color:#FC8181; border-color:#C53030; }
-.lio-zone-unexplored { background:#1A202C; color:#4A5568; border-color:#2D3748; }
+.lio-zone-profitable { background:var(--sage);  color:var(--c-green);  border-color:#9AE6B4; }
+.lio-zone-neutral    { background:#EDF2F7;      color:#718096;          border-color:#CBD5E0; }
+.lio-zone-toxic      { background:var(--peach); color:var(--c-red);    border-color:#FEB2B2; }
+.lio-zone-unexplored { background:#F7FAFC;      color:#A0AEC0;          border-color:#E2E8F0; }
 
-.lio-ring-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
-.lio-ring { width:80px; height:80px; }
+/* Noise meter — gradient from green → amber → red on white track */
+.lio-noise-meter {
+  height:10px; border-radius:6px; overflow:hidden; position:relative;
+  background:linear-gradient(90deg, #9AE6B4 0%, #FEFCBF 50%, #FEB2B2 100%);
+  border:1px solid var(--border);
+}
+.lio-noise-cursor {
+  position:absolute; top:-3px; width:3px; height:16px;
+  background:var(--text); border-radius:2px;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
+  transition:left .6s ease;
+}
 
-.lio-noise-meter { height:12px; border-radius:6px; overflow:hidden;
-  background:linear-gradient(90deg,#276749 0%,#ECC94B 50%,#C53030 100%);
-  position:relative; }
-.lio-noise-cursor { position:absolute; top:-4px; width:4px; height:20px;
-  background:#F7FAFC; border-radius:2px; box-shadow:0 0 6px #fff8;
-  transition:left .6s ease; }
-
-.lio-refresh-badge { font-size:10px; color:#4A5568; }
+.lio-refresh-badge { font-size:10px; color:var(--muted); }
+.lio-sec-hdr {
+  font-size:10px; font-weight:600; color:var(--muted);
+  letter-spacing:.07em; text-transform:uppercase; margin-bottom:8px; margin-top:4px;
+}
 </style>
 </head>
 
@@ -1588,15 +1622,15 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 <!-- ══ TAB: LIO ═══════════════════════════════════════════════════════════════ -->
 <div id="tab-lio" class="tab-panel">
-<div class="main" style="background:#080B12;min-height:100vh;padding:18px;">
+<div class="main">
 
   <!-- Header bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+  <div class="card" style="background:var(--sky);display:flex;align-items:center;justify-content:space-between;">
     <div>
-      <div style="font-size:16px;font-weight:700;color:#E2E8F0;letter-spacing:.04em;">
+      <div style="font-size:14px;font-weight:600;color:var(--text);letter-spacing:.02em;">
         🧬 Learning Intelligence Observatory
       </div>
-      <div style="font-size:11px;color:#4A5568;margin-top:3px;">
+      <div style="font-size:11px;color:var(--muted);margin-top:3px;">
         Read-only observational telemetry · LRN-001 pipeline · PRP-003A readiness
         <span class="lio-refresh-badge" id="lio-last-refresh">· refreshing…</span>
       </div>
@@ -1605,7 +1639,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   </div>
 
   <!-- ── S1: Learning Heartbeat ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§1 · Learning Heartbeat</div>
+  <div class="lio-sec-hdr">§1 · Learning Heartbeat</div>
   <div class="lio-grid-4" style="margin-bottom:14px;">
     <div class="lio-card" title="Total memory records stored since boot. Formula: LMO store count. Each closed trade contributes one record.">
       <div class="hdr"><span class="dot blue pulse" id="lio-hb-dot"></span>Total Records</div>
@@ -1630,13 +1664,13 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   </div>
 
   <!-- ── S2: Pattern Crystallization ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;margin-top:4px;">§2 · Pattern Crystallization Observatory</div>
+  <div class="lio-sec-hdr">§2 · Pattern Crystallization Observatory</div>
   <div class="lio-card" style="margin-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <span class="hdr" style="margin:0;">All pattern candidates — lifecycle stage</span>
-      <span id="lio-pat-summary" style="font-size:11px;color:#718096;"></span>
+      <span id="lio-pat-summary" style="font-size:11px;color:var(--muted);"></span>
     </div>
-    <div id="lio-pattern-empty" style="color:#4A5568;font-size:12px;padding:18px 0;text-align:center;display:none;">
+    <div id="lio-pattern-empty" style="color:var(--muted);font-size:12px;padding:18px 0;text-align:center;display:none;">
       No patterns yet. Records accumulate → FORMING at 10 samples → STABLE at 20 + conf≥70 + 3 contexts.
     </div>
     <div style="overflow-x:auto;">
@@ -1653,11 +1687,11 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   </div>
 
   <!-- ── S3: Negative Memory Observatory ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§3 · Negative Memory Observatory</div>
+  <div class="lio-sec-hdr">§3 · Negative Memory Observatory</div>
   <div class="lio-grid" style="margin-bottom:14px;">
     <div class="lio-card">
       <div class="hdr"><span class="dot red"></span>Toxicity Heat Table</div>
-      <div id="lio-neg-empty" style="color:#4A5568;font-size:12px;padding:14px 0;text-align:center;display:none;">No toxic patterns recorded yet.</div>
+      <div id="lio-neg-empty" style="color:var(--muted);font-size:12px;padding:14px 0;text-align:center;display:none;">No toxic patterns recorded yet.</div>
       <div style="overflow-x:auto;">
         <table class="lio-table" id="lio-neg-table">
           <thead><tr><th>Pattern</th><th>Losses</th><th>Score</th><th>Status</th></tr></thead>
@@ -1681,46 +1715,46 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
       </div>
       <div class="lio-gate-row">
         <span class="lio-gate-label">Catastrophic Threshold</span>
-        <span class="lio-gate-val" style="color:#ECC94B;">net_pnl &lt; -$2.00</span>
+        <span class="lio-gate-val" style="color:var(--c-amber);">net_pnl &lt; -$2.00</span>
       </div>
       <div class="lio-gate-row">
         <span class="lio-gate-label">Permanent Ban After</span>
-        <span class="lio-gate-val" style="color:#FC8181;">3 rollbacks</span>
+        <span class="lio-gate-val lio-gate-fail">3 rollbacks</span>
       </div>
       <div class="lio-gate-row">
         <span class="lio-gate-label">Decay Rate / Cycle</span>
-        <span class="lio-gate-val" style="color:#A0AEC0;">0.90×</span>
+        <span class="lio-gate-val" style="color:var(--muted);">0.90×</span>
       </div>
     </div>
   </div>
 
   <!-- ── S4: Ecology Maturity Observatory ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§4 · Ecology Maturity Observatory</div>
+  <div class="lio-sec-hdr">§4 · Ecology Maturity Observatory</div>
   <div class="lio-grid-4" style="margin-bottom:14px;">
-    <div class="lio-card" title="Total signals evaluated by the PRP-002 OpportunityEcology pipeline. Source: ecology_snapshot().total_evaluated">
+    <div class="lio-card sky" title="Total signals evaluated by the PRP-002 OpportunityEcology pipeline. Source: ecology_snapshot().total_evaluated">
       <div class="hdr"><span class="dot blue"></span>Total Evaluated</div>
       <div class="lio-big-val" id="lio-eco-evaluated">—</div>
       <div class="lio-sub-val">PRP-002 signal volume</div>
     </div>
-    <div class="lio-card" title="Active trading contexts with profitable history (survival_rate, avg_pnl). Source: alpha_context_memory.profitable_count">
+    <div class="lio-card sage" title="Active trading contexts with profitable history. Source: alpha_context_memory.profitable_count">
       <div class="hdr"><span class="dot green"></span>Mature Contexts</div>
       <div class="lio-big-val" id="lio-eco-mature">—</div>
       <div class="lio-sub-val" id="lio-eco-immature">— immature</div>
     </div>
-    <div class="lio-card" title="Fraction of signals surviving RSI + context filters. 0.60+ = healthy ecology. Source: signal_density_engine.survival_rate">
-      <div class="hdr"><span class="dot yellow"></span>Survival Rate</div>
+    <div class="lio-card lem" title="Fraction of signals surviving RSI + context filters. 0.60+ = healthy ecology.">
+      <div class="hdr"><span class="dot amber"></span>Survival Rate</div>
       <div class="lio-big-val" id="lio-eco-survival">—</div>
       <div class="lio-sub-val" id="lio-eco-sph">— signals/hr</div>
     </div>
-    <div class="lio-card" title="Signal Truth Density = outcomes_with_truth / total_outcomes. Non-zero confirms PRP-001 is recording outcomes. Source: SignalTruthEngine.truth_density()">
-      <div class="hdr"><span class="dot yellow"></span>Truth Density</div>
+    <div class="lio-card" title="Signal Truth Density = outcomes_with_truth / total_outcomes. Non-zero confirms PRP-001 is recording outcomes.">
+      <div class="hdr"><span class="dot amber"></span>Truth Density</div>
       <div class="lio-big-val" id="lio-eco-truth">—</div>
       <div class="lio-sub-val" id="lio-eco-health-badge">ecology: —</div>
     </div>
   </div>
 
   <!-- ── S5: RL Intelligence Observatory ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§5 · RL Intelligence Observatory</div>
+  <div class="lio-sec-hdr">§5 · RL Intelligence Observatory</div>
   <div class="lio-grid" style="margin-bottom:14px;">
     <div class="lio-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -1729,34 +1763,34 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
       </div>
       <div class="lio-grid" style="gap:10px;">
         <div>
-          <div class="lio-label" title="Average Q-value across all visited contexts. Positive = system expects net positive reward.">Avg Q-Value</div>
-          <div style="font-size:18px;font-weight:700;color:#63B3ED;" id="lio-rl-avgq">—</div>
+          <div class="lio-label" title="Average Q-value across visited contexts. Positive = system expects net positive reward.">Avg Q-Value</div>
+          <div class="big" style="color:var(--c-blue);" id="lio-rl-avgq">—</div>
         </div>
         <div>
-          <div class="lio-label" title="Intelligence score 0–100 derived from Q-value distribution, mature contexts, and non-toxic ratio.">Intelligence Score</div>
-          <div style="font-size:18px;font-weight:700;color:#68D391;" id="lio-rl-intel">—</div>
+          <div class="lio-label" title="Intelligence score 0–100 derived from Q-distribution, mature contexts, and non-toxic ratio.">Intelligence Score</div>
+          <div class="big" style="color:var(--c-green);" id="lio-rl-intel">—</div>
         </div>
         <div>
-          <div class="lio-label" title="Fraction of decisions using exploration (random) vs exploitation (learned). Lower = more confident.">Explore Ratio</div>
-          <div style="font-size:18px;font-weight:700;color:#ECC94B;" id="lio-rl-explore">—</div>
+          <div class="lio-label" title="Fraction of decisions using exploration vs exploitation. Lower = more confident.">Explore Ratio</div>
+          <div class="big" style="color:var(--c-amber);" id="lio-rl-explore">—</div>
         </div>
         <div>
-          <div class="lio-label" title="Toxic contexts = contexts flagged as consistently negative. Source: rl_engine._toxic_contexts">Toxic Contexts</div>
-          <div style="font-size:18px;font-weight:700;color:#FC8181;" id="lio-rl-toxic">—</div>
+          <div class="lio-label" title="Toxic contexts flagged as consistently negative.">Toxic Contexts</div>
+          <div class="big" style="color:var(--c-red);" id="lio-rl-toxic">—</div>
         </div>
       </div>
       <div style="margin-top:12px;">
         <div class="lio-label">Explore / Exploit balance</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-          <span style="font-size:10px;color:#718096;min-width:52px;" id="lio-rl-explore-pct">0%</span>
-          <div style="flex:1;background:#2D3748;border-radius:4px;height:8px;overflow:hidden;">
-            <div id="lio-rl-explore-bar" style="height:8px;background:linear-gradient(90deg,#2B6CB0,#63B3ED);border-radius:4px;transition:width .6s;width:100%;"></div>
+          <span style="font-size:10px;color:var(--muted);min-width:52px;" id="lio-rl-explore-pct">0%</span>
+          <div style="flex:1;background:#EDF2F7;border-radius:4px;height:8px;overflow:hidden;">
+            <div id="lio-rl-explore-bar" style="height:8px;background:linear-gradient(90deg,var(--c-blue),#63B3ED);border-radius:4px;transition:width .6s;width:100%;"></div>
           </div>
-          <span style="font-size:10px;color:#718096;min-width:52px;text-align:right;" id="lio-rl-exploit-pct">0%</span>
+          <span style="font-size:10px;color:var(--muted);min-width:52px;text-align:right;" id="lio-rl-exploit-pct">0%</span>
         </div>
       </div>
     </div>
-    <div class="lio-card" title="Q-value quality distribution: elite (>0.7), high, neutral, penalized (<0). Source: rl_engine quality_distribution">
+    <div class="lio-card" title="Q-value quality distribution: elite (>0.8), high, neutral, penalized (<-0.2).">
       <div class="hdr"><span class="dot blue"></span>Q-Value Distribution &amp; Session Intelligence</div>
       <div id="lio-rl-quality" style="margin-bottom:10px;"></div>
       <div class="hdr" style="margin-top:10px;"><span class="dot blue"></span>Session Intelligence</div>
@@ -1768,36 +1802,36 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   </div>
 
   <!-- ── S6: Learning Topology Map ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§6 · Learning Topology Map</div>
+  <div class="lio-sec-hdr">§6 · Learning Topology Map</div>
   <div class="lio-card" style="margin-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <span class="hdr" style="margin:0;">Regime × Strategy Opportunity Geography</span>
-      <div style="display:flex;gap:8px;font-size:10px;">
-        <span style="background:#1C4532;color:#68D391;padding:2px 8px;border-radius:10px;">■ Profitable</span>
-        <span style="background:#2D3748;color:#A0AEC0;padding:2px 8px;border-radius:10px;">■ Neutral</span>
-        <span style="background:#742A2A;color:#FC8181;padding:2px 8px;border-radius:10px;">■ Toxic</span>
-        <span style="background:#1A202C;color:#4A5568;padding:2px 8px;border-radius:10px;">■ Unexplored</span>
+      <div style="display:flex;gap:6px;font-size:10px;font-weight:600;">
+        <span class="lio-zone-profitable" style="padding:2px 8px;">■ Profitable</span>
+        <span class="lio-zone-neutral"    style="padding:2px 8px;">■ Neutral</span>
+        <span class="lio-zone-toxic"      style="padding:2px 8px;">■ Toxic</span>
+        <span class="lio-zone-unexplored" style="padding:2px 8px;">■ Unexplored</span>
       </div>
     </div>
-    <div id="lio-topology-empty" style="color:#4A5568;font-size:12px;padding:24px 0;text-align:center;display:none;">
+    <div id="lio-topology-empty" style="color:var(--muted);font-size:12px;padding:24px 0;text-align:center;display:none;">
       Topology map forms as trades close and patterns accumulate.
     </div>
     <div id="lio-topology-grid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
   </div>
 
   <!-- ── S7: Cognitive Compression Observatory ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§7 · Cognitive Compression Observatory</div>
+  <div class="lio-sec-hdr">§7 · Cognitive Compression Observatory</div>
   <div class="lio-grid" style="margin-bottom:14px;">
     <div class="lio-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <span class="hdr" style="margin:0;"><span class="dot yellow"></span>Signal Noise Meter</span>
+        <span class="hdr" style="margin:0;"><span class="dot amber"></span>Signal Noise Meter</span>
         <span id="lio-noise-badge" class="lio-state-badge lio-state-DORMANT">—</span>
       </div>
       <div style="position:relative;margin-bottom:18px;">
         <div class="lio-noise-meter">
           <div class="lio-noise-cursor" id="lio-noise-cursor" style="left:0%;"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:#4A5568;">
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--muted);">
           <span>HEALTHY</span><span>NOISY</span><span>SATURATED</span><span>CRITICAL</span>
         </div>
       </div>
@@ -1815,7 +1849,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
       </div>
     </div>
     <div class="lio-card">
-      <div class="hdr"><span class="dot yellow"></span>Activity Metrics</div>
+      <div class="hdr"><span class="dot amber"></span>Activity Metrics</div>
       <div class="lio-gate-row">
         <span class="lio-gate-label" title="Total signals seen by SignalTruthEngine.">Total Signals</span>
         <span class="lio-gate-val" id="lio-total-signals">—</span>
@@ -1829,7 +1863,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
         <span class="lio-gate-val" id="lio-suppressed">—</span>
       </div>
       <div class="lio-gate-row">
-        <span class="lio-gate-label" title="Cognitive activity load 0–1. High = system has high crystallization efficiency.">Cognitive Load</span>
+        <span class="lio-gate-label" title="Cognitive activity load 0–1. High = high crystallization efficiency.">Cognitive Load</span>
         <span class="lio-gate-val" id="lio-cog-load">—</span>
       </div>
       <div class="lio-gate-row">
@@ -1840,16 +1874,16 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   </div>
 
   <!-- ── S8: Sovereign Readiness Meter ── -->
-  <div style="font-size:10px;color:#4A5568;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">§8 · Sovereign Governance Readiness</div>
+  <div class="lio-sec-hdr">§8 · Sovereign Governance Readiness</div>
   <div class="lio-card" style="margin-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <span class="hdr" style="margin:0;"><span class="dot" id="lio-sov-dot"></span>PRP-003A Activation Gate — MetaGovernanceSovereign</span>
       <span id="lio-sov-badge" class="lio-state-badge lio-state-NOT_READY">NOT READY</span>
     </div>
     <div id="lio-sov-gates"></div>
-    <div style="margin-top:12px;padding:10px 12px;background:#0D1117;border-radius:8px;border-left:3px solid #2D3748;">
-      <div style="font-size:10px;color:#4A5568;line-height:1.7;">
-        <strong style="color:#718096;">SOVEREIGN_READY</strong> requires all 4 gates to pass simultaneously.
+    <div style="margin-top:12px;padding:10px 12px;background:var(--lem);border-radius:8px;border-left:3px solid #ECC94B;">
+      <div style="font-size:10px;color:var(--c-amber);line-height:1.7;">
+        <strong>SOVEREIGN_READY</strong> requires all 4 gates to pass simultaneously.
         MetaGovernanceSovereign must NOT be activated until this meter reads SOVEREIGN_READY.
         This is a read-only observational indicator — it does not activate anything automatically.
       </div>
@@ -4693,17 +4727,17 @@ function _lioRenderRL(d) {
     const total = (qd.elite||0) + (qd.high||0) + (qd.neutral||0) + (qd.penalized||0);
     const pct = v => total ? ((v/total)*100).toFixed(1)+'%' : '0%';
     qEl.innerHTML = `
-      <div style="display:flex;gap:4px;margin-bottom:5px;">
-        <div style="flex:${qd.elite||0};background:#276749;height:8px;border-radius:2px;" title="Elite: ${qd.elite}"></div>
-        <div style="flex:${qd.high||0};background:#2B6CB0;height:8px;border-radius:2px;" title="High: ${qd.high}"></div>
-        <div style="flex:${qd.neutral||0};background:#4A5568;height:8px;border-radius:2px;" title="Neutral: ${qd.neutral}"></div>
-        <div style="flex:${qd.penalized||0};background:#9B2C2C;height:8px;border-radius:2px;" title="Penalized: ${qd.penalized}"></div>
+      <div style="display:flex;gap:3px;margin-bottom:5px;border-radius:4px;overflow:hidden;">
+        <div style="flex:${qd.elite||0};background:#276749;height:8px;" title="Elite: ${qd.elite}"></div>
+        <div style="flex:${qd.high||0};background:#2B6CB0;height:8px;" title="High: ${qd.high}"></div>
+        <div style="flex:${qd.neutral||0};background:#CBD5E0;height:8px;" title="Neutral: ${qd.neutral}"></div>
+        <div style="flex:${qd.penalized||0};background:#9B2C2C;height:8px;" title="Penalized: ${qd.penalized}"></div>
       </div>
-      <div style="display:flex;gap:10px;font-size:10px;color:#718096;">
-        <span style="color:#68D391;">● Elite ${pct(qd.elite||0)}</span>
-        <span style="color:#63B3ED;">● High ${pct(qd.high||0)}</span>
-        <span style="color:#718096;">● Neutral ${pct(qd.neutral||0)}</span>
-        <span style="color:#FC8181;">● Penalized ${pct(qd.penalized||0)}</span>
+      <div style="display:flex;gap:10px;font-size:10px;color:var(--muted);">
+        <span style="color:#276749;">● Elite ${pct(qd.elite||0)}</span>
+        <span style="color:#2B6CB0;">● High ${pct(qd.high||0)}</span>
+        <span>● Neutral ${pct(qd.neutral||0)}</span>
+        <span style="color:#9B2C2C;">● Penalized ${pct(qd.penalized||0)}</span>
       </div>`;
   }
 
