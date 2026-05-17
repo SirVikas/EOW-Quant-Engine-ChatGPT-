@@ -14,7 +14,7 @@ if "%REPO_URL%"=="" exit
 for /f "usebackq delims=" %%I in (`powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.FolderBrowserDialog; if($f.ShowDialog() -eq 'OK'){$f.SelectedPath}"`) do set "TARGET_DIR=%%I"
 if "%TARGET_DIR%"=="" exit
 
-"%GIT_SHELL%" -c "cd '%TARGET_DIR%'; if [ -d '.git' ]; then git pull origin main; else git clone '%REPO_URL%' .; fi"
+"%GIT_SHELL%" -c "cd '%TARGET_DIR%'; if [ -d '.git' ]; then git stash; git pull origin main; git stash drop 2>/dev/null; else git clone '%REPO_URL%' .; fi"
 
 powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Restore Complete!')"
 pause
