@@ -1,5 +1,26 @@
 {
   "total_patterns": 1,
-  "formed_patterns": 0,
-  "patterns": []
+  "formed_patterns": 1,
+  "patterns": [
+    {
+      "pattern_id": "d20fa663-479",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "MEDIUM",
+        "instrument": "BTCUSDT",
+        "parameter": "MR_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "samples": 20,
+      "success": 20,
+      "confidence": 100.0,
+      "contexts": [
+        "MEAN_REVERTING/MEDIUM/10",
+        "MEAN_REVERTING/MEDIUM/14",
+        "MEAN_REVERTING/MEDIUM/20"
+      ],
+      "last_seen": 20,
+      "created_at": 1779036032.3045723
+    }
+  ]
 }
