@@ -8195,7 +8195,7 @@ async def lio_sovereign_readiness():
         },
         "truth_density": {
             "current": round(truth_dens, 4),
-            "target":  0.0,
+            "target":  "> 0",
             "pass":    truth_dens > 0,
             "label":   "Signal Truth Density",
         },
