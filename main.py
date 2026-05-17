@@ -2229,7 +2229,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
     logger.info(
-        "[LEARNING_INTELLIGENCE_OBSERVATORY] ACTIVE | endpoints=8 "
+        "[LEARNING_INTELLIGENCE_OBSERVATORY] ACTIVE | endpoints=9 "
         "| telemetry=LIVE | refresh=3s | mode=READ_ONLY_OBSERVATIONAL"
     )
 
@@ -8224,6 +8224,75 @@ async def lio_sovereign_readiness():
         "pass_count":  pass_count,
         "total_gates": total_gates,
         "gates":       gates,
+        "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/alpha-discovery")
+async def lio_alpha_discovery():
+    """LIO §9 — Alpha Discovery Observatory: positive memory emergence, profitable-context
+    formation rate, and positive/negative memory ratio.  READ-ONLY — no RL modifications."""
+    from core.learning_memory import learning_memory_orchestrator
+    import time as _t
+    lmo       = learning_memory_orchestrator
+    rl_state  = rl_engine.get_evolution_state()
+    neg_counts = lmo._neg_memory.count()
+
+    qd            = rl_state.get("quality_distribution", {})
+    elite         = qd.get("elite", 0)
+    high          = qd.get("high", 0)
+    penalized     = qd.get("penalized", 0)
+    profitable_pct = qd.get("profitable_pct", 0.0)
+    total_ctx     = rl_state.get("total_contexts", 0)
+    profitable_ctx = elite + high          # q > 0.40
+
+    sess_intel = rl_state.get("session_intelligence", {})
+    sess_profitable = sum(sv.get("profitable", 0) for sv in sess_intel.values())
+
+    # Profitable patterns: formed + at least 1 success
+    all_pats = lmo._engine.all_patterns()
+    profitable_patterns = sum(
+        1 for p in all_pats if p.is_formed and p.success > 0
+    )
+    # Positive topology zones (avg_conf ≥ 70)
+    heatmap = lmo.pattern_heatmap()
+    topology_profitable = sum(1 for c in heatmap if c.get("avg_conf", 0) >= 70)
+
+    total_bans   = neg_counts.get("permanent", 0) + neg_counts.get("temporary", 0)
+    perm_bans    = neg_counts.get("permanent", 0)
+
+    # Ratio: profitable contexts vs total known-negative contexts
+    pos_neg_ratio = round(profitable_ctx / max(1, total_bans), 3)
+
+    # Alpha discovery velocity: % of total contexts that are profitable
+    discovery_velocity = round(profitable_ctx / max(1, total_ctx) * 100, 2)
+
+    # Discovery health composite
+    if profitable_ctx >= 5 and profitable_pct >= 20:
+        discovery_health = "CRYSTALLIZING"
+    elif profitable_ctx >= 2 or sess_profitable >= 1 or profitable_patterns >= 1:
+        discovery_health = "EMERGING"
+    elif total_bans > 0 and profitable_ctx == 0:
+        discovery_health = "STAGNANT"
+    else:
+        discovery_health = "SEARCHING"
+
+    return {
+        "discovery_health":        discovery_health,
+        "profitable_contexts":     profitable_ctx,
+        "elite_contexts":          elite,
+        "high_contexts":           high,
+        "penalized_contexts":      penalized,
+        "total_contexts":          total_ctx,
+        "profitable_pct":          profitable_pct,
+        "profitable_sessions":     sess_profitable,
+        "profitable_patterns":     profitable_patterns,
+        "total_bans":              total_bans,
+        "permanent_bans":          perm_bans,
+        "pos_neg_ratio":           pos_neg_ratio,
+        "topology_profitable_zones": topology_profitable,
+        "alpha_discovery_velocity":  discovery_velocity,
+        "session_intelligence":      sess_intel,
         "ts": int(_t.time() * 1000),
     }
 

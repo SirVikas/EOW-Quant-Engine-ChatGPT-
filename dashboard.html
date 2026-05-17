@@ -1890,6 +1890,72 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
     </div>
   </div>
 
+  <!-- §9 Alpha Discovery Observatory -->
+  <div class="lio-sec-hdr">§9 · Alpha Discovery Observatory</div>
+  <div class="lio-card" style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span class="hdr" style="margin:0;"><span class="dot" id="lio-alpha-dot"></span>Opportunity Discovery</span>
+      <span id="lio-alpha-badge" class="lio-state-badge lio-state-SEARCHING">SEARCHING</span>
+    </div>
+
+    <!-- KPI row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
+      <div class="lio-kpi-cell">
+        <div class="lio-label" title="RL contexts with Q-value &gt; 0.40 (HIGH or ELITE grade).">Profitable Contexts</div>
+        <div class="lio-big" id="lio-alpha-profitable-ctx">—</div>
+        <div class="lio-sub" id="lio-alpha-ctx-sub">of — total</div>
+      </div>
+      <div class="lio-kpi-cell">
+        <div class="lio-label" title="Profitable contexts ÷ total negative-memory entries. Ratio &gt; 1.0 means system is discovering faster than it is being banned.">Pos / Neg Ratio</div>
+        <div class="lio-big" id="lio-alpha-ratio">—</div>
+        <div class="lio-sub" id="lio-alpha-ratio-sub">bans tracked</div>
+      </div>
+      <div class="lio-kpi-cell">
+        <div class="lio-label" title="% of all RL contexts that are profitable (Q &gt; 0). Discovery velocity rising is the first signal that alpha is crystallising.">Discovery Velocity</div>
+        <div class="lio-big" id="lio-alpha-velocity">—</div>
+        <div class="lio-sub">% of contexts</div>
+      </div>
+      <div class="lio-kpi-cell">
+        <div class="lio-label" title="Profitable topology zones (avg_conf ≥ 70%). Non-zero value means at least one strategy+regime combination is reliably positive.">Profitable Zones</div>
+        <div class="lio-big" id="lio-alpha-zones">—</div>
+        <div class="lio-sub">topology cells</div>
+      </div>
+    </div>
+
+    <!-- Pos vs Neg memory bar -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px;">
+        <span>Positive Memory Growth</span>
+        <span id="lio-alpha-bar-label">0 profitable · 0 banned</span>
+      </div>
+      <div style="background:#EDF2F7;border-radius:4px;height:10px;overflow:hidden;display:flex;">
+        <div id="lio-alpha-bar-pos" style="background:var(--c-green);height:10px;width:0%;transition:width .8s;" title="Profitable contexts"></div>
+        <div id="lio-alpha-bar-neg" style="background:var(--c-red);height:10px;width:0%;transition:width .8s;" title="Banned contexts"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px;">
+        <span style="color:var(--c-green);">■ Profitable</span>
+        <span style="color:var(--c-red);">■ Banned</span>
+      </div>
+    </div>
+
+    <!-- Session breakdown -->
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">Profitable Sessions</div>
+    <table class="lio-table" style="width:100%;">
+      <thead><tr>
+        <th>Session</th><th>Profitable Ctx</th><th>Avg Q</th><th>Discovery</th>
+      </tr></thead>
+      <tbody id="lio-alpha-session-tbody"></tbody>
+    </table>
+
+    <div style="margin-top:12px;padding:10px 12px;background:var(--sky);border-radius:8px;border-left:3px solid var(--c-blue);">
+      <div style="font-size:10px;color:var(--c-blue);line-height:1.7;">
+        <strong>CRYSTALLIZING</strong> requires profitable_contexts ≥ 5 and profitable_pct ≥ 20%.
+        Until this section shows green activity, the system is in survivability mode.
+        Watch this panel for the first signals of genuine alpha emergence.
+      </div>
+    </div>
+  </div>
+
 </div>
 </div><!-- /tab-lio -->
 
@@ -4566,7 +4632,7 @@ async function loadLIO() {
     catch { return null; }
   };
 
-  const [summary, patterns, negMem, ecology, rl, topology, cognition, sov] = await Promise.all([
+  const [summary, patterns, negMem, ecology, rl, topology, cognition, sov, alpha] = await Promise.all([
     safe(BASE + '/summary'),
     safe(BASE + '/patterns'),
     safe(BASE + '/negative-memory'),
@@ -4575,6 +4641,7 @@ async function loadLIO() {
     safe(BASE + '/topology'),
     safe(BASE + '/cognition'),
     safe(BASE + '/sovereign-readiness'),
+    safe(BASE + '/alpha-discovery'),
   ]);
 
   const ts = new Date().toLocaleTimeString();
@@ -4589,6 +4656,7 @@ async function loadLIO() {
   _lioRenderTopology(topology);
   _lioRenderCognition(cognition);
   _lioRenderSovereign(sov);
+  _lioRenderAlpha(alpha);
 }
 
 function _lioSet(id, val) {
@@ -4850,6 +4918,60 @@ function _lioRenderSovereign(d) {
       </div>
       <span style="font-size:11px;color:var(--muted);white-space:nowrap;">${passCount}/${total} gates</span>
     </div>`;
+}
+
+function _lioRenderAlpha(d) {
+  if (!d) return;
+  _lioStateBadge('lio-alpha-badge', d.discovery_health);
+
+  const dot = document.getElementById('lio-alpha-dot');
+  if (dot) {
+    dot.className = 'dot' + (d.discovery_health === 'CRYSTALLIZING' ? ' green pulse'
+                    : d.discovery_health === 'EMERGING' ? ' yellow pulse'
+                    : '');
+  }
+
+  const profCtx  = d.profitable_contexts ?? 0;
+  const totalCtx = d.total_contexts      ?? 0;
+  const bans     = d.total_bans          ?? 0;
+  const ratio    = d.pos_neg_ratio       ?? 0;
+  const vel      = d.alpha_discovery_velocity ?? 0;
+  const zones    = d.topology_profitable_zones ?? 0;
+
+  _lioSet('lio-alpha-profitable-ctx', profCtx);
+  _lioSet('lio-alpha-ctx-sub',        `of ${totalCtx} total`);
+  _lioSet('lio-alpha-ratio',          ratio.toFixed(3));
+  _lioSet('lio-alpha-ratio-sub',      `${bans} bans tracked`);
+  _lioSet('lio-alpha-velocity',       vel.toFixed(1) + '%');
+  _lioSet('lio-alpha-zones',          zones);
+
+  // Positive vs negative memory bar
+  const total = profCtx + bans;
+  const posPct = total ? ((profCtx / total) * 100).toFixed(1) : 0;
+  const negPct = total ? ((bans    / total) * 100).toFixed(1) : 0;
+  const posBar = document.getElementById('lio-alpha-bar-pos');
+  const negBar = document.getElementById('lio-alpha-bar-neg');
+  if (posBar) posBar.style.width = posPct + '%';
+  if (negBar) negBar.style.width = negPct + '%';
+  _lioSet('lio-alpha-bar-label', `${profCtx} profitable · ${bans} banned`);
+
+  // Session table
+  const sessData = d.session_intelligence || {};
+  const tbody = document.getElementById('lio-alpha-session-tbody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    const sessions = ['ASIA','LONDON','NY','LATE'];
+    sessions.forEach(sess => {
+      const sv = sessData[sess] || {};
+      const prof = sv.profitable ?? 0;
+      const avgQ = sv.avg_q     != null ? sv.avg_q.toFixed(4) : '—';
+      const disc = prof > 0 ? `<span style="color:var(--c-green);font-weight:600;">ACTIVE</span>`
+                            : `<span style="color:var(--muted);">NONE</span>`;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${sess}</td><td style="color:${prof>0?'var(--c-green)':'var(--muted)'};">${prof}</td><td>${avgQ}</td><td>${disc}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
 }
 </script>
 
