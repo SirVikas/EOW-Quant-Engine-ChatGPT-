@@ -124,7 +124,7 @@ class MemoryApplier:
             if pattern.confidence >= CONFIDENCE_WEIGHT_CUTOFF
             else LOW_CONF_MEMORY_WEIGHT
         )
-        blended = weight * proposed_val + (1.0 - weight) * proposed_val
+        blended = weight * current_val + (1.0 - weight) * proposed_val
         # memory_direction is the same (memory confirmed the direction);
         # the blend nudges magnitude toward pattern expectation.
         # confidence-scaled magnitude: if confidence < 70 reduce proposed delta

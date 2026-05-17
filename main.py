@@ -134,6 +134,7 @@ from core.signal_ecology.signal_density_engine import signal_density_engine     
 from core.signal_ecology.exploration_recovery  import exploration_recovery_governor   # PRP-002
 from core.signal_ecology.alpha_context_memory  import alpha_context_memory            # PRP-002
 from core.signal_ecology.adaptive_rsi_governor import adaptive_rsi_governor           # PRP-002
+from core.learning_memory.trade_memory_bridge  import trade_memory_bridge              # LRN-001
 
 
 def _safe_num(v):
@@ -499,11 +500,29 @@ async def on_tick(tick: Tick):
                 net_pnl     = last_trade.net_pnl,
             )
             # PRP-002: update alpha context memory with trade outcome
+            _close_utc_hour = __import__("datetime").datetime.utcnow().hour
             opportunity_ecology.record_trade_outcome(
                 regime      = _trade_regime,
-                utc_hour    = __import__("datetime").datetime.utcnow().hour,
+                utc_hour    = _close_utc_hour,
                 strategy_id = _trade_strategy,
                 net_pnl     = last_trade.net_pnl,
+            )
+            # LRN-001: feed trade outcome into learning memory pipeline
+            try:
+                _re_close    = regime_det.state(sym)
+                _atr_close   = getattr(_re_close, "atr_pct", 1.5) or 1.5
+            except Exception:
+                _atr_close   = 1.5
+            trade_memory_bridge.record_trade(
+                trade_id    = last_trade.trade_id,
+                symbol      = last_trade.symbol,
+                regime      = _trade_regime,
+                strategy_id = _trade_strategy,
+                side        = getattr(last_trade, "side", "LONG"),
+                net_pnl     = last_trade.net_pnl,
+                confidence  = getattr(last_trade, "confidence", 0.51),
+                atr_pct     = _atr_close,
+                utc_hour    = _close_utc_hour,
             )
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
@@ -4604,6 +4623,12 @@ async def learning_memory_heatmap():
         "heatmap": learning_memory_orchestrator.pattern_heatmap(),
         "phase": "030B",
     }
+
+
+@app.get("/api/learning-memory/bridge")
+async def learning_memory_bridge_status():
+    """LRN-001 — TradeMemoryBridge telemetry: records fed, wins/losses, LMO state."""
+    return trade_memory_bridge.get_telemetry()
 
 
 # ── PRP-001 Signal Truth API ──────────────────────────────────────────────────
