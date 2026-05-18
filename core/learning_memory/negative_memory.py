@@ -14,10 +14,15 @@ import os
 import time
 from typing import Any, Dict, Tuple
 
-NEGATIVE_STORE_PATH   = "reports/learning_memory/negative_memory.jsonl"
-DECAY_RATE            = 0.90
-PERMANENT_BAN_AFTER   = 3      # rollbacks before permanent ban
-TEMP_REMOVAL_THRESHOLD = 0.10  # remove temporary entry when score < this
+NEGATIVE_STORE_PATH        = "reports/learning_memory/negative_memory.jsonl"
+DECAY_RATE                 = 0.90
+PERMANENT_BAN_AFTER        = 3      # rollbacks before permanent ban
+TEMP_REMOVAL_THRESHOLD     = 0.10  # remove temporary entry when score < this
+# During sparse early-phase learning a pattern may accumulate 3 rollbacks before
+# meaningful positive evidence can form.  Require a minimum sample count before
+# the ban becomes irreversible so the engine cannot permanently exclude a context
+# on fewer than 5 executed-outcome observations.
+MIN_SAMPLES_FOR_PERMANENT_BAN = 5
 
 
 class NegativeMemory:
@@ -34,8 +39,14 @@ class NegativeMemory:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def record_rollback(self, key_tuple: tuple) -> None:
-        """Record a rollback for the given pattern key."""
+    def record_rollback(self, key_tuple: tuple, current_samples: int = 0) -> None:
+        """Record a rollback for the given pattern key.
+
+        current_samples: caller passes the pattern's executed-outcome sample count.
+        Permanent ban is deferred until the pattern has accumulated at least
+        MIN_SAMPLES_FOR_PERMANENT_BAN samples so early-phase sparse evidence
+        cannot trigger irreversible exclusion before recovery is possible.
+        """
         key_str = self._key_str(key_tuple)
         entry   = self._entries.get(key_str)
         if entry is None:
@@ -53,7 +64,8 @@ class NegativeMemory:
         entry["last_cycle"]  = self._cycle
         entry["score"]       = 1.0   # reset decay on new rollback
 
-        if entry["rollbacks"] >= PERMANENT_BAN_AFTER:
+        if (entry["rollbacks"] >= PERMANENT_BAN_AFTER
+                and current_samples >= MIN_SAMPLES_FOR_PERMANENT_BAN):
             entry["permanent"] = True
 
         self._persist(entry)
