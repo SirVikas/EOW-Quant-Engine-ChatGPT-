@@ -5124,23 +5124,23 @@ function _buildLIOReportHTML(d) {
       <div class="kpi-val" style="font-size:14px;">${s.heartbeat_state||'—'}</div></div>
     <div class="kpi"><div class="kpi-label">Total Records</div>
       <div class="kpi-val">${s.total_records||0}</div>
-      <div class="kpi-sub">${s.cycle_count||0} cycles</div></div>
+      <div class="kpi-sub">${s.lmo_cycle_count||0} cycles</div></div>
     <div class="kpi"><div class="kpi-label">Formed Patterns</div>
-      <div class="kpi-val">${s.formed_patterns||0}</div>
+      <div class="kpi-val">${s.patterns_formed||0}</div>
       <div class="kpi-sub">of ${s.total_patterns||0} candidates</div></div>
     <div class="kpi"><div class="kpi-label">Negative Memories</div>
-      <div class="kpi-val">${s.negative_memory_count||0}</div>
+      <div class="kpi-val">${s.active_negative_memories||0}</div>
       <div class="kpi-sub">${s.permanent_bans||0} permanent bans</div></div>
   </div>
   <div class="kpi-grid">
     <div class="kpi"><div class="kpi-label">Cognition Score</div>
-      <div class="kpi-val">${s.cognition_score!=null?s.cognition_score.toFixed(1):'—'}</div></div>
+      <div class="kpi-val">${s.cognition_activity_score!=null?s.cognition_activity_score.toFixed(1):'—'}</div></div>
     <div class="kpi"><div class="kpi-label">Growth Rate</div>
-      <div class="kpi-val">${s.growth_rate_per_cycle||0}/cycle</div></div>
-    <div class="kpi"><div class="kpi-label">Enabled</div>
-      <div class="kpi-val" style="font-size:14px;">${s.enabled?'✅ YES':'❌ NO'}</div></div>
-    <div class="kpi"><div class="kpi-label">Last Cycle</div>
-      <div class="kpi-val" style="font-size:12px;">${s.last_cycle_id||'—'}</div></div>
+      <div class="kpi-val">${s.memory_growth_rate||0}/cycle</div></div>
+    <div class="kpi"><div class="kpi-label">LMO Enabled</div>
+      <div class="kpi-val" style="font-size:14px;">${s.lmo_enabled!==false?'✅ YES':'❌ NO'}</div></div>
+    <div class="kpi"><div class="kpi-label">Bridge Recorded</div>
+      <div class="kpi-val" style="font-size:12px;">${s.bridge_total_recorded||0} trades</div></div>
   </div>
 </div>
 
