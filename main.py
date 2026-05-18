@@ -2229,7 +2229,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
     _thought("All subsystems online. Scanning markets…", "SYSTEM")
     logger.info(
-        "[LEARNING_INTELLIGENCE_OBSERVATORY] ACTIVE | endpoints=9 "
+        "[LEARNING_INTELLIGENCE_OBSERVATORY] ACTIVE | endpoints=10 "
         "| telemetry=LIVE | refresh=3s | mode=READ_ONLY_OBSERVATIONAL"
     )
 
@@ -8294,6 +8294,45 @@ async def lio_alpha_discovery():
         "alpha_discovery_velocity":  discovery_velocity,
         "session_intelligence":      sess_intel,
         "ts": int(_t.time() * 1000),
+    }
+
+
+@app.get("/api/learning-intelligence/report-bundle")
+async def lio_report_bundle():
+    """LIO — Full snapshot bundle: all 9 sections in one atomic call for report download."""
+    import asyncio, time as _t
+    (
+        _summary, _patterns, _neg_mem, _ecology,
+        _rl, _topology, _cognition, _sov, _alpha,
+    ) = await asyncio.gather(
+        lio_summary(),
+        lio_patterns(),
+        lio_negative_memory(),
+        lio_ecology(),
+        lio_rl(),
+        lio_topology(),
+        lio_cognition(),
+        lio_sovereign_readiness(),
+        lio_alpha_discovery(),
+    )
+    return {
+        "metadata": {
+            "report_type":    "LIO_FULL_SNAPSHOT",
+            "version":        APP_VERSION,
+            "generated_at":   int(_t.time() * 1000),
+            "generated_at_iso": __import__("datetime").datetime.utcnow().strftime(
+                "%Y-%m-%d %H:%M:%S UTC"
+            ),
+        },
+        "summary":           _summary,
+        "patterns":          _patterns,
+        "negative_memory":   _neg_mem,
+        "ecology":           _ecology,
+        "rl":                _rl,
+        "topology":          _topology,
+        "cognition":         _cognition,
+        "sovereign_readiness": _sov,
+        "alpha_discovery":   _alpha,
     }
 
 
