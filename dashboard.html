@@ -1635,7 +1635,17 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
         <span class="lio-refresh-badge" id="lio-last-refresh">· refreshing…</span>
       </div>
     </div>
-    <span id="lio-heartbeat-badge" class="lio-state-badge lio-state-DORMANT">— DORMANT</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="lio-heartbeat-badge" class="lio-state-badge lio-state-DORMANT">— DORMANT</span>
+      <button onclick="downloadLIOReport()" id="lio-download-btn"
+        style="font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);
+               background:#fff;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px;
+               font-family:var(--font);transition:background .15s;"
+        onmouseover="this.style.background='var(--sky)'" onmouseout="this.style.background='#fff'"
+        title="Download full LIO snapshot report as HTML">
+        📥 Download Report
+      </button>
+    </div>
   </div>
 
   <!-- ── S1: Learning Heartbeat ── -->
@@ -4972,6 +4982,339 @@ function _lioRenderAlpha(d) {
       tbody.appendChild(tr);
     });
   }
+}
+
+async function downloadLIOReport() {
+  const btn = document.getElementById('lio-download-btn');
+  if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
+  try {
+    const r = await fetch(API + '/api/learning-intelligence/report-bundle',
+                          {signal: AbortSignal.timeout(8000)});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const html = _buildLIOReportHTML(d);
+    const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+    const a    = document.createElement('a');
+    const ts   = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    a.href     = URL.createObjectURL(blob);
+    a.download = `phoenix_lio_report_${ts}.html`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    alert('Report generation failed: ' + e.message);
+  } finally {
+    if (btn) { btn.textContent = '📥 Download Report'; btn.disabled = false; }
+  }
+}
+
+function _buildLIOReportHTML(d) {
+  const meta = d.metadata || {};
+  const s    = d.summary  || {};
+  const pats = (d.patterns || {}).patterns || [];
+  const neg  = d.negative_memory || {};
+  const eco  = d.ecology  || {};
+  const rl   = d.rl       || {};
+  const cog  = d.cognition || {};
+  const sov  = d.sovereign_readiness || {};
+  const alp  = d.alpha_discovery || {};
+  const qd   = rl.quality_distribution || {};
+  const sess = rl.session_intelligence || {};
+
+  const stageColor = st => ({STABLE:'#276749',FORMING:'#2B6CB0',OBSERVED:'#718096',
+    TOXIC:'#7B6100',BANNED:'#9B2C2C'})[st]||'#718096';
+  const statusColor = st => st==='PERMANENTLY_BANNED'?'#9B2C2C':
+    st==='QUARANTINED'?'#7B6100':st==='TOXIC'?'#7B6100':'#718096';
+  const pct = (v,t) => t ? Math.min(100,(v/t*100)).toFixed(0)+'%' : '0%';
+
+  const patRows = pats.map(p => `
+    <tr>
+      <td>${p.regime||''}</td><td>${p.volatility||''}</td><td>${p.instrument||''}</td>
+      <td>${(p.strategy||'').replace('MeanReversion_PAPER_SPEED','MR_PAPER')}</td>
+      <td>${p.direction||''}</td>
+      <td>${p.samples||0}/20</td>
+      <td>${p.win_rate!=null?(p.win_rate*100).toFixed(1)+'%':'—'}</td>
+      <td>${p.confidence!=null?p.confidence.toFixed(1)+'%':'—'}</td>
+      <td>${p.context_count>=3?p.context_count+'✓':p.context_count+'/3'}</td>
+      <td style="color:${stageColor(p.stage)};font-weight:600;">${p.stage||'—'}</td>
+    </tr>`).join('');
+
+  const negRows = (neg.entries||[]).map(e => `
+    <tr>
+      <td>${e.instrument||''} / ${(e.strategy||'').replace('MeanReversion_PAPER_SPEED','MR_PAPER')}
+          ${e.direction==='UP'?'▲':e.direction==='DOWN'?'▼':e.direction||''}</td>
+      <td>${e.rollbacks||0}</td>
+      <td>${(e.score||0).toFixed(2)}</td>
+      <td style="color:${statusColor(e.status)};font-weight:600;">${(e.status||'').replace('_',' ')}</td>
+    </tr>`).join('');
+
+  const gateRows = Object.entries(sov.gates||{}).map(([k,g]) => `
+    <tr>
+      <td>${g.label||k}</td>
+      <td>${g.current}</td>
+      <td>${g.target}</td>
+      <td style="font-size:13px;">${g.pass?'✅':'❌'}</td>
+    </tr>`).join('');
+
+  const sessRows = Object.entries(sess).map(([s,v]) => `
+    <tr>
+      <td>${s}</td><td>${v.n_contexts||0}</td>
+      <td>${(v.avg_q||0).toFixed(4)}</td>
+      <td style="color:${v.profitable>0?'#276749':'#718096'};">${v.profitable>0?'ACTIVE':'NONE'}</td>
+    </tr>`).join('');
+
+  const alphaSessRows = Object.entries(alp.session_intelligence||{}).map(([s,v]) => `
+    <tr>
+      <td>${s}</td><td>${v.profitable||0}</td>
+      <td>${(v.avg_q||0).toFixed(4)}</td>
+      <td style="color:${(v.profitable||0)>0?'#276749':'#718096'};">${(v.profitable||0)>0?'ACTIVE':'NONE'}</td>
+    </tr>`).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PHOENIX LIO Report — ${meta.generated_at_iso||''}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;background:#F0F7F7;color:#1A202C;padding:24px;}
+  h1{font-size:20px;font-weight:700;color:#1A202C;margin-bottom:2px;}
+  .sub{color:#718096;font-size:11px;margin-bottom:24px;}
+  .section{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:16px 20px;margin-bottom:16px;}
+  .sec-title{font-size:12px;font-weight:700;color:#2B6CB0;text-transform:uppercase;
+             letter-spacing:.06em;margin-bottom:12px;border-bottom:1px solid #EDF2F7;padding-bottom:6px;}
+  table{width:100%;border-collapse:collapse;font-size:11.5px;}
+  th{text-align:left;color:#718096;font-weight:600;font-size:10px;text-transform:uppercase;
+     padding:5px 8px;border-bottom:1px solid #E2E8F0;}
+  td{padding:5px 8px;border-bottom:1px solid #F7FAFC;color:#1A202C;}
+  tr:last-child td{border-bottom:none;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+  .kpi{background:#F7FAFC;border-radius:8px;padding:10px 12px;}
+  .kpi-label{font-size:10px;color:#718096;margin-bottom:4px;}
+  .kpi-val{font-size:20px;font-weight:700;color:#1A202C;}
+  .kpi-sub{font-size:10px;color:#718096;margin-top:2px;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+  .badge-green{background:#C6F6D5;color:#276749;}
+  .badge-blue{background:#BEE3F8;color:#2B6CB0;}
+  .badge-amber{background:#FEFCBF;color:#7B6100;}
+  .badge-red{background:#FED7D7;color:#9B2C2C;}
+  .badge-gray{background:#EDF2F7;color:#718096;}
+  .progress-track{background:#EDF2F7;border-radius:4px;height:8px;overflow:hidden;margin-top:4px;}
+  .progress-fill{height:8px;border-radius:4px;}
+  .note{background:#BEE3F8;border-left:3px solid #2B6CB0;border-radius:6px;
+        padding:8px 12px;font-size:10px;color:#2B6CB0;margin-top:10px;}
+  .warn-note{background:#FEFCBF;border-left:3px solid #ECC94B;border-radius:6px;
+             padding:8px 12px;font-size:10px;color:#7B6100;margin-top:10px;}
+  @media print{body{background:#fff;padding:12px;} .section{break-inside:avoid;}}
+</style>
+</head>
+<body>
+<h1>🧬 PHOENIX — Learning Intelligence Observatory</h1>
+<div class="sub">
+  EOW Quant Engine v${meta.version||'—'} &nbsp;|&nbsp;
+  Generated: ${meta.generated_at_iso||'—'} &nbsp;|&nbsp;
+  Report type: LIO Full Snapshot &nbsp;|&nbsp;
+  Mode: READ-ONLY OBSERVATIONAL
+</div>
+
+<!-- §1 Learning Heartbeat -->
+<div class="section">
+  <div class="sec-title">§1 · Learning Heartbeat</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Heartbeat State</div>
+      <div class="kpi-val" style="font-size:14px;">${s.heartbeat_state||'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Records</div>
+      <div class="kpi-val">${s.total_records||0}</div>
+      <div class="kpi-sub">${s.cycle_count||0} cycles</div></div>
+    <div class="kpi"><div class="kpi-label">Formed Patterns</div>
+      <div class="kpi-val">${s.formed_patterns||0}</div>
+      <div class="kpi-sub">of ${s.total_patterns||0} candidates</div></div>
+    <div class="kpi"><div class="kpi-label">Negative Memories</div>
+      <div class="kpi-val">${s.negative_memory_count||0}</div>
+      <div class="kpi-sub">${s.permanent_bans||0} permanent bans</div></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Cognition Score</div>
+      <div class="kpi-val">${s.cognition_score!=null?s.cognition_score.toFixed(1):'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Growth Rate</div>
+      <div class="kpi-val">${s.growth_rate_per_cycle||0}/cycle</div></div>
+    <div class="kpi"><div class="kpi-label">Enabled</div>
+      <div class="kpi-val" style="font-size:14px;">${s.enabled?'✅ YES':'❌ NO'}</div></div>
+    <div class="kpi"><div class="kpi-label">Last Cycle</div>
+      <div class="kpi-val" style="font-size:12px;">${s.last_cycle_id||'—'}</div></div>
+  </div>
+</div>
+
+<!-- §2 Pattern Crystallization -->
+<div class="section">
+  <div class="sec-title">§2 · Pattern Crystallization Observatory
+    — ${(d.patterns||{}).formed_patterns||0} stable · ${pats.length} total candidates
+  </div>
+  ${pats.length===0?'<div style="color:#718096;font-size:11px;">No patterns yet.</div>':''}
+  ${pats.length>0?`<table>
+    <thead><tr>
+      <th>Regime</th><th>Vol</th><th>Symbol</th><th>Strategy</th><th>Dir</th>
+      <th>Samples</th><th>WR%</th><th>Conf%</th><th>Contexts</th><th>Stage</th>
+    </tr></thead>
+    <tbody>${patRows}</tbody>
+  </table>`:''}
+</div>
+
+<!-- §3 Negative Memory -->
+<div class="section">
+  <div class="sec-title">§3 · Negative Memory Observatory</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Permanent Bans</div>
+      <div class="kpi-val" style="color:#9B2C2C;">${(neg.counts||{}).permanent||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Temporary (Decaying)</div>
+      <div class="kpi-val">${(neg.counts||{}).temporary||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Tracked</div>
+      <div class="kpi-val">${(neg.counts||{}).total||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Decay Rate</div>
+      <div class="kpi-val" style="font-size:14px;">${(neg.decay_rate||0.90)}×/cycle</div></div>
+  </div>
+  ${(neg.entries||[]).length>0?`<table>
+    <thead><tr><th>Pattern</th><th>Losses</th><th>Score</th><th>Status</th></tr></thead>
+    <tbody>${negRows}</tbody>
+  </table>`:'<div style="color:#718096;font-size:11px;">No entries.</div>'}
+</div>
+
+<!-- §4 Ecology -->
+<div class="section">
+  <div class="sec-title">§4 · Ecology Maturity Observatory</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Total Evaluated</div>
+      <div class="kpi-val">${eco.total_evaluated||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Mature Contexts</div>
+      <div class="kpi-val">${eco.mature_contexts||0}</div>
+      <div class="kpi-sub">${eco.immature_contexts||0} immature</div></div>
+    <div class="kpi"><div class="kpi-label">Survival Rate</div>
+      <div class="kpi-val">${eco.survival_rate!=null?(eco.survival_rate*100).toFixed(1)+'%':'—'}</div>
+      <div class="kpi-sub">${eco.signals_per_hr||0} signals/hr</div></div>
+    <div class="kpi"><div class="kpi-label">Truth Density</div>
+      <div class="kpi-val" style="font-size:16px;">${eco.truth_density!=null?eco.truth_density.toFixed(4):'—'}</div>
+      <div class="kpi-sub">ecology: ${eco.ecology_health||'—'}</div></div>
+  </div>
+</div>
+
+<!-- §5 RL Intelligence -->
+<div class="section">
+  <div class="sec-title">§5 · RL Intelligence Observatory</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Brain Status</div>
+      <div class="kpi-val" style="font-size:13px;">${rl.brain_status||'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Avg Q-Value</div>
+      <div class="kpi-val" style="font-size:16px;">${rl.avg_q!=null?rl.avg_q.toFixed(4):'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Intelligence Score</div>
+      <div class="kpi-val">${rl.intelligence_score!=null?rl.intelligence_score.toFixed(1):'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Explore Ratio</div>
+      <div class="kpi-val">${rl.explore_ratio!=null?(rl.explore_ratio*100).toFixed(1)+'%':'—'}</div></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Elite Contexts</div>
+      <div class="kpi-val" style="color:#276749;">${qd.elite||0}</div></div>
+    <div class="kpi"><div class="kpi-label">High Contexts</div>
+      <div class="kpi-val" style="color:#2B6CB0;">${qd.high||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Neutral</div>
+      <div class="kpi-val">${qd.neutral||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Penalized</div>
+      <div class="kpi-val" style="color:#9B2C2C;">${qd.penalized||0}</div></div>
+  </div>
+  <table style="margin-top:8px;">
+    <thead><tr><th>Session</th><th>Contexts</th><th>Avg Q</th><th>Profitable</th></tr></thead>
+    <tbody>${sessRows}</tbody>
+  </table>
+</div>
+
+<!-- §6 Topology -->
+<div class="section">
+  <div class="sec-title">§6 · Learning Topology Map</div>
+  ${((d.topology||{}).heatmap||[]).length===0
+    ? '<div style="color:#718096;font-size:11px;">No topology data yet.</div>'
+    : `<table>
+    <thead><tr><th>Regime</th><th>Strategy</th><th>Avg Conf%</th><th>Observations</th><th>Zone</th></tr></thead>
+    <tbody>${((d.topology||{}).heatmap||[]).map(c=>{
+      const zone = c.avg_conf>=70?'PROFITABLE':c.avg_conf>=40?'NEUTRAL':
+                   (Object.values((d.topology||{}).zones||{}).find(arr=>arr.some&&arr.some(z=>z.regime===c.regime&&z.parameter===c.parameter&&z.zone==='toxic'))?'TOXIC':'UNEXPLORED');
+      const zc   = {PROFITABLE:'#276749',NEUTRAL:'#2B6CB0',TOXIC:'#9B2C2C',UNEXPLORED:'#718096'}[zone]||'#718096';
+      return `<tr><td>${c.regime}</td><td>${c.parameter}</td>
+        <td>${c.avg_conf!=null?c.avg_conf.toFixed(1)+'%':'—'}</td>
+        <td>${c.count||0}</td>
+        <td style="color:${zc};font-weight:600;">${zone}</td></tr>`;
+    }).join('')}</tbody></table>`}
+</div>
+
+<!-- §7 Cognition -->
+<div class="section">
+  <div class="sec-title">§7 · Cognitive Compression Observatory</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Noise State</div>
+      <div class="kpi-val" style="font-size:13px;">${cog.noise_state||'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Signal Noise Ratio</div>
+      <div class="kpi-val">${cog.signal_noise_ratio!=null?(cog.signal_noise_ratio*100).toFixed(1)+'%':'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Compression Ratio</div>
+      <div class="kpi-val">${cog.compression_ratio!=null?(cog.compression_ratio*100).toFixed(1)+'%':'—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Avg Samples/Pattern</div>
+      <div class="kpi-val">${cog.repeated_signal_loops!=null?cog.repeated_signal_loops.toFixed(2):'—'}</div></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Total Signals</div><div class="kpi-val">${cog.total_signals||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Resolved Outcomes</div><div class="kpi-val">${cog.total_outcomes||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Suppressed Evals</div><div class="kpi-val">${cog.suppressed_redundant_evals||0}</div></div>
+    <div class="kpi"><div class="kpi-label">Cognitive Load</div>
+      <div class="kpi-val">${cog.cognitive_activity_load!=null?(cog.cognitive_activity_load*100).toFixed(1)+'%':'—'}</div></div>
+  </div>
+</div>
+
+<!-- §8 Sovereign Readiness -->
+<div class="section">
+  <div class="sec-title">§8 · Sovereign Governance Readiness — PRP-003A
+    &nbsp;<span class="badge ${(sov.pass_count||0)===4?'badge-green':'badge-amber'}">${sov.state||'—'}</span>
+    &nbsp;${sov.pass_count||0}/${sov.total_gates||4} gates
+  </div>
+  <table>
+    <thead><tr><th>Gate</th><th>Current</th><th>Target</th><th>Status</th></tr></thead>
+    <tbody>${gateRows}</tbody>
+  </table>
+  <div class="warn-note">
+    SOVEREIGN_READY requires all 4 gates simultaneously. MetaGovernanceSovereign must NOT be
+    activated until state = SOVEREIGN_READY. This report is read-only observational.
+  </div>
+</div>
+
+<!-- §9 Alpha Discovery -->
+<div class="section">
+  <div class="sec-title">§9 · Alpha Discovery Observatory
+    &nbsp;<span class="badge ${alp.discovery_health==='CRYSTALLIZING'?'badge-green':
+      alp.discovery_health==='EMERGING'?'badge-blue':'badge-gray'}">${alp.discovery_health||'STAGNANT'}</span>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Profitable Contexts</div>
+      <div class="kpi-val" style="color:${(alp.profitable_contexts||0)>0?'#276749':'#1A202C'};">${alp.profitable_contexts||0}</div>
+      <div class="kpi-sub">of ${alp.total_contexts||0} total</div></div>
+    <div class="kpi"><div class="kpi-label">Pos / Neg Ratio</div>
+      <div class="kpi-val">${(alp.pos_neg_ratio||0).toFixed(3)}</div>
+      <div class="kpi-sub">${alp.total_bans||0} bans tracked</div></div>
+    <div class="kpi"><div class="kpi-label">Discovery Velocity</div>
+      <div class="kpi-val">${(alp.alpha_discovery_velocity||0).toFixed(1)}%</div></div>
+    <div class="kpi"><div class="kpi-label">Profitable Zones</div>
+      <div class="kpi-val">${alp.topology_profitable_zones||0}</div></div>
+  </div>
+  <table style="margin-top:8px;">
+    <thead><tr><th>Session</th><th>Profitable Ctx</th><th>Avg Q</th><th>Discovery</th></tr></thead>
+    <tbody>${alphaSessRows}</tbody>
+  </table>
+  <div class="note">
+    CRYSTALLIZING threshold: profitable_contexts ≥ 5 and profitable_pct ≥ 20%.
+    Watch this section for the first signals of genuine alpha emergence.
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:24px;color:#A0AEC0;font-size:10px;">
+  PHOENIX EOW Quant Engine · LIO Full Snapshot · Generated ${meta.generated_at_iso||''} · v${meta.version||'—'}
+  &nbsp;·&nbsp; READ-ONLY OBSERVATIONAL — No execution logic modified
+</div>
+</body>
+</html>`;
 }
 </script>
 

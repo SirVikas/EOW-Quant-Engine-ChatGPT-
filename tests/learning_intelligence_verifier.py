@@ -359,8 +359,8 @@ if _MAIN.exists():
     _main_src = _MAIN.read_text(encoding="utf-8")
     check("J01 LIO boot log line present",
           "LEARNING_INTELLIGENCE_OBSERVATORY" in _main_src and "ACTIVE" in _main_src)
-    check("J02 9 LIO endpoints declared",
-          _main_src.count("/api/learning-intelligence/") >= 9)
+    check("J02 10 LIO endpoints declared",
+          _main_src.count("/api/learning-intelligence/") >= 10)
     check("J03 lio_summary endpoint",         "async def lio_summary" in _main_src)
     check("J04 lio_patterns endpoint",        "async def lio_patterns" in _main_src)
     check("J05 lio_negative_memory endpoint", "async def lio_negative_memory" in _main_src)
@@ -391,8 +391,8 @@ if _MAIN.exists():
           "alpha_discovery_velocity" in _main_src)
     check("K06 session_intelligence passed through",
           '"session_intelligence"' in _main_src)
-    check("K07 endpoints=9 in boot log",
-          "endpoints=9" in _main_src)
+    check("K07 endpoints=9+ in boot log",
+          "endpoints=10" in _main_src or "endpoints=9" in _main_src)
 else:
     for i in range(1, 8):
         check(f"K0{i} main.py found", False, "file not found")
@@ -406,6 +406,33 @@ check("K12 lio-alpha-velocity element",          "lio-alpha-velocity" in _DASH_S
 check("K13 lio-alpha-bar-pos element",           "lio-alpha-bar-pos" in _DASH_SRC)
 check("K14 _lioRenderAlpha function declared",   "_lioRenderAlpha" in _DASH_SRC)
 check("K15 alpha-discovery in loadLIO fetch",    "alpha-discovery" in _DASH_SRC)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SECTION L — Report Download (v1.8.0)
+# ══════════════════════════════════════════════════════════════════════════════
+section("SECTION L — Report Download bundle")
+
+if _MAIN.exists():
+    check("L01 lio_report_bundle endpoint declared",
+          "async def lio_report_bundle" in _main_src)
+    check("L02 /api/learning-intelligence/report-bundle route",
+          "/api/learning-intelligence/report-bundle" in _main_src)
+    check("L03 asyncio.gather used for atomic bundle fetch",
+          "asyncio.gather" in _main_src)
+    check("L04 metadata block with version and timestamp",
+          '"report_type"' in _main_src and '"generated_at_iso"' in _main_src)
+    check("L05 endpoints=10 in boot log",
+          "endpoints=10" in _main_src)
+
+check("L06 download button in dashboard",     "lio-download-btn" in _DASH_SRC)
+check("L07 downloadLIOReport function",       "async function downloadLIOReport" in _DASH_SRC)
+check("L08 _buildLIOReportHTML function",     "_buildLIOReportHTML" in _DASH_SRC)
+check("L09 report-bundle fetch in downloader","report-bundle" in _DASH_SRC)
+check("L10 HTML blob download logic",         "text/html;charset=utf-8" in _DASH_SRC)
+check("L11 phoenix_lio_report filename",      "phoenix_lio_report_" in _DASH_SRC)
+check("L12 all 9 sections in HTML builder",
+      all(f"§{i} ·" in _DASH_SRC for i in range(1,10)))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
