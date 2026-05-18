@@ -212,13 +212,24 @@ check("D04 permanent=True → PERMANENTLY_BANNED",
 with tempfile.TemporaryDirectory() as tmpdir:
     neg = NegativeMemory(path=os.path.join(tmpdir, "neg.jsonl"))
     key = ("MEAN_REVERTING", "MEDIUM", "BTCUSDT", "BAD_STRAT", "UP")
-    neg.record_rollback(key)
-    neg.record_rollback(key)
-    neg.record_rollback(key)
+    # Option-A guard: 3 rollbacks with samples < MIN_SAMPLES_FOR_PERMANENT_BAN
+    # must NOT set permanent ban (sparse-sample protection)
+    neg.record_rollback(key, current_samples=2)
+    neg.record_rollback(key, current_samples=2)
+    neg.record_rollback(key, current_samples=2)
     entries = neg.to_list()
-    check("D05 3 rollbacks → permanent=True in entry",
-          len(entries) == 1 and entries[0].get("permanent") is True,
+    check("D05 3 rollbacks + samples<5 → permanent=False (sparse-sample guard)",
+          len(entries) == 1 and entries[0].get("permanent") is False,
           f"entries={entries}")
+    # Same pattern with sufficient samples must escalate to permanent ban
+    neg2 = NegativeMemory(path=os.path.join(tmpdir, "neg2.jsonl"))
+    neg2.record_rollback(key, current_samples=5)
+    neg2.record_rollback(key, current_samples=5)
+    neg2.record_rollback(key, current_samples=5)
+    entries2 = neg2.to_list()
+    check("D05b 3 rollbacks + samples>=5 → permanent=True",
+          len(entries2) == 1 and entries2[0].get("permanent") is True,
+          f"entries2={entries2}")
     # Parse key_str
     ks = entries[0].get("key_str", "")
     parts = ks.split("|")

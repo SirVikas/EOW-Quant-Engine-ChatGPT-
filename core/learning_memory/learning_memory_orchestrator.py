@@ -190,7 +190,7 @@ class LearningMemoryOrchestrator:
                     if did_rollback:
                         key = self._engine._make_key(record)
                         if key:
-                            self._neg_memory.record_rollback(key)
+                            self._neg_memory.record_rollback(key, current_samples=pat.samples)
                             self._forgetter.apply_rollback_penalty(pat)
                             logger.warning(
                                 f"[FTD-030B] Rollback penalty + negative memory: {param}"
