@@ -148,7 +148,9 @@ class TradeMemoryBridge:
                     parameter  = strategy_id or "UNKNOWN",
                     direction  = direction,
                 )
-                learning_memory_orchestrator._neg_memory.record_rollback(_key)
+                _pat = learning_memory_orchestrator._engine.get_pattern(_key)
+                _samples = _pat.samples if _pat else 0
+                learning_memory_orchestrator._neg_memory.record_rollback(_key, current_samples=_samples)
                 logger.warning(
                     f"[TRADE_MEMORY_BRIDGE] Catastrophic loss → extra negative-memory entry: "
                     f"{symbol} {strategy_id} pnl={net_pnl:+.4f}"
