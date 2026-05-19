@@ -1,0 +1,27 @@
+{
+  "report": "06_asymmetry_validation_report",
+  "prp": "001",
+  "total_outcomes": 76,
+  "global_achievement_ratio": 0.1361,
+  "optimism_bias_rate": 0.9474,
+  "asymmetry_health": "BROKEN",
+  "by_strategy": {
+    "MeanReversion_PAPER_SPEED": {
+      "count": 76,
+      "avg_rr_declared": 3.75,
+      "avg_rr_achieved": 0.606,
+      "achievement_ratio": 0.162,
+      "achievable_count": 37,
+      "achievable_rate": 0.4868
+    }
+  },
+  "by_regime": {
+    "MEAN_REVERTING": {
+      "count": 76,
+      "avg_rr_declared": 3.75,
+      "avg_rr_achieved": 0.606,
+      "achievement_ratio": 0.162
+    }
+  },
+  "ts": 1779202749520
+}

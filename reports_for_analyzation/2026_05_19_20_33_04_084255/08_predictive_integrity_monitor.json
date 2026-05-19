@@ -1,0 +1,22 @@
+{
+  "report": "08_predictive_integrity_monitor",
+  "prp": "001",
+  "global_truth_density": 0.2105,
+  "recent_win_rate": 0.16,
+  "rolling_drift": 0.0505,
+  "confidence_calibration": [
+    {
+      "confidence_up_to": 0.5,
+      "signals": 73,
+      "wins": 15,
+      "win_rate": 0.2055
+    },
+    {
+      "confidence_up_to": 0.55,
+      "signals": 3,
+      "wins": 1,
+      "win_rate": 0.3333
+    }
+  ],
+  "ts": 1779202749520
+}

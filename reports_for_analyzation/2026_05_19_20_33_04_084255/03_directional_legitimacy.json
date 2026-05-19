@@ -1,0 +1,75 @@
+{
+  "report": "03_directional_legitimacy_report",
+  "prp": "001",
+  "global_score": 0.5,
+  "rolling_score": 0.56,
+  "label": "NEUTRAL",
+  "by_regime": {
+    "MEAN_REVERTING": {
+      "total": 76,
+      "correct": 38,
+      "legit_rate": 0.5,
+      "LONG_rate": 0.5714,
+      "SHORT_rate": 0.4118,
+      "label": "NEUTRAL"
+    }
+  },
+  "by_strategy": {
+    "MeanReversion_PAPER_SPEED": {
+      "total": 76,
+      "correct": 38,
+      "legit_rate": 0.5
+    }
+  },
+  "by_hour": {
+    "21": {
+      "total": 3,
+      "legit_rate": 0.0
+    },
+    "22": {
+      "total": 4,
+      "legit_rate": 0.0
+    },
+    "23": {
+      "total": 13,
+      "legit_rate": 0.6154
+    },
+    "0": {
+      "total": 3,
+      "legit_rate": 0.0
+    },
+    "1": {
+      "total": 7,
+      "legit_rate": 0.5714
+    },
+    "2": {
+      "total": 3,
+      "legit_rate": 1.0
+    },
+    "5": {
+      "total": 5,
+      "legit_rate": 0.8
+    },
+    "6": {
+      "total": 8,
+      "legit_rate": 0.375
+    },
+    "7": {
+      "total": 4,
+      "legit_rate": 0.0
+    },
+    "8": {
+      "total": 3,
+      "legit_rate": 1.0
+    },
+    "9": {
+      "total": 3,
+      "legit_rate": 0.6667
+    },
+    "14": {
+      "total": 20,
+      "legit_rate": 0.55
+    }
+  },
+  "ts": 1779202749520
+}

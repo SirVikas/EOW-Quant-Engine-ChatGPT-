@@ -1,0 +1,27 @@
+{
+  "report": "01_signal_truth_matrix",
+  "prp": "001",
+  "total_signals": 76,
+  "total_outcomes": 76,
+  "truth_density": 0.2105,
+  "directional_legit": 0.3816,
+  "noise_ratio": 0.6184,
+  "total_net_pnl": -20.2301,
+  "by_regime": {
+    "MEAN_REVERTING": {
+      "signals": 76,
+      "outcomes": 76,
+      "wins": 16,
+      "win_rate": 0.2105
+    }
+  },
+  "by_strategy": {
+    "MeanReversion_PAPER_SPEED": {
+      "signals": 76,
+      "outcomes": 76,
+      "wins": 16,
+      "win_rate": 0.2105
+    }
+  },
+  "ts": 1779202749520
+}

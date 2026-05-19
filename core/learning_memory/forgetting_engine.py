@@ -6,6 +6,10 @@ Rules:
   - Time decay applied via ConfidenceUpdater (0.95 ^ age)
   - Rollback penalty: confidence × 0.7
   - Remove pattern if confidence < 25 after update
+  - Sub-formation patterns (< FORMATION_MIN_SAMPLES) are immune from pruning:
+    confidence on fewer than 20 observations is statistically unreliable and
+    early pruning creates a thrashing cycle where patterns can never accumulate
+    to the formation gate.
 """
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
@@ -15,6 +19,10 @@ if TYPE_CHECKING:
 
 ROLLBACK_PENALTY     = 0.70   # multiply confidence by this on rollback
 REMOVAL_THRESHOLD    = 25.0   # remove pattern when confidence drops below this
+
+# Mirror of PatternEngine.FORMATION_MIN_SAMPLES — avoid circular import.
+# Patterns below this sample count are immune from confidence-based pruning.
+_PRUNE_MIN_SAMPLES   = 20
 
 
 class ForgettingEngine:
@@ -33,7 +41,8 @@ class ForgettingEngine:
         """
         to_remove = [
             key for key, pat in engine._patterns.items()
-            if pat.confidence < REMOVAL_THRESHOLD and pat.samples > 0
+            if pat.confidence < REMOVAL_THRESHOLD
+            and pat.samples >= _PRUNE_MIN_SAMPLES
         ]
         removed_ids = []
         for key in to_remove:

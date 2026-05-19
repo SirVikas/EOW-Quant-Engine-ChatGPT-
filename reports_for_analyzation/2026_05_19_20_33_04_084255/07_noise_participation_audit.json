@@ -1,0 +1,94 @@
+{
+  "report": "07_noise_participation_audit",
+  "prp": "001",
+  "by_hour": [
+    {
+      "hour": 0,
+      "total": 3,
+      "fp": 2,
+      "fp_rate": 0.6667
+    },
+    {
+      "hour": 1,
+      "total": 7,
+      "fp": 5,
+      "fp_rate": 0.7143
+    },
+    {
+      "hour": 2,
+      "total": 3,
+      "fp": 2,
+      "fp_rate": 0.6667
+    },
+    {
+      "hour": 5,
+      "total": 5,
+      "fp": 4,
+      "fp_rate": 0.8
+    },
+    {
+      "hour": 6,
+      "total": 8,
+      "fp": 7,
+      "fp_rate": 0.875
+    },
+    {
+      "hour": 7,
+      "total": 4,
+      "fp": 3,
+      "fp_rate": 0.75
+    },
+    {
+      "hour": 8,
+      "total": 3,
+      "fp": 3,
+      "fp_rate": 1.0
+    },
+    {
+      "hour": 9,
+      "total": 3,
+      "fp": 3,
+      "fp_rate": 1.0
+    },
+    {
+      "hour": 14,
+      "total": 20,
+      "fp": 16,
+      "fp_rate": 0.8
+    },
+    {
+      "hour": 21,
+      "total": 3,
+      "fp": 3,
+      "fp_rate": 1.0
+    },
+    {
+      "hour": 22,
+      "total": 4,
+      "fp": 3,
+      "fp_rate": 0.75
+    },
+    {
+      "hour": 23,
+      "total": 13,
+      "fp": 9,
+      "fp_rate": 0.6923
+    }
+  ],
+  "by_regime_side": {
+    "MEAN_REVERTING": {
+      "LONG": {
+        "total": 42,
+        "fp": 36,
+        "fp_rate": 0.8571
+      },
+      "SHORT": {
+        "total": 34,
+        "fp": 24,
+        "fp_rate": 0.7059
+      }
+    }
+  },
+  "confidence_traps": 0,
+  "ts": 1779202749520
+}

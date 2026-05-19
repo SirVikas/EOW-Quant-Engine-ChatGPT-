@@ -1,0 +1,222 @@
+{
+  "total_events": 19,
+  "severity_breakdown": {
+    "WARNING": 18,
+    "ERROR": 1
+  },
+  "events": [
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779202403.6566942,
+      "symbol": "",
+      "extra": "gap=30.8s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779201398.3262758,
+      "symbol": "",
+      "extra": "gap=32.9s"
+    },
+    {
+      "code": "WS_002",
+      "type": "WebSocket",
+      "message": "No tick received for >60 seconds",
+      "reason": "Connection likely dropped or stream stalled",
+      "severity": "ERROR",
+      "auto_fix": "Force reconnect triggered",
+      "ts": 1779201169.369362,
+      "symbol": "",
+      "extra": "gap=61.1s attempt=2"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779201153.9295292,
+      "symbol": "",
+      "extra": "gap=45.7s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779200104.658934,
+      "symbol": "",
+      "extra": "gap=33.1s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779199267.5389125,
+      "symbol": "",
+      "extra": "gap=31.7s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779198430.4961507,
+      "symbol": "",
+      "extra": "gap=31.2s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779197805.992712,
+      "symbol": "",
+      "extra": "gap=31.3s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779196997.5553532,
+      "symbol": "",
+      "extra": "gap=33.0s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779196146.5673118,
+      "symbol": "",
+      "extra": "gap=33.7s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779195710.162169,
+      "symbol": "",
+      "extra": "gap=31.6s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779195478.78584,
+      "symbol": "",
+      "extra": "gap=33.9s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779194644.0227504,
+      "symbol": "",
+      "extra": "gap=32.5s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779194233.7540019,
+      "symbol": "",
+      "extra": "gap=31.6s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779194020.7216883,
+      "symbol": "",
+      "extra": "gap=30.0s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779190672.4670017,
+      "symbol": "",
+      "extra": "gap=62.4s attempt=1"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779190649.6993027,
+      "symbol": "",
+      "extra": "gap=39.6s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779189416.1495912,
+      "symbol": "",
+      "extra": "gap=31.4s"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779188333.8319888,
+      "symbol": "",
+      "extra": "gap=37.2s"
+    }
+  ],
+  "replay_available": false,
+  "module": "AUDIT_ENGINE",
+  "phase": "022",
+  "snapshot_ts": 1779202746029
+}

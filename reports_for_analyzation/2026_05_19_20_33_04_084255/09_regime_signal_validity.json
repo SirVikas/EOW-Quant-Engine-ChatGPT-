@@ -1,0 +1,15 @@
+{
+  "report": "09_regime_signal_validity",
+  "prp": "001",
+  "global_legit_score": 0.5,
+  "by_regime": {
+    "MEAN_REVERTING": {
+      "total": 76,
+      "legit_rate": 0.5,
+      "status": "VALID",
+      "LONG_valid": true,
+      "SHORT_valid": false
+    }
+  },
+  "ts": 1779202749520
+}

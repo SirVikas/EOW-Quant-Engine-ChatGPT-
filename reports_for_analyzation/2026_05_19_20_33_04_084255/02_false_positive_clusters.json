@@ -1,0 +1,55 @@
+{
+  "report": "02_false_positive_clusters",
+  "prp": "001",
+  "total_false_positives": 60,
+  "total_outcomes": 76,
+  "false_positive_rate": 0.7895,
+  "clusters": [
+    {
+      "regime": "MEAN_REVERTING",
+      "strategy": "MeanReversion_PAPER_SPEED",
+      "rsi_zone": "EXTREME_LOW",
+      "conf_tier": "LOW",
+      "side": "LONG",
+      "count": 36,
+      "avg_pnl": -0.4468,
+      "symbols": [
+        "AIGENSYNUSDT",
+        "FIDAUSDT",
+        "LTCUSDT",
+        "UNIUSDT",
+        "NEARUSDT",
+        "BCHUSDT",
+        "TONUSDT",
+        "ETHUSDT",
+        "SPKUSDT",
+        "BTCUSDT"
+      ],
+      "last_ts": 1779201825539
+    },
+    {
+      "regime": "MEAN_REVERTING",
+      "strategy": "MeanReversion_PAPER_SPEED",
+      "rsi_zone": "EXTREME_LOW",
+      "conf_tier": "LOW",
+      "side": "SHORT",
+      "count": 24,
+      "avg_pnl": -0.4716,
+      "symbols": [
+        "AIGENSYNUSDT",
+        "LTCUSDT",
+        "UNIUSDT",
+        "FIDAUSDT",
+        "NEARUSDT",
+        "TONUSDT",
+        "ETHUSDT",
+        "UUSDT",
+        "SPKUSDT",
+        "BTCUSDT"
+      ],
+      "last_ts": 1779199291481
+    }
+  ],
+  "confidence_traps": [],
+  "ts": 1779202749520
+}

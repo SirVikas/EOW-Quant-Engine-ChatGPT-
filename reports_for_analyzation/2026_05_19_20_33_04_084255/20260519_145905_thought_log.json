@@ -1,0 +1,2507 @@
+{
+  "captured_at": "2026-05-19T14:59:05.805Z",
+  "snapshot_id": "446a831e-8e11-4923-ba6b-887e0092d621",
+  "total_entries": 500,
+  "entries": [
+    {
+      "ts": 1779199379011,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199379039,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=52.2 above_sma=True bands=[47.0,53.0] (rsi=52.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199379135,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199379150,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=44.7 above_sma=False bands=[47.0,53.0] (rsi=44.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199381108,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199381131,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout UNIUSDT score=0.713 rr=5.00"
+    },
+    {
+      "ts": 1779199381136,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_LEVEL: rsi=38.0 above_sma=False bands=[47.0,53.0] (rsi=38.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199382822,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199382848,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[38.0,62.0] (rsi=50.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199383195,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199383229,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=62.1 above_sma=True bands=[47.0,53.0] (rsi=62.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199439386,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199439402,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=39.0 above_sma=False bands=[47.0,53.0] (rsi=39.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199439669,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199439688,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_CRASH_GUARD LONG: rsi=33.8<38.0 but prev=54.6\u226540.0 (first-touch crash) (rsi=33.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199439748,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199439770,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=33.3 above_sma=False bands=[47.0,53.0] (rsi=33.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199440617,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199440642,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=44.4 above_sma=False bands=[47.0,53.0] (rsi=44.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199441981,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199442001,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=33.3 above_sma=False bands=[47.0,53.0] (rsi=33.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199442790,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199442829,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=51.9 above_sma=True bands=[38.0,62.0] (rsi=51.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199444579,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199444600,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=52.2 above_sma=True bands=[47.0,53.0] (rsi=52.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199444710,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199444737,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_LEVEL: rsi=27.9 above_sma=False bands=[47.0,53.0] (rsi=27.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199444943,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199444962,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=52.7 above_sma=True bands=[47.0,53.0] (rsi=52.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199471620,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #204: meta_score=48.1 verdict=\u2014"
+    },
+    {
+      "ts": 1779199552222,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199552244,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=57.5 above_sma=True bands=[47.0,53.0] (rsi=57.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199552564,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199552610,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=61.0 above_sma=True bands=[47.0,53.0] (rsi=61.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199552704,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199552723,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=55.6 above_sma=True bands=[47.0,53.0] (rsi=55.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199552927,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199552945,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=59.4 above_sma=True bands=[38.0,62.0] (rsi=59.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199554385,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199554403,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=54.2 above_sma=True bands=[47.0,53.0] (rsi=54.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199554781,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199554803,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=57.7 above_sma=True bands=[47.0,53.0] (rsi=57.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199558460,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199558482,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=55.4 above_sma=True bands=[47.0,53.0] (rsi=55.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199560365,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199560392,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=44.8 above_sma=True bands=[38.0,62.0] (rsi=44.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199561817,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199561834,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry UNIUSDT score=0.711 rr=5.00"
+    },
+    {
+      "ts": 1779199561835,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=3.4900 rsi=44.6"
+    },
+    {
+      "ts": 1779199620957,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199620961,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199620979,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=47.2 above_sma=False bands=[47.0,53.0] (rsi=47.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199621084,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199621087,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199621107,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=40.1 above_sma=False bands=[38.0,62.0] (rsi=40.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199621238,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199621240,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199621261,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=42.1 above_sma=False bands=[47.0,53.0] (rsi=42.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199621493,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199621495,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199621509,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=43.3 above_sma=False bands=[47.0,53.0] (rsi=43.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199622965,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199622967,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199622989,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=50.0 above_sma=True bands=[38.0,62.0] (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199630496,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199630499,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199630512,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=2.0090 rsi=46.8"
+    },
+    {
+      "ts": 1779199630696,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199630699,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199630713,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_LEVEL: rsi=39.1 above_sma=False bands=[47.0,53.0] (rsi=39.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199634732,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP AIGENSYNUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199634736,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK AIGENSYNUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199634758,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback AIGENSYNUSDT: SHORT entry=0.0361 rsi=77.2"
+    },
+    {
+      "ts": 1779199634759,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT AIGENSYNUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779199634770,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) AIGENSYNUSDT"
+    },
+    {
+      "ts": 1779199634779,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE AIGENSYNUSDT: state=PAUSED cl=7 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779199634783,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO AIGENSYNUSDT: score=0.458 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779199634786,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY AIGENSYNUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779199634789,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator AIGENSYNUSDT: score=0.458 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=5217.274243"
+    },
+    {
+      "ts": 1779199634789,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override AIGENSYNUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779199634789,
+      "level": "TRADE",
+      "msg": "\u2705 Opened SHORT AIGENSYNUSDT qty=5217.274243 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779199640208,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FIDAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199640212,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199640237,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback FIDAUSDT: LONG entry=0.0202 rsi=46.0"
+    },
+    {
+      "ts": 1779199642103,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199642106,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199642125,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[47.0,53.0] (rsi=50.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199738411,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199738414,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199738427,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=36.4 above_sma=False bands=[47.0,53.0] (rsi=36.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199738585,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199738593,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199738611,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=34.8 above_sma=False bands=[47.0,53.0] (rsi=34.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199738826,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199738829,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199738840,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=40.5 above_sma=False bands=[47.0,53.0] (rsi=40.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199739970,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199739974,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199739992,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=36.7 above_sma=False bands=[47.0,53.0] (rsi=36.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199740404,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199740408,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199740436,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=40.0 above_sma=False bands=[47.0,53.0] (rsi=40.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199742092,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199742095,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199742108,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_CRASH_GUARD LONG: rsi=31.5<38.0 but prev=40.1\u226540.0 (first-touch crash) (rsi=31.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199743437,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199743445,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199743460,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_LEVEL: rsi=33.3 above_sma=False bands=[47.0,53.0] (rsi=33.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199743565,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FIDAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199743567,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199743587,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback FIDAUSDT: LONG entry=0.0202 rsi=35.8"
+    },
+    {
+      "ts": 1779199765726,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199765736,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199765768,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=50.0 above_sma=True bands=[38.0,62.0] (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199771628,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #205: meta_score=48.1 verdict=\u2014"
+    },
+    {
+      "ts": 1779199801083,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199801091,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199801106,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2113.4800 rsi=36.2"
+    },
+    {
+      "ts": 1779199801107,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG ETHUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779199801113,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) ETHUSDT"
+    },
+    {
+      "ts": 1779199801125,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE ETHUSDT: state=PAUSED cl=7 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779199801129,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO ETHUSDT: score=0.104 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779199801132,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY ETHUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779199801140,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator ETHUSDT: score=0.104 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.089041"
+    },
+    {
+      "ts": 1779199801142,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override ETHUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779199801147,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG ETHUSDT qty=0.089041 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779199801329,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FIDAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199801332,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199801354,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback FIDAUSDT: LONG entry=0.0202 rsi=35.8"
+    },
+    {
+      "ts": 1779199801410,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199801416,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199801441,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=32.8 above_sma=False bands=[47.0,53.0] (rsi=32.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199801511,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199801516,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199801563,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=39.1 above_sma=False bands=[38.0,62.0] (rsi=39.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199801681,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199801681,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199801709,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_CRASH_GUARD LONG: rsi=37.7<38.0 but prev=40.5\u226540.0 (first-touch crash) (rsi=37.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199801874,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199801877,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199801895,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[47.0,53.0] (rsi=50.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199802187,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199802192,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199802242,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback SPKUSDT: LONG entry=0.0282 rsi=33.1"
+    },
+    {
+      "ts": 1779199802244,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG SPKUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779199802260,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) SPKUSDT"
+    },
+    {
+      "ts": 1779199802272,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE SPKUSDT: state=PAUSED cl=7 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779199802277,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO SPKUSDT: score=0.136 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779199802285,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY SPKUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779199802288,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator SPKUSDT: score=0.136 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=6670.935198"
+    },
+    {
+      "ts": 1779199802292,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override SPKUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779199802306,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG SPKUSDT qty=6670.935198 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779199804759,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199804762,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199804772,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_LEVEL: rsi=35.2 above_sma=False bands=[47.0,53.0] (rsi=35.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199811687,
+      "level": "TRADE",
+      "msg": "[TM] BCHUSDT BE: SL\u2192381.7648 (R=1.53\u22651.5 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1779199817858,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199817862,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199817880,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=50.0 above_sma=True bands=[38.0,62.0] (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199829671,
+      "level": "TRADE",
+      "msg": "[TM] AIGENSYNUSDT BE: SL\u21920.0360 (R=1.50\u22651.5 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1779199859226,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199859226,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199859247,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=40.5 above_sma=False bands=[38.0,62.0] (rsi=40.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199859686,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199859695,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199859714,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=48.6 above_sma=True bands=[38.0,62.0] (rsi=48.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199860199,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199860201,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199860226,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=33.9 above_sma=False bands=[47.0,53.0] (rsi=33.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199860330,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UNIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199860333,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199860354,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=3.4790 rsi=37.5"
+    },
+    {
+      "ts": 1779199860355,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG UNIUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779199860360,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) UNIUSDT"
+    },
+    {
+      "ts": 1779199860367,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE UNIUSDT: state=PAUSED cl=7 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779199860370,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO UNIUSDT: score=0.183 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779199860373,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY UNIUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779199860382,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator UNIUSDT: score=0.183 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=54.092291"
+    },
+    {
+      "ts": 1779199860385,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override UNIUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779199860394,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG UNIUSDT qty=54.092291 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779199861229,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199861232,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199861246,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=True bands=[47.0,53.0] (rsi=50.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779199861586,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199861589,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199861607,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=2.0020 rsi=36.8"
+    },
+    {
+      "ts": 1779199861609,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG TONUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779199861619,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) TONUSDT"
+    },
+    {
+      "ts": 1779199861626,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE TONUSDT: state=PAUSED cl=7 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779199861627,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO TONUSDT: score=0.194 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779199861631,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY TONUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779199861634,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator TONUSDT: score=0.194 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=93.999541"
+    },
+    {
+      "ts": 1779199861636,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override TONUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779199861642,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG TONUSDT qty=93.999541 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779199865755,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FIDAUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779199865759,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=7 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779199865779,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=27.3 above_sma=False bands=[47.0,53.0] (rsi=27.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199910870,
+      "level": "TRADE",
+      "msg": "[TM] TONUSDT TIME_EXIT @ 1.9980 (Fast-fail: 0.8min r=-0.537<-0.45)"
+    },
+    {
+      "ts": 1779199917159,
+      "level": "TRADE",
+      "msg": "Position closed [SL] TONUSDT @ 1.998"
+    },
+    {
+      "ts": 1779199929271,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199929286,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=31.1 above_sma=False bands=[47.0,53.0] (rsi=31.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199929454,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199929472,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=39.5 above_sma=False bands=[38.0,62.0] (rsi=39.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199937073,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199937092,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=45.5 above_sma=True bands=[38.0,62.0] (rsi=45.5 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199939846,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199939863,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=27.8 above_sma=False bands=[47.0,53.0] (rsi=27.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199945446,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199945459,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[47.0,53.0] (rsi=50.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199982598,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199982616,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=76732.2600 rsi=37.0"
+    },
+    {
+      "ts": 1779199982617,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG BTCUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779199982623,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) BTCUSDT"
+    },
+    {
+      "ts": 1779199982629,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE BTCUSDT: state=PAUSED cl=8 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779199982642,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO BTCUSDT: score=0.073 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779199982653,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY BTCUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779199982660,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator BTCUSDT: score=0.073 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.002451"
+    },
+    {
+      "ts": 1779199982663,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override BTCUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779199982671,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG BTCUSDT qty=0.002451 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779199983623,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199983658,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=29.7 above_sma=False bands=[47.0,53.0] (rsi=29.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779199984342,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199984358,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=46.9 above_sma=False bands=[38.0,62.0] (rsi=46.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779199986263,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779199986285,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=44.4 above_sma=False bands=[47.0,53.0] (rsi=44.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200000031,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=8 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200000063,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=17.0 above_sma=False bands=[47.0,53.0] (rsi=17.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200011579,
+      "level": "TRADE",
+      "msg": "[TM] UNIUSDT TIME_EXIT @ 3.4750 (Fast-fail: 2.5min r=-0.479<-0.45)"
+    },
+    {
+      "ts": 1779200014204,
+      "level": "TRADE",
+      "msg": "Position closed [SL] UNIUSDT @ 3.475"
+    },
+    {
+      "ts": 1779200027608,
+      "level": "TRADE",
+      "msg": "[TM] ETHUSDT TIME_EXIT @ 2111.1900 (Fast-fail: 3.8min r=-0.451<-0.45)"
+    },
+    {
+      "ts": 1779200027623,
+      "level": "TRADE",
+      "msg": "Position closed [SL] ETHUSDT @ 2111.18"
+    },
+    {
+      "ts": 1779200044355,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=10 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200044375,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=51.7 above_sma=False bands=[38.0,62.0] (rsi=51.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200044717,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=10 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200044732,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=32.2 above_sma=False bands=[47.0,53.0] (rsi=32.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200045384,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=10 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200045407,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=55.6 above_sma=True bands=[38.0,62.0] (rsi=55.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200050484,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=10 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200050505,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=20.0 above_sma=False bands=[47.0,53.0] (rsi=20.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200051506,
+      "level": "TRADE",
+      "msg": "[TM] BTCUSDT TIME_EXIT @ 76649.2800 (Fast-fail: 1.1min r=-0.451<-0.45)"
+    },
+    {
+      "ts": 1779200051525,
+      "level": "TRADE",
+      "msg": "Position closed [SL] BTCUSDT @ 76649.27"
+    },
+    {
+      "ts": 1779200055556,
+      "level": "TRADE",
+      "msg": "[TM] SPKUSDT TIME_EXIT @ 0.0282 (Fast-fail: 4.2min r=-0.458<-0.45)"
+    },
+    {
+      "ts": 1779200055570,
+      "level": "TRADE",
+      "msg": "Position closed [SL] SPKUSDT @ 0.028178"
+    },
+    {
+      "ts": 1779200058798,
+      "level": "TRADE",
+      "msg": "[TM] AIGENSYNUSDT PARTIAL_TP 2608.637121 @ 0.0358 (R=3.00\u22653.0 \u2192 50% exit)"
+    },
+    {
+      "ts": 1779200074422,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #206: meta_score=47.0 verdict=\u2014"
+    },
+    {
+      "ts": 1779200127717,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200127730,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=28.8 above_sma=False bands=[47.0,53.0] (rsi=28.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200128108,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200128110,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass FIDAUSDT: SLEEP_MODE(vol=10075=7%_of_avg=151648,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779200128116,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=17.0 above_sma=False bands=[47.0,53.0] (rsi=17.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200130257,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200130281,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[38.0,62.0] (rsi=50.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200133839,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200133858,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=45.5 above_sma=False bands=[47.0,53.0] (rsi=45.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200175377,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200175393,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=21.3 above_sma=False bands=[47.0,53.0] (rsi=21.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200175737,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200175763,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=45.5 above_sma=False bands=[38.0,62.0] (rsi=45.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200175862,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200175891,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=31.5 above_sma=False bands=[47.0,53.0] (rsi=31.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200176801,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=12 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200176816,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=54.5 above_sma=True bands=[38.0,62.0] (rsi=54.5 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200201644,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] AIGENSYNUSDT @ 0.03588"
+    },
+    {
+      "ts": 1779200239616,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] BCHUSDT @ 381.0"
+    },
+    {
+      "ts": 1779200252829,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback FIDAUSDT: LONG entry=0.0201 rsi=17.0"
+    },
+    {
+      "ts": 1779200252831,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG FIDAUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200252836,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) FIDAUSDT"
+    },
+    {
+      "ts": 1779200252847,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE FIDAUSDT: state=PAUSED cl=0 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200252850,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO FIDAUSDT: score=0.233 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200252854,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY FIDAUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200252857,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator FIDAUSDT: score=0.233 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=9357.676387"
+    },
+    {
+      "ts": 1779200252858,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override FIDAUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200252863,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG FIDAUSDT qty=9357.676387 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200253692,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=45.5 above_sma=False bands=[38.0,62.0] (rsi=45.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200253806,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=47.1 above_sma=False bands=[38.0,62.0] (rsi=47.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200254988,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=32.7 above_sma=False bands=[47.0,53.0] (rsi=32.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200255043,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9930 rsi=33.8"
+    },
+    {
+      "ts": 1779200255044,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG TONUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200255050,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) TONUSDT"
+    },
+    {
+      "ts": 1779200255062,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE TONUSDT: state=PAUSED cl=0 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200255063,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO TONUSDT: score=0.255 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200255066,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY TONUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200255068,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator TONUSDT: score=0.255 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=94.281055"
+    },
+    {
+      "ts": 1779200255071,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override TONUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200255076,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG TONUSDT qty=94.281055 risk=4.70U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200270137,
+      "level": "TRADE",
+      "msg": "[TM] FIDAUSDT TIME_EXIT @ 0.0200 (Fast-fail: 0.3min r=-0.576<-0.45)"
+    },
+    {
+      "ts": 1779200270146,
+      "level": "TRADE",
+      "msg": "Position closed [SL] FIDAUSDT @ 0.02004"
+    },
+    {
+      "ts": 1779200342045,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_LEVEL: rsi=41.0 above_sma=False bands=[38.0,62.0] (rsi=41.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200342423,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=39.2 above_sma=False bands=[47.0,53.0] (rsi=39.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200342510,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=47.1 above_sma=False bands=[38.0,62.0] (rsi=47.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200342756,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=40.0 above_sma=False bands=[38.0,62.0] (rsi=40.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200345855,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[38.0,62.0] (rsi=50.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200351325,
+      "level": "TRADE",
+      "msg": "[TM] TONUSDT TIME_EXIT @ 1.9890 (Fast-fail: 1.6min r=-0.513<-0.45)"
+    },
+    {
+      "ts": 1779200356269,
+      "level": "TRADE",
+      "msg": "Position closed [SL] TONUSDT @ 1.989"
+    },
+    {
+      "ts": 1779200374412,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #207: meta_score=47.4 verdict=\u2014"
+    },
+    {
+      "ts": 1779200446645,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=76474.2800 rsi=35.5"
+    },
+    {
+      "ts": 1779200446646,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG BTCUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200446653,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) BTCUSDT"
+    },
+    {
+      "ts": 1779200446664,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE BTCUSDT: state=PAUSED cl=2 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200446668,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO BTCUSDT: score=0.148 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200446670,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY BTCUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200446674,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator BTCUSDT: score=0.148 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.002454"
+    },
+    {
+      "ts": 1779200446676,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override BTCUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200446681,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG BTCUSDT qty=0.002454 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200447423,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=40.6 above_sma=False bands=[38.0,62.0] (rsi=40.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200447610,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_CRASH_GUARD LONG: rsi=36.4<38.0 but prev=47.1\u226540.0 (first-touch crash) (rsi=36.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200448981,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=52.5 above_sma=False bands=[38.0,62.0] (rsi=52.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200449032,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[38.0,62.0] (rsi=50.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200450286,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_LEVEL: rsi=40.3 above_sma=False bands=[38.0,62.0] (rsi=40.3 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200452401,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=36.4 above_sma=False bands=[47.0,53.0] (rsi=36.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200482616,
+      "level": "TRADE",
+      "msg": "[TM] BTCUSDT TIME_EXIT @ 76365.9700 (Fast-fail: 0.6min r=-0.590<-0.45)"
+    },
+    {
+      "ts": 1779200482678,
+      "level": "TRADE",
+      "msg": "Position closed [SL] BTCUSDT @ 76365.97"
+    },
+    {
+      "ts": 1779200580464,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200580480,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_CRASH_GUARD LONG: rsi=34.1<38.0 but prev=40.6\u226540.0 (first-touch crash) (rsi=34.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200580671,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200580687,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=46.4 above_sma=False bands=[38.0,62.0] (rsi=46.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200581537,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BCHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200581551,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BCHUSDT: RSI_LEVEL: rsi=40.7 above_sma=False bands=[38.0,62.0] (rsi=40.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200581629,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200581657,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UNIUSDT: RSI_CRASH_GUARD LONG: rsi=33.8<38.0 but prev=40.3\u226540.0 (first-touch crash) (rsi=33.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200582139,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200582158,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout LTCUSDT score=0.760 rr=5.00"
+    },
+    {
+      "ts": 1779200582160,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=28.8 above_sma=False bands=[47.0,53.0] (rsi=28.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200583432,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FIDAUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200583460,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback FIDAUSDT: LONG entry=0.0199 rsi=16.0"
+    },
+    {
+      "ts": 1779200583460,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG FIDAUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200583460,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) FIDAUSDT"
+    },
+    {
+      "ts": 1779200583480,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE FIDAUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200583483,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO FIDAUSDT: score=0.192 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200583486,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY FIDAUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200583488,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator FIDAUSDT: score=0.192 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=9409.988322"
+    },
+    {
+      "ts": 1779200583490,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override FIDAUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200583495,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG FIDAUSDT qty=9409.988322 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200584630,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200584647,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback NEARUSDT: LONG entry=1.6110 rsi=31.2"
+    },
+    {
+      "ts": 1779200584647,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG NEARUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200584647,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) NEARUSDT"
+    },
+    {
+      "ts": 1779200584667,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE NEARUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200584672,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO NEARUSDT: score=0.149 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200584675,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY NEARUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200584677,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator NEARUSDT: score=0.149 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=116.412829"
+    },
+    {
+      "ts": 1779200584680,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override NEARUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200584685,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG NEARUSDT qty=116.412829 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200584984,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK AIGENSYNUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200585007,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED AIGENSYNUSDT: RSI_LEVEL: rsi=38.5 above_sma=False bands=[38.0,62.0] (rsi=38.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200585561,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200585574,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[38.0,62.0] (rsi=50.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200660698,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK AIGENSYNUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200660711,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED AIGENSYNUSDT: RSI_LEVEL: rsi=26.2 above_sma=False bands=[47.0,53.0] (rsi=26.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200660824,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200660836,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2100.1900 rsi=13.6"
+    },
+    {
+      "ts": 1779200660840,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG ETHUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200660849,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) ETHUSDT"
+    },
+    {
+      "ts": 1779200660856,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE ETHUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200660860,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO ETHUSDT: score=0.111 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200660863,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY ETHUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200660866,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator ETHUSDT: score=0.111 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.089297"
+    },
+    {
+      "ts": 1779200660867,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override ETHUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200660881,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG ETHUSDT qty=0.089297 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200661432,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200661444,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=10.9 above_sma=False bands=[47.0,53.0] (rsi=10.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200661617,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200661634,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9790 rsi=14.0"
+    },
+    {
+      "ts": 1779200661638,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG TONUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200661646,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) TONUSDT"
+    },
+    {
+      "ts": 1779200661657,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE TONUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200661659,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO TONUSDT: score=0.248 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200661661,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY TONUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200661665,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator TONUSDT: score=0.248 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=94.765572"
+    },
+    {
+      "ts": 1779200661667,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override TONUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200661676,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG TONUSDT qty=94.765572 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200662486,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200662509,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=40.7 above_sma=False bands=[38.0,62.0] (rsi=40.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200663979,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UNIUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200663994,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UNIUSDT: LONG entry=3.4510 rsi=15.8"
+    },
+    {
+      "ts": 1779200663997,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG UNIUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200664010,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) UNIUSDT"
+    },
+    {
+      "ts": 1779200664019,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE UNIUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200664023,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO UNIUSDT: score=0.068 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200664026,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY UNIUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200664029,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator UNIUSDT: score=0.068 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=54.343978"
+    },
+    {
+      "ts": 1779200664033,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override UNIUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200664044,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG UNIUSDT qty=54.343978 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200666218,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200666235,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=44.4 above_sma=False bands=[38.0,62.0] (rsi=44.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200667284,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BCHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200667297,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BCHUSDT: RSI_CRASH_GUARD LONG: rsi=26.5<38.0 but prev=40.7\u226540.0 (first-touch crash) (rsi=26.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200674418,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #208: meta_score=47.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779200762621,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200762635,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=41.4 above_sma=False bands=[38.0,62.0] (rsi=41.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200762695,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK AIGENSYNUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200762706,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback AIGENSYNUSDT: LONG entry=0.0357 rsi=26.6"
+    },
+    {
+      "ts": 1779200762707,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG AIGENSYNUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200762714,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) AIGENSYNUSDT"
+    },
+    {
+      "ts": 1779200762724,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE AIGENSYNUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200762727,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO AIGENSYNUSDT: score=0.150 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200762730,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY AIGENSYNUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200762734,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator AIGENSYNUSDT: score=0.150 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=5253.251184"
+    },
+    {
+      "ts": 1779200762736,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override AIGENSYNUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200762741,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG AIGENSYNUSDT qty=5253.251184 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200764661,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200764676,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=13.3 above_sma=False bands=[47.0,53.0] (rsi=13.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200764751,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200764772,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[38.0,62.0] (rsi=50.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200773743,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BCHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779200773761,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BCHUSDT: LONG entry=380.1000 rsi=29.8"
+    },
+    {
+      "ts": 1779200773762,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG BCHUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200773767,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) BCHUSDT"
+    },
+    {
+      "ts": 1779200773775,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE BCHUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200773778,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO BCHUSDT: score=0.191 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200773781,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY BCHUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200773784,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator BCHUSDT: score=0.191 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.493399"
+    },
+    {
+      "ts": 1779200773786,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override BCHUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200773792,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG BCHUSDT qty=0.493399 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200819146,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200819151,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200819170,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=48.1 above_sma=False bands=[38.0,62.0] (rsi=48.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200819241,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200819245,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200819264,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=76431.5800 rsi=22.6"
+    },
+    {
+      "ts": 1779200819266,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG BTCUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779200819272,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) BTCUSDT"
+    },
+    {
+      "ts": 1779200819281,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE BTCUSDT: state=PAUSED cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779200819285,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO BTCUSDT: score=0.484 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779200819294,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY BTCUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779200819304,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator BTCUSDT: score=0.484 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=0.002454"
+    },
+    {
+      "ts": 1779200819307,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override BTCUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779200819314,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG BTCUSDT qty=0.002454 risk=4.69U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779200822078,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200822082,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200822108,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=57.1 above_sma=False bands=[38.0,62.0] (rsi=57.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200822317,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200822321,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200822334,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=17.1 above_sma=False bands=[47.0,53.0] (rsi=17.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200863538,
+      "level": "TRADE",
+      "msg": "[TM] UNIUSDT BE: SL\u21923.4558 (R=1.57\u22651.5 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1779200881377,
+      "level": "TRADE",
+      "msg": "[TM] ETHUSDT BE: SL\u21922103.1303 (R=1.51\u22651.5 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1779200890340,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200890343,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200890358,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=45.9 above_sma=False bands=[38.0,62.0] (rsi=45.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200893704,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200893708,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200893735,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=57.1 above_sma=True bands=[38.0,62.0] (rsi=57.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200897483,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200897486,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200897503,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=31.1 above_sma=False bands=[47.0,53.0] (rsi=31.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200955434,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200955437,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200955455,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_CRASH_GUARD LONG: rsi=37.3<38.0 but prev=45.9\u226540.0 (first-touch crash) (rsi=37.3 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200955553,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200955556,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200955570,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=23.1 above_sma=False bands=[47.0,53.0] (rsi=23.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779200955616,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779200955618,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779200955630,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=42.9 above_sma=False bands=[38.0,62.0] (rsi=42.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779200974421,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #209: meta_score=47.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779201017549,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP LTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779201017566,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779201017670,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=23.5 above_sma=False bands=[47.0,53.0] (rsi=23.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779201027080,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779201027096,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779201027179,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=38.9 above_sma=False bands=[38.0,62.0] (rsi=38.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779201066369,
+      "level": "TRADE",
+      "msg": "[TM] FIDAUSDT BE: SL\u21920.0200 (R=1.56\u22651.5 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1779201089676,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779201089681,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779201089705,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=57.1 above_sma=True bands=[38.0,62.0] (rsi=57.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779201091945,
+      "level": "TRADE",
+      "msg": "[TM] NEARUSDT TIME_EXIT @ 1.6110 (Stale: 8.5min r=0.000<0.15)"
+    },
+    {
+      "ts": 1779201092053,
+      "level": "TRADE",
+      "msg": "Position closed [SL] NEARUSDT @ 1.611"
+    },
+    {
+      "ts": 1779201187942,
+      "level": "TRADE",
+      "msg": "[TM] TONUSDT TIME_EXIT @ 1.9790 (Stale: 8.8min r=0.000<0.15)"
+    },
+    {
+      "ts": 1779201187959,
+      "level": "TRADE",
+      "msg": "Position closed [SL] TONUSDT @ 1.979"
+    },
+    {
+      "ts": 1779201246253,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK LTCUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779201246267,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED LTCUSDT: RSI_LEVEL: rsi=24.0 above_sma=False bands=[47.0,53.0] (rsi=24.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779201246832,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779201246847,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=39.6 above_sma=False bands=[38.0,62.0] (rsi=39.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779201247805,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=5 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779201247817,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED UUSDT: RSI_LEVEL: rsi=57.1 above_sma=True bands=[38.0,62.0] (rsi=57.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779201271342,
+      "level": "TRADE",
+      "msg": "[TM] AIGENSYNUSDT TIME_EXIT @ 0.0357 (Stale: 8.5min r=0.089<0.15)"
+    },
+    {
+      "ts": 1779201271350,
+      "level": "TRADE",
+      "msg": "Position closed [SL] AIGENSYNUSDT @ 0.03571"
+    },
+    {
+      "ts": 1779201274423,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #210: meta_score=46.8 verdict=\u2014"
+    },
+    {
+      "ts": 1779201274885,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] ETHUSDT @ 2104.23"
+    },
+    {
+      "ts": 1779201281224,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] UNIUSDT @ 3.457"
+    },
+    {
+      "ts": 1779201285165,
+      "level": "TRADE",
+      "msg": "[TM] BCHUSDT TIME_EXIT @ 380.2000 (Stale: 8.5min r=0.110<0.15)"
+    },
+    {
+      "ts": 1779201286967,
+      "level": "TRADE",
+      "msg": "Position closed [SL] BCHUSDT @ 380.1"
+    },
+    {
+      "ts": 1779201288509,
+      "level": "TRADE",
+      "msg": "Position closed [SL] FIDAUSDT @ 0.01995"
+    },
+    {
+      "ts": 1779201299317,
+      "level": "TRADE",
+      "msg": "[TM] BTCUSDT TIME_EXIT @ 76258.4500 (Stale: 8.0min r=-0.944<0.15)"
+    },
+    {
+      "ts": 1779201299451,
+      "level": "TRADE",
+      "msg": "Position closed [SL] BTCUSDT @ 76258.45"
+    },
+    {
+      "ts": 1779201324736,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SPKUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779201324741,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback SPKUSDT: LONG entry=0.0281 rsi=33.9"
+    },
+    {
+      "ts": 1779201324741,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG SPKUSDT | PAPER_SPEED_FALLBACK(momentum micro-signal)"
+    },
+    {
+      "ts": 1779201324771,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) SPKUSDT"
+    },
+    {
+      "ts": 1779201324783,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE SPKUSDT: state=REDUCING cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779201324789,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO SPKUSDT: score=0.132 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779201324796,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator SPKUSDT: score=0.132 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=6670.280671"
+    },
+    {
+      "ts": 1779201324805,
+      "level": "TRADE",
+      "msg": "\u26a1 PAPER_SPEED market-fill override SPKUSDT: USE_LIMIT_ORDERS bypassed"
+    },
+    {
+      "ts": 1779201324817,
+      "level": "TRADE",
+      "msg": "\u2705 Opened LONG SPKUSDT qty=6670.280671 risk=4.68U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779201574479,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #211: meta_score=46.9 verdict=\u2014"
+    },
+    {
+      "ts": 1779201825446,
+      "level": "TRADE",
+      "msg": "[TM] SPKUSDT TIME_EXIT @ 0.0281 (Stale: 8.3min r=0.141<0.15)"
+    },
+    {
+      "ts": 1779201825455,
+      "level": "TRADE",
+      "msg": "Position closed [SL] SPKUSDT @ 0.028077"
+    },
+    {
+      "ts": 1779201874523,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #212: meta_score=46.8 verdict=\u2014"
+    },
+    {
+      "ts": 1779202174546,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #213: meta_score=46.8 verdict=\u2014"
+    },
+    {
+      "ts": 1779202474534,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #214: meta_score=46.8 verdict=\u2014"
+    }
+  ]
+}

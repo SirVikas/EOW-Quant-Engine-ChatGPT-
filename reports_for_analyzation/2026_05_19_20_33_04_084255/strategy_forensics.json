@@ -1,0 +1,23 @@
+{
+  "title": "Strategy Forensics \u2014 Per-Strategy Performance Breakdown",
+  "generated_at": "2026-05-19 14:59:05 UTC",
+  "total_strategies": 1,
+  "best_strategy": "NONE \u2014 all strategies losing",
+  "strategies": [
+    {
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "n_trades": 203,
+      "win_rate_pct": 18.23,
+      "profit_factor": 0.329,
+      "net_pnl_usdt": -64.095,
+      "avg_win_usdt": 0.8506,
+      "avg_loss_usdt": 0.5757,
+      "actual_rr": 1.478,
+      "total_fees_usdt": 30.1463,
+      "fee_pct_of_gp": 95.8,
+      "avg_r_multiple": -0.063,
+      "verdict": "NOISE"
+    }
+  ],
+  "action": "RSI filter + real strategies needed before any strategy is viable"
+}

@@ -1,0 +1,2057 @@
+{
+  "records": [
+    {
+      "cycle_id": "c30cef8a",
+      "timestamp": 1779138419.8172214,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.5084 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779138419817
+    },
+    {
+      "cycle_id": "95a34079",
+      "timestamp": 1779139274.0763824,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ETHUSDT net_pnl=-0.4756 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779139274076
+    },
+    {
+      "cycle_id": "4eab54f6",
+      "timestamp": 1779139739.3607092,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT BTCUSDT net_pnl=-0.4061 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779139739360
+    },
+    {
+      "cycle_id": "201cff05",
+      "timestamp": 1779142440.0530863,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "22",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT BTCUSDT net_pnl=-0.3246 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779142440053
+    },
+    {
+      "cycle_id": "582ec9f3",
+      "timestamp": 1779142474.0711682,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "22",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG AIGENSYNUSDT net_pnl=+0.0964 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779142474071
+    },
+    {
+      "cycle_id": "e5e13a42",
+      "timestamp": 1779142729.690301,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "22",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.5044 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779142729690
+    },
+    {
+      "cycle_id": "6251a0f0",
+      "timestamp": 1779142731.7189305,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "22",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT LTCUSDT net_pnl=-0.4777 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779142731718
+    },
+    {
+      "cycle_id": "46f99c13",
+      "timestamp": 1779145883.9404614,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT UNIUSDT net_pnl=-0.6445 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779145883941
+    },
+    {
+      "cycle_id": "1c807b89",
+      "timestamp": 1779146951.5741682,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT LTCUSDT net_pnl=+0.2580 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779146951574
+    },
+    {
+      "cycle_id": "fd5bd0ee",
+      "timestamp": 1779147001.5543222,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG TONUSDT net_pnl=-0.6483 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779147001554
+    },
+    {
+      "cycle_id": "fd8eccb6",
+      "timestamp": 1779147272.0852919,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT SPKUSDT net_pnl=+0.4205 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779147272085
+    },
+    {
+      "cycle_id": "02668384",
+      "timestamp": 1779147495.468807,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT UNIUSDT net_pnl=-0.4824 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779147495468
+    },
+    {
+      "cycle_id": "1ed94d7a",
+      "timestamp": 1779147577.0422385,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT FIDAUSDT net_pnl=-0.6200 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779147577042
+    },
+    {
+      "cycle_id": "2fdd2385",
+      "timestamp": 1779147672.2326307,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT TONUSDT net_pnl=-0.5522 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779147672232
+    },
+    {
+      "cycle_id": "3ed0b2f1",
+      "timestamp": 1779147791.3360832,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.5013 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779147791336
+    },
+    {
+      "cycle_id": "f05dbdcb",
+      "timestamp": 1779147858.697774,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT BTCUSDT net_pnl=-0.1992 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779147858697
+    },
+    {
+      "cycle_id": "39bcc3dd",
+      "timestamp": 1779148148.7683249,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ETHUSDT net_pnl=+0.4088 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779148148768
+    },
+    {
+      "cycle_id": "47e234dc",
+      "timestamp": 1779148199.452368,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG FIDAUSDT net_pnl=-0.6217 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779148199452
+    },
+    {
+      "cycle_id": "c659bcf0",
+      "timestamp": 1779148430.7999425,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT AIGENSYNUSDT net_pnl=-0.2149 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779148430799
+    },
+    {
+      "cycle_id": "94eaa108",
+      "timestamp": 1779148678.8291638,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "23",
+        "instrument": "BCHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT BCHUSDT net_pnl=+1.2337 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779148678829
+    },
+    {
+      "cycle_id": "6d3d7358",
+      "timestamp": 1779148879.2789712,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG TONUSDT net_pnl=+0.3065 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779148879278
+    },
+    {
+      "cycle_id": "6ea4bfe0",
+      "timestamp": 1779148961.1263025,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG SPKUSDT net_pnl=-0.2076 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779148961126
+    },
+    {
+      "cycle_id": "c0504ab2",
+      "timestamp": 1779149188.9081357,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG LTCUSDT net_pnl=-0.2311 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779149188908
+    },
+    {
+      "cycle_id": "12a34d56",
+      "timestamp": 1779152781.4834878,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG NEARUSDT net_pnl=-0.4999 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779152781483
+    },
+    {
+      "cycle_id": "fc54269e",
+      "timestamp": 1779153144.734928,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG AIGENSYNUSDT net_pnl=+1.4635 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779153144734
+    },
+    {
+      "cycle_id": "6c4c2dde",
+      "timestamp": 1779153844.6365814,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=+0.7865 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779153844636
+    },
+    {
+      "cycle_id": "750ad18e",
+      "timestamp": 1779154009.7686675,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG AIGENSYNUSDT net_pnl=-0.7443 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779154009768
+    },
+    {
+      "cycle_id": "dcdfbe6e",
+      "timestamp": 1779155330.4596126,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT AIGENSYNUSDT net_pnl=-0.6278 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779155330460
+    },
+    {
+      "cycle_id": "dcc3292a",
+      "timestamp": 1779155821.1421733,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG AIGENSYNUSDT net_pnl=-0.5748 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779155821142
+    },
+    {
+      "cycle_id": "739d9c68",
+      "timestamp": 1779155879.8181195,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ETHUSDT net_pnl=-0.2620 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779155879818
+    },
+    {
+      "cycle_id": "2abcf7de",
+      "timestamp": 1779156005.2637627,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "2",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG UNIUSDT net_pnl=-0.4817 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779156005263
+    },
+    {
+      "cycle_id": "9c6a5cf7",
+      "timestamp": 1779156027.298864,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "2",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG BTCUSDT net_pnl=-0.4716 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779156027298
+    },
+    {
+      "cycle_id": "b04f0fd6",
+      "timestamp": 1779156365.853882,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "2",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT LTCUSDT net_pnl=+0.2964 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779156365853
+    },
+    {
+      "cycle_id": "05cf47fa",
+      "timestamp": 1779167424.5182502,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "5",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG SPKUSDT net_pnl=-0.4906 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779167424518
+    },
+    {
+      "cycle_id": "1f6c7231",
+      "timestamp": 1779167513.427575,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "5",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG AIGENSYNUSDT net_pnl=-0.2141 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779167513427
+    },
+    {
+      "cycle_id": "75a18e0e",
+      "timestamp": 1779167653.511454,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "5",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG UNIUSDT net_pnl=-0.7509 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779167653511
+    },
+    {
+      "cycle_id": "9ec99a57",
+      "timestamp": 1779167749.2506611,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "5",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT FIDAUSDT net_pnl=+0.2804 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779167749250
+    },
+    {
+      "cycle_id": "6b3686d6",
+      "timestamp": 1779167765.3456588,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "5",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG LTCUSDT net_pnl=-0.5453 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779167765345
+    },
+    {
+      "cycle_id": "bf73e9dd",
+      "timestamp": 1779171104.739597,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.5016 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779171104739
+    },
+    {
+      "cycle_id": "5b9fc9e0",
+      "timestamp": 1779171778.7860646,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT BTCUSDT net_pnl=-0.3021 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779171778786
+    },
+    {
+      "cycle_id": "a95187ca",
+      "timestamp": 1779171783.0531418,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT LTCUSDT net_pnl=-0.3351 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779171783053
+    },
+    {
+      "cycle_id": "6bfe387b",
+      "timestamp": 1779171968.8855774,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG SPKUSDT net_pnl=-0.5439 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779171968885
+    },
+    {
+      "cycle_id": "68745480",
+      "timestamp": 1779172128.7799885,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT FIDAUSDT net_pnl=+0.0113 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779172128780
+    },
+    {
+      "cycle_id": "984bd223",
+      "timestamp": 1779172411.49179,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT UNIUSDT net_pnl=-0.2116 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779172411491
+    },
+    {
+      "cycle_id": "82c1de40",
+      "timestamp": 1779172862.3635416,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ETHUSDT net_pnl=-0.4549 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779172862363
+    },
+    {
+      "cycle_id": "8b7dc016",
+      "timestamp": 1779172924.3784359,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "6",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT FIDAUSDT net_pnl=-0.9047 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779172924378
+    },
+    {
+      "cycle_id": "2c82aee9",
+      "timestamp": 1779174468.8088186,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "7",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT SPKUSDT net_pnl=-0.4831 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779174468808
+    },
+    {
+      "cycle_id": "1c4d522c",
+      "timestamp": 1779174656.001943,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "7",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ETHUSDT net_pnl=-0.1983 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779174656001
+    },
+    {
+      "cycle_id": "59944825",
+      "timestamp": 1779174776.5337186,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "7",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT TONUSDT net_pnl=-0.8133 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779174776533
+    },
+    {
+      "cycle_id": "9a34809c",
+      "timestamp": 1779177260.9086099,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "7",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG BTCUSDT net_pnl=+0.3414 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779177260908
+    },
+    {
+      "cycle_id": "2d97003e",
+      "timestamp": 1779177674.7414892,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "8",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG FIDAUSDT net_pnl=-0.7198 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779177674741
+    },
+    {
+      "cycle_id": "a012383f",
+      "timestamp": 1779178086.8200326,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "8",
+        "instrument": "UUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT UUSDT net_pnl=-0.2454 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779178086820
+    },
+    {
+      "cycle_id": "b27b5c3b",
+      "timestamp": 1779178324.0192254,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "8",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ETHUSDT net_pnl=-0.4686 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779178324019
+    },
+    {
+      "cycle_id": "75f566a6",
+      "timestamp": 1779181860.683232,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "9",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ETHUSDT net_pnl=-0.2418 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779181860683
+    },
+    {
+      "cycle_id": "8c3e5f11",
+      "timestamp": 1779181903.9622042,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "9",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG TONUSDT net_pnl=-0.5414 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779181903962
+    },
+    {
+      "cycle_id": "9b5deb00",
+      "timestamp": 1779182119.6211765,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "9",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG BTCUSDT net_pnl=-0.3281 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779182119621
+    },
+    {
+      "cycle_id": "53a7bf76",
+      "timestamp": 1779199291.485621,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT AIGENSYNUSDT net_pnl=-0.5263 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779199291485
+    },
+    {
+      "cycle_id": "7fd49a68",
+      "timestamp": 1779199917.22357,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG TONUSDT net_pnl=-0.6392 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779199917223
+    },
+    {
+      "cycle_id": "ef1ae3cb",
+      "timestamp": 1779200014.3155668,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG UNIUSDT net_pnl=-0.4797 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200014315
+    },
+    {
+      "cycle_id": "b9c708a3",
+      "timestamp": 1779200027.7133813,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ETHUSDT net_pnl=-0.4681 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200027713
+    },
+    {
+      "cycle_id": "a4247f95",
+      "timestamp": 1779200051.601099,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG BTCUSDT net_pnl=-0.4666 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200051601
+    },
+    {
+      "cycle_id": "8eea4db0",
+      "timestamp": 1779200055.6362474,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG SPKUSDT net_pnl=-0.4768 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200055636
+    },
+    {
+      "cycle_id": "d7f2bf78",
+      "timestamp": 1779200201.695676,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT AIGENSYNUSDT net_pnl=+0.7285 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200201695
+    },
+    {
+      "cycle_id": "eccf7265",
+      "timestamp": 1779200239.684584,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "BCHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT BCHUSDT net_pnl=+0.3771 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200239684
+    },
+    {
+      "cycle_id": "f9375a03",
+      "timestamp": 1779200270.208651,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG FIDAUSDT net_pnl=-0.6371 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200270208
+    },
+    {
+      "cycle_id": "cd062b17",
+      "timestamp": 1779200356.3331447,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG TONUSDT net_pnl=-0.6399 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200356333
+    },
+    {
+      "cycle_id": "1d7f0e2c",
+      "timestamp": 1779200482.7447565,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG BTCUSDT net_pnl=-0.5283 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779200482744
+    },
+    {
+      "cycle_id": "b976522b",
+      "timestamp": 1779201092.2912471,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG NEARUSDT net_pnl=-0.2626 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201092294
+    },
+    {
+      "cycle_id": "1802b30c",
+      "timestamp": 1779201188.0295942,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG TONUSDT net_pnl=-0.2626 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201188029
+    },
+    {
+      "cycle_id": "1e7a352b",
+      "timestamp": 1779201271.4169908,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "AIGENSYNUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG AIGENSYNUSDT net_pnl=-0.2101 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201271420
+    },
+    {
+      "cycle_id": "e0a8a083",
+      "timestamp": 1779201274.9441402,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ETHUSDT net_pnl=+0.0980 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201274944
+    },
+    {
+      "cycle_id": "a64c176d",
+      "timestamp": 1779201281.2913756,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG UNIUSDT net_pnl=+0.0633 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201281291
+    },
+    {
+      "cycle_id": "4f64a3a4",
+      "timestamp": 1779201287.022802,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "BCHUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG BCHUSDT net_pnl=-0.2626 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201287022
+    },
+    {
+      "cycle_id": "df48007b",
+      "timestamp": 1779201288.562102,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "FIDAUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG FIDAUSDT net_pnl=-0.0745 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201288562
+    },
+    {
+      "cycle_id": "f181b6c4",
+      "timestamp": 1779201299.5149846,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "BTCUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG BTCUSDT net_pnl=-0.6872 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201299514
+    },
+    {
+      "cycle_id": "10741fa2",
+      "timestamp": 1779201825.5420117,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "14",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG SPKUSDT net_pnl=-0.2021 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779201825542
+    }
+  ],
+  "phase": "030B"
+}
