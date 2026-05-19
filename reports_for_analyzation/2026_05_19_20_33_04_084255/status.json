@@ -1,0 +1,211 @@
+{
+  "health": {
+    "status": "HEALTHY",
+    "total_ticks": 534,
+    "age_secs": 95.1,
+    "tick_interval_secs": 120,
+    "dedup_ratio": 0.0,
+    "anomaly_rate": 6.7,
+    "escalation_rate": 0.337,
+    "sync_rate": 0.0,
+    "last_tick_ms": 123
+  },
+  "orchestrator": {
+    "module": "OBS_ORCHESTRATOR",
+    "version": "1.0",
+    "total_ticks": 534,
+    "total_compressed": 534,
+    "total_deduped": 0,
+    "total_anomalies": 3579,
+    "total_escalations": 180,
+    "total_syncs": 0,
+    "total_errors": 0,
+    "last_tick_ts": 1779202650847,
+    "last_tick_ms": 123,
+    "tick_interval_secs": 120,
+    "cleanup_every_n_ticks": 15,
+    "event_bus": {
+      "module": "EVENT_BUS",
+      "version": "1.0",
+      "channels": [
+        "ANOMALY",
+        "ESCALATION",
+        "SYNC_READY",
+        "FEED_UPDATE",
+        "SUMMARY"
+      ],
+      "subscribers": {
+        "ANOMALY": 0,
+        "ESCALATION": 0,
+        "SYNC_READY": 0,
+        "FEED_UPDATE": 0,
+        "SUMMARY": 0
+      },
+      "stats": {
+        "total_emitted": 0,
+        "total_handler_calls": 0,
+        "total_handler_errors": 0,
+        "total_subscriptions": 0,
+        "per_channel": {}
+      },
+      "recent_event_count": 0,
+      "handler_error_count": 0
+    },
+    "escalation_active": 100,
+    "sync_pending": true
+  },
+  "anomaly_engine": {
+    "module": "ANOMALY_DETECTOR",
+    "version": "1.0",
+    "total_scans": 534,
+    "total_anomalies": 3579,
+    "critical_count": 1040,
+    "high_count": 1919,
+    "medium_count": 538,
+    "low_count": 82,
+    "peak_iq": 12.5,
+    "last_scan_ts": 1779202650844
+  },
+  "escalation": {
+    "module": "ESCALATION_ENGINE",
+    "version": "1.0",
+    "total_evaluated": 534,
+    "total_escalated": 180,
+    "total_suppressed": 354,
+    "total_acked": 0,
+    "total_resolved": 0,
+    "l1_count": 0,
+    "l2_count": 0,
+    "l3_count": 180,
+    "active_count": 100,
+    "last_escalation_ts": 1779202410307
+  },
+  "event_bus": {
+    "module": "EVENT_BUS",
+    "version": "1.0",
+    "channels": [
+      "ANOMALY",
+      "ESCALATION",
+      "SYNC_READY",
+      "FEED_UPDATE",
+      "SUMMARY"
+    ],
+    "subscribers": {
+      "ANOMALY": 0,
+      "ESCALATION": 0,
+      "SYNC_READY": 0,
+      "FEED_UPDATE": 0,
+      "SUMMARY": 0
+    },
+    "stats": {
+      "total_emitted": 0,
+      "total_handler_calls": 0,
+      "total_handler_errors": 0,
+      "total_subscriptions": 0,
+      "per_channel": {}
+    },
+    "recent_event_count": 0,
+    "handler_error_count": 0
+  },
+  "strategic_feed": {
+    "module": "STRATEGIC_FEED",
+    "version": "1.0",
+    "total_refreshes": 534,
+    "last_refresh_ts": 1779202650844,
+    "feeds_active": 5,
+    "max_signal": 100.0,
+    "feed_states": {
+      "RISK": {
+        "state": "ELEVATED",
+        "strength": 40.0
+      },
+      "LEARNING": {
+        "state": "CRITICAL",
+        "strength": 100.0
+      },
+      "PERFORMANCE": {
+        "state": "LOSING",
+        "strength": 75.0
+      },
+      "ANOMALY": {
+        "state": "CRITICAL",
+        "strength": 100.0
+      },
+      "REGIME": {
+        "state": "WEAK",
+        "strength": 30.0
+      }
+    }
+  },
+  "summary_engine": {
+    "module": "AI_SUMMARY_ENGINE",
+    "version": "1.0",
+    "total_summaries": 534,
+    "critical_count": 534,
+    "high_count": 0,
+    "routine_count": 0,
+    "monitoring_count": 0,
+    "last_summary_ts": 1779202650844,
+    "last_priority": "CRITICAL"
+  },
+  "sync_engine": {
+    "module": "GITHUB_SYNC_ENGINE",
+    "version": "1.0",
+    "batch_size": 20,
+    "syncs_last_hour": 4,
+    "rate_limit": 4,
+    "secs_since_sync": 2521.0,
+    "sync_interval": 900,
+    "should_flush": true,
+    "stats": {
+      "total_queued": 534,
+      "total_flushed": 72,
+      "total_suppressed": 798,
+      "total_errors": 0,
+      "last_sync_ts": 1779200225075,
+      "last_checksum": "1da46e50dd1a110f"
+    },
+    "governance": {
+      "max_batch_size": 20,
+      "high_flush_threshold": 3,
+      "max_syncs_per_hour": 4,
+      "min_cooldown_secs": 120
+    }
+  },
+  "lifecycle": {
+    "module": "REPORT_LIFECYCLE",
+    "version": "1.0",
+    "stats": {
+      "total_writes": 1068,
+      "total_raw_writes": 534,
+      "total_comp_writes": 534,
+      "total_dedup_skips": 0,
+      "total_cleanup_runs": 35,
+      "total_files_pruned": 1069,
+      "last_cleanup_ts": 1779201549728,
+      "last_write_ts": 1779202650834
+    },
+    "storage": {
+      "raw_files": 100,
+      "raw_mb": 0.11,
+      "raw_ceiling_mb": 50.0,
+      "comp_files": 500,
+      "comp_mb": 0.36,
+      "comp_ceiling_mb": 200.0
+    },
+    "paths": {
+      "raw": "D:\\EOW Quant Engine V18.0\\eow_quant_engine_FINAL_v2.2\\eow_quant_engine\\reports\\observability\\raw",
+      "compressed": "D:\\EOW Quant Engine V18.0\\eow_quant_engine_FINAL_v2.2\\eow_quant_engine\\reports\\observability\\compressed",
+      "latest": "D:\\EOW Quant Engine V18.0\\eow_quant_engine_FINAL_v2.2\\eow_quant_engine\\reports\\observability\\latest"
+    }
+  },
+  "delta_reporter": {
+    "module": "DELTA_REPORTER",
+    "version": "1.0",
+    "total_reports": 534,
+    "total_suppressed": 400,
+    "total_meaningful": 133,
+    "has_baseline": true,
+    "meaningful_ratio": 0.249
+  }
+}

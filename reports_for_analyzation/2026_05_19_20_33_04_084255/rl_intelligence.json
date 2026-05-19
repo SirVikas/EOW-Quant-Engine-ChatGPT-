@@ -1,0 +1,174 @@
+{
+  "title": "RL Learning Intelligence \u2014 Contextual Bandit Evolution (FTD-055-ATHENA)",
+  "generated_at": "2026-05-19 14:59:05 UTC",
+  "verdict": "LEARNING_ACTIVE_NO_ALPHA",
+  "verdict_detail": "RL correctly flagged 2 toxic context(s). No profitable contexts yet \u2014 signal quality is the limiting factor, not the RL.",
+  "intelligence_score": 12.5,
+  "learning_velocity": {
+    "updates_per_min": 0.071,
+    "updates_per_hour": 4.3,
+    "total_updates": 76,
+    "total_pulls": 76,
+    "avg_q_velocity": 0.0342,
+    "uptime_min": 1074.8
+  },
+  "context_coverage": {
+    "total_contexts_seen": 21,
+    "contexts_visited_3plus": 4,
+    "contexts_unvisited": 17,
+    "coverage_pct": 19.0,
+    "exploration_status": "EARLY_PHASE",
+    "unvisited_contexts": [
+      "TRENDING|NY|TrendFollowing",
+      "TRENDING|NY|MeanReversion",
+      "VOLATILITY_EXPANSION|NY|TrendFollowing",
+      "VOLATILITY_EXPANSION|NY|MeanReversion",
+      "TRENDING|LATE|TrendFollowing",
+      "TRENDING|LATE|MeanReversion",
+      "VOLATILITY_EXPANSION|LATE|TrendFollowing",
+      "VOLATILITY_EXPANSION|LATE|MeanReversion",
+      "TRENDING|ASIA|TrendFollowing",
+      "TRENDING|ASIA|MeanReversion"
+    ]
+  },
+  "alpha_discovery": {
+    "profitable_contexts": [],
+    "toxic_contexts": [
+      {
+        "context": "MEAN_REVERTING|LONDON|MeanReversion",
+        "q_value": -0.4216,
+        "win_rate": 0.208,
+        "n_visits": 216,
+        "total_pnl": -48.278
+      },
+      {
+        "context": "MEAN_REVERTING|ASIA|MeanReversion",
+        "q_value": -0.3053,
+        "win_rate": 0.176,
+        "n_visits": 187,
+        "total_pnl": -38.0954
+      }
+    ],
+    "differentiation_by_session": {
+      "NY": [
+        {
+          "context": "MEAN_REVERTING|NY|MeanReversion",
+          "q": -0.2351,
+          "wr_pct": 16.8,
+          "n": 274,
+          "pnl": -59.9975
+        }
+      ],
+      "LATE": [
+        {
+          "context": "MEAN_REVERTING|LATE|MeanReversion",
+          "q": -0.2169,
+          "wr_pct": 17.2,
+          "n": 239,
+          "pnl": -52.657
+        }
+      ],
+      "ASIA": [
+        {
+          "context": "MEAN_REVERTING|ASIA|MeanReversion",
+          "q": -0.3053,
+          "wr_pct": 17.6,
+          "n": 187,
+          "pnl": -38.0954
+        }
+      ],
+      "LONDON": [
+        {
+          "context": "MEAN_REVERTING|LONDON|MeanReversion",
+          "q": -0.4216,
+          "wr_pct": 20.8,
+          "n": 216,
+          "pnl": -48.278
+        }
+      ]
+    }
+  },
+  "strategy_coverage": {
+    "MeanReversion": {
+      "visited_contexts": 4,
+      "total_contexts": 12,
+      "avg_q": -0.2947,
+      "coverage_pct": 33.3
+    },
+    "TrendFollowing": {
+      "visited_contexts": 0,
+      "total_contexts": 9,
+      "avg_q": 0.0,
+      "coverage_pct": 0.0
+    }
+  },
+  "convergence_estimate": {
+    "max_visits_any_context": 274,
+    "visits_for_full_maturity": 50,
+    "visits_needed_top_context": 0,
+    "updates_per_min": 0.071,
+    "projected_minutes_to_mature_top_ctx": 0.0,
+    "note": "50 visits \u2192 LR=0.07 (stable), Q-values reliable for policy decisions."
+  },
+  "maturity_distribution": {
+    "fresh": 17,
+    "accel": 0,
+    "standard": 0,
+    "mature": 4
+  },
+  "quality_distribution": {
+    "elite": 0,
+    "high": 0,
+    "neutral": 17,
+    "penalized": 4,
+    "profitable_pct": 0.0
+  },
+  "session_intelligence": {
+    "ASIA": {
+      "n_contexts": 1,
+      "avg_q": -0.3053,
+      "profitable": 0
+    },
+    "LONDON": {
+      "n_contexts": 1,
+      "avg_q": -0.4216,
+      "profitable": 0
+    },
+    "NY": {
+      "n_contexts": 1,
+      "avg_q": -0.2351,
+      "profitable": 0
+    },
+    "LATE": {
+      "n_contexts": 1,
+      "avg_q": -0.2169,
+      "profitable": 0
+    }
+  },
+  "policy_evolution": {
+    "allow_rate": 0.434,
+    "explore_ratio": 0.0,
+    "toxic_block_rate": 0.566,
+    "floor_raise_rate": 0.868,
+    "floor_lower_rate": 0.0,
+    "boost_fire_rate": 0.0
+  },
+  "hyperparameters": {
+    "learning_rate_adaptive": "0.07\u21920.25 (by maturity)",
+    "ev_floor": -0.3,
+    "ucb_coeff": 1.5,
+    "min_visits": 3,
+    "q_bounds": [
+      -2.0,
+      5.0
+    ],
+    "decay_per_day": 0.98,
+    "bootstrap_dampen": 0.5,
+    "regime_ucb_mult": {
+      "TRENDING": 1.2,
+      "MEAN_REVERTING": 1.0,
+      "VOLATILITY_EXPANSION": 0.8,
+      "UNKNOWN": 1.1
+    }
+  }
+}

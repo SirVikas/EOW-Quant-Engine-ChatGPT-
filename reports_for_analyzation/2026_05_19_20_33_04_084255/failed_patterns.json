@@ -1,0 +1,149 @@
+{
+  "failed_patterns": [
+    {
+      "pattern_id": "a80cb58c-002",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "BCHUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 73,
+      "created_at": 1779201287.022802
+    },
+    {
+      "pattern_id": "a794c1c6-777",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FIDAUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 74,
+      "created_at": 1779201288.5631104
+    },
+    {
+      "pattern_id": "e865d78b-1d0",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "BTCUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 75,
+      "created_at": 1779201299.5149846
+    },
+    {
+      "pattern_id": "49d5cced-26c",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "SPKUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 76,
+      "created_at": 1779201825.5430121
+    },
+    {
+      "pattern_id": "1ffbb59b-da6",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "AIGENSYNUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 69.83,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 63,
+      "created_at": 1779200201.6966763
+    },
+    {
+      "pattern_id": "50ea41f2-e07",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "BCHUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 73.51,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 64,
+      "created_at": 1779200239.685586
+    },
+    {
+      "pattern_id": "be9df871-837",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ETHUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 100.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 71,
+      "created_at": 1779201274.9441402
+    },
+    {
+      "pattern_id": "73dd52ec-ca9",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "UNIUSDT",
+        "parameter": "MeanReversion_PAPER_SPEED",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 100.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 72,
+      "created_at": 1779201281.2913756
+    }
+  ],
+  "phase": "030B"
+}

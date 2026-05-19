@@ -1,0 +1,235 @@
+{
+  "module": "AUTO_INTELLIGENCE_ENGINE",
+  "phase": "030",
+  "enabled": true,
+  "interval_min": 5.0,
+  "min_trades": 30,
+  "min_score": 55.0,
+  "cycles_run": 214,
+  "daily_cycles": 0,
+  "max_daily": 12,
+  "last_run_ts": null,
+  "pending_check": false,
+  "last_cycle": {
+    "cycle_num": 214,
+    "ts_start": 1779202474526,
+    "ts_end": 1779202474529,
+    "phase": "BLOCKED",
+    "meta_score": 46.8,
+    "blocked": true,
+    "block_reason": "META_SCORE_TOO_LOW(46.8<55.0)",
+    "correction_verdict": "\u2014",
+    "applied_count": 0,
+    "rollback_count": 0
+  },
+  "evolution": {
+    "module": "EVOLUTION_TRACKER",
+    "total_correction_pairs": 0,
+    "drift_paused": false,
+    "paused_until_cycle": 0,
+    "current_cycle": 0,
+    "recent_corrections": [],
+    "total_alerts": 0,
+    "active_alerts": [],
+    "recent_alerts": [],
+    "reactive_adjustments": {
+      "total": 57,
+      "by_diagnosis": {
+        "NORMAL_SL": 44,
+        "FEE_TOXIC": 13
+      },
+      "recent": [
+        {
+          "ts": 1779200027679,
+          "ts_fmt": "2026-05-19 14:13:47 UTC",
+          "symbol": "ETHUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.4681,
+          "r_multiple": -0.4681,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.85,
+              "to": 0.8
+            },
+            "atr_tp": {
+              "from": 2.24,
+              "to": 2.32
+            }
+          },
+          "note": "Micro-adjustment: sl 0.85\u21920.8 tp 2.24\u21922.32 RR=2.9x."
+        },
+        {
+          "ts": 1779200051562,
+          "ts_fmt": "2026-05-19 14:14:11 UTC",
+          "symbol": "BTCUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.4666,
+          "r_multiple": -0.4666,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.75,
+              "to": 0.7
+            },
+            "atr_tp": {
+              "from": 2.4,
+              "to": 2.48
+            }
+          },
+          "note": "Micro-adjustment: sl 0.75\u21920.7 tp 2.4\u21922.48 RR=3.54x."
+        },
+        {
+          "ts": 1779200055607,
+          "ts_fmt": "2026-05-19 14:14:15 UTC",
+          "symbol": "SPKUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.4768,
+          "r_multiple": -0.4768,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.85,
+              "to": 0.8
+            },
+            "atr_tp": {
+              "from": 2.24,
+              "to": 2.32
+            }
+          },
+          "note": "Micro-adjustment: sl 0.85\u21920.8 tp 2.24\u21922.32 RR=2.9x."
+        },
+        {
+          "ts": 1779200270181,
+          "ts_fmt": "2026-05-19 14:17:50 UTC",
+          "symbol": "FIDAUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.6371,
+          "r_multiple": -0.6371,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.8,
+              "to": 0.75
+            },
+            "atr_tp": {
+              "from": 2.32,
+              "to": 2.4
+            }
+          },
+          "note": "Micro-adjustment: sl 0.8\u21920.75 tp 2.32\u21922.4 RR=3.2x."
+        },
+        {
+          "ts": 1779200356298,
+          "ts_fmt": "2026-05-19 14:19:16 UTC",
+          "symbol": "TONUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.6399,
+          "r_multiple": -0.6399,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.75,
+              "to": 0.7
+            },
+            "atr_tp": {
+              "from": 2.4,
+              "to": 2.48
+            }
+          },
+          "note": "Micro-adjustment: sl 0.75\u21920.7 tp 2.4\u21922.48 RR=3.54x."
+        },
+        {
+          "ts": 1779201092176,
+          "ts_fmt": "2026-05-19 14:31:32 UTC",
+          "symbol": "NEARUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.2626,
+          "r_multiple": -0.2626,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.75,
+              "to": 0.7
+            },
+            "atr_tp": {
+              "from": 2.4,
+              "to": 2.48
+            }
+          },
+          "note": "Micro-adjustment: sl 0.75\u21920.7 tp 2.4\u21922.48 RR=3.54x."
+        },
+        {
+          "ts": 1779201271379,
+          "ts_fmt": "2026-05-19 14:34:31 UTC",
+          "symbol": "AIGENSYNUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.2101,
+          "r_multiple": -0.2101,
+          "diagnosis": "FEE_TOXIC",
+          "category": "EXPENSE_REDUCTION",
+          "changes": {
+            "suppressed_until": 1779202171.3778107
+          },
+          "note": "Symbol suppressed for 15 min. Fee ratio 285.6% exceeds 50% threshold. Profit-centric: avoiding high-fee, low-gain pattern."
+        },
+        {
+          "ts": 1779201286996,
+          "ts_fmt": "2026-05-19 14:34:46 UTC",
+          "symbol": "BCHUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.2626,
+          "r_multiple": -0.2626,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 1.0,
+              "to": 0.95
+            },
+            "atr_tp": {
+              "from": 2.0,
+              "to": 2.08
+            }
+          },
+          "note": "Micro-adjustment: sl 1.0\u21920.95 tp 2.0\u21922.08 RR=2.19x."
+        },
+        {
+          "ts": 1779201288537,
+          "ts_fmt": "2026-05-19 14:34:48 UTC",
+          "symbol": "FIDAUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.0745,
+          "r_multiple": -0.0745,
+          "diagnosis": "FEE_TOXIC",
+          "category": "EXPENSE_REDUCTION",
+          "changes": {
+            "suppressed_until": 1779202188.5366275
+          },
+          "note": "Symbol suppressed for 15 min. Fee ratio 79.8% exceeds 50% threshold. Profit-centric: avoiding high-fee, low-gain pattern."
+        },
+        {
+          "ts": 1779201825499,
+          "ts_fmt": "2026-05-19 14:43:45 UTC",
+          "symbol": "SPKUSDT",
+          "strategy_id": "MeanReversion_PAPER_SPEED",
+          "trade_pnl": -0.2021,
+          "r_multiple": -0.2021,
+          "diagnosis": "FEE_TOXIC",
+          "category": "EXPENSE_REDUCTION",
+          "changes": {
+            "suppressed_until": 1779202725.489418
+          },
+          "note": "Symbol suppressed for 15 min. Fee ratio 249.5% exceeds 50% threshold. Profit-centric: avoiding high-fee, low-gain pattern."
+        }
+      ]
+    },
+    "snapshot_ts": 1779202745929
+  }
+}

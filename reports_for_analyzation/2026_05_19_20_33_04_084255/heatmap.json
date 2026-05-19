@@ -1,0 +1,11 @@
+{
+  "heatmap": [
+    {
+      "regime": "MEAN_REVERTING",
+      "parameter": "MeanReversion_PAPER_SPEED",
+      "avg_conf": 42.9,
+      "count": 8
+    }
+  ],
+  "phase": "030B"
+}

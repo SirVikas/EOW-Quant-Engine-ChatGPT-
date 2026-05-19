@@ -1,0 +1,85 @@
+{
+  "negative_memory": [
+    {
+      "key_str": "MEAN_REVERTING|LOW|SPKUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 5,
+      "permanent": false,
+      "score": 0.9,
+      "last_cycle": 75,
+      "created_at": 1779148961.127263
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|AIGENSYNUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 4,
+      "permanent": true,
+      "score": 1.0,
+      "last_cycle": 69,
+      "created_at": 1779154009.7706714
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|ETHUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 5,
+      "permanent": false,
+      "score": 0.16677181699666577,
+      "last_cycle": 59,
+      "created_at": 1779155879.8191166
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|FIDAUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 3,
+      "permanent": false,
+      "score": 0.7290000000000001,
+      "last_cycle": 73,
+      "created_at": 1779177674.7426605
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|TONUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 4,
+      "permanent": false,
+      "score": 0.4304672100000001,
+      "last_cycle": 68,
+      "created_at": 1779181903.9622042
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|BTCUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 4,
+      "permanent": false,
+      "score": 0.81,
+      "last_cycle": 74,
+      "created_at": 1779182119.6211765
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|AIGENSYNUSDT|MeanReversion_PAPER_SPEED|DOWN",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.12157665459056935,
+      "last_cycle": 56,
+      "created_at": 1779199291.485621
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|UNIUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.15009463529699918,
+      "last_cycle": 58,
+      "created_at": 1779200014.3155668
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|NEARUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.3874204890000001,
+      "last_cycle": 67,
+      "created_at": 1779201092.2962377
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|BCHUSDT|MeanReversion_PAPER_SPEED|UP",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.6561,
+      "last_cycle": 72,
+      "created_at": 1779201287.022802
+    }
+  ],
+  "phase": "030B"
+}

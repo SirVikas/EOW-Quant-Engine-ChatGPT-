@@ -1,0 +1,527 @@
+{
+  "prp": "001",
+  "phase": "SIGNAL_TRUTH_RECONSTRUCTION",
+  "generated_ts": 1779202749520,
+  "reports": {
+    "01_signal_truth_matrix": {
+      "report": "01_signal_truth_matrix",
+      "prp": "001",
+      "total_signals": 76,
+      "total_outcomes": 76,
+      "truth_density": 0.2105,
+      "directional_legit": 0.3816,
+      "noise_ratio": 0.6184,
+      "total_net_pnl": -20.2301,
+      "by_regime": {
+        "MEAN_REVERTING": {
+          "signals": 76,
+          "outcomes": 76,
+          "wins": 16,
+          "win_rate": 0.2105
+        }
+      },
+      "by_strategy": {
+        "MeanReversion_PAPER_SPEED": {
+          "signals": 76,
+          "outcomes": 76,
+          "wins": 16,
+          "win_rate": 0.2105
+        }
+      },
+      "ts": 1779202749520
+    },
+    "02_false_positive_clusters": {
+      "report": "02_false_positive_clusters",
+      "prp": "001",
+      "total_false_positives": 60,
+      "total_outcomes": 76,
+      "false_positive_rate": 0.7895,
+      "clusters": [
+        {
+          "regime": "MEAN_REVERTING",
+          "strategy": "MeanReversion_PAPER_SPEED",
+          "rsi_zone": "EXTREME_LOW",
+          "conf_tier": "LOW",
+          "side": "LONG",
+          "count": 36,
+          "avg_pnl": -0.4468,
+          "symbols": [
+            "AIGENSYNUSDT",
+            "FIDAUSDT",
+            "LTCUSDT",
+            "UNIUSDT",
+            "NEARUSDT",
+            "BCHUSDT",
+            "TONUSDT",
+            "ETHUSDT",
+            "SPKUSDT",
+            "BTCUSDT"
+          ],
+          "last_ts": 1779201825539
+        },
+        {
+          "regime": "MEAN_REVERTING",
+          "strategy": "MeanReversion_PAPER_SPEED",
+          "rsi_zone": "EXTREME_LOW",
+          "conf_tier": "LOW",
+          "side": "SHORT",
+          "count": 24,
+          "avg_pnl": -0.4716,
+          "symbols": [
+            "AIGENSYNUSDT",
+            "LTCUSDT",
+            "UNIUSDT",
+            "FIDAUSDT",
+            "NEARUSDT",
+            "TONUSDT",
+            "ETHUSDT",
+            "UUSDT",
+            "SPKUSDT",
+            "BTCUSDT"
+          ],
+          "last_ts": 1779199291481
+        }
+      ],
+      "confidence_traps": [],
+      "ts": 1779202749520
+    },
+    "03_directional_legitimacy": {
+      "report": "03_directional_legitimacy_report",
+      "prp": "001",
+      "global_score": 0.5,
+      "rolling_score": 0.56,
+      "label": "NEUTRAL",
+      "by_regime": {
+        "MEAN_REVERTING": {
+          "total": 76,
+          "correct": 38,
+          "legit_rate": 0.5,
+          "LONG_rate": 0.5714,
+          "SHORT_rate": 0.4118,
+          "label": "NEUTRAL"
+        }
+      },
+      "by_strategy": {
+        "MeanReversion_PAPER_SPEED": {
+          "total": 76,
+          "correct": 38,
+          "legit_rate": 0.5
+        }
+      },
+      "by_hour": {
+        "21": {
+          "total": 3,
+          "legit_rate": 0.0
+        },
+        "22": {
+          "total": 4,
+          "legit_rate": 0.0
+        },
+        "23": {
+          "total": 13,
+          "legit_rate": 0.6154
+        },
+        "0": {
+          "total": 3,
+          "legit_rate": 0.0
+        },
+        "1": {
+          "total": 7,
+          "legit_rate": 0.5714
+        },
+        "2": {
+          "total": 3,
+          "legit_rate": 1.0
+        },
+        "5": {
+          "total": 5,
+          "legit_rate": 0.8
+        },
+        "6": {
+          "total": 8,
+          "legit_rate": 0.375
+        },
+        "7": {
+          "total": 4,
+          "legit_rate": 0.0
+        },
+        "8": {
+          "total": 3,
+          "legit_rate": 1.0
+        },
+        "9": {
+          "total": 3,
+          "legit_rate": 0.6667
+        },
+        "14": {
+          "total": 20,
+          "legit_rate": 0.55
+        }
+      },
+      "ts": 1779202749520
+    },
+    "04_confidence_reality_divergence": {
+      "report": "04_confidence_reality_divergence",
+      "prp": "001",
+      "total_divergences": 0,
+      "total_outcomes": 76,
+      "divergence_rate": 0.0,
+      "recent": [],
+      "ts": 1779202749520
+    },
+    "05_context_quality_analysis": {
+      "report": "05_context_quality_analysis",
+      "prp": "001",
+      "total_scored": 76,
+      "tier_breakdown": {
+        "HIGH": {
+          "count": 68,
+          "wins": 16,
+          "win_rate": 0.2353,
+          "avg_pnl": -0.2351
+        },
+        "MEDIUM": {
+          "count": 8,
+          "wins": 0,
+          "win_rate": 0.0,
+          "avg_pnl": -0.5306
+        }
+      },
+      "discrimination": "INSUFFICIENT_DATA",
+      "recent_quality": [
+        {
+          "signal_id": "eccf7265",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 75.0,
+          "atr_pct": 0.108
+        },
+        {
+          "signal_id": "53a7bf76",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 77.27,
+          "atr_pct": 0.207
+        },
+        {
+          "signal_id": "d7f2bf78",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 77.19,
+          "atr_pct": 0.188
+        },
+        {
+          "signal_id": "b9c708a3",
+          "score": 0.58,
+          "tier": "MEDIUM",
+          "regime": "MEAN_REVERTING",
+          "rsi": 36.17,
+          "atr_pct": 0.152
+        },
+        {
+          "signal_id": "8eea4db0",
+          "score": 0.7,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 33.11,
+          "atr_pct": 0.122
+        },
+        {
+          "signal_id": "ef1ae3cb",
+          "score": 0.58,
+          "tier": "MEDIUM",
+          "regime": "MEAN_REVERTING",
+          "rsi": 37.5,
+          "atr_pct": 0.191
+        },
+        {
+          "signal_id": "7fd49a68",
+          "score": 0.58,
+          "tier": "MEDIUM",
+          "regime": "MEAN_REVERTING",
+          "rsi": 36.76,
+          "atr_pct": 0.31
+        },
+        {
+          "signal_id": "a4247f95",
+          "score": 0.58,
+          "tier": "MEDIUM",
+          "regime": "MEAN_REVERTING",
+          "rsi": 36.98,
+          "atr_pct": 0.111
+        },
+        {
+          "signal_id": "f9375a03",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 17.02,
+          "atr_pct": 0.288
+        },
+        {
+          "signal_id": "cd062b17",
+          "score": 0.7,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 33.85,
+          "atr_pct": 0.326
+        },
+        {
+          "signal_id": "1d7f0e2c",
+          "score": 0.58,
+          "tier": "MEDIUM",
+          "regime": "MEAN_REVERTING",
+          "rsi": 35.52,
+          "atr_pct": 0.12
+        },
+        {
+          "signal_id": "df48007b",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 16.0,
+          "atr_pct": 0.294
+        },
+        {
+          "signal_id": "b976522b",
+          "score": 0.7,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 31.25,
+          "atr_pct": 0.235
+        },
+        {
+          "signal_id": "e0a8a083",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 13.55,
+          "atr_pct": 0.188
+        },
+        {
+          "signal_id": "1802b30c",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 14.04,
+          "atr_pct": 0.343
+        },
+        {
+          "signal_id": "a64c176d",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 15.79,
+          "atr_pct": 0.199
+        },
+        {
+          "signal_id": "1e7a352b",
+          "score": 0.79,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 26.58,
+          "atr_pct": 0.262
+        },
+        {
+          "signal_id": "4f64a3a4",
+          "score": 0.79,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 29.79,
+          "atr_pct": 0.145
+        },
+        {
+          "signal_id": "f181b6c4",
+          "score": 0.85,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 22.64,
+          "atr_pct": 0.107
+        },
+        {
+          "signal_id": "10741fa2",
+          "score": 0.7,
+          "tier": "HIGH",
+          "regime": "MEAN_REVERTING",
+          "rsi": 33.9,
+          "atr_pct": 0.165
+        }
+      ],
+      "ts": 1779202749520
+    },
+    "06_asymmetry_validation_report": {
+      "report": "06_asymmetry_validation_report",
+      "prp": "001",
+      "total_outcomes": 76,
+      "global_achievement_ratio": 0.1361,
+      "optimism_bias_rate": 0.9474,
+      "asymmetry_health": "BROKEN",
+      "by_strategy": {
+        "MeanReversion_PAPER_SPEED": {
+          "count": 76,
+          "avg_rr_declared": 3.75,
+          "avg_rr_achieved": 0.606,
+          "achievement_ratio": 0.162,
+          "achievable_count": 37,
+          "achievable_rate": 0.4868
+        }
+      },
+      "by_regime": {
+        "MEAN_REVERTING": {
+          "count": 76,
+          "avg_rr_declared": 3.75,
+          "avg_rr_achieved": 0.606,
+          "achievement_ratio": 0.162
+        }
+      },
+      "ts": 1779202749520
+    },
+    "07_noise_participation_audit": {
+      "report": "07_noise_participation_audit",
+      "prp": "001",
+      "by_hour": [
+        {
+          "hour": 0,
+          "total": 3,
+          "fp": 2,
+          "fp_rate": 0.6667
+        },
+        {
+          "hour": 1,
+          "total": 7,
+          "fp": 5,
+          "fp_rate": 0.7143
+        },
+        {
+          "hour": 2,
+          "total": 3,
+          "fp": 2,
+          "fp_rate": 0.6667
+        },
+        {
+          "hour": 5,
+          "total": 5,
+          "fp": 4,
+          "fp_rate": 0.8
+        },
+        {
+          "hour": 6,
+          "total": 8,
+          "fp": 7,
+          "fp_rate": 0.875
+        },
+        {
+          "hour": 7,
+          "total": 4,
+          "fp": 3,
+          "fp_rate": 0.75
+        },
+        {
+          "hour": 8,
+          "total": 3,
+          "fp": 3,
+          "fp_rate": 1.0
+        },
+        {
+          "hour": 9,
+          "total": 3,
+          "fp": 3,
+          "fp_rate": 1.0
+        },
+        {
+          "hour": 14,
+          "total": 20,
+          "fp": 16,
+          "fp_rate": 0.8
+        },
+        {
+          "hour": 21,
+          "total": 3,
+          "fp": 3,
+          "fp_rate": 1.0
+        },
+        {
+          "hour": 22,
+          "total": 4,
+          "fp": 3,
+          "fp_rate": 0.75
+        },
+        {
+          "hour": 23,
+          "total": 13,
+          "fp": 9,
+          "fp_rate": 0.6923
+        }
+      ],
+      "by_regime_side": {
+        "MEAN_REVERTING": {
+          "LONG": {
+            "total": 42,
+            "fp": 36,
+            "fp_rate": 0.8571
+          },
+          "SHORT": {
+            "total": 34,
+            "fp": 24,
+            "fp_rate": 0.7059
+          }
+        }
+      },
+      "confidence_traps": 0,
+      "ts": 1779202749520
+    },
+    "08_predictive_integrity_monitor": {
+      "report": "08_predictive_integrity_monitor",
+      "prp": "001",
+      "global_truth_density": 0.2105,
+      "recent_win_rate": 0.16,
+      "rolling_drift": 0.0505,
+      "confidence_calibration": [
+        {
+          "confidence_up_to": 0.5,
+          "signals": 73,
+          "wins": 15,
+          "win_rate": 0.2055
+        },
+        {
+          "confidence_up_to": 0.55,
+          "signals": 3,
+          "wins": 1,
+          "win_rate": 0.3333
+        }
+      ],
+      "ts": 1779202749520
+    },
+    "09_regime_signal_validity": {
+      "report": "09_regime_signal_validity",
+      "prp": "001",
+      "global_legit_score": 0.5,
+      "by_regime": {
+        "MEAN_REVERTING": {
+          "total": 76,
+          "legit_rate": 0.5,
+          "status": "VALID",
+          "LONG_valid": true,
+          "SHORT_valid": false
+        }
+      },
+      "ts": 1779202749520
+    },
+    "10_truth_density_summary": {
+      "report": "10_truth_density_summary",
+      "prp": "001",
+      "total_signals": 76,
+      "total_outcomes": 76,
+      "truth_density": 0.2105,
+      "directional_legit": 0.3816,
+      "noise_ratio": 0.6184,
+      "avg_net_pnl": -0.2662,
+      "total_net_pnl": -20.2301,
+      "data_sufficient": true,
+      "ts": 1779202749520
+    }
+  }
+}
