@@ -237,6 +237,51 @@ with tempfile.TemporaryDirectory() as tmpdir:
     check("D07 key_str parts[0]=MEAN_REVERTING",  parts[0] == "MEAN_REVERTING")
     check("D08 key_str parts[4]=UP",              parts[4] == "UP")
 
+# ForgettingEngine sub-formation prune guard (v1.9.1)
+from core.learning_memory.forgetting_engine import ForgettingEngine as FE
+_fe = FE()
+_pe_fe = PatternEngine()
+
+# Sub-formation pattern (samples < 20): must survive prune even at confidence=0
+_sub_key = ("MEAN_REVERTING", "LOW", "BTCUSDT", "MR_STRAT", "UP")
+_sub_rec = MemoryStore.build_record(
+    cycle_id="FE_TEST", regime="MEAN_REVERTING", volatility="LOW",
+    timeframe="10", instrument="BTCUSDT", parameter="MR_STRAT",
+    direction="UP", score_delta=-5.0, rollback=True,
+    meta_score=30.0, contradiction=False, ai_mode="TRADE", rationale=""
+)
+_pe_fe.ingest(_sub_rec)
+_sub_pat = _pe_fe.get_pattern(_sub_key)
+if _sub_pat:
+    _sub_pat.confidence = 0.0  # force to below REMOVAL_THRESHOLD
+    _sub_pat.samples    = 4    # sub-formation
+pruned_fe = _fe.prune(_pe_fe)
+check("D09 sub-formation pattern (4 samples, conf=0) NOT pruned",
+      len(pruned_fe) == 0 and _pe_fe.get_pattern(_sub_key) is not None,
+      f"pruned={pruned_fe}")
+
+# Formation-threshold pattern (samples >= 20): must be pruned at low confidence
+_form_key = ("MEAN_REVERTING", "LOW", "ETHUSDT", "MR_STRAT", "UP")
+for _i in range(20):
+    _r = MemoryStore.build_record(
+        cycle_id=f"FE_FORM_{_i}", regime="MEAN_REVERTING", volatility="LOW",
+        timeframe=str(_i % 24), instrument="ETHUSDT", parameter="MR_STRAT",
+        direction="UP", score_delta=-5.0, rollback=True,
+        meta_score=30.0, contradiction=False, ai_mode="TRADE", rationale=""
+    )
+    _pe_fe.ingest(_r)
+_form_pat = _pe_fe.get_pattern(_form_key)
+if _form_pat:
+    _form_pat.confidence = 10.0  # below REMOVAL_THRESHOLD=25
+    _form_pat.samples    = 20
+pruned_form = _fe.prune(_pe_fe)
+check("D10 formed pattern (20 samples, conf=10) IS pruned",
+      _form_key in [_pe_fe._make_key({"regime":"MEAN_REVERTING","volatility":"LOW",
+                                       "instrument":"ETHUSDT","parameter":"MR_STRAT",
+                                       "direction":"UP"}) for _ in [0]]
+      or _pe_fe.get_pattern(_form_key) is None,
+      f"pruned_form={pruned_form}")
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION E — Ecology endpoint structure
