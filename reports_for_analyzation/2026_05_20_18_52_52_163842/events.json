@@ -1,0 +1,30 @@
+{
+  "recent_events": [],
+  "bus_status": {
+    "module": "EVENT_BUS",
+    "version": "1.0",
+    "channels": [
+      "ANOMALY",
+      "ESCALATION",
+      "SYNC_READY",
+      "FEED_UPDATE",
+      "SUMMARY"
+    ],
+    "subscribers": {
+      "ANOMALY": 0,
+      "ESCALATION": 0,
+      "SYNC_READY": 0,
+      "FEED_UPDATE": 0,
+      "SUMMARY": 0
+    },
+    "stats": {
+      "total_emitted": 0,
+      "total_handler_calls": 0,
+      "total_handler_errors": 0,
+      "total_subscriptions": 0,
+      "per_channel": {}
+    },
+    "recent_event_count": 0,
+    "handler_error_count": 0
+  }
+}

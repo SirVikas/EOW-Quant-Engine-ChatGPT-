@@ -1,0 +1,42 @@
+{
+  "module": "AUTO_INTELLIGENCE_ENGINE",
+  "phase": "030",
+  "enabled": true,
+  "interval_min": 5.0,
+  "min_trades": 30,
+  "min_score": 55.0,
+  "cycles_run": 44,
+  "daily_cycles": 0,
+  "max_daily": 12,
+  "last_run_ts": null,
+  "pending_check": false,
+  "last_cycle": {
+    "cycle_num": 44,
+    "ts_start": 1779282931607,
+    "ts_end": 1779282931611,
+    "phase": "BLOCKED",
+    "meta_score": 48.2,
+    "blocked": true,
+    "block_reason": "META_SCORE_TOO_LOW(48.2<55.0)",
+    "correction_verdict": "\u2014",
+    "applied_count": 0,
+    "rollback_count": 0
+  },
+  "evolution": {
+    "module": "EVOLUTION_TRACKER",
+    "total_correction_pairs": 0,
+    "drift_paused": false,
+    "paused_until_cycle": 0,
+    "current_cycle": 0,
+    "recent_corrections": [],
+    "total_alerts": 0,
+    "active_alerts": [],
+    "recent_alerts": [],
+    "reactive_adjustments": {
+      "total": 0,
+      "by_diagnosis": {},
+      "recent": []
+    },
+    "snapshot_ts": 1779283206048
+  }
+}

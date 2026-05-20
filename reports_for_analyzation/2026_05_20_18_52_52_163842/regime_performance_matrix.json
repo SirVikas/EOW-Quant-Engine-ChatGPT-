@@ -1,0 +1,24 @@
+{
+  "title": "Regime Performance Matrix \u2014 Enhanced with RL Integration (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-20 13:20:05 UTC",
+  "total_trades": 259,
+  "regimes": {
+    "MEAN_REVERTING": {
+      "n_trades": 259,
+      "wr_pct": 18.1,
+      "pf": 0.344,
+      "net_pnl": -75.7687,
+      "avg_win": 0.8447,
+      "avg_loss": 0.5447,
+      "total_fees": 38.4126,
+      "rl_avg_q": -0.2498,
+      "rl_mature_contexts": 4,
+      "rl_toxic_contexts": 1,
+      "rl_learning_status": "MATURE",
+      "verdict": "LOSING"
+    }
+  },
+  "best_by_pf": "MEAN_REVERTING",
+  "best_by_rl_q": "MEAN_REVERTING",
+  "verdict": "ALL_REGIMES_LOSING \u2014 no regime shows positive expectancy yet"
+}

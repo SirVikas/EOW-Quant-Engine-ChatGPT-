@@ -1,0 +1,31 @@
+{
+  "title": "Capital Efficiency \u2014 Gap Analysis vs $1/min Target",
+  "generated_at": "2026-05-20 13:20:05 UTC",
+  "current_state": {
+    "win_rate_pct": 18.15,
+    "avg_win_usdt": 0.8447,
+    "avg_loss_usdt": 0.5447,
+    "actual_rr": 1.551,
+    "expected_value_per_trade_usdt": -0.2925,
+    "breakeven_win_rate_pct": 39.2,
+    "net_per_minute_usdt": -2.925,
+    "total_fees_usdt": 38.4126
+  },
+  "target": {
+    "net_per_minute_usdt": 1.0,
+    "assumed_trades_per_hr": 10,
+    "required_ev_per_trade_usdt": 6.0,
+    "required_win_rate_pct": 99.9,
+    "required_rr_at_50pct_wr": 2.0
+  },
+  "gap": {
+    "current_per_min": -2.925,
+    "gap_to_close": 3.925,
+    "primary_lever": "WIN_RATE",
+    "roadmap": [
+      "Step 1: RSI filter \u2192 target WR 49%+ (currently 18.1%)",
+      "Step 2: With WR 51%, increase risk/trade from 0.54 to 1.63 USDT",
+      "Step 3: Kelly sizing at 60% WR \u2192 auto-scales to ~$1/min"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "title": "Edge Validation Report \u2014 Randomness vs Skill (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-20 13:20:05 UTC",
+  "methodology": {
+    "bootstrap_iterations": 500,
+    "confidence_level": "90%",
+    "baseline": "50% WR null hypothesis (random coin flip)",
+    "note": "Bootstrap 90% CI: if lower bound > 1.0 then PF > 1.0 with 95% confidence. Binomial z-score tests WR vs 50% null. Neither test requires normality."
+  },
+  "full_history": {
+    "label": "ALL_HISTORY",
+    "n": 259,
+    "wr_pct": 18.1,
+    "pf_actual": 0.344,
+    "pf_bootstrap_ci_90": {
+      "lo": 0.224,
+      "hi": 0.503
+    },
+    "avg_win": 0.8447,
+    "avg_loss": 0.5447,
+    "rr": 1.551,
+    "breakeven_wr_pct": 39.2,
+    "beats_breakeven": false,
+    "z_score_vs_50pct": -10.253,
+    "z_significance": "NOT_SIGNIFICANT",
+    "ev_per_trade": -0.2925,
+    "verdict": "NO_EDGE",
+    "bootstrap_note": "PF CI upper bound < 1.0 \u2192 negative expectancy confirmed with high confidence"
+  },
+  "session_only": {
+    "label": "CURRENT_SESSION",
+    "n": 0,
+    "verdict": "INSUFFICIENT_DATA"
+  },
+  "regime_breakdown": {
+    "MEAN_REVERTING": {
+      "label": "MEAN_REVERTING",
+      "n": 259,
+      "wr_pct": 18.1,
+      "pf_actual": 0.344,
+      "pf_bootstrap_ci_90": {
+        "lo": 0.229,
+        "hi": 0.495
+      },
+      "avg_win": 0.8447,
+      "avg_loss": 0.5447,
+      "rr": 1.551,
+      "breakeven_wr_pct": 39.2,
+      "beats_breakeven": false,
+      "z_score_vs_50pct": -10.253,
+      "z_significance": "NOT_SIGNIFICANT",
+      "ev_per_trade": -0.2925,
+      "verdict": "NO_EDGE",
+      "bootstrap_note": "PF CI upper bound < 1.0 \u2192 negative expectancy confirmed with high confidence"
+    }
+  },
+  "overall_verdict": "NO_STATISTICAL_EDGE \u2014 PF < 1.0 across all windows. Signal quality must improve before RL can amplify alpha."
+}

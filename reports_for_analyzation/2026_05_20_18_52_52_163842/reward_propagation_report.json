@@ -1,0 +1,22 @@
+{
+  "title": "Reward Propagation Report \u2014 Shaped Reward Quality Analysis (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-20 13:20:05 UTC",
+  "total_trades": 259,
+  "reward_shaping": {
+    "avg_raw_pnl": -0.2925,
+    "avg_shaped_reward": -0.307,
+    "shaping_delta": -0.0145,
+    "trades_penalized": 46,
+    "total_reduction": 3.7473,
+    "philosophy": "Fee-heavy wins penalized to teach fee efficiency. Low-R wins (R < 0.80) mildly penalized to discourage marginal entries. Losses pass through unchanged \u2014 real loss pain drives avoidance learning."
+  },
+  "fee_learning_impact": {
+    "total_fees": 38.4126,
+    "fee_pct_of_gross_wins": 96.8,
+    "fee_drag_diagnosis": "HIGH \u2014 fees > 30% of gross wins (shaping penalty fires frequently)"
+  },
+  "q_signal_health": {
+    "avg_q_visited_contexts": -0.2498,
+    "reward_signal": "DEGRADED \u2014 shaped rewards persistently negative; RL learning loss avoidance"
+  }
+}

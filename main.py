@@ -1132,6 +1132,19 @@ async def on_tick(tick: Tick):
                 _l_p = sum(-d for d in _rsi_d_prev if d < 0) / _rsi_p
                 _rsi_prev = (100.0 - 100.0 / (1.0 + _g_p / _l_p)) if _l_p > 0 else 100.0
 
+            # ── Multi-candle RSI history for persistence confirmation ─────────
+            # AdaptiveRSIGovernor uses this to verify RSI has been sustainably in
+            # the extreme zone (≥2 of last 3 candles) before allowing MEAN_REVERTING
+            # entries. Blocks first-touch crashes/spikes that resolve on the next
+            # candle. Oldest→newest order; gracefully degrades if closes too short.
+            _rsi_history: list = [_rsi_prev, _rsi_val]  # minimum 2-candle window
+            if len(closes) >= _rsi_p + 3:
+                _rsi_d_t2 = [closes[i] - closes[i-1] for i in range(-_rsi_p - 2, -2)]
+                _g_t2 = sum(d for d in _rsi_d_t2 if d > 0) / _rsi_p
+                _l_t2 = sum(-d for d in _rsi_d_t2 if d < 0) / _rsi_p
+                _rsi_t2 = (100.0 - 100.0 / (1.0 + _g_t2 / _l_t2)) if _l_t2 > 0 else 100.0
+                _rsi_history = [_rsi_t2, _rsi_prev, _rsi_val]
+
             # ── PRP-002: adaptive RSI evaluation via OpportunityEcology ─────────
             # Replaces hardcoded 70/30 / 48/52 bands. AdaptiveRSIGovernor starts
             # at the same thresholds and widens them if survival rate drops below
@@ -1144,6 +1157,7 @@ async def on_tick(tick: Tick):
                 utc_hour=__import__("datetime").datetime.utcnow().hour,
                 strategy_id=f"{strategy_type}_PAPER_SPEED",
                 symbol=sym,
+                rsi_history=_rsi_history,
             )
             _ps_side: Signal | None = (
                 Signal(_ps_ec_dec.rsi_side)

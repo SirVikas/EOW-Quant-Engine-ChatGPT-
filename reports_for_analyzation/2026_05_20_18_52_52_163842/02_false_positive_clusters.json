@@ -1,0 +1,10 @@
+{
+  "report": "02_false_positive_clusters",
+  "prp": "001",
+  "total_false_positives": 0,
+  "total_outcomes": 0,
+  "false_positive_rate": 0.0,
+  "clusters": [],
+  "confidence_traps": [],
+  "ts": 1779283193467
+}

@@ -1,0 +1,68 @@
+{
+  "title": "Strategy Evolution Report \u2014 Per-Strategy Learning Trajectory (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-20 13:20:05 UTC",
+  "total_strategies": 1,
+  "improving_count": 0,
+  "degrading_count": 0,
+  "viable_count": 0,
+  "strategies": {
+    "MeanReversion_PAPER_SPEED": {
+      "n_trades": 259,
+      "overall": {
+        "n": 259,
+        "wr": 0.1815,
+        "wr_pct": 18.1,
+        "pf": 0.344,
+        "avg_pnl": -0.2925,
+        "avg_win": 0.8447,
+        "avg_loss": 0.5447,
+        "ev": -0.2925,
+        "gross_profit": 39.6989,
+        "gross_loss": 115.4677
+      },
+      "total_fees": 38.4126,
+      "fee_pct_of_gross": 96.8,
+      "early_period": {
+        "n": 86,
+        "wr": 0.1628,
+        "wr_pct": 16.3,
+        "pf": 0.249,
+        "avg_pnl": -0.4319,
+        "avg_win": 0.8794,
+        "avg_loss": 0.6869,
+        "ev": -0.4319,
+        "gross_profit": 12.3119,
+        "gross_loss": 49.4588
+      },
+      "mid_period": {
+        "n": 86,
+        "wr": 0.2093,
+        "wr_pct": 20.9,
+        "pf": 0.511,
+        "avg_pnl": -0.1952,
+        "avg_win": 0.9751,
+        "avg_loss": 0.505,
+        "ev": -0.1952,
+        "gross_profit": 17.5523,
+        "gross_loss": 34.3407
+      },
+      "late_period": {
+        "n": 87,
+        "wr": 0.1724,
+        "wr_pct": 17.2,
+        "pf": 0.311,
+        "avg_pnl": -0.251,
+        "avg_win": 0.6556,
+        "avg_loss": 0.4398,
+        "ev": -0.251,
+        "gross_profit": 9.8347,
+        "gross_loss": 31.6682
+      },
+      "wr_trend": "FLAT",
+      "pf_trend": "FLAT",
+      "evolution_verdict": "FLAT",
+      "is_viable": false
+    }
+  },
+  "verdict": "NO_VIABLE_STRATEGIES \u2014 all strategies PF < 0.90"
+}

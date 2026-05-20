@@ -1,0 +1,58 @@
+{
+  "consistency": {
+    "equity_volatility_pct": 0.0,
+    "equity_vol_window": 20,
+    "vol_high_threshold_pct": 1.5,
+    "vol_normal_threshold_pct": 0.8,
+    "vol_high_size_mult": 0.75,
+    "win_brake_start": 3,
+    "win_brake_per_win_pct": 5.0,
+    "win_brake_min": 0.7,
+    "noise_filter_min_trades": 3,
+    "rolling_dd_window": 10,
+    "trade_history_len": 0,
+    "equity_history_len": 21,
+    "module": "CONSISTENCY_ENGINE",
+    "phase": "FTD-040"
+  },
+  "drawdown": {
+    "peak_equity": 924.2314,
+    "current_equity": 924.2314,
+    "drawdown_pct": 0.0,
+    "tier_thresholds": {
+      "soft_cut": 0.05,
+      "hard_cut": 0.1,
+      "stop": 0.15
+    },
+    "module": "DRAWDOWN_CONTROLLER",
+    "phase": 5
+  },
+  "streak": {
+    "win_streak_min": 3,
+    "loss_streak_min": 3,
+    "hot_score_adj": -0.03,
+    "cold_score_adj": 0.05,
+    "module": "STREAK_INTELLIGENCE_ENGINE",
+    "phase": 6
+  },
+  "capital_recovery": {
+    "peak_equity": 924.2314,
+    "trough_equity": 0.0,
+    "current_equity": 924.2314,
+    "in_recovery": false,
+    "defensive_dd_thresh": 0.05,
+    "recovery_size_min": 0.7,
+    "module": "CAPITAL_RECOVERY_ENGINE",
+    "phase": 6
+  },
+  "loss_cluster": {
+    "paused": false,
+    "pause_remaining_min": 0.0,
+    "reduce_after": 3,
+    "pause_after": 5,
+    "pause_minutes": 30,
+    "reduce_size_mult": 0.5,
+    "module": "LOSS_CLUSTER_CONTROLLER",
+    "phase": 6
+  }
+}
