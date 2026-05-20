@@ -26,7 +26,7 @@ from __future__ import annotations
 import time
 import threading
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
@@ -98,10 +98,14 @@ class OpportunityEcology:
         utc_hour:    int,
         strategy_id: str,
         symbol:      str = "",
+        rsi_history: Optional[List[float]] = None,
     ) -> EcologyDecision:
         """
         Full ecology evaluation for one signal candidate.
         Returns EcologyDecision; caller checks .approved and multiplies by .size_multiplier.
+
+        rsi_history: ordered list of recent RSI values (oldest→newest, current last).
+        Passed through to AdaptiveRSIGovernor for multi-candle persistence confirmation.
         """
         with self._lock:
             self._total_evaluated += 1
@@ -113,6 +117,7 @@ class OpportunityEcology:
                 rsi_prev=rsi_prev,
                 above_sma=above_sma,
                 symbol=symbol,
+                rsi_history=rsi_history,
             )
 
             if rsi_dec.blocked:

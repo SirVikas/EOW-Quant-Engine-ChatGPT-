@@ -15,7 +15,7 @@ import time
 import threading
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any
 
 from loguru import logger
 
@@ -40,6 +40,15 @@ _TR_SHORT_RSI_START = 52.0
 # Adaptation limits — max relaxation from start
 _MR_MAX_RELAX = 8.0   # RSI band can widen by at most 8 points
 _TR_MAX_RELAX = 10.0  # RSI band can widen by at most 10 points
+
+# Multi-candle RSI persistence confirmation (MEAN_REVERTING only)
+# Requires RSI to have been persistently in the extreme zone across recent candles,
+# blocking first-touch crashes/spikes that clear on the very next candle.
+# Buffer extends the zone slightly inward (e.g. long_band=30 → zone is below 35),
+# allowing for minor RSI oscillation while still confirming sustained presence.
+_MR_PERSIST_BUFFER    = 5.0   # zone = long_band + buffer (long) / short_band - buffer (short)
+_MR_PERSIST_MIN_COUNT = 2     # at least this many of the history window must be in zone
+_MR_PERSIST_WINDOW    = 3     # number of candles to check (including current)
 
 # Target survival rate window
 _TARGET_SURVIVAL_LO = 0.10   # 10% floor
@@ -118,10 +127,17 @@ class AdaptiveRSIGovernor:
         rsi_prev: float,
         above_sma: bool,
         symbol: str = "",
+        rsi_history: Optional[List[float]] = None,
     ) -> RSIDecision:
         """
         Evaluate RSI against dynamic bands and return a decision.
         Also triggers periodic band adaptation.
+
+        rsi_history: ordered list of recent RSI values (oldest→newest, current last).
+        When provided (len≥2), enables multi-candle persistence check for
+        MEAN_REVERTING regime — confirms RSI has been persistently in the extreme
+        zone rather than arriving via a single-candle crash/spike.
+        Falls back gracefully to crash-guard-only when None or too short.
         """
         with self._lock:
             self._maybe_adapt()
@@ -131,7 +147,7 @@ class AdaptiveRSIGovernor:
             sr = self._survival_rate(regime_key)
 
             side, blocked, reason = self._evaluate(
-                regime_key, rsi_val, rsi_prev, above_sma, bands
+                regime_key, rsi_val, rsi_prev, above_sma, bands, rsi_history
             )
 
             passed = not blocked
@@ -171,6 +187,7 @@ class AdaptiveRSIGovernor:
         rsi_prev: float,
         above_sma: bool,
         bands: Dict[str, float],
+        rsi_history: Optional[List[float]] = None,
     ) -> Tuple[Optional[str], bool, str]:
 
         if regime == "MEAN_REVERTING":
@@ -181,6 +198,13 @@ class AdaptiveRSIGovernor:
 
             if above_sma and rsi_val > short_band:
                 if rsi_prev > prev_short:
+                    # Persistence check: require RSI to have been sustainably overbought,
+                    # not just landed in the zone this candle after arriving from mid-range.
+                    persist_block = self._check_persistence_short(
+                        rsi_history, short_band
+                    )
+                    if persist_block:
+                        return None, True, persist_block
                     return "SHORT", False, ""
                 else:
                     return None, True, (
@@ -189,6 +213,13 @@ class AdaptiveRSIGovernor:
                     )
             elif not above_sma and rsi_val < long_band:
                 if rsi_prev < prev_long:
+                    # Persistence check: require RSI to have been sustainably oversold,
+                    # not just arrived via a single-candle crash.
+                    persist_block = self._check_persistence_long(
+                        rsi_history, long_band
+                    )
+                    if persist_block:
+                        return None, True, persist_block
                     return "LONG", False, ""
                 else:
                     return None, True, (
@@ -214,6 +245,48 @@ class AdaptiveRSIGovernor:
                     f"RSI_LEVEL: rsi={rsi_val:.1f} above_sma={above_sma} "
                     f"bands=[{long_band:.1f},{short_band:.1f}]"
                 )
+
+    def _check_persistence_long(
+        self, rsi_history: Optional[List[float]], long_band: float
+    ) -> str:
+        """
+        Returns a block reason string if the LONG entry lacks multi-candle persistence.
+        Returns "" (empty) if check passes or insufficient data (graceful degradation).
+        The zone is long_band + _MR_PERSIST_BUFFER — slightly relaxed to allow for
+        minor oscillation while the symbol remains in oversold territory.
+        """
+        if not rsi_history or len(rsi_history) < 2:
+            return ""  # insufficient history — defer to crash guard only
+        window = rsi_history[-_MR_PERSIST_WINDOW:]
+        zone_ceiling = long_band + _MR_PERSIST_BUFFER
+        in_zone = sum(1 for r in window if r < zone_ceiling)
+        if in_zone >= _MR_PERSIST_MIN_COUNT:
+            return ""
+        return (
+            f"RSI_PERSIST_LONG: only {in_zone}/{len(window)} candles below "
+            f"{zone_ceiling:.1f} (need {_MR_PERSIST_MIN_COUNT}) — "
+            f"history={[round(r,1) for r in window]}"
+        )
+
+    def _check_persistence_short(
+        self, rsi_history: Optional[List[float]], short_band: float
+    ) -> str:
+        """
+        Returns a block reason string if the SHORT entry lacks multi-candle persistence.
+        Returns "" (empty) if check passes or insufficient data (graceful degradation).
+        """
+        if not rsi_history or len(rsi_history) < 2:
+            return ""  # insufficient history — defer to crash guard only
+        window = rsi_history[-_MR_PERSIST_WINDOW:]
+        zone_floor = short_band - _MR_PERSIST_BUFFER
+        in_zone = sum(1 for r in window if r > zone_floor)
+        if in_zone >= _MR_PERSIST_MIN_COUNT:
+            return ""
+        return (
+            f"RSI_PERSIST_SHORT: only {in_zone}/{len(window)} candles above "
+            f"{zone_floor:.1f} (need {_MR_PERSIST_MIN_COUNT}) — "
+            f"history={[round(r,1) for r in window]}"
+        )
 
     # ── Band adaptation ────────────────────────────────────────────────────────
 

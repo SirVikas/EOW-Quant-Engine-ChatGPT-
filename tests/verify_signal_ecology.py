@@ -138,6 +138,67 @@ check("B18 telemetry has survival_by_regime", "MEAN_REVERTING" in telem["surviva
 check("B19 band_state() returns dict", isinstance(gov.band_state(), dict))
 check("B20 recent_decisions returns list", isinstance(gov.recent_decisions(5), list))
 
+# ── Multi-candle RSI persistence confirmation (v1.11.0) ───────────────────────
+# B21: LONG passes when ≥2 of last 3 readings are below long_band+5 (=35)
+d_p1 = gov.get_signal(regime="MEAN_REVERTING", rsi_val=27.0, rsi_prev=29.0,
+                      above_sma=False, symbol="TEST",
+                      rsi_history=[28.0, 29.0, 27.0])   # all 3 in zone → pass
+check("B21 persistence LONG passes (3/3 in zone)", not d_p1.blocked,
+      f"reason={d_p1.block_reason}")
+
+# B22: LONG passes when exactly 2 of 3 readings are in zone (boundary)
+d_p2 = gov.get_signal(regime="MEAN_REVERTING", rsi_val=27.0, rsi_prev=29.0,
+                      above_sma=False, symbol="TEST",
+                      rsi_history=[38.0, 29.0, 27.0])   # first above 35, last 2 in zone → pass
+check("B22 persistence LONG passes (2/3 in zone)", not d_p2.blocked,
+      f"reason={d_p2.block_reason}")
+
+# B23: LONG blocked when only 1 of 3 readings is in zone (first-touch crash)
+d_p3 = gov.get_signal(regime="MEAN_REVERTING", rsi_val=27.0, rsi_prev=29.0,
+                      above_sma=False, symbol="TEST",
+                      rsi_history=[42.0, 38.0, 27.0])   # only last 1 in zone → blocked
+check("B23 persistence LONG blocked (1/3 in zone, first-touch crash)", d_p3.blocked,
+      f"reason={d_p3.block_reason}")
+check("B24 persistence block reason mentions RSI_PERSIST_LONG",
+      "RSI_PERSIST_LONG" in d_p3.block_reason, f"reason={d_p3.block_reason}")
+
+# B25: SHORT passes when ≥2 of last 3 readings are above short_band-5 (=65)
+d_p4 = gov.get_signal(regime="MEAN_REVERTING", rsi_val=73.0, rsi_prev=71.0,
+                      above_sma=True, symbol="TEST",
+                      rsi_history=[72.0, 71.0, 73.0])   # all 3 above 65 → pass
+check("B25 persistence SHORT passes (3/3 in zone)", not d_p4.blocked,
+      f"reason={d_p4.block_reason}")
+
+# B26: SHORT blocked when only 1 of 3 readings is in overbought zone (first-touch spike)
+d_p5 = gov.get_signal(regime="MEAN_REVERTING", rsi_val=73.0, rsi_prev=71.0,
+                      above_sma=True, symbol="TEST",
+                      rsi_history=[58.0, 62.0, 73.0])   # only last 1 above 65 → blocked
+check("B26 persistence SHORT blocked (1/3 in zone, first-touch spike)", d_p5.blocked,
+      f"reason={d_p5.block_reason}")
+check("B27 persistence block reason mentions RSI_PERSIST_SHORT",
+      "RSI_PERSIST_SHORT" in d_p5.block_reason, f"reason={d_p5.block_reason}")
+
+# B28: No history provided → crash guard still gates correctly (graceful degradation)
+d_p6 = gov.get_signal(regime="MEAN_REVERTING", rsi_val=28.0, rsi_prev=33.0,
+                      above_sma=False, symbol="TEST",
+                      rsi_history=None)   # None → persistence check skipped
+check("B28 no history → crash guard only, LONG passes if prev<35", not d_p6.blocked,
+      f"reason={d_p6.block_reason}")
+
+# B29: Short history (1 value) → graceful degradation, no persistence block
+d_p7 = gov.get_signal(regime="MEAN_REVERTING", rsi_val=28.0, rsi_prev=33.0,
+                      above_sma=False, symbol="TEST",
+                      rsi_history=[28.0])   # len=1 → skip persistence
+check("B29 single-item history → no persistence block", not d_p7.blocked,
+      f"reason={d_p7.block_reason}")
+
+# B30: TRENDING regime ignores persistence check entirely (persistence is MR-only)
+d_p8 = gov.get_signal(regime="TRENDING", rsi_val=45.0, rsi_prev=46.0,
+                      above_sma=True, symbol="TEST",
+                      rsi_history=[60.0, 58.0, 45.0])   # history with non-extreme values
+check("B30 TRENDING regime unaffected by rsi_history", not d_p8.blocked,
+      f"reason={d_p8.block_reason}")
+
 
 # ── SignalDensityEngine ────────────────────────────────────────────────────────
 section("TEST C — SignalDensityEngine")
