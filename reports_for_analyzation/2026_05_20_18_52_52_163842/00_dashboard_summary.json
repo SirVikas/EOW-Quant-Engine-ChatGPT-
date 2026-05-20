@@ -1,0 +1,17 @@
+{
+  "prp": "001",
+  "module": "SignalTruthReports",
+  "truth_density": 0.0,
+  "directional_legit": 0.0,
+  "directional_label": "DIRECTIONAL_BIAS",
+  "noise_ratio": 0.0,
+  "asymmetry_health": "BROKEN",
+  "rr_achievement_ratio": 0.0,
+  "optimism_bias_rate": 0.0,
+  "false_positive_rate": 0.0,
+  "active_fp_clusters": 0,
+  "total_signals": 0,
+  "total_outcomes": 0,
+  "total_net_pnl": 0.0,
+  "ts": 1779283193467
+}

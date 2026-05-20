@@ -1,0 +1,54 @@
+{
+  "mode": "NORMAL",
+  "decision": "MONITOR \u2014 assess next candle",
+  "regime": {
+    "window": 50,
+    "pairs": 0,
+    "regimes": {},
+    "module": "REGIME_MEMORY",
+    "phase": 5
+  },
+  "learning": {
+    "window_size": 50,
+    "min_samples": 5,
+    "recency_decay": 0.93,
+    "thresholds": {
+      "wr_high": 0.55,
+      "wr_low": 0.45,
+      "weight_at_low": 0.8
+    },
+    "regimes": {}
+  },
+  "edge": {
+    "window_size": 50,
+    "min_trades": 20,
+    "emergency_min_trades": 5,
+    "emergency_kill_at": -0.3,
+    "edge_boost_at": 0.15,
+    "edge_kill_at": 0.0,
+    "boost_mult": 1.25,
+    "strategies": {}
+  },
+  "drawdown": {
+    "peak_equity": 924.2314,
+    "current_equity": 924.2314,
+    "drawdown_pct": 0.0,
+    "tier_thresholds": {
+      "soft_cut": 0.05,
+      "hard_cut": 0.1,
+      "stop": 0.15
+    },
+    "module": "DRAWDOWN_CONTROLLER",
+    "phase": 5
+  },
+  "streak": {
+    "win_streak_min": 3,
+    "loss_streak_min": 3,
+    "hot_score_adj": -0.03,
+    "cold_score_adj": 0.05,
+    "module": "STREAK_INTELLIGENCE_ENGINE",
+    "phase": 6
+  },
+  "module": "AI_BRAIN",
+  "phase": "023"
+}

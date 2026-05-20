@@ -1,0 +1,2507 @@
+{
+  "captured_at": "2026-05-20T13:20:05.771Z",
+  "snapshot_id": "65887075-73c3-4754-a0c0-b17fedae26d0",
+  "total_entries": 500,
+  "entries": [
+    {
+      "ts": 1779281205336,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass NEARUSDT: SLEEP_MODE(vol=8=0%_of_avg=13457,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779281205341,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=42.1 above_sma=False bands=[52.0,48.0] (rsi=42.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281218871,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281218882,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=68.7 above_sma=True bands=[52.0,48.0] (rsi=68.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281218928,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281218933,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=66.7 above_sma=True bands=[52.0,48.0] (rsi=66.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281218981,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281218997,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=74.2 above_sma=True bands=[52.0,48.0] (rsi=74.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281219413,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281219418,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=65.2 above_sma=True bands=[27.0,73.0] (rsi=65.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281219995,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281220015,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=45.8 above_sma=False bands=[27.0,73.0] (rsi=45.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281221773,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281221787,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=42.1 above_sma=False bands=[52.0,48.0] (rsi=42.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281228996,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281229005,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback EDENUSDT: SHORT entry=0.0813 rsi=50.0"
+    },
+    {
+      "ts": 1779281278191,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281278197,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=63.3 above_sma=True bands=[52.0,48.0] (rsi=63.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281278282,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281278290,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=65.2 above_sma=True bands=[52.0,48.0] (rsi=65.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281278520,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281278531,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=58.6 above_sma=True bands=[52.0,48.0] (rsi=58.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281278860,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281278866,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=60.4 above_sma=True bands=[52.0,48.0] (rsi=60.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281279928,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281279944,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=46.2 above_sma=False bands=[27.0,73.0] (rsi=46.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281283897,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281283917,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=38.9 above_sma=False bands=[52.0,48.0] (rsi=38.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281286241,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281286250,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=38.7 above_sma=False bands=[27.0,73.0] (rsi=38.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281337808,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281337813,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_CRASH_GUARD LONG: rsi=22.3<27.0 but prev=38.7\u226529.0 (first-touch crash) (rsi=22.3 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281337902,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281337907,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=56.5 above_sma=True bands=[52.0,48.0] (rsi=56.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281338065,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281338071,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=52.8 above_sma=True bands=[52.0,48.0] (rsi=52.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281338163,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281338174,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=63.6 above_sma=True bands=[52.0,48.0] (rsi=63.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281338608,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281338615,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=46.2 above_sma=False bands=[52.0,48.0] (rsi=46.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281339341,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281339353,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=56.8 above_sma=True bands=[52.0,48.0] (rsi=56.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281342192,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281342193,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass NEARUSDT: SLEEP_MODE(vol=496=4%_of_avg=12243,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779281342200,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=42.1 above_sma=False bands=[52.0,48.0] (rsi=42.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281397812,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281397818,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=59.0 above_sma=True bands=[52.0,48.0] (rsi=59.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281398272,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281398289,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=60.8 above_sma=True bands=[52.0,48.0] (rsi=60.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281398334,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281398349,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=68.0 above_sma=True bands=[52.0,48.0] (rsi=68.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281398496,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281398508,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=40.0 above_sma=False bands=[52.0,48.0] (rsi=40.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281398520,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281398522,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3657 n=11 (rsi=19.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281398603,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281398609,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=67.9 above_sma=True bands=[52.0,48.0] (rsi=67.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281398650,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281398662,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=42.9 above_sma=False bands=[27.0,73.0] (rsi=42.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281431509,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #39: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779281457943,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281457958,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=71.1 above_sma=True bands=[52.0,48.0] (rsi=71.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281458025,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281458041,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=57.6 above_sma=True bands=[52.0,48.0] (rsi=57.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281458591,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281458599,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=40.7 above_sma=False bands=[27.0,73.0] (rsi=40.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281459241,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281459261,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3657 n=11 (rsi=26.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281460410,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281460416,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=57.9 above_sma=True bands=[52.0,48.0] (rsi=57.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281461344,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281461352,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=72.0 above_sma=True bands=[52.0,48.0] (rsi=72.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281470069,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281470081,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=31.8 above_sma=False bands=[52.0,48.0] (rsi=31.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281517811,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281517823,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=56.1 above_sma=True bands=[52.0,48.0] (rsi=56.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281518434,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281518448,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=61.0 above_sma=True bands=[52.0,48.0] (rsi=61.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281518833,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281518841,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=64.2 above_sma=True bands=[52.0,48.0] (rsi=64.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281519330,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281519337,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=27.8 above_sma=False bands=[27.0,73.0] (rsi=27.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281519808,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281519813,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=78.3 above_sma=True bands=[52.0,48.0] (rsi=78.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281520755,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281520774,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=35.5 above_sma=False bands=[27.0,73.0] (rsi=35.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281549789,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281549802,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback NEARUSDT: SHORT entry=1.6300 rsi=50.0"
+    },
+    {
+      "ts": 1779281578108,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281578115,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=43.7 above_sma=False bands=[27.0,73.0] (rsi=43.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281578181,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281578187,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=62.7 above_sma=True bands=[52.5,47.5] (rsi=62.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281578381,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281578387,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=15.2 above_sma=False bands=[52.5,47.5] (rsi=15.2 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281578447,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281578457,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=78.3 above_sma=True bands=[52.5,47.5] (rsi=78.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281578465,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281578480,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=55.5 above_sma=True bands=[52.5,47.5] (rsi=55.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281578990,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281578996,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=42.9 above_sma=False bands=[27.0,73.0] (rsi=42.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281582826,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281582836,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=58.7 above_sma=True bands=[52.5,47.5] (rsi=58.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281637809,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281637814,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=43.7 above_sma=False bands=[27.0,73.0] (rsi=43.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281637911,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281637920,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=64.8 above_sma=True bands=[52.5,47.5] (rsi=64.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281638474,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281638481,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=28.3 above_sma=False bands=[27.0,73.0] (rsi=28.3 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281638875,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281638886,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=64.2 above_sma=True bands=[52.5,47.5] (rsi=64.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281639074,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281639087,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=77.3 above_sma=True bands=[52.5,47.5] (rsi=77.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281641381,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281641388,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=59.4 above_sma=True bands=[52.5,47.5] (rsi=59.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281646142,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281646152,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=62.5 above_sma=False bands=[27.0,73.0] (rsi=62.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281697749,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281697756,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=73.9 above_sma=True bands=[52.5,47.5] (rsi=73.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281697822,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281697827,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=62.5 above_sma=False bands=[27.0,73.0] (rsi=62.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281697851,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281697866,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=84.3 above_sma=True bands=[52.5,47.5] (rsi=84.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281697929,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281697952,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout TONUSDT score=0.763 rr=5.00"
+    },
+    {
+      "ts": 1779281697952,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=95.0 above_sma=True bands=[52.5,47.5] (rsi=95.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281697969,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281697982,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=64.7 above_sma=True bands=[52.5,47.5] (rsi=64.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281698115,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281698127,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=40.0 above_sma=False bands=[27.0,73.0] (rsi=40.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281699147,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281699158,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=31.6 above_sma=False bands=[52.5,47.5] (rsi=31.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281731550,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #40: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779281757851,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281757857,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=85.3 above_sma=True bands=[52.5,47.5] (rsi=85.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281757943,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281757955,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=58.3 above_sma=True bands=[27.0,73.0] (rsi=58.3 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281758094,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281758100,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_CRASH_GUARD SHORT: rsi=75.0>73.0 but prev=62.5\u226471.0 (first-touch spike) (rsi=75.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281758326,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281758334,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=95.0 above_sma=True bands=[52.5,47.5] (rsi=95.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281758378,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281758399,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=73.0 above_sma=True bands=[52.5,47.5] (rsi=73.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281758839,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281758849,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=37.3 above_sma=False bands=[52.5,47.5] (rsi=37.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281763248,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281763254,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry EDENUSDT score=0.568 rr=5.00"
+    },
+    {
+      "ts": 1779281763255,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=44.8 above_sma=False bands=[52.5,47.5] (rsi=44.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281822183,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281822200,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=81.6 above_sma=True bands=[52.5,47.5] (rsi=81.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281822367,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281822387,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3657 n=11 (rsi=80.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281822789,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281822789,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=46.4 above_sma=False bands=[52.5,47.5] (rsi=46.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281823112,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281823116,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout TONUSDT score=0.637 rr=5.00"
+    },
+    {
+      "ts": 1779281823116,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=95.7 above_sma=True bands=[52.5,47.5] (rsi=95.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281823242,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281823248,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=60.8 above_sma=True bands=[27.0,73.0] (rsi=60.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281823364,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281823371,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=43.3 above_sma=False bands=[52.5,47.5] (rsi=43.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281823703,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281823716,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=89.0 above_sma=True bands=[52.5,47.5] (rsi=89.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281877816,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281877828,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=42.0 above_sma=False bands=[53.0,47.0] (rsi=42.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281878024,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281878031,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=68.1 above_sma=True bands=[53.0,47.0] (rsi=68.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281878102,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281878116,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=95.5 above_sma=True bands=[53.0,47.0] (rsi=95.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281878181,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281878191,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=70.9 above_sma=True bands=[53.0,47.0] (rsi=70.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281878306,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281878315,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=48.9 above_sma=True bands=[27.0,73.0] (rsi=48.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281878695,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281878704,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=56.7 above_sma=True bands=[53.0,47.0] (rsi=56.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281879784,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281879796,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=67.6 above_sma=True bands=[27.0,73.0] (rsi=67.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281938048,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281938058,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=61.7 above_sma=True bands=[53.5,46.5] (rsi=61.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281938140,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281938148,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=62.1 above_sma=True bands=[53.5,46.5] (rsi=62.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281938474,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281938482,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=51.6 above_sma=True bands=[27.0,73.0] (rsi=51.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281938499,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281938510,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=38.5 above_sma=False bands=[53.5,46.5] (rsi=38.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281938673,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281938685,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=64.7 above_sma=True bands=[53.5,46.5] (rsi=64.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281941413,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281941413,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=67.6 above_sma=True bands=[53.5,46.5] (rsi=67.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281943447,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281943459,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=87.0 above_sma=True bands=[53.5,46.5] (rsi=87.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281998016,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281998032,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=38.9 above_sma=False bands=[54.0,46.0] (rsi=38.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779281998101,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281998115,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=61.0 above_sma=True bands=[54.0,46.0] (rsi=61.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281998288,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281998315,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=50.0 above_sma=False bands=[27.0,73.0] (rsi=50.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779281998385,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281998410,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=59.2 above_sma=True bands=[54.0,46.0] (rsi=59.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281999229,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281999240,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=79.2 above_sma=True bands=[54.0,46.0] (rsi=79.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779281999444,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779281999456,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=70.6 above_sma=True bands=[54.0,46.0] (rsi=70.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282000627,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282000661,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=49.2 above_sma=True bands=[27.0,73.0] (rsi=49.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282031539,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #41: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779282057763,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282057771,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=56.2 above_sma=True bands=[54.5,45.5] (rsi=56.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282057802,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282057816,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=60.9 above_sma=True bands=[54.5,45.5] (rsi=60.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282058249,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282058255,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=57.1 above_sma=True bands=[54.5,45.5] (rsi=57.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282058281,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282058305,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=45.2 above_sma=False bands=[27.0,73.0] (rsi=45.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282058817,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282058831,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout NEARUSDT score=0.747 rr=5.00"
+    },
+    {
+      "ts": 1779282058832,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=75.6 above_sma=True bands=[54.5,45.5] (rsi=75.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282058932,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282058941,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=34.5 above_sma=False bands=[54.5,45.5] (rsi=34.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282060046,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282060061,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=48.2 above_sma=True bands=[27.0,73.0] (rsi=48.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282117925,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282117946,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=77565.1000 rsi=50.0"
+    },
+    {
+      "ts": 1779282118678,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282118688,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=41.3 above_sma=False bands=[27.0,73.0] (rsi=41.3 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282118903,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282118922,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=32.5 above_sma=False bands=[55.0,45.0] (rsi=32.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282120613,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282120621,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2133.9000 rsi=51.8"
+    },
+    {
+      "ts": 1779282121556,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282121572,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=56.5 above_sma=True bands=[55.0,45.0] (rsi=56.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282122338,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282122351,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=77.8 above_sma=True bands=[55.0,45.0] (rsi=77.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282126525,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282126534,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=51.6 above_sma=True bands=[27.0,73.0] (rsi=51.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282178006,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282178019,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=55.4 above_sma=True bands=[27.0,73.0] (rsi=55.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282178032,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282178040,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=77588.6400 rsi=52.5"
+    },
+    {
+      "ts": 1779282178323,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282178334,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=57.4 above_sma=True bands=[55.5,44.5] (rsi=57.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282178426,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282178432,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=38.5 above_sma=False bands=[55.5,44.5] (rsi=38.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282178643,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282178649,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=77.8 above_sma=True bands=[55.5,44.5] (rsi=77.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282178931,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282178940,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=36.4 above_sma=False bands=[27.0,73.0] (rsi=36.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282179320,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282179320,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=58.3 above_sma=True bands=[55.5,44.5] (rsi=58.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282237784,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282237797,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=77566.2000 rsi=48.8"
+    },
+    {
+      "ts": 1779282237840,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282237856,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.3860 rsi=46.5"
+    },
+    {
+      "ts": 1779282237960,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282237984,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2134.7600 rsi=52.2"
+    },
+    {
+      "ts": 1779282239084,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282239094,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9570 rsi=47.8"
+    },
+    {
+      "ts": 1779282243088,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282243099,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=36.4 above_sma=False bands=[56.0,44.0] (rsi=36.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282243347,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282243356,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=79.5 above_sma=True bands=[56.0,44.0] (rsi=79.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282244431,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282244437,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=42.5 above_sma=True bands=[27.0,73.0] (rsi=42.5 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282297801,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282297809,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2134.3800 rsi=48.9"
+    },
+    {
+      "ts": 1779282297928,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282297938,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=87.2 above_sma=True bands=[56.5,43.5] (rsi=87.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282298039,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282298051,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=34.8 above_sma=False bands=[56.5,43.5] (rsi=34.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282298760,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282298766,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.3869 rsi=47.7"
+    },
+    {
+      "ts": 1779282298919,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282298930,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=77556.8800 rsi=49.8"
+    },
+    {
+      "ts": 1779282299027,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282299034,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=46.7 above_sma=True bands=[27.0,73.0] (rsi=46.7 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282300327,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282300340,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TONUSDT score=0.520 rr=5.00"
+    },
+    {
+      "ts": 1779282300340,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9550 rsi=41.7"
+    },
+    {
+      "ts": 1779282331538,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #42: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779282357877,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282357886,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: LONG entry=77550.0100 rsi=49.5"
+    },
+    {
+      "ts": 1779282358042,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282358062,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=78.8 above_sma=True bands=[56.5,43.5] (rsi=78.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282358271,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282358277,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2133.8900 rsi=48.9"
+    },
+    {
+      "ts": 1779282358350,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282358357,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=43.5 above_sma=False bands=[56.5,43.5] (rsi=43.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282358373,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282358386,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.3869 rsi=48.3"
+    },
+    {
+      "ts": 1779282359289,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282359299,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=47.3 above_sma=True bands=[27.0,73.0] (rsi=47.3 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282364418,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282364426,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TONUSDT score=0.557 rr=5.00"
+    },
+    {
+      "ts": 1779282364426,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9560 rsi=44.0"
+    },
+    {
+      "ts": 1779282417810,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282417824,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=56.4 above_sma=True bands=[27.0,73.0] (rsi=56.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282417880,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282417886,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=40.9 above_sma=False bands=[56.5,43.5] (rsi=40.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282417965,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282417981,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2133.4200 rsi=47.6"
+    },
+    {
+      "ts": 1779282417997,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282418003,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback BTCUSDT: SHORT entry=77533.3500 rsi=48.5"
+    },
+    {
+      "ts": 1779282418370,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282418381,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.3868 rsi=51.2"
+    },
+    {
+      "ts": 1779282419301,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282419308,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=81.8 above_sma=True bands=[56.5,43.5] (rsi=81.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282419642,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282419648,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9560 rsi=45.8"
+    },
+    {
+      "ts": 1779282477784,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282477795,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=40.0 above_sma=False bands=[56.5,43.5] (rsi=40.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282477803,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282477812,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=36.6 above_sma=False bands=[56.5,43.5] (rsi=36.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282477981,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282477989,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=42.9 above_sma=False bands=[56.5,43.5] (rsi=42.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282478022,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282478032,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=41.0 above_sma=False bands=[56.5,43.5] (rsi=41.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282478048,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282478056,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback SPKUSDT: LONG entry=0.0286 rsi=48.0"
+    },
+    {
+      "ts": 1779282485449,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282485454,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9620 rsi=53.6"
+    },
+    {
+      "ts": 1779282487187,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282487194,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=81.1 above_sma=True bands=[56.5,43.5] (rsi=81.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282537777,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282537783,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=45.8 above_sma=True bands=[27.0,73.0] (rsi=45.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282537795,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282537800,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=41.0 above_sma=False bands=[56.5,43.5] (rsi=41.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282537973,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282537981,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9620 rsi=50.0"
+    },
+    {
+      "ts": 1779282538276,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282538286,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=40.9 above_sma=False bands=[56.5,43.5] (rsi=40.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282538759,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282538764,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ETHUSDT: LONG entry=2133.1600 rsi=42.3"
+    },
+    {
+      "ts": 1779282538879,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282538886,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.3875 rsi=46.6"
+    },
+    {
+      "ts": 1779282546909,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282546916,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=81.1 above_sma=True bands=[56.5,43.5] (rsi=81.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282597850,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282597858,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=40.0 above_sma=False bands=[56.5,43.5] (rsi=40.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282597915,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282597924,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=77.8 above_sma=True bands=[56.5,43.5] (rsi=77.8 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282598143,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282598153,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=43.4 above_sma=False bands=[56.5,43.5] (rsi=43.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282598245,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282598252,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback EDENUSDT: SHORT entry=0.0810 rsi=46.9"
+    },
+    {
+      "ts": 1779282598355,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282598374,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=47.2 above_sma=True bands=[27.0,73.0] (rsi=47.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282598514,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282598520,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=38.3 above_sma=False bands=[56.5,43.5] (rsi=38.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282600730,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282600740,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TONUSDT score=0.531 rr=5.00"
+    },
+    {
+      "ts": 1779282600741,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9590 rsi=40.7"
+    },
+    {
+      "ts": 1779282631604,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #43: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779282658015,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282658024,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=17.0 above_sma=False bands=[56.0,44.0] (rsi=17.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282658034,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282658041,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=39.2 above_sma=True bands=[27.0,73.0] (rsi=39.2 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282658086,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282658091,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TONUSDT score=0.499 rr=5.00"
+    },
+    {
+      "ts": 1779282658092,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9580 rsi=32.0"
+    },
+    {
+      "ts": 1779282658344,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282658350,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=43.4 above_sma=False bands=[56.0,44.0] (rsi=43.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282658541,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282658548,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=24.7 above_sma=False bands=[56.0,44.0] (rsi=24.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282659299,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282659314,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=25.0 above_sma=False bands=[56.0,44.0] (rsi=25.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282659420,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282659426,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=73.7 above_sma=True bands=[56.0,44.0] (rsi=73.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282717959,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282717968,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout ONDOUSDT score=0.608 rr=5.00"
+    },
+    {
+      "ts": 1779282717969,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=23.7 above_sma=False bands=[55.5,44.5] (rsi=23.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282718130,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282718138,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=19.3 above_sma=False bands=[55.5,44.5] (rsi=19.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282718453,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282718461,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=36.5 above_sma=False bands=[55.5,44.5] (rsi=36.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282719541,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282719546,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=49.8 above_sma=True bands=[27.0,73.0] (rsi=49.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282719889,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282719899,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=27.0 above_sma=False bands=[55.5,44.5] (rsi=27.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282723270,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282723277,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9560 rsi=29.6"
+    },
+    {
+      "ts": 1779282725682,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282725693,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=75.7 above_sma=True bands=[55.5,44.5] (rsi=75.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282778007,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282778018,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=32.8 above_sma=False bands=[55.0,45.0] (rsi=32.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282778085,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282778087,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass BTCUSDT: SLEEP_MODE(vol=1=7%_of_avg=10,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779282778095,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=22.1 above_sma=False bands=[55.0,45.0] (rsi=22.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282778375,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282778386,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=37.1 above_sma=False bands=[55.0,45.0] (rsi=37.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282778450,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282778458,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=34.0 above_sma=False bands=[55.0,45.0] (rsi=34.0 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282780724,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282780732,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=38.1 above_sma=False bands=[27.0,73.0] (rsi=38.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282781970,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282781977,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=68.3 above_sma=True bands=[55.0,45.0] (rsi=68.3 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282783015,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282783027,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9550 rsi=30.8"
+    },
+    {
+      "ts": 1779282837731,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282837737,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=37.8 above_sma=False bands=[54.5,45.5] (rsi=37.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282838052,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282838053,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass BTCUSDT: SLEEP_MODE(vol=1=10%_of_avg=10,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779282838054,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=22.7 above_sma=False bands=[54.5,45.5] (rsi=22.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282838357,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282838363,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=42.5 above_sma=False bands=[54.5,45.5] (rsi=42.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282838553,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282838553,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback EDENUSDT: SHORT entry=0.0810 rsi=50.0"
+    },
+    {
+      "ts": 1779282839232,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282839240,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=30.5 above_sma=False bands=[27.0,73.0] (rsi=30.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282842660,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282842670,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=67.5 above_sma=True bands=[54.5,45.5] (rsi=67.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282843856,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282843865,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TONUSDT score=0.516 rr=5.00"
+    },
+    {
+      "ts": 1779282843867,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9560 rsi=36.0"
+    },
+    {
+      "ts": 1779282898082,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282898085,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3349 n=20 (rsi=17.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282898154,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282898160,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=43.7 above_sma=False bands=[54.0,46.0] (rsi=43.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282898422,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282898428,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9550 rsi=40.9"
+    },
+    {
+      "ts": 1779282898501,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282898513,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback EDENUSDT: SHORT entry=0.0808 rsi=48.9"
+    },
+    {
+      "ts": 1779282899129,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282899134,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=29.7 above_sma=False bands=[54.0,46.0] (rsi=29.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282901105,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282901110,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=29.9 above_sma=False bands=[27.0,73.0] (rsi=29.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282902133,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282902134,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass NEARUSDT: SLEEP_MODE(vol=2177=5%_of_avg=41254,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779282902146,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=59.4 above_sma=True bands=[54.0,46.0] (rsi=59.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779282931616,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #44: meta_score=48.2 verdict=\u2014"
+    },
+    {
+      "ts": 1779282958066,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282958072,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9540 rsi=40.9"
+    },
+    {
+      "ts": 1779282958128,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282958135,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback EDENUSDT: SHORT entry=0.0805 rsi=55.0"
+    },
+    {
+      "ts": 1779282958196,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282958209,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3349 n=20 (rsi=21.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282958220,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282958225,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.3862 rsi=50.7"
+    },
+    {
+      "ts": 1779282958263,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282958271,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=30.9 above_sma=False bands=[53.5,46.5] (rsi=30.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779282958582,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282958584,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=27.2 above_sma=False bands=[27.0,73.0] (rsi=27.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779282958721,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779282958727,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=53.6 above_sma=True bands=[53.5,46.5] (rsi=53.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779283017797,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283017807,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3349 n=20 (rsi=11.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283018195,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283018203,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=19.7 above_sma=False bands=[53.0,47.0] (rsi=19.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283018301,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283018307,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=44.4 above_sma=False bands=[53.0,47.0] (rsi=44.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283018491,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283018499,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=27.9 above_sma=False bands=[27.0,73.0] (rsi=27.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283018588,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283018604,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=61.4 above_sma=True bands=[27.0,73.0] (rsi=61.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283019229,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283019234,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback TONUSDT: LONG entry=1.9550 rsi=40.9"
+    },
+    {
+      "ts": 1779283027401,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283027412,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=55.2 above_sma=True bands=[53.0,47.0] (rsi=55.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779283077944,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283077956,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=43.8 above_sma=False bands=[52.5,47.5] (rsi=43.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283078243,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283078256,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3349 n=20 (rsi=12.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283078290,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283078308,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=64.3 above_sma=True bands=[27.0,73.0] (rsi=64.3 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283078676,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283078684,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=47.6 above_sma=True bands=[27.0,73.0] (rsi=47.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283078732,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283078746,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=19.8 above_sma=False bands=[52.5,47.5] (rsi=19.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283079307,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283079318,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=30.1 above_sma=False bands=[52.5,47.5] (rsi=30.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283079900,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283079905,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback NEARUSDT: LONG entry=1.6600 rsi=51.6"
+    },
+    {
+      "ts": 1779283137983,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283138004,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3349 n=20 (rsi=23.0 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283138070,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283138086,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=32.8 above_sma=False bands=[52.0,48.0] (rsi=32.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283138472,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283138484,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=55.0 above_sma=True bands=[27.0,73.0] (rsi=55.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283138493,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283138502,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=27.6 above_sma=False bands=[27.0,73.0] (rsi=27.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283138516,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283138534,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=35.4 above_sma=False bands=[52.0,48.0] (rsi=35.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283138835,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283138835,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry NEARUSDT score=0.524 rr=5.00"
+    },
+    {
+      "ts": 1779283138858,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback NEARUSDT: LONG entry=1.6590 rsi=38.5"
+    },
+    {
+      "ts": 1779283138992,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283139004,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=69.8 above_sma=True bands=[27.0,73.0] (rsi=69.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283197881,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283197900,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback NEARUSDT: LONG entry=1.6600 rsi=50.0"
+    },
+    {
+      "ts": 1779283197961,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283197976,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=28.1 above_sma=False bands=[27.0,73.0] (rsi=28.1 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283198232,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283198239,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: CONTEXT_TOXIC: toxic_context avg=-0.3349 n=20 (rsi=22.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283198386,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283198393,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=40.8 above_sma=False bands=[51.5,48.5] (rsi=40.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779283198630,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP EDENUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283198638,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=63.4 above_sma=True bands=[27.0,73.0] (rsi=63.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283198937,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udd2c Live Process Snapshot downloaded \u2192 eow_live_process_20260520_131958.zip (103 KB | logs=2000 rl_contexts=21 trades=259)"
+    },
+    {
+      "ts": 1779283200083,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283200101,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=47.6 above_sma=True bands=[27.0,73.0] (rsi=47.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779283200115,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SPKUSDT: tier=TIER_3 af=RELAX score_min=0.400 vol_mult=0.20\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779283200145,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SPKUSDT: RSI_LEVEL: rsi=30.7 above_sma=False bands=[51.5,48.5] (rsi=30.7 above_sma=False regime=TRENDING)"
+    }
+  ]
+}

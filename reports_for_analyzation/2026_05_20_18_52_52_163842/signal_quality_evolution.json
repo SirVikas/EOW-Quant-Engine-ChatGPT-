@@ -1,0 +1,112 @@
+{
+  "title": "Signal Quality Evolution \u2014 RR and WR Trends Over Time (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-20 13:20:05 UTC",
+  "total_trades": 259,
+  "window_size": 50,
+  "wr_trend": "FLAT",
+  "rr_trend": "IMPROVING",
+  "avg_fee_drag_pct": 119.0,
+  "rolling_windows": [
+    {
+      "window_start": 1,
+      "window_end": 50,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.348,
+      "rr": 1.586,
+      "avg_pnl": -0.3101,
+      "fee_drag_pct": 80.8
+    },
+    {
+      "window_start": 26,
+      "window_end": 75,
+      "n": 50,
+      "wr_pct": 14.0,
+      "pf": 0.198,
+      "rr": 1.219,
+      "avg_pnl": -0.5296,
+      "fee_drag_pct": 112.7
+    },
+    {
+      "window_start": 51,
+      "window_end": 100,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.286,
+      "rr": 1.304,
+      "avg_pnl": -0.4385,
+      "fee_drag_pct": 87.3
+    },
+    {
+      "window_start": 76,
+      "window_end": 125,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.632,
+      "rr": 2.878,
+      "avg_pnl": -0.1722,
+      "fee_drag_pct": 52.2
+    },
+    {
+      "window_start": 101,
+      "window_end": 150,
+      "n": 50,
+      "wr_pct": 18.0,
+      "pf": 0.467,
+      "rr": 2.13,
+      "avg_pnl": -0.2266,
+      "fee_drag_pct": 77.9
+    },
+    {
+      "window_start": 126,
+      "window_end": 175,
+      "n": 50,
+      "wr_pct": 24.0,
+      "pf": 0.33,
+      "rr": 1.046,
+      "avg_pnl": -0.2395,
+      "fee_drag_pct": 129.0
+    },
+    {
+      "window_start": 151,
+      "window_end": 200,
+      "n": 50,
+      "wr_pct": 20.0,
+      "pf": 0.239,
+      "rr": 0.955,
+      "avg_pnl": -0.2836,
+      "fee_drag_pct": 170.2
+    },
+    {
+      "window_start": 176,
+      "window_end": 225,
+      "n": 50,
+      "wr_pct": 10.0,
+      "pf": 0.169,
+      "rr": 1.521,
+      "avg_pnl": -0.3323,
+      "fee_drag_pct": 222.8
+    },
+    {
+      "window_start": 201,
+      "window_end": 250,
+      "n": 50,
+      "wr_pct": 12.0,
+      "pf": 0.285,
+      "rr": 2.087,
+      "avg_pnl": -0.2694,
+      "fee_drag_pct": 137.8
+    }
+  ],
+  "regime_signal_quality": {
+    "MEAN_REVERTING": {
+      "n": 259,
+      "wr_pct": 18.1,
+      "rr": 1.551,
+      "pf": 0.344,
+      "fee_drag_pct": 96.8
+    }
+  },
+  "verdict": "SIGNAL_IMPROVING \u2014 at least WR or RR trending upward",
+  "fee_drag_finding": "CRITICAL \u2014 avg fee drag 119.0% of gross wins. Raise MIN_NOTIONAL_USDT to reduce fee-per-trade ratio."
+}

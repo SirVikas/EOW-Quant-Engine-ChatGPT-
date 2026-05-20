@@ -1,0 +1,46 @@
+{
+  "total_events": 3,
+  "severity_breakdown": {
+    "ERROR": 1,
+    "WARNING": 2
+  },
+  "events": [
+    {
+      "code": "WS_002",
+      "type": "WebSocket",
+      "message": "No tick received for >60 seconds",
+      "reason": "Connection likely dropped or stream stalled",
+      "severity": "ERROR",
+      "auto_fix": "Force reconnect triggered",
+      "ts": 1779275528.0257773,
+      "symbol": "",
+      "extra": "gap=63.3s attempt=2"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779275463.4892564,
+      "symbol": "",
+      "extra": "gap=60.7s attempt=1"
+    },
+    {
+      "code": "WS_001",
+      "type": "WebSocket",
+      "message": "No tick received for >30 seconds",
+      "reason": "Market inactivity or slow connection \u2014 stream may be delayed",
+      "severity": "WARNING",
+      "auto_fix": "Ping sent to check connection",
+      "ts": 1779275434.4891815,
+      "symbol": "",
+      "extra": "gap=31.7s"
+    }
+  ],
+  "replay_available": false,
+  "module": "AUDIT_ENGINE",
+  "phase": "022",
+  "snapshot_ts": 1779283206190
+}
