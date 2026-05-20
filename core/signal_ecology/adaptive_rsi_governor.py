@@ -181,15 +181,7 @@ class AdaptiveRSIGovernor:
 
             if above_sma and rsi_val > short_band:
                 if rsi_prev > prev_short:
-                    # Momentum guard: RSI must be rolling over (falling) from overbought.
-                    # Rising RSI above overbought = momentum continuation, not reversal.
-                    if rsi_val < rsi_prev:
-                        return "SHORT", False, ""
-                    else:
-                        return None, True, (
-                            f"RSI_MOMENTUM_GUARD SHORT: rsi={rsi_val:.1f}>{short_band:.1f} "
-                            f"still rising ({rsi_prev:.1f}→{rsi_val:.1f}) — wait for rollover"
-                        )
+                    return "SHORT", False, ""
                 else:
                     return None, True, (
                         f"RSI_CRASH_GUARD SHORT: rsi={rsi_val:.1f}>{short_band:.1f} "
@@ -197,15 +189,7 @@ class AdaptiveRSIGovernor:
                     )
             elif not above_sma and rsi_val < long_band:
                 if rsi_prev < prev_long:
-                    # Momentum guard: RSI must be bouncing (rising) from oversold.
-                    # Falling RSI below oversold = continued selling, not mean reversion.
-                    if rsi_val > rsi_prev:
-                        return "LONG", False, ""
-                    else:
-                        return None, True, (
-                            f"RSI_MOMENTUM_GUARD LONG: rsi={rsi_val:.1f}<{long_band:.1f} "
-                            f"still falling ({rsi_prev:.1f}→{rsi_val:.1f}) — wait for bounce"
-                        )
+                    return "LONG", False, ""
                 else:
                     return None, True, (
                         f"RSI_CRASH_GUARD LONG: rsi={rsi_val:.1f}<{long_band:.1f} "
