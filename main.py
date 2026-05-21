@@ -110,6 +110,8 @@ from core.bootstrap.api_loader  import api_loader
 from core.infra_health_manager import InfraHealthManager
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
+from core.persistence.suppression_log import SuppressionEventLog  # FTD-DECISION-SNAP
+from core.time.session_definitions import get_session_label as _get_session_label  # FTD-DECISION-SNAP
 from utils.report_generator import build_report_archive
 from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
 from core.intelligence.auto_intelligence_engine import AutoIntelligenceEngine  # FTD-030
@@ -277,6 +279,13 @@ _thought_log: list[dict] = []
 # Last structured skip event — used by the live Skip Reason indicator on dashboard
 _last_skip: dict = {}
 
+# FTD-DECISION-SNAP: bridge open-time snapshot to close-time persistence
+# Keyed by symbol; written at execution approval, consumed at DataLake persist.
+_pending_decision_snapshots: dict[str, dict] = {}
+
+# FTD-DECISION-SNAP: append-only suppression event log
+_supp_log = SuppressionEventLog()
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -295,6 +304,96 @@ async def _safe_send(ws: WebSocket, data: dict):
     except Exception:
         if ws in _ws_clients:
             _ws_clients.remove(ws)
+
+
+def _capture_decision_snapshot(
+    *,
+    sym: str,
+    strategy_id: str,
+    strategy_type: str,
+    regime: str,
+    utc_hour: int,
+    rl_ok: bool,
+    rl_reason: str,
+    ps_ec_dec=None,    # EcologyDecision — present for PAPER_SPEED only
+    ctx_amp: dict | None = None,  # alpha amplification — present for PRIMARY_STRATEGY only
+) -> dict:
+    """
+    Collect the exact subsystem states that approved this trade at execution time.
+    Returns a causal evidence dict for TradeRecord.decision_snapshot.
+
+    Fail-open contract: any per-field failure leaves that field absent.
+    The function itself never raises.
+    """
+    from core.time.session_definitions import make_context as _mc
+    is_ps = strategy_id.endswith("_PAPER_SPEED")
+    snap: dict = {
+        "pipeline":      "PAPER_SPEED" if is_ps else "PRIMARY_STRATEGY",
+        "utc_hour":      utc_hour,
+        "session_label": _get_session_label(utc_hour),
+    }
+
+    # ── RL block ──────────────────────────────────────────────────────────────
+    try:
+        _ctx_key  = _mc(regime, utc_hour, strategy_type)
+        _rl_tbl   = getattr(rl_engine, "_table", {})
+        _rl_state = _rl_tbl.get(_ctx_key)
+        snap["rl"] = {
+            "context":  _ctx_key,
+            "q_value":  round(_rl_state.q_value, 4) if _rl_state else None,
+            "n_visits": _rl_state.n_visits if _rl_state else 0,
+            "ev_floor": getattr(rl_engine, "ENTRY_EV_FLOOR", -0.30),
+            "approved": rl_ok,
+            "reason":   rl_reason,
+        }
+    except Exception:
+        pass
+
+    # ── Ecology ───────────────────────────────────────────────────────────────
+    if ps_ec_dec is not None:
+        try:
+            snap["ecology"] = {
+                "verdict":         "PASS" if ps_ec_dec.approved else "BLOCK",
+                "block_reason":    getattr(ps_ec_dec, "block_reason", None),
+                "regime":          regime,
+                "rsi_value":       getattr(ps_ec_dec, "rsi_val", None),
+                "context_type":    getattr(ps_ec_dec, "context_type", None),
+                "boost_mult":      getattr(ps_ec_dec, "context_boost_mult", None),
+                "survival_rate":   getattr(ps_ec_dec, "survival_rate", None),
+                "size_multiplier": getattr(ps_ec_dec, "size_multiplier", None),
+            }
+        except Exception:
+            pass
+    else:
+        snap["ecology"] = {
+            "verdict": "NOT_EVALUATED",
+            "reason":  "PRIMARY_STRATEGY signals bypass ecology gate",
+        }
+
+    # ── Alpha context ─────────────────────────────────────────────────────────
+    # PRIMARY_STRATEGY: explicit ctx_amp dict from alpha_context_memory.get_amplification()
+    # PAPER_SPEED: alpha boost is embedded inside EcologyDecision
+    _amp = ctx_amp or (
+        {
+            "boost_mult":   getattr(ps_ec_dec, "context_boost_mult", None),
+            "context_type": getattr(ps_ec_dec, "context_type", None),
+            "reason":       "embedded_in_ecology_decision",
+        }
+        if ps_ec_dec is not None else None
+    )
+    if _amp is not None:
+        try:
+            snap["alpha_context"] = {
+                "boost_mult":   _amp.get("boost_mult"),
+                "context_type": _amp.get("context_type"),
+                "boost_reason": _amp.get("reason"),
+                "n_trades":     _amp.get("n_trades"),
+                "avg_pnl":      _amp.get("avg_pnl"),
+            }
+        except Exception:
+            pass
+
+    return snap
 
 
 def _estimate_atr_pct(closes: list[float]) -> float:
@@ -339,6 +438,10 @@ async def on_tick(tick: Tick):
                 "PAPER_SPEED" if last_trade.strategy_id.endswith("_PAPER_SPEED")
                 else "PRIMARY_STRATEGY"
             )
+            # FTD-DECISION-SNAP: attach open-time causal snapshot before DataLake persist
+            _snap = _pending_decision_snapshots.pop(sym, None)
+            if _snap is not None:
+                last_trade.decision_snapshot = _snap
             data_lake.save_trade(asdict(last_trade))
             # MASTER-001: update signal filter loss/win tracker
             if last_trade.net_pnl >= 0:
@@ -1346,6 +1449,10 @@ async def on_tick(tick: Tick):
                     "reason": _rl_reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                _supp_log.record(
+                    gate="RL_GATE", symbol=sym, strategy=sig.strategy_id,
+                    regime=regime.value, utc_hour=_utc_hr_ec, reason=_rl_reason,
+                )
                 trade_flow_monitor.record_skip(sym, _rl_reason)
                 # FTD-054-PHOENIX: RL TOXIC hard-block must be bypassed in paper/learning
                 # mode. After 21 trades at WR=9.5%, Q=-0.3163 crossed the EV floor (-0.3)
@@ -1385,6 +1492,10 @@ async def on_tick(tick: Tick):
                     "reason": _lean.reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                _supp_log.record(
+                    gate="LEAN_GATE", symbol=sym, strategy=sig.strategy_id,
+                    regime=regime.value, utc_hour=_utc_hr_ec, reason=_lean.reason,
+                )
                 trade_flow_monitor.record_skip(sym, _lean.reason)
                 return
 
@@ -1683,6 +1794,10 @@ async def on_tick(tick: Tick):
                     "reason": _dd_result.reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                _supp_log.record(
+                    gate="DRAWDOWN_CONTROLLER", symbol=sym, strategy=sig.strategy_id,
+                    regime=regime.value, utc_hour=_utc_hr_ec, reason=_dd_result.reason,
+                )
                 trade_flow_monitor.record_skip(sym, _dd_result.reason)
                 return
 
@@ -1697,6 +1812,10 @@ async def on_tick(tick: Tick):
                     "reason": _alloc.reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                _supp_log.record(
+                    gate="CAPITAL_ALLOCATOR", symbol=sym, strategy=sig.strategy_id,
+                    regime=regime.value, utc_hour=_utc_hr_ec, reason=_alloc.reason,
+                )
                 trade_flow_monitor.record_skip(sym, _alloc.reason)
                 return
             # ── Phase 6: Capital Recovery Engine — smooth size restoration ──
@@ -1897,6 +2016,14 @@ async def on_tick(tick: Tick):
                     regime=regime.value,
                 )
                 if submitted:
+                    # FTD-DECISION-SNAP: preserve causal ontology state at approval time
+                    _pending_decision_snapshots[sym] = _capture_decision_snapshot(
+                        sym=sym, strategy_id=sig.strategy_id, strategy_type=strategy_type,
+                        regime=regime.value, utc_hour=_utc_hr_ec,
+                        rl_ok=_rl_ok, rl_reason=_rl_reason,
+                        ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
+                        ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
+                    )
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
@@ -1931,6 +2058,14 @@ async def on_tick(tick: Tick):
                     regime=regime.value,
                 )
                 if risk_ctrl.open_position(pos, order_type="MARKET"):
+                    # FTD-DECISION-SNAP: preserve causal ontology state at approval time
+                    _pending_decision_snapshots[sym] = _capture_decision_snapshot(
+                        sym=sym, strategy_id=sig.strategy_id, strategy_type=strategy_type,
+                        regime=regime.value, utc_hour=_utc_hr_ec,
+                        rl_ok=_rl_ok, rl_reason=_rl_reason,
+                        ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
+                        ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
+                    )
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
