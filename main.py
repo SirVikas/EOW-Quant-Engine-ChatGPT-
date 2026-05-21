@@ -442,6 +442,22 @@ async def on_tick(tick: Tick):
             _snap = _pending_decision_snapshots.pop(sym, None)
             if _snap is not None:
                 last_trade.decision_snapshot = _snap
+            # FTD-SESSION-FORENSICS: assign origin + close session attribution
+            _close_utc_h = __import__("datetime").datetime.utcnow().hour
+            _close_sess  = _get_session_label(_close_utc_h)
+            _origin_sess = (_snap.get("session_label", "UNKNOWN")
+                            if _snap is not None else "UNKNOWN")
+            _origin_utc_h = (_snap.get("utc_hour", -1)
+                             if _snap is not None else -1)
+            _crossed = (_origin_sess != "UNKNOWN") and (_origin_sess != _close_sess)
+            last_trade.origin_session           = _origin_sess
+            last_trade.close_session            = _close_sess
+            last_trade.origin_utc_hour          = _origin_utc_h
+            last_trade.close_utc_hour           = _close_utc_h
+            last_trade.crossed_session_boundary = _crossed
+            last_trade.boundary_transition      = (
+                f"{_origin_sess}→{_close_sess}" if _crossed else ""
+            )
             data_lake.save_trade(asdict(last_trade))
             # MASTER-001: update signal filter loss/win tracker
             if last_trade.net_pnl >= 0:
@@ -8259,6 +8275,128 @@ async def lio_rl():
     }
 
 
+@app.get("/api/learning-intelligence/session-attribution")
+async def lio_session_attribution():
+    """
+    LIO — Session-attribution forensics.
+
+    Diagnostic overlay: exposes origin-session vs close-session win-rates,
+    cross-boundary trade distribution, hold-duration asymmetry, and the
+    boundary transition matrix.
+
+    NON-GOVERNING: these metrics are observability-only.  They do not affect
+    RL learning, ecology gates, or any execution decision.
+    """
+    import time as _t
+    from collections import defaultdict
+
+    raw_trades = data_lake.get_trades(limit=5000)
+
+    # ── Accumulators ────────────────────────────────────────────────────────
+    origin_wins:  dict[str, int] = defaultdict(int)
+    origin_loss:  dict[str, int] = defaultdict(int)
+    close_wins:   dict[str, int] = defaultdict(int)
+    close_loss:   dict[str, int] = defaultdict(int)
+    transition_counts: dict[str, int] = defaultdict(int)
+
+    total = len(raw_trades)
+    cross_total = cross_wins = cross_loss = 0
+    hold_ms_by_origin:  dict[str, list] = defaultdict(list)
+    hold_ms_by_close:   dict[str, list] = defaultdict(list)
+    hold_ms_winners:    list = []
+    hold_ms_losers:     list = []
+    hold_ms_cross:      list = []
+
+    for tr in raw_trades:
+        origin = tr.get("origin_session", "UNKNOWN")
+        close  = tr.get("close_session",  "UNKNOWN")
+        pnl    = tr.get("net_pnl", 0.0)
+        won    = pnl >= 0
+        hold   = max(0, tr.get("exit_ts", 0) - tr.get("entry_ts", 0))  # ms
+        crossed = tr.get("crossed_session_boundary", False)
+
+        if origin != "UNKNOWN":
+            (origin_wins if won else origin_loss)[origin] += 1
+            hold_ms_by_origin[origin].append(hold)
+        if close != "UNKNOWN":
+            (close_wins if won else close_loss)[close] += 1
+            hold_ms_by_close[close].append(hold)
+        if won:
+            hold_ms_winners.append(hold)
+        else:
+            hold_ms_losers.append(hold)
+        if crossed:
+            cross_total += 1
+            transition = tr.get("boundary_transition", f"{origin}→{close}")
+            transition_counts[transition] += 1
+            if won:
+                cross_wins += 1
+            else:
+                cross_loss += 1
+            hold_ms_cross.append(hold)
+
+    def _wr(wins, loss):
+        n = wins + loss
+        return round(wins / n * 100, 1) if n else None
+
+    def _avg_ms(lst):
+        return round(sum(lst) / len(lst) / 1000, 1) if lst else None  # → seconds
+
+    all_sessions = set(origin_wins) | set(origin_loss) | set(close_wins) | set(close_loss)
+    origin_wr = {
+        s: {
+            "wins":   origin_wins[s],
+            "losses": origin_loss[s],
+            "win_rate_pct": _wr(origin_wins[s], origin_loss[s]),
+            "avg_hold_sec": _avg_ms(hold_ms_by_origin.get(s, [])),
+        }
+        for s in sorted(all_sessions)
+        if origin_wins[s] + origin_loss[s] > 0
+    }
+    close_wr = {
+        s: {
+            "wins":   close_wins[s],
+            "losses": close_loss[s],
+            "win_rate_pct": _wr(close_wins[s], close_loss[s]),
+            "avg_hold_sec": _avg_ms(hold_ms_by_close.get(s, [])),
+        }
+        for s in sorted(all_sessions)
+        if close_wins[s] + close_loss[s] > 0
+    }
+    total_with_origin = sum(origin_wins.values()) + sum(origin_loss.values())
+
+    return {
+        "scope_note": (
+            "Forensic overlay only.  These metrics expose temporal attribution "
+            "structure and do not govern any RL, ecology, or execution decisions."
+        ),
+        "total_trades_analysed": total,
+        "trades_with_origin_attribution": total_with_origin,
+        "origin_session_win_rates": origin_wr,
+        "close_session_win_rates": close_wr,
+        "cross_boundary": {
+            "total":              cross_total,
+            "winner_cross_count": cross_wins,
+            "loser_cross_count":  cross_loss,
+            "winner_cross_pct":   round(cross_wins / len(hold_ms_winners) * 100, 1) if hold_ms_winners else None,
+            "loser_cross_pct":    round(cross_loss / len(hold_ms_losers) * 100, 1) if hold_ms_losers else None,
+            "avg_hold_sec":       _avg_ms(hold_ms_cross),
+        },
+        "boundary_transition_matrix": dict(
+            sorted(transition_counts.items(), key=lambda x: -x[1])
+        ),
+        "hold_duration": {
+            "avg_winner_hold_sec": _avg_ms(hold_ms_winners),
+            "avg_loser_hold_sec":  _avg_ms(hold_ms_losers),
+            "hold_asymmetry_note": (
+                "If loser hold > winner hold, delayed-loss sessions may absorb "
+                "losses from earlier-session entries (origin-receiver distortion)."
+            ),
+        },
+        "ts": int(_t.time() * 1000),
+    }
+
+
 @app.get("/api/learning-intelligence/topology")
 async def lio_topology():
     """LIO — Learning topology map: profitable/toxic/neutral/unexplored zones."""
@@ -8509,7 +8647,7 @@ async def lio_report_bundle():
     import asyncio, time as _t
     (
         _summary, _patterns, _neg_mem, _ecology,
-        _rl, _topology, _cognition, _sov, _alpha,
+        _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8520,6 +8658,7 @@ async def lio_report_bundle():
         lio_cognition(),
         lio_sovereign_readiness(),
         lio_alpha_discovery(),
+        lio_session_attribution(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -8541,8 +8680,9 @@ async def lio_report_bundle():
         "rl":                _rl,
         "topology":          _topology,
         "cognition":         _cognition,
-        "sovereign_readiness": _sov,
-        "alpha_discovery":   _alpha,
+        "sovereign_readiness":    _sov,
+        "alpha_discovery":        _alpha,
+        "session_attribution":    _sess_attr,
     }
 
 
