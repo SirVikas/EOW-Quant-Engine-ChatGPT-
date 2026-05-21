@@ -334,6 +334,11 @@ async def on_tick(tick: Tick):
         _thought(f"Position closed [{action}] {sym} @ {price}", "TRADE")
         if pnl_calc.trades:
             last_trade = pnl_calc.trades[-1]
+            # FTD-PATH-ATTR: tag origin pipeline before persisting to DataLake
+            last_trade.origin_pipeline = (
+                "PAPER_SPEED" if last_trade.strategy_id.endswith("_PAPER_SPEED")
+                else "PRIMARY_STRATEGY"
+            )
             data_lake.save_trade(asdict(last_trade))
             # MASTER-001: update signal filter loss/win tracker
             if last_trade.net_pnl >= 0:
@@ -7796,6 +7801,40 @@ async def download_report_bundle():
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
 # ── FTD-LIO: Learning Intelligence Observatory API ─────────────────────────
 
+def _build_rl_pipeline_mix(engine) -> dict:
+    """
+    Inspect rl_engine context keys to derive a pipeline attribution breakdown.
+    Context keys have the form REGIME|SESSION|STRATEGY.  Strategies ending with
+    _PAPER_SPEED originated from the ecology-gated pipeline; all others are
+    PRIMARY_STRATEGY (ecology-bypassed).  This is observability-only — no
+    execution state is mutated.
+    """
+    contexts = getattr(engine, "_contexts", {})
+    paper_speed, primary, unknown = [], [], []
+    for ctx_key in contexts:
+        parts = ctx_key.split("|")
+        strategy = parts[2] if len(parts) == 3 else ""
+        if strategy.endswith("_PAPER_SPEED"):
+            paper_speed.append(ctx_key)
+        elif strategy:
+            primary.append(ctx_key)
+        else:
+            unknown.append(ctx_key)
+    total = len(contexts)
+    return {
+        "total_rl_contexts": total,
+        "paper_speed_contexts": len(paper_speed),
+        "primary_strategy_contexts": len(primary),
+        "unknown_contexts": len(unknown),
+        "paper_speed_pct": round(len(paper_speed) / total * 100, 1) if total else 0.0,
+        "primary_strategy_pct": round(len(primary) / total * 100, 1) if total else 0.0,
+        "note": (
+            "RL Q-table is shared across both pipelines. paper_speed_contexts "
+            "originated via ecology gate; primary_strategy_contexts bypassed ecology."
+        ),
+    }
+
+
 @app.get("/api/learning-intelligence/summary")
 async def lio_summary():
     """LIO — Learning heartbeat: state, record counts, activity metrics."""
@@ -8007,6 +8046,11 @@ async def lio_ecology():
         "rsi_blocked":       snap.get("rsi_blocked", 0),
         "context_blocked":   snap.get("context_blocked", 0),
         "recovery_trades":   snap.get("recovery_trades", 0),
+        "scope_note":        (
+            "Ecology metrics (survival_rate, RSI gates, context blocks) apply "
+            "exclusively to PAPER_SPEED signals. PRIMARY_STRATEGY signals bypass "
+            "ecology evaluation entirely and are not represented in these counts."
+        ),
         "ts": int(_t.time() * 1000),
     }
 
@@ -8075,6 +8119,7 @@ async def lio_rl():
         "session_authority":  __import__(
             "core.time.session_definitions", fromlist=["get_session_integrity_block"]
         ).get_session_integrity_block(),
+        "pipeline_mix":       _build_rl_pipeline_mix(rl_engine),
         "ts": int(_t.time() * 1000),
     }
 

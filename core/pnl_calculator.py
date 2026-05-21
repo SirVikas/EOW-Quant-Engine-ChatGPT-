@@ -46,6 +46,9 @@ class TradeRecord:
     net_pnl_pct:    float = 0.0
     r_multiple:     float = 0.0   # net_pnl / initial_risk
 
+    # FTD-PATH-ATTR: which execution pipeline originated this trade
+    origin_pipeline: str = "UNKNOWN"  # "PAPER_SPEED" | "PRIMARY_STRATEGY" | "UNKNOWN"
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 
