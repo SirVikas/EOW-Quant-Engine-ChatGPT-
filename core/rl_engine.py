@@ -242,6 +242,17 @@ def _bootstrap_q(table: Dict[str, "ContextState"], new_key: str) -> float:
 TOXIC_Q_THRESH    = -0.30   # Q below this → candidate for toxic flag
 TOXIC_MIN_VISITS  = 8       # minimum trades before toxic classification
 
+# ── Minimum Exploration Floor ─────────────────────────────────────────────────
+# Tags immature contexts in the mildly-negative Q zone before the UCB gate so
+# they are counted separately for observability.  UCB1's bonus is always positive,
+# meaning mildly-negative contexts pass Rule 3 anyway — Rule 4 just gives them
+# a distinct diagnostic label and counter.  Fires BEFORE Rule 3 (between Rules 2
+# and 3).  Set EXPLORE_FLOOR_ENABLED=False to revert instantly to pure UCB1.
+
+EXPLORE_FLOOR_ENABLED    = True    # master switch — flip to disable with zero code change
+EXPLORE_FLOOR_MAX_VISITS = 20      # only contexts still in fast/accel learning tier
+EXPLORE_FLOOR_Q_THRESH   = -0.15   # mildly-negative zone lower bound: (Q_THRESH, 0)
+
 
 # ── Context key ───────────────────────────────────────────────────────────────
 # make_context is imported from core.time.session_definitions — the single
@@ -317,6 +328,7 @@ class RLContextualBandit:
         self._floor_lowers:   int   = 0   # times score floor lowered
         self._floor_raises:   int   = 0   # times score floor raised
         self._toxic_blocks:   int   = 0   # trades blocked via toxic flag
+        self._floor_explores: int   = 0   # Rule 4 floor-explore grants (FTD-EXPLORE-FLOOR)
         self._init_ts:        float = time.time()
         # Active save path — bound by load_state() when a custom path is given,
         # defaults to the global constant so all auto-saves are consistent.
@@ -418,7 +430,11 @@ class RLContextualBandit:
         Rules:
           1. Under-explored contexts always pass (guaranteed exploration).
           2. Toxic contexts (deep negative Q, well-visited) are blocked.
-          3. UCB score > floor → TRADE. UCB includes regime-aware coefficient.
+          3. Minimum exploration floor (FTD-EXPLORE-FLOOR): immature contexts
+             (n < EXPLORE_FLOOR_MAX_VISITS) with mildly-negative Q in the zone
+             (EXPLORE_FLOOR_Q_THRESH, 0) are tagged RL_FLOOR_EXPLORE before UCB
+             evaluation.  Diagnostics-first; disable via EXPLORE_FLOOR_ENABLED.
+          4. UCB score > floor → TRADE. UCB includes regime-aware coefficient.
         """
         ctx_key  = make_context(regime, utc_hour, strategy)
         state    = self._get_or_create(ctx_key)
@@ -438,6 +454,24 @@ class RLContextualBandit:
             return False, (
                 f"RL_TOXIC(q={state.q_value:+.3f} "
                 f"wr={state.win_rate:.0%} n={state.n_visits})"
+            )
+
+        # Rule 4: minimum exploration floor — fires BEFORE UCB evaluation.
+        # UCB1's bonus is always positive, so mildly-negative contexts pass Rule 3
+        # anyway.  Rule 4 intercepts them first to give a distinct diagnostic label
+        # (RL_FLOOR_EXPLORE) and a separate counter, making learning-starvation risk
+        # visible without changing gating behaviour.
+        # Mildly-negative zone: EXPLORE_FLOOR_Q_THRESH < q < 0  (i.e. (-0.15, 0)).
+        # Hard-disabled by setting EXPLORE_FLOOR_ENABLED=False.
+        if (EXPLORE_FLOOR_ENABLED
+                and state.n_visits < EXPLORE_FLOOR_MAX_VISITS
+                and EXPLORE_FLOOR_Q_THRESH < state.q_value < 0):
+            self._total_allowed  += 1
+            self._floor_explores += 1
+            self._explore_trades += 1
+            return True, (
+                f"RL_FLOOR_EXPLORE(q={state.q_value:+.3f} "
+                f"n={state.n_visits}<{EXPLORE_FLOOR_MAX_VISITS})"
             )
 
         # Rule 3: regime-aware UCB gate
@@ -730,10 +764,16 @@ class RLContextualBandit:
                 "profitable_pct": round(profitable_ratio * 100, 1),
             },
             "learning_dynamics": {
-                "avg_q":         round(avg_q, 4),
-                "avg_q_velocity": round(avg_vel, 4),
-                "explore_ratio": round(explore_ratio, 3),
-                "toxic_count":   len(self._toxic_contexts),
+                "avg_q":              round(avg_q, 4),
+                "avg_q_velocity":     round(avg_vel, 4),
+                "explore_ratio":      round(explore_ratio, 3),
+                "floor_explore_pct":  round(self._floor_explores / max(explored, 1) * 100, 1),
+                "toxic_count":        len(self._toxic_contexts),
+                "explore_floor_cfg":  {
+                    "enabled":    EXPLORE_FLOOR_ENABLED,
+                    "max_visits": EXPLORE_FLOOR_MAX_VISITS,
+                    "q_thresh":   EXPLORE_FLOOR_Q_THRESH,
+                },
             },
             "session_intelligence": session_intel,
             "counters": {
@@ -741,6 +781,9 @@ class RLContextualBandit:
                 "total_updates":  self._total_updates,
                 "total_allowed":  self._total_allowed,
                 "total_blocked":  self._total_blocked,
+                "explore_trades": self._explore_trades,
+                "exploit_trades": self._exploit_trades,
+                "floor_explores": self._floor_explores,
                 "toxic_blocks":   self._toxic_blocks,
                 "boost_fires":    self._boost_fires,
                 "floor_lowers":   self._floor_lowers,
