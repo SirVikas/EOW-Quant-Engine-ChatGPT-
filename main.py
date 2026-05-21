@@ -2247,6 +2247,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         "| telemetry=LIVE | refresh=3s | mode=READ_ONLY_OBSERVATIONAL"
     )
 
+    # ── Session Router boot confirmation — prevents silent assumption drift ────
+    from core.time.session_definitions import SESSION_BUCKETS_UTC, SESSION_DISPLAY
+    _sess_log = " | ".join(
+        f"{name} {SESSION_BUCKETS_UTC[name][0]:02d}:00–{SESSION_BUCKETS_UTC[name][1] - 1:02d}:59 UTC"
+        for name in SESSION_BUCKETS_UTC
+    )
+    _thought(f"🕐 [SESSION_ROUTER] Timezone Authority=UTC | {_sess_log}", "SYSTEM")
+    logger.info(f"[SESSION_ROUTER] Timezone=UTC | {_sess_log} | source=datetime.utcnow().hour")
+
     # ── Pre-seed genome candle store after bootstrap completes ────────────────
     async def _seed_genome_from_bootstrap():
         """Wait for mdp bootstrap to complete, then inject candles into genome."""
@@ -8063,6 +8072,9 @@ async def lio_rl():
         "session_intelligence": t.get("session_intelligence", {}),
         "counters":           counters,
         "profitable_pct":     profitable_pct,
+        "session_authority":  __import__(
+            "core.time.session_definitions", fromlist=["get_session_integrity_block"]
+        ).get_session_integrity_block(),
         "ts": int(_t.time() * 1000),
     }
 
@@ -8329,6 +8341,9 @@ async def lio_report_bundle():
         lio_sovereign_readiness(),
         lio_alpha_discovery(),
     )
+    _sess_auth = __import__(
+        "core.time.session_definitions", fromlist=["get_session_integrity_block"]
+    ).get_session_integrity_block()
     return {
         "metadata": {
             "report_type":    "LIO_FULL_SNAPSHOT",
@@ -8337,6 +8352,7 @@ async def lio_report_bundle():
             "generated_at_iso": __import__("datetime").datetime.utcnow().strftime(
                 "%Y-%m-%d %H:%M:%S UTC"
             ),
+            "session_authority": _sess_auth,
         },
         "summary":           _summary,
         "patterns":          _patterns,
