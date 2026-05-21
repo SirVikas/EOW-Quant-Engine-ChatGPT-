@@ -53,6 +53,8 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from loguru import logger
 
+from core.time.session_definitions import SESSION_BUCKETS_UTC, make_context  # canonical session authority
+
 
 # Default path for cross-session Q-table persistence
 _QTABLE_STATE_PATH = pathlib.Path("data/rl_qtable_state.json")
@@ -242,23 +244,8 @@ TOXIC_MIN_VISITS  = 8       # minimum trades before toxic classification
 
 
 # ── Context key ───────────────────────────────────────────────────────────────
-
-def make_context(regime: str, utc_hour: int, strategy: str) -> str:
-    """
-    Create a hashable context key from the three dimensions.
-
-    hour_bucket groups hours into coarse trading sessions:
-      ASIA   0-5,  LONDON  6-12,  NY  13-18,  LATE  19-23
-    """
-    if utc_hour < 6:
-        bucket = "ASIA"
-    elif utc_hour < 13:
-        bucket = "LONDON"
-    elif utc_hour < 19:
-        bucket = "NY"
-    else:
-        bucket = "LATE"
-    return f"{regime}|{bucket}|{strategy}"
+# make_context is imported from core.time.session_definitions — the single
+# canonical authority for all session bucket boundaries.  Do not redefine it here.
 
 
 # ── Context state ─────────────────────────────────────────────────────────────
