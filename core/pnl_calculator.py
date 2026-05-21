@@ -49,6 +49,9 @@ class TradeRecord:
     # FTD-PATH-ATTR: which execution pipeline originated this trade
     origin_pipeline: str = "UNKNOWN"  # "PAPER_SPEED" | "PRIMARY_STRATEGY" | "UNKNOWN"
 
+    # FTD-DECISION-SNAP: causal evidence snapshot captured at execution approval time
+    decision_snapshot: Optional[dict] = None
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 
