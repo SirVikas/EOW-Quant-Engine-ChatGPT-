@@ -52,6 +52,14 @@ class TradeRecord:
     # FTD-DECISION-SNAP: causal evidence snapshot captured at execution approval time
     decision_snapshot: Optional[dict] = None
 
+    # FTD-SESSION-FORENSICS: temporal attribution — where the trade began vs where it ended
+    origin_session:           str  = "UNKNOWN"  # session label at trade OPEN (UTC)
+    close_session:            str  = "UNKNOWN"  # session label at trade CLOSE (UTC)
+    crossed_session_boundary: bool = False       # origin_session != close_session
+    origin_utc_hour:          int  = -1          # UTC hour integer at trade open
+    close_utc_hour:           int  = -1          # UTC hour integer at trade close
+    boundary_transition:      str  = ""          # "ASIA→LONDON" or "" if no crossing
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 
