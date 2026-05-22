@@ -8854,6 +8854,101 @@ async def lio_exploration_diagnostics():
     }
 
 
+@app.get("/api/learning-intelligence/memory-pressure-dynamics")
+async def lio_memory_pressure_dynamics():
+    """
+    LIO — Memory Pressure & Ontology Drift Dynamics.
+
+    FTD-ONTOLOGY-DRIFT: Non-governing research instrumentation.
+    Measures how PHOENIX's five memory subsystems (RL Q-memory, PatternEngine
+    WR-memory, NegativeMemory rollback-memory, Ecology WR-memory,
+    AlphaContextMemory amplification-memory) agree or diverge in their belief
+    about what works. Produces pairwise drift scores, plasticity/fossilization
+    diagnostics, and a 6-category cognitive state classification.
+
+    Key namespace note: RL context keys (regime|hour|strategy) differ from
+    NegMem PatternKeys (regime|volatility|instrument|parameter|direction).
+    Direct key-level comparison is not possible — drift is measured at the
+    aggregate level. Research only — no execution authority.
+    """
+    from core.memory_pressure_analytics import compute_memory_pressure_dynamics as _cmpd
+    from collections import defaultdict as _dd
+
+    # ── RL state ─────────────────────────────────────────────────────────────
+    _rl_summ = rl_engine.summary()
+    _rl_evo  = rl_engine.get_evolution_state()
+    _rl_ld   = _rl_evo.get("learning_dynamics", {})
+
+    try:
+        _q_values     = [s.q_value    for s in rl_engine._table.values() if s.n_visits > 0]
+        _q_velocities = [s.q_velocity for s in rl_engine._table.values() if s.n_visits > 0]
+        _regime_q: dict = _dd(list)
+        for _k, _s in rl_engine._table.items():
+            if _s.n_visits > 0:
+                _regime_q[_k.split("|")[0]].append(_s.q_value)
+        _regime_avg_q = {r: round(sum(qs) / len(qs), 4) for r, qs in _regime_q.items() if qs}
+    except Exception:
+        _q_values = []; _q_velocities = []; _regime_avg_q = {}
+
+    # ── NegMem state ──────────────────────────────────────────────────────────
+    try:
+        from core.learning_memory import learning_memory_orchestrator as _lmo_mod
+        _lmo       = _lmo_mod.learning_memory_orchestrator
+        _nm_count  = _lmo._neg_memory.count()
+        _nm_entries = _lmo._neg_memory.to_list()
+    except Exception:
+        _nm_count   = {"permanent": 0, "temporary": 0, "total": 0}
+        _nm_entries = []
+
+    # ── Pattern state ─────────────────────────────────────────────────────────
+    try:
+        _all_pats   = _lmo._engine.all_patterns()
+        _formed     = _lmo._engine.formed_patterns()
+        _pat_state  = {
+            "total_patterns":       len(_all_pats),
+            "formed_patterns":      len(_formed),
+            "formed_pattern_dicts": [p.to_dict() for p in _formed],
+        }
+    except Exception:
+        _pat_state = {"total_patterns": 0, "formed_patterns": 0, "formed_pattern_dicts": []}
+
+    # ── Ecology state ─────────────────────────────────────────────────────────
+    try:
+        _eco_state = {"regimes": learning_engine.summary().get("regimes", {})}
+    except Exception:
+        _eco_state = {"regimes": {}}
+
+    # ── AlphaContext state ────────────────────────────────────────────────────
+    try:
+        _ac_telem  = alpha_context_memory.get_telemetry()
+        _ac_state  = {
+            "profitable_count": _ac_telem.get("profitable_count", 0),
+            "toxic_count":      _ac_telem.get("toxic_count", 0),
+            "total_contexts":   _ac_telem.get("total_contexts", 0),
+        }
+    except Exception:
+        _ac_state = {"profitable_count": 0, "toxic_count": 0, "total_contexts": 0}
+
+    _state = {
+        "rl": {
+            "profitable_pct":  _rl_summ.get("profitable_pct", 0.0),
+            "total_contexts":  _rl_summ.get("total_contexts", 0),
+            "q_values":        _q_values,
+            "q_velocities":    _q_velocities,
+            "toxic_count":     _rl_ld.get("toxic_count", 0),
+            "explore_ratio":   _rl_ld.get("explore_ratio", 0.0),
+            "evolution_score": _rl_evo.get("intelligence_score", 0),
+            "regime_avg_q":    _regime_avg_q,
+        },
+        "negmem":        {"count": _nm_count,  "entries": _nm_entries},
+        "patterns":      _pat_state,
+        "ecology":       _eco_state,
+        "alpha_context": _ac_state,
+    }
+
+    return _cmpd(_state)
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -8862,6 +8957,7 @@ async def lio_report_bundle():
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
+        _mem_pressure,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8878,6 +8974,7 @@ async def lio_report_bundle():
         lio_economic_ground_truth(),
         lio_timeframe_survivability(),
         lio_regime_survivability_cartography(),
+        lio_memory_pressure_dynamics(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -8907,6 +9004,7 @@ async def lio_report_bundle():
         "economic_ground_truth":               _eco_truth,
         "timeframe_survivability":             _tf_surviv,
         "regime_survivability_cartography":    _regime_carto,
+        "memory_pressure_dynamics":            _mem_pressure,
     }
 
 
