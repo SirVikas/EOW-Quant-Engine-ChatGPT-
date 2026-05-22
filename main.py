@@ -8641,13 +8641,68 @@ async def lio_alpha_discovery():
     }
 
 
+@app.get("/api/learning-intelligence/exploration-diagnostics")
+async def lio_exploration_diagnostics():
+    """
+    LIO — Exploration persistence and NegativeMemory sensitivity forensics.
+
+    FTD-EXPLORE-OBSERVABILITY: Non-governing read-only overlay.
+    Provides:
+      • Lifetime exploration event counts (survives restarts via JSONL)
+      • Since-restart exploration counts (in-memory counters)
+      • Session / pipeline / context breakdown of floor-explore events
+      • NegativeMemory sensitivity diagnostics and ontology conflict classification
+    """
+    import datetime as _dt
+    from core.persistence.exploration_log import exploration_event_log as _exp_log
+
+    # Lifetime exploration summary (from persistent JSONL — survives restarts)
+    _exp_summary = _exp_log.summary()
+
+    # Since-restart counters (in-memory — reset on restart)
+    _rl_state   = rl_engine.get_evolution_state()
+    _counters   = _rl_state.get("counters", {})
+    _restart_ts  = _boot_ts if _boot_ts > 0 else None
+    _restart_iso = (
+        _dt.datetime.utcfromtimestamp(_restart_ts).strftime("%Y-%m-%d %H:%M:%S UTC")
+        if _restart_ts else None
+    )
+
+    # NegativeMemory forensics (ontology conflict classification)
+    try:
+        from core.learning_memory import learning_memory_orchestrator as _lmo
+        _negmem_forensics = _lmo.negmem_forensics()
+    except Exception as _exc:
+        _negmem_forensics = {"error": str(_exc), "scope_note": "forensics unavailable"}
+
+    return {
+        "scope_note": (
+            "FTD-EXPLORE-OBSERVABILITY: Non-governing forensic overlay. "
+            "Read-only. No execution authority."
+        ),
+        "exploration_persistence": {
+            "lifetime": _exp_summary,
+            "since_restart": {
+                "restart_utc_ts":  int(_restart_ts) if _restart_ts else None,
+                "restart_iso":     _restart_iso,
+                "explore_trades":  _counters.get("explore_trades", 0),
+                "exploit_trades":  _counters.get("exploit_trades", 0),
+                "floor_explores":  _counters.get("floor_explores", 0),
+                "explore_ratio":   _rl_state.get("learning_dynamics", {}).get("explore_ratio", 0.0),
+                "floor_explore_pct": _rl_state.get("learning_dynamics", {}).get("floor_explore_pct", 0.0),
+            },
+        },
+        "negmem_forensics": _negmem_forensics,
+    }
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all 9 sections in one atomic call for report download."""
     import asyncio, time as _t
     (
         _summary, _patterns, _neg_mem, _ecology,
-        _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
+        _rl, _topology, _cognition, _sov, _alpha, _sess_attr, _exp_diag,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8659,6 +8714,7 @@ async def lio_report_bundle():
         lio_sovereign_readiness(),
         lio_alpha_discovery(),
         lio_session_attribution(),
+        lio_exploration_diagnostics(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -8673,16 +8729,17 @@ async def lio_report_bundle():
             ),
             "session_authority": _sess_auth,
         },
-        "summary":           _summary,
-        "patterns":          _patterns,
-        "negative_memory":   _neg_mem,
-        "ecology":           _ecology,
-        "rl":                _rl,
-        "topology":          _topology,
-        "cognition":         _cognition,
+        "summary":                _summary,
+        "patterns":               _patterns,
+        "negative_memory":        _neg_mem,
+        "ecology":                _ecology,
+        "rl":                     _rl,
+        "topology":               _topology,
+        "cognition":              _cognition,
         "sovereign_readiness":    _sov,
         "alpha_discovery":        _alpha,
         "session_attribution":    _sess_attr,
+        "exploration_diagnostics": _exp_diag,
     }
 
 
