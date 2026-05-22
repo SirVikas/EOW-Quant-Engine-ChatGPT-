@@ -111,6 +111,7 @@ from core.infra_health_manager import InfraHealthManager
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from core.persistence.suppression_log import SuppressionEventLog  # FTD-DECISION-SNAP
+from core.exploration_economics import build_exploration_origin as _build_eo  # FTD-EXPLORE-ATTR
 from core.time.session_definitions import get_session_label as _get_session_label  # FTD-DECISION-SNAP
 from utils.report_generator import build_report_archive
 from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
@@ -282,6 +283,10 @@ _last_skip: dict = {}
 # FTD-DECISION-SNAP: bridge open-time snapshot to close-time persistence
 # Keyed by symbol; written at execution approval, consumed at DataLake persist.
 _pending_decision_snapshots: dict[str, dict] = {}
+
+# FTD-EXPLORE-ATTR: bridge RL exploration provenance to close-time TradeRecord persistence
+# Keyed by symbol; written at execution approval, consumed at DataLake persist.
+_pending_exploration_origins: dict[str, dict] = {}
 
 # FTD-DECISION-SNAP: append-only suppression event log
 _supp_log = SuppressionEventLog()
@@ -458,6 +463,10 @@ async def on_tick(tick: Tick):
             last_trade.boundary_transition      = (
                 f"{_origin_sess}→{_close_sess}" if _crossed else ""
             )
+            # FTD-EXPLORE-ATTR: attach RL exploration provenance before DataLake persist
+            _eo = _pending_exploration_origins.pop(sym, None)
+            if _eo is not None:
+                last_trade.exploration_origin = _eo
             data_lake.save_trade(asdict(last_trade))
             # MASTER-001: update signal filter loss/win tracker
             if last_trade.net_pnl >= 0:
@@ -2040,6 +2049,8 @@ async def on_tick(tick: Tick):
                         ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
                         ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
                     )
+                    # FTD-EXPLORE-ATTR: persist RL exploration provenance at approval time
+                    _pending_exploration_origins[sym] = _build_eo(_rl_reason)
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
@@ -2082,6 +2093,8 @@ async def on_tick(tick: Tick):
                         ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
                         ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
                     )
+                    # FTD-EXPLORE-ATTR: persist RL exploration provenance at approval time
+                    _pending_exploration_origins[sym] = _build_eo(_rl_reason)
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
@@ -3608,6 +3621,7 @@ async def reset_session_state(_auth=Depends(require_roles("admin"))):
     _last_processed_candle_ts.clear()
     _last_symbol_eval_ms.clear()
     _is_exploration_trade.clear()
+    _pending_exploration_origins.clear()   # FTD-EXPLORE-ATTR: orphan cleanup
     _closed_trade_count[0] = 0
 
     msg = (
@@ -8641,6 +8655,40 @@ async def lio_alpha_discovery():
     }
 
 
+@app.get("/api/learning-intelligence/exploration-economic-attribution")
+async def lio_exploration_economic_attribution():
+    """
+    LIO — Exploration economic survivability diagnostics.
+
+    FTD-EXPLORE-ATTR: Non-governing read-only overlay.
+    Provides per-type WR, avg PnL, fee drag, Q-delta, profitability correlation,
+    session breakdown, NY-specific Rule4 diagnostics, survivability classification,
+    and longitudinal dynamics (rolling 10/25-trade windows).
+    """
+    from core.exploration_economics import compute_exploration_economics as _cee
+    from dataclasses import asdict
+
+    # Use in-memory current-session trades + any DataLake history
+    session_trades  = [asdict(t) for t in pnl_calc.trades]
+    historical      = data_lake.get_trades(limit=1000)
+
+    # Deduplicate: DataLake may already include current-session trades persisted at close.
+    # Prefer in-memory (richer, exploration_origin present) — deduplicate by trade_id.
+    seen: dict[str, dict] = {}
+    for t in session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            seen[tid] = t
+    for t in historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in seen:
+            seen[tid] = t
+
+    all_trades = sorted(seen.values(), key=lambda x: x.get("entry_ts", 0))
+    result = _cee(all_trades)
+    return result
+
+
 @app.get("/api/learning-intelligence/exploration-diagnostics")
 async def lio_exploration_diagnostics():
     """
@@ -8698,11 +8746,12 @@ async def lio_exploration_diagnostics():
 
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
-    """LIO — Full snapshot bundle: all 9 sections in one atomic call for report download."""
+    """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
     import asyncio, time as _t
     (
         _summary, _patterns, _neg_mem, _ecology,
-        _rl, _topology, _cognition, _sov, _alpha, _sess_attr, _exp_diag,
+        _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
+        _exp_diag, _exp_econ,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8715,6 +8764,7 @@ async def lio_report_bundle():
         lio_alpha_discovery(),
         lio_session_attribution(),
         lio_exploration_diagnostics(),
+        lio_exploration_economic_attribution(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -8729,17 +8779,18 @@ async def lio_report_bundle():
             ),
             "session_authority": _sess_auth,
         },
-        "summary":                _summary,
-        "patterns":               _patterns,
-        "negative_memory":        _neg_mem,
-        "ecology":                _ecology,
-        "rl":                     _rl,
-        "topology":               _topology,
-        "cognition":              _cognition,
-        "sovereign_readiness":    _sov,
-        "alpha_discovery":        _alpha,
-        "session_attribution":    _sess_attr,
-        "exploration_diagnostics": _exp_diag,
+        "summary":                         _summary,
+        "patterns":                        _patterns,
+        "negative_memory":                 _neg_mem,
+        "ecology":                         _ecology,
+        "rl":                              _rl,
+        "topology":                        _topology,
+        "cognition":                       _cognition,
+        "sovereign_readiness":             _sov,
+        "alpha_discovery":                 _alpha,
+        "session_attribution":             _sess_attr,
+        "exploration_diagnostics":         _exp_diag,
+        "exploration_economic_attribution": _exp_econ,
     }
 
 
