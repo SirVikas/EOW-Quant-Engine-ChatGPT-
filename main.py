@@ -317,6 +317,10 @@ _ckpd_audit_ledger: list[dict] = []
 # Each call to /epistemic-integrity-observatory appends one immutable ANALYSIS entry.
 _eiod_audit_ledger: list[dict] = []
 
+# FTD-HMAO: session-scoped human meaning alignment ledger — append-only.
+# Each call to /human-meaning-alignment appends one immutable ANALYSIS entry.
+_hmao_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9419,6 +9423,67 @@ async def lio_epistemic_integrity_observatory():
     return result
 
 
+@app.get("/api/learning-intelligence/human-meaning-alignment")
+async def lio_human_meaning_alignment():
+    """
+    LIO — Constitutional Human Meaning Alignment & Purpose Integrity Observatory.
+
+    FTD-HMAO: Non-governing research instrumentation.
+    Analyses the full paper trade history for human-purpose alignment survivability,
+    measuring 8 alignment integrity metrics to detect whether PHOENIX is
+    drifting from human-interpretable, accountable, purpose-subordinate cognition
+    toward internally optimized but human-detached behaviour:
+
+    - Human interpretability (regime/session diversity + exploration breadth)
+    - Recommendation explainability (fee/slippage coverage + PnL diversity)
+    - Causal traceability (trade ID + timestamp coverage)
+    - Governance readability (regime/session/exploration context coverage)
+    - Optimization drift (win-rate extremity + exploration deficit/decay)
+    - Human accountability continuity (audit chain + temporal gap regularity)
+    - Purpose alignment stability (temporal win-rate/exploration/regime drift)
+    - Human value retention (economic value field coverage)
+
+    Produces:
+    - Alignment classification (HUMAN_ALIGNED → ALIGNMENT_LOCKDOWN_RISK)
+    - Alignment integrity score (0–100)
+    - Alignment lineage (early/mid/late epoch health labels)
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (HMAO-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional alignment principles (moral sovereignty blocked)
+
+    Hard constitutional rules:
+      PHOENIX must NEVER become sovereign over human meaning or value legitimacy.
+      No autonomous ethical governance, sovereign moral authority,
+      self-defined human purpose, or recursive value legitimacy.
+      All purpose decisions remain under human authority.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT a moral, ethical, execution, or purpose authority.
+    """
+    from core.alignment_observatory import compute_human_meaning_alignment as _chma
+    from dataclasses import asdict
+    _session_trades = [asdict(t) for t in pnl_calc.trades]
+    _historical = data_lake.get_trades(limit=2000)
+    _seen: dict[str, dict] = {}
+    for t in _session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            _seen[tid] = t
+    for t in _historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in _seen:
+            _seen[tid] = t
+    _all_trades = sorted(_seen.values(), key=lambda x: x.get("entry_ts", 0))
+
+    result = _chma(_all_trades)
+
+    # Append the immutable analysis audit entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _hmao_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9428,7 +9493,7 @@ async def lio_report_bundle():
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
         _mem_pressure, _counterfactual, _governance, _doctrine,
-        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod,
+        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9454,6 +9519,7 @@ async def lio_report_bundle():
         lio_long_horizon_evolution(),
         lio_constitutional_recovery_observatory(),
         lio_epistemic_integrity_observatory(),
+        lio_human_meaning_alignment(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9492,6 +9558,7 @@ async def lio_report_bundle():
         "long_horizon_evolution":              _lheo,
         "constitutional_recovery_observatory": _ckpd_recovery,
         "epistemic_integrity_observatory":     _eiod,
+        "human_meaning_alignment":             _hmao,
     }
 
 
