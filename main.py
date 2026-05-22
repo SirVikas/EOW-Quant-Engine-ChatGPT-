@@ -309,6 +309,10 @@ _gmp_pilot_ledger: list[dict] = []
 # Each call to /long-horizon-evolution appends one immutable ANALYSIS entry.
 _lheo_audit_ledger: list[dict] = []
 
+# FTD-CKPD: session-scoped constitutional recovery ledger — append-only.
+# Each call to /constitutional-recovery-observatory appends one immutable ANALYSIS entry.
+_ckpd_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9289,6 +9293,67 @@ async def lio_long_horizon_evolution():
     return result
 
 
+@app.get("/api/learning-intelligence/constitutional-recovery-observatory")
+async def lio_constitutional_recovery_observatory():
+    """
+    LIO — Constitutional Knowledge Preservation & Catastrophic Recovery Doctrine.
+
+    FTD-CKPD: Non-governing research instrumentation.
+    Analyses the full paper trade history for reconstruction viability under
+    catastrophic disruption, measuring 7 recovery metrics plus a composite
+    constitutional continuity confidence metric:
+
+    - Archive integrity (economic record field coverage)
+    - Ledger continuity (temporal regularity of trade sequence)
+    - Reconstruction confidence (fee/slippage coverage for reality verification)
+    - Governance lineage completeness (regime/session/exploration metadata)
+    - Audit survivability (entry_ts/trade_id provenance coverage)
+    - Knowledge redundancy (regime/session/volume diversity)
+    - Constitutional continuity confidence (derived composite)
+
+    Produces:
+    - Recovery classification (CONSTITUTIONALLY_RECOVERABLE →
+      RECOVERY_LOCKDOWN_RECOMMENDED)
+    - Recovery survivability score (0–100)
+    - 3-scenario catastrophic disruption analysis (50% loss, 18-month gap,
+      metadata corruption)
+    - Recovery lineage (early/mid/late epoch summaries)
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (CKPD-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional recovery principles (autonomous recovery blocked)
+
+    Hard constitutional rules:
+      PHOENIX must NEVER become sovereign over its own existential continuity.
+      No autonomous self-recovery, recursive self-restoration, or sovereign
+      continuity authority. All recovery decisions remain at developer discretion.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT an execution, governance, or recovery authority.
+    """
+    from core.recovery_observatory import compute_constitutional_recovery as _ccr
+    from dataclasses import asdict
+    _session_trades = [asdict(t) for t in pnl_calc.trades]
+    _historical = data_lake.get_trades(limit=2000)
+    _seen: dict[str, dict] = {}
+    for t in _session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            _seen[tid] = t
+    for t in _historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in _seen:
+            _seen[tid] = t
+    _all_trades = sorted(_seen.values(), key=lambda x: x.get("entry_ts", 0))
+
+    result = _ccr(_all_trades)
+
+    # Append the immutable analysis audit entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _ckpd_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9298,7 +9363,7 @@ async def lio_report_bundle():
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
         _mem_pressure, _counterfactual, _governance, _doctrine,
-        _reality, _micro_pilot, _lheo,
+        _reality, _micro_pilot, _lheo, _ckpd_recovery,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9322,6 +9387,7 @@ async def lio_report_bundle():
         lio_reality_verification(),
         lio_guarded_micro_pilot(),
         lio_long_horizon_evolution(),
+        lio_constitutional_recovery_observatory(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9358,6 +9424,7 @@ async def lio_report_bundle():
         "reality_verification":                _reality,
         "guarded_micro_pilot":                 _micro_pilot,
         "long_horizon_evolution":              _lheo,
+        "constitutional_recovery_observatory": _ckpd_recovery,
     }
 
 
