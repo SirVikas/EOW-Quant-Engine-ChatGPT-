@@ -292,6 +292,10 @@ _pending_exploration_origins: dict[str, dict] = {}
 # FTD-DECISION-SNAP: append-only suppression event log
 _supp_log = SuppressionEventLog()
 
+# FTD-GADD: session-scoped audit ledger — append-only, never cleared during session.
+# Each call to /governed-adaptive-doctrine appends one immutable entry.
+_gadd_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9030,6 +9034,75 @@ async def lio_adaptive_governance_simulator():
     return _cag(all_trades)
 
 
+@app.get("/api/learning-intelligence/governed-adaptive-doctrine")
+async def lio_governed_adaptive_doctrine():
+    """
+    LIO — Guarded Adaptive Deployment Doctrine & Human Override Constitution.
+
+    FTD-GADD: Non-governing research instrumentation.
+    Synthesises constitutional governance health across all PHOENIX adaptive
+    subsystems (CIL, GAGS, memory pressure) to produce:
+
+    - Governance state assessment (OBSERVATION_ONLY, SANDBOX_REPLAY,
+      HUMAN_REVIEW_REQUIRED, GUARDED_EXPERIMENT, AUTO_DISABLED,
+      CONSTITUTION_LOCKDOWN)
+    - Constitutional risk diagnostics (autonomous drift risk, overfitting
+      escalation, governance instability, human-override integrity,
+      recommendation confidence, sandbox-production divergence)
+    - Constitutional classification (CONSTITUTIONALLY_STABLE,
+      OVERSIGHT_DEPENDENT, ADAPTIVE_DRIFT_RISK, RECOMMENDATION_OVERREACH,
+      GOVERNANCE_FRAGMENTATION, LOCKDOWN_RECOMMENDED)
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (appended to session-scoped ledger)
+    - Human override constitution verification (all authority subordinate
+      to explicit human governance)
+
+    Hard constitutional rules:
+      PHOENIX must NEVER become sovereign over its own deployment authority.
+      No adaptive authority is self-authorised, self-persisted, or self-escalated.
+      All decisions remain at developer discretion.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — not an execution authority.
+    """
+    import asyncio as _asyncio
+    from core.deployment_doctrine import compute_governed_adaptive_doctrine as _cgad
+
+    _cil_result, _gag_result, _mpd_result = await _asyncio.gather(
+        lio_counterfactual_interventions(),
+        lio_adaptive_governance_simulator(),
+        lio_memory_pressure_dynamics(),
+    )
+
+    try:
+        _rl_evo = rl_engine.get_evolution_state()
+        _rl_ld  = _rl_evo.get("learning_dynamics", {})
+        _rl_summ = rl_engine.summary()
+        _rl_state: dict = {
+            "explore_ratio":  _rl_ld.get("explore_ratio",  0.0),
+            "profitable_pct": _rl_summ.get("profitable_pct", 0.0),
+            "total_contexts": _rl_summ.get("total_contexts", 0),
+        }
+    except Exception:
+        _rl_state = {"explore_ratio": 0.0, "profitable_pct": 0.0, "total_contexts": 0}
+
+    _state = {
+        "counterfactual":  _cil_result,
+        "governance":      _gag_result,
+        "memory_pressure": _mpd_result,
+        "rl":              _rl_state,
+        "audit_ledger":    _gadd_audit_ledger,
+    }
+
+    result = _cgad(_state)
+
+    # Append the immutable audit entry to the session-scoped ledger (append-only).
+    if isinstance(result.get("audit_entry"), dict):
+        _gadd_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9038,7 +9111,7 @@ async def lio_report_bundle():
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
-        _mem_pressure, _counterfactual, _governance,
+        _mem_pressure, _counterfactual, _governance, _doctrine,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9058,6 +9131,7 @@ async def lio_report_bundle():
         lio_memory_pressure_dynamics(),
         lio_counterfactual_interventions(),
         lio_adaptive_governance_simulator(),
+        lio_governed_adaptive_doctrine(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9090,6 +9164,7 @@ async def lio_report_bundle():
         "memory_pressure_dynamics":            _mem_pressure,
         "counterfactual_interventions":        _counterfactual,
         "adaptive_governance_simulator":       _governance,
+        "governed_adaptive_doctrine":          _doctrine,
     }
 
 
