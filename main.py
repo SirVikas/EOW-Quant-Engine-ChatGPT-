@@ -321,6 +321,10 @@ _eiod_audit_ledger: list[dict] = []
 # Each call to /human-meaning-alignment appends one immutable ANALYSIS entry.
 _hmao_audit_ledger: list[dict] = []
 
+# FTD-RTAG: session-scoped report ecosystem governance ledger — append-only.
+# Each call to /report-ecosystem-governance appends one immutable GOVERNANCE_ASSESSMENT entry.
+_rtag_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9484,6 +9488,49 @@ async def lio_human_meaning_alignment():
     return result
 
 
+@app.get("/api/learning-intelligence/report-ecosystem-governance")
+async def lio_report_ecosystem_governance():
+    """
+    LIO — Constitutional Report Taxonomy Alignment & Export Governance.
+
+    FTD-RTAG: Non-governing research instrumentation.
+    Analyses the PHOENIX report registry and produces a constitutional
+    report ecosystem governance assessment — no live trade data required:
+
+    - Registry health (schema violations, family coverage, critical reports)
+    - Dependency graph health (cycle detection, dangling refs, topological order)
+    - Bundle coverage (orphaned reports, bundle compositions)
+    - Overlap risk (high-overlap reports, canonical metric violations)
+    - Metadata compliance (unified schema field coverage)
+    - Archive survivability (high-priority report count and tier)
+    - Ecosystem health score (0–100)
+
+    Produces:
+    - Ecosystem health classification (HEALTHY → CRITICAL)
+    - All six canonical bundle compositions
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (RTAG-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional reporting principles (autonomous governance blocked)
+
+    Hard constitutional rules:
+      PHOENIX reporting must NEVER become autonomous.
+      No self-authorized exports, autonomous lineage mutation,
+      autonomous archive rewriting, or undocumented report proliferation.
+      All reporting governance remains under human constitutional authority.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT a reporting, execution, or governance authority.
+    """
+    from core.export_bundle_manager import compute_report_ecosystem_governance as _creg
+    result = _creg()
+
+    # Append the immutable governance assessment entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _rtag_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9493,7 +9540,7 @@ async def lio_report_bundle():
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
         _mem_pressure, _counterfactual, _governance, _doctrine,
-        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao,
+        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao, _rtag,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9520,6 +9567,7 @@ async def lio_report_bundle():
         lio_constitutional_recovery_observatory(),
         lio_epistemic_integrity_observatory(),
         lio_human_meaning_alignment(),
+        lio_report_ecosystem_governance(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9559,6 +9607,7 @@ async def lio_report_bundle():
         "constitutional_recovery_observatory": _ckpd_recovery,
         "epistemic_integrity_observatory":     _eiod,
         "human_meaning_alignment":             _hmao,
+        "report_ecosystem_governance":         _rtag,
     }
 
 
