@@ -325,6 +325,14 @@ _hmao_audit_ledger: list[dict] = []
 # Each call to /report-ecosystem-governance appends one immutable GOVERNANCE_ASSESSMENT entry.
 _rtag_audit_ledger: list[dict] = []
 
+# FTD-UEI: session-scoped export snapshot ledger — append-only.
+# Snapshot records are appended here by the export infrastructure governance endpoint.
+_export_snapshot_ledger: list[dict] = []
+
+# FTD-UEI: session-scoped export infrastructure governance ledger — append-only.
+# Each call to /export-infrastructure-governance appends one immutable INFRASTRUCTURE_ASSESSMENT entry.
+_uei_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9531,6 +9539,51 @@ async def lio_report_ecosystem_governance():
     return result
 
 
+@app.get("/api/learning-intelligence/export-infrastructure-governance")
+async def lio_export_infrastructure_governance():
+    """
+    LIO — Constitutional Unified Export & Download Infrastructure Governance.
+
+    FTD-UEI: Non-governing research instrumentation.
+    Orchestrates PHOENIX's institutional export infrastructure and produces
+    a constitutional export infrastructure governance assessment — no live
+    trade data required:
+
+    - Bundle composer health (all 6 canonical bundles composable)
+    - Manifest generation health (manifest_id format, hash validity)
+    - Reconstruction hash infrastructure (determinism, order-insensitivity)
+    - Archive integrity validation (hash, manifest, metadata, constitutional)
+    - Snapshot continuity health (ledger analysis)
+    - Export ordering health (topological sort validity)
+    - Export metadata compliance (required fields schema)
+
+    Produces:
+    - Infrastructure health score (0–100) and tier (HEALTHY → CRITICAL)
+    - All 6 bundle types and 7 snapshot types enumerated
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (UEI-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional export principles (autonomous governance blocked)
+
+    Hard constitutional rules:
+      PHOENIX exports MUST remain institutionally auditable and reconstructible.
+      All export authority MUST remain constitutionally subordinate to
+      explicit human governance. No self-authorized exports, autonomous
+      archive deletion, autonomous lineage mutation, or silent manifest
+      alteration is permitted.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT an export, execution, or governance authority.
+    """
+    from core.download_center import compute_export_infrastructure_governance as _ceig
+    result = _ceig(snapshots=list(_export_snapshot_ledger))
+
+    # Append the immutable infrastructure assessment entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _uei_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9540,7 +9593,7 @@ async def lio_report_bundle():
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
         _mem_pressure, _counterfactual, _governance, _doctrine,
-        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao, _rtag,
+        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao, _rtag, _uei,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9568,6 +9621,7 @@ async def lio_report_bundle():
         lio_epistemic_integrity_observatory(),
         lio_human_meaning_alignment(),
         lio_report_ecosystem_governance(),
+        lio_export_infrastructure_governance(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9608,6 +9662,7 @@ async def lio_report_bundle():
         "epistemic_integrity_observatory":     _eiod,
         "human_meaning_alignment":             _hmao,
         "report_ecosystem_governance":         _rtag,
+        "export_infrastructure_governance":    _uei,
     }
 
 
