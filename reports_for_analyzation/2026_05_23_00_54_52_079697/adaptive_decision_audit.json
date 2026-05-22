@@ -1,0 +1,73 @@
+{
+  "title": "Adaptive Decision Audit \u2014 RL Policy Explainability (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-22 19:21:40 UTC",
+  "total_contexts_audited": 4,
+  "tier_distribution": {
+    "ELITE": 0,
+    "HIGH": 0,
+    "NEUTRAL": 1,
+    "PENALIZED": 3
+  },
+  "toxic_contexts": 3,
+  "policy_summary": {
+    "floor_raises_active": 3,
+    "floor_lowers_active": 0,
+    "boosts_active": 0,
+    "penalties_active": 3,
+    "net_posture": "RESTRICTIVE \u2014 majority of visited contexts raising execution bar"
+  },
+  "context_decisions": [
+    {
+      "context": "MEAN_REVERTING|NY|MeanReversion",
+      "n_visits": 412,
+      "q_value": -0.0735,
+      "tier": "NEUTRAL",
+      "is_toxic": false,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "DEGRADING",
+      "policy_effect": "NEUTRAL \u2014 no gate or confidence adjustment",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.0735 tier=NEUTRAL visits=412 WR=18.9% | floor_delta=+0.00 boost=1.00x"
+    },
+    {
+      "context": "MEAN_REVERTING|LATE|MeanReversion",
+      "n_visits": 288,
+      "q_value": -0.3185,
+      "tier": "PENALIZED",
+      "is_toxic": true,
+      "floor_delta": 0.04,
+      "confidence_mult": 0.85,
+      "q_direction": "IMPROVING",
+      "policy_effect": "HARD_BLOCK (paper bypass active)",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.3185 tier=PENALIZED visits=288 WR=16.7% | floor_delta=+0.04 boost=0.85x | TOXIC \u2192 hard-block in LIVE mode (bypassed while BYPASS_ALL_GATES=True) | bootstrap_prior=-0.155"
+    },
+    {
+      "context": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 248,
+      "q_value": -0.5215,
+      "tier": "PENALIZED",
+      "is_toxic": true,
+      "floor_delta": 0.04,
+      "confidence_mult": 0.85,
+      "q_direction": "DEGRADING",
+      "policy_effect": "HARD_BLOCK (paper bypass active)",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.5215 tier=PENALIZED visits=248 WR=18.1% | floor_delta=+0.04 boost=0.85x | TOXIC \u2192 hard-block in LIVE mode (bypassed while BYPASS_ALL_GATES=True) | bootstrap_prior=-0.0962"
+    },
+    {
+      "context": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 216,
+      "q_value": -0.4216,
+      "tier": "PENALIZED",
+      "is_toxic": true,
+      "floor_delta": 0.04,
+      "confidence_mult": 0.85,
+      "q_direction": "IMPROVING",
+      "policy_effect": "HARD_BLOCK (paper bypass active)",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.4216 tier=PENALIZED visits=216 WR=20.8% | floor_delta=+0.04 boost=0.85x | TOXIC \u2192 hard-block in LIVE mode (bypassed while BYPASS_ALL_GATES=True) | bootstrap_prior=-0.102"
+    }
+  ]
+}

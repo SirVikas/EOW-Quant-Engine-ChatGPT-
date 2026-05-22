@@ -1,0 +1,115 @@
+{
+  "active_summary": {
+    "module": "ANOMALY_DETECTOR",
+    "version": "1.0",
+    "worst_severity": "CRITICAL",
+    "anomaly_counts": {
+      "CRITICAL": 2,
+      "HIGH": 4,
+      "MEDIUM": 1,
+      "LOW": 0
+    },
+    "recent_critical": [
+      "Intelligence score critically low: 4/100",
+      "Allow rate critically low: 0%"
+    ],
+    "recent_high": [
+      "3 toxic RL contexts \u2014 significant learning degradation",
+      "TRENDING win rate dangerously low: 0%",
+      "MEAN_REVERTING win rate dangerously low: 0%"
+    ],
+    "total_anomalies": 7,
+    "total_scans": 1
+  },
+  "recent_history": [
+    {
+      "anomaly_id": "60ddff41",
+      "severity": "MEDIUM",
+      "category": "LOSS_STREAK",
+      "description": "3 consecutive losses",
+      "metric": "consec_losses",
+      "current_value": 3,
+      "threshold": 3,
+      "delta": 3,
+      "ts": 1779477633955
+    },
+    {
+      "anomaly_id": "385de480",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "metric": "le_vol_exp_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779477633955
+    },
+    {
+      "anomaly_id": "44253b09",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "MEAN_REVERTING win rate dangerously low: 0%",
+      "metric": "le_mean_rev_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779477633955
+    },
+    {
+      "anomaly_id": "33ddadd8",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "TRENDING win rate dangerously low: 0%",
+      "metric": "le_trending_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779477633955
+    },
+    {
+      "anomaly_id": "a8211e48",
+      "severity": "HIGH",
+      "category": "TOXIC_SPIKE",
+      "description": "3 toxic RL contexts \u2014 significant learning degradation",
+      "metric": "rl_toxic",
+      "current_value": 3,
+      "threshold": 1,
+      "delta": 3,
+      "ts": 1779477633955
+    },
+    {
+      "anomaly_id": "9b387287",
+      "severity": "CRITICAL",
+      "category": "ALLOW_COLLAPSE",
+      "description": "Allow rate critically low: 0%",
+      "metric": "rl_allow_rate",
+      "current_value": 0.0,
+      "threshold": 0.3,
+      "delta": 0.0,
+      "ts": 1779477633955
+    },
+    {
+      "anomaly_id": "0d334dff",
+      "severity": "CRITICAL",
+      "category": "IQ_REGRESSION",
+      "description": "Intelligence score critically low: 4/100",
+      "metric": "iq_score",
+      "current_value": 3.6,
+      "threshold": 20.0,
+      "delta": 0.0,
+      "ts": 1779477633955
+    }
+  ],
+  "stats": {
+    "module": "ANOMALY_DETECTOR",
+    "version": "1.0",
+    "total_scans": 1,
+    "total_anomalies": 7,
+    "critical_count": 2,
+    "high_count": 4,
+    "medium_count": 1,
+    "low_count": 0,
+    "peak_iq": 3.6,
+    "last_scan_ts": 1779477633955
+  }
+}

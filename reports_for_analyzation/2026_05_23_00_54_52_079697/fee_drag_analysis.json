@@ -1,0 +1,268 @@
+{
+  "title": "Fee Drag Analysis \u2014 Where Costs Are Eating Profit",
+  "generated_at": "2026-05-22 19:21:40 UTC",
+  "total_fees_usdt": 66.0135,
+  "total_slippage_usdt": 49.5099,
+  "total_cost_usdt": 115.5234,
+  "toxic_symbols": [
+    "NEARUSDT",
+    "ONDOUSDT",
+    "LTCUSDT"
+  ],
+  "by_symbol": [
+    {
+      "symbol": "TONUSDT",
+      "n_trades": 51,
+      "total_fees_usdt": 7.4145,
+      "total_slippage_usdt": 5.5609,
+      "total_cost_usdt": 12.9754,
+      "net_pnl_usdt": -19.2488,
+      "fee_per_trade_usdt": 0.1454,
+      "fee_pct_of_gross_win": 187.1,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "n_trades": 50,
+      "total_fees_usdt": 7.2882,
+      "total_slippage_usdt": 5.4661,
+      "total_cost_usdt": 12.7543,
+      "net_pnl_usdt": -11.7629,
+      "fee_per_trade_usdt": 0.1458,
+      "fee_pct_of_gross_win": 212.3,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "EDENUSDT",
+      "n_trades": 48,
+      "total_fees_usdt": 6.769,
+      "total_slippage_usdt": 5.0767,
+      "total_cost_usdt": 11.8457,
+      "net_pnl_usdt": -22.2376,
+      "fee_per_trade_usdt": 0.141,
+      "fee_pct_of_gross_win": 27.8,
+      "verdict": "OK"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "n_trades": 45,
+      "total_fees_usdt": 6.5193,
+      "total_slippage_usdt": 4.8895,
+      "total_cost_usdt": 11.4088,
+      "net_pnl_usdt": -11.078,
+      "fee_per_trade_usdt": 0.1449,
+      "fee_pct_of_gross_win": 298.5,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "n_trades": 37,
+      "total_fees_usdt": 5.4322,
+      "total_slippage_usdt": 4.0742,
+      "total_cost_usdt": 9.5064,
+      "net_pnl_usdt": -1.8746,
+      "fee_per_trade_usdt": 0.1468,
+      "fee_pct_of_gross_win": 56.3,
+      "verdict": "FEE_TOXIC"
+    },
+    {
+      "symbol": "FIDAUSDT",
+      "n_trades": 31,
+      "total_fees_usdt": 4.6885,
+      "total_slippage_usdt": 3.5164,
+      "total_cost_usdt": 8.2049,
+      "net_pnl_usdt": -16.2073,
+      "fee_per_trade_usdt": 0.1512,
+      "fee_pct_of_gross_win": 47.6,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "n_trades": 29,
+      "total_fees_usdt": 4.1182,
+      "total_slippage_usdt": 3.0887,
+      "total_cost_usdt": 7.2069,
+      "net_pnl_usdt": -1.9688,
+      "fee_per_trade_usdt": 0.142,
+      "fee_pct_of_gross_win": 51.0,
+      "verdict": "FEE_TOXIC"
+    },
+    {
+      "symbol": "SPKUSDT",
+      "n_trades": 26,
+      "total_fees_usdt": 3.9158,
+      "total_slippage_usdt": 2.9368,
+      "total_cost_usdt": 6.8526,
+      "net_pnl_usdt": -5.5769,
+      "fee_per_trade_usdt": 0.1506,
+      "fee_pct_of_gross_win": 125.3,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "BCHUSDT",
+      "n_trades": 23,
+      "total_fees_usdt": 3.5428,
+      "total_slippage_usdt": 2.6571,
+      "total_cost_usdt": 6.2,
+      "net_pnl_usdt": -6.0022,
+      "fee_per_trade_usdt": 0.154,
+      "fee_pct_of_gross_win": 131.5,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "AIGENSYNUSDT",
+      "n_trades": 22,
+      "total_fees_usdt": 3.2922,
+      "total_slippage_usdt": 2.4691,
+      "total_cost_usdt": 5.7613,
+      "net_pnl_usdt": -6.7517,
+      "fee_per_trade_usdt": 0.1496,
+      "fee_pct_of_gross_win": 111.1,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "ALTUSDT",
+      "n_trades": 20,
+      "total_fees_usdt": 2.8668,
+      "total_slippage_usdt": 2.1501,
+      "total_cost_usdt": 5.017,
+      "net_pnl_usdt": -9.3855,
+      "fee_per_trade_usdt": 0.1433,
+      "fee_pct_of_gross_win": 108.9,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "LTCUSDT",
+      "n_trades": 13,
+      "total_fees_usdt": 2.0067,
+      "total_slippage_usdt": 1.505,
+      "total_cost_usdt": 3.5117,
+      "net_pnl_usdt": -1.6503,
+      "fee_per_trade_usdt": 0.1544,
+      "fee_pct_of_gross_win": 113.1,
+      "verdict": "FEE_TOXIC"
+    },
+    {
+      "symbol": "INJUSDT",
+      "n_trades": 10,
+      "total_fees_usdt": 1.4972,
+      "total_slippage_usdt": 1.1229,
+      "total_cost_usdt": 2.6201,
+      "net_pnl_usdt": -4.7343,
+      "fee_per_trade_usdt": 0.1497,
+      "fee_pct_of_gross_win": null,
+      "verdict": "OK"
+    },
+    {
+      "symbol": "PROVEUSDT",
+      "n_trades": 8,
+      "total_fees_usdt": 1.1535,
+      "total_slippage_usdt": 0.8651,
+      "total_cost_usdt": 2.0186,
+      "net_pnl_usdt": -3.1404,
+      "fee_per_trade_usdt": 0.1442,
+      "fee_pct_of_gross_win": 69.8,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "n_trades": 7,
+      "total_fees_usdt": 1.0614,
+      "total_slippage_usdt": 0.7961,
+      "total_cost_usdt": 1.8575,
+      "net_pnl_usdt": -2.9875,
+      "fee_per_trade_usdt": 0.1516,
+      "fee_pct_of_gross_win": 1677.4,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "RONINUSDT",
+      "n_trades": 7,
+      "total_fees_usdt": 1.0559,
+      "total_slippage_usdt": 0.7919,
+      "total_cost_usdt": 1.8478,
+      "net_pnl_usdt": 2.4958,
+      "fee_per_trade_usdt": 0.1508,
+      "fee_pct_of_gross_win": 26.1,
+      "verdict": "OK"
+    },
+    {
+      "symbol": "ALLOUSDT",
+      "n_trades": 6,
+      "total_fees_usdt": 0.8504,
+      "total_slippage_usdt": 0.6378,
+      "total_cost_usdt": 1.4882,
+      "net_pnl_usdt": -3.0413,
+      "fee_per_trade_usdt": 0.1417,
+      "fee_pct_of_gross_win": 522.3,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "ASTERUSDT",
+      "n_trades": 5,
+      "total_fees_usdt": 0.7132,
+      "total_slippage_usdt": 0.5349,
+      "total_cost_usdt": 1.2481,
+      "net_pnl_usdt": -2.5328,
+      "fee_per_trade_usdt": 0.1426,
+      "fee_pct_of_gross_win": null,
+      "verdict": "OK"
+    },
+    {
+      "symbol": "WLDUSDT",
+      "n_trades": 4,
+      "total_fees_usdt": 0.5587,
+      "total_slippage_usdt": 0.419,
+      "total_cost_usdt": 0.9776,
+      "net_pnl_usdt": 0.7627,
+      "fee_per_trade_usdt": 0.1397,
+      "fee_pct_of_gross_win": 22.7,
+      "verdict": "OK"
+    },
+    {
+      "symbol": "UUSDT",
+      "n_trades": 3,
+      "total_fees_usdt": 0.4331,
+      "total_slippage_usdt": 0.3248,
+      "total_cost_usdt": 0.7579,
+      "net_pnl_usdt": -0.739,
+      "fee_per_trade_usdt": 0.1444,
+      "fee_pct_of_gross_win": null,
+      "verdict": "OK"
+    },
+    {
+      "symbol": "GENIUSUSDT",
+      "n_trades": 3,
+      "total_fees_usdt": 0.4174,
+      "total_slippage_usdt": 0.313,
+      "total_cost_usdt": 0.7304,
+      "net_pnl_usdt": -1.5154,
+      "fee_per_trade_usdt": 0.1391,
+      "fee_pct_of_gross_win": 34.3,
+      "verdict": "FEE_HEAVY"
+    },
+    {
+      "symbol": "FETUSDT",
+      "n_trades": 2,
+      "total_fees_usdt": 0.2796,
+      "total_slippage_usdt": 0.2097,
+      "total_cost_usdt": 0.4893,
+      "net_pnl_usdt": -1.0696,
+      "fee_per_trade_usdt": 0.1398,
+      "fee_pct_of_gross_win": null,
+      "verdict": "OK"
+    },
+    {
+      "symbol": "SAHARAUSDT",
+      "n_trades": 1,
+      "total_fees_usdt": 0.1389,
+      "total_slippage_usdt": 0.1041,
+      "total_cost_usdt": 0.243,
+      "net_pnl_usdt": 0.5081,
+      "fee_per_trade_usdt": 0.1389,
+      "fee_pct_of_gross_win": 27.3,
+      "verdict": "OK"
+    }
+  ],
+  "action": "Remove toxic symbols: TONUSDT, ETHUSDT"
+}

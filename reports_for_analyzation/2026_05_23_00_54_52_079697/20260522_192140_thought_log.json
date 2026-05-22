@@ -1,0 +1,227 @@
+{
+  "captured_at": "2026-05-22T19:21:40.889Z",
+  "snapshot_id": "46508e69-b906-4c8b-b9ed-a0d21aa2ccf5",
+  "total_entries": 44,
+  "entries": [
+    {
+      "ts": 1779477511980,
+      "level": "SYSTEM",
+      "msg": "\ud83d\ude80 EOW Quant Engine booting\u2026"
+    },
+    {
+      "ts": 1779477511981,
+      "level": "SYSTEM",
+      "msg": "Mode: PAPER | Capital: 1000.0 USDT"
+    },
+    {
+      "ts": 1779477512010,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udccb Function Registry loaded \u2014 81 functions registered"
+    },
+    {
+      "ts": 1779477513158,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udcc2 DataLake replay: 451 trades \u2192 equity=870.26 USDT"
+    },
+    {
+      "ts": 1779477513161,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udcc2 State restored: snapshot(870.26) validated vs replay(870.26)"
+    },
+    {
+      "ts": 1779477513164,
+      "level": "SYSTEM",
+      "msg": "\u26a1 Phase 4 Profit Engine online | rr_min=2.0 score_min=0.48 max_per_trade=5% daily_cap=6%"
+    },
+    {
+      "ts": 1779477513165,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 Phase 5 EV Engine online | ev_window=30 ev_min_trades=10 adaptive_lr=0.05 dd_stop=15%"
+    },
+    {
+      "ts": 1779477513167,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udd13 Phase 5.1 Activation Layer online | activator_tiers=T1@5min T2@12min T3@25min | explore_rate=3% smart_fee_rr\u22653.0:15%"
+    },
+    {
+      "ts": 1779477513169,
+      "level": "SYSTEM",
+      "msg": "Phase 6.6 Gate online | can_trade=True reason=BYPASS_ALL_GATES safe_mode=False"
+    },
+    {
+      "ts": 1779477513173,
+      "level": "SYSTEM",
+      "msg": "All subsystems online. Scanning markets\u2026"
+    },
+    {
+      "ts": 1779477513177,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udd50 [SESSION_ROUTER] Timezone Authority=UTC | ASIA 00:00\u201305:59 UTC | LONDON 06:00\u201312:59 UTC | NY 13:00\u201318:59 UTC | LATE 19:00\u201323:59 UTC"
+    },
+    {
+      "ts": 1779477513192,
+      "level": "SYSTEM",
+      "msg": "\u26a1 [FTD-031] Performance layer online | target=100.0ms cache_ttl_pattern=60.0s queue_workers=2"
+    },
+    {
+      "ts": 1779477520651,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback GENIUSUSDT: LONG entry=0.6445 rsi=42.8"
+    },
+    {
+      "ts": 1779477520729,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=38.8 above_sma=False bands=[30.0,70.0] (rsi=38.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477520827,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=29.1 above_sma=False bands=[48.0,52.0] (rsi=29.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477520892,
+      "level": "SYSTEM",
+      "msg": "\ud83d\udce5 DNA imported from D:\\EOW Quant Engine V18.0\\eow_quant_engine_FINAL_v2.2\\eow_quant_engine\\data\\exports\\optimized_dna.json"
+    },
+    {
+      "ts": 1779477520927,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI_LEVEL: rsi=49.4 above_sma=False bands=[30.0,70.0] (rsi=49.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477521046,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=47.8 above_sma=False bands=[48.0,52.0] (rsi=47.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477521096,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ALLOUSDT: RSI_LEVEL: rsi=35.1 above_sma=False bands=[48.0,52.0] (rsi=35.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477521234,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=41.7 above_sma=False bands=[30.0,70.0] (rsi=41.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477521284,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FETUSDT: RSI_LEVEL: rsi=32.5 above_sma=False bands=[48.0,52.0] (rsi=32.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477521340,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=27.8 above_sma=False bands=[48.0,52.0] (rsi=27.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477521369,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=42.9 above_sma=False bands=[30.0,70.0] (rsi=42.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477525485,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=28.8 above_sma=False bands=[48.0,52.0] (rsi=28.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477525699,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=37.4 above_sma=False bands=[48.0,52.0] (rsi=37.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477526792,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED INJUSDT: RSI_LEVEL: rsi=48.5 above_sma=False bands=[30.0,70.0] (rsi=48.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477527056,
+      "level": "SYSTEM",
+      "msg": "\u26a1 Mode switched to PAPER"
+    },
+    {
+      "ts": 1779477527117,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ALTUSDT: RSI_LEVEL: rsi=34.8 above_sma=False bands=[48.0,52.0] (rsi=34.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477527822,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UUSDT: SHORT entry=1.0007 rsi=100.0"
+    },
+    {
+      "ts": 1779477600943,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=31.9 above_sma=False bands=[48.0,52.0] (rsi=31.9 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477601283,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=45.6 above_sma=False bands=[48.0,52.0] (rsi=45.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477601386,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED EDENUSDT: RSI_LEVEL: rsi=25.8 above_sma=False bands=[48.0,52.0] (rsi=25.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477601577,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=35.4 above_sma=False bands=[48.0,52.0] (rsi=35.4 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477601656,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback ONDOUSDT: SHORT entry=0.3954 rsi=54.5"
+    },
+    {
+      "ts": 1779477601672,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED INJUSDT: RSI_LEVEL: rsi=42.9 above_sma=False bands=[30.0,70.0] (rsi=42.9 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477602171,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED SAHARAUSDT: RSI_LEVEL: rsi=55.8 above_sma=False bands=[30.0,70.0] (rsi=55.8 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477602299,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FETUSDT: RSI_LEVEL: rsi=47.1 above_sma=False bands=[48.0,52.0] (rsi=47.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477602314,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=49.3 above_sma=False bands=[30.0,70.0] (rsi=49.3 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477603468,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED TONUSDT: RSI_LEVEL: rsi=54.5 above_sma=False bands=[30.0,70.0] (rsi=54.5 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779477607909,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ALTUSDT: RSI_LEVEL: rsi=39.1 above_sma=False bands=[48.0,52.0] (rsi=39.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477607962,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED FIDAUSDT: RSI_LEVEL: rsi=38.8 above_sma=False bands=[48.0,52.0] (rsi=38.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477610921,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED GENIUSUSDT: RSI_LEVEL: rsi=43.3 above_sma=False bands=[48.0,52.0] (rsi=43.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477611445,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED ALLOUSDT: RSI_LEVEL: rsi=37.8 above_sma=False bands=[48.0,52.0] (rsi=37.8 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779477619476,
+      "level": "SIGNAL",
+      "msg": "\u26a1 PAPER_SPEED fallback UUSDT: SHORT entry=1.0007 rsi=100.0"
+    }
+  ]
+}

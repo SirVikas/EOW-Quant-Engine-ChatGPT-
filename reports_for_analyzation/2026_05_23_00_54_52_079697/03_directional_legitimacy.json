@@ -1,0 +1,11 @@
+{
+  "report": "03_directional_legitimacy_report",
+  "prp": "001",
+  "global_score": 0.0,
+  "rolling_score": 0.0,
+  "label": "DIRECTIONAL_BIAS",
+  "by_regime": {},
+  "by_strategy": {},
+  "by_hour": {},
+  "ts": 1779477703678
+}

@@ -1,0 +1,107 @@
+{
+  "prp": "001",
+  "phase": "SIGNAL_TRUTH_RECONSTRUCTION",
+  "generated_ts": 1779477703677,
+  "reports": {
+    "01_signal_truth_matrix": {
+      "report": "01_signal_truth_matrix",
+      "prp": "001",
+      "total_signals": 0,
+      "total_outcomes": 0,
+      "truth_density": 0.0,
+      "directional_legit": 0.0,
+      "noise_ratio": 0.0,
+      "total_net_pnl": 0.0,
+      "by_regime": {},
+      "by_strategy": {},
+      "ts": 1779477703677
+    },
+    "02_false_positive_clusters": {
+      "report": "02_false_positive_clusters",
+      "prp": "001",
+      "total_false_positives": 0,
+      "total_outcomes": 0,
+      "false_positive_rate": 0.0,
+      "clusters": [],
+      "confidence_traps": [],
+      "ts": 1779477703677
+    },
+    "03_directional_legitimacy": {
+      "report": "03_directional_legitimacy_report",
+      "prp": "001",
+      "global_score": 0.0,
+      "rolling_score": 0.0,
+      "label": "DIRECTIONAL_BIAS",
+      "by_regime": {},
+      "by_strategy": {},
+      "by_hour": {},
+      "ts": 1779477703677
+    },
+    "04_confidence_reality_divergence": {
+      "report": "04_confidence_reality_divergence",
+      "prp": "001",
+      "total_divergences": 0,
+      "total_outcomes": 0,
+      "divergence_rate": 0.0,
+      "recent": [],
+      "ts": 1779477703677
+    },
+    "05_context_quality_analysis": {
+      "report": "05_context_quality_analysis",
+      "prp": "001",
+      "total_scored": 0,
+      "tier_breakdown": {},
+      "discrimination": "INSUFFICIENT_DATA",
+      "recent_quality": [],
+      "ts": 1779477703677
+    },
+    "06_asymmetry_validation_report": {
+      "report": "06_asymmetry_validation_report",
+      "prp": "001",
+      "total_outcomes": 0,
+      "global_achievement_ratio": 0.0,
+      "optimism_bias_rate": 0.0,
+      "asymmetry_health": "BROKEN",
+      "by_strategy": {},
+      "by_regime": {},
+      "ts": 1779477703677
+    },
+    "07_noise_participation_audit": {
+      "report": "07_noise_participation_audit",
+      "prp": "001",
+      "by_hour": [],
+      "by_regime_side": {},
+      "confidence_traps": 0,
+      "ts": 1779477703677
+    },
+    "08_predictive_integrity_monitor": {
+      "report": "08_predictive_integrity_monitor",
+      "prp": "001",
+      "global_truth_density": 0.0,
+      "recent_win_rate": 0.0,
+      "rolling_drift": 0.0,
+      "confidence_calibration": [],
+      "ts": 1779477703678
+    },
+    "09_regime_signal_validity": {
+      "report": "09_regime_signal_validity",
+      "prp": "001",
+      "global_legit_score": 0.0,
+      "by_regime": {},
+      "ts": 1779477703678
+    },
+    "10_truth_density_summary": {
+      "report": "10_truth_density_summary",
+      "prp": "001",
+      "total_signals": 0,
+      "total_outcomes": 0,
+      "truth_density": 0.0,
+      "directional_legit": 0.0,
+      "noise_ratio": 0.0,
+      "avg_net_pnl": 0.0,
+      "total_net_pnl": 0.0,
+      "data_sufficient": false,
+      "ts": 1779477703678
+    }
+  }
+}
