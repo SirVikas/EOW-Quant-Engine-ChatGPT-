@@ -8699,6 +8699,39 @@ async def lio_economic_ground_truth():
     return _cegt(all_trades)
 
 
+@app.get("/api/learning-intelligence/timeframe-survivability")
+async def lio_timeframe_survivability():
+    """
+    LIO — Timeframe Economics Comparator & Alpha Survivability Mapping.
+
+    FTD-TF-SURVIV: Non-governing research instrumentation.
+    Compares 1m (actual) vs 5m and 15m (shadow projections) economics to answer:
+    is PHOENIX discovering weak signals or strong signals trapped in 1m friction?
+
+    Shadow projections assume the same directional signal captures proportionally
+    more gross PnL at higher timeframes with identical fees. Research only —
+    no execution authority, no routing changes.
+    """
+    from core.timeframe_economics import compute_timeframe_survivability as _ctfs
+    from dataclasses import asdict
+
+    session_trades = [asdict(t) for t in pnl_calc.trades]
+    historical     = data_lake.get_trades(limit=1000)
+
+    seen: dict[str, dict] = {}
+    for t in session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            seen[tid] = t
+    for t in historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in seen:
+            seen[tid] = t
+
+    all_trades = sorted(seen.values(), key=lambda x: x.get("entry_ts", 0))
+    return _ctfs(all_trades)
+
+
 @app.get("/api/learning-intelligence/exploration-economic-attribution")
 async def lio_exploration_economic_attribution():
     """
@@ -8795,7 +8828,7 @@ async def lio_report_bundle():
     (
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
-        _exp_diag, _exp_econ, _eco_truth,
+        _exp_diag, _exp_econ, _eco_truth, _tf_surviv,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8810,6 +8843,7 @@ async def lio_report_bundle():
         lio_exploration_diagnostics(),
         lio_exploration_economic_attribution(),
         lio_economic_ground_truth(),
+        lio_timeframe_survivability(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -8837,6 +8871,7 @@ async def lio_report_bundle():
         "exploration_diagnostics":         _exp_diag,
         "exploration_economic_attribution": _exp_econ,
         "economic_ground_truth":            _eco_truth,
+        "timeframe_survivability":          _tf_surviv,
     }
 
 
