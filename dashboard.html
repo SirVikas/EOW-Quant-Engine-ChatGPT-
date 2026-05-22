@@ -2010,9 +2010,16 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
   <!-- Download center -->
   <div class="card">
-    <div style="font-size:12px;font-weight:700;margin-bottom:8px">Download Center</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">All downloads require explicit human approval. auto_authorized=False.</div>
-    <div id="irel-downloads" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    <div style="font-size:12px;font-weight:700;margin-bottom:6px">Download Center
+      <span style="font-weight:400;color:var(--muted);font-size:11px"> — auto_authorized=False, human approval required</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="irelOpenHTML()"     style="padding:5px 13px;border-radius:5px;border:1px solid #BEE3F8;background:#EBF8FF;color:#2B6CB0;cursor:pointer;font-size:12px;font-weight:600">🌐 View HTML Report</button>
+      <button onclick="irelDownloadJSON()" style="padding:5px 13px;border-radius:5px;border:1px solid #C6F6D5;background:#F0FFF4;color:#276749;cursor:pointer;font-size:12px;font-weight:600">⬇ Download JSON</button>
+      <button onclick="irelOpenMarkdown()" style="padding:5px 13px;border-radius:5px;border:1px solid #E2E8F0;background:#F7FAFC;color:#4A5568;cursor:pointer;font-size:12px;font-weight:600">📄 View Markdown</button>
+      <button onclick="irelOpenBundle()"   style="padding:5px 13px;border-radius:5px;border:1px solid #E9D8FD;background:#FAF5FF;color:#553C9A;cursor:pointer;font-size:12px;font-weight:600">📦 Full Bundle JSON</button>
+      <button onclick="irelOpenRawAPI()"   style="padding:5px 13px;border-radius:5px;border:1px solid #FED7D7;background:#FFF5F5;color:#9B2C2C;cursor:pointer;font-size:12px;font-weight:600">🔍 Raw IREL API</button>
+    </div>
   </div>
 
 </div>
@@ -2025,6 +2032,8 @@ let _irelData = null;
 let _irelLoaded = false;
 
 function loadIREL() {
+  const tierEl = document.getElementById('irel-tier');
+  if (tierEl) tierEl.textContent = 'Loading...';
   fetch('/api/learning-intelligence/institutional-reporting-experience')
     .then(r => r.json())
     .then(data => {
@@ -2033,12 +2042,32 @@ function loadIREL() {
       renderIREL(data);
     })
     .catch(e => {
-      document.getElementById('irel-tier').textContent = 'Error: ' + e.message;
+      if (tierEl) tierEl.textContent = 'Error: ' + e.message;
     });
 }
 
 function _tierColor(tier) {
   return {HEALTHY:'#276749',ADEQUATE:'#2B6CB0',VULNERABLE:'#92400E',CRITICAL:'#9B2C2C'}[tier] || '#718096';
+}
+
+// ── Download center actions ────────────────────────────────────────────────────
+function irelOpenHTML()     { window.open('/api/learning-intelligence/institutional-report-html',     '_blank'); }
+function irelOpenMarkdown() { window.open('/api/learning-intelligence/institutional-report-markdown', '_blank'); }
+function irelOpenBundle()   { window.open('/api/learning-intelligence/institutional-report-bundle',   '_blank'); }
+function irelOpenRawAPI()   { window.open('/api/learning-intelligence/institutional-reporting-experience', '_blank'); }
+function irelDownloadJSON() {
+  fetch('/api/learning-intelligence/institutional-reporting-experience')
+    .then(r => r.json())
+    .then(data => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `phoenix_irel_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch(e => alert('Download failed: ' + e.message));
 }
 
 function renderIREL(data) {
@@ -2061,7 +2090,7 @@ function renderIREL(data) {
     bdEl.appendChild(pill);
   }
 
-  // Tab manifest
+  // Tab manifest — each card clickable to open that LIO endpoint in new tab
   const tabs = (data.tab_manifest || {}).tabs || [];
   document.getElementById('irel-tab-count').textContent =
     `(${tabs.length} tabs, ${(data.tab_manifest||{}).total_mapped_reports||0} reports)`;
@@ -2069,62 +2098,85 @@ function renderIREL(data) {
   tmEl.innerHTML = '';
   for (const tab of tabs) {
     const d = document.createElement('div');
-    d.style.cssText = 'background:#F7FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:8px 10px';
-    d.innerHTML = `<div style="font-size:13px;margin-bottom:2px">${tab.icon} <b>${tab.label}</b></div>
-                   <div style="font-size:10px;color:#718096">${tab.report_count} reports</div>
-                   <div style="font-size:10px;color:#A0AEC0">${tab.description}</div>`;
+    d.style.cssText = 'background:#F7FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:8px 10px;'
+                    + 'cursor:pointer;transition:border-color .15s,background .15s';
+    d.onmouseover = () => { d.style.borderColor='#90CDF4'; d.style.background='#EBF8FF'; };
+    d.onmouseout  = () => { d.style.borderColor='#E2E8F0'; d.style.background='#F7FAFC'; };
+    d.onclick     = () => irelFilterTab(tab.tab_id);
+    d.title       = `Filter to ${tab.label} reports`;
+    d.innerHTML   = `<div style="font-size:13px;margin-bottom:2px">${tab.icon} <b>${tab.label}</b></div>
+                     <div style="font-size:10px;color:#718096">${tab.report_count} report${tab.report_count!==1?'s':''}</div>
+                     <div style="font-size:10px;color:#A0AEC0">${tab.description}</div>`;
     tmEl.appendChild(d);
   }
 
-  // Report statuses (group by tab)
+  // Report statuses
+  renderIRELReports(data, null);
+}
+
+function renderIRELReports(data, filterTabId) {
   const statuses = (data.dashboard_structure || {}).report_statuses || [];
   const populated = (data.dashboard_structure || {}).populated_reports || 0;
   const total     = (data.dashboard_structure || {}).total_reports || 25;
   const pct       = (data.dashboard_structure || {}).coverage_pct || 0;
+  const filterLabel = filterTabId ? ` — filtered: ${filterTabId}` : '';
   document.getElementById('irel-coverage').textContent =
-    `(${populated}/${total} populated — ${pct}%)`;
+    `(${populated}/${total} populated — ${pct}%${filterLabel})`;
+
   const rsEl = document.getElementById('irel-report-statuses');
   rsEl.innerHTML = '';
+
+  // Group by tab
   const byTab = {};
   for (const s of statuses) {
+    if (filterTabId && s.tab_id !== filterTabId) continue;
     (byTab[s.tab_id] = byTab[s.tab_id] || []).push(s);
   }
+
   for (const [tabId, reps] of Object.entries(byTab)) {
     const sec = document.createElement('div');
-    sec.style.marginBottom = '6px';
+    sec.style.marginBottom = '8px';
+
     const hdr = document.createElement('div');
-    hdr.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;color:#718096;margin-bottom:3px';
+    hdr.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;color:#718096;margin-bottom:4px';
     hdr.textContent = tabId;
     sec.appendChild(hdr);
+
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px';
     for (const r of reps) {
       const chip = document.createElement('span');
-      chip.style.cssText = `background:${r.has_data?'#C6F6D5':'#FED7D7'};color:${r.has_data?'#276749':'#9B2C2C'};`
-        + 'border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600';
-      chip.title = r.name + ' | ' + r.priority;
+      const hasDta = r.has_data;
+      chip.style.cssText =
+        `background:${hasDta?'#C6F6D5':'#FED7D7'};color:${hasDta?'#276749':'#9B2C2C'};` +
+        'border-radius:4px;padding:3px 7px;font-size:10px;font-weight:600;cursor:pointer;' +
+        'transition:opacity .15s;user-select:none';
+      chip.title   = `${r.name} | Priority: ${r.priority} | Click to open API`;
       chip.textContent = r.report_id;
+      chip.onmouseover = () => { chip.style.opacity = '0.7'; };
+      chip.onmouseout  = () => { chip.style.opacity = '1'; };
+      // Open the LIO endpoint for this report in a new tab
+      if (r.endpoint) {
+        chip.onclick = () => window.open(r.endpoint, '_blank');
+      }
       row.appendChild(chip);
     }
     sec.appendChild(row);
     rsEl.appendChild(sec);
   }
 
-  // Download center chips
-  const dlEl = document.getElementById('irel-downloads');
-  dlEl.innerHTML = '';
-  const formats = ['html', 'json', 'markdown', 'zip', 'pdf_ready_html'];
-  for (const fmt of formats) {
-    const chip = document.createElement('span');
-    chip.style.cssText = 'background:#EBF8FF;color:#2B6CB0;border:1px solid #BEE3F8;'
-      + 'border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:default';
-    chip.textContent = fmt;
-    chip.title = 'auto_authorized=False — human approval required';
-    dlEl.appendChild(chip);
+  // Show "clear filter" hint if filtered
+  if (filterTabId) {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:10px;color:#718096;margin-top:6px';
+    hint.innerHTML = '<span style="cursor:pointer;text-decoration:underline" onclick="renderIRELReports(_irelData,null)">✕ Clear filter</span>';
+    rsEl.appendChild(hint);
   }
 }
 
-
+function irelFilterTab(tabId) {
+  if (_irelData) renderIRELReports(_irelData, tabId);
+}
 </script>
 
 <!-- ══ VAULT MODAL ════════════════════════════════════════════════════════════ -->
