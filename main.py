@@ -8988,6 +8988,48 @@ async def lio_memory_pressure_dynamics():
     return _cmpd(_state)
 
 
+@app.get("/api/learning-intelligence/adaptive-governance-simulator")
+async def lio_adaptive_governance_simulator():
+    """
+    LIO — Guarded Adaptive Governance Simulator & Policy Arbitration Engine.
+
+    FTD-GAGS: Non-governing research instrumentation.
+    Simulates 6 compound policy stacks (sequential intervention composition)
+    and arbitrates across 6 governance profiles (ECONOMIC_MAXIMALIST,
+    PLASTICITY_PRESERVER, SURVIVABILITY_DEFENSIVE, ECOLOGY_BALANCED,
+    ONTOLOGY_HARMONIZER, ADAPTIVE_GENERALIST) to identify multi-objective
+    tradeoffs in adaptive governance.
+
+    Produces governance profile scores, conflict detection between competing
+    profiles (EXPECTANCY_VS_PLASTICITY, OPPORTUNITY_VS_SURVIVABILITY,
+    ONTOLOGY_VS_BALANCE), regime specialization risk (HHI), overfitting risk,
+    and a 6-category governance outcome classification per profile
+    (GOVERNANCE_STABLE, ECONOMIC_AUTHORITARIANISM, PLASTICITY_OVEREXPANSION,
+    ONTOLOGY_FRAGMENTATION, ECOLOGICAL_COLLAPSE, BALANCED_ADAPTATION).
+
+    Isolation guarantee: no production state is read or written.
+    Research only — not an execution authority.
+    """
+    from core.governance_simulator import compute_adaptive_governance as _cag
+    from dataclasses import asdict
+
+    session_trades = [asdict(t) for t in pnl_calc.trades]
+    historical     = data_lake.get_trades(limit=1000)
+
+    seen: dict[str, dict] = {}
+    for t in session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            seen[tid] = t
+    for t in historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in seen:
+            seen[tid] = t
+
+    all_trades = sorted(seen.values(), key=lambda x: x.get("entry_ts", 0))
+    return _cag(all_trades)
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -8996,7 +9038,7 @@ async def lio_report_bundle():
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
-        _mem_pressure, _counterfactual,
+        _mem_pressure, _counterfactual, _governance,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9015,6 +9057,7 @@ async def lio_report_bundle():
         lio_regime_survivability_cartography(),
         lio_memory_pressure_dynamics(),
         lio_counterfactual_interventions(),
+        lio_adaptive_governance_simulator(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9046,6 +9089,7 @@ async def lio_report_bundle():
         "regime_survivability_cartography":    _regime_carto,
         "memory_pressure_dynamics":            _mem_pressure,
         "counterfactual_interventions":        _counterfactual,
+        "adaptive_governance_simulator":       _governance,
     }
 
 
