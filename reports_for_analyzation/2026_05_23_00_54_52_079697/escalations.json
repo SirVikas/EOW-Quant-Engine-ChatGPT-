@@ -1,0 +1,60 @@
+{
+  "active": [
+    {
+      "escalation_id": "3bef0f79",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: ALLOW_COLLAPSE, IQ_REGRESSION",
+      "description": "[L3_SYNC] Intelligence score critically low: 4/100 | Allow rate critically low: 0%",
+      "anomaly_ids": [
+        "0d334dff",
+        "9b387287"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "ALLOW_COLLAPSE"
+      ],
+      "ts": 1779477633955,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    }
+  ],
+  "history": [
+    {
+      "escalation_id": "3bef0f79",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: ALLOW_COLLAPSE, IQ_REGRESSION",
+      "description": "[L3_SYNC] Intelligence score critically low: 4/100 | Allow rate critically low: 0%",
+      "anomaly_ids": [
+        "0d334dff",
+        "9b387287"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "ALLOW_COLLAPSE"
+      ],
+      "ts": 1779477633955,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    }
+  ],
+  "stats": {
+    "module": "ESCALATION_ENGINE",
+    "version": "1.0",
+    "total_evaluated": 1,
+    "total_escalated": 1,
+    "total_suppressed": 0,
+    "total_acked": 0,
+    "total_resolved": 0,
+    "l1_count": 0,
+    "l2_count": 0,
+    "l3_count": 1,
+    "active_count": 1,
+    "last_escalation_ts": 1779477633955
+  }
+}

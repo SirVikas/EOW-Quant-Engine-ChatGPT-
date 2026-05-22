@@ -1,0 +1,23 @@
+{
+  "module": "AI_SUMMARY_ENGINE",
+  "version": "1.0",
+  "summary_ts": 1779477633955,
+  "priority": "CRITICAL",
+  "signal_strength": 70.0,
+  "worst_severity": "CRITICAL",
+  "anomaly_count": 7,
+  "headline": "CRITICAL: Multiple severe conditions detected \u2014 immediate review required",
+  "risk_narrative": "Risk gate is OPEN. Loss streak: 3 consecutive losses \u2014 monitoring. 3 toxic RL context(s) blocked. Allow rate: 0%.",
+  "learning_narrative": "Intelligence score CRITICAL at 4/100 \u2014 insufficient learning data. RL maturity: BOOTSTRAPPING. Confidence: DECLINING. Exploration pressure: CONVERGED. 0% of RL contexts are profitable. 3 context(s) blocked as toxic.",
+  "performance_narrative": "Session PnL: -$129.74. 451 trade(s) executed this session. Profit factor BELOW 1.0 at 0.40 \u2014 session net-negative. Win rate: 1951%.",
+  "regime_narrative": "Active regime: TRENDING. TRENDING win rate WEAK at 0%.",
+  "directives": [
+    "Elevated toxic contexts \u2014 monitor RL learning stability",
+    "Loss streak detected \u2014 monitor next 3 trades before adjusting",
+    "Intelligence score critically low \u2014 RL engine has insufficient learning data",
+    "RL confidence declining \u2014 reduce position size until trend reverses",
+    "Profit factor below 1.0 \u2014 session is currently unprofitable",
+    "Win rate erosion in active regime \u2014 verify strategy-regime alignment"
+  ],
+  "directive_count": 6
+}

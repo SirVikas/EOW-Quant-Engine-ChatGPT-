@@ -1,0 +1,11 @@
+{
+  "report": "06_asymmetry_validation_report",
+  "prp": "001",
+  "total_outcomes": 0,
+  "global_achievement_ratio": 0.0,
+  "optimism_bias_rate": 0.0,
+  "asymmetry_health": "BROKEN",
+  "by_strategy": {},
+  "by_regime": {},
+  "ts": 1779477703678
+}

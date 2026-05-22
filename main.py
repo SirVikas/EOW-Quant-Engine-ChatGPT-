@@ -337,6 +337,10 @@ _uei_audit_ledger: list[dict] = []
 # Each call to /download-center-governance appends one immutable DOWNLOAD_CENTER_ASSESSMENT entry.
 _udca_audit_ledger: list[dict] = []
 
+# FTD-IREL: session-scoped institutional reporting experience ledger — append-only.
+# Each call to /institutional-reporting-experience appends one immutable IREL_ASSESSMENT entry.
+_irel_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9633,6 +9637,56 @@ async def lio_download_center_governance():
     return result
 
 
+@app.get("/api/learning-intelligence/institutional-reporting-experience")
+async def lio_institutional_reporting_experience():
+    """
+    LIO — Institutional Reporting Experience (IREL) Governance.
+
+    FTD-IREL: Non-governing research instrumentation.
+    Assesses PHOENIX's dynamic institutional reporting and observability layer —
+    whether the registry-driven rendering, timeline visualization, export
+    presentation, and download experience are fully operational:
+
+    - Renderer health (all 7 render modes: html, json, markdown, and variants)
+    - Dashboard orchestrator health (tab manifest, 8 tabs, all 25 reports mapped)
+    - Export presentation health (executive_html, research_markdown, governance_html)
+    - Download experience health (orchestrate, metadata, manifest, list_available)
+    - Timeline visualization health (evolution, lineage graph, regime map, drift flow)
+
+    Produces:
+    - IREL health score (0–100) and tier (HEALTHY → CRITICAL)
+    - Scoring breakdown by component (renderer 25, orchestrator 25, presentation 20,
+      download 15, timeline 15)
+    - Full tab manifest (8 institutional tabs, all 25 reports auto-discovered)
+    - Dashboard structure with per-report data availability status
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (IREL-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional IREL principles (autonomous reporting blocked)
+
+    Hard constitutional rules:
+      PHOENIX reporting governance MUST remain registry-driven and institutionally
+      auditable. No autonomous report modification, no headless export without
+      human approval, no dashboard-driven order placement.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT an export, execution, or governance authority.
+    """
+    from core.dashboard_orchestrator import compute_institutional_reporting_experience as _cirel
+    result = _cirel(snapshots=list(_export_snapshot_ledger))
+
+    # Append the immutable IREL assessment entry to the session-scoped ledger.
+    audit_entry = {
+        "audit_id":   result.get("audit_id", ""),
+        "score":      result.get("irel_health_score", 0),
+        "tier":       result.get("irel_health_tier", ""),
+        "ts_ms":      result.get("generated_at_ms", 0),
+        "auto_authorized": False,
+    }
+    _irel_audit_ledger.append(audit_entry)
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9643,6 +9697,7 @@ async def lio_report_bundle():
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
         _mem_pressure, _counterfactual, _governance, _doctrine,
         _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao, _rtag, _uei, _udca,
+        _irel,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9672,6 +9727,7 @@ async def lio_report_bundle():
         lio_report_ecosystem_governance(),
         lio_export_infrastructure_governance(),
         lio_download_center_governance(),
+        lio_institutional_reporting_experience(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9714,6 +9770,7 @@ async def lio_report_bundle():
         "report_ecosystem_governance":         _rtag,
         "export_infrastructure_governance":    _uei,
         "download_center_governance":          _udca,
+        "institutional_reporting_experience":  _irel,
     }
 
 

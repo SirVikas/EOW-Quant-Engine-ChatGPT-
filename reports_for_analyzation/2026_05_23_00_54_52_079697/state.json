@@ -1,0 +1,31 @@
+{
+  "module": "AUTO_INTELLIGENCE_ENGINE",
+  "phase": "030",
+  "enabled": true,
+  "interval_min": 5.0,
+  "min_trades": 30,
+  "min_score": 55.0,
+  "cycles_run": 0,
+  "daily_cycles": 0,
+  "max_daily": 12,
+  "last_run_ts": null,
+  "pending_check": false,
+  "last_cycle": {},
+  "evolution": {
+    "module": "EVOLUTION_TRACKER",
+    "total_correction_pairs": 0,
+    "drift_paused": false,
+    "paused_until_cycle": 0,
+    "current_cycle": 0,
+    "recent_corrections": [],
+    "total_alerts": 0,
+    "active_alerts": [],
+    "recent_alerts": [],
+    "reactive_adjustments": {
+      "total": 0,
+      "by_diagnosis": {},
+      "recent": []
+    },
+    "snapshot_ts": 1779477701393
+  }
+}

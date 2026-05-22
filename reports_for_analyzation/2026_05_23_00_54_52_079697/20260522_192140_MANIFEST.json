@@ -1,0 +1,44 @@
+{
+  "framework": "EOW Live Process Access Framework",
+  "version": "1.1",
+  "snapshot_id": "46508e69-b906-4c8b-b9ed-a0d21aa2ccf5",
+  "generated_at": "2026-05-22T19:21:40.889Z",
+  "runtime_uptime_sec": 188.9,
+  "contents": {
+    "*_runtime_logs.json": "All loguru log records (last 2000)",
+    "*_runtime_logs.txt": "Human-readable plain-text log stream",
+    "*_thought_log.json": "Engine CT-Scan decision trace (last 500 thoughts)",
+    "*_rl_qtable.json": "Complete RL Q-table \u2014 all context states",
+    "*_trade_logs.json": "In-memory + SQLite trade execution history",
+    "*_CHECKSUMS.sha256": "SHA-256 hashes for all artifacts"
+  },
+  "export_limits": {
+    "max_log_records": 2000,
+    "max_message_len": 2048,
+    "max_trade_records": 500,
+    "max_bundle_bytes": 52428800
+  },
+  "artifact_sizes": {
+    "20260522_192140_runtime_logs.json": 518473,
+    "20260522_192140_runtime_logs.txt": 256257,
+    "20260522_192140_thought_log.json": 8425,
+    "20260522_192140_rl_qtable.json": 8024,
+    "20260522_192140_trade_logs.json": 1141160,
+    "20260522_192140_CHECKSUMS.sha256": 493
+  },
+  "sha256_hashes": {
+    "20260522_192140_runtime_logs.json": "2bdb9aff0c269e4c8c9b013dd23a4e345df0d7662d6e1bd0bbfc12dbfd813620",
+    "20260522_192140_runtime_logs.txt": "f012b5daace9303426910517780e3f5e29df2f790de3f177176a503935f942d5",
+    "20260522_192140_thought_log.json": "e051c929d7590d6a5d477834a086165cb0c5a52331b87e4d69e1f90b29dd0082",
+    "20260522_192140_rl_qtable.json": "f15c78a50dd2fc4a49fe9b5a8a7c704765a368b9cdc6b2e41345f53706f99246",
+    "20260522_192140_trade_logs.json": "45cfed4db0e926cd3b6958ad7d31300f60e9697d25f08d009152cdfa155c6f77",
+    "20260522_192140_CHECKSUMS.sha256": "2b77c6fa57a7852e0288248e3faaafed9015c0aeaa930c9cfcf2b6598be878bc"
+  },
+  "architecture": {
+    "extraction_mode": "read-only",
+    "thread_safety": "threading.RLock on all buffer access",
+    "corruption_risk": "zero \u2014 no mutation of engine state",
+    "blocking": "non-blocking (safe for asyncio.to_thread)",
+    "rl_consistency": "GIL-protected primitive reads; per-entry try/except"
+  }
+}

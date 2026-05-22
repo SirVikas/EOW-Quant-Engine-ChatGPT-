@@ -1,0 +1,24 @@
+{
+  "title": "Trade Quality Evolution \u2014 Are Later Trades Smarter? (FTD-055-ATHENA)",
+  "generated_at": "2026-05-22 19:21:40 UTC",
+  "session_trades": 0,
+  "verdict": "INSUFFICIENT_DATA",
+  "overall_session": {
+    "n": 0,
+    "wr_pct": 0.0,
+    "pf": 0.0,
+    "avg_pnl": 0.0,
+    "ev": 0.0
+  },
+  "early_vs_late": {
+    "early_half": {},
+    "late_half": {},
+    "wr_delta_pct": 0.0,
+    "pf_delta": 0.0,
+    "trend": "INSUFFICIENT_DATA",
+    "interpretation": "Only 0 session trades \u2014 need \u226510 for meaningful comparison."
+  },
+  "rolling_windows": [],
+  "regime_evolution": {},
+  "action": "Insufficient data (0 session trades \u2014 need \u226510)."
+}

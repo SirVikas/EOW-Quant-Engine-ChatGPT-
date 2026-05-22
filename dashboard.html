@@ -560,6 +560,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
   <button class="tab-btn"        onclick="switchTab('perf')"     id="tab-btn-perf">📊 Performance</button>
   <button class="tab-btn"        onclick="switchTab('lio')"      id="tab-btn-lio">🧬 LIO</button>
+  <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
 </nav>
 
 <!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
@@ -1968,6 +1969,168 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 </div>
 </div><!-- /tab-lio -->
+
+<!-- ══ INSTITUTIONAL TAB (FTD-IREL) ══════════════════════════════════════════ -->
+<div id="tab-institutional" class="tab-panel">
+<div class="main">
+
+  <!-- Constitutional banner — always visible -->
+  <div class="card" style="background:#1A202C;color:#F7FAFC;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px">🏛 PHOENIX Constitutional Governance Notice</div>
+    <div style="font-size:11px;opacity:.85;line-height:1.6">
+      All institutional reports are research instruments — not trading instructions.<br>
+      Human authority is required for all governance and deployment decisions.<br>
+      No report output is autonomously authorized to modify engine behaviour.<br>
+      <span style="opacity:.6;font-size:10px">auto_authorized=False | human_authority=True</span>
+    </div>
+  </div>
+
+  <!-- IREL health summary card -->
+  <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">IREL Health Score</div>
+      <div id="irel-score" style="font-size:32px;font-weight:700;color:var(--c-blue)">—</div>
+      <div id="irel-tier"  style="font-size:11px;color:var(--muted)">Loading...</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="irel-breakdown"></div>
+    <button onclick="loadIREL()" style="padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:12px">⟳ Refresh</button>
+  </div>
+
+  <!-- Tab manifest — auto-discovered from REPORT_REGISTRY -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">Institutional Tab Manifest <span id="irel-tab-count" style="color:var(--muted);font-weight:400"></span></div>
+    <div id="irel-tab-manifest" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
+  </div>
+
+  <!-- Report coverage by tab -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">Report Coverage <span id="irel-coverage" style="color:var(--muted);font-weight:400"></span></div>
+    <div id="irel-report-statuses"></div>
+  </div>
+
+  <!-- Download center -->
+  <div class="card">
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">Download Center</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">All downloads require explicit human approval. auto_authorized=False.</div>
+    <div id="irel-downloads" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
+
+</div>
+</div><!-- /tab-institutional -->
+
+<script>
+// ── FTD-IREL: Institutional tab logic ─────────────────────────────────────────
+
+let _irelData = null;
+let _irelLoaded = false;
+
+function loadIREL() {
+  fetch('/api/learning-intelligence/institutional-reporting-experience')
+    .then(r => r.json())
+    .then(data => {
+      _irelData = data;
+      _irelLoaded = true;
+      renderIREL(data);
+    })
+    .catch(e => {
+      document.getElementById('irel-tier').textContent = 'Error: ' + e.message;
+    });
+}
+
+function _tierColor(tier) {
+  return {HEALTHY:'#276749',ADEQUATE:'#2B6CB0',VULNERABLE:'#92400E',CRITICAL:'#9B2C2C'}[tier] || '#718096';
+}
+
+function renderIREL(data) {
+  // Health score
+  const score = data.irel_health_score ?? '—';
+  const tier  = data.irel_health_tier  ?? 'UNKNOWN';
+  document.getElementById('irel-score').textContent = score;
+  document.getElementById('irel-score').style.color = _tierColor(tier);
+  document.getElementById('irel-tier').textContent  = tier + ' | auto_authorized=False';
+
+  // Scoring breakdown pills
+  const bd = data.scoring_breakdown || {};
+  const bdEl = document.getElementById('irel-breakdown');
+  bdEl.innerHTML = '';
+  for (const [k, v] of Object.entries(bd)) {
+    const pill = document.createElement('div');
+    pill.style.cssText = 'background:#EDF2F7;border-radius:6px;padding:6px 10px;font-size:11px;text-align:center';
+    pill.innerHTML = `<div style="font-weight:600;font-size:10px;color:#718096;text-transform:uppercase">${k}</div>
+                      <div style="font-size:16px;font-weight:700">${v.score}/${v.weight}</div>`;
+    bdEl.appendChild(pill);
+  }
+
+  // Tab manifest
+  const tabs = (data.tab_manifest || {}).tabs || [];
+  document.getElementById('irel-tab-count').textContent =
+    `(${tabs.length} tabs, ${(data.tab_manifest||{}).total_mapped_reports||0} reports)`;
+  const tmEl = document.getElementById('irel-tab-manifest');
+  tmEl.innerHTML = '';
+  for (const tab of tabs) {
+    const d = document.createElement('div');
+    d.style.cssText = 'background:#F7FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:8px 10px';
+    d.innerHTML = `<div style="font-size:13px;margin-bottom:2px">${tab.icon} <b>${tab.label}</b></div>
+                   <div style="font-size:10px;color:#718096">${tab.report_count} reports</div>
+                   <div style="font-size:10px;color:#A0AEC0">${tab.description}</div>`;
+    tmEl.appendChild(d);
+  }
+
+  // Report statuses (group by tab)
+  const statuses = (data.dashboard_structure || {}).report_statuses || [];
+  const populated = (data.dashboard_structure || {}).populated_reports || 0;
+  const total     = (data.dashboard_structure || {}).total_reports || 25;
+  const pct       = (data.dashboard_structure || {}).coverage_pct || 0;
+  document.getElementById('irel-coverage').textContent =
+    `(${populated}/${total} populated — ${pct}%)`;
+  const rsEl = document.getElementById('irel-report-statuses');
+  rsEl.innerHTML = '';
+  const byTab = {};
+  for (const s of statuses) {
+    (byTab[s.tab_id] = byTab[s.tab_id] || []).push(s);
+  }
+  for (const [tabId, reps] of Object.entries(byTab)) {
+    const sec = document.createElement('div');
+    sec.style.marginBottom = '6px';
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;color:#718096;margin-bottom:3px';
+    hdr.textContent = tabId;
+    sec.appendChild(hdr);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px';
+    for (const r of reps) {
+      const chip = document.createElement('span');
+      chip.style.cssText = `background:${r.has_data?'#C6F6D5':'#FED7D7'};color:${r.has_data?'#276749':'#9B2C2C'};`
+        + 'border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600';
+      chip.title = r.name + ' | ' + r.priority;
+      chip.textContent = r.report_id;
+      row.appendChild(chip);
+    }
+    sec.appendChild(row);
+    rsEl.appendChild(sec);
+  }
+
+  // Download center chips
+  const dlEl = document.getElementById('irel-downloads');
+  dlEl.innerHTML = '';
+  const formats = ['html', 'json', 'markdown', 'zip', 'pdf_ready_html'];
+  for (const fmt of formats) {
+    const chip = document.createElement('span');
+    chip.style.cssText = 'background:#EBF8FF;color:#2B6CB0;border:1px solid #BEE3F8;'
+      + 'border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:default';
+    chip.textContent = fmt;
+    chip.title = 'auto_authorized=False — human approval required';
+    dlEl.appendChild(chip);
+  }
+}
+
+// Load on tab switch — only once, or on explicit refresh
+const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
+function switchTab(t) {
+  if (_origSwitchTab) _origSwitchTab(t);
+  if (t === 'institutional' && !_irelLoaded) loadIREL();
+}
+</script>
 
 <!-- ══ VAULT MODAL ════════════════════════════════════════════════════════════ -->
 <div id="vault-overlay" onclick="closeVaultModal(event)">
