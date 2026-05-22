@@ -217,6 +217,7 @@ def build_dashboard_structure(bundle_data: Optional[dict] = None) -> dict:
                 "name":       meta.get("name", report_id),
                 "tab_id":     tab_id,
                 "bundle_key": bk,
+                "endpoint":   meta.get("endpoint", ""),
                 "has_data":   has_data,
                 "priority":   priority,
                 "family":     meta.get("report_family", ""),
