@@ -305,6 +305,10 @@ _grv_audit_ledger: list[dict] = []
 # EXECUTION entries would be added here on human-confirmed pilot trades (future).
 _gmp_pilot_ledger: list[dict] = []
 
+# FTD-LHEO: session-scoped evolution observatory ledger — append-only.
+# Each call to /long-horizon-evolution appends one immutable ANALYSIS entry.
+_lheo_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9225,6 +9229,66 @@ async def lio_guarded_micro_pilot():
     return result
 
 
+@app.get("/api/learning-intelligence/long-horizon-evolution")
+async def lio_long_horizon_evolution():
+    """
+    LIO — Long-Horizon Constitutional Evolution Observatory.
+
+    FTD-LHEO: Non-governing research instrumentation.
+    Segments the full paper trade history into up to 5 temporal eras and
+    computes 8 constitutional continuity metrics to detect whether PHOENIX
+    remains cognitively stable across very long learning horizons:
+
+    - Constitutional stability (health variance across eras)
+    - Drift acceleration (net-expectancy rate of change between eras)
+    - Governance ideology concentration (regime monoculture via HHI)
+    - Plasticity half-life (exploration decay rate from early to late era)
+    - Exploration extinction risk (absolute late-era exploration level)
+    - Survivability monoculture risk (mean within-era regime HHI)
+    - Cognitive diversity retention (session + regime + win-rate convergence)
+    - Long-horizon replay dependence (low explore + declining win rate)
+
+    Produces:
+    - Evolutionary classification (CONSTITUTIONALLY_RESILIENT →
+      LONG_HORIZON_LOCKDOWN_RISK)
+    - Long-horizon stability score (0–100)
+    - Per-era cognitive snapshots + cognitive lineage trajectories
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (LHEO-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional evolution principles (self-rewriting blocked)
+
+    Hard constitutional rules:
+      PHOENIX must NEVER evolve beyond explicit constitutional human governance.
+      No self-rewriting doctrine, recursive constitutional mutation, or sovereign
+      adaptive succession. All evolution decisions remain at developer discretion.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT an execution or governance authority.
+    """
+    from core.evolution_observatory import compute_long_horizon_evolution as _clhe
+    from dataclasses import asdict
+    _session_trades = [asdict(t) for t in pnl_calc.trades]
+    _historical = data_lake.get_trades(limit=2000)
+    _seen: dict[str, dict] = {}
+    for t in _session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            _seen[tid] = t
+    for t in _historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in _seen:
+            _seen[tid] = t
+    _all_trades = sorted(_seen.values(), key=lambda x: x.get("entry_ts", 0))
+
+    result = _clhe(_all_trades)
+
+    # Append the immutable analysis audit entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _lheo_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9233,7 +9297,8 @@ async def lio_report_bundle():
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
-        _mem_pressure, _counterfactual, _governance, _doctrine, _reality, _micro_pilot,
+        _mem_pressure, _counterfactual, _governance, _doctrine,
+        _reality, _micro_pilot, _lheo,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9256,6 +9321,7 @@ async def lio_report_bundle():
         lio_governed_adaptive_doctrine(),
         lio_reality_verification(),
         lio_guarded_micro_pilot(),
+        lio_long_horizon_evolution(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9291,6 +9357,7 @@ async def lio_report_bundle():
         "governed_adaptive_doctrine":          _doctrine,
         "reality_verification":                _reality,
         "guarded_micro_pilot":                 _micro_pilot,
+        "long_horizon_evolution":              _lheo,
     }
 
 
