@@ -111,7 +111,8 @@ from core.infra_health_manager import InfraHealthManager
 from utils.capital_scaler import CapitalScaler
 from utils.export_manager import ExportManager
 from core.persistence.suppression_log import SuppressionEventLog  # FTD-DECISION-SNAP
-from core.exploration_economics import build_exploration_origin as _build_eo  # FTD-EXPLORE-ATTR
+from core.exploration_economics import build_exploration_origin as _build_eo    # FTD-EXPLORE-ATTR
+from core.economic_truth import classify_trade_economics as _classify_eco       # FTD-ECO-TRUTH
 from core.time.session_definitions import get_session_label as _get_session_label  # FTD-DECISION-SNAP
 from utils.report_generator import build_report_archive
 from core.export_engine import system_export_engine, SystemSnapshot   # FTD-025A
@@ -467,6 +468,20 @@ async def on_tick(tick: Tick):
             _eo = _pending_exploration_origins.pop(sym, None)
             if _eo is not None:
                 last_trade.exploration_origin = _eo
+            # FTD-ECO-TRUTH: compute economic ground truth at close time
+            try:
+                last_trade.economic_truth = _classify_eco({
+                    "gross_pnl":               last_trade.gross_pnl,
+                    "net_pnl":                 last_trade.net_pnl,
+                    "fee_entry":               last_trade.fee_entry,
+                    "fee_exit":                last_trade.fee_exit,
+                    "entry_ts":                last_trade.entry_ts,
+                    "exit_ts":                 last_trade.exit_ts,
+                    "r_multiple":              last_trade.r_multiple,
+                    "crossed_session_boundary": last_trade.crossed_session_boundary,
+                })
+            except Exception:
+                pass
             data_lake.save_trade(asdict(last_trade))
             # MASTER-001: update signal filter loss/win tracker
             if last_trade.net_pnl >= 0:
@@ -8655,6 +8670,35 @@ async def lio_alpha_discovery():
     }
 
 
+@app.get("/api/learning-intelligence/economic-ground-truth")
+async def lio_economic_ground_truth():
+    """
+    LIO — Economic ground truth layer.
+
+    FTD-ECO-TRUTH: Non-governing read-only overlay.
+    Provides fee-adjusted expectancy, payoff geometry, subsystem attribution,
+    economic classification breakdown, session economics, and survivability score.
+    """
+    from core.economic_truth import compute_economic_ground_truth as _cegt
+    from dataclasses import asdict
+
+    session_trades = [asdict(t) for t in pnl_calc.trades]
+    historical     = data_lake.get_trades(limit=1000)
+
+    seen: dict[str, dict] = {}
+    for t in session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            seen[tid] = t
+    for t in historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in seen:
+            seen[tid] = t
+
+    all_trades = sorted(seen.values(), key=lambda x: x.get("entry_ts", 0))
+    return _cegt(all_trades)
+
+
 @app.get("/api/learning-intelligence/exploration-economic-attribution")
 async def lio_exploration_economic_attribution():
     """
@@ -8751,7 +8795,7 @@ async def lio_report_bundle():
     (
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
-        _exp_diag, _exp_econ,
+        _exp_diag, _exp_econ, _eco_truth,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8765,6 +8809,7 @@ async def lio_report_bundle():
         lio_session_attribution(),
         lio_exploration_diagnostics(),
         lio_exploration_economic_attribution(),
+        lio_economic_ground_truth(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -8791,6 +8836,7 @@ async def lio_report_bundle():
         "session_attribution":             _sess_attr,
         "exploration_diagnostics":         _exp_diag,
         "exploration_economic_attribution": _exp_econ,
+        "economic_ground_truth":            _eco_truth,
     }
 
 
