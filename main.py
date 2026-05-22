@@ -333,6 +333,10 @@ _export_snapshot_ledger: list[dict] = []
 # Each call to /export-infrastructure-governance appends one immutable INFRASTRUCTURE_ASSESSMENT entry.
 _uei_audit_ledger: list[dict] = []
 
+# FTD-UDCA: session-scoped download center governance ledger — append-only.
+# Each call to /download-center-governance appends one immutable DOWNLOAD_CENTER_ASSESSMENT entry.
+_udca_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9584,6 +9588,51 @@ async def lio_export_infrastructure_governance():
     return result
 
 
+@app.get("/api/learning-intelligence/download-center-governance")
+async def lio_download_center_governance():
+    """
+    LIO — Constitutional Unified Download Center & Archive Experience Governance.
+
+    FTD-UDCA: Non-governing research instrumentation.
+    Assesses PHOENIX's institutional archive experience layer — whether the
+    archive is operationally accessible, navigable, replayable, and
+    constitutionally auditable:
+
+    - Archive browser operability (snapshot browsing, filtering, timeline)
+    - Replay explorer health (lineage replay, snapshot comparison, era comparison)
+    - Export preview integrity (manifest preview, dependency chain, size estimates)
+    - Archive visualization health (dependency graph, bundle topology, lineage tree)
+    - Institutional search operability (report search, bundle search, snapshot search)
+    - Lineage navigation accessibility
+    - Download center overall accessibility
+
+    Produces:
+    - Download center health score (0–100) and tier (HEALTHY → CRITICAL)
+    - All 6 bundle types and 7 snapshot types enumerated
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (UDCA-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional download center principles (autonomous actions blocked)
+
+    Hard constitutional rules:
+      PHOENIX archive experience MUST remain institutionally auditable
+      and reconstructible. All archive access authority MUST remain
+      constitutionally subordinate to explicit human governance.
+      No autonomous archive mutation, self-authorized snapshot deletion,
+      autonomous lineage rewriting, or silent manifest alteration.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT an export, execution, or governance authority.
+    """
+    from core.download_dashboard import compute_download_center_governance as _cdcg
+    result = _cdcg(snapshots=list(_export_snapshot_ledger))
+
+    # Append the immutable download center assessment entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _udca_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9593,7 +9642,7 @@ async def lio_report_bundle():
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
         _mem_pressure, _counterfactual, _governance, _doctrine,
-        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao, _rtag, _uei,
+        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod, _hmao, _rtag, _uei, _udca,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9622,6 +9671,7 @@ async def lio_report_bundle():
         lio_human_meaning_alignment(),
         lio_report_ecosystem_governance(),
         lio_export_infrastructure_governance(),
+        lio_download_center_governance(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9663,6 +9713,7 @@ async def lio_report_bundle():
         "human_meaning_alignment":             _hmao,
         "report_ecosystem_governance":         _rtag,
         "export_infrastructure_governance":    _uei,
+        "download_center_governance":          _udca,
     }
 
 
