@@ -8854,6 +8854,45 @@ async def lio_exploration_diagnostics():
     }
 
 
+@app.get("/api/learning-intelligence/counterfactual-interventions")
+async def lio_counterfactual_interventions():
+    """
+    LIO — Protected Counterfactual Intervention Laboratory.
+
+    FTD-CIL: Non-governing research instrumentation.
+    Simulates 8 hypothetical adaptive interventions (NegMem soft decay,
+    Rule4 high explore, NY-only survivability, 5m TF projection, RL reset
+    MEAN_REVERTING, ASIA suppression, RL-dominant ontology, stricter ecology)
+    against the historical trade stream in an isolated sandbox.
+
+    Produces per-intervention economics deltas, 7-category classification
+    (BENEFICIAL_ADAPTATION, COSMETIC_STABILITY, OPPORTUNITY_COLLAPSE,
+    FRAGILE_OPTIMIZATION, ONTOLOGY_STABILIZATION, COGNITIVE_OVERFITTING,
+    INSUFFICIENT_DATA), replay confidence scores, and intervention ranking.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — not an execution authority.
+    """
+    from core.counterfactual_lab import compute_counterfactual_interventions as _cci
+    from dataclasses import asdict
+
+    session_trades = [asdict(t) for t in pnl_calc.trades]
+    historical     = data_lake.get_trades(limit=1000)
+
+    seen: dict[str, dict] = {}
+    for t in session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            seen[tid] = t
+    for t in historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in seen:
+            seen[tid] = t
+
+    all_trades = sorted(seen.values(), key=lambda x: x.get("entry_ts", 0))
+    return _cci(all_trades)
+
+
 @app.get("/api/learning-intelligence/memory-pressure-dynamics")
 async def lio_memory_pressure_dynamics():
     """
@@ -8957,7 +8996,7 @@ async def lio_report_bundle():
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
-        _mem_pressure,
+        _mem_pressure, _counterfactual,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8975,6 +9014,7 @@ async def lio_report_bundle():
         lio_timeframe_survivability(),
         lio_regime_survivability_cartography(),
         lio_memory_pressure_dynamics(),
+        lio_counterfactual_interventions(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9005,6 +9045,7 @@ async def lio_report_bundle():
         "timeframe_survivability":             _tf_surviv,
         "regime_survivability_cartography":    _regime_carto,
         "memory_pressure_dynamics":            _mem_pressure,
+        "counterfactual_interventions":        _counterfactual,
     }
 
 
