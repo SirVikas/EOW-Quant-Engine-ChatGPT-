@@ -313,6 +313,10 @@ _lheo_audit_ledger: list[dict] = []
 # Each call to /constitutional-recovery-observatory appends one immutable ANALYSIS entry.
 _ckpd_audit_ledger: list[dict] = []
 
+# FTD-EIOD: session-scoped epistemic integrity ledger — append-only.
+# Each call to /epistemic-integrity-observatory appends one immutable ANALYSIS entry.
+_eiod_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9354,6 +9358,67 @@ async def lio_constitutional_recovery_observatory():
     return result
 
 
+@app.get("/api/learning-intelligence/epistemic-integrity-observatory")
+async def lio_epistemic_integrity_observatory():
+    """
+    LIO — Constitutional Scientific Method Doctrine & Epistemic Integrity Observatory.
+
+    FTD-EIOD: Non-governing research instrumentation.
+    Analyses the full paper trade history for scientific-method survivability,
+    measuring 8 epistemic integrity metrics to detect whether PHOENIX is
+    drifting from evidence-driven cognition into ideological self-confirmation:
+
+    - Evidence sufficiency (trade/regime/session/exploration breadth)
+    - Replay statistical confidence (Wilson CI width on win rate)
+    - Governance evidence depth (diversity of evidence base for governance)
+    - Contradiction tolerance (cross-regime win-rate std dev)
+    - Minority hypothesis survivability (non-dominant regime persistence)
+    - Falsification rate (exploration × win-rate volatility proxy)
+    - Consensus rigidity (HHI of regime/session distributions)
+    - Epistemic plasticity (early-vs-late belief updating)
+
+    Produces:
+    - Epistemic classification (SCIENTIFICALLY_HEALTHY →
+      EPISTEMIC_LOCKDOWN_RISK)
+    - Epistemic integrity score (0–100)
+    - Epistemic lineage (early/mid/late epoch health labels)
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (EIOD-{ts}-{sha256[:16]} prefix)
+    - Hard constitutional epistemic principles (truth sovereignty blocked)
+
+    Hard constitutional rules:
+      PHOENIX must NEVER become sovereign over truth legitimacy itself.
+      No autonomous truth certification, sovereign epistemic authority,
+      self-validating doctrine, or recursive scientific legitimacy.
+      All epistemic decisions remain at developer discretion.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT a truth, execution, governance, or epistemic authority.
+    """
+    from core.epistemic_observatory import compute_epistemic_integrity as _cei
+    from dataclasses import asdict
+    _session_trades = [asdict(t) for t in pnl_calc.trades]
+    _historical = data_lake.get_trades(limit=2000)
+    _seen: dict[str, dict] = {}
+    for t in _session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            _seen[tid] = t
+    for t in _historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in _seen:
+            _seen[tid] = t
+    _all_trades = sorted(_seen.values(), key=lambda x: x.get("entry_ts", 0))
+
+    result = _cei(_all_trades)
+
+    # Append the immutable analysis audit entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _eiod_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9363,7 +9428,7 @@ async def lio_report_bundle():
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
         _mem_pressure, _counterfactual, _governance, _doctrine,
-        _reality, _micro_pilot, _lheo, _ckpd_recovery,
+        _reality, _micro_pilot, _lheo, _ckpd_recovery, _eiod,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9388,6 +9453,7 @@ async def lio_report_bundle():
         lio_guarded_micro_pilot(),
         lio_long_horizon_evolution(),
         lio_constitutional_recovery_observatory(),
+        lio_epistemic_integrity_observatory(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9425,6 +9491,7 @@ async def lio_report_bundle():
         "guarded_micro_pilot":                 _micro_pilot,
         "long_horizon_evolution":              _lheo,
         "constitutional_recovery_observatory": _ckpd_recovery,
+        "epistemic_integrity_observatory":     _eiod,
     }
 
 
