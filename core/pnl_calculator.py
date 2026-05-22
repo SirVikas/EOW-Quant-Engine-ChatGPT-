@@ -65,6 +65,11 @@ class TradeRecord:
     #       visit_count_at_entry, explore_floor_active
     exploration_origin:       Optional[dict] = None
 
+    # FTD-ECO-TRUTH: economic ground truth — computed at trade close time
+    # Keys: gross_pnl, net_pnl, fees_paid, fee_drag_pct, hold_duration_sec,
+    #       risk_reward_realized, economic_classification, payoff_geometry
+    economic_truth:           Optional[dict] = None
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 
