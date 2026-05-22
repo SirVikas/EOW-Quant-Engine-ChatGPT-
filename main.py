@@ -300,6 +300,11 @@ _gadd_audit_ledger: list[dict] = []
 # Each call to /reality-verification appends one immutable entry.
 _grv_audit_ledger: list[dict] = []
 
+# FTD-GMPD: session-scoped micro-pilot execution ledger — append-only.
+# Holds ANALYSIS entries from each /guarded-micro-pilot call.
+# EXECUTION entries would be added here on human-confirmed pilot trades (future).
+_gmp_pilot_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9166,6 +9171,60 @@ async def lio_reality_verification():
     return result
 
 
+@app.get("/api/learning-intelligence/guarded-micro-pilot")
+async def lio_guarded_micro_pilot():
+    """
+    LIO — Ultra-Guarded Micro Pilot Execution Doctrine & Human Confirmation Exchange Bridge.
+
+    FTD-GMPD: Non-governing research instrumentation.
+    Synthesises paper trade history and the session-scoped pilot execution ledger
+    to produce a constitutional micro-pilot governance assessment:
+
+    - Execution readiness (paper corpus quality: size, fee/slippage coverage)
+    - Pilot state (PAPER_ONLY, SHADOW_OBSERVATION, HUMAN_ARMED_MICRO,
+      SINGLE_CONFIRM_EXECUTION, MANUAL_KILL_SWITCH, CONSTITUTION_LOCKDOWN)
+    - Reality classification (REALITY_CONSISTENT → PILOT_LOCKDOWN_RECOMMENDED)
+    - Execution reconciliation metrics (fill, slippage, latency, fee drag,
+      hold economics) — populated only when execution entries exist in ledger
+    - Confirmation chain integrity (human_confirmed invariant)
+    - Kill-switch advisory
+    - Research-only recommendations (never auto-authorised)
+    - Pilot opportunity suggestion (human confirmation always required)
+    - Immutable audit entry (GMPD-{ts}-{sha256} prefix)
+
+    Hard constitutional rules:
+      PHOENIX may NEVER self-fire an exchange order.
+      PHOENIX must NEVER possess sovereign economic execution authority.
+      All execution authority remains explicitly human-controlled.
+      No autonomous scaling, re-entry, or risk escalation.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — NOT an execution authority.
+    """
+    from core.micro_pilot_doctrine import compute_guarded_micro_pilot as _cgmp
+    from dataclasses import asdict
+    _session_trades = [asdict(t) for t in pnl_calc.trades]
+    _historical = data_lake.get_trades(limit=1000)
+    _seen: dict[str, dict] = {}
+    for t in _session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            _seen[tid] = t
+    for t in _historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in _seen:
+            _seen[tid] = t
+    _all_trades = sorted(_seen.values(), key=lambda x: x.get("entry_ts", 0))
+
+    result = _cgmp(_all_trades, pilot_ledger=_gmp_pilot_ledger)
+
+    # Append the immutable analysis audit entry to the session-scoped ledger.
+    if isinstance(result.get("audit_entry"), dict):
+        _gmp_pilot_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9174,7 +9233,7 @@ async def lio_report_bundle():
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
-        _mem_pressure, _counterfactual, _governance, _doctrine, _reality,
+        _mem_pressure, _counterfactual, _governance, _doctrine, _reality, _micro_pilot,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9196,6 +9255,7 @@ async def lio_report_bundle():
         lio_adaptive_governance_simulator(),
         lio_governed_adaptive_doctrine(),
         lio_reality_verification(),
+        lio_guarded_micro_pilot(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9230,6 +9290,7 @@ async def lio_report_bundle():
         "adaptive_governance_simulator":       _governance,
         "governed_adaptive_doctrine":          _doctrine,
         "reality_verification":                _reality,
+        "guarded_micro_pilot":                 _micro_pilot,
     }
 
 
