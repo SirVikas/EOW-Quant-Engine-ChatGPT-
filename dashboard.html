@@ -2124,12 +2124,7 @@ function renderIREL(data) {
   }
 }
 
-// Load on tab switch — only once, or on explicit refresh
-const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
-function switchTab(t) {
-  if (_origSwitchTab) _origSwitchTab(t);
-  if (t === 'institutional' && !_irelLoaded) loadIREL();
-}
+
 </script>
 
 <!-- ══ VAULT MODAL ════════════════════════════════════════════════════════════ -->
@@ -2312,7 +2307,7 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['overview','dbo','combat','report','perf','lio'].forEach(t => {
+  ['overview','dbo','combat','report','perf','lio','institutional'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
@@ -2343,6 +2338,9 @@ function switchTab(name) {
   }
   if (name === 'lio') {
     loadLIO();
+  }
+  if (name === 'institutional' && !_irelLoaded) {
+    loadIREL();
   }
 }
 
@@ -2842,8 +2840,6 @@ async function forceActivateLearningMemory() {
 }
 
 // Auto-load layer panels when dbo tab is opened
-const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
-
 function pushEquityPoint(eq, bh) {
   if(!eqChart) return;
   state.equityCurve.push(eq); state.equityCurve.shift();
