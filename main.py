@@ -296,6 +296,10 @@ _supp_log = SuppressionEventLog()
 # Each call to /governed-adaptive-doctrine appends one immutable entry.
 _gadd_audit_ledger: list[dict] = []
 
+# FTD-GRVL: session-scoped reality-verification audit ledger — append-only.
+# Each call to /reality-verification appends one immutable entry.
+_grv_audit_ledger: list[dict] = []
+
 
 def _thought(msg: str, level: str = "INFO"):
     entry = {"ts": int(time.time() * 1000), "level": level, "msg": msg}
@@ -9103,6 +9107,65 @@ async def lio_governed_adaptive_doctrine():
     return result
 
 
+@app.get("/api/learning-intelligence/reality-verification")
+async def lio_reality_verification():
+    """
+    LIO — Guarded Reality Verification Layer.
+
+    FTD-GRVL: Non-governing research instrumentation.
+    Measures divergence between simulated paper-trading assumptions and
+    real-world execution friction across 8 metrics:
+
+    - Fill divergence (slippage cost vs gross PnL)
+    - Slippage divergence (per-trade cost ratio)
+    - Latency divergence (hold-duration coefficient of variation)
+    - Liquidity survivability (% trades profitable after 2× spread)
+    - Spread fragility (2×/5×/10× spread stress scenarios)
+    - Market impact sensitivity (NE degradation under 2× fee stress)
+    - Pilot survivability score (composite 0–100)
+    - Simulation-reality confidence (corpus size + cost coverage)
+
+    Produces:
+    - Pilot state (PAPER_ONLY → CONSTITUTION_LOCKDOWN)
+    - Reality-alignment classification (REALITY_ALIGNED →
+      PILOT_NOT_RECOMMENDED)
+    - Research-only recommendations (never auto-authorised)
+    - Immutable audit entry (appended to session-scoped ledger)
+    - Pilot hard principles verification (human supremacy enforced)
+
+    Hard constitutional rules:
+      PHOENIX must NEVER self-grant real-world economic authority.
+      No autonomous live trading, automatic capital scaling, or
+      self-authorized deployment. All decisions remain at developer
+      discretion.
+
+    Isolation guarantee: no production state is read or written.
+    Research only — not an execution authority.
+    """
+    from core.reality_verification import compute_reality_verification as _crv
+    from dataclasses import asdict
+    _session_trades = [asdict(t) for t in pnl_calc.trades]
+    _historical = data_lake.get_trades(limit=1000)
+    _seen: dict[str, dict] = {}
+    for t in _session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            _seen[tid] = t
+    for t in _historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in _seen:
+            _seen[tid] = t
+    _all_trades = sorted(_seen.values(), key=lambda x: x.get("entry_ts", 0))
+
+    result = _crv(_all_trades)
+
+    # Append the immutable audit entry to the session-scoped ledger (append-only).
+    if isinstance(result.get("audit_entry"), dict):
+        _grv_audit_ledger.append(result["audit_entry"])
+
+    return result
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
@@ -9111,7 +9174,7 @@ async def lio_report_bundle():
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
         _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
-        _mem_pressure, _counterfactual, _governance, _doctrine,
+        _mem_pressure, _counterfactual, _governance, _doctrine, _reality,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -9132,6 +9195,7 @@ async def lio_report_bundle():
         lio_counterfactual_interventions(),
         lio_adaptive_governance_simulator(),
         lio_governed_adaptive_doctrine(),
+        lio_reality_verification(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -9165,6 +9229,7 @@ async def lio_report_bundle():
         "counterfactual_interventions":        _counterfactual,
         "adaptive_governance_simulator":       _governance,
         "governed_adaptive_doctrine":          _doctrine,
+        "reality_verification":                _reality,
     }
 
 
