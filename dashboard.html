@@ -2056,18 +2056,24 @@ function irelOpenMarkdown() { window.open('/api/learning-intelligence/institutio
 function irelOpenBundle()   { window.open('/api/learning-intelligence/report-bundle',   '_blank'); }
 function irelOpenRawAPI()   { window.open('/api/learning-intelligence/institutional-reporting-experience', '_blank'); }
 function irelDownloadJSON() {
-  fetch('/api/learning-intelligence/institutional-reporting-experience')
+  const btn = document.querySelector('[onclick="irelDownloadJSON()"]');
+  if (btn) { btn.textContent = '⏳ Downloading...'; btn.disabled = true; }
+  fetch('/api/learning-intelligence/report-bundle')
     .then(r => r.json())
     .then(data => {
       const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
       a.href     = url;
-      a.download = `phoenix_irel_${Date.now()}.json`;
+      a.download = `phoenix_full_bundle_${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      if (btn) { btn.textContent = '⬇ Download JSON'; btn.disabled = false; }
     })
-    .catch(e => alert('Download failed: ' + e.message));
+    .catch(e => {
+      alert('Download failed: ' + e.message);
+      if (btn) { btn.textContent = '⬇ Download JSON'; btn.disabled = false; }
+    });
 }
 
 function renderIREL(data) {
