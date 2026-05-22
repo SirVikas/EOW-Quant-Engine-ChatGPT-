@@ -8699,6 +8699,39 @@ async def lio_economic_ground_truth():
     return _cegt(all_trades)
 
 
+@app.get("/api/learning-intelligence/regime-survivability-cartography")
+async def lio_regime_survivability_cartography():
+    """
+    LIO — Adaptive Economic Regime Mapping & Survivability Cartography.
+
+    FTD-REGIME-SURVIV: Non-governing research instrumentation.
+    Maps economic survivability across regime × session × timeframe × exploration state.
+    Generates survivability heatmap, 6-category alpha landscape classification,
+    regime-transition diagnostics, and ontology alignment economics.
+
+    Shadow TF projections (5m/15m) use same proportional-gross model as
+    timeframe-survivability endpoint. Research only — no execution authority.
+    """
+    from core.regime_cartography import compute_regime_survivability_cartography as _crsc
+    from dataclasses import asdict
+
+    session_trades = [asdict(t) for t in pnl_calc.trades]
+    historical     = data_lake.get_trades(limit=1000)
+
+    seen: dict[str, dict] = {}
+    for t in session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            seen[tid] = t
+    for t in historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in seen:
+            seen[tid] = t
+
+    all_trades = sorted(seen.values(), key=lambda x: x.get("entry_ts", 0))
+    return _crsc(all_trades)
+
+
 @app.get("/api/learning-intelligence/timeframe-survivability")
 async def lio_timeframe_survivability():
     """
@@ -8828,7 +8861,7 @@ async def lio_report_bundle():
     (
         _summary, _patterns, _neg_mem, _ecology,
         _rl, _topology, _cognition, _sov, _alpha, _sess_attr,
-        _exp_diag, _exp_econ, _eco_truth, _tf_surviv,
+        _exp_diag, _exp_econ, _eco_truth, _tf_surviv, _regime_carto,
     ) = await asyncio.gather(
         lio_summary(),
         lio_patterns(),
@@ -8844,6 +8877,7 @@ async def lio_report_bundle():
         lio_exploration_economic_attribution(),
         lio_economic_ground_truth(),
         lio_timeframe_survivability(),
+        lio_regime_survivability_cartography(),
     )
     _sess_auth = __import__(
         "core.time.session_definitions", fromlist=["get_session_integrity_block"]
@@ -8869,9 +8903,10 @@ async def lio_report_bundle():
         "alpha_discovery":                 _alpha,
         "session_attribution":             _sess_attr,
         "exploration_diagnostics":         _exp_diag,
-        "exploration_economic_attribution": _exp_econ,
-        "economic_ground_truth":            _eco_truth,
-        "timeframe_survivability":          _tf_surviv,
+        "exploration_economic_attribution":    _exp_econ,
+        "economic_ground_truth":               _eco_truth,
+        "timeframe_survivability":             _tf_surviv,
+        "regime_survivability_cartography":    _regime_carto,
     }
 
 
