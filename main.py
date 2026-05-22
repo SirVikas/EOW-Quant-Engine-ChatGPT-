@@ -9687,6 +9687,30 @@ async def lio_institutional_reporting_experience():
     return result
 
 
+@app.get("/api/learning-intelligence/institutional-report-html", response_class=HTMLResponse)
+async def lio_institutional_report_html():
+    """LIO — Rendered institutional report as self-contained HTML (FTD-IREL)."""
+    from core.institutional_report_renderer import render_report_bundle
+    html = render_report_bundle({}, mode="html", app_version=APP_VERSION)
+    return HTMLResponse(content=html if isinstance(html, str) else str(html))
+
+
+@app.get("/api/learning-intelligence/institutional-report-markdown")
+async def lio_institutional_report_markdown():
+    """LIO — Rendered institutional report as markdown text (FTD-IREL)."""
+    from fastapi.responses import PlainTextResponse
+    from core.institutional_report_renderer import render_report_bundle
+    md = render_report_bundle({}, mode="markdown", app_version=APP_VERSION)
+    return PlainTextResponse(content=md if isinstance(md, str) else str(md))
+
+
+@app.get("/api/learning-intelligence/institutional-report-bundle")
+async def lio_institutional_report_bundle():
+    """LIO — Rendered institutional report as structured JSON (FTD-IREL)."""
+    from core.institutional_report_renderer import render_report_bundle
+    return render_report_bundle({}, mode="json", app_version=APP_VERSION)
+
+
 @app.get("/api/learning-intelligence/report-bundle")
 async def lio_report_bundle():
     """LIO — Full snapshot bundle: all sections in one atomic call for report download."""
