@@ -60,6 +60,11 @@ class TradeRecord:
     close_utc_hour:           int  = -1          # UTC hour integer at trade close
     boundary_transition:      str  = ""          # "ASIA→LONDON" or "" if no crossing
 
+    # FTD-EXPLORE-ATTR: RL exploration provenance — captured at execution approval time
+    # Keys: explore_type, was_exploration_trade, q_value_at_entry,
+    #       visit_count_at_entry, explore_floor_active
+    exploration_origin:       Optional[dict] = None
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 
