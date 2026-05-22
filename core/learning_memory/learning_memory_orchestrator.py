@@ -266,6 +266,125 @@ class LearningMemoryOrchestrator:
     def negative_memory_list(self) -> List[Dict[str, Any]]:
         return self._neg_memory.to_list()
 
+    def negmem_forensics(self) -> Dict[str, Any]:
+        """
+        FTD-EXPLORE-OBSERVABILITY — NegativeMemory sensitivity diagnostics.
+
+        Classifies every PatternEngine record into one of four ontology categories
+        by comparing PatternEngine win-rate against NegativeMemory ban status:
+
+          ALIGNED_POSITIVE    — WR > 0  AND NegMem healthy
+          ALIGNED_NEGATIVE    — WR = 0  AND NegMem toxic/banned
+          CONFLICT_POSITIVE_WR— WR > 0  AND NegMem toxic/banned  ← key research signal
+          CONFLICT_NEGATIVE_WR— WR = 0  AND NegMem healthy
+
+        Non-governing: read-only overlay, zero execution authority.
+        Does NOT change any threshold, score, or ban status.
+        """
+        from core.learning_memory.negative_memory import TEMP_REMOVAL_THRESHOLD
+
+        all_pats      = self._engine.all_patterns()
+        negmem_entries = self._neg_memory.to_list()
+
+        # Index NegMem by key string
+        negmem_index: Dict[str, Dict] = {e["key_str"]: e for e in negmem_entries}
+
+        def _key_str(key_tuple: tuple) -> str:
+            return "|".join(str(k) for k in key_tuple)
+
+        def _is_banned(entry: Dict) -> bool:
+            if entry.get("permanent"):
+                return True
+            return entry.get("score", 0.0) >= TEMP_REMOVAL_THRESHOLD
+
+        aligned_positive    = 0
+        aligned_negative    = 0
+        conflict_positive_wr = 0
+        conflict_negative_wr = 0
+        quarantine_at_lt5    = 0
+        toxic_at_wr_gt50     = 0
+
+        per_pattern: List[Dict] = []
+
+        for pat in all_pats:
+            ks      = _key_str(pat.key)
+            samples = max(pat.samples, 1)
+            wr      = pat.success / samples
+            nm_entry = negmem_index.get(ks)
+            banned   = _is_banned(nm_entry) if nm_entry else False
+
+            wr_positive = wr > 0.0
+
+            if   wr_positive and not banned:  category = "ALIGNED_POSITIVE"
+            elif not wr_positive and banned:  category = "ALIGNED_NEGATIVE"
+            elif wr_positive and banned:      category = "CONFLICT_POSITIVE_WR"
+            else:                             category = "CONFLICT_NEGATIVE_WR"
+
+            if category == "ALIGNED_POSITIVE":
+                aligned_positive += 1
+            elif category == "ALIGNED_NEGATIVE":
+                aligned_negative += 1
+            elif category == "CONFLICT_POSITIVE_WR":
+                conflict_positive_wr += 1
+            else:
+                conflict_negative_wr += 1
+
+            if banned and pat.samples < 5:
+                quarantine_at_lt5 += 1
+            if banned and wr > 0.50:
+                toxic_at_wr_gt50 += 1
+
+            per_pattern.append({
+                "key":              ks,
+                "samples":          pat.samples,
+                "successes":        pat.success,
+                "wr_pct":           round(wr * 100, 1),
+                "negmem_banned":    banned,
+                "negmem_rollbacks": nm_entry.get("rollbacks", 0) if nm_entry else 0,
+                "negmem_score":     round(nm_entry.get("score", 0.0), 3) if nm_entry else None,
+                "negmem_permanent": nm_entry.get("permanent", False) if nm_entry else False,
+                "category":         category,
+            })
+
+        total         = len(all_pats)
+        conflict_total = conflict_positive_wr + conflict_negative_wr
+
+        all_rollbacks  = [e.get("rollbacks", 0) for e in negmem_entries]
+        perm_rollbacks = [e.get("rollbacks", 0) for e in negmem_entries if e.get("permanent")]
+
+        return {
+            "scope_note": (
+                "FTD-EXPLORE-OBSERVABILITY: Non-governing forensic overlay. "
+                "Read-only. No execution authority. No threshold is modified."
+            ),
+            "total_patterns_tracked": total,
+            "ontology_conflict_summary": {
+                "aligned_positive":    aligned_positive,
+                "aligned_negative":    aligned_negative,
+                "conflict_positive_wr": conflict_positive_wr,
+                "conflict_negative_wr": conflict_negative_wr,
+                "conflict_total":      conflict_total,
+                "conflict_ratio":      round(conflict_total / max(total, 1), 3),
+            },
+            "negmem_sensitivity": {
+                "quarantine_events_at_n_lt_5":    quarantine_at_lt5,
+                "toxic_promotions_at_wr_gt_50pct": toxic_at_wr_gt50,
+                "avg_losses_before_quarantine": (
+                    round(sum(all_rollbacks) / len(all_rollbacks), 2)
+                    if all_rollbacks else None
+                ),
+                "avg_losses_before_permanent_ban": (
+                    round(sum(perm_rollbacks) / len(perm_rollbacks), 2)
+                    if perm_rollbacks else None
+                ),
+                "total_negmem_entries": len(negmem_entries),
+                "permanent_bans":       sum(1 for e in negmem_entries if e.get("permanent")),
+            },
+            "per_pattern_classification": sorted(
+                per_pattern, key=lambda x: -x["negmem_rollbacks"]
+            ),
+        }
+
     def pattern_heatmap(self) -> list:
         """Regime × parameter → avg confidence heatmap (from PR #80 FTD-030B)."""
         buckets: dict = {}
