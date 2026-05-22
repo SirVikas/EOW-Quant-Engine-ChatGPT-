@@ -54,6 +54,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from loguru import logger
 
 from core.time.session_definitions import SESSION_BUCKETS_UTC, make_context  # canonical session authority
+from core.persistence.exploration_log import exploration_event_log as _exploration_log  # FTD-EXPLORE-OBSERVABILITY
 
 
 # Default path for cross-session Q-table persistence
@@ -441,10 +442,23 @@ class RLContextualBandit:
         floor    = override_floor if override_floor is not None else ENTRY_EV_FLOOR
         self._total_pulls += 1
 
+        # Shared derivations used by both Rule 1 and Rule 4 loggers (fail-open).
+        _ctx_parts = ctx_key.split("|")
+        _log_sess  = _ctx_parts[1] if len(_ctx_parts) >= 2 else "UNKNOWN"
+        _log_pipe  = "PAPER_SPEED" if strategy.endswith("_PAPER_SPEED") else "PRIMARY_STRATEGY"
+
         # Rule 1: always explore under-visited contexts
         if state.n_visits < MIN_VISITS_EXPLORE:
             self._total_allowed  += 1
             self._explore_trades += 1
+            try:   # FTD-EXPLORE-OBSERVABILITY: persist for cross-restart attribution
+                _exploration_log.record(
+                    session=_log_sess, context=ctx_key, pipeline=_log_pipe,
+                    q_value=state.q_value, visits=state.n_visits,
+                    rule="RULE1_MIN_EXPLORE",
+                )
+            except Exception:
+                pass
             return True, f"RL_EXPLORE(visits={state.n_visits}<{MIN_VISITS_EXPLORE})"
 
         # Rule 2: toxic context block (after sufficient visits)
@@ -469,6 +483,14 @@ class RLContextualBandit:
             self._total_allowed  += 1
             self._floor_explores += 1
             self._explore_trades += 1
+            try:   # FTD-EXPLORE-OBSERVABILITY: persist for cross-restart attribution
+                _exploration_log.record(
+                    session=_log_sess, context=ctx_key, pipeline=_log_pipe,
+                    q_value=state.q_value, visits=state.n_visits,
+                    rule="RULE4_FLOOR_EXPLORE",
+                )
+            except Exception:
+                pass
             return True, (
                 f"RL_FLOOR_EXPLORE(q={state.q_value:+.3f} "
                 f"n={state.n_visits}<{EXPLORE_FLOOR_MAX_VISITS})"
