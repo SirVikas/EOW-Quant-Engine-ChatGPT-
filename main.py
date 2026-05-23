@@ -2714,6 +2714,38 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-D] Economic truth boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── Phase-E: Survivability Evolution Program boot registration ────────────
+    try:
+        from core.survivability_evolution.survivability_evolution_orchestrator import get_survivability_health
+        _surv_seen: dict[str, dict] = {}
+        for _t in [asdict(t) for t in pnl_calc.trades]:
+            _tid = _t.get("trade_id", "")
+            if _tid:
+                _surv_seen[_tid] = _t
+        for _t in data_lake.get_trades(limit=1000):
+            _tid = _t.get("trade_id", "")
+            if _tid and _tid not in _surv_seen:
+                _surv_seen[_tid] = _t
+        _surv_trades = list(_surv_seen.values())
+        _surv_h      = get_survivability_health(_surv_trades)
+        _surv_score  = _surv_h.get("evolution_score", 0)
+        _surv_tier   = _surv_h.get("evolution_tier", "UNKNOWN")
+        _surv_exp    = _surv_h.get("expectancy_persistence_state", "UNKNOWN")
+        _surv_ecol   = _surv_h.get("ecological_preservation_tier", "UNKNOWN")
+        _surv_alpha  = _surv_h.get("alpha_persistence_state", "UNKNOWN")
+        _surv_entr   = _surv_h.get("entropy_state", "UNKNOWN")
+        _surv_conf   = _surv_h.get("confidence_realism_score", 0)
+        _thought(
+            f"🧬 [PHASE-E] Survivability Evolution registered | "
+            f"evolution={_surv_score}/100 tier={_surv_tier} | "
+            f"expectancy_persistence={_surv_exp} ecology={_surv_ecol} "
+            f"alpha={_surv_alpha} entropy={_surv_entr} confidence_realism={_surv_conf} | "
+            f"endpoints: /api/survivability/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-E] Survivability evolution boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5371,6 +5403,78 @@ async def economic_truth_orchestration():
     trades = _build_eco_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, run_economic_truth, trades
+    )
+
+
+# ── Phase-E: Survivability Evolution Program API ─────────────────────────────
+
+@app.get("/api/survivability/expectancy-stability")
+async def survivability_expectancy_stability():
+    """Phase-E E.1 — Expectancy stability: persistence, decay velocity, half-life, instability."""
+    from core.survivability_evolution.expectancy_stability_engine import compute_expectancy_stability
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_expectancy_stability, trades
+    )
+
+
+@app.get("/api/survivability/ecology-preservation")
+async def survivability_ecology_preservation():
+    """Phase-E E.2 — Ecological self-preservation: threat detection and advisory throttling."""
+    from core.survivability_evolution.ecological_self_preservation_engine import compute_ecological_self_preservation
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_ecological_self_preservation, trades
+    )
+
+
+@app.get("/api/survivability/regime-memory")
+async def survivability_regime_memory():
+    """Phase-E E.3 — Regime adaptation memory: historical survivability and collapse conditions."""
+    from core.survivability_evolution.regime_adaptation_memory_engine import compute_regime_adaptation_memory
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_regime_adaptation_memory, trades
+    )
+
+
+@app.get("/api/survivability/alpha-persistence")
+async def survivability_alpha_persistence():
+    """Phase-E E.4 — Alpha persistence: decay curves, evaporation risk, edge vs statistical noise."""
+    from core.survivability_evolution.alpha_persistence_tracker import track_alpha_persistence
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, track_alpha_persistence, trades
+    )
+
+
+@app.get("/api/survivability/confidence-realism")
+async def survivability_confidence_realism():
+    """Phase-E E.5 — Confidence realism: hallucination detection, conviction reliability."""
+    from core.survivability_evolution.confidence_realism_engine import compute_confidence_realism
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_confidence_realism, trades
+    )
+
+
+@app.get("/api/survivability/entropy")
+async def survivability_entropy():
+    """Phase-E E.6 — Entropy resistance: 6-domain degradation analysis, STABLE→DEGENERATIVE."""
+    from core.survivability_evolution.entropy_resistance_engine import compute_entropy_resistance
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_entropy_resistance, trades
+    )
+
+
+@app.get("/api/survivability/orchestration")
+async def survivability_orchestration():
+    """Phase-E E.7 — Unified SURVIVABILITY_EVOLUTION_REPORT across all 6 engines."""
+    from core.survivability_evolution.survivability_evolution_orchestrator import run_survivability_evolution
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, run_survivability_evolution, trades
     )
 
 
