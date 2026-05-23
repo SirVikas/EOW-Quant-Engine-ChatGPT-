@@ -30,7 +30,7 @@ def compute_drawdown_tolerance(trades: List[dict]) -> dict:
         if n < 10:
             return _insufficient(ts_ms, n)
 
-        pnls = [float(t.get("pnl", 0)) for t in trades]
+        pnls = [float(t.get("gross_pnl", t.get("pnl", 0))) for t in trades]
 
         # Cumulative equity
         equity   = []
