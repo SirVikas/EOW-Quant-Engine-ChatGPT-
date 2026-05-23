@@ -2680,6 +2680,40 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-C] Compression boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── Phase-D: Economic Truth Reconstruction boot registration ──────────────
+    try:
+        from core.economic_truth_reconstruction.economic_truth_orchestrator import get_economic_health
+        _eco_session   = [asdict(t) for t in pnl_calc.trades]
+        _eco_hist      = data_lake.get_trades(limit=1000)
+        _eco_seen: dict[str, dict] = {}
+        for _t in _eco_session:
+            _tid = _t.get("trade_id", "")
+            if _tid:
+                _eco_seen[_tid] = _t
+        for _t in _eco_hist:
+            _tid = _t.get("trade_id", "")
+            if _tid and _tid not in _eco_seen:
+                _eco_seen[_tid] = _t
+        _eco_trades = list(_eco_seen.values())
+        _eco_h      = get_economic_health(_eco_trades)
+        _eco_score  = _eco_h.get("survivability_score", 0)
+        _eco_tier   = _eco_h.get("survivability_tier", "UNKNOWN")
+        _eco_exp    = _eco_h.get("expectancy_condition", "UNKNOWN")
+        _eco_fee    = _eco_h.get("fee_drag_state", "UNKNOWN")
+        _eco_alpha  = _eco_h.get("alpha_concentration", "UNKNOWN")
+        _eco_ecol   = _eco_h.get("ecological_collapse_severity", "UNKNOWN")
+        _eco_regime = _eco_h.get("dominant_regime") or "UNKNOWN"
+        _thought(
+            f"📊 [PHASE-D] Economic Truth Reconstruction registered | "
+            f"survivability={_eco_score}/100 tier={_eco_tier} | "
+            f"expectancy={_eco_exp} fee_drag={_eco_fee} alpha={_eco_alpha} "
+            f"ecology={_eco_ecol} dominant_regime={_eco_regime} | "
+            f"endpoints: /api/economic-truth/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-D] Economic truth boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5250,6 +5284,94 @@ async def compression_orchestration():
     """Phase-C Orchestration — Unified OPERATIONAL_COMPRESSION_REPORT across all domains."""
     from core.operational_compression.compression_orchestrator import run_full_compression
     return await asyncio.get_event_loop().run_in_executor(None, run_full_compression)
+
+
+# ── Phase-D: Economic Truth Reconstruction API ───────────────────────────────
+
+def _build_eco_trades() -> list:
+    """Combine session + historical trades deduplicated by trade_id."""
+    session_trades = [asdict(t) for t in pnl_calc.trades]
+    historical     = data_lake.get_trades(limit=1000)
+    seen: dict[str, dict] = {}
+    for t in session_trades:
+        tid = t.get("trade_id", "")
+        if tid:
+            seen[tid] = t
+    for t in historical:
+        tid = t.get("trade_id", "")
+        if tid and tid not in seen:
+            seen[tid] = t
+    return list(seen.values())
+
+
+@app.get("/api/economic-truth/expectancy")
+async def economic_truth_expectancy():
+    """Phase-D Expectancy — Multi-axis expectancy reconstruction with survivability verdict."""
+    from core.economic_truth_reconstruction.expectancy_reconstruction import compute_expectancy_reconstruction
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_expectancy_reconstruction, trades
+    )
+
+
+@app.get("/api/economic-truth/fee-drag")
+async def economic_truth_fee_drag():
+    """Phase-D Fee Drag — Fee drag intelligence with cost-adjusted survivability assessment."""
+    from core.economic_truth_reconstruction.fee_drag_intelligence import compute_fee_drag_intelligence
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_fee_drag_intelligence, trades
+    )
+
+
+@app.get("/api/economic-truth/alpha")
+async def economic_truth_alpha():
+    """Phase-D Alpha — Survivable alpha detector across 8 dimensions."""
+    from core.economic_truth_reconstruction.survivable_alpha_detector import detect_survivable_alpha
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, detect_survivable_alpha, trades
+    )
+
+
+@app.get("/api/economic-truth/ecology")
+async def economic_truth_ecology():
+    """Phase-D Ecology — Ecological collapse detector with live telemetry + trade history."""
+    from core.economic_truth_reconstruction.ecological_collapse_detector import detect_ecological_collapse
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, detect_ecological_collapse, trades
+    )
+
+
+@app.get("/api/economic-truth/regime")
+async def economic_truth_regime():
+    """Phase-D Regime — Regime survivability across 6 extended regime categories."""
+    from core.economic_truth_reconstruction.regime_survivability_engine import compute_regime_survivability
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_regime_survivability, trades
+    )
+
+
+@app.get("/api/economic-truth/filtration")
+async def economic_truth_filtration():
+    """Phase-D Filtration — Adaptive signal filtration candidates with contradictory evidence."""
+    from core.economic_truth_reconstruction.adaptive_signal_filtration import compute_adaptive_filtration
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_adaptive_filtration, trades
+    )
+
+
+@app.get("/api/economic-truth/orchestration")
+async def economic_truth_orchestration():
+    """Phase-D Orchestration — Unified ECONOMIC_TRUTH_REPORT across all 6 engines."""
+    from core.economic_truth_reconstruction.economic_truth_orchestrator import run_economic_truth
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, run_economic_truth, trades
+    )
 
 
 def _pnl_to_upe_records(trades: list) -> list:
