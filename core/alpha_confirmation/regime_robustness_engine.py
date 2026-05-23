@@ -30,7 +30,7 @@ def compute_regime_robustness(trades: List[dict]) -> dict:
             regime = str(t.get("regime", t.get("market_regime", "UNKNOWN"))).upper()
             if not regime or regime == "NONE" or regime == "":
                 regime = "UNKNOWN"
-            regime_buckets.setdefault(regime, []).append(float(t.get("pnl", 0)))
+            regime_buckets.setdefault(regime, []).append(float(t.get("gross_pnl", t.get("pnl", 0))))
 
         regime_stats = {}
         for regime, pnls in regime_buckets.items():

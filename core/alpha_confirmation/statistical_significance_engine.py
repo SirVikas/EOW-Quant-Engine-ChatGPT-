@@ -23,7 +23,7 @@ def compute_statistical_significance(trades: List[dict]) -> dict:
         if n < _MIN_TRADES:
             return _insufficient(ts_ms, n)
 
-        pnls = [float(t.get("pnl", 0)) for t in trades]
+        pnls = [float(t.get("gross_pnl", t.get("pnl", 0))) for t in trades]
         wins = sum(1 for p in pnls if p > 0)
         win_rate = wins / n
 

@@ -29,7 +29,7 @@ def compute_oos_validation(trades: List[dict]) -> dict:
         oos_set = trades[split:]
 
         def _stats(subset):
-            pnls     = [float(t.get("pnl", 0)) for t in subset]
+            pnls     = [float(t.get("gross_pnl", t.get("pnl", 0))) for t in subset]
             wins     = sum(1 for p in pnls if p > 0)
             win_rate = wins / len(pnls) if pnls else 0.0
             mean_pnl = sum(pnls) / len(pnls) if pnls else 0.0
