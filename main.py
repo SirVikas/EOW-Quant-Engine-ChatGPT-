@@ -2777,6 +2777,38 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-G] Execution governance boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── Phase-H: Institutional Continuity boot registration ───────────────────
+    try:
+        from core.institutional_continuity.continuity_evolution_orchestrator import get_continuity_health
+        _cont_seen: dict[str, dict] = {}
+        for _t in [asdict(t) for t in pnl_calc.trades]:
+            _tid = _t.get("trade_id", "")
+            if _tid:
+                _cont_seen[_tid] = _t
+        for _t in data_lake.get_trades(limit=1000):
+            _tid = _t.get("trade_id", "")
+            if _tid and _tid not in _cont_seen:
+                _cont_seen[_tid] = _t
+        _cont_trades  = list(_cont_seen.values())
+        _cont_h       = get_continuity_health(_cont_trades)
+        _cont_score   = _cont_h.get("continuity_score", 0)
+        _cont_tier    = _cont_h.get("continuity_tier", "UNKNOWN")
+        _cont_entropy = _cont_h.get("entropy_state", "UNKNOWN")
+        _cont_doc     = _cont_h.get("doctrine_state", "UNKNOWN")
+        _cont_inherit = _cont_h.get("inheritance_state", "UNKNOWN")
+        _cont_cr      = _cont_h.get("cross_regime_verdict", "UNKNOWN")
+        _cont_id      = _cont_h.get("identity_status", "UNKNOWN")
+        _thought(
+            f"🏺 [PHASE-H] Institutional Continuity registered | "
+            f"continuity={_cont_score}/100 tier={_cont_tier} | "
+            f"entropy={_cont_entropy} doctrine={_cont_doc} "
+            f"inheritance={_cont_inherit} cross_regime={_cont_cr} identity={_cont_id} | "
+            f"endpoints: /api/continuity/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-H] Institutional continuity boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5578,6 +5610,78 @@ async def execution_governance_orchestration():
     trades = _build_eco_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, run_adaptive_execution_civilization, trades
+    )
+
+
+# ── Phase-H: Institutional Continuity API ────────────────────────────────────
+
+@app.get("/api/continuity/survivability-memory")
+async def continuity_survivability_memory():
+    """Phase-H H.1 — Multi-cycle survivability memory: collapse/recovery/alpha-persistence eras."""
+    from core.institutional_continuity.multi_cycle_survivability_memory import compute_multi_cycle_survivability_memory
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_multi_cycle_survivability_memory, trades
+    )
+
+
+@app.get("/api/continuity/doctrine")
+async def continuity_doctrine():
+    """Phase-H H.2 — Evolutionary doctrine memory: doctrine drift, regression, contradictions."""
+    from core.institutional_continuity.evolutionary_doctrine_memory import compute_evolutionary_doctrine_memory
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_evolutionary_doctrine_memory, trades
+    )
+
+
+@app.get("/api/continuity/entropy")
+async def continuity_entropy():
+    """Phase-H H.3 — Long-horizon entropy: slow erosion, instability accumulation (DURABLE→EXHAUSTED)."""
+    from core.institutional_continuity.long_horizon_entropy_engine import compute_long_horizon_entropy
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_long_horizon_entropy, trades
+    )
+
+
+@app.get("/api/continuity/recovery")
+async def continuity_recovery():
+    """Phase-H H.4 — Recovery inheritance: historical stabilisation pathways and repeatable conditions."""
+    from core.institutional_continuity.institutional_recovery_inheritance import compute_institutional_recovery_inheritance
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_institutional_recovery_inheritance, trades
+    )
+
+
+@app.get("/api/continuity/cross-regime")
+async def continuity_cross_regime():
+    """Phase-H H.5 — Cross-regime continuity: survivability across 6 environment types."""
+    from core.institutional_continuity.cross_regime_continuity_engine import compute_cross_regime_continuity
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_cross_regime_continuity, trades
+    )
+
+
+@app.get("/api/continuity/identity")
+async def continuity_identity():
+    """Phase-H H.6 — Institutional identity stability: anti-drift constitutional validation."""
+    from core.institutional_continuity.institutional_identity_stability_engine import compute_institutional_identity_stability
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_institutional_identity_stability, trades
+    )
+
+
+@app.get("/api/continuity/orchestration")
+async def continuity_orchestration():
+    """Phase-H H.7 — Unified INSTITUTIONAL_CONTINUITY_REPORT (CONT-{ts}-{sha256[:16]}) across all 6 engines."""
+    from core.institutional_continuity.continuity_evolution_orchestrator import run_institutional_continuity
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, run_institutional_continuity, trades
     )
 
 
