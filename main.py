@@ -2746,6 +2746,37 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-E] Survivability evolution boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── Phase-G: Adaptive Execution Governance boot registration ──────────────
+    try:
+        from core.adaptive_execution_governance.adaptive_execution_orchestrator import get_execution_governance_health
+        _gov_seen: dict[str, dict] = {}
+        for _t in [asdict(t) for t in pnl_calc.trades]:
+            _tid = _t.get("trade_id", "")
+            if _tid:
+                _gov_seen[_tid] = _t
+        for _t in data_lake.get_trades(limit=1000):
+            _tid = _t.get("trade_id", "")
+            if _tid and _tid not in _gov_seen:
+                _gov_seen[_tid] = _t
+        _gov_trades   = list(_gov_seen.values())
+        _gov_h        = get_execution_governance_health(_gov_trades)
+        _gov_score    = _gov_h.get("civilization_score", 0)
+        _gov_tier     = _gov_h.get("civilization_tier", "UNKNOWN")
+        _gov_advisory = _gov_h.get("restraint_advisory", "UNKNOWN")
+        _gov_eq       = _gov_h.get("equilibrium_state", "UNKNOWN")
+        _gov_safety   = _gov_h.get("governance_status", "UNKNOWN")
+        _gov_disc     = _gov_h.get("discipline_tier", "UNKNOWN")
+        _thought(
+            f"🏛 [PHASE-G] Adaptive Execution Governance registered | "
+            f"civilization={_gov_score}/100 tier={_gov_tier} | "
+            f"advisory={_gov_advisory} equilibrium={_gov_eq} "
+            f"governance={_gov_safety} discipline={_gov_disc} | "
+            f"endpoints: /api/execution-governance/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-G] Execution governance boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5475,6 +5506,78 @@ async def survivability_orchestration():
     trades = _build_eco_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, run_survivability_evolution, trades
+    )
+
+
+# ── Phase-G: Adaptive Execution Governance API ───────────────────────────────
+
+@app.get("/api/execution-governance/restraint")
+async def execution_governance_restraint():
+    """Phase-G G.1 — Survivability restraint advisory (TRADE_ALLOWED→ENTROPY_ALERT)."""
+    from core.adaptive_execution_governance.restraint_advisory_engine import compute_restraint_advisory
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_restraint_advisory, trades
+    )
+
+
+@app.get("/api/execution-governance/discipline-gate")
+async def execution_governance_discipline_gate():
+    """Phase-G G.2 — Capital discipline gate: pre-trade survivability evaluation (PASS→UNSAFE)."""
+    from core.adaptive_execution_governance.capital_discipline_gate import compute_capital_discipline_gate
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_capital_discipline_gate, trades
+    )
+
+
+@app.get("/api/execution-governance/equilibrium")
+async def execution_governance_equilibrium():
+    """Phase-G G.3 — Equilibrium resumption: 6-dimension stabilisation assessment."""
+    from core.adaptive_execution_governance.equilibrium_resumption_engine import compute_equilibrium_resumption
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_equilibrium_resumption, trades
+    )
+
+
+@app.get("/api/execution-governance/overrides")
+async def execution_governance_overrides():
+    """Phase-G G.4 — Operator override transparency: replay-visible override lineage."""
+    from core.adaptive_execution_governance.operator_override_transparency_engine import compute_operator_override_transparency
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_operator_override_transparency, trades
+    )
+
+
+@app.get("/api/execution-governance/discipline-memory")
+async def execution_governance_discipline_memory():
+    """Phase-G G.5 — Execution discipline memory: revenge trading, impulsive spikes, discipline runs."""
+    from core.adaptive_execution_governance.execution_discipline_memory_engine import compute_execution_discipline_memory
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_execution_discipline_memory, trades
+    )
+
+
+@app.get("/api/execution-governance/governance-safety")
+async def execution_governance_safety():
+    """Phase-G G.6 — Human governance safety: constitutional invariant validation."""
+    from core.adaptive_execution_governance.human_governance_safety_engine import compute_human_governance_safety
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_human_governance_safety, trades
+    )
+
+
+@app.get("/api/execution-governance/orchestration")
+async def execution_governance_orchestration():
+    """Phase-G G.7 — Unified ADAPTIVE_EXECUTION_CIVILIZATION_REPORT across all 6 engines."""
+    from core.adaptive_execution_governance.adaptive_execution_orchestrator import run_adaptive_execution_civilization
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, run_adaptive_execution_civilization, trades
     )
 
 
