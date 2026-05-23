@@ -35,24 +35,65 @@ KNOWN_BUNDLES: frozenset = frozenset({
 # MASTER_ARCHIVE includes every registered report.
 BUNDLE_MEMBERSHIP: Dict[str, Set[str]] = {
     BUNDLE_EXECUTIVE: {
+        # Original Phase-A core observability
         "SUMMARY", "ECOLOGY", "RL_LEARNING", "ECONOMIC_GROUND_TRUTH",
         "SESSION_ATTRIBUTION", "EXPLORATION_DIAGNOSTICS", "GRVL",
+        # Phase-C compression operator view
+        "COMPRESSION_EXECUTIVE",
+        # Phase-D economic truth synthesis
+        "ECONOMIC_TRUTH",
+        # Phase-E survivability synthesis
+        "SURVIVABILITY_EVOLUTION",
+        # Phase-G execution governance synthesis
+        "EXECUTION_CIVILIZATION",
+        # Phase-H institutional continuity synthesis
+        "INSTITUTIONAL_CONTINUITY",
     },
     BUNDLE_RESEARCH: {
+        # Original Phase-A deep research
         "PATTERNS", "NEGATIVE_MEMORY", "TOPOLOGY", "COGNITION",
         "ALPHA_DISCOVERY", "EXPLORATION_DIAGNOSTICS",
         "EXPLORATION_ECONOMIC_ATTRIBUTION", "TIMEFRAME_SURVIVABILITY",
         "REGIME_CARTOGRAPHY", "MEMORY_PRESSURE", "COUNTERFACTUAL_LAB",
+        # Phase-C compression analytics
+        "COMPRESSION_ANOMALIES", "COMPRESSION_ECOLOGY", "COMPRESSION_VISIBILITY",
+        # Phase-D economic truth sub-engines
+        "EXPECTANCY_RECONSTRUCTION", "FEE_DRAG_INTELLIGENCE", "SURVIVABLE_ALPHA",
+        "ECONOMIC_ECOLOGICAL_COLLAPSE", "REGIME_SURVIVABILITY", "ADAPTIVE_FILTRATION",
+        # Phase-E survivability sub-engines
+        "EXPECTANCY_STABILITY", "ECOLOGICAL_PRESERVATION", "REGIME_MEMORY",
+        "ALPHA_PERSISTENCE", "CONFIDENCE_REALISM", "ENTROPY_RESISTANCE",
+        # Phase-H continuity sub-engines (analytical depth)
+        "MULTI_CYCLE_SURVIVABILITY", "EVOLUTIONARY_DOCTRINE", "LONG_HORIZON_ENTROPY",
+        "RECOVERY_INHERITANCE", "CROSS_REGIME_CONTINUITY", "INSTITUTIONAL_IDENTITY",
     },
     BUNDLE_GOVERNANCE: {
+        # Original Phase-A governance
         "SOVEREIGN_READINESS", "GAGS", "GADD", "GRVL", "GMPD",
         "CKPD", "LHEO", "HMAO",
+        # Phase-B wiring audit (full cross-PRP constitutional coverage)
+        "WIRING_CONSTITUTION", "WIRING_PROPAGATION", "WIRING_DEPENDENCIES",
+        "WIRING_ARCHIVE", "WIRING_RENDERING", "WIRING_COMPRESSION",
+        "WIRING_FULL_REPORT", "WIRING_HEALTH",
+        # Phase-C compression governance
+        "COMPRESSION_GOVERNANCE", "COMPRESSION_ORCHESTRATION",
+        # Phase-G execution governance (all sub-engines + synthesis)
+        "RESTRAINT_ADVISORY", "DISCIPLINE_GATE", "EQUILIBRIUM_RESUMPTION",
+        "OVERRIDE_TRANSPARENCY", "DISCIPLINE_MEMORY", "GOVERNANCE_SAFETY",
+        "EXECUTION_CIVILIZATION",
     },
     BUNDLE_EPISTEMIC: {
         "EIOD", "EXPLORATION_DIAGNOSTICS", "EXPLORATION_ECONOMIC_ATTRIBUTION",
     },
     BUNDLE_CONTINUITY: {
+        # Original Phase-A continuity
         "CKPD", "LHEO", "HMAO", "COGNITION", "MEMORY_PRESSURE",
+        # Phase-E survivability evolution (multi-cycle foundation)
+        "SURVIVABILITY_EVOLUTION", "EXPECTANCY_STABILITY",
+        # Phase-H institutional continuity (all 7 engines)
+        "MULTI_CYCLE_SURVIVABILITY", "EVOLUTIONARY_DOCTRINE", "LONG_HORIZON_ENTROPY",
+        "RECOVERY_INHERITANCE", "CROSS_REGIME_CONTINUITY", "INSTITUTIONAL_IDENTITY",
+        "INSTITUTIONAL_CONTINUITY",
     },
     BUNDLE_MASTER_ARCHIVE: set(REPORT_REGISTRY.keys()),
 }
