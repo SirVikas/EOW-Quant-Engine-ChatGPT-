@@ -44,6 +44,8 @@ BUNDLE_MEMBERSHIP: Dict[str, Set[str]] = {
         "ECONOMIC_TRUTH",
         # Phase-E survivability synthesis
         "SURVIVABILITY_EVOLUTION",
+        # Phase-F adaptive equilibrium synthesis
+        "ADAPTIVE_EQUILIBRIUM",
         # Phase-G execution governance synthesis
         "EXECUTION_CIVILIZATION",
         # Phase-H institutional continuity synthesis
@@ -60,6 +62,9 @@ BUNDLE_MEMBERSHIP: Dict[str, Set[str]] = {
         # Phase-D economic truth sub-engines
         "EXPECTANCY_RECONSTRUCTION", "FEE_DRAG_INTELLIGENCE", "SURVIVABLE_ALPHA",
         "ECONOMIC_ECOLOGICAL_COLLAPSE", "REGIME_SURVIVABILITY", "ADAPTIVE_FILTRATION",
+        # Phase-F adaptive equilibrium sub-engines
+        "KELLY_EFFICIENCY", "DRAWDOWN_DYNAMICS", "RETURN_CONSISTENCY",
+        "CAPITAL_UTILIZATION", "EQUILIBRIUM_BAND", "DISCIPLINE_COST",
         # Phase-E survivability sub-engines
         "EXPECTANCY_STABILITY", "ECOLOGICAL_PRESERVATION", "REGIME_MEMORY",
         "ALPHA_PERSISTENCE", "CONFIDENCE_REALISM", "ENTROPY_RESISTANCE",
