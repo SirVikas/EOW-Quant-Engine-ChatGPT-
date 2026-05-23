@@ -196,8 +196,13 @@ class MeanReversionStrategy:
         self.rsi_ob     = float(d.get("rsi_ob",   cfg.RSI_OVERBOUGHT))
         self.rsi_os     = float(d.get("rsi_os",   cfg.RSI_OVERSOLD))
         self.atr_period = int(d.get("atr_period", cfg.ATR_PERIOD))
-        self.atr_sl     = float(d.get("atr_sl",   cfg.ATR_MULT_SL))
-        self.atr_tp     = float(d.get("atr_tp",   cfg.ATR_MULT_TP * 0.7))  # tighter TP
+        # SL tighter than TrendFollowing — MR exits at BB mean, not a long run.
+        # TP floor of 1.5×ATR ensures BB mean dominates: mean ≈ 2×ATR from lower/upper
+        # band, so max/min(mean, price ± 1.5×ATR) always resolves to mean.
+        # Previous values (SL=2.5, TP=7.0) set TP unreachably far (7×ATR vs 2×ATR
+        # natural target), causing near-0% win rate — every trade closed by SL.
+        self.atr_sl     = float(d.get("atr_sl",   1.5))
+        self.atr_tp     = float(d.get("atr_tp",   1.5))
 
     def generate_signal(
         self, symbol: str, closes: List[float],
