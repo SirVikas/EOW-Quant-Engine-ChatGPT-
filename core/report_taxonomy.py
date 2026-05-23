@@ -50,6 +50,8 @@ BUNDLE_MEMBERSHIP: Dict[str, Set[str]] = {
         "EXECUTION_CIVILIZATION",
         # Phase-H institutional continuity synthesis
         "INSTITUTIONAL_CONTINUITY",
+        # Phase-I alpha confirmation synthesis
+        "ALPHA_CONFIRMATION",
     },
     BUNDLE_RESEARCH: {
         # Original Phase-A deep research
@@ -73,6 +75,8 @@ BUNDLE_MEMBERSHIP: Dict[str, Set[str]] = {
         "RECOVERY_INHERITANCE", "CROSS_REGIME_CONTINUITY", "INSTITUTIONAL_IDENTITY",
     },
     BUNDLE_GOVERNANCE: {
+        # Phase-I live readiness gate
+        "LIVE_READINESS_GATE",
         # Original Phase-A governance
         "SOVEREIGN_READINESS", "GAGS", "GADD", "GRVL", "GMPD",
         "CKPD", "LHEO", "HMAO",
@@ -89,6 +93,9 @@ BUNDLE_MEMBERSHIP: Dict[str, Set[str]] = {
     },
     BUNDLE_EPISTEMIC: {
         "EIOD", "EXPLORATION_DIAGNOSTICS", "EXPLORATION_ECONOMIC_ATTRIBUTION",
+        # Phase-I alpha certification (epistemic rigor)
+        "STATISTICAL_SIGNIFICANCE", "OOS_VALIDATION", "FEE_SURVIVAL_CERT",
+        "REGIME_ROBUSTNESS", "DRAWDOWN_TOLERANCE", "ALPHA_CONFIRMATION",
     },
     BUNDLE_CONTINUITY: {
         # Original Phase-A continuity

@@ -2825,6 +2825,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-F] Adaptive equilibrium boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── Phase-I: Alpha Confirmation boot registration ──────────────────────────
+    try:
+        from core.alpha_confirmation.alpha_confirmation_orchestrator import get_alpha_health
+        _alpha_h    = get_alpha_health()
+        _alpha_stat = _alpha_h.get("status", "UNKNOWN")
+        _thought(
+            f"🔬 [PHASE-I] Alpha Confirmation registered | "
+            f"status={_alpha_stat} | "
+            f"engines: I.1 Statistics / I.2 OOS / I.3 Fee-Survival / "
+            f"I.4 Regime / I.5 Drawdown / I.6 Gate / I.7 Orchestrator | "
+            f"live_deployment_authorized=False | "
+            f"endpoints: /api/alpha-confirmation/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-I] Alpha confirmation boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5770,6 +5787,90 @@ async def equilibrium_orchestration():
     trades = _build_eco_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, run_adaptive_equilibrium, trades
+    )
+
+
+# ── Phase-I: Alpha Confirmation & Live-Readiness Gating ───────────────────────
+
+@app.get("/api/alpha-confirmation/statistics")
+async def alpha_statistics():
+    """Phase-I I.1 — Statistical significance: z/t tests on win rate and mean PnL vs noise."""
+    from core.alpha_confirmation.statistical_significance_engine import compute_statistical_significance
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_statistical_significance, trades
+    )
+
+
+@app.get("/api/alpha-confirmation/oos")
+async def alpha_oos():
+    """Phase-I I.2 — Out-of-sample validation: 60/40 IS/OOS split with degradation ratio."""
+    from core.alpha_confirmation.oos_validation_engine import compute_oos_validation
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_oos_validation, trades
+    )
+
+
+@app.get("/api/alpha-confirmation/fee-survival")
+async def alpha_fee_survival():
+    """Phase-I I.3 — Fee-survival certification: rolling window net-PnL survival rate."""
+    from core.alpha_confirmation.fee_survival_engine import compute_fee_survival
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_fee_survival, trades
+    )
+
+
+@app.get("/api/alpha-confirmation/regime-robustness")
+async def alpha_regime_robustness():
+    """Phase-I I.4 — Regime robustness: qualifying profitable regimes and concentration risk."""
+    from core.alpha_confirmation.regime_robustness_engine import compute_regime_robustness
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_regime_robustness, trades
+    )
+
+
+@app.get("/api/alpha-confirmation/drawdown-tolerance")
+async def alpha_drawdown_tolerance():
+    """Phase-I I.5 — Drawdown tolerance: DD ratio, recovery ratio, Calmar proxy."""
+    from core.alpha_confirmation.drawdown_tolerance_engine import compute_drawdown_tolerance
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_drawdown_tolerance, trades
+    )
+
+
+@app.get("/api/alpha-confirmation/gate")
+async def alpha_gate():
+    """Phase-I I.6 — Live readiness gate: hard constitutional gate (live_deployment_authorized=False always)."""
+    from core.alpha_confirmation.statistical_significance_engine import compute_statistical_significance
+    from core.alpha_confirmation.oos_validation_engine           import compute_oos_validation
+    from core.alpha_confirmation.fee_survival_engine             import compute_fee_survival
+    from core.alpha_confirmation.regime_robustness_engine        import compute_regime_robustness
+    from core.alpha_confirmation.drawdown_tolerance_engine       import compute_drawdown_tolerance
+    from core.alpha_confirmation.live_readiness_gate             import compute_live_readiness
+
+    def _run_gate():
+        trades = _build_eco_trades()
+        i1 = compute_statistical_significance(trades)
+        i2 = compute_oos_validation(trades)
+        i3 = compute_fee_survival(trades)
+        i4 = compute_regime_robustness(trades)
+        i5 = compute_drawdown_tolerance(trades)
+        return compute_live_readiness([i1, i2, i3, i4, i5])
+
+    return await asyncio.get_event_loop().run_in_executor(None, _run_gate)
+
+
+@app.get("/api/alpha-confirmation/orchestration")
+async def alpha_orchestration():
+    """Phase-I I.7 — Alpha Confirmation Orchestrator (ALPHA-{ts}-{sha256[:16]}): CONFIRMED/CANDIDATE/DEVELOPING/UNPROVEN."""
+    from core.alpha_confirmation.alpha_confirmation_orchestrator import run_alpha_confirmation
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, run_alpha_confirmation, trades
     )
 
 

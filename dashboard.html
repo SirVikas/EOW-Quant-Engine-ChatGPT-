@@ -2166,12 +2166,30 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
       <div id="prp-h-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
     </div>
 
+    <!-- Phase-I -->
+    <div class="card" id="prp-card-phaseI" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">🔬</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-I</div>
+            <div style="font-size:12px;font-weight:600;">Alpha Confirmation</div>
+          </div>
+        </div>
+        <a href="/api/alpha-confirmation/orchestration" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-i-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-i-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-i-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
   </div><!-- /prp-grid -->
 
   <!-- Constitutional notice -->
   <div class="card" style="background:var(--sky);font-size:11px;color:var(--muted);line-height:1.7;">
     All PRP phase outputs carry <code>diagnostic_only=True</code> and <code>auto_authorized=False</code>.
-    No phase tier automatically modifies engine behaviour — human authority is required for all governance decisions.
+    Phase-I additionally carries <code>live_deployment_authorized=False</code> — even a CONFIRMED tier
+    does not authorize live trading. Human due diligence and explicit approval are required.
     Lineage IDs are archived for forensic traceability.
   </div>
 
@@ -2242,6 +2260,7 @@ async function loadPRP() {
     fetch('/api/equilibrium/orchestration').then(r => r.json()),
     fetch('/api/execution-governance/orchestration').then(r => r.json()),
     fetch('/api/continuity/orchestration').then(r => r.json()),
+    fetch('/api/alpha-confirmation/orchestration').then(r => r.json()),
   ];
 
   const results = await Promise.allSettled(fetches);
@@ -2323,6 +2342,19 @@ async function loadPRP() {
     `<br><span style="font-family:monospace;font-size:9px;opacity:.5;">${(d.lineage_id||'').slice(0,22)||'—'}</span>`;
     _prpSetCard('H', tier, score, sub);
   } else { _prpError('H', results[6].reason?.message); }
+
+  // Phase-I: Alpha Confirmation
+  if (results[7].status === 'fulfilled') {
+    const d = results[7].value;
+    const tier  = d.alpha_tier || '—';
+    const score = d.alpha_score != null ? `Score: ${d.alpha_score}/100` : '';
+    const gate  = d.gate_status ? `Gate: ${d.gate_status}` : '';
+    const block = d.blocking_reasons?.length ? ` · ${d.blocking_reasons.length} block(s)` : '';
+    const sub   = gate + block +
+    `<br><span style="font-family:monospace;font-size:9px;opacity:.5;">${(d.lineage_id||'').slice(0,22)||'—'}</span>` +
+    `<br><span style="font-size:9px;color:#9B2C2C;font-weight:600;">live_deployment_authorized: false</span>`;
+    _prpSetCard('I', tier, score, sub);
+  } else { _prpError('I', results[7].reason?.message); }
 
   if (refreshEl) refreshEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
 }
