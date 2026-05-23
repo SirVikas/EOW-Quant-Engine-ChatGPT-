@@ -27,10 +27,10 @@ def compute_fee_survival(trades: List[dict]) -> dict:
 
         # Prefer net_pnl if available; otherwise use pnl (assume inclusive of fees)
         pnls = [float(t.get("net_pnl", t.get("pnl", 0))) for t in trades]
-        fees = [abs(float(t.get("fee", t.get("commission", 0)))) for t in trades]
+        fees = [abs(float(t.get("fee_entry", 0)) + float(t.get("fee_exit", t.get("fee", t.get("commission", 0))))) for t in trades]
 
         total_fees    = sum(fees)
-        total_gross   = sum(float(t.get("pnl", 0)) for t in trades)
+        total_gross   = sum(float(t.get("gross_pnl", t.get("pnl", 0))) for t in trades)
         total_net     = sum(pnls)
         fee_drag_pct  = total_fees / abs(total_gross) if total_gross != 0 else 1.0
 
