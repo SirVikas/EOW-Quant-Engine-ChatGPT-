@@ -5079,6 +5079,36 @@ async def prp002_download():
     )
 
 
+# ── PRP-002 Analytics Reports API ─────────────────────────────────────────────
+
+@app.get("/api/prp/002/analytics/density-reports")
+async def prp002_analytics_density():
+    """PRP-002 Analytics — Reports 01,02,06,07,09,10: density, filter, ecology."""
+    from analytics.odyssey.signal_density_reports import generate_all_reports
+    return await asyncio.get_event_loop().run_in_executor(None, generate_all_reports)
+
+
+@app.get("/api/prp/002/analytics/exploration-reports")
+async def prp002_analytics_exploration():
+    """PRP-002 Analytics — Reports 03,08: collapse monitor and recovery cycles."""
+    from analytics.odyssey.exploration_reports import generate_all_reports
+    return await asyncio.get_event_loop().run_in_executor(None, generate_all_reports)
+
+
+@app.get("/api/prp/002/analytics/context-reports")
+async def prp002_analytics_context():
+    """PRP-002 Analytics — Reports 04,05: alpha context clusters and recurrence."""
+    from analytics.odyssey.context_cluster_reports import generate_all_reports
+    return await asyncio.get_event_loop().run_in_executor(None, generate_all_reports)
+
+
+@app.get("/api/prp/002/analytics/full-bundle")
+async def prp002_analytics_full_bundle():
+    """PRP-002 Analytics — All 10 forensic reports in one bundle (complete=True)."""
+    from analytics.odyssey.context_cluster_reports import generate_full_prp002_bundle
+    return await asyncio.get_event_loop().run_in_executor(None, generate_full_prp002_bundle)
+
+
 def _pnl_to_upe_records(trades: list) -> list:
     """Convert pnl_calculator.TradeRecord list → UPE TradeRecord list."""
     records = []
