@@ -467,6 +467,126 @@ REPORT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "description": "FTD-HMAO: Human purpose alignment governance — 8 alignment metrics, 6 classifications",
     },
 
+    # ── Phase-I: Alpha Confirmation & Live-Readiness Gating ──────────────────
+
+    "STATISTICAL_SIGNIFICANCE": {
+        "report_id":           "STATISTICAL_SIGNIFICANCE",
+        "name":                "Statistical Significance Engine",
+        "report_family":       FAMILY_EPISTEMIC,
+        "doctrine_version":    "1.36",
+        "export_tier":         TIER_EPISTEMIC,
+        "endpoint":            "/api/alpha-confirmation/statistics",
+        "bundle_key":          "statistical_significance",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH"],
+        "overlapping_reports": ["ALPHA_CONFIRMATION"],
+        "constitutional_scope": "EPISTEMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 30},
+        "description": "Statistical significance — binomial z-test (win rate) + t-test (mean PnL) with p-values; PROVEN/INDICATIVE/INSUFFICIENT_EVIDENCE/NO_EDGE",
+    },
+
+    "OOS_VALIDATION": {
+        "report_id":           "OOS_VALIDATION",
+        "name":                "Out-of-Sample Validation Engine",
+        "report_family":       FAMILY_EPISTEMIC,
+        "doctrine_version":    "1.36",
+        "export_tier":         TIER_EPISTEMIC,
+        "endpoint":            "/api/alpha-confirmation/oos",
+        "bundle_key":          "oos_validation",
+        "dependencies":        ["STATISTICAL_SIGNIFICANCE"],
+        "overlapping_reports": ["ALPHA_CONFIRMATION"],
+        "constitutional_scope": "EPISTEMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 50},
+        "description": "Out-of-sample validation — 60/40 IS/OOS chronological split with degradation ratio; OOS_CONSISTENT/MINOR_DEGRADATION/SIGNIFICANT_DEGRADATION/OOS_FAILURE",
+    },
+
+    "FEE_SURVIVAL_CERT": {
+        "report_id":           "FEE_SURVIVAL_CERT",
+        "name":                "Fee-Survival Certification Engine",
+        "report_family":       FAMILY_EPISTEMIC,
+        "doctrine_version":    "1.36",
+        "export_tier":         TIER_EPISTEMIC,
+        "endpoint":            "/api/alpha-confirmation/fee-survival",
+        "bundle_key":          "fee_survival_cert",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH", "FEE_DRAG_INTELLIGENCE"],
+        "overlapping_reports": ["ALPHA_CONFIRMATION"],
+        "constitutional_scope": "EPISTEMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 20},
+        "description": "Fee-survival certification — rolling 20-trade net-PnL window survival rate; FEE_CERTIFIED/MARGINAL/FEE_ERODED/FEE_DESTROYED",
+    },
+
+    "REGIME_ROBUSTNESS": {
+        "report_id":           "REGIME_ROBUSTNESS",
+        "name":                "Regime Robustness Engine",
+        "report_family":       FAMILY_EPISTEMIC,
+        "doctrine_version":    "1.36",
+        "export_tier":         TIER_EPISTEMIC,
+        "endpoint":            "/api/alpha-confirmation/regime-robustness",
+        "bundle_key":          "regime_robustness",
+        "dependencies":        ["REGIME_SURVIVABILITY", "REGIME_MEMORY"],
+        "overlapping_reports": ["ALPHA_CONFIRMATION"],
+        "constitutional_scope": "EPISTEMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 20},
+        "description": "Regime robustness — qualifying profitable regimes (≥10 trades each) and concentration risk; ROBUST/ADEQUATE/CONCENTRATED/FRAGILE",
+    },
+
+    "DRAWDOWN_TOLERANCE": {
+        "report_id":           "DRAWDOWN_TOLERANCE",
+        "name":                "Drawdown Tolerance Engine",
+        "report_family":       FAMILY_EPISTEMIC,
+        "doctrine_version":    "1.36",
+        "export_tier":         TIER_EPISTEMIC,
+        "endpoint":            "/api/alpha-confirmation/drawdown-tolerance",
+        "bundle_key":          "drawdown_tolerance",
+        "dependencies":        ["DRAWDOWN_DYNAMICS"],
+        "overlapping_reports": ["ALPHA_CONFIRMATION"],
+        "constitutional_scope": "EPISTEMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 10},
+        "description": "Drawdown tolerance — DD ratio, recovery ratio, Calmar proxy with live-deployment thresholds; DEPLOYMENT_READY/BORDERLINE/EXCESSIVE_DRAWDOWN/DISQUALIFYING",
+    },
+
+    "LIVE_READINESS_GATE": {
+        "report_id":           "LIVE_READINESS_GATE",
+        "name":                "Live Readiness Gate",
+        "report_family":       FAMILY_GOVERNANCE,
+        "doctrine_version":    "1.36",
+        "export_tier":         TIER_GOVERNANCE,
+        "endpoint":            "/api/alpha-confirmation/gate",
+        "bundle_key":          "live_readiness_gate",
+        "dependencies":        [
+            "STATISTICAL_SIGNIFICANCE", "OOS_VALIDATION", "FEE_SURVIVAL_CERT",
+            "REGIME_ROBUSTNESS", "DRAWDOWN_TOLERANCE",
+        ],
+        "overlapping_reports": ["ALPHA_CONFIRMATION"],
+        "constitutional_scope": "GOVERNANCE_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 50},
+        "description": "Live readiness constitutional gate — hard block if ANY sub-engine fails; READY_FOR_CONSIDERATION/CONDITIONAL/BLOCKED/INSUFFICIENT_DATA; live_deployment_authorized=False always",
+    },
+
+    "ALPHA_CONFIRMATION": {
+        "report_id":           "ALPHA_CONFIRMATION",
+        "name":                "Alpha Confirmation Orchestration",
+        "report_family":       FAMILY_EPISTEMIC,
+        "doctrine_version":    "1.36",
+        "export_tier":         TIER_EPISTEMIC,
+        "endpoint":            "/api/alpha-confirmation/orchestration",
+        "bundle_key":          "alpha_confirmation",
+        "dependencies":        [
+            "STATISTICAL_SIGNIFICANCE", "OOS_VALIDATION", "FEE_SURVIVAL_CERT",
+            "REGIME_ROBUSTNESS", "DRAWDOWN_TOLERANCE", "LIVE_READINESS_GATE",
+        ],
+        "overlapping_reports": ["ECONOMIC_TRUTH", "SURVIVABILITY_EVOLUTION"],
+        "constitutional_scope": "EPISTEMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 50},
+        "description": "Alpha confirmation orchestration — Phase-I ALPHA lineage, CONFIRMED/CANDIDATE/DEVELOPING/UNPROVEN tiers; live_deployment_authorized=False on all outputs",
+    },
+
     # ── Phase-F: Adaptive Equilibrium & Capital Discipline ───────────────────
 
     "KELLY_EFFICIENCY": {
@@ -1307,4 +1427,4 @@ REPORT_REGISTRY: Dict[str, Dict[str, Any]] = {
 }
 
 # Total registered reports — must equal len(REPORT_REGISTRY)
-EXPECTED_REPORT_COUNT = 75
+EXPECTED_REPORT_COUNT = 82
