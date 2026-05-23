@@ -2646,6 +2646,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             "SYSTEM",
         )
 
+    # ── Phase-B: Cross-PRP Wiring Audit boot registration ────────────────────
+    try:
+        from core.cross_prp_audit.cross_prp_audit_orchestrator import get_wiring_audit_health
+        _wiring_h = get_wiring_audit_health()
+        _wiring_score = _wiring_h.get("wiring_health_score", 0)
+        _wiring_tier  = _wiring_h.get("wiring_health_tier", "UNKNOWN")
+        _thought(
+            f"🔗 [PHASE-B] Cross-PRP Wiring Audit registered | "
+            f"health={_wiring_score}/100 tier={_wiring_tier} | "
+            f"endpoints: /api/wiring-audit/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-B] Wiring audit boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5107,6 +5122,64 @@ async def prp002_analytics_full_bundle():
     """PRP-002 Analytics — All 10 forensic reports in one bundle (complete=True)."""
     from analytics.odyssey.context_cluster_reports import generate_full_prp002_bundle
     return await asyncio.get_event_loop().run_in_executor(None, generate_full_prp002_bundle)
+
+
+# ── Phase-B Cross-PRP Wiring Audit API ────────────────────────────────────────
+
+@app.get("/api/wiring-audit/constitution")
+async def wiring_audit_constitution():
+    """Phase-B.1 — PRP Registry & Endpoint Constitutional Audit."""
+    from core.cross_prp_audit.endpoint_constitution_auditor import audit_endpoint_constitution
+    return await asyncio.get_event_loop().run_in_executor(None, audit_endpoint_constitution)
+
+
+@app.get("/api/wiring-audit/propagation")
+async def wiring_audit_propagation():
+    """Phase-B.2 — Cross-Report Propagation Audit (ghost/orphan detection)."""
+    from core.cross_prp_audit.report_propagation_auditor import audit_report_propagation
+    return await asyncio.get_event_loop().run_in_executor(None, audit_report_propagation)
+
+
+@app.get("/api/wiring-audit/dependencies")
+async def wiring_audit_dependencies():
+    """Phase-B.3 — Dependency Survivability Audit (import/init chain)."""
+    from core.cross_prp_audit.dependency_survivability_auditor import audit_dependency_survivability
+    return await asyncio.get_event_loop().run_in_executor(None, audit_dependency_survivability)
+
+
+@app.get("/api/wiring-audit/archive")
+async def wiring_audit_archive():
+    """Phase-B.4 — Archive Replay & Continuity Audit (bundle determinism)."""
+    from core.cross_prp_audit.archive_continuity_auditor import audit_archive_continuity
+    return await asyncio.get_event_loop().run_in_executor(None, audit_archive_continuity)
+
+
+@app.get("/api/wiring-audit/rendering")
+async def wiring_audit_rendering():
+    """Phase-B.5 — Institutional Rendering Consistency Audit (multi-mode parity)."""
+    from core.cross_prp_audit.rendering_consistency_auditor import audit_rendering_consistency
+    return await asyncio.get_event_loop().run_in_executor(None, audit_rendering_consistency)
+
+
+@app.get("/api/wiring-audit/compression")
+async def wiring_audit_compression():
+    """Phase-B.6 — Operational Compression Readiness Mapping (Tier 1-4 classification)."""
+    from core.cross_prp_audit.compression_readiness_mapper import map_compression_readiness
+    return await asyncio.get_event_loop().run_in_executor(None, map_compression_readiness)
+
+
+@app.get("/api/wiring-audit/full-report")
+async def wiring_audit_full_report():
+    """Phase-B Master — Full Cross-PRP Wiring Audit (all 6 domains, composite score)."""
+    from core.cross_prp_audit.cross_prp_audit_orchestrator import run_full_wiring_audit
+    return await asyncio.get_event_loop().run_in_executor(None, run_full_wiring_audit)
+
+
+@app.get("/api/wiring-audit/health")
+async def wiring_audit_health():
+    """Phase-B Health — Lightweight wiring health check (scores + tier only)."""
+    from core.cross_prp_audit.cross_prp_audit_orchestrator import get_wiring_audit_health
+    return await asyncio.get_event_loop().run_in_executor(None, get_wiring_audit_health)
 
 
 def _pnl_to_upe_records(trades: list) -> list:
