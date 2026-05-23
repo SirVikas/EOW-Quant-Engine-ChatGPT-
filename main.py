@@ -2661,6 +2661,25 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-B] Wiring audit boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── Phase-C: Operational Compression Layer boot registration ──────────────
+    try:
+        from core.operational_compression.compression_orchestrator import get_compression_health
+        _comp_h = get_compression_health()
+        _comp_score = _comp_h.get("composite_score", 0)
+        _comp_tier  = _comp_h.get("composite_tier", "UNKNOWN")
+        _vis_tiers  = _comp_h.get("visibility_tier_count", 0)
+        _anom_state = _comp_h.get("anomaly_cluster_state", "UNKNOWN")
+        _exec_avail = "YES" if _comp_h.get("executive_condition") not in (None, "UNAVAILABLE") else "NO"
+        _thought(
+            f"🗜 [PHASE-C] Operational Compression registered | "
+            f"health={_comp_score}/100 tier={_comp_tier} | "
+            f"visibility_tiers={_vis_tiers} anomaly_state={_anom_state} "
+            f"executive_synthesis={_exec_avail} | endpoints: /api/compression/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-C] Compression boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5180,6 +5199,57 @@ async def wiring_audit_health():
     """Phase-B Health — Lightweight wiring health check (scores + tier only)."""
     from core.cross_prp_audit.cross_prp_audit_orchestrator import get_wiring_audit_health
     return await asyncio.get_event_loop().run_in_executor(None, get_wiring_audit_health)
+
+
+# ── Phase-C: Operational Compression Layer ────────────────────────────────────
+
+@app.get("/api/compression/executive")
+async def compression_executive():
+    """Phase-C Executive — Executive compression of full institutional intelligence."""
+    from core.operational_compression.executive_compression_engine import generate_executive_compression
+    return await asyncio.get_event_loop().run_in_executor(None, generate_executive_compression)
+
+
+@app.get("/api/compression/health")
+async def compression_health():
+    """Phase-C Health — Institutional health score across 9 weighted domains."""
+    from core.operational_compression.institutional_health_score_engine import compute_institutional_health
+    return await asyncio.get_event_loop().run_in_executor(None, compute_institutional_health)
+
+
+@app.get("/api/compression/anomalies")
+async def compression_anomalies():
+    """Phase-C Anomalies — Clustered anomaly report across 7 institutional domains."""
+    from core.operational_compression.anomaly_clustering_engine import cluster_anomalies
+    return await asyncio.get_event_loop().run_in_executor(None, cluster_anomalies)
+
+
+@app.get("/api/compression/ecology")
+async def compression_ecology():
+    """Phase-C Ecology — Signal ecology compressed into 8 operator-readable domains."""
+    from core.operational_compression.signal_ecology_compression_layer import compress_signal_ecology
+    return await asyncio.get_event_loop().run_in_executor(None, compress_signal_ecology)
+
+
+@app.get("/api/compression/governance")
+async def compression_governance():
+    """Phase-C Governance — Governance civilization compressed into executive summary."""
+    from core.operational_compression.governance_compression_layer import compress_governance
+    return await asyncio.get_event_loop().run_in_executor(None, compress_governance)
+
+
+@app.get("/api/compression/visibility")
+async def compression_visibility():
+    """Phase-C Visibility — Multi-tier visibility architecture with lineage preservation."""
+    from core.operational_compression.multi_tier_visibility_architecture import build_visibility_tier_map
+    return await asyncio.get_event_loop().run_in_executor(None, build_visibility_tier_map)
+
+
+@app.get("/api/compression/orchestration")
+async def compression_orchestration():
+    """Phase-C Orchestration — Unified OPERATIONAL_COMPRESSION_REPORT across all domains."""
+    from core.operational_compression.compression_orchestrator import run_full_compression
+    return await asyncio.get_event_loop().run_in_executor(None, run_full_compression)
 
 
 def _pnl_to_upe_records(trades: list) -> list:
