@@ -561,6 +561,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('perf')"     id="tab-btn-perf">📊 Performance</button>
   <button class="tab-btn"        onclick="switchTab('lio')"      id="tab-btn-lio">🧬 LIO</button>
   <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
+  <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
 </nav>
 
 <!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
@@ -2025,7 +2026,307 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 </div>
 </div><!-- /tab-institutional -->
 
+<!-- ══ TAB: PRP CHAIN ═══════════════════════════════════════════════════════════ -->
+<div id="tab-prp" class="tab-panel">
+<div class="main">
+
+  <!-- Header -->
+  <div class="card" style="background:#1A202C;color:#F7FAFC;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <div style="font-size:14px;font-weight:700;letter-spacing:.02em;">🔱 PHOENIX Reconstruction Program — Chain Status</div>
+      <div style="font-size:11px;opacity:.75;margin-top:4px;">
+        Phases B → H · diagnostic_only=True · auto_authorized=False · human_authority=True
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="prp-last-refresh" style="font-size:10px;opacity:.6;">—</span>
+      <button onclick="loadPRP()" style="padding:5px 13px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#F7FAFC;cursor:pointer;font-size:12px;font-weight:600;">⟳ Refresh All</button>
+    </div>
+  </div>
+
+  <!-- Phase cards grid -->
+  <div id="prp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px;">
+
+    <!-- Phase-B -->
+    <div class="card" id="prp-card-phaseB" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">🔌</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-B</div>
+            <div style="font-size:12px;font-weight:600;">Wiring Audit</div>
+          </div>
+        </div>
+        <a href="/api/wiring-audit/health" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-b-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-b-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-b-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
+    <!-- Phase-C -->
+    <div class="card" id="prp-card-phaseC" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">📦</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-C</div>
+            <div style="font-size:12px;font-weight:600;">Compression</div>
+          </div>
+        </div>
+        <a href="/api/compression/orchestration" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-c-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-c-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-c-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
+    <!-- Phase-D -->
+    <div class="card" id="prp-card-phaseD" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">📊</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-D</div>
+            <div style="font-size:12px;font-weight:600;">Economic Truth</div>
+          </div>
+        </div>
+        <a href="/api/economic-truth/orchestration" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-d-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-d-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-d-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
+    <!-- Phase-E -->
+    <div class="card" id="prp-card-phaseE" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">🧬</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-E</div>
+            <div style="font-size:12px;font-weight:600;">Survivability</div>
+          </div>
+        </div>
+        <a href="/api/survivability/orchestration" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-e-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-e-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-e-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
+    <!-- Phase-F -->
+    <div class="card" id="prp-card-phaseF" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">⚖</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-F</div>
+            <div style="font-size:12px;font-weight:600;">Equilibrium</div>
+          </div>
+        </div>
+        <a href="/api/equilibrium/orchestration" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-f-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-f-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-f-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
+    <!-- Phase-G -->
+    <div class="card" id="prp-card-phaseG" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">🏛</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-G</div>
+            <div style="font-size:12px;font-weight:600;">Execution Gov.</div>
+          </div>
+        </div>
+        <a href="/api/execution-governance/orchestration" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-g-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-g-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-g-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
+    <!-- Phase-H -->
+    <div class="card" id="prp-card-phaseH" style="border-left:4px solid #A0AEC0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">🏺</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Phase-H</div>
+            <div style="font-size:12px;font-weight:600;">Continuity</div>
+          </div>
+        </div>
+        <a href="/api/continuity/orchestration" target="_blank" style="font-size:10px;color:var(--c-blue);text-decoration:none;">API ↗</a>
+      </div>
+      <div id="prp-h-tier"  style="font-size:22px;font-weight:700;color:#718096;">—</div>
+      <div id="prp-h-score" style="font-size:11px;color:var(--muted);margin-top:2px;">Loading…</div>
+      <div id="prp-h-sub"   style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;"></div>
+    </div>
+
+  </div><!-- /prp-grid -->
+
+  <!-- Constitutional notice -->
+  <div class="card" style="background:var(--sky);font-size:11px;color:var(--muted);line-height:1.7;">
+    All PRP phase outputs carry <code>diagnostic_only=True</code> and <code>auto_authorized=False</code>.
+    No phase tier automatically modifies engine behaviour — human authority is required for all governance decisions.
+    Lineage IDs are archived for forensic traceability.
+  </div>
+
+</div>
+</div><!-- /tab-prp -->
+
 <script>
+// ── PRP Chain tab ─────────────────────────────────────────────────────────────
+
+const _PRP_TIER_COLORS = {
+  // Positive tiers — green
+  GROUNDED: '#276749', SOVEREIGN: '#276749', EVOLVING: '#276749',
+  BALANCED: '#276749', ENDURING: '#276749', HEALTHY: '#276749',
+  OPERATIONAL: '#276749',
+  // Moderate — blue
+  STABILIZING: '#2B6CB0', ADAPTING: '#2B6CB0', PERSISTENT: '#2B6CB0',
+  ADEQUATE: '#2B6CB0',
+  // Warning — amber
+  UNSTABLE: '#92400E', GUARDED: '#92400E', STRUGGLING: '#92400E',
+  STRESSED: '#92400E', FRAGILE: '#92400E', VULNERABLE: '#92400E',
+  // Critical — red
+  COLLAPSING: '#9B2C2C', COMPROMISED: '#9B2C2C', CRITICAL: '#9B2C2C',
+  DECAYING: '#9B2C2C', UNSOUND: '#9B2C2C',
+};
+
+const _PRP_TIER_BORDERS = {
+  GROUNDED: '#9AE6B4', SOVEREIGN: '#9AE6B4', EVOLVING: '#9AE6B4',
+  BALANCED: '#9AE6B4', ENDURING: '#9AE6B4', HEALTHY: '#9AE6B4',
+  OPERATIONAL: '#9AE6B4',
+  STABILIZING: '#BEE3F8', ADAPTING: '#BEE3F8', PERSISTENT: '#BEE3F8', ADEQUATE: '#BEE3F8',
+  UNSTABLE: '#FAF089', GUARDED: '#FAF089', STRUGGLING: '#FAF089',
+  STRESSED: '#FAF089', FRAGILE: '#FAF089', VULNERABLE: '#FAF089',
+  COLLAPSING: '#FC8181', COMPROMISED: '#FC8181', CRITICAL: '#FC8181',
+  DECAYING: '#FC8181', UNSOUND: '#FC8181',
+};
+
+function _prpSetCard(phase, tier, score, sub) {
+  const card   = document.getElementById('prp-card-phase' + phase);
+  const tierEl = document.getElementById('prp-' + phase.toLowerCase() + '-tier');
+  const scoreEl= document.getElementById('prp-' + phase.toLowerCase() + '-score');
+  const subEl  = document.getElementById('prp-' + phase.toLowerCase() + '-sub');
+  const color  = _PRP_TIER_COLORS[tier]  || '#718096';
+  const border = _PRP_TIER_BORDERS[tier] || '#A0AEC0';
+  if (tierEl)  { tierEl.textContent = tier || '—'; tierEl.style.color = color; }
+  if (scoreEl) scoreEl.textContent = score != null ? score : '';
+  if (subEl)   subEl.innerHTML = sub || '';
+  if (card)    card.style.borderLeftColor = border;
+}
+
+function _prpError(phase, msg) {
+  const scoreEl = document.getElementById('prp-' + phase.toLowerCase() + '-score');
+  const subEl   = document.getElementById('prp-' + phase.toLowerCase() + '-sub');
+  if (scoreEl) scoreEl.textContent = 'Error';
+  if (subEl)   subEl.textContent = msg || 'fetch failed';
+  const tierEl  = document.getElementById('prp-' + phase.toLowerCase() + '-tier');
+  if (tierEl)  { tierEl.textContent = '—'; tierEl.style.color = '#9B2C2C'; }
+}
+
+async function loadPRP() {
+  const refreshEl = document.getElementById('prp-last-refresh');
+  if (refreshEl) refreshEl.textContent = 'refreshing…';
+
+  const fetches = [
+    fetch('/api/wiring-audit/health').then(r => r.json()),
+    fetch('/api/compression/orchestration').then(r => r.json()),
+    fetch('/api/economic-truth/orchestration').then(r => r.json()),
+    fetch('/api/survivability/orchestration').then(r => r.json()),
+    fetch('/api/equilibrium/orchestration').then(r => r.json()),
+    fetch('/api/execution-governance/orchestration').then(r => r.json()),
+    fetch('/api/continuity/orchestration').then(r => r.json()),
+  ];
+
+  const results = await Promise.allSettled(fetches);
+
+  // Phase-B: Wiring Audit
+  if (results[0].status === 'fulfilled') {
+    const d = results[0].value;
+    const tier  = d.wiring_health_tier || '—';
+    const score = d.wiring_health_score != null ? `Score: ${d.wiring_health_score}/100` : '';
+    const sub   = `<span style="font-family:monospace;font-size:9px;opacity:.6;">${(d.audit_id||'').slice(0,20)||'—'}</span>`;
+    _prpSetCard('B', tier, score, sub);
+  } else { _prpError('B', results[0].reason?.message); }
+
+  // Phase-C: Compression
+  if (results[1].status === 'fulfilled') {
+    const d = results[1].value;
+    const tier  = d.composite_tier || '—';
+    const score = d.composite_score != null ? `Score: ${d.composite_score}/100` : '';
+    const sub   = d.visibility_tier_count != null ? `${d.visibility_tier_count} domain tiers` : '';
+    _prpSetCard('C', tier, score, sub);
+  } else { _prpError('C', results[1].reason?.message); }
+
+  // Phase-D: Economic Truth
+  if (results[2].status === 'fulfilled') {
+    const d = results[2].value;
+    const tier  = d.survivability_tier || '—';
+    const score = d.survivability_score != null ? `Score: ${d.survivability_score}/100` : '';
+    const sub   = [
+      d.alpha_concentration ? `Alpha: ${d.alpha_concentration}` : '',
+      d.dominant_regime     ? `Regime: ${d.dominant_regime}`    : '',
+    ].filter(Boolean).join(' · ') +
+    `<br><span style="font-family:monospace;font-size:9px;opacity:.5;">${(d.economic_id||'').slice(0,22)||'—'}</span>`;
+    _prpSetCard('D', tier, score, sub);
+  } else { _prpError('D', results[2].reason?.message); }
+
+  // Phase-E: Survivability
+  if (results[3].status === 'fulfilled') {
+    const d = results[3].value;
+    const tier  = d.evolution_tier || '—';
+    const score = d.evolution_score != null ? `Score: ${d.evolution_score}/100` : '';
+    const concern = d.primary_concern ? `Concern: ${d.primary_concern}` : '';
+    const sub   = concern +
+    `<br><span style="font-family:monospace;font-size:9px;opacity:.5;">${(d.lineage_id||'').slice(0,22)||'—'}</span>`;
+    _prpSetCard('E', tier, score, sub);
+  } else { _prpError('E', results[3].reason?.message); }
+
+  // Phase-F: Equilibrium
+  if (results[4].status === 'fulfilled') {
+    const d = results[4].value;
+    const tier  = d.equilibrium_tier || '—';
+    const score = d.equilibrium_score != null ? `Score: ${d.equilibrium_score}/100` : '';
+    const concern = d.primary_concern ? `Concern: ${d.primary_concern}` : '';
+    const sub   = concern +
+    `<br><span style="font-family:monospace;font-size:9px;opacity:.5;">${(d.lineage_id||'').slice(0,22)||'—'}</span>`;
+    _prpSetCard('F', tier, score, sub);
+  } else { _prpError('F', results[4].reason?.message); }
+
+  // Phase-G: Execution Governance
+  if (results[5].status === 'fulfilled') {
+    const d = results[5].value;
+    const tier  = d.civilization_tier || '—';
+    const score = d.civilization_score != null ? `Score: ${d.civilization_score}/100` : '';
+    const advisory = d.advisory_state ? `Advisory: ${d.advisory_state}` : '';
+    const gate     = d.gate_state     ? ` · Gate: ${d.gate_state}`      : '';
+    const sub   = advisory + gate +
+    `<br><span style="font-family:monospace;font-size:9px;opacity:.5;">${(d.lineage_id||'').slice(0,22)||'—'}</span>`;
+    _prpSetCard('G', tier, score, sub);
+  } else { _prpError('G', results[5].reason?.message); }
+
+  // Phase-H: Continuity
+  if (results[6].status === 'fulfilled') {
+    const d = results[6].value;
+    const tier  = d.continuity_tier || '—';
+    const score = d.continuity_score != null ? `Score: ${d.continuity_score}/100` : '';
+    const sub   = [
+      d.entropy_state     ? `Entropy: ${d.entropy_state}`         : '',
+      d.cross_regime_verdict ? `X-Regime: ${d.cross_regime_verdict}` : '',
+    ].filter(Boolean).join(' · ') +
+    `<br><span style="font-family:monospace;font-size:9px;opacity:.5;">${(d.lineage_id||'').slice(0,22)||'—'}</span>`;
+    _prpSetCard('H', tier, score, sub);
+  } else { _prpError('H', results[6].reason?.message); }
+
+  if (refreshEl) refreshEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
 // ── FTD-IREL: Institutional tab logic ─────────────────────────────────────────
 
 let _irelData = null;
@@ -2365,12 +2666,15 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['overview','dbo','combat','report','perf','lio','institutional'].forEach(t => {
+  ['overview','dbo','combat','report','perf','lio','institutional','prp'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
     if (btn)   btn.classList.toggle('active',   t === name);
   });
+  if (name === 'prp') {
+    loadPRP();
+  }
   if (name === 'dbo') {
     initGrowthChart();
     renderDBO();
