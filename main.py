@@ -2809,6 +2809,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-H] Institutional continuity boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── Phase-F: Adaptive Equilibrium boot registration ────────────────────────
+    try:
+        from core.adaptive_equilibrium.adaptive_equilibrium_orchestrator import get_equilibrium_health
+        _eq_h    = get_equilibrium_health()
+        _eq_stat = _eq_h.get("status", "UNKNOWN")
+        _thought(
+            f"⚖ [PHASE-F] Adaptive Equilibrium registered | "
+            f"status={_eq_stat} | "
+            f"engines: F.1 Kelly / F.2 Drawdown / F.3 Consistency / "
+            f"F.4 Utilization / F.5 Band / F.6 Discipline / F.7 Orchestrator | "
+            f"endpoints: /api/equilibrium/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHASE-F] Adaptive equilibrium boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5682,6 +5698,78 @@ async def continuity_orchestration():
     trades = _build_eco_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, run_institutional_continuity, trades
+    )
+
+
+# ── Phase-F: Adaptive Equilibrium & Capital Discipline ─────────────────────────
+
+@app.get("/api/equilibrium/kelly")
+async def equilibrium_kelly():
+    """Phase-F F.1 — Kelly capital efficiency: optimal vs actual position sizing."""
+    from core.adaptive_equilibrium.kelly_efficiency_engine import compute_kelly_efficiency
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_kelly_efficiency, trades
+    )
+
+
+@app.get("/api/equilibrium/drawdown")
+async def equilibrium_drawdown():
+    """Phase-F F.2 — Drawdown dynamics: multi-phase drawdown analysis and recovery velocity."""
+    from core.adaptive_equilibrium.drawdown_dynamics_engine import compute_drawdown_dynamics
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_drawdown_dynamics, trades
+    )
+
+
+@app.get("/api/equilibrium/consistency")
+async def equilibrium_consistency():
+    """Phase-F F.3 — Return consistency: rolling window consistency scoring."""
+    from core.adaptive_equilibrium.return_consistency_engine import compute_return_consistency
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_return_consistency, trades
+    )
+
+
+@app.get("/api/equilibrium/utilization")
+async def equilibrium_utilization():
+    """Phase-F F.4 — Capital utilization: PnL-per-unit efficiency and sizing variance."""
+    from core.adaptive_equilibrium.capital_utilization_engine import compute_capital_utilization
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_capital_utilization, trades
+    )
+
+
+@app.get("/api/equilibrium/band")
+async def equilibrium_band():
+    """Phase-F F.5 — Equilibrium band: statistical 2.5-sigma band excursion detection."""
+    from core.adaptive_equilibrium.equilibrium_band_engine import compute_equilibrium_band
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_equilibrium_band, trades
+    )
+
+
+@app.get("/api/equilibrium/discipline-cost")
+async def equilibrium_discipline_cost():
+    """Phase-F F.6 — Discipline cost: economic cost of over-caution and under-discipline."""
+    from core.adaptive_equilibrium.discipline_cost_engine import compute_discipline_cost
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_discipline_cost, trades
+    )
+
+
+@app.get("/api/equilibrium/orchestration")
+async def equilibrium_orchestration():
+    """Phase-F F.7 — Adaptive Equilibrium Orchestrator (EQ-{ts}-{sha256[:16]}): BALANCED/ADAPTING/STRESSED/CRITICAL."""
+    from core.adaptive_equilibrium.adaptive_equilibrium_orchestrator import run_adaptive_equilibrium
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, run_adaptive_equilibrium, trades
     )
 
 

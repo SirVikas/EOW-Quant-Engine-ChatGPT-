@@ -467,6 +467,123 @@ REPORT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "description": "FTD-HMAO: Human purpose alignment governance — 8 alignment metrics, 6 classifications",
     },
 
+    # ── Phase-F: Adaptive Equilibrium & Capital Discipline ───────────────────
+
+    "KELLY_EFFICIENCY": {
+        "report_id":           "KELLY_EFFICIENCY",
+        "name":                "Kelly Capital Efficiency",
+        "report_family":       FAMILY_ECONOMIC,
+        "doctrine_version":    "1.35",
+        "export_tier":         TIER_RESEARCH,
+        "endpoint":            "/api/equilibrium/kelly",
+        "bundle_key":          "kelly_efficiency",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH"],
+        "overlapping_reports": ["ADAPTIVE_EQUILIBRIUM"],
+        "constitutional_scope": "ECONOMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_HIGH,
+        "evidence_requirements": {"min_trades": 5},
+        "description": "Kelly capital efficiency — optimal vs actual position sizing with OPTIMAL/ADEQUATE/SUBOPTIMAL/NEGLIGENT states",
+    },
+
+    "DRAWDOWN_DYNAMICS": {
+        "report_id":           "DRAWDOWN_DYNAMICS",
+        "name":                "Drawdown Dynamics Engine",
+        "report_family":       FAMILY_ECONOMIC,
+        "doctrine_version":    "1.35",
+        "export_tier":         TIER_RESEARCH,
+        "endpoint":            "/api/equilibrium/drawdown",
+        "bundle_key":          "drawdown_dynamics",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH"],
+        "overlapping_reports": ["ADAPTIVE_EQUILIBRIUM"],
+        "constitutional_scope": "ECONOMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_HIGH,
+        "evidence_requirements": {"min_trades": 5},
+        "description": "Drawdown dynamics — multi-phase peak/trough/recovery analysis with STABLE/RECOVERING/DETERIORATING/CRITICAL states",
+    },
+
+    "RETURN_CONSISTENCY": {
+        "report_id":           "RETURN_CONSISTENCY",
+        "name":                "Return Consistency Engine",
+        "report_family":       FAMILY_ECONOMIC,
+        "doctrine_version":    "1.35",
+        "export_tier":         TIER_RESEARCH,
+        "endpoint":            "/api/equilibrium/consistency",
+        "bundle_key":          "return_consistency",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH"],
+        "overlapping_reports": ["ADAPTIVE_EQUILIBRIUM", "EXPECTANCY_STABILITY"],
+        "constitutional_scope": "ECONOMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_HIGH,
+        "evidence_requirements": {"min_trades": 10},
+        "description": "Return consistency — rolling window variance and positive-ratio scoring with CONSISTENT/ADEQUATE/VARIABLE/ERRATIC states",
+    },
+
+    "CAPITAL_UTILIZATION": {
+        "report_id":           "CAPITAL_UTILIZATION",
+        "name":                "Capital Utilization Engine",
+        "report_family":       FAMILY_ECONOMIC,
+        "doctrine_version":    "1.35",
+        "export_tier":         TIER_RESEARCH,
+        "endpoint":            "/api/equilibrium/utilization",
+        "bundle_key":          "capital_utilization",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH"],
+        "overlapping_reports": ["ADAPTIVE_EQUILIBRIUM"],
+        "constitutional_scope": "ECONOMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_MEDIUM,
+        "evidence_requirements": {"min_trades": 5},
+        "description": "Capital utilization — PnL-per-unit efficiency and sizing coefficient of variation with EFFICIENT/ADEQUATE/UNDERUTILIZED/OVEREXTENDED states",
+    },
+
+    "EQUILIBRIUM_BAND": {
+        "report_id":           "EQUILIBRIUM_BAND",
+        "name":                "Equilibrium Band Engine",
+        "report_family":       FAMILY_ECONOMIC,
+        "doctrine_version":    "1.35",
+        "export_tier":         TIER_RESEARCH,
+        "endpoint":            "/api/equilibrium/band",
+        "bundle_key":          "equilibrium_band",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH"],
+        "overlapping_reports": ["ADAPTIVE_EQUILIBRIUM"],
+        "constitutional_scope": "ECONOMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_HIGH,
+        "evidence_requirements": {"min_trades": 20},
+        "description": "Equilibrium band — 2.5-sigma statistical band detection with IN_BAND/APPROACHING/OUTSIDE_BAND/FAR_OUTSIDE states",
+    },
+
+    "DISCIPLINE_COST": {
+        "report_id":           "DISCIPLINE_COST",
+        "name":                "Discipline Cost Engine",
+        "report_family":       FAMILY_ECONOMIC,
+        "doctrine_version":    "1.35",
+        "export_tier":         TIER_RESEARCH,
+        "endpoint":            "/api/equilibrium/discipline-cost",
+        "bundle_key":          "discipline_cost",
+        "dependencies":        ["ECONOMIC_GROUND_TRUTH"],
+        "overlapping_reports": ["ADAPTIVE_EQUILIBRIUM", "DISCIPLINE_MEMORY"],
+        "constitutional_scope": "ECONOMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_MEDIUM,
+        "evidence_requirements": {"min_trades": 5},
+        "description": "Discipline cost — quantifies economic cost of over-caution and under-discipline with COST_MINIMAL/MODERATE/SIGNIFICANT/SEVERE states",
+    },
+
+    "ADAPTIVE_EQUILIBRIUM": {
+        "report_id":           "ADAPTIVE_EQUILIBRIUM",
+        "name":                "Adaptive Equilibrium Orchestration",
+        "report_family":       FAMILY_ECONOMIC,
+        "doctrine_version":    "1.35",
+        "export_tier":         TIER_CORE,
+        "endpoint":            "/api/equilibrium/orchestration",
+        "bundle_key":          "adaptive_equilibrium",
+        "dependencies":        [
+            "KELLY_EFFICIENCY", "DRAWDOWN_DYNAMICS", "RETURN_CONSISTENCY",
+            "CAPITAL_UTILIZATION", "EQUILIBRIUM_BAND", "DISCIPLINE_COST",
+        ],
+        "overlapping_reports": ["ECONOMIC_TRUTH", "SURVIVABILITY_EVOLUTION"],
+        "constitutional_scope": "ECONOMIC_OBSERVABILITY",
+        "archive_priority":    PRIORITY_CRITICAL,
+        "evidence_requirements": {"min_trades": 5},
+        "description": "Adaptive equilibrium orchestration — Phase-F EQ lineage, BALANCED/ADAPTING/STRESSED/CRITICAL tiers (capital mathematics layer)",
+    },
+
     # ── Phase-B: Cross-PRP Wiring Audit ──────────────────────────────────────
 
     "WIRING_CONSTITUTION": {
@@ -1190,4 +1307,4 @@ REPORT_REGISTRY: Dict[str, Dict[str, Any]] = {
 }
 
 # Total registered reports — must equal len(REPORT_REGISTRY)
-EXPECTED_REPORT_COUNT = 68
+EXPECTED_REPORT_COUNT = 75
