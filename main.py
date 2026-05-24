@@ -1422,10 +1422,20 @@ async def on_tick(tick: Tick):
                 )
 
         if sig and sig.signal != Signal.NONE:
-            # FTD-037: Disabled strategy_id check — surgically blocks all NOISE strategies.
-            # More precise than regime blocking; allows good strategies in any regime.
+            # FTD-037: Disabled strategy_id check — surgically blocks all NOISE strategies
+            # in live mode. In BYPASS/paper mode the RL bandit must see trade outcomes even
+            # from losing strategies so Q-values can converge and de-prioritise them via
+            # decay. Without this bypass, all currently-generated signals (ALPHA_PBE_v1,
+            # ALPHA_TCB_v1, TrendFollowing_PAPER_SPEED) are silently discarded → permanent
+            # drought → ALLOW_COLLAPSE (same failure mode as LCC + RL-TOXIC, FTD-054-PHOENIX).
             if sig.strategy_id in _DISABLED_STRATEGY_IDS:
-                return
+                if not cfg.BYPASS_ALL_GATES:
+                    return
+                _thought(
+                    f"⚡ DISABLED_OVERRIDE {sym}: {sig.strategy_id} allowed "
+                    f"[bypass=active — RL needs outcomes; Q-decay will deprioritise if losing]",
+                    "SIGNAL",
+                )
 
             # FTD-037: Session strategy loss cap — catches any unlisted strategy that
             # goes bad this session (prevents -$92 runaway on a single strategy_id).
