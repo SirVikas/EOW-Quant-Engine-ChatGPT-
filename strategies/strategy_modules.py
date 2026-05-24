@@ -99,9 +99,10 @@ class TrendFollowingStrategy:
         self.rsi_period = int(d.get("rsi_period", cfg.RSI_PERIOD))
         self.rsi_ob     = float(d.get("rsi_ob",   cfg.RSI_OVERBOUGHT))
         self.rsi_os     = float(d.get("rsi_os",   cfg.RSI_OVERSOLD))
-        self.atr_period = int(d.get("atr_period", cfg.ATR_PERIOD))
-        self.atr_sl     = float(d.get("atr_sl",   cfg.ATR_MULT_SL))
-        self.atr_tp     = float(d.get("atr_tp",   cfg.ATR_MULT_TP))
+        self.atr_period  = int(d.get("atr_period", cfg.ATR_PERIOD))
+        self.atr_sl      = float(d.get("atr_sl",   cfg.ATR_MULT_SL))
+        self.atr_tp      = float(d.get("atr_tp",   cfg.ATR_MULT_TP))
+        self.min_atr_pct = float(d.get("min_atr_pct", MIN_ATR_PCT))
 
     def generate_signal(
         self, symbol: str, closes: List[float],
@@ -124,7 +125,7 @@ class TrendFollowingStrategy:
 
         # ── Data quality guards ────────────────────────────────────────────
         atr_pct = (atr / price * 100) if price else 0
-        if atr_pct < MIN_ATR_PCT:
+        if atr_pct < self.min_atr_pct:
             return None   # stablecoin / too low volatility
 
         if rsi == 50.0:
@@ -196,14 +197,15 @@ class MeanReversionStrategy:
         self.rsi_period = int(d.get("rsi_period", cfg.RSI_PERIOD))
         self.rsi_ob     = float(d.get("rsi_ob",   cfg.RSI_OVERBOUGHT))
         self.rsi_os     = float(d.get("rsi_os",   cfg.RSI_OVERSOLD))
-        self.atr_period = int(d.get("atr_period", cfg.ATR_PERIOD))
+        self.atr_period  = int(d.get("atr_period", cfg.ATR_PERIOD))
         # SL tighter than TrendFollowing — MR exits at BB mean, not a long run.
         # TP floor of 1.5×ATR ensures BB mean dominates: mean ≈ 2×ATR from lower/upper
         # band, so max/min(mean, price ± 1.5×ATR) always resolves to mean.
         # Previous values (SL=2.5, TP=7.0) set TP unreachably far (7×ATR vs 2×ATR
         # natural target), causing near-0% win rate — every trade closed by SL.
-        self.atr_sl     = float(d.get("atr_sl",   1.5))
-        self.atr_tp     = float(d.get("atr_tp",   1.5))
+        self.atr_sl      = float(d.get("atr_sl",   1.5))
+        self.atr_tp      = float(d.get("atr_tp",   1.5))
+        self.min_atr_pct = float(d.get("min_atr_pct", MIN_ATR_PCT))
 
     def generate_signal(
         self, symbol: str, closes: List[float],
@@ -223,7 +225,7 @@ class MeanReversionStrategy:
 
         # Volatility guard
         atr_pct = (atr / price * 100) if price else 0
-        if atr_pct < MIN_ATR_PCT:
+        if atr_pct < self.min_atr_pct:
             return None
 
         if price <= lower and rsi < self.rsi_os:
