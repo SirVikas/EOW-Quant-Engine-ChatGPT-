@@ -5417,7 +5417,7 @@ async def compression_orchestration():
 # ── Phase-D: Economic Truth Reconstruction API ───────────────────────────────
 
 def _build_eco_trades() -> list:
-    """Combine session + historical trades deduplicated by trade_id."""
+    """Combine session + historical trades deduplicated by trade_id, oldest first."""
     session_trades = [asdict(t) for t in pnl_calc.trades]
     historical     = data_lake.get_trades(limit=1000)
     seen: dict[str, dict] = {}
@@ -5429,7 +5429,19 @@ def _build_eco_trades() -> list:
         tid = t.get("trade_id", "")
         if tid and tid not in seen:
             seen[tid] = t
-    return list(seen.values())
+    # Sort chronologically so IS/OOS splits and cumulative-PnL curves are correct.
+    # data_lake returns DESC by default; without sorting, OOS = oldest trades (backwards).
+    return sorted(seen.values(), key=lambda t: t.get("exit_ts", 0))
+
+
+# Phase-I uses a rolling window so the certification reflects the CURRENT strategy
+# config, not all-time history which may span multiple strategy revisions.
+_PHASE_I_LOOKBACK = 300
+
+
+def _build_phase_i_trades() -> list:
+    """Most recent _PHASE_I_LOOKBACK trades for Phase-I alpha certification."""
+    return _build_eco_trades()[-_PHASE_I_LOOKBACK:]
 
 
 @app.get("/api/economic-truth/expectancy")
@@ -5796,7 +5808,7 @@ async def equilibrium_orchestration():
 async def alpha_statistics():
     """Phase-I I.1 — Statistical significance: z/t tests on win rate and mean PnL vs noise."""
     from core.alpha_confirmation.statistical_significance_engine import compute_statistical_significance
-    trades = _build_eco_trades()
+    trades = _build_phase_i_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, compute_statistical_significance, trades
     )
@@ -5806,7 +5818,7 @@ async def alpha_statistics():
 async def alpha_oos():
     """Phase-I I.2 — Out-of-sample validation: 60/40 IS/OOS split with degradation ratio."""
     from core.alpha_confirmation.oos_validation_engine import compute_oos_validation
-    trades = _build_eco_trades()
+    trades = _build_phase_i_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, compute_oos_validation, trades
     )
@@ -5816,7 +5828,7 @@ async def alpha_oos():
 async def alpha_fee_survival():
     """Phase-I I.3 — Fee-survival certification: rolling window net-PnL survival rate."""
     from core.alpha_confirmation.fee_survival_engine import compute_fee_survival
-    trades = _build_eco_trades()
+    trades = _build_phase_i_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, compute_fee_survival, trades
     )
@@ -5826,7 +5838,7 @@ async def alpha_fee_survival():
 async def alpha_regime_robustness():
     """Phase-I I.4 — Regime robustness: qualifying profitable regimes and concentration risk."""
     from core.alpha_confirmation.regime_robustness_engine import compute_regime_robustness
-    trades = _build_eco_trades()
+    trades = _build_phase_i_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, compute_regime_robustness, trades
     )
@@ -5836,7 +5848,7 @@ async def alpha_regime_robustness():
 async def alpha_drawdown_tolerance():
     """Phase-I I.5 — Drawdown tolerance: DD ratio, recovery ratio, Calmar proxy."""
     from core.alpha_confirmation.drawdown_tolerance_engine import compute_drawdown_tolerance
-    trades = _build_eco_trades()
+    trades = _build_phase_i_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, compute_drawdown_tolerance, trades
     )
@@ -5853,7 +5865,7 @@ async def alpha_gate():
     from core.alpha_confirmation.live_readiness_gate             import compute_live_readiness
 
     def _run_gate():
-        trades = _build_eco_trades()
+        trades = _build_phase_i_trades()
         i1 = compute_statistical_significance(trades)
         i2 = compute_oos_validation(trades)
         i3 = compute_fee_survival(trades)
@@ -5868,7 +5880,7 @@ async def alpha_gate():
 async def alpha_orchestration():
     """Phase-I I.7 — Alpha Confirmation Orchestrator (ALPHA-{ts}-{sha256[:16]}): CONFIRMED/CANDIDATE/DEVELOPING/UNPROVEN."""
     from core.alpha_confirmation.alpha_confirmation_orchestrator import run_alpha_confirmation
-    trades = _build_eco_trades()
+    trades = _build_phase_i_trades()
     return await asyncio.get_event_loop().run_in_executor(
         None, run_alpha_confirmation, trades
     )
