@@ -1,0 +1,251 @@
+{
+  "last_heal_ts": 1779666044095,
+  "balance": {},
+  "ws_stale_cycles": 0,
+  "reconnect_backoff_s": 5.0,
+  "conn_reset_count": 0,
+  "last_ws_error": null,
+  "network_audit": null,
+  "recent_events": [
+    {
+      "ts": 1779665449338,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665494927,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665494927,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665495139,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665540583,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665540584,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665540780,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665586245,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665586247,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665586471,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665631963,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665631963,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665632172,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665677611,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665677612,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665677804,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665723286,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665723286,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665723495,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665769270,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665769271,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665769510,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665815348,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665815348,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665815525,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665861125,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665861205,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665861458,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665907494,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665907494,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665907712,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665953099,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665953100,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665953296,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779665998856,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779665998857,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779665999053,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    },
+    {
+      "ts": 1779666044495,
+      "action": "BALANCE_SYNC",
+      "result": "PAPER mode — skipped",
+      "ok": true
+    },
+    {
+      "ts": 1779666044496,
+      "action": "WS_CHECK",
+      "result": "Live — ticks flowing",
+      "ok": true
+    },
+    {
+      "ts": 1779666044692,
+      "action": "API_PING",
+      "result": "OK",
+      "ok": true
+    }
+  ]
+}

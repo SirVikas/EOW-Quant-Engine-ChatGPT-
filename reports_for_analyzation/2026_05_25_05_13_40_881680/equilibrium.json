@@ -1,0 +1,27 @@
+{
+  "engine": "F.7_ADAPTIVE_EQUILIBRIUM",
+  "lineage_id": "EQ-1779666058852-44ddcffa9327e3b9",
+  "equilibrium_score": 47,
+  "equilibrium_tier": "STRESSED",
+  "trade_count": 740,
+  "sub_engine_states": {
+    "f1_kelly": "NEGLIGENT",
+    "f2_drawdown": "STABLE",
+    "f3_consistency": "ERRATIC",
+    "f4_utilization": "OVEREXTENDED",
+    "f5_band": "IN_BAND",
+    "f6_discipline": "COST_MINIMAL"
+  },
+  "sub_engine_scores": {
+    "kelly_score": 0,
+    "drawdown_score": 20,
+    "consistency_score": 0,
+    "utilization_score": 2,
+    "band_score": 15,
+    "discipline_score": 10
+  },
+  "primary_concern": "kelly_efficiency",
+  "diagnostic_only": true,
+  "auto_authorized": false,
+  "lineage_preserved": true
+}

@@ -1,0 +1,59 @@
+{
+  "module": "ADAPTIVE_EDGE_ENGINE",
+  "phase": "FTD-037",
+  "total_tracked": 2,
+  "active": [
+    "MR_BB_RSI_v1"
+  ],
+  "reduced": [],
+  "scaling": [],
+  "disabled": [
+    "TrendFollowing_PAPER_SPEED"
+  ],
+  "top_strategy": "TrendFollowing_PAPER_SPEED",
+  "top_score": 0.0178,
+  "strategies": [
+    {
+      "strategy_id": "TrendFollowing_PAPER_SPEED",
+      "n_trades": 36,
+      "state": "DISABLED",
+      "aee_score": 0.0178,
+      "rank": 1,
+      "weighted_pf": 0.1018,
+      "weighted_rr": -0.1629,
+      "cost_pct": 375502589.46,
+      "win_rate": 1.94,
+      "win_streak": 0,
+      "loss_streak": 26,
+      "size_mult": 0.0,
+      "can_trade": false,
+      "block_reason": "edge=-0.0673 < 0 (immediate kill)",
+      "disable_log": [
+        {
+          "ts": 1779660078947,
+          "reason": "edge=-0.0673 < 0 (immediate kill)",
+          "pf": 0.6219,
+          "edge": -0.0673
+        }
+      ]
+    },
+    {
+      "strategy_id": "MR_BB_RSI_v1",
+      "n_trades": 2,
+      "state": "ACTIVE",
+      "aee_score": 0.0008,
+      "rank": 2,
+      "weighted_pf": 0.0,
+      "weighted_rr": -0.2571,
+      "cost_pct": 99.69,
+      "win_rate": 0.0,
+      "win_streak": 0,
+      "loss_streak": 2,
+      "size_mult": 1.0,
+      "can_trade": true,
+      "block_reason": "",
+      "disable_log": []
+    }
+  ],
+  "score_formula": "AEE_Score = 0.35×PF_score + 0.25×RR_score + 0.25×Cost_score + 0.15×Consistency"
+}

@@ -1,0 +1,13 @@
+{
+  "trades_per_hour": 17.0,
+  "signals_per_hour": 169.0,
+  "rejection_rate_pct": 0.0,
+  "minutes_since_last_trade": 0.6,
+  "top_rejection_reasons": {},
+  "total_signals": 169,
+  "total_trades": 17,
+  "total_skips": 0,
+  "window_min": 60,
+  "module": "TRADE_FLOW_MONITOR",
+  "phase": 5.1
+}

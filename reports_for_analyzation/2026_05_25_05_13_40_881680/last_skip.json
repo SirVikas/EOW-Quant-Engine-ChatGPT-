@@ -1,0 +1,12 @@
+{
+  "last_skip": {},
+  "skip_total": 145,
+  "recent_msgs": [
+    "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=33.3 above_sma=False bands=[58.0,42.0] (rsi=33.3 above_sma=False regime=TRENDING)",
+    "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=75.0 above_sma=True bands=[58.0,42.0] (rsi=75.0 above_sma=True regime=TRENDING)",
+    "⚡ PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=81.9 above_sma=True bands=[58.0,42.0] (rsi=81.9 above_sma=True regime=TRENDING)",
+    "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=57.4 above_sma=False bands=[24.0,76.0] (rsi=57.4 above_sma=False regime=MEAN_REVERTING)",
+    "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=66.2 above_sma=True bands=[58.0,42.0] (rsi=66.2 above_sma=True regime=TRENDING)"
+  ],
+  "ts": 1779666058852
+}

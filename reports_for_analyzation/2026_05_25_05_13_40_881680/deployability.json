@@ -1,0 +1,25 @@
+{
+  "score": 0,
+  "status": "BLOCKED",
+  "block_reason": "LOW_SHARPE(-4.87<1.0)",
+  "n_trades": 740,
+  "warmup_mode": false,
+  "consistency_bonus": 0.0,
+  "components": {
+    "sharpe_norm": 0,
+    "sortino_norm": 0,
+    "win_rate_score": 0,
+    "risk_ctrl_score": 0,
+    "dd_inverse": 0
+  },
+  "thresholds": {
+    "warmup_trades": 30,
+    "min_trades": 50,
+    "min_sharpe": 1.0,
+    "max_drawdown": "20%",
+    "max_ruin": "10%",
+    "consistency_at": 0.55,
+    "ready_at": 85,
+    "improving_at": 60
+  }
+}

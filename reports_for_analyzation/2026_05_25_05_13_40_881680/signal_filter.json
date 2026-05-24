@@ -1,0 +1,42 @@
+{
+  "consecutive_losses": {
+    "ETHUSDT": 6,
+    "WLDUSDT": 5,
+    "ONDOUSDT": 6,
+    "BTCUSDT": 5,
+    "ASTERUSDT": 4,
+    "NEARUSDT": 6,
+    "GENIUSUSDT": 5
+  },
+  "paused_symbols": {
+    "ONDOUSDT": 9.2,
+    "NEARUSDT": 9.1,
+    "ETHUSDT": 19.7,
+    "BTCUSDT": 12.1,
+    "WLDUSDT": 14.3,
+    "GENIUSUSDT": 29.4,
+    "ASTERUSDT": 15.6
+  },
+  "regime_thresholds": {
+    "TRENDING": {
+      "min_rr": 1.5,
+      "min_conf": 0.15
+    },
+    "MEAN_REVERTING": {
+      "min_rr": 1.5,
+      "min_conf": 0.15
+    },
+    "VOLATILITY_EXPANSION": {
+      "min_rr": 1.8,
+      "min_conf": 0.2
+    },
+    "UNKNOWN": {
+      "min_rr": 1.5,
+      "min_conf": 0.1
+    }
+  },
+  "fixed_thresholds": {
+    "min_atr_pct": 0.01,
+    "max_cost_frac": 0.2
+  }
+}

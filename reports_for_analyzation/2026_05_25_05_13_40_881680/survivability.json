@@ -1,0 +1,453 @@
+{
+  "report": "SURVIVABILITY_EVOLUTION_REPORT",
+  "survivability_id": "SURV-1779666057663-8203d5f7498b1273",
+  "trade_count": 740,
+  "evolution_score": 20,
+  "evolution_tier": "COLLAPSING",
+  "expectancy_persistence_state": "DEGRADING",
+  "ecological_preservation_tier": "SAFE",
+  "alpha_persistence_state": "ABSENT",
+  "entropy_state": "CRITICAL",
+  "confidence_realism_score": 50,
+  "dominant_regime": "RANGING",
+  "score_evidence": {
+    "expectancy_stable": false,
+    "ecology_preserved": true,
+    "alpha_persisting": false,
+    "entropy_managed": false,
+    "confidence_realistic": false
+  },
+  "domain_reports": {
+    "expectancy_stability": {
+      "report": "EXPECTANCY_STABILITY_REPORT",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057663,
+      "total_trades": 740,
+      "stability_state": "DEGRADING",
+      "persistence_score": 3,
+      "decay_velocity": 0.000351,
+      "half_life_estimate": 0,
+      "confidence_interval": {
+        "low": -0.4276,
+        "high": -0.0521
+      },
+      "instability_detected": false,
+      "rolling_windows": {
+        "w10": {
+          "size": 10,
+          "points_computed": 731,
+          "positive_count": 113,
+          "mean_exp": -0.2401,
+          "decay_velocity": 0.000188
+        },
+        "w20": {
+          "size": 20,
+          "points_computed": 721,
+          "positive_count": 75,
+          "mean_exp": -0.2409,
+          "decay_velocity": 0.000189
+        },
+        "w50": {
+          "size": 50,
+          "points_computed": 691,
+          "positive_count": 21,
+          "mean_exp": -0.2399,
+          "decay_velocity": 0.000351
+        }
+      },
+      "primary_window_size": 50
+    },
+    "ecological_preservation": {
+      "report": "ECOLOGICAL_SELF_PRESERVATION_REPORT",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057878,
+      "total_trades": 740,
+      "preservation_score": 100,
+      "preservation_tier": "SAFE",
+      "threat_count": 0,
+      "threats": [],
+      "high_threat_count": 0,
+      "recommendations": []
+    },
+    "regime_memory": {
+      "report": "REGIME_ADAPTATION_MEMORY_REPORT",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057880,
+      "total_trades": 740,
+      "regime_count": 2,
+      "regime_memory": {
+        "RANGING": {
+          "trade_count": 574,
+          "net_expectancy": -0.2766,
+          "survivability": "NOT_SURVIVABLE",
+          "win_rate": 19.0,
+          "early_expectancy": -0.2824,
+          "late_expectancy": -0.2708,
+          "expectancy_trend": "IMPROVING",
+          "collapse_recurrence_count": 483,
+          "recovery_count": 20
+        },
+        "TRENDING": {
+          "trade_count": 166,
+          "net_expectancy": -0.1181,
+          "survivability": "NOT_SURVIVABLE",
+          "win_rate": 17.5,
+          "early_expectancy": -0.1012,
+          "late_expectancy": -0.1351,
+          "expectancy_trend": "DEGRADING",
+          "collapse_recurrence_count": 129,
+          "recovery_count": 3
+        }
+      },
+      "transition_history": [
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -1.3407718238482156
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.4260177497796002
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.3088853574226801
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.6742924253479327
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": 0.2313753846677965
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": 2.4702745932759194
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": 2.126968530508296
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.014584208326793635
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.39352632911771146
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.728412334106098
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": 0.5475195017812207
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.461409383359616
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.24910131779460382
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.37315898270281544
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.10927162045200697
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.42308741357568025
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": 0.49049852329439414
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.5804785949933926
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.2809804641336026
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.008230797863813505
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.2786194768515595
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.17551260890801731
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.3871051633453111
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": 0.0505080494025108
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.3462881376754938
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.5323960417794485
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.6514516086001507
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": 0.1752401668822463
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.2826904177812002
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": 1.1896113850061236
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.25717930502159014
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.5317287843412886
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.10475513097598874
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.635200758002232
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.3454178143841956
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": 0.39158734746528295
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.1970834411130901
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.25912746890857075
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.19723853958648008
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.2562506220931897
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": 0.5833144398037158
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.2157807241122341
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": 0.95126915609157
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.2744292712692635
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.18259884248842978
+        },
+        {
+          "from": "TRENDING",
+          "to": "RANGING",
+          "net_at_transition": -0.24035748271280793
+        },
+        {
+          "from": "RANGING",
+          "to": "TRENDING",
+          "net_at_transition": -0.2927520597603842
+        }
+      ],
+      "transition_count": 47,
+      "collapse_conditions": [
+        "Regime RANGING: net_exp=-0.2766, win_rate=19.0% — historically collapse-associated",
+        "Regime TRENDING: net_exp=-0.1181, win_rate=17.5% — historically collapse-associated"
+      ],
+      "survivability_conditions": [],
+      "adaptive_fingerprints": {
+        "RANGING": "MARGINAL_STABLE",
+        "TRENDING": "COLLAPSING"
+      },
+      "dominant_regime": "RANGING"
+    },
+    "alpha_persistence": {
+      "report": "ALPHA_PERSISTENCE_REPORT",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057911,
+      "total_trades": 740,
+      "alpha_state": "ABSENT",
+      "persistence_score": 15,
+      "decay_curve": [
+        -0.165725,
+        -0.171114,
+        -0.181128,
+        -0.171877,
+        -0.177283,
+        -0.184778,
+        -0.203588,
+        -0.209722,
+        -0.21607,
+        -0.219143,
+        -0.224205,
+        -0.226608,
+        -0.216376,
+        -0.211961,
+        -0.200788,
+        -0.204674,
+        -0.202632,
+        -0.204899,
+        -0.202887,
+        -0.177021
+      ],
+      "decay_velocity": 0.00019,
+      "alpha_duration": 0,
+      "temporal_degradation": false,
+      "evaporation_risk": "LOW",
+      "concentration_migration": false,
+      "regime_dependency": "UNKNOWN"
+    },
+    "confidence_realism": {
+      "report": "CONFIDENCE_REALISM_REPORT",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057943,
+      "total_trades": 740,
+      "trades_with_confidence": 0,
+      "realism_score": 50,
+      "conviction_reliability": "UNKNOWN",
+      "hallucination_detected": false,
+      "overconfidence_zones": [],
+      "overconfidence_zone_count": 0,
+      "expectancy_confirmed_confidence": null,
+      "confidence_entropy": null,
+      "confidence_buckets": {}
+    },
+    "entropy_resistance": {
+      "report": "ENTROPY_RESISTANCE_REPORT",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057943,
+      "total_trades": 740,
+      "entropy_state": "CRITICAL",
+      "resistance_score": 48,
+      "entropy_domains": {
+        "signal_entropy": {
+          "score": 92,
+          "stdev_net": 0.784945
+        },
+        "ecological_entropy": {
+          "score": 52,
+          "fast_ratio": 0.1986,
+          "strategy_count": 4
+        },
+        "regime_instability_entropy": {
+          "score": 94,
+          "transition_count": 47,
+          "transition_rate": 0.0636
+        },
+        "alpha_fragmentation": {
+          "score": 0,
+          "positive_pockets": 0,
+          "negative_pockets": 7
+        },
+        "survivability_erosion": {
+          "score": 15,
+          "positive_ratio": 0.1546
+        },
+        "structural_degradation_velocity": {
+          "score": 50,
+          "decay_velocity": 0.000188
+        }
+      },
+      "degradation_velocity": 0.000188
+    }
+  },
+  "domain_errors": [],
+  "lineage_preserved": true,
+  "replay_safe": true,
+  "diagnostic_only": true,
+  "auto_authorized": false,
+  "generated_ts": 1779666057663
+}

@@ -1,0 +1,120 @@
+{
+  "package_type": "PHOENIX_UNIFIED_INTELLIGENCE",
+  "version": "1.37.0",
+  "captured_at": "2026-05-24 23:40:57 UTC",
+  "captured_at_ms": 1779666057322,
+  "bypass_mode": true,
+  "trade_count": 740,
+  "capital_usdt": 821.6,
+  "net_pnl_usdt": -178.4,
+  "files": {
+    "00_BRIEFING.md": {
+      "size_bytes": 5905,
+      "sha256": "918ff5f0db16bb3ca9da570c18069483a4cccaf5ca60525ed9cc35de3a82a9dc"
+    },
+    "01_operational_health/system_status.json": {
+      "size_bytes": 2131,
+      "sha256": "a8fc66c719d2246d986239f6604c57c156de8b579f3d5166f4213f1a404f36c8"
+    },
+    "01_operational_health/healer_snapshot.json": {
+      "size_bytes": 5058,
+      "sha256": "c2f73cdc6b771b954052300d311c7f1709f93228c42c136465a5865439976760"
+    },
+    "01_operational_health/observability_health.json": {
+      "size_bytes": 211,
+      "sha256": "7c4c86ab1f38ac751f5c94118eb737be45a0eaf3c245a6a50bf50208efd832ee"
+    },
+    "01_operational_health/anomalies.json": {
+      "size_bytes": 9928,
+      "sha256": "7ea9c38cafe0da7a8ba57a400a54ed8ad764d98e3e2cb71f4c7151884fa3dd2f"
+    },
+    "01_operational_health/escalations.json": {
+      "size_bytes": 22915,
+      "sha256": "66787b267469b1247a628d74c08e326209109e36c99ccec293593ce742f93d82"
+    },
+    "01_operational_health/halt_audit.json": {
+      "size_bytes": 10311,
+      "sha256": "56cb437e409daedc91eba81d79f0d99c697651ebc3ab8a08a1e97d775e6d49c9"
+    },
+    "02_signal_intelligence/trade_flow.json": {
+      "size_bytes": 289,
+      "sha256": "fee6f911e2d6606911dfce10b5121192d7b482098b6de2d78e75c0cf2df900a0"
+    },
+    "02_signal_intelligence/thought_log.json": {
+      "size_bytes": 15902,
+      "sha256": "4dbe0eb7b7063bfec3d78fdb0c8b37c73470bd46c3aad0abbc9a7f72effa8a8e"
+    },
+    "02_signal_intelligence/last_skip.json": {
+      "size_bytes": 735,
+      "sha256": "81aa09b05632d1c0be7fd0be6c9a25cc7e1991a3f8d83f1274e6e6114ef928a0"
+    },
+    "02_signal_intelligence/regime_map.json": {
+      "size_bytes": 1742,
+      "sha256": "a551fa6b2e71081383bf0d99cd1318f3e618416d7861709dc264533c0efe7b2d"
+    },
+    "02_signal_intelligence/signal_filter.json": {
+      "size_bytes": 742,
+      "sha256": "d3ea8ec7cc09c87386867068bc326e257b5cee02afa960348253b49627d7a0b1"
+    },
+    "03_live_process_snapshot/rl_qtable.json": {
+      "size_bytes": 3718,
+      "sha256": "9d49d017d2c91687de9e7c5859c70d9260a969547bbc71fe594cb5e4b96b0060"
+    },
+    "04_economic_truth/orchestration.json": {
+      "size_bytes": 30485,
+      "sha256": "87eac2780c0dfbc801b34e001bdaf65ae5bbdf475ef9e1b463f16f7ae1d6bbb9"
+    },
+    "05_alpha_and_learning/lio_full_snapshot.json": {
+      "size_bytes": 209250,
+      "sha256": "ade3316c161bfd8f14a5c7cb67af0b80fd6d271bf517db182ee2906521184aec"
+    },
+    "06_risk_and_governance/alpha_confirmation.json": {
+      "size_bytes": 925,
+      "sha256": "4233a4ed0cef53854c56fb71131e3306ee99872de429ba600b9b0bd012f561df"
+    },
+    "06_risk_and_governance/execution_governance.json": {
+      "size_bytes": 79548,
+      "sha256": "f3af6a0e843b2cc0f4d167a08d58046a4b1699a7c7596ea5a6c25e2bf387c5cf"
+    },
+    "06_risk_and_governance/survivability.json": {
+      "size_bytes": 12304,
+      "sha256": "cc533aa6983ef37bec6699a99d69cea96f8f4f2a0b5e91cf5584fe8e7fcb4dab"
+    },
+    "06_risk_and_governance/continuity.json": {
+      "size_bytes": 20073,
+      "sha256": "0f07091006c88f04331dbad1c7bf866bd6f11ae0c09d09c22c0ccb58c3ca17b1"
+    },
+    "06_risk_and_governance/equilibrium.json": {
+      "size_bytes": 707,
+      "sha256": "fbc746327cc7e39860ff88103c987e7b30eb414548fa1057e7b0171794490b0c"
+    },
+    "07_capital_and_performance/session_stats.json": {
+      "size_bytes": 70062,
+      "sha256": "cfe51e7eb86e9cee8a21a2c783253e48f177b90095f762c7e10becb1f027ed22"
+    },
+    "07_capital_and_performance/trades_recent_100.json": {
+      "size_bytes": 240008,
+      "sha256": "c9cc5961d19ee6b6d83cafa19eb8d512df85e6ba448fb56e72555ae32ffb0728"
+    },
+    "07_capital_and_performance/analytics.json": {
+      "size_bytes": 7023,
+      "sha256": "07b60f52cc5c3fc3c83648cd99ad8149363fcc61e2f0fe09623310f61564ed4b"
+    },
+    "07_capital_and_performance/deployability.json": {
+      "size_bytes": 506,
+      "sha256": "46a3c2812d3bbe988bf4699aef624dfb9d1702fdd6810c1a8fca307a26c4105f"
+    },
+    "07_capital_and_performance/capital_flow.json": {
+      "size_bytes": 863,
+      "sha256": "f0268ba96b14a394b3a55f046a5b035272a7818d00c7c159675a9861aa4d8be9"
+    },
+    "07_capital_and_performance/aee_state.json": {
+      "size_bytes": 1414,
+      "sha256": "51c476ace4289d90d75da6b0cef1bd7c200f3f1482fc8b6f38c4b4000798bd3b"
+    },
+    "09_genome/genome_state.json": {
+      "size_bytes": 67438,
+      "sha256": "d663743ba8fa1571aa0877e2929fe442db220a14eb4be72121f42a71b1f6e851"
+    }
+  }
+}

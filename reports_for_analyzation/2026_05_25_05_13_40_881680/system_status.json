@@ -1,0 +1,91 @@
+{
+  "mode": "PAPER",
+  "capital": 821.6047,
+  "drawdown_pct": 0.75,
+  "streak": -28,
+  "halted": false,
+  "symbols_watched": 13,
+  "open_positions": 2,
+  "total_trades": 740,
+  "ws_status": "🟢 LIVE",
+  "ts": 1779666058852,
+  "profit_engine": {
+    "rr_engine": {
+      "min_rr": 2.0,
+      "module": "RR_ENGINE",
+      "phase": 4
+    },
+    "trade_scorer": {
+      "min_score": 0.48,
+      "weights": {
+        "regime_alignment": 0.25,
+        "volume_strength": 0.2,
+        "adx_trend": 0.2,
+        "rsi_momentum": 0.15,
+        "vol_expansion": 0.1,
+        "cost_efficiency": 0.1
+      },
+      "module": "TRADE_SCORER",
+      "phase": 4
+    },
+    "capital_allocator": {
+      "max_capital_pct": 0.05,
+      "daily_risk_cap": 0.06,
+      "daily_risk_used": 214.6954,
+      "daily_risk_cap_usdt": 49.2963,
+      "daily_risk_remaining": 0.0,
+      "score_bands": {
+        ">0.90": "2.0x",
+        ">0.80": "1.5x",
+        ">0.70": "1.0x",
+        ">0.60": "0.5x"
+      },
+      "module": "CAPITAL_ALLOCATOR",
+      "phase": 4
+    },
+    "trade_manager": {
+      "managed_count": 2,
+      "managed_symbols": [
+        "ASTERUSDT",
+        "WLDUSDT"
+      ],
+      "active_modes": {
+        "ASTERUSDT": "TREND_FOLLOW",
+        "WLDUSDT": "TREND_FOLLOW"
+      },
+      "be_r": 1.5,
+      "range_be_r": 0.5,
+      "partial_tp_r": 3.0,
+      "trail_atr_mult": 1.75,
+      "vtp_accel": 0.15,
+      "vtp_extend_atr": 2.0,
+      "module": "TRADE_MANAGER",
+      "phase": 5
+    },
+    "alpha_engine": {
+      "strategies": [
+        "TrendBreakout",
+        "PullbackEntry",
+        "VolatilitySqueeze"
+      ],
+      "module": "ALPHA_ENGINE",
+      "phase": 4
+    }
+  },
+  "consistency": {
+    "equity_volatility_pct": 0.0,
+    "equity_vol_window": 20,
+    "vol_high_threshold_pct": 1.5,
+    "vol_normal_threshold_pct": 0.8,
+    "vol_high_size_mult": 0.75,
+    "win_brake_start": 3,
+    "win_brake_per_win_pct": 5.0,
+    "win_brake_min": 0.7,
+    "noise_filter_min_trades": 3,
+    "rolling_dd_window": 10,
+    "trade_history_len": 10,
+    "equity_history_len": 21,
+    "module": "CONSISTENCY_ENGINE",
+    "phase": "FTD-040"
+  }
+}
