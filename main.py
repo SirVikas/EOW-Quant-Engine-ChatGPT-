@@ -1299,18 +1299,22 @@ async def on_tick(tick: Tick):
         # (TrendFollowing confirmed -$16.20 NOISE over 117 trades in ALL-period data).
         if _paper_speed and strategy_type in _DISABLED_PAPER_SPEED_STRATEGIES:
             sig = None  # suppress fallback entirely for this strategy
-        # FIX: when a primary/alpha signal carries a disabled strategy_id, clear it
-        # so the paper_speed fallback can generate the {strategy_type}_PAPER_SPEED
+        # In live mode: when a primary/alpha signal carries a disabled strategy_id, clear
+        # it so the paper_speed fallback can generate the {strategy_type}_PAPER_SPEED
         # variant. TrendFollowing is excluded because TrendFollowing_PAPER_SPEED is
-        # itself in _DISABLED_STRATEGY_IDS. MeanReversion_PAPER_SPEED RSI thresholds
-        # were tightened (FTD-054-PHOENIX) to reduce noise dominance (was 60/40, now 70/30).
+        # itself in _DISABLED_STRATEGY_IDS.
+        # In BYPASS/paper mode: skip this clearing so alpha signals (ALPHA_PBE_v1,
+        # ALPHA_TCB_v1, score=0.578, RR=5.0) flow through to DISABLED_OVERRIDE at line
+        # 1431 instead of being replaced by PAPER_SPEED variants that may fail RSI
+        # filtering — the net effect without this guard is a second silent signal drop.
         if (
-            _paper_speed
+            not cfg.BYPASS_ALL_GATES
+            and _paper_speed
             and sig and sig.signal != Signal.NONE
             and sig.strategy_id in _DISABLED_STRATEGY_IDS
             and strategy_type not in _DISABLED_PAPER_SPEED_STRATEGIES
         ):
-            sig = None  # let paper_speed fallback generate the alpha-rated variant
+            sig = None  # live mode only: force paper_speed fallback for disabled alpha ids
         if _paper_speed and (not sig or sig.signal == Signal.NONE) and len(closes) >= 2:
             _entry = closes[-1]
 
