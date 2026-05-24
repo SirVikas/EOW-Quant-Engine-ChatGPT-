@@ -233,6 +233,8 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
 #   ALPHA_VSE_v1:              3 trades, PF 0.031, -$0.70,  fee 483%
 #   MR_BB_RSI_v1_INV:          4 trades, PF 0.018, -$1.09,  fee 720%
 #   TrendFollowing_PAPER_SPEED_INV: 4 trades, 0% WR, -$0.22
+#   MeanReversion_PAPER_SPEED: 1287+ visits across RL contexts, WR 16-19%, -$293.75 total;
+#     RL classified MEAN_REVERTING|LONDON (Q=-0.422) and MEAN_REVERTING|ASIA (Q=-0.344) toxic
 _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
     "TF_EMA_RSI_v1",
     "MR_BB_RSI_v1",
@@ -242,10 +244,16 @@ _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
     "ALPHA_VSE_v1",
     "MR_BB_RSI_v1_INV",
     "TrendFollowing_PAPER_SPEED_INV",
-    "TrendFollowing_PAPER_SPEED",   # 117 trades, PF 0.657, -$16.20
+    "TrendFollowing_PAPER_SPEED",    # 117 trades, PF 0.657, -$16.20
+    "MeanReversion_PAPER_SPEED",     # 1287+ visits, WR 16-19%, -$293.75; RL TOXIC
 })
-# Paper-speed fallback block (prevents synthesizing signals for bad strategy types)
-_DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({"TrendFollowing"})
+# Paper-speed fallback block (prevents synthesizing signals for bad strategy types).
+# Setting _paper_speed=False (not sig=None) is critical: sig is already None at this
+# point, so only clearing _paper_speed actually prevents the generation block at line 1318.
+_DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({
+    "TrendFollowing",   # 117 trades, PF 0.657, -$16.20 noise
+    "MeanReversion",    # 1287+ visits, WR 16-19%, RL TOXIC — suppress PAPER_SPEED fallback
+})
 
 # Hour gate — skipped in BYPASS_ALL_GATES mode so RL can accumulate data across all hours.
 # Enforced in LIVE mode only (calendar filter, not a data quality gate).
@@ -1298,7 +1306,7 @@ async def on_tick(tick: Tick):
         # FTD-037: blocked for strategies in _DISABLED_PAPER_SPEED_STRATEGIES
         # (TrendFollowing confirmed -$16.20 NOISE over 117 trades in ALL-period data).
         if _paper_speed and strategy_type in _DISABLED_PAPER_SPEED_STRATEGIES:
-            sig = None  # suppress fallback entirely for this strategy
+            _paper_speed = False  # prevent PAPER_SPEED generation block at line 1318 from firing
         # In live mode: when a primary/alpha signal carries a disabled strategy_id, clear
         # it so the paper_speed fallback can generate the {strategy_type}_PAPER_SPEED
         # variant. TrendFollowing is excluded because TrendFollowing_PAPER_SPEED is
