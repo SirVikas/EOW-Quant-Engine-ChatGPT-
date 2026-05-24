@@ -35,7 +35,8 @@ class TradeSignal:
 # Minimum ATR% to even consider a trade.
 # Stablecoins: ATR% ≈ 0.002–0.05%  → blocked
 # Real coins:  ATR% ≈ 0.1%+        → allowed
-MIN_ATR_PCT = 0.05   # raised 0.015→0.05: SL_dist = ATR*2.5; at 0.015% SL is only 0.04% — sub-tick noise on BTC/XRP
+MIN_ATR_PCT = 0.10   # raised 0.05→0.10: fee round-trip ≈ 0.08%; BB-mean TP ≈ 2×ATR;
+                     # at 0.10% ATR → gross TP ≈ 0.20% → fee_drag ≤ 40% (ecology threshold).
 
 # ── Shared Indicator Helpers ─────────────────────────────────────────────────
 
