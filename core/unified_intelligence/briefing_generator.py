@@ -164,7 +164,7 @@ def _build_rl_contexts(label: str, contexts: list) -> str:
     for ctx in contexts[:5]:
         if not isinstance(ctx, dict):
             continue
-        key    = str(_g(ctx, "key", default="?"))[:52]
+        key    = str(_g(ctx, "context", default="?"))[:52]
         q      = _g(ctx, "q_value", default=0.0)
         visits = _g(ctx, "n_visits", default=0)
         wr     = _g(ctx, "win_rate", default=0.0)
