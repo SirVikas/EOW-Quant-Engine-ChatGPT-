@@ -949,11 +949,12 @@ async def on_tick(tick: Tick):
             )
             return
 
-        # ASIA session hard block — NOT bypassed by BYPASS_ALL_GATES.
-        # 454-trade forensic corpus: ASIA (UTC 00:00-05:59) = 0% win rate, -0.60 net
-        # expectancy. Paper-mode ASIA data poisons Phase-I analytics without adding
-        # alpha discovery value. Block applies in both paper and live modes.
-        if _current_utc_hour < 6:
+        # ASIA + LATE session hard block — NOT bypassed by BYPASS_ALL_GATES.
+        # Forensic corpus (545 trades): ASIA (UTC 00-05) = 0% WR, -0.60 net_exp;
+        # LATE (UTC 19-23) = 10% WR, -0.36 net_exp. Both flagged as LOW_QUALITY_CLUSTER
+        # by filtration engine. LATE is in _AVOID_HOURS_UTC for live mode but paper
+        # mode bypasses that gate via BYPASS_ALL_GATES=True — this block is unconditional.
+        if _current_utc_hour < 6 or _current_utc_hour >= 19:
             return
 
         # Use real 1-min candle OHLC for strategy indicators.
