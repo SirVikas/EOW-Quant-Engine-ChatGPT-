@@ -10642,6 +10642,345 @@ async def lio_report_bundle():
     }
 
 
+# ── One-Click Unified Intelligence Export ─────────────────────────────────────
+
+@app.get("/api/unified-intelligence/export")
+async def unified_intelligence_export():
+    """
+    One-Click Unified Intelligence Package — complete PHOENIX operational
+    intelligence consolidated into a single structured ZIP download.
+
+    This endpoint is the primary forensic/diagnostic artifact: share the ZIP
+    to get an immediate full-system diagnosis without navigating dozens of
+    individual endpoints.
+
+    ZIP contents:
+      00_BRIEFING.md                    ← Synthesized read-first intelligence brief
+      00_MANIFEST.json                  ← Index with file sizes, SHA-256, metadata
+
+      01_operational_health/            ← System state, observability, escalations
+        system_status.json
+        healer_snapshot.json
+        observability_health.json
+        anomalies.json
+        escalations.json
+        halt_audit.json
+
+      02_signal_intelligence/           ← Signal pipeline health and decision trace
+        trade_flow.json
+        thought_log.json                ← CT-scan log (last 100 entries)
+        last_skip.json
+        regime_map.json
+        signal_filter.json
+
+      03_live_process_snapshot/         ← RL Q-table and runtime state
+        rl_qtable.json
+
+      04_economic_truth/                ← Phase-D: 6-engine economic truth report
+        orchestration.json
+
+      05_alpha_and_learning/            ← Full LIO snapshot (29 sections)
+        lio_full_snapshot.json
+
+      06_risk_and_governance/           ← Phases E–I orchestration reports
+        alpha_confirmation.json
+        execution_governance.json
+        survivability.json
+        continuity.json
+        equilibrium.json
+
+      07_capital_and_performance/       ← PnL, trades, analytics, deployability
+        session_stats.json
+        trades_recent_100.json
+        analytics.json
+        deployability.json
+        capital_flow.json
+        aee_state.json
+
+      09_genome/                        ← Genome DNA and evolution history
+        genome_state.json
+    """
+    import zipfile, io as _io, hashlib, json as _json
+    from fastapi.responses import StreamingResponse
+    from core.unified_intelligence.briefing_generator import generate_briefing
+
+    ts_ms       = int(time.time() * 1000)
+    ts_str      = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+    captured_at = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+
+    def _safe(fn, default=None):
+        try:
+            return fn()
+        except Exception:
+            return default
+
+    def _exc_safe(result, default=None):
+        return default if isinstance(result, Exception) else result
+
+    # ── Parallel async collection — heavy orchestration endpoints ─────────────
+    (
+        _et_report,
+        _ac_report,
+        _sv_report,
+        _eg_report,
+        _ic_report,
+        _aeq_report,
+        _obs_h,
+        _obs_a,
+        _obs_e,
+        _lio_bundle_result,
+        _halt_audit_result,
+        _last_skip_result,
+        _status_result,
+    ) = await asyncio.gather(
+        economic_truth_orchestration(),
+        alpha_orchestration(),
+        survivability_orchestration(),
+        execution_governance_orchestration(),
+        continuity_orchestration(),
+        equilibrium_orchestration(),
+        obs_health(),
+        obs_anomalies(),
+        obs_escalations(),
+        lio_report_bundle(),
+        get_halt_audit(),
+        get_last_skip(),
+        get_status(),
+        return_exceptions=True,
+    )
+
+    # ── Synchronous data collection ───────────────────────────────────────────
+    _ss       = pnl_calc.session_stats
+    _n_trades = len(pnl_calc.trades)
+
+    _trade_dicts: list = []
+    for _t in pnl_calc.trades[-100:]:
+        try:
+            _trade_dicts.append({k: getattr(_t, k) for k in _t.__dataclass_fields__})
+        except Exception:
+            pass
+
+    _heal     = _safe(healer.snapshot, {})
+    _lake_s   = _safe(data_lake.db_stats, {})
+    _redis_ok = any(
+        e.get("action") == "REDIS_FLUSH" and e.get("ok", False)
+        for e in (_heal or {}).get("recent_events", [])
+    )
+    _sqlite_ok = (_lake_s or {}).get("trades", -1) >= 0
+
+    _analytics = _safe(lambda: _sanitize(compute_full_analytics(
+        pnl_trades=[{"net_pnl": t.net_pnl, "r_multiple": t.r_multiple}
+                    for t in pnl_calc.trades],
+        initial_capital=pnl_calc._initial_capital,
+        session_stats=_ss,
+        healer_snapshot=_heal,
+        lake_stats=_lake_s,
+        genome_state=_safe(genome.export_state, {}),
+        redis_ok=_redis_ok,
+        persistence_ok=(_redis_ok or _sqlite_ok),
+    )), {})
+
+    _genome_state = _safe(genome.export_state, {})
+    _rl_summary   = _safe(rl_engine.summary, {})
+
+    # Full Q-table export — each context's learning state
+    _rl_qtable = _safe(lambda: {
+        k: {
+            "q_value":   round(s.q_value, 5),
+            "n_visits":  s.n_visits,
+            "n_wins":    s.n_wins,
+            "total_pnl": round(s.total_pnl, 4),
+            "win_rate":  round(s.win_rate, 4),
+            "toxic":     k in rl_engine._toxic_contexts,
+        }
+        for k, s in rl_engine._table.items()
+    }, {})
+
+    _trade_flow = _safe(trade_flow_monitor.summary, {})
+
+    _regime_map = _safe(lambda: {
+        sym: {
+            "regime":     s.regime.value,
+            "adx":        s.adx,
+            "atr_pct":    s.atr_pct,
+            "bb_width":   s.bb_width,
+            "confidence": s.confidence,
+        }
+        for sym, s in regime_det.all_states().items()
+    }, {})
+
+    _positions: list = []
+    try:
+        for _sym, _pos in risk_ctrl.positions.items():
+            _positions.append({
+                "symbol":     _sym,
+                "side":       getattr(_pos, "side", ""),
+                "qty":        getattr(_pos, "qty", 0.0),
+                "entry_px":   getattr(_pos, "entry_px", 0.0),
+                "unrealised": getattr(_pos, "unrealised_pnl", 0.0),
+            })
+    except Exception:
+        pass
+
+    _deployability = _safe(lambda: _sanitize(deployability_engine.to_dict(
+        deployability_engine.compute(
+            trades=_n_trades,
+            sharpe=_ss.get("sharpe_ratio", 0.0),
+            sortino=_ss.get("sortino_ratio", 0.0),
+            win_rate=_ss.get("win_rate", 0.0),
+            max_drawdown=_ss.get("max_drawdown_pct", 0.0) / 100,
+            risk_of_ruin=_ss.get("risk_of_ruin", 0.0),
+            avg_r=_ss.get("avg_r_multiple", 0.0),
+        )
+    )), {})
+
+    _capital_flow       = _safe(capital_flow_engine.summary, {})
+    _aee_state          = _safe(adaptive_edge_engine.summary, {})
+    _signal_filter_snap = _safe(signal_filter.summary, {})
+    _thought_log_snap   = list(_thought_log)[-100:]
+
+    # ── Build unified intelligence data dict ──────────────────────────────────
+    intel = {
+        "captured_at":     captured_at,
+        "captured_at_ms":  ts_ms,
+        "version":         APP_VERSION,
+        "boot_ts":         _boot_ts,
+        "bypass_mode":     cfg.BYPASS_ALL_GATES,
+        # L1: Operational health
+        "system_status":   _exc_safe(_status_result, {}),
+        "healer_snapshot": _heal,
+        "obs_health":      _exc_safe(_obs_h, {}),
+        "obs_anomalies":   _exc_safe(_obs_a, {}),
+        "obs_escalations": _exc_safe(_obs_e, {}),
+        "halt_audit":      _exc_safe(_halt_audit_result, {}),
+        # L2: Signal intelligence
+        "trade_flow":      _trade_flow,
+        "thought_log":     _thought_log_snap,
+        "last_skip":       _exc_safe(_last_skip_result, {}),
+        "regime_map":      _regime_map,
+        "signal_filter":   _signal_filter_snap,
+        # L3: Live process
+        "rl_summary":      _rl_summary,
+        "rl_qtable":       _rl_qtable,
+        # L4: Economic truth
+        "economic_truth":  _exc_safe(_et_report, {}),
+        # L5: Alpha and learning
+        "lio_snapshot":    _exc_safe(_lio_bundle_result, {}),
+        # L6: Risk and governance
+        "alpha_confirmation":    _exc_safe(_ac_report, {}),
+        "survivability":         _exc_safe(_sv_report, {}),
+        "execution_governance":  _exc_safe(_eg_report, {}),
+        "continuity":            _exc_safe(_ic_report, {}),
+        "equilibrium":           _exc_safe(_aeq_report, {}),
+        # L7: Capital and performance
+        "session_stats":        _ss,
+        "trades_recent_100":    _trade_dicts,
+        "analytics":            _analytics,
+        "deployability":        _deployability,
+        "capital_flow":         _capital_flow,
+        "aee_state":            _aee_state,
+        "positions":            _positions,
+        # L9: Genome
+        "genome_state":         _genome_state,
+    }
+
+    # ── Generate the BRIEFING.md ───────────────────────────────────────────────
+    try:
+        briefing_md = generate_briefing(intel)
+    except Exception as _be:
+        import traceback as _tb
+        briefing_md = (
+            f"# PHOENIX Intelligence Briefing\n\n"
+            f"**Briefing generation error:**\n```\n{_tb.format_exc()}\n```\n"
+        )
+        logger.error(f"[UNIFIED-INTEL] briefing_generator failed: {_be}")
+
+    # ── JSON serializer ────────────────────────────────────────────────────────
+    def _jb(obj) -> bytes:
+        try:
+            return _json.dumps(_sanitize(obj), indent=2, ensure_ascii=False).encode("utf-8")
+        except Exception as _je:
+            return _json.dumps({"error": str(_je)}).encode("utf-8")
+
+    # ── Build file map ────────────────────────────────────────────────────────
+    file_map: dict = {
+        "00_BRIEFING.md":                                      briefing_md.encode("utf-8"),
+        # 01
+        "01_operational_health/system_status.json":            _jb(intel["system_status"]),
+        "01_operational_health/healer_snapshot.json":          _jb(intel["healer_snapshot"]),
+        "01_operational_health/observability_health.json":     _jb(intel["obs_health"]),
+        "01_operational_health/anomalies.json":                _jb(intel["obs_anomalies"]),
+        "01_operational_health/escalations.json":              _jb(intel["obs_escalations"]),
+        "01_operational_health/halt_audit.json":               _jb(intel["halt_audit"]),
+        # 02
+        "02_signal_intelligence/trade_flow.json":              _jb(intel["trade_flow"]),
+        "02_signal_intelligence/thought_log.json":             _jb(intel["thought_log"]),
+        "02_signal_intelligence/last_skip.json":               _jb(intel["last_skip"]),
+        "02_signal_intelligence/regime_map.json":              _jb(intel["regime_map"]),
+        "02_signal_intelligence/signal_filter.json":           _jb(intel["signal_filter"]),
+        # 03
+        "03_live_process_snapshot/rl_qtable.json":             _jb(intel["rl_qtable"]),
+        # 04
+        "04_economic_truth/orchestration.json":                _jb(intel["economic_truth"]),
+        # 05
+        "05_alpha_and_learning/lio_full_snapshot.json":        _jb(intel["lio_snapshot"]),
+        # 06
+        "06_risk_and_governance/alpha_confirmation.json":      _jb(intel["alpha_confirmation"]),
+        "06_risk_and_governance/execution_governance.json":    _jb(intel["execution_governance"]),
+        "06_risk_and_governance/survivability.json":           _jb(intel["survivability"]),
+        "06_risk_and_governance/continuity.json":              _jb(intel["continuity"]),
+        "06_risk_and_governance/equilibrium.json":             _jb(intel["equilibrium"]),
+        # 07
+        "07_capital_and_performance/session_stats.json":       _jb(intel["session_stats"]),
+        "07_capital_and_performance/trades_recent_100.json":   _jb(intel["trades_recent_100"]),
+        "07_capital_and_performance/analytics.json":           _jb(intel["analytics"]),
+        "07_capital_and_performance/deployability.json":       _jb(intel["deployability"]),
+        "07_capital_and_performance/capital_flow.json":        _jb(intel["capital_flow"]),
+        "07_capital_and_performance/aee_state.json":           _jb(intel["aee_state"]),
+        # 09
+        "09_genome/genome_state.json":                         _jb(intel["genome_state"]),
+    }
+
+    # ── Build MANIFEST.json ────────────────────────────────────────────────────
+    manifest = {
+        "package_type":   "PHOENIX_UNIFIED_INTELLIGENCE",
+        "version":        APP_VERSION,
+        "captured_at":    captured_at,
+        "captured_at_ms": ts_ms,
+        "bypass_mode":    cfg.BYPASS_ALL_GATES,
+        "trade_count":    _n_trades,
+        "capital_usdt":   round((_ss.get("capital") or 0.0), 2),
+        "net_pnl_usdt":   round((_ss.get("total_net_pnl") or 0.0), 2),
+        "files":          {
+            path: {
+                "size_bytes": len(content),
+                "sha256":     hashlib.sha256(content).hexdigest(),
+            }
+            for path, content in file_map.items()
+        },
+    }
+    manifest_bytes = _jb(manifest)
+
+    # ── Assemble and stream the ZIP ────────────────────────────────────────────
+    buf = _io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as _zf:
+        _zf.writestr("00_MANIFEST.json", manifest_bytes)
+        for _path, _content in file_map.items():
+            _zf.writestr(_path, _content)
+    buf.seek(0)
+
+    filename = f"PHOENIX_Intelligence_{ts_str}.zip"
+    logger.info(
+        f"[UNIFIED-INTEL] package assembled | files={len(file_map)+1} "
+        f"trades={_n_trades} version={APP_VERSION}"
+    )
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
