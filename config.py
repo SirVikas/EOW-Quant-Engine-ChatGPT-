@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.36.4"
+APP_VERSION = "1.36.5"
 
 
 class EngineConfig(BaseSettings):
@@ -132,6 +132,27 @@ class EngineConfig(BaseSettings):
     ATR_MULT_TP: float = 10.0             # raised 7.5→10.0: RR=4.0× — wider TP lets winners run
     BB_PERIOD: int = 20
     BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
+
+    # ── Session-Adaptive Volatility + Sizing ──────────────────────────────────
+    # Per-session ATR floor and position-size multipliers.
+    # ASIA (00-05 UTC): ATR typically 40-50% lower than NY — the fixed 0.10% floor
+    # blocks nearly every ASIA setup before the strategy or RL see it. A session-
+    # proportionate threshold lets the bandit discover ASIA alpha independently.
+    # LATE (19-23 UTC): moderate vol reduction post-NY close.
+    # Size scale compensates for higher relative fee drag at lower ATR: smaller
+    # position → same dollar risk → lower fee % of notional move.
+    SESSION_MIN_ATR_PCT: dict = {
+        "ASIA":   0.06,   # stablecoins ATR < 0.01%; 0.06% still filters noise
+        "LONDON": 0.10,   # baseline
+        "NY":     0.10,   # baseline
+        "LATE":   0.07,   # slightly relaxed; lower vol than NY but not ASIA-thin
+    }
+    SESSION_SIZE_SCALE: dict = {
+        "ASIA":   0.50,   # half-size: ASIA vol → fee drag % of move doubles vs NY
+        "LONDON": 1.00,
+        "NY":     1.00,
+        "LATE":   0.70,   # 70%: post-NY liquidity drop; limit slippage exposure
+    }
 
     # ── Phase 4: Profit Engine ───────────────────────────────────────────────
     # RR Engine

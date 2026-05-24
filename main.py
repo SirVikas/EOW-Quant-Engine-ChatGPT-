@@ -894,11 +894,23 @@ async def on_tick(tick: Tick):
         "UNKNOWN":              "TrendFollowing",
     }.get(regime.value, "TrendFollowing")
 
+    # Session-adaptive scaling — resolved here so min_atr_pct is baked into the
+    # strategy instance before signal generation. No hard blocks: RL context key
+    # is REGIME|SESSION|STRATEGY so the bandit accumulates per-session Q-values
+    # and converges to session-appropriate behaviour on its own.
+    _session_utc_hour   = __import__("datetime").datetime.utcnow().hour
+    _session_label_now  = _get_session_label(_session_utc_hour)
+    _session_min_atr    = cfg.SESSION_MIN_ATR_PCT.get(_session_label_now, 0.10)
+    _session_size_scale = cfg.SESSION_SIZE_SCALE.get(_session_label_now, 1.00)
+
     dna      = genome.active_dna.get(strategy_type, {})
     # FTD-REA-001: merge per-symbol reactive overrides (RSI bands, ATR multipliers)
     _re_overrides = reactive_evolution_engine.get_overrides(sym)
     if _re_overrides:
         dna = {**dna, **_re_overrides}
+    # Inject session-calibrated ATR floor — ASIA/LATE have lower absolute ATR;
+    # the global MIN_ATR_PCT=0.10 would block all their setups before RL sees them.
+    dna = {**dna, "min_atr_pct": _session_min_atr}
     strategy = get_strategy(regime, dna)
 
     # 5. Generate signal (only if no open position + throttle checks)
@@ -935,7 +947,7 @@ async def on_tick(tick: Tick):
         # Without this, 17/24 hours are permanently dark to RL → context table is
         # sparse → bandit explores fewer dimensions → slower convergence.
         # In LIVE mode this gate remains active (historical -ve PnL hours are hard-blocked).
-        _current_utc_hour = __import__("datetime").datetime.utcnow().hour
+        _current_utc_hour = _session_utc_hour  # reuse value computed at strategy-build time
         if not cfg.BYPASS_ALL_GATES and _current_utc_hour in _AVOID_HOURS_UTC:
             # Calculate next allowed hour so the user knows when to expect trades.
             _allowed_hours = sorted(set(range(24)) - _AVOID_HOURS_UTC)
@@ -949,13 +961,10 @@ async def on_tick(tick: Tick):
             )
             return
 
-        # ASIA + LATE session hard block — NOT bypassed by BYPASS_ALL_GATES.
-        # Forensic corpus (545 trades): ASIA (UTC 00-05) = 0% WR, -0.60 net_exp;
-        # LATE (UTC 19-23) = 10% WR, -0.36 net_exp. Both flagged as LOW_QUALITY_CLUSTER
-        # by filtration engine. LATE is in _AVOID_HOURS_UTC for live mode but paper
-        # mode bypasses that gate via BYPASS_ALL_GATES=True — this block is unconditional.
-        if _current_utc_hour < 6 or _current_utc_hour >= 19:
-            return
+        # No session hard blocks. ASIA/LATE are allowed to trade with session-calibrated
+        # parameters (_session_min_atr, _session_size_scale). The RL bandit learns
+        # per-session Q-values via the REGIME|SESSION|STRATEGY context key and will
+        # naturally deprioritise sessions where expected value is negative.
 
         # Use real 1-min candle OHLC for strategy indicators.
         # tick_buffers hold individual trade prices (noisy, many per second) — they
@@ -1515,6 +1524,9 @@ async def on_tick(tick: Tick):
             _final_mult = _final_mult * _regime_risk_mult
             # PRP-002: apply ecology size multiplier (recovery reduction or context boost)
             _final_mult = _final_mult * _prp002_size_mult
+            # Session size scale: ASIA 0.50×, LATE 0.70× — lower vol means fee drag
+            # is a larger fraction of the move; smaller position preserves expectancy.
+            _final_mult = _final_mult * _session_size_scale
             sizing.qty  = sizing.qty * _final_mult
             # FTD-056-ACT: enforce minimum notional floor so micro-trades don't produce
             # disproportionate fee overhead (fee_drag was 132.3% avg across session)
