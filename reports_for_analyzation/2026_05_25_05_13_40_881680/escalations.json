@@ -1,0 +1,848 @@
+{
+  "active": [
+    {
+      "escalation_id": "09b1417c",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: ALLOW_COLLAPSE, IQ_REGRESSION",
+      "description": "[L3_SYNC] Intelligence score critically low: 4/100 | Allow rate critically low: 0%",
+      "anomaly_ids": [
+        "089a4b5d",
+        "a46cb68d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "ALLOW_COLLAPSE"
+      ],
+      "ts": 1779658353802,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "083e126c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses — significant losing streak | Intelligence score low: 24/100 | TRENDING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "672180cd",
+        "81f5879f",
+        "2f3f0d28",
+        "d38c3228",
+        "66a4fabd"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK",
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779658595905,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "4b945c14",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses — significant losing streak | Intelligence score low: 24/100 | TRENDING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "16d7a4b6",
+        "fb5ba6cc",
+        "7c98281c",
+        "8575913b",
+        "f6a0d731"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK",
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779658956638,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "919cc694",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses — significant losing streak | Intelligence score low: 24/100 | TRENDING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "b688a967",
+        "1531b0c5",
+        "2461e925",
+        "9f050254",
+        "1f649e80"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK",
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779659317799,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "20b2bba1",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 12% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "e30c697e",
+        "c3738796",
+        "4e677b39",
+        "6122b5c2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779660160204,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "62b2a100",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 12% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "37aa1019",
+        "dcb1f111",
+        "07417998",
+        "81a8a179"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779660521278,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "4d32a4ed",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 10% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "9ab9ea94",
+        "faccace9",
+        "16f5b01d",
+        "401b4d61"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779660882603,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "613a8743",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 10% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "ddfcf4e8",
+        "18dbca1f",
+        "b4cc5f2b",
+        "0202918f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779661243242,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "241485b2",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 8% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "dda5b8a9",
+        "72abd034",
+        "4be1f06c",
+        "6418ecbd"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779661604264,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ddcf9203",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses — significant losing streak | Intelligence score low: 26/100 | TRENDING win rate dangerously low: 7%",
+      "anomaly_ids": [
+        "0c85cc0f",
+        "8dbf01cf",
+        "29ef54e5",
+        "1b7a0bc1",
+        "13b37b1d"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK",
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779661724386,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "82de1be5",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 8 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "22c28b72"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779661965082,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6b795d28",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 11 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "e2ce4d1b"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779662325801,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "11f8e9db",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 11 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "8e942dc8"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779662686430,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "9e9636cb",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 11 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "2e7d131f"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779663047401,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c308add7",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 16 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "9997ea50"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779663407984,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6a7fec05",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 19 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "642c2c92"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779663769706,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "fe579d3d",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 19 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "307d4d7b"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779664129946,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8cc4f4dd",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 20 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "8f71f522"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779664490328,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "40497206",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 23 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "90f381c4"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779664851102,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "be327639",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 26 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "4f47aec9"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779665211743,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3efff558",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 27 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "8f6b46e8"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779665572609,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "fcfe008a",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 27 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "97199726"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779665933511,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    }
+  ],
+  "history": [
+    {
+      "escalation_id": "fcfe008a",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 27 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "97199726"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779665933511,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3efff558",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 27 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "8f6b46e8"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779665572609,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "be327639",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 26 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "4f47aec9"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779665211743,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "40497206",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 23 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "90f381c4"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779664851102,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8cc4f4dd",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 20 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "8f71f522"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779664490328,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "fe579d3d",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 19 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "307d4d7b"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779664129946,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6a7fec05",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 19 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "642c2c92"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779663769706,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c308add7",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 16 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "9997ea50"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779663407984,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "9e9636cb",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 11 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "2e7d131f"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779663047401,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "11f8e9db",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 11 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "8e942dc8"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779662686430,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6b795d28",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 11 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "e2ce4d1b"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779662325801,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "82de1be5",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 8 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "22c28b72"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779661965082,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ddcf9203",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses — significant losing streak | Intelligence score low: 26/100 | TRENDING win rate dangerously low: 7%",
+      "anomaly_ids": [
+        "0c85cc0f",
+        "8dbf01cf",
+        "29ef54e5",
+        "1b7a0bc1",
+        "13b37b1d"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK",
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779661724386,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "241485b2",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 8% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "dda5b8a9",
+        "72abd034",
+        "4be1f06c",
+        "6418ecbd"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779661604264,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "613a8743",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 10% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "ddfcf4e8",
+        "18dbca1f",
+        "b4cc5f2b",
+        "0202918f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779661243242,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "4d32a4ed",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 10% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "9ab9ea94",
+        "faccace9",
+        "16f5b01d",
+        "401b4d61"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779660882603,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "62b2a100",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 12% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "37aa1019",
+        "dcb1f111",
+        "07417998",
+        "81a8a179"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779660521278,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "20b2bba1",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 26/100 | TRENDING win rate dangerously low: 12% | MEAN_REVERTING win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "e30c697e",
+        "c3738796",
+        "4e677b39",
+        "6122b5c2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779660160204,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "75290e96",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 14 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "2e5a51ce"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779660038993,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779660160219
+    },
+    {
+      "escalation_id": "45c6d720",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 9 consecutive losses — risk controls may need review",
+      "anomaly_ids": [
+        "d71e4946"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779659678374,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779660160219
+    }
+  ],
+  "stats": {
+    "module": "ESCALATION_ENGINE",
+    "version": "1.0",
+    "total_evaluated": 65,
+    "total_escalated": 24,
+    "total_suppressed": 41,
+    "total_acked": 0,
+    "total_resolved": 2,
+    "l1_count": 0,
+    "l2_count": 9,
+    "l3_count": 15,
+    "active_count": 22,
+    "last_escalation_ts": 1779665933511
+  }
+}

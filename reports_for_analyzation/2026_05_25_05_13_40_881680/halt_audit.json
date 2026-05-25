@@ -1,0 +1,258 @@
+{
+  "halted": false,
+  "graceful_stop": false,
+  "halt_events": [],
+  "skip_log": [
+    {
+      "ts": 1779665460362,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED GENIUSUSDT: RSI_LEVEL: rsi=77.4 above_sma=True bands=[58.0,42.0] (rsi=77.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665460955,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=85.9 above_sma=True bands=[58.0,42.0] (rsi=85.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665461379,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=38.6 above_sma=False bands=[20.0,80.0] (rsi=38.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665461426,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=45.0 above_sma=True bands=[20.0,80.0] (rsi=45.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665499398,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ASTERUSDT: RSI_LEVEL: rsi=50.0 above_sma=True bands=[20.0,80.0] (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665521243,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=59.9 above_sma=True bands=[20.0,80.0] (rsi=59.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665521351,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED GENIUSUSDT: RSI_LEVEL: rsi=78.9 above_sma=True bands=[58.0,42.0] (rsi=78.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665521684,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=50.0 above_sma=True bands=[20.0,80.0] (rsi=50.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665522428,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=88.6 above_sma=True bands=[58.0,42.0] (rsi=88.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665522862,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=37.2 above_sma=False bands=[20.0,80.0] (rsi=37.2 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665523022,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ASTERUSDT: RSI_LEVEL: rsi=44.4 above_sma=True bands=[20.0,80.0] (rsi=44.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665580288,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=53.8 above_sma=True bands=[20.5,79.5] (rsi=53.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665580597,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=81.9 above_sma=True bands=[58.0,42.0] (rsi=81.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665580674,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=32.6 above_sma=False bands=[58.0,42.0] (rsi=32.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779665583185,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED GENIUSUSDT: RSI_LEVEL: rsi=72.0 above_sma=True bands=[58.0,42.0] (rsi=72.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665584559,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=52.8 above_sma=True bands=[20.5,79.5] (rsi=52.8 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665640099,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=78.7 above_sma=True bands=[58.0,42.0] (rsi=78.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665640297,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED GENIUSUSDT: RSI_LEVEL: rsi=66.5 above_sma=True bands=[58.0,42.0] (rsi=66.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665640947,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=27.5 above_sma=False bands=[58.0,42.0] (rsi=27.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779665641049,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=48.4 above_sma=True bands=[21.0,79.0] (rsi=48.4 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665641291,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=44.4 above_sma=False bands=[21.0,79.0] (rsi=44.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665700110,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=51.7 above_sma=False bands=[21.5,78.5] (rsi=51.7 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665700155,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=55.9 above_sma=True bands=[21.5,78.5] (rsi=55.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665700618,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=29.7 above_sma=False bands=[58.0,42.0] (rsi=29.7 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779665700776,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=79.7 above_sma=True bands=[58.0,42.0] (rsi=79.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665702865,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED GENIUSUSDT: RSI_LEVEL: rsi=62.6 above_sma=True bands=[58.0,42.0] (rsi=62.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665761285,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=61.9 above_sma=True bands=[22.0,78.0] (rsi=61.9 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665761507,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=81.0 above_sma=True bands=[58.0,42.0] (rsi=81.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665762102,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=66.1 above_sma=True bands=[58.0,42.0] (rsi=66.1 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665765055,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=37.5 above_sma=False bands=[58.0,42.0] (rsi=37.5 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779665769974,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=46.6 above_sma=False bands=[22.0,78.0] (rsi=46.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665820373,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=73.5 above_sma=True bands=[58.0,42.0] (rsi=73.5 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665820905,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=56.6 above_sma=True bands=[22.5,77.5] (rsi=56.6 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665822681,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=60.4 above_sma=True bands=[58.0,42.0] (rsi=60.4 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665823819,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=34.1 above_sma=False bands=[58.0,42.0] (rsi=34.1 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779665829274,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=46.6 above_sma=False bands=[22.5,77.5] (rsi=46.6 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665880763,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=62.5 above_sma=True bands=[23.0,77.0] (rsi=62.5 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665880790,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=66.2 above_sma=True bands=[58.0,42.0] (rsi=66.2 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665880846,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=64.9 above_sma=True bands=[58.0,42.0] (rsi=64.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665880917,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=36.6 above_sma=False bands=[58.0,42.0] (rsi=36.6 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779665882197,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=54.0 above_sma=True bands=[23.0,77.0] (rsi=54.0 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665940623,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=63.6 above_sma=True bands=[58.0,42.0] (rsi=63.6 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665940647,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=61.1 above_sma=True bands=[23.5,76.5] (rsi=61.1 above_sma=True regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665941199,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=65.7 above_sma=True bands=[58.0,42.0] (rsi=65.7 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779665942002,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=49.3 above_sma=False bands=[23.5,76.5] (rsi=49.3 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779665943882,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED WLDUSDT: RSI_LEVEL: rsi=33.3 above_sma=False bands=[58.0,42.0] (rsi=33.3 above_sma=False regime=TRENDING)"
+    },
+    {
+      "ts": 1779666007830,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED BTCUSDT: RSI_LEVEL: rsi=75.0 above_sma=True bands=[58.0,42.0] (rsi=75.0 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779666008343,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ETHUSDT: RSI_LEVEL: rsi=81.9 above_sma=True bands=[58.0,42.0] (rsi=81.9 above_sma=True regime=TRENDING)"
+    },
+    {
+      "ts": 1779666008730,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED NEARUSDT: RSI_LEVEL: rsi=57.4 above_sma=False bands=[24.0,76.0] (rsi=57.4 above_sma=False regime=MEAN_REVERTING)"
+    },
+    {
+      "ts": 1779666009327,
+      "level": "FILTER",
+      "msg": "⚡ PAPER_SPEED ONDOUSDT: RSI_LEVEL: rsi=66.2 above_sma=True bands=[58.0,42.0] (rsi=66.2 above_sma=True regime=TRENDING)"
+    }
+  ],
+  "ts": 1779666058852
+}

@@ -1,0 +1,1001 @@
+{
+  "report": "ECONOMIC_TRUTH_REPORT",
+  "economic_id": "ECO-1779666057430-0c0742af0b10b1a2",
+  "trade_count": 740,
+  "survivability_score": 50,
+  "survivability_tier": "MARGINAL",
+  "survivability_verdict": "NOT_VIABLE",
+  "overall_net_expectancy": -0.2411,
+  "overall_gross_expectancy": -0.0183,
+  "expectancy_condition": "NOT_VIABLE",
+  "fee_drag_state": "NOT_SURVIVABLE",
+  "trade_frequency_toxicity": "ELEVATED",
+  "alpha_pocket_count": 2,
+  "alpha_concentration": "LOCALIZED",
+  "global_alpha_state": "LOCALIZED",
+  "ecological_collapse_severity": "LOW",
+  "survivable_regimes": [
+    "LOW_VOLATILITY"
+  ],
+  "dominant_regime": "COMPRESSION",
+  "overall_regime_health": "SINGLE_REGIME_VIABLE",
+  "score_evidence": {
+    "net_positive": false,
+    "fee_survivable": false,
+    "alpha_pockets_found": true,
+    "ecology_stable": true,
+    "regime_survivable": true
+  },
+  "domain_reports": {
+    "expectancy": {
+      "report": "EXPECTANCY_RECONSTRUCTION_REPORT",
+      "total_trades": 740,
+      "decomposition": {
+        "session": {
+          "ASIA": {
+            "group": "ASIA",
+            "classification": "TRUE_NEGATIVE",
+            "count": 44,
+            "net_expectancy": -0.3013,
+            "gross_expectancy": -0.0582,
+            "win_rate": 13.6,
+            "fee_destruction_ratio": 4.177,
+            "stability_coefficient": 3.12
+          },
+          "LATE": {
+            "group": "LATE",
+            "classification": "TRUE_NEGATIVE",
+            "count": 130,
+            "net_expectancy": -0.2126,
+            "gross_expectancy": -0.0556,
+            "win_rate": 10.8,
+            "fee_destruction_ratio": 2.8237,
+            "stability_coefficient": 1.61
+          },
+          "LONDON": {
+            "group": "LONDON",
+            "classification": "TRUE_NEGATIVE",
+            "count": 7,
+            "net_expectancy": -0.5609,
+            "gross_expectancy": -0.4193,
+            "win_rate": 0.0,
+            "fee_destruction_ratio": 0.3377,
+            "stability_coefficient": 0.88
+          },
+          "NY": {
+            "group": "NY",
+            "classification": "FEE_COLLAPSED",
+            "count": 208,
+            "net_expectancy": -0.1679,
+            "gross_expectancy": 0.0341,
+            "win_rate": 24.5,
+            "fee_destruction_ratio": 5.9238,
+            "stability_coefficient": 4.47
+          },
+          "UNKNOWN": {
+            "group": "UNKNOWN",
+            "classification": "TRUE_NEGATIVE",
+            "count": 351,
+            "net_expectancy": -0.2811,
+            "gross_expectancy": -0.0226,
+            "win_rate": 19.1,
+            "fee_destruction_ratio": 11.4381,
+            "stability_coefficient": 3.19
+          }
+        },
+        "regime": {
+          "MEAN_REVERTING": {
+            "group": "MEAN_REVERTING",
+            "classification": "TRUE_NEGATIVE",
+            "count": 574,
+            "net_expectancy": -0.2766,
+            "gross_expectancy": -0.0248,
+            "win_rate": 19.0,
+            "fee_destruction_ratio": 10.1532,
+            "stability_coefficient": 3.11
+          },
+          "TRENDING": {
+            "group": "TRENDING",
+            "classification": "FEE_COLLAPSED",
+            "count": 166,
+            "net_expectancy": -0.1181,
+            "gross_expectancy": 0.0042,
+            "win_rate": 17.5,
+            "fee_destruction_ratio": 29.119,
+            "stability_coefficient": 3.56
+          }
+        },
+        "strategy": {
+          "ALPHA_PBE_v1": {
+            "group": "ALPHA_PBE_v1",
+            "classification": "INSUFFICIENT_DATA",
+            "count": 4,
+            "net_expectancy": 0.4018,
+            "gross_expectancy": 0.6182,
+            "win_rate": 50.0,
+            "fee_destruction_ratio": 0.35,
+            "stability_coefficient": 3.64
+          },
+          "MR_BB_RSI_v1": {
+            "group": "MR_BB_RSI_v1",
+            "classification": "TRUE_NEGATIVE",
+            "count": 14,
+            "net_expectancy": -0.2948,
+            "gross_expectancy": -0.0858,
+            "win_rate": 0.0,
+            "fee_destruction_ratio": 2.4359,
+            "stability_coefficient": 0.69
+          },
+          "MeanReversion_PAPER_SPEED": {
+            "group": "MeanReversion_PAPER_SPEED",
+            "classification": "TRUE_NEGATIVE",
+            "count": 556,
+            "net_expectancy": -0.2811,
+            "gross_expectancy": -0.0279,
+            "win_rate": 19.2,
+            "fee_destruction_ratio": 9.0753,
+            "stability_coefficient": 3.08
+          },
+          "TrendFollowing_PAPER_SPEED": {
+            "group": "TrendFollowing_PAPER_SPEED",
+            "classification": "FEE_COLLAPSED",
+            "count": 166,
+            "net_expectancy": -0.1181,
+            "gross_expectancy": 0.0042,
+            "win_rate": 17.5,
+            "fee_destruction_ratio": 29.119,
+            "stability_coefficient": 3.56
+          }
+        },
+        "hold_bucket": {
+          "15–30 min": {
+            "group": "15–30 min",
+            "classification": "SURVIVABLE",
+            "count": 34,
+            "net_expectancy": 0.6176,
+            "gross_expectancy": 0.849,
+            "win_rate": 64.7,
+            "fee_destruction_ratio": 0.2726,
+            "stability_coefficient": 2.4
+          },
+          "1–5 min": {
+            "group": "1–5 min",
+            "classification": "TRUE_NEGATIVE",
+            "count": 276,
+            "net_expectancy": -0.3732,
+            "gross_expectancy": -0.1528,
+            "win_rate": 10.9,
+            "fee_destruction_ratio": 1.4424,
+            "stability_coefficient": 2.23
+          },
+          "5–15 min": {
+            "group": "5–15 min",
+            "classification": "FEE_COLLAPSED",
+            "count": 271,
+            "net_expectancy": -0.0564,
+            "gross_expectancy": 0.1672,
+            "win_rate": 29.5,
+            "fee_destruction_ratio": 1.3373,
+            "stability_coefficient": 12.0
+          },
+          "< 1 min": {
+            "group": "< 1 min",
+            "classification": "TRUE_NEGATIVE",
+            "count": 147,
+            "net_expectancy": -0.5647,
+            "gross_expectancy": -0.3426,
+            "win_rate": 0.0,
+            "fee_destruction_ratio": 0.6483,
+            "stability_coefficient": 0.5
+          },
+          "> 30 min": {
+            "group": "> 30 min",
+            "classification": "SURVIVABLE",
+            "count": 12,
+            "net_expectancy": 0.16,
+            "gross_expectancy": 0.4,
+            "win_rate": 50.0,
+            "fee_destruction_ratio": 0.6,
+            "stability_coefficient": 2.13
+          }
+        },
+        "confidence_bucket": {
+          "NO_CONFIDENCE_DATA": {
+            "group": "NO_CONFIDENCE_DATA",
+            "classification": "TRUE_NEGATIVE",
+            "count": 740,
+            "net_expectancy": -0.2411,
+            "gross_expectancy": -0.0183,
+            "win_rate": 18.6,
+            "fee_destruction_ratio": 12.1749,
+            "stability_coefficient": 3.26
+          }
+        },
+        "fee_adjusted": {
+          "OVERALL": {
+            "group": "OVERALL",
+            "gross_expectancy": -0.0183,
+            "net_expectancy": -0.2411,
+            "total_fees_paid": 164.8434,
+            "total_gross_pnl": -13.5519,
+            "total_net_pnl": -178.3953,
+            "fee_destruction_ratio": 12.1749
+          }
+        }
+      },
+      "false_expectancy_groups": [
+        {
+          "axis": "session",
+          "group": "NY",
+          "count": 208,
+          "net_expectancy": -0.1679,
+          "gross_expectancy": 0.0341,
+          "win_rate": 24.5,
+          "fee_destruction_ratio": 5.9238,
+          "stability_coefficient": 4.47
+        },
+        {
+          "axis": "regime",
+          "group": "TRENDING",
+          "count": 166,
+          "net_expectancy": -0.1181,
+          "gross_expectancy": 0.0042,
+          "win_rate": 17.5,
+          "fee_destruction_ratio": 29.119,
+          "stability_coefficient": 3.56
+        },
+        {
+          "axis": "strategy",
+          "group": "TrendFollowing_PAPER_SPEED",
+          "count": 166,
+          "net_expectancy": -0.1181,
+          "gross_expectancy": 0.0042,
+          "win_rate": 17.5,
+          "fee_destruction_ratio": 29.119,
+          "stability_coefficient": 3.56
+        },
+        {
+          "axis": "hold_bucket",
+          "group": "5–15 min",
+          "count": 271,
+          "net_expectancy": -0.0564,
+          "gross_expectancy": 0.1672,
+          "win_rate": 29.5,
+          "fee_destruction_ratio": 1.3373,
+          "stability_coefficient": 12.0
+        }
+      ],
+      "fee_collapsed_groups": [
+        {
+          "axis": "session",
+          "group": "NY",
+          "count": 208,
+          "net_expectancy": -0.1679,
+          "gross_expectancy": 0.0341,
+          "win_rate": 24.5,
+          "fee_destruction_ratio": 5.9238,
+          "stability_coefficient": 4.47
+        },
+        {
+          "axis": "regime",
+          "group": "TRENDING",
+          "count": 166,
+          "net_expectancy": -0.1181,
+          "gross_expectancy": 0.0042,
+          "win_rate": 17.5,
+          "fee_destruction_ratio": 29.119,
+          "stability_coefficient": 3.56
+        },
+        {
+          "axis": "strategy",
+          "group": "TrendFollowing_PAPER_SPEED",
+          "count": 166,
+          "net_expectancy": -0.1181,
+          "gross_expectancy": 0.0042,
+          "win_rate": 17.5,
+          "fee_destruction_ratio": 29.119,
+          "stability_coefficient": 3.56
+        },
+        {
+          "axis": "hold_bucket",
+          "group": "5–15 min",
+          "count": 271,
+          "net_expectancy": -0.0564,
+          "gross_expectancy": 0.1672,
+          "win_rate": 29.5,
+          "fee_destruction_ratio": 1.3373,
+          "stability_coefficient": 12.0
+        }
+      ],
+      "survivable_regions": [
+        {
+          "axis": "hold_bucket",
+          "group": "15–30 min",
+          "count": 34,
+          "net_expectancy": 0.6176,
+          "gross_expectancy": 0.849,
+          "win_rate": 64.7,
+          "fee_destruction_ratio": 0.2726,
+          "stability_coefficient": 2.4
+        },
+        {
+          "axis": "hold_bucket",
+          "group": "> 30 min",
+          "count": 12,
+          "net_expectancy": 0.16,
+          "gross_expectancy": 0.4,
+          "win_rate": 50.0,
+          "fee_destruction_ratio": 0.6,
+          "stability_coefficient": 2.13
+        }
+      ],
+      "survivable_region_count": 2,
+      "expectancy_decay": {
+        "early_half": {
+          "count": 370,
+          "net_expectancy": -0.2783,
+          "gross_expectancy": -0.0202,
+          "win_rate": 20.0,
+          "fee_destruction_ratio": 12.7772,
+          "stability_coefficient": 3.19
+        },
+        "late_half": {
+          "count": 370,
+          "net_expectancy": -0.2038,
+          "gross_expectancy": -0.0165,
+          "win_rate": 17.3,
+          "fee_destruction_ratio": 11.3515,
+          "stability_coefficient": 3.27
+        },
+        "decay_delta": 0.0745,
+        "trend": "IMPROVING"
+      },
+      "overall_net_expectancy": -0.2411,
+      "overall_gross_expectancy": -0.0183,
+      "total_net_pnl": -178.3953,
+      "survivability_verdict": "NOT_VIABLE",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057470
+    },
+    "fee_drag": {
+      "report": "FEE_DRAG_INTELLIGENCE_REPORT",
+      "total_trades": 740,
+      "gross_expectancy": -0.0183,
+      "net_expectancy": -0.2411,
+      "total_gross_pnl": -13.5519,
+      "total_net_pnl": -178.3953,
+      "total_fees_paid": 164.8434,
+      "total_slippage": 70.6472,
+      "avg_fee_per_trade": 0.222761,
+      "fee_destruction_ratio": 12.1749,
+      "slippage_destruction": 5.2131,
+      "execution_inefficiency": 12.1638,
+      "cost_adjusted_survivability": "NOT_SURVIVABLE",
+      "trade_frequency_toxicity": "ELEVATED",
+      "fee_collapsed_trade_count": 97,
+      "fee_collapsed_pct": 13.1,
+      "fee_drag_distribution": {
+        "UNSURVIVABLE": 106,
+        "HIGH_DRAG": 19,
+        "MODERATE_DRAG": 68,
+        "LOW_DRAG": 42,
+        "NEGATIVE_GROSS": 505
+      },
+      "session_fee_analysis": {
+        "ASIA": {
+          "count": 44,
+          "total_gross": -2.5606,
+          "total_net": -13.2556,
+          "total_fees": 10.6949,
+          "fee_drag_pct": 417.7,
+          "verdict": "TRUE_NEGATIVE"
+        },
+        "LATE": {
+          "count": 130,
+          "total_gross": -7.2281,
+          "total_net": -27.6373,
+          "total_fees": 20.4091,
+          "fee_drag_pct": 282.4,
+          "verdict": "TRUE_NEGATIVE"
+        },
+        "LONDON": {
+          "count": 7,
+          "total_gross": -2.9351,
+          "total_net": -3.9265,
+          "total_fees": 0.9914,
+          "fee_drag_pct": 33.8,
+          "verdict": "TRUE_NEGATIVE"
+        },
+        "NY": {
+          "count": 208,
+          "total_gross": 7.1023,
+          "total_net": -34.921,
+          "total_fees": 42.0233,
+          "fee_drag_pct": 591.7,
+          "verdict": "FEE_COLLAPSED"
+        },
+        "UNKNOWN": {
+          "count": 351,
+          "total_gross": -7.9303,
+          "total_net": -98.6549,
+          "total_fees": 90.7246,
+          "fee_drag_pct": 1144.0,
+          "verdict": "TRUE_NEGATIVE"
+        }
+      },
+      "regime_fee_analysis": {
+        "MEAN_REVERTING": {
+          "count": 574,
+          "total_gross": -14.2444,
+          "total_net": -158.7881,
+          "fee_drag_pct": 1014.7
+        },
+        "TRENDING": {
+          "count": 166,
+          "total_gross": 0.6924,
+          "total_net": -19.6072,
+          "fee_drag_pct": 2931.7
+        }
+      },
+      "worst_fee_patterns": [
+        {
+          "dim": "regime",
+          "key": "TRENDING",
+          "count": 166,
+          "total_gross": 0.6924,
+          "total_net": -19.6072,
+          "fee_drag_pct": 2931.7
+        },
+        {
+          "dim": "session",
+          "key": "UNKNOWN",
+          "count": 351,
+          "total_gross": -7.9303,
+          "total_net": -98.6549,
+          "total_fees": 90.7246,
+          "fee_drag_pct": 1144.0,
+          "verdict": "TRUE_NEGATIVE"
+        },
+        {
+          "dim": "regime",
+          "key": "MEAN_REVERTING",
+          "count": 574,
+          "total_gross": -14.2444,
+          "total_net": -158.7881,
+          "fee_drag_pct": 1014.7
+        },
+        {
+          "dim": "session",
+          "key": "NY",
+          "count": 208,
+          "total_gross": 7.1023,
+          "total_net": -34.921,
+          "total_fees": 42.0233,
+          "fee_drag_pct": 591.7,
+          "verdict": "FEE_COLLAPSED"
+        },
+        {
+          "dim": "session",
+          "key": "ASIA",
+          "count": 44,
+          "total_gross": -2.5606,
+          "total_net": -13.2556,
+          "total_fees": 10.6949,
+          "fee_drag_pct": 417.7,
+          "verdict": "TRUE_NEGATIVE"
+        }
+      ],
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057477
+    },
+    "alpha": {
+      "report": "SURVIVABLE_ALPHA_REPORT",
+      "total_trades": 740,
+      "alpha_pockets": [
+        {
+          "dimension": "timeframe",
+          "group": "> 30 min",
+          "trade_count": 12,
+          "net_expectancy": 0.16,
+          "win_rate": 50.0,
+          "total_net_pnl": 1.9201,
+          "net_pnl_stdev": 0.3405,
+          "density": "SPARSE"
+        },
+        {
+          "dimension": "timeframe",
+          "group": "15–30 min",
+          "trade_count": 34,
+          "net_expectancy": 0.6176,
+          "win_rate": 64.7,
+          "total_net_pnl": 20.9974,
+          "net_pnl_stdev": 1.4817,
+          "density": "MODERATE"
+        }
+      ],
+      "pocket_count": 2,
+      "dimension_coverage": {
+        "session": {
+          "groups_analyzed": 5,
+          "survivable_pockets": 0,
+          "groups": [
+            "UNKNOWN",
+            "NY",
+            "LATE",
+            "ASIA",
+            "LONDON"
+          ]
+        },
+        "timeframe": {
+          "groups_analyzed": 5,
+          "survivable_pockets": 2
+        },
+        "volatility": {
+          "groups_analyzed": 2,
+          "survivable_pockets": 0
+        },
+        "market_structure": {
+          "groups_analyzed": 2,
+          "survivable_pockets": 0,
+          "regimes_seen": [
+            "MEAN_REVERTING",
+            "TRENDING"
+          ]
+        },
+        "confidence_regime": {
+          "groups_analyzed": 1,
+          "survivable_pockets": 0
+        },
+        "directional_state": {
+          "groups_analyzed": 2,
+          "survivable_pockets": 0
+        },
+        "trade_density": {
+          "groups_analyzed": 7,
+          "survivable_pockets": 0
+        },
+        "ecological_context": {
+          "groups_analyzed": 2,
+          "survivable_pockets": 0
+        }
+      },
+      "global_net_expectancy": -0.2411,
+      "global_alpha_state": "LOCALIZED",
+      "strongest_pocket": {
+        "dimension": "timeframe",
+        "group": "15–30 min",
+        "trade_count": 34,
+        "net_expectancy": 0.6176,
+        "win_rate": 64.7,
+        "total_net_pnl": 20.9974,
+        "net_pnl_stdev": 1.4817,
+        "density": "MODERATE"
+      },
+      "survivability_index": 25,
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057487
+    },
+    "ecology": {
+      "report": "ECOLOGICAL_COLLAPSE_REPORT",
+      "collapse_severity": "LOW",
+      "collapse_signals": [
+        {
+          "signal": "STRATEGY_CROWDING",
+          "severity": "MEDIUM",
+          "source": "trade_history",
+          "detail": "Strategy 'MeanReversion_PAPER_SPEED' dominates 75% with net_exp=-0.2811"
+        }
+      ],
+      "signal_count": 1,
+      "critical_signal_count": 0,
+      "recovery_zones": [
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~82"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~267"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~294"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~423"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~426"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~440"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~445"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~447"
+        },
+        {
+          "zone": "ROLLING_EXP_RECOVERY",
+          "source": "trade_history",
+          "detail": "Rolling expectancy positive at trade sequence index ~553"
+        }
+      ],
+      "recovery_zone_count": 9,
+      "ecology_state": {
+        "is_starvation": false,
+        "is_drought": false,
+        "survival_rate": 0.125,
+        "drought_seconds": 48.4,
+        "consecutive_blocks": 1,
+        "total_recoveries": 6,
+        "active_recovery": false,
+        "total_contexts": 50,
+        "toxic_count": 21,
+        "toxic_ratio": 0.42,
+        "boost_count": 7,
+        "block_count": 19
+      },
+      "trade_analysis": {
+        "total_trades": 740,
+        "fast_trade_count": 147,
+        "fast_trade_ratio": 0.1986,
+        "overtrading_toxic": false,
+        "regime_distribution": {
+          "MEAN_REVERTING": 574,
+          "TRENDING": 166
+        },
+        "collapse_onset_idx": 0,
+        "rolling_expectancy": [
+          -0.195,
+          -0.1989,
+          -0.1988,
+          -0.1919,
+          -0.189,
+          -0.1947,
+          -0.2031,
+          -0.2073,
+          -0.2095,
+          -0.1981
+        ]
+      },
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057530
+    },
+    "regime": {
+      "report": "REGIME_SURVIVABILITY_REPORT",
+      "total_trades": 740,
+      "regime_analysis": {
+        "COMPRESSION": {
+          "regime": "COMPRESSION",
+          "trade_count": 324,
+          "net_expectancy": -0.5108,
+          "gross_expectancy": -0.2593,
+          "win_rate": 6.5,
+          "fee_vulnerability": 0.9697,
+          "alpha_persistence": 0.0525,
+          "stability_coeff": 1.47,
+          "early_expectancy": -0.5574,
+          "late_expectancy": -0.4643,
+          "expectancy_decay_delta": 0.0931,
+          "instability_risk": "LOW",
+          "survivability": "NOT_SURVIVABLE"
+        },
+        "LOW_VOLATILITY": {
+          "regime": "LOW_VOLATILITY",
+          "trade_count": 40,
+          "net_expectancy": 0.5414,
+          "gross_expectancy": 0.7923,
+          "win_rate": 62.5,
+          "fee_vulnerability": 0.3166,
+          "alpha_persistence": 0.225,
+          "stability_coeff": 2.55,
+          "early_expectancy": 0.6109,
+          "late_expectancy": 0.472,
+          "expectancy_decay_delta": -0.1389,
+          "instability_risk": "MODERATE",
+          "survivability": "SURVIVABLE"
+        },
+        "RANGING": {
+          "regime": "RANGING",
+          "trade_count": 210,
+          "net_expectancy": -0.0711,
+          "gross_expectancy": 0.1814,
+          "win_rate": 30.0,
+          "fee_vulnerability": 1.392,
+          "alpha_persistence": 0.2048,
+          "stability_coeff": 10.36,
+          "early_expectancy": -0.138,
+          "late_expectancy": -0.0042,
+          "expectancy_decay_delta": 0.1338,
+          "instability_risk": "HIGH",
+          "survivability": "FEE_COLLAPSED"
+        },
+        "TRENDING": {
+          "regime": "TRENDING",
+          "trade_count": 166,
+          "net_expectancy": -0.1181,
+          "gross_expectancy": 0.0042,
+          "win_rate": 17.5,
+          "fee_vulnerability": 29.3168,
+          "alpha_persistence": 0.1325,
+          "stability_coeff": 3.56,
+          "early_expectancy": -0.1012,
+          "late_expectancy": -0.1351,
+          "expectancy_decay_delta": -0.0339,
+          "instability_risk": "HIGH",
+          "survivability": "FEE_COLLAPSED"
+        }
+      },
+      "regime_count": 4,
+      "survivable_regimes": [
+        "LOW_VOLATILITY"
+      ],
+      "collapsed_regimes": [
+        "COMPRESSION",
+        "RANGING",
+        "TRENDING"
+      ],
+      "survivable_regime_count": 1,
+      "collapsed_regime_count": 3,
+      "transition_fragility": {
+        "COMPRESSION→RANGING": {
+          "count": 103,
+          "net_expectancy": -0.1767,
+          "fragile": true
+        },
+        "RANGING→COMPRESSION": {
+          "count": 101,
+          "net_expectancy": -0.6111,
+          "fragile": true
+        },
+        "COMPRESSION→LOW_VOLATILITY": {
+          "count": 18,
+          "net_expectancy": 0.8159,
+          "fragile": false
+        },
+        "LOW_VOLATILITY→COMPRESSION": {
+          "count": 19,
+          "net_expectancy": -0.5514,
+          "fragile": true
+        },
+        "LOW_VOLATILITY→RANGING": {
+          "count": 12,
+          "net_expectancy": 0.2659,
+          "fragile": false
+        },
+        "RANGING→LOW_VOLATILITY": {
+          "count": 14,
+          "net_expectancy": 0.3627,
+          "fragile": false
+        },
+        "COMPRESSION→TRENDING": {
+          "count": 19,
+          "net_expectancy": -0.0258,
+          "fragile": true
+        },
+        "TRENDING→COMPRESSION": {
+          "count": 19,
+          "net_expectancy": -0.1566,
+          "fragile": true
+        },
+        "RANGING→TRENDING": {
+          "count": 2,
+          "net_expectancy": 0.1467,
+          "fragile": false
+        },
+        "TRENDING→LOW_VOLATILITY": {
+          "count": 2,
+          "net_expectancy": -0.0625,
+          "fragile": true
+        },
+        "LOW_VOLATILITY→TRENDING": {
+          "count": 3,
+          "net_expectancy": -0.3596,
+          "fragile": true
+        },
+        "TRENDING→RANGING": {
+          "count": 2,
+          "net_expectancy": 0.2834,
+          "fragile": false
+        }
+      },
+      "dominant_regime": "COMPRESSION",
+      "overall_regime_health": "SINGLE_REGIME_VIABLE",
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057541
+    },
+    "filtration": {
+      "report": "ADAPTIVE_SIGNAL_FILTRATION_REPORT",
+      "total_trades": 740,
+      "filtration_candidates": [
+        {
+          "filter": "LOW_QUALITY_CLUSTER",
+          "cluster": "ASIA|MEAN_REVERTING",
+          "count": 44,
+          "net_expectancy": -0.3013,
+          "win_rate": 13.6,
+          "stability_coeff": 3.12,
+          "rationale": "Consistently negative expectancy and sub-35% win rate"
+        },
+        {
+          "filter": "LOW_QUALITY_CLUSTER",
+          "cluster": "LATE|MEAN_REVERTING",
+          "count": 56,
+          "net_expectancy": -0.3343,
+          "win_rate": 10.7,
+          "stability_coeff": 1.32,
+          "rationale": "Consistently negative expectancy and sub-35% win rate"
+        },
+        {
+          "filter": "LOW_QUALITY_CLUSTER",
+          "cluster": "LATE|TRENDING",
+          "count": 74,
+          "net_expectancy": -0.1205,
+          "win_rate": 10.8,
+          "stability_coeff": 1.67,
+          "rationale": "Consistently negative expectancy and sub-35% win rate"
+        },
+        {
+          "filter": "LOW_QUALITY_CLUSTER",
+          "cluster": "LONDON|TRENDING",
+          "count": 7,
+          "net_expectancy": -0.5609,
+          "win_rate": 0.0,
+          "stability_coeff": 0.88,
+          "rationale": "Consistently negative expectancy and sub-35% win rate"
+        },
+        {
+          "filter": "LOW_QUALITY_CLUSTER",
+          "cluster": "NY|MEAN_REVERTING",
+          "count": 123,
+          "net_expectancy": -0.2289,
+          "win_rate": 24.4,
+          "stability_coeff": 3.8,
+          "rationale": "Consistently negative expectancy and sub-35% win rate"
+        },
+        {
+          "filter": "LOW_QUALITY_CLUSTER",
+          "cluster": "NY|TRENDING",
+          "count": 85,
+          "net_expectancy": -0.0796,
+          "win_rate": 24.7,
+          "stability_coeff": 6.61,
+          "rationale": "Consistently negative expectancy and sub-35% win rate"
+        },
+        {
+          "filter": "LOW_QUALITY_CLUSTER",
+          "cluster": "UNKNOWN|MEAN_REVERTING",
+          "count": 351,
+          "net_expectancy": -0.2811,
+          "win_rate": 19.1,
+          "stability_coeff": 3.19,
+          "rationale": "Consistently negative expectancy and sub-35% win rate"
+        },
+        {
+          "filter": "ECOLOGICAL_SATURATION",
+          "cluster": "FAST_TRADES",
+          "count": 147,
+          "net_expectancy": -0.5647,
+          "win_rate": 0.0,
+          "stability_coeff": 0.5,
+          "rationale": "Fast trades (<60s) have negative expectancy — ecological overload"
+        }
+      ],
+      "candidate_count": 8,
+      "contradictory_evidence": [],
+      "contradictory_count": 0,
+      "filtration_score": 100,
+      "filtration_verdict": "HIGH_FILTRATION_NEED",
+      "cluster_analysis": {
+        "low_quality_clusters": [
+          {
+            "filter": "LOW_QUALITY_CLUSTER",
+            "cluster": "ASIA|MEAN_REVERTING",
+            "count": 44,
+            "net_expectancy": -0.3013,
+            "win_rate": 13.6,
+            "stability_coeff": 3.12,
+            "rationale": "Consistently negative expectancy and sub-35% win rate"
+          },
+          {
+            "filter": "LOW_QUALITY_CLUSTER",
+            "cluster": "LATE|MEAN_REVERTING",
+            "count": 56,
+            "net_expectancy": -0.3343,
+            "win_rate": 10.7,
+            "stability_coeff": 1.32,
+            "rationale": "Consistently negative expectancy and sub-35% win rate"
+          },
+          {
+            "filter": "LOW_QUALITY_CLUSTER",
+            "cluster": "LATE|TRENDING",
+            "count": 74,
+            "net_expectancy": -0.1205,
+            "win_rate": 10.8,
+            "stability_coeff": 1.67,
+            "rationale": "Consistently negative expectancy and sub-35% win rate"
+          },
+          {
+            "filter": "LOW_QUALITY_CLUSTER",
+            "cluster": "LONDON|TRENDING",
+            "count": 7,
+            "net_expectancy": -0.5609,
+            "win_rate": 0.0,
+            "stability_coeff": 0.88,
+            "rationale": "Consistently negative expectancy and sub-35% win rate"
+          },
+          {
+            "filter": "LOW_QUALITY_CLUSTER",
+            "cluster": "NY|MEAN_REVERTING",
+            "count": 123,
+            "net_expectancy": -0.2289,
+            "win_rate": 24.4,
+            "stability_coeff": 3.8,
+            "rationale": "Consistently negative expectancy and sub-35% win rate"
+          },
+          {
+            "filter": "LOW_QUALITY_CLUSTER",
+            "cluster": "NY|TRENDING",
+            "count": 85,
+            "net_expectancy": -0.0796,
+            "win_rate": 24.7,
+            "stability_coeff": 6.61,
+            "rationale": "Consistently negative expectancy and sub-35% win rate"
+          },
+          {
+            "filter": "LOW_QUALITY_CLUSTER",
+            "cluster": "UNKNOWN|MEAN_REVERTING",
+            "count": 351,
+            "net_expectancy": -0.2811,
+            "win_rate": 19.1,
+            "stability_coeff": 3.19,
+            "rationale": "Consistently negative expectancy and sub-35% win rate"
+          }
+        ],
+        "unstable_zones": [],
+        "fee_toxic": {
+          "count": 110,
+          "pct": 14.9
+        },
+        "fast_trades": {
+          "count": 147
+        },
+        "volatility_trap": {
+          "count": 0
+        },
+        "confidence_hallucination": {
+          "count": 0
+        }
+      },
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "generated_ts": 1779666057551
+    }
+  },
+  "domain_errors": [],
+  "lineage_preserved": true,
+  "replay_safe": true,
+  "diagnostic_only": true,
+  "auto_authorized": false,
+  "generated_ts": 1779666057430
+}

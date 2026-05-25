@@ -1,0 +1,31 @@
+{
+  "module": "CAPITAL_FLOW_ENGINE",
+  "phase": "FTD-038+039",
+  "stabilizer_state": "SMOOTH",
+  "stabilizer_mult": 1.0,
+  "protect_mode": false,
+  "protect_reason": "",
+  "equity_smoothness": 0.3332,
+  "recent_pnl_sum": -1.783,
+  "allocations": [
+    {
+      "strategy_id": "TrendFollowing_PAPER_SPEED",
+      "aee_state": "DISABLED",
+      "aee_rank": 1,
+      "priority_mult": 0.0,
+      "alloc_pct": 0.0,
+      "can_trade": false
+    },
+    {
+      "strategy_id": "MR_BB_RSI_v1",
+      "aee_state": "ACTIVE",
+      "aee_rank": 2,
+      "priority_mult": 1.25,
+      "alloc_pct": 100.0,
+      "can_trade": true
+    }
+  ],
+  "alloc_log": [],
+  "stab_formula": "SMOOTH=1.00× | VOLATILE=0.85× | SPIKE=0.75× | DEFENSIVE=0.60×",
+  "priority_formula": "rank1=1.25× | rank2=1.00× | rank3=0.75× | rank4+=0.50× | SCALING+0.10× | REDUCED=0.50× | DISABLED=0×"
+}

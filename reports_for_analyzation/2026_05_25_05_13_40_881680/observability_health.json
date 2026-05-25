@@ -1,0 +1,11 @@
+{
+  "status": "HEALTHY",
+  "total_ticks": 65,
+  "age_secs": 2.8,
+  "tick_interval_secs": 120,
+  "dedup_ratio": 0.0,
+  "anomaly_rate": 5.94,
+  "escalation_rate": 0.369,
+  "sync_rate": 0.0,
+  "last_tick_ms": 185
+}

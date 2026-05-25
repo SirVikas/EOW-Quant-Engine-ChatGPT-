@@ -1,0 +1,93 @@
+{
+  "ETHUSDT": {
+    "regime": "TRENDING",
+    "adx": 28.92,
+    "atr_pct": 0.078,
+    "bb_width": 0.498,
+    "confidence": 0.357
+  },
+  "BTCUSDT": {
+    "regime": "TRENDING",
+    "adx": 20.76,
+    "atr_pct": 0.068,
+    "bb_width": 0.342,
+    "confidence": 0.03
+  },
+  "ONDOUSDT": {
+    "regime": "TRENDING",
+    "adx": 45.98,
+    "atr_pct": 0.232,
+    "bb_width": 1.31,
+    "confidence": 0.95
+  },
+  "SOLUSDT": {
+    "regime": "TRENDING",
+    "adx": 35.69,
+    "atr_pct": 0.095,
+    "bb_width": 0.528,
+    "confidence": 0.628
+  },
+  "SUIUSDT": {
+    "regime": "TRENDING",
+    "adx": 26.65,
+    "atr_pct": 0.14,
+    "bb_width": 0.602,
+    "confidence": 0.266
+  },
+  "NEARUSDT": {
+    "regime": "MEAN_REVERTING",
+    "adx": 13.27,
+    "atr_pct": 0.299,
+    "bb_width": 0.715,
+    "confidence": 0.336
+  },
+  "BNBUSDT": {
+    "regime": "TRENDING",
+    "adx": 32.83,
+    "atr_pct": 0.049,
+    "bb_width": 0.31,
+    "confidence": 0.513
+  },
+  "MEGAUSDT": {
+    "regime": "TRENDING",
+    "adx": 60.77,
+    "atr_pct": 0.121,
+    "bb_width": 0.979,
+    "confidence": 0.95
+  },
+  "TRXUSDT": {
+    "regime": "TRENDING",
+    "adx": 53.61,
+    "atr_pct": 0.033,
+    "bb_width": 0.059,
+    "confidence": 0.95
+  },
+  "XRPUSDT": {
+    "regime": "TRENDING",
+    "adx": 25.21,
+    "atr_pct": 0.061,
+    "bb_width": 0.294,
+    "confidence": 0.209
+  },
+  "WLDUSDT": {
+    "regime": "TRENDING",
+    "adx": 39.18,
+    "atr_pct": 0.247,
+    "bb_width": 0.908,
+    "confidence": 0.767
+  },
+  "GENIUSUSDT": {
+    "regime": "TRENDING",
+    "adx": 36.56,
+    "atr_pct": 0.49,
+    "bb_width": 1.469,
+    "confidence": 0.663
+  },
+  "ASTERUSDT": {
+    "regime": "MEAN_REVERTING",
+    "adx": 6.48,
+    "atr_pct": 0.101,
+    "bb_width": 0.523,
+    "confidence": 0.676
+  }
+}

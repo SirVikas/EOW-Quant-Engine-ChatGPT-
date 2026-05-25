@@ -1,0 +1,2834 @@
+{
+  "report": "ADAPTIVE_EXECUTION_CIVILIZATION_REPORT",
+  "execution_id": "EXEC-1779666058022-0ff29a832cba99cd",
+  "trade_count": 740,
+  "civilization_score": 40,
+  "civilization_tier": "GUARDED",
+  "restraint_advisory": "ENTROPY_ALERT",
+  "gate_state": "DEFENSIVE",
+  "equilibrium_state": "CAUTIONARY",
+  "override_count": 175,
+  "discipline_tier": "IMPULSIVE",
+  "governance_status": "CERTIFIED",
+  "score_evidence": {
+    "execution_viable": false,
+    "gate_acceptable": false,
+    "equilibrium_stable": true,
+    "governance_certified": true,
+    "discipline_adequate": false
+  },
+  "domain_reports": {
+    "restraint": {
+      "report": "RESTRAINT_ADVISORY_REPORT",
+      "advisory": "ENTROPY_ALERT",
+      "advisory_rationale": "Entropy state CRITICAL — systemic degradation accelerating",
+      "contributing_subsystems": [
+        "trade_history_analysis",
+        "entropy_resistance_engine",
+        "ecological_self_preservation_engine"
+      ],
+      "entropy_state": "CRITICAL",
+      "ecological_preservation_tier": "SAFE",
+      "net_expectancy": -0.2411,
+      "rolling_last10_expectancy": -0.1783,
+      "fast_trade_ratio": 0.19864864864864865,
+      "decay_detected": false,
+      "trade_count": 740,
+      "lineage_id": "ADV-1779666058022-e884a068f3b9",
+      "confidence_realism_linkage": "see /api/survivability/confidence-realism",
+      "entropy_linkage": "see /api/survivability/entropy",
+      "replay_safe": true,
+      "lineage_preserved": true,
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "human_confirmed": true,
+      "override_visible": true,
+      "generated_ts": 1779666058022
+    },
+    "discipline_gate": {
+      "report": "CAPITAL_DISCIPLINE_GATE_REPORT",
+      "gate_state": "DEFENSIVE",
+      "gate_score": 50,
+      "checks": [
+        {
+          "check": "survivability_check",
+          "passed": false,
+          "detail": "Net expectancy: -0.2411"
+        },
+        {
+          "check": "ecological_check",
+          "passed": true,
+          "detail": "Fast trade ratio: 19.9%"
+        },
+        {
+          "check": "entropy_check",
+          "passed": false,
+          "detail": "Entropy state: CRITICAL"
+        },
+        {
+          "check": "confidence_realism_check",
+          "passed": true,
+          "detail": "Confidence realism score: 50"
+        },
+        {
+          "check": "equilibrium_check",
+          "passed": false,
+          "detail": "Win rate: 18.6%"
+        },
+        {
+          "check": "participation_check",
+          "passed": true,
+          "detail": "Last-10 rolling exp: -0.1783"
+        }
+      ],
+      "checks_passed": 3,
+      "checks_failed": 3,
+      "constitutional_note": "This gate recommends — it does not autonomously block. Final authority is human-confirmed.",
+      "trade_count": 740,
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "human_confirmed": true,
+      "override_visible": true,
+      "lineage_preserved": true,
+      "generated_ts": 1779666058062
+    },
+    "equilibrium": {
+      "report": "EQUILIBRIUM_RESUMPTION_REPORT",
+      "equilibrium_state": "CAUTIONARY",
+      "equilibrium_score": 59,
+      "recovery_readiness": false,
+      "dimension_scores": {
+        "ecological_stabilization": 100,
+        "entropy_normalization": 48,
+        "expectancy_recovery": 46,
+        "confidence_realism_recovery": 50,
+        "alpha_persistence_restoration": 15,
+        "regime_stabilization": 60
+      },
+      "dimension_weights": {
+        "ecological_stabilization": 0.25,
+        "entropy_normalization": 0.2,
+        "expectancy_recovery": 0.2,
+        "confidence_realism_recovery": 0.15,
+        "alpha_persistence_restoration": 0.1,
+        "regime_stabilization": 0.1
+      },
+      "trade_count": 740,
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "human_confirmed": true,
+      "lineage_preserved": true,
+      "generated_ts": 1779666058096
+    },
+    "override_transparency": {
+      "report": "OPERATOR_OVERRIDE_TRANSPARENCY_REPORT",
+      "total_trade_count": 740,
+      "total_override_count": 175,
+      "explicit_override_count": 0,
+      "inferred_override_count": 175,
+      "override_frequency_pct": 23.6,
+      "override_negative_rate": 84.6,
+      "override_avg_net": -0.2281,
+      "override_events": [
+        {
+          "trade_id": "c3cd72da",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.5272,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "df057d43",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.4024,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "31d94d07",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 1.7185,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "4b3b6a08",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2256,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "384821ee",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4714,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "41704c9f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.312,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "29b10f50",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.3231,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "ae394a20",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 3.8915,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "0f37ec6a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4966,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "93639c98",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5778,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "0c515005",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.2282,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "3919e3d1",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.975,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f45a2e60",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.2174,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "97ac7439",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.279,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "1534f283",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.6429,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "073a0d02",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2767,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "3c61fea3",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.3294,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "93a7ee35",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3212,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "8363fbd8",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5766,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "6e566116",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5336,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "6b9457f2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.205,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "3631978b",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2534,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "599080d9",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5674,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "9f24192e",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4789,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "81e0fe4a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.478,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "5f0551c8",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4761,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "e5e13a42",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5044,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "6ea4bfe0",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2076,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "fc54269e",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 1.4635,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "739d9c68",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.262,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "2abcf7de",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4817,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "5b9fc9e0",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3021,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "59944825",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.8133,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "a4247f95",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4666,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f9375a03",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.6371,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "1d7f0e2c",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5283,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "df48007b",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0745,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "10741fa2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2021,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4641a1b8",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5901,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "c110da05",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.7105,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b33b6302",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4642,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "a7fd4eb9",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2159,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "2d4d0789",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.8192,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "e22eaa80",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5328,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4a432dca",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0976,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "6280e68f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5136,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "509c2743",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4857,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "70dcc553",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1939,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4c9db80f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4921,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "a9dc7ddd",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2095,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "5c7e4743",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5222,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b4fbf491",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.6324,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "1df266d9",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4592,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f5b9af85",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 6.8134,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "99b58272",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.455,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "aea6da49",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5684,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b919fda2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4734,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "1aa2861f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.1155,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "0fcfafdc",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2293,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "836199af",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.5231,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "bc94903b",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3174,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f096a31a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.8262,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "5cbd2fbb",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3137,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4edc2068",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1915,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f3ab7e98",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 5.2735,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "54cd9502",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0286,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "83b6f4e0",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -2.9124,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "763fafc9",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.8865,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "c206947c",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.3289,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "282900e2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.6679,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "bb94e1f3",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.7265,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "df277ed7",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4477,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "3136e6c7",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.2509,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "a79a8cac",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.274,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "2f5655d7",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 1.3884,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "881f797a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4967,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f60fca3f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1875,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "9c50f498",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5526,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "eab81dbb",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2505,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "7c333ed9",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5967,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4efc86ca",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5087,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "20d4a897",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1894,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "6430bb76",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5077,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "6688adce",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.9738,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "ece6dfa0",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2084,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b309aed0",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.71,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "99c6f522",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0644,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "61112c19",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4988,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "75baaf73",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5971,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "c736667a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.4712,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b2b7fc74",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.8454,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "bc1eb364",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.1146,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4f7d7a2a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.2593,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "1c35ece2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 1.883,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "0424a36b",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.5081,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "2f835d38",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5212,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "7e24f593",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5694,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "35965c80",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.8589,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "db39c377",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3935,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "c3f6d81c",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5479,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "8b1e7cc2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.1482,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "1863fcc4",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4376,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "7543a530",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4494,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "6af699c7",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5425,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "54a1eb98",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2111,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4abee9a3",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4872,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "cd76f620",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4906,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "5028c696",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5248,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "65dcbbab",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4401,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "caa93b89",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5228,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "972644e2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.0216,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "833437b1",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.9356,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "01f98f92",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3315,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "85732e6a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3549,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "9dde5d5f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -1.2057,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "01170cf6",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1628,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "8e38bd6d",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4774,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "723731c4",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.426,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b90ed604",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.1366,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "20d91d20",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3829,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b14b3f96",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0146,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "3b5c30ed",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1699,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "c437c70e",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 2.1311,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "20a510d3",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 1.0442,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "d18df92f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3727,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "432069f0",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3181,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "a56ec668",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2525,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "606195a9",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5834,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "ad8d3e8e",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3095,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4602c1ed",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.5475,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "5fdd93a7",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1057,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "5c965f43",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3921,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "06c2e6c1",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.1486,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "1b9e8766",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.108,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "42c4d5aa",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4614,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "e1262146",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2491,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "255aa72a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.006,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "cb794f05",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3732,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "9d4e6100",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1093,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "55ae673f",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.5245,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "b14d5615",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2346,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "8d0e3108",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5805,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "aac0fc19",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.281,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "75b7ee8c",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.0505,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "65a200e1",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5324,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "02e733f4",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.4599,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "89bdb7bf",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.6515,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "12b261d2",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.1752,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "e008812d",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0086,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4de477fd",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2827,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "1ce4e3b5",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2572,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "c0ab36b1",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.5317,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "79196145",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1048,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "dbf70cad",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.6352,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4bbe6b31",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.3278,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "ae2a2465",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0081,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "e2320c3e",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2591,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "a476779a",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1972,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "d9cec798",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0731,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "a648361d",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1773,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f22d4a29",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1773,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "4600a8dc",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.179,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "99906f24",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1974,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "ebd701f6",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.0735,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "3ee61800",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2563,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "9b5e9e94",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": 0.5833,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEUTRAL"
+        },
+        {
+          "trade_id": "72ab8fd0",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1825,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "b73abd87",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2158,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "021282f6",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1839,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "c692e6ee",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1743,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "f946d9f5",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1451,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "2f281046",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1918,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "2bf1659b",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2699,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "1de13f13",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.1721,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        },
+        {
+          "trade_id": "c1319a17",
+          "override_type": "RAPID_REENTRY_LOSS",
+          "net_pnl": -0.2928,
+          "confidence": null,
+          "override_reason": "INFERRED",
+          "survivability_impact": "NEGATIVE"
+        }
+      ],
+      "discipline_effectiveness": "DISCIPLINE_HELPED",
+      "lineage_note": "All override events preserved in replay-visible lineage",
+      "replay_visible": true,
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "human_confirmed": true,
+      "override_visible": true,
+      "lineage_preserved": true,
+      "generated_ts": 1779666058158
+    },
+    "discipline_memory": {
+      "report": "EXECUTION_DISCIPLINE_MEMORY_REPORT",
+      "total_trades": 740,
+      "discipline_score": 40,
+      "discipline_tier": "IMPULSIVE",
+      "revenge_episode_count": 175,
+      "revenge_episodes": [
+        {
+          "trade_id": "c3cd72da",
+          "gap_seconds": 3.2,
+          "net_pnl": -1.5272
+        },
+        {
+          "trade_id": "df057d43",
+          "gap_seconds": 44.9,
+          "net_pnl": 0.4024
+        },
+        {
+          "trade_id": "31d94d07",
+          "gap_seconds": 60.5,
+          "net_pnl": 1.7185
+        },
+        {
+          "trade_id": "4b3b6a08",
+          "gap_seconds": 41.1,
+          "net_pnl": -0.2256
+        },
+        {
+          "trade_id": "384821ee",
+          "gap_seconds": 289.3,
+          "net_pnl": -0.4714
+        },
+        {
+          "trade_id": "41704c9f",
+          "gap_seconds": 39.7,
+          "net_pnl": -1.312
+        },
+        {
+          "trade_id": "29b10f50",
+          "gap_seconds": 14.1,
+          "net_pnl": 0.3231
+        },
+        {
+          "trade_id": "ae394a20",
+          "gap_seconds": 46.7,
+          "net_pnl": 3.8915
+        },
+        {
+          "trade_id": "0f37ec6a",
+          "gap_seconds": 111.1,
+          "net_pnl": -0.4966
+        },
+        {
+          "trade_id": "93639c98",
+          "gap_seconds": 44.8,
+          "net_pnl": -0.5778
+        },
+        {
+          "trade_id": "0c515005",
+          "gap_seconds": 118.4,
+          "net_pnl": -1.2282
+        },
+        {
+          "trade_id": "3919e3d1",
+          "gap_seconds": 43.3,
+          "net_pnl": -0.975
+        },
+        {
+          "trade_id": "f45a2e60",
+          "gap_seconds": 33.5,
+          "net_pnl": -1.2174
+        },
+        {
+          "trade_id": "97ac7439",
+          "gap_seconds": 88.9,
+          "net_pnl": -1.279
+        },
+        {
+          "trade_id": "1534f283",
+          "gap_seconds": 210.9,
+          "net_pnl": -0.6429
+        },
+        {
+          "trade_id": "073a0d02",
+          "gap_seconds": 187.1,
+          "net_pnl": -0.2767
+        },
+        {
+          "trade_id": "3c61fea3",
+          "gap_seconds": 201.0,
+          "net_pnl": -1.3294
+        },
+        {
+          "trade_id": "93a7ee35",
+          "gap_seconds": 235.9,
+          "net_pnl": -0.3212
+        },
+        {
+          "trade_id": "8363fbd8",
+          "gap_seconds": 138.8,
+          "net_pnl": -0.5766
+        },
+        {
+          "trade_id": "6e566116",
+          "gap_seconds": 11.0,
+          "net_pnl": -0.5336
+        },
+        {
+          "trade_id": "6b9457f2",
+          "gap_seconds": 185.1,
+          "net_pnl": -1.205
+        },
+        {
+          "trade_id": "3631978b",
+          "gap_seconds": 90.9,
+          "net_pnl": -0.2534
+        },
+        {
+          "trade_id": "599080d9",
+          "gap_seconds": 58.4,
+          "net_pnl": -0.5674
+        },
+        {
+          "trade_id": "9f24192e",
+          "gap_seconds": 257.1,
+          "net_pnl": -0.4789
+        },
+        {
+          "trade_id": "81e0fe4a",
+          "gap_seconds": 102.9,
+          "net_pnl": -0.478
+        },
+        {
+          "trade_id": "5f0551c8",
+          "gap_seconds": 87.7,
+          "net_pnl": -0.4761
+        },
+        {
+          "trade_id": "e5e13a42",
+          "gap_seconds": 2.3,
+          "net_pnl": -0.5044
+        },
+        {
+          "trade_id": "6ea4bfe0",
+          "gap_seconds": 243.6,
+          "net_pnl": -0.2076
+        },
+        {
+          "trade_id": "fc54269e",
+          "gap_seconds": 157.0,
+          "net_pnl": 1.4635
+        },
+        {
+          "trade_id": "739d9c68",
+          "gap_seconds": 68.6,
+          "net_pnl": -0.262
+        },
+        {
+          "trade_id": "2abcf7de",
+          "gap_seconds": 58.1,
+          "net_pnl": -0.4817
+        },
+        {
+          "trade_id": "5b9fc9e0",
+          "gap_seconds": 193.9,
+          "net_pnl": -0.3021
+        },
+        {
+          "trade_id": "59944825",
+          "gap_seconds": 130.5,
+          "net_pnl": -0.8133
+        },
+        {
+          "trade_id": "a4247f95",
+          "gap_seconds": 65.5,
+          "net_pnl": -0.4666
+        },
+        {
+          "trade_id": "f9375a03",
+          "gap_seconds": 201.3,
+          "net_pnl": -0.6371
+        },
+        {
+          "trade_id": "1d7f0e2c",
+          "gap_seconds": 90.4,
+          "net_pnl": -0.5283
+        },
+        {
+          "trade_id": "df48007b",
+          "gap_seconds": 100.8,
+          "net_pnl": -0.0745
+        },
+        {
+          "trade_id": "10741fa2",
+          "gap_seconds": 25.4,
+          "net_pnl": -0.2021
+        },
+        {
+          "trade_id": "4641a1b8",
+          "gap_seconds": 112.1,
+          "net_pnl": -0.5901
+        },
+        {
+          "trade_id": "c110da05",
+          "gap_seconds": 281.4,
+          "net_pnl": -0.7105
+        },
+        {
+          "trade_id": "b33b6302",
+          "gap_seconds": 94.8,
+          "net_pnl": -0.4642
+        },
+        {
+          "trade_id": "a7fd4eb9",
+          "gap_seconds": 14.5,
+          "net_pnl": -0.2159
+        },
+        {
+          "trade_id": "2d4d0789",
+          "gap_seconds": 113.9,
+          "net_pnl": -0.8192
+        },
+        {
+          "trade_id": "e22eaa80",
+          "gap_seconds": 136.0,
+          "net_pnl": -0.5328
+        },
+        {
+          "trade_id": "4a432dca",
+          "gap_seconds": 95.6,
+          "net_pnl": -0.0976
+        },
+        {
+          "trade_id": "6280e68f",
+          "gap_seconds": 49.6,
+          "net_pnl": -0.5136
+        },
+        {
+          "trade_id": "509c2743",
+          "gap_seconds": 49.3,
+          "net_pnl": -0.4857
+        },
+        {
+          "trade_id": "70dcc553",
+          "gap_seconds": 128.9,
+          "net_pnl": -0.1939
+        },
+        {
+          "trade_id": "4c9db80f",
+          "gap_seconds": 112.7,
+          "net_pnl": -0.4921
+        },
+        {
+          "trade_id": "a9dc7ddd",
+          "gap_seconds": 248.7,
+          "net_pnl": -0.2095
+        },
+        {
+          "trade_id": "5c7e4743",
+          "gap_seconds": 16.9,
+          "net_pnl": -0.5222
+        },
+        {
+          "trade_id": "b4fbf491",
+          "gap_seconds": 72.3,
+          "net_pnl": -0.6324
+        },
+        {
+          "trade_id": "1df266d9",
+          "gap_seconds": 39.8,
+          "net_pnl": -0.4592
+        },
+        {
+          "trade_id": "f5b9af85",
+          "gap_seconds": 20.8,
+          "net_pnl": 6.8134
+        },
+        {
+          "trade_id": "99b58272",
+          "gap_seconds": 79.3,
+          "net_pnl": -0.455
+        },
+        {
+          "trade_id": "aea6da49",
+          "gap_seconds": 18.2,
+          "net_pnl": -0.5684
+        },
+        {
+          "trade_id": "b919fda2",
+          "gap_seconds": 217.3,
+          "net_pnl": -0.4734
+        },
+        {
+          "trade_id": "1aa2861f",
+          "gap_seconds": 57.9,
+          "net_pnl": 0.1155
+        },
+        {
+          "trade_id": "0fcfafdc",
+          "gap_seconds": 154.7,
+          "net_pnl": -0.2293
+        },
+        {
+          "trade_id": "836199af",
+          "gap_seconds": 171.9,
+          "net_pnl": 0.5231
+        },
+        {
+          "trade_id": "bc94903b",
+          "gap_seconds": 253.3,
+          "net_pnl": -0.3174
+        },
+        {
+          "trade_id": "f096a31a",
+          "gap_seconds": 114.0,
+          "net_pnl": -0.8262
+        },
+        {
+          "trade_id": "5cbd2fbb",
+          "gap_seconds": 54.0,
+          "net_pnl": -0.3137
+        },
+        {
+          "trade_id": "4edc2068",
+          "gap_seconds": 295.0,
+          "net_pnl": -0.1915
+        },
+        {
+          "trade_id": "f3ab7e98",
+          "gap_seconds": 33.9,
+          "net_pnl": 5.2735
+        },
+        {
+          "trade_id": "54cd9502",
+          "gap_seconds": 145.1,
+          "net_pnl": -0.0286
+        },
+        {
+          "trade_id": "83b6f4e0",
+          "gap_seconds": 187.2,
+          "net_pnl": -2.9124
+        },
+        {
+          "trade_id": "763fafc9",
+          "gap_seconds": 48.3,
+          "net_pnl": 0.8865
+        },
+        {
+          "trade_id": "c206947c",
+          "gap_seconds": 52.5,
+          "net_pnl": 0.3289
+        },
+        {
+          "trade_id": "282900e2",
+          "gap_seconds": 58.7,
+          "net_pnl": -0.6679
+        },
+        {
+          "trade_id": "bb94e1f3",
+          "gap_seconds": 278.7,
+          "net_pnl": -0.7265
+        },
+        {
+          "trade_id": "df277ed7",
+          "gap_seconds": 267.4,
+          "net_pnl": -0.4477
+        },
+        {
+          "trade_id": "3136e6c7",
+          "gap_seconds": 44.4,
+          "net_pnl": 0.2509
+        },
+        {
+          "trade_id": "a79a8cac",
+          "gap_seconds": 26.5,
+          "net_pnl": 0.274
+        },
+        {
+          "trade_id": "2f5655d7",
+          "gap_seconds": 113.5,
+          "net_pnl": 1.3884
+        },
+        {
+          "trade_id": "881f797a",
+          "gap_seconds": 105.5,
+          "net_pnl": -0.4967
+        },
+        {
+          "trade_id": "f60fca3f",
+          "gap_seconds": 159.7,
+          "net_pnl": -0.1875
+        },
+        {
+          "trade_id": "9c50f498",
+          "gap_seconds": 115.6,
+          "net_pnl": -0.5526
+        },
+        {
+          "trade_id": "eab81dbb",
+          "gap_seconds": 56.4,
+          "net_pnl": -0.2505
+        },
+        {
+          "trade_id": "7c333ed9",
+          "gap_seconds": 133.5,
+          "net_pnl": -0.5967
+        },
+        {
+          "trade_id": "4efc86ca",
+          "gap_seconds": 269.3,
+          "net_pnl": -0.5087
+        },
+        {
+          "trade_id": "20d4a897",
+          "gap_seconds": 190.7,
+          "net_pnl": -0.1894
+        },
+        {
+          "trade_id": "6430bb76",
+          "gap_seconds": 287.0,
+          "net_pnl": -0.5077
+        },
+        {
+          "trade_id": "6688adce",
+          "gap_seconds": 101.0,
+          "net_pnl": -0.9738
+        },
+        {
+          "trade_id": "ece6dfa0",
+          "gap_seconds": 38.0,
+          "net_pnl": -0.2084
+        },
+        {
+          "trade_id": "b309aed0",
+          "gap_seconds": 66.4,
+          "net_pnl": -0.71
+        },
+        {
+          "trade_id": "99c6f522",
+          "gap_seconds": 53.1,
+          "net_pnl": -0.0644
+        },
+        {
+          "trade_id": "61112c19",
+          "gap_seconds": 12.1,
+          "net_pnl": -0.4988
+        },
+        {
+          "trade_id": "75baaf73",
+          "gap_seconds": 28.2,
+          "net_pnl": -0.5971
+        },
+        {
+          "trade_id": "c736667a",
+          "gap_seconds": 211.9,
+          "net_pnl": -1.4712
+        },
+        {
+          "trade_id": "b2b7fc74",
+          "gap_seconds": 124.9,
+          "net_pnl": -1.8454
+        },
+        {
+          "trade_id": "bc1eb364",
+          "gap_seconds": 68.5,
+          "net_pnl": -1.1146
+        },
+        {
+          "trade_id": "4f7d7a2a",
+          "gap_seconds": 239.5,
+          "net_pnl": -1.2593
+        },
+        {
+          "trade_id": "1c35ece2",
+          "gap_seconds": 69.1,
+          "net_pnl": 1.883
+        },
+        {
+          "trade_id": "0424a36b",
+          "gap_seconds": 134.7,
+          "net_pnl": 0.5081
+        },
+        {
+          "trade_id": "2f835d38",
+          "gap_seconds": 298.9,
+          "net_pnl": -0.5212
+        },
+        {
+          "trade_id": "7e24f593",
+          "gap_seconds": 101.4,
+          "net_pnl": -0.5694
+        },
+        {
+          "trade_id": "35965c80",
+          "gap_seconds": 205.6,
+          "net_pnl": -0.8589
+        },
+        {
+          "trade_id": "db39c377",
+          "gap_seconds": 204.0,
+          "net_pnl": -0.3935
+        },
+        {
+          "trade_id": "c3f6d81c",
+          "gap_seconds": 12.4,
+          "net_pnl": -0.5479
+        },
+        {
+          "trade_id": "8b1e7cc2",
+          "gap_seconds": 54.4,
+          "net_pnl": 0.1482
+        },
+        {
+          "trade_id": "1863fcc4",
+          "gap_seconds": 245.6,
+          "net_pnl": -0.4376
+        },
+        {
+          "trade_id": "7543a530",
+          "gap_seconds": 23.9,
+          "net_pnl": -0.4494
+        },
+        {
+          "trade_id": "6af699c7",
+          "gap_seconds": 57.4,
+          "net_pnl": -0.5425
+        },
+        {
+          "trade_id": "54a1eb98",
+          "gap_seconds": 87.7,
+          "net_pnl": -0.2111
+        },
+        {
+          "trade_id": "4abee9a3",
+          "gap_seconds": 49.8,
+          "net_pnl": -0.4872
+        },
+        {
+          "trade_id": "cd76f620",
+          "gap_seconds": 195.7,
+          "net_pnl": -0.4906
+        },
+        {
+          "trade_id": "5028c696",
+          "gap_seconds": 92.7,
+          "net_pnl": -0.5248
+        },
+        {
+          "trade_id": "65dcbbab",
+          "gap_seconds": 66.0,
+          "net_pnl": -0.4401
+        },
+        {
+          "trade_id": "caa93b89",
+          "gap_seconds": 155.3,
+          "net_pnl": -0.5228
+        },
+        {
+          "trade_id": "972644e2",
+          "gap_seconds": 30.1,
+          "net_pnl": 0.0216
+        },
+        {
+          "trade_id": "833437b1",
+          "gap_seconds": 199.6,
+          "net_pnl": -0.9356
+        },
+        {
+          "trade_id": "01f98f92",
+          "gap_seconds": 96.9,
+          "net_pnl": -0.3315
+        },
+        {
+          "trade_id": "85732e6a",
+          "gap_seconds": 90.5,
+          "net_pnl": -0.3549
+        },
+        {
+          "trade_id": "9dde5d5f",
+          "gap_seconds": 22.9,
+          "net_pnl": -1.2057
+        },
+        {
+          "trade_id": "01170cf6",
+          "gap_seconds": 20.8,
+          "net_pnl": -0.1628
+        },
+        {
+          "trade_id": "8e38bd6d",
+          "gap_seconds": 88.2,
+          "net_pnl": -0.4774
+        },
+        {
+          "trade_id": "723731c4",
+          "gap_seconds": 2.0,
+          "net_pnl": -0.426
+        },
+        {
+          "trade_id": "b90ed604",
+          "gap_seconds": 7.3,
+          "net_pnl": 0.1366
+        },
+        {
+          "trade_id": "20d91d20",
+          "gap_seconds": 42.1,
+          "net_pnl": -0.3829
+        },
+        {
+          "trade_id": "b14b3f96",
+          "gap_seconds": 27.0,
+          "net_pnl": -0.0146
+        },
+        {
+          "trade_id": "3b5c30ed",
+          "gap_seconds": 269.2,
+          "net_pnl": -0.1699
+        },
+        {
+          "trade_id": "c437c70e",
+          "gap_seconds": 5.3,
+          "net_pnl": 2.1311
+        },
+        {
+          "trade_id": "20a510d3",
+          "gap_seconds": 165.3,
+          "net_pnl": 1.0442
+        },
+        {
+          "trade_id": "d18df92f",
+          "gap_seconds": 81.4,
+          "net_pnl": -0.3727
+        },
+        {
+          "trade_id": "432069f0",
+          "gap_seconds": 66.8,
+          "net_pnl": -0.3181
+        },
+        {
+          "trade_id": "a56ec668",
+          "gap_seconds": 274.4,
+          "net_pnl": -0.2525
+        },
+        {
+          "trade_id": "606195a9",
+          "gap_seconds": 15.7,
+          "net_pnl": -0.5834
+        },
+        {
+          "trade_id": "ad8d3e8e",
+          "gap_seconds": 48.5,
+          "net_pnl": -0.3095
+        },
+        {
+          "trade_id": "4602c1ed",
+          "gap_seconds": 114.3,
+          "net_pnl": 0.5475
+        },
+        {
+          "trade_id": "5fdd93a7",
+          "gap_seconds": 252.9,
+          "net_pnl": -0.1057
+        },
+        {
+          "trade_id": "5c965f43",
+          "gap_seconds": 247.2,
+          "net_pnl": -0.3921
+        },
+        {
+          "trade_id": "06c2e6c1",
+          "gap_seconds": 145.6,
+          "net_pnl": 0.1486
+        },
+        {
+          "trade_id": "1b9e8766",
+          "gap_seconds": 67.6,
+          "net_pnl": -0.108
+        },
+        {
+          "trade_id": "42c4d5aa",
+          "gap_seconds": 68.7,
+          "net_pnl": -0.4614
+        },
+        {
+          "trade_id": "e1262146",
+          "gap_seconds": 158.5,
+          "net_pnl": -0.2491
+        },
+        {
+          "trade_id": "255aa72a",
+          "gap_seconds": 237.3,
+          "net_pnl": -0.006
+        },
+        {
+          "trade_id": "cb794f05",
+          "gap_seconds": 90.3,
+          "net_pnl": -0.3732
+        },
+        {
+          "trade_id": "9d4e6100",
+          "gap_seconds": 52.1,
+          "net_pnl": -0.1093
+        },
+        {
+          "trade_id": "55ae673f",
+          "gap_seconds": 53.1,
+          "net_pnl": 0.5245
+        },
+        {
+          "trade_id": "b14d5615",
+          "gap_seconds": 169.4,
+          "net_pnl": -0.2346
+        },
+        {
+          "trade_id": "8d0e3108",
+          "gap_seconds": 88.3,
+          "net_pnl": -0.5805
+        },
+        {
+          "trade_id": "aac0fc19",
+          "gap_seconds": 245.5,
+          "net_pnl": -0.281
+        },
+        {
+          "trade_id": "75b7ee8c",
+          "gap_seconds": 276.0,
+          "net_pnl": 0.0505
+        },
+        {
+          "trade_id": "65a200e1",
+          "gap_seconds": 11.3,
+          "net_pnl": -0.5324
+        },
+        {
+          "trade_id": "02e733f4",
+          "gap_seconds": 52.8,
+          "net_pnl": -0.4599
+        },
+        {
+          "trade_id": "89bdb7bf",
+          "gap_seconds": 153.6,
+          "net_pnl": -0.6515
+        },
+        {
+          "trade_id": "12b261d2",
+          "gap_seconds": 66.6,
+          "net_pnl": 0.1752
+        },
+        {
+          "trade_id": "e008812d",
+          "gap_seconds": 54.2,
+          "net_pnl": -0.0086
+        },
+        {
+          "trade_id": "4de477fd",
+          "gap_seconds": 1.0,
+          "net_pnl": -0.2827
+        },
+        {
+          "trade_id": "1ce4e3b5",
+          "gap_seconds": 98.1,
+          "net_pnl": -0.2572
+        },
+        {
+          "trade_id": "c0ab36b1",
+          "gap_seconds": 119.3,
+          "net_pnl": -0.5317
+        },
+        {
+          "trade_id": "79196145",
+          "gap_seconds": 299.5,
+          "net_pnl": -0.1048
+        },
+        {
+          "trade_id": "dbf70cad",
+          "gap_seconds": 70.9,
+          "net_pnl": -0.6352
+        },
+        {
+          "trade_id": "4bbe6b31",
+          "gap_seconds": 42.8,
+          "net_pnl": -0.3278
+        },
+        {
+          "trade_id": "ae2a2465",
+          "gap_seconds": 178.4,
+          "net_pnl": -0.0081
+        },
+        {
+          "trade_id": "e2320c3e",
+          "gap_seconds": 227.7,
+          "net_pnl": -0.2591
+        },
+        {
+          "trade_id": "a476779a",
+          "gap_seconds": 115.1,
+          "net_pnl": -0.1972
+        },
+        {
+          "trade_id": "d9cec798",
+          "gap_seconds": 70.5,
+          "net_pnl": -0.0731
+        },
+        {
+          "trade_id": "a648361d",
+          "gap_seconds": 194.3,
+          "net_pnl": -0.1773
+        },
+        {
+          "trade_id": "f22d4a29",
+          "gap_seconds": 57.0,
+          "net_pnl": -0.1773
+        },
+        {
+          "trade_id": "4600a8dc",
+          "gap_seconds": 57.0,
+          "net_pnl": -0.179
+        },
+        {
+          "trade_id": "99906f24",
+          "gap_seconds": 36.8,
+          "net_pnl": -0.1974
+        },
+        {
+          "trade_id": "ebd701f6",
+          "gap_seconds": 297.1,
+          "net_pnl": -0.0735
+        },
+        {
+          "trade_id": "3ee61800",
+          "gap_seconds": 109.6,
+          "net_pnl": -0.2563
+        },
+        {
+          "trade_id": "9b5e9e94",
+          "gap_seconds": 57.7,
+          "net_pnl": 0.5833
+        },
+        {
+          "trade_id": "72ab8fd0",
+          "gap_seconds": 129.9,
+          "net_pnl": -0.1825
+        },
+        {
+          "trade_id": "b73abd87",
+          "gap_seconds": 257.2,
+          "net_pnl": -0.2158
+        },
+        {
+          "trade_id": "021282f6",
+          "gap_seconds": 77.4,
+          "net_pnl": -0.1839
+        },
+        {
+          "trade_id": "c692e6ee",
+          "gap_seconds": 69.4,
+          "net_pnl": -0.1743
+        },
+        {
+          "trade_id": "f946d9f5",
+          "gap_seconds": 152.0,
+          "net_pnl": -0.1451
+        },
+        {
+          "trade_id": "2f281046",
+          "gap_seconds": 86.1,
+          "net_pnl": -0.1918
+        },
+        {
+          "trade_id": "2bf1659b",
+          "gap_seconds": 178.0,
+          "net_pnl": -0.2699
+        },
+        {
+          "trade_id": "1de13f13",
+          "gap_seconds": 27.1,
+          "net_pnl": -0.1721
+        },
+        {
+          "trade_id": "c1319a17",
+          "gap_seconds": 228.1,
+          "net_pnl": -0.2928
+        }
+      ],
+      "impulsive_spike_count": 63,
+      "impulsive_spikes": [
+        {
+          "window_start_ts": 1779063899393,
+          "trade_count": 9,
+          "avg_net": -0.3317
+        },
+        {
+          "window_start_ts": 1779067499393,
+          "trade_count": 10,
+          "avg_net": -0.3153
+        },
+        {
+          "window_start_ts": 1779078299393,
+          "trade_count": 7,
+          "avg_net": -0.6075
+        },
+        {
+          "window_start_ts": 1779089099393,
+          "trade_count": 8,
+          "avg_net": -0.0736
+        },
+        {
+          "window_start_ts": 1779092699393,
+          "trade_count": 12,
+          "avg_net": -0.428
+        },
+        {
+          "window_start_ts": 1779107099393,
+          "trade_count": 7,
+          "avg_net": -0.5271
+        },
+        {
+          "window_start_ts": 1779110699393,
+          "trade_count": 9,
+          "avg_net": -0.3779
+        },
+        {
+          "window_start_ts": 1779114299393,
+          "trade_count": 6,
+          "avg_net": -0.4186
+        },
+        {
+          "window_start_ts": 1779121499393,
+          "trade_count": 13,
+          "avg_net": 0.4481
+        },
+        {
+          "window_start_ts": 1779125099393,
+          "trade_count": 7,
+          "avg_net": -0.6293
+        },
+        {
+          "window_start_ts": 1779132299393,
+          "trade_count": 6,
+          "avg_net": -0.4892
+        },
+        {
+          "window_start_ts": 1779135899393,
+          "trade_count": 9,
+          "avg_net": -0.4062
+        },
+        {
+          "window_start_ts": 1779143099393,
+          "trade_count": 5,
+          "avg_net": 0.0487
+        },
+        {
+          "window_start_ts": 1779146699393,
+          "trade_count": 11,
+          "avg_net": -0.2308
+        },
+        {
+          "window_start_ts": 1779153899393,
+          "trade_count": 7,
+          "avg_net": -0.4094
+        },
+        {
+          "window_start_ts": 1779164699393,
+          "trade_count": 5,
+          "avg_net": -0.3441
+        },
+        {
+          "window_start_ts": 1779168299393,
+          "trade_count": 6,
+          "avg_net": -0.3139
+        },
+        {
+          "window_start_ts": 1779171899393,
+          "trade_count": 6,
+          "avg_net": -0.4188
+        },
+        {
+          "window_start_ts": 1779197099393,
+          "trade_count": 16,
+          "avg_net": -0.2622
+        },
+        {
+          "window_start_ts": 1779207899393,
+          "trade_count": 9,
+          "avg_net": -0.2429
+        },
+        {
+          "window_start_ts": 1779211499393,
+          "trade_count": 7,
+          "avg_net": -0.3325
+        },
+        {
+          "window_start_ts": 1779229499393,
+          "trade_count": 9,
+          "avg_net": 0.0576
+        },
+        {
+          "window_start_ts": 1779233099393,
+          "trade_count": 11,
+          "avg_net": -0.2869
+        },
+        {
+          "window_start_ts": 1779236699393,
+          "trade_count": 10,
+          "avg_net": -0.1237
+        },
+        {
+          "window_start_ts": 1779240299393,
+          "trade_count": 5,
+          "avg_net": -0.2214
+        },
+        {
+          "window_start_ts": 1779290699393,
+          "trade_count": 5,
+          "avg_net": -0.7826
+        },
+        {
+          "window_start_ts": 1779294299393,
+          "trade_count": 8,
+          "avg_net": 0.3337
+        },
+        {
+          "window_start_ts": 1779297899393,
+          "trade_count": 12,
+          "avg_net": -0.173
+        },
+        {
+          "window_start_ts": 1779301499393,
+          "trade_count": 7,
+          "avg_net": -0.3698
+        },
+        {
+          "window_start_ts": 1779315899393,
+          "trade_count": 7,
+          "avg_net": -0.3954
+        },
+        {
+          "window_start_ts": 1779319499393,
+          "trade_count": 11,
+          "avg_net": 0.4359
+        },
+        {
+          "window_start_ts": 1779323099393,
+          "trade_count": 12,
+          "avg_net": -0.6736
+        },
+        {
+          "window_start_ts": 1779326699393,
+          "trade_count": 8,
+          "avg_net": -0.4714
+        },
+        {
+          "window_start_ts": 1779369899393,
+          "trade_count": 11,
+          "avg_net": -0.4299
+        },
+        {
+          "window_start_ts": 1779373499393,
+          "trade_count": 6,
+          "avg_net": -0.0102
+        },
+        {
+          "window_start_ts": 1779384299393,
+          "trade_count": 13,
+          "avg_net": -0.3063
+        },
+        {
+          "window_start_ts": 1779387899393,
+          "trade_count": 9,
+          "avg_net": 0.2425
+        },
+        {
+          "window_start_ts": 1779402299393,
+          "trade_count": 12,
+          "avg_net": -0.3662
+        },
+        {
+          "window_start_ts": 1779405899393,
+          "trade_count": 11,
+          "avg_net": -0.4976
+        },
+        {
+          "window_start_ts": 1779409499393,
+          "trade_count": 9,
+          "avg_net": -0.621
+        },
+        {
+          "window_start_ts": 1779456299393,
+          "trade_count": 10,
+          "avg_net": -0.5023
+        },
+        {
+          "window_start_ts": 1779467099393,
+          "trade_count": 6,
+          "avg_net": -0.7571
+        },
+        {
+          "window_start_ts": 1779470699393,
+          "trade_count": 20,
+          "avg_net": -0.0535
+        },
+        {
+          "window_start_ts": 1779474299393,
+          "trade_count": 6,
+          "avg_net": 0.0825
+        },
+        {
+          "window_start_ts": 1779492299393,
+          "trade_count": 10,
+          "avg_net": -0.0794
+        },
+        {
+          "window_start_ts": 1779495899393,
+          "trade_count": 16,
+          "avg_net": -0.1236
+        },
+        {
+          "window_start_ts": 1779553499393,
+          "trade_count": 7,
+          "avg_net": -0.0352
+        },
+        {
+          "window_start_ts": 1779557099393,
+          "trade_count": 16,
+          "avg_net": -0.378
+        },
+        {
+          "window_start_ts": 1779560699393,
+          "trade_count": 9,
+          "avg_net": -0.2962
+        },
+        {
+          "window_start_ts": 1779575099393,
+          "trade_count": 7,
+          "avg_net": -0.4345
+        },
+        {
+          "window_start_ts": 1779578699393,
+          "trade_count": 17,
+          "avg_net": -0.3528
+        },
+        {
+          "window_start_ts": 1779582299393,
+          "trade_count": 9,
+          "avg_net": -0.3004
+        },
+        {
+          "window_start_ts": 1779625499393,
+          "trade_count": 13,
+          "avg_net": -0.3503
+        },
+        {
+          "window_start_ts": 1779629099393,
+          "trade_count": 17,
+          "avg_net": 0.2916
+        },
+        {
+          "window_start_ts": 1779632699393,
+          "trade_count": 20,
+          "avg_net": -0.0631
+        },
+        {
+          "window_start_ts": 1779636299393,
+          "trade_count": 19,
+          "avg_net": -0.2551
+        },
+        {
+          "window_start_ts": 1779639899393,
+          "trade_count": 18,
+          "avg_net": -0.1374
+        },
+        {
+          "window_start_ts": 1779643499393,
+          "trade_count": 19,
+          "avg_net": -0.1771
+        },
+        {
+          "window_start_ts": 1779647099393,
+          "trade_count": 17,
+          "avg_net": -0.1358
+        },
+        {
+          "window_start_ts": 1779650699393,
+          "trade_count": 20,
+          "avg_net": -0.1342
+        },
+        {
+          "window_start_ts": 1779654299393,
+          "trade_count": 12,
+          "avg_net": -0.0752
+        },
+        {
+          "window_start_ts": 1779657899393,
+          "trade_count": 19,
+          "avg_net": -0.1258
+        },
+        {
+          "window_start_ts": 1779661499393,
+          "trade_count": 19,
+          "avg_net": -0.2115
+        }
+      ],
+      "discipline_periods_count": 2,
+      "disciplined_trade_count": 11,
+      "undisciplined_trade_count": 622,
+      "discipline_effectiveness": "EMOTIONAL_OVERRIDES_DOMINATED",
+      "conditions_discipline_helped": [
+        "Consecutive positive run of 5 trades — disciplined participation preserved edge",
+        "Consecutive positive run of 6 trades — disciplined participation preserved edge"
+      ],
+      "conditions_overrides_degraded": [
+        "Revenge trading detected: 175 episodes with avg gap 115s — rapid re-entry after losses accelerated degradation",
+        "Impulsive spikes detected: 55 windows with negative expectancy — rushed participation degraded edge"
+      ],
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "human_confirmed": true,
+      "lineage_preserved": true,
+      "generated_ts": 1779666058159
+    },
+    "governance_safety": {
+      "report": "HUMAN_GOVERNANCE_SAFETY_REPORT",
+      "governance_status": "CERTIFIED",
+      "governance_health_score": 100,
+      "engines_checked": 5,
+      "engines_validated": 5,
+      "engines_unavailable": 0,
+      "validation_results": [
+        {
+          "engine": "restraint_advisory",
+          "validated": true,
+          "violations": [],
+          "available": true
+        },
+        {
+          "engine": "capital_discipline_gate",
+          "validated": true,
+          "violations": [],
+          "available": true
+        },
+        {
+          "engine": "equilibrium_resumption",
+          "validated": true,
+          "violations": [],
+          "available": true
+        },
+        {
+          "engine": "override_transparency",
+          "validated": true,
+          "violations": [],
+          "available": true
+        },
+        {
+          "engine": "discipline_memory",
+          "validated": true,
+          "violations": [],
+          "available": true
+        }
+      ],
+      "violation_count": 0,
+      "safety_assertions": [
+        "No autonomous execution paths detected",
+        "All outputs carry diagnostic_only=True",
+        "Human confirmation required for all advisories",
+        "Override lineage preserved and visible",
+        "No sovereign capital control authority present"
+      ],
+      "constitutional_invariants": {
+        "diagnostic_only": true,
+        "auto_authorized": false,
+        "human_confirmed": true,
+        "lineage_preserved": true,
+        "override_visible": true
+      },
+      "diagnostic_only": true,
+      "auto_authorized": false,
+      "human_confirmed": true,
+      "override_visible": true,
+      "lineage_preserved": true,
+      "generated_ts": 1779666058199
+    }
+  },
+  "domain_errors": [],
+  "constitutional_note": "PHOENIX operates under human constitutional authority. All advisories require human confirmation.",
+  "lineage_preserved": true,
+  "replay_safe": true,
+  "diagnostic_only": true,
+  "auto_authorized": false,
+  "human_confirmed": true,
+  "override_visible": true,
+  "generated_ts": 1779666058022
+}

@@ -1,0 +1,367 @@
+{
+  "active_summary": {
+    "module": "ANOMALY_DETECTOR",
+    "version": "1.0",
+    "worst_severity": "CRITICAL",
+    "anomaly_counts": {
+      "CRITICAL": 1,
+      "HIGH": 7,
+      "MEDIUM": 2,
+      "LOW": 0
+    },
+    "recent_critical": [
+      "28 consecutive losses — risk controls may need review"
+    ],
+    "recent_high": [
+      "TRENDING win rate dangerously low: 1%",
+      "MEAN_REVERTING win rate dangerously low: 0%",
+      "VOLATILITY_EXPANSION win rate dangerously low: 0%"
+    ],
+    "total_anomalies": 386,
+    "total_scans": 65
+  },
+  "recent_history": [
+    {
+      "anomaly_id": "51889ad1",
+      "severity": "MEDIUM",
+      "category": "TOXIC_SPIKE",
+      "description": "2 toxic RL context detected",
+      "metric": "rl_toxic",
+      "current_value": 2,
+      "threshold": 1,
+      "delta": 0,
+      "ts": 1779666056018
+    },
+    {
+      "anomaly_id": "f668bb41",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "metric": "le_vol_exp_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779666056018
+    },
+    {
+      "anomaly_id": "a70cebd6",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "MEAN_REVERTING win rate dangerously low: 0%",
+      "metric": "le_mean_rev_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779666056018
+    },
+    {
+      "anomaly_id": "e2cdc83e",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "TRENDING win rate dangerously low: 1%",
+      "metric": "le_trending_wr",
+      "current_value": 0.011,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779666056018
+    },
+    {
+      "anomaly_id": "1ec3da3d",
+      "severity": "HIGH",
+      "category": "IQ_REGRESSION",
+      "description": "Intelligence score low: 26/100",
+      "metric": "iq_score",
+      "current_value": 25.5,
+      "threshold": 35.0,
+      "delta": 0.0,
+      "ts": 1779666056018
+    },
+    {
+      "anomaly_id": "a25eb9c4",
+      "severity": "CRITICAL",
+      "category": "LOSS_STREAK",
+      "description": "28 consecutive losses — risk controls may need review",
+      "metric": "consec_losses",
+      "current_value": 28,
+      "threshold": 3,
+      "delta": 1,
+      "ts": 1779666056018
+    },
+    {
+      "anomaly_id": "acd9f1c2",
+      "severity": "MEDIUM",
+      "category": "TOXIC_SPIKE",
+      "description": "2 toxic RL context detected",
+      "metric": "rl_toxic",
+      "current_value": 2,
+      "threshold": 1,
+      "delta": 0,
+      "ts": 1779665933511
+    },
+    {
+      "anomaly_id": "3af13525",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "metric": "le_vol_exp_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665933511
+    },
+    {
+      "anomaly_id": "1a8c7622",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "MEAN_REVERTING win rate dangerously low: 0%",
+      "metric": "le_mean_rev_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665933511
+    },
+    {
+      "anomaly_id": "5a535c49",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "TRENDING win rate dangerously low: 1%",
+      "metric": "le_trending_wr",
+      "current_value": 0.012,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665933511
+    },
+    {
+      "anomaly_id": "707dd4a1",
+      "severity": "HIGH",
+      "category": "IQ_REGRESSION",
+      "description": "Intelligence score low: 26/100",
+      "metric": "iq_score",
+      "current_value": 25.5,
+      "threshold": 35.0,
+      "delta": 0.0,
+      "ts": 1779665933511
+    },
+    {
+      "anomaly_id": "97199726",
+      "severity": "CRITICAL",
+      "category": "LOSS_STREAK",
+      "description": "27 consecutive losses — risk controls may need review",
+      "metric": "consec_losses",
+      "current_value": 27,
+      "threshold": 3,
+      "delta": 0,
+      "ts": 1779665933511
+    },
+    {
+      "anomaly_id": "ba8cb81b",
+      "severity": "MEDIUM",
+      "category": "TOXIC_SPIKE",
+      "description": "2 toxic RL context detected",
+      "metric": "rl_toxic",
+      "current_value": 2,
+      "threshold": 1,
+      "delta": 0,
+      "ts": 1779665813165
+    },
+    {
+      "anomaly_id": "3c94e424",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "metric": "le_vol_exp_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665813165
+    },
+    {
+      "anomaly_id": "8ea49cb8",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "MEAN_REVERTING win rate dangerously low: 0%",
+      "metric": "le_mean_rev_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665813165
+    },
+    {
+      "anomaly_id": "5abb4c8b",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "TRENDING win rate dangerously low: 1%",
+      "metric": "le_trending_wr",
+      "current_value": 0.012,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665813165
+    },
+    {
+      "anomaly_id": "f6b00a26",
+      "severity": "HIGH",
+      "category": "IQ_REGRESSION",
+      "description": "Intelligence score low: 26/100",
+      "metric": "iq_score",
+      "current_value": 25.5,
+      "threshold": 35.0,
+      "delta": 0.0,
+      "ts": 1779665813165
+    },
+    {
+      "anomaly_id": "fa08b112",
+      "severity": "CRITICAL",
+      "category": "LOSS_STREAK",
+      "description": "27 consecutive losses — risk controls may need review",
+      "metric": "consec_losses",
+      "current_value": 27,
+      "threshold": 3,
+      "delta": 0,
+      "ts": 1779665813165
+    },
+    {
+      "anomaly_id": "f67d9ab2",
+      "severity": "MEDIUM",
+      "category": "TOXIC_SPIKE",
+      "description": "2 toxic RL context detected",
+      "metric": "rl_toxic",
+      "current_value": 2,
+      "threshold": 1,
+      "delta": 0,
+      "ts": 1779665693036
+    },
+    {
+      "anomaly_id": "18b6eb58",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "metric": "le_vol_exp_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665693036
+    },
+    {
+      "anomaly_id": "46cc4e1d",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "MEAN_REVERTING win rate dangerously low: 0%",
+      "metric": "le_mean_rev_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665693036
+    },
+    {
+      "anomaly_id": "a7b5c04a",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "TRENDING win rate dangerously low: 1%",
+      "metric": "le_trending_wr",
+      "current_value": 0.012,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665693036
+    },
+    {
+      "anomaly_id": "ab24c1d1",
+      "severity": "HIGH",
+      "category": "IQ_REGRESSION",
+      "description": "Intelligence score low: 26/100",
+      "metric": "iq_score",
+      "current_value": 25.5,
+      "threshold": 35.0,
+      "delta": 0.0,
+      "ts": 1779665693036
+    },
+    {
+      "anomaly_id": "4e51ce4b",
+      "severity": "CRITICAL",
+      "category": "LOSS_STREAK",
+      "description": "27 consecutive losses — risk controls may need review",
+      "metric": "consec_losses",
+      "current_value": 27,
+      "threshold": 3,
+      "delta": 0,
+      "ts": 1779665693036
+    },
+    {
+      "anomaly_id": "1d29d3c5",
+      "severity": "MEDIUM",
+      "category": "TOXIC_SPIKE",
+      "description": "2 toxic RL context detected",
+      "metric": "rl_toxic",
+      "current_value": 2,
+      "threshold": 1,
+      "delta": 0,
+      "ts": 1779665572608
+    },
+    {
+      "anomaly_id": "8dbeeaa2",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "metric": "le_vol_exp_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665572608
+    },
+    {
+      "anomaly_id": "1abf3fb5",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "MEAN_REVERTING win rate dangerously low: 0%",
+      "metric": "le_mean_rev_wr",
+      "current_value": 0.0,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665572608
+    },
+    {
+      "anomaly_id": "be60f652",
+      "severity": "HIGH",
+      "category": "WIN_RATE_EROSION",
+      "description": "TRENDING win rate dangerously low: 1%",
+      "metric": "le_trending_wr",
+      "current_value": 0.012,
+      "threshold": 0.35,
+      "delta": null,
+      "ts": 1779665572608
+    },
+    {
+      "anomaly_id": "ee7eeb81",
+      "severity": "HIGH",
+      "category": "IQ_REGRESSION",
+      "description": "Intelligence score low: 26/100",
+      "metric": "iq_score",
+      "current_value": 25.5,
+      "threshold": 35.0,
+      "delta": 0.0,
+      "ts": 1779665572608
+    },
+    {
+      "anomaly_id": "8f6b46e8",
+      "severity": "CRITICAL",
+      "category": "LOSS_STREAK",
+      "description": "27 consecutive losses — risk controls may need review",
+      "metric": "consec_losses",
+      "current_value": 27,
+      "threshold": 3,
+      "delta": 0,
+      "ts": 1779665572608
+    }
+  ],
+  "stats": {
+    "module": "ANOMALY_DETECTOR",
+    "version": "1.0",
+    "total_scans": 65,
+    "total_anomalies": 386,
+    "critical_count": 43,
+    "high_count": 271,
+    "medium_count": 68,
+    "low_count": 4,
+    "peak_iq": 25.5,
+    "last_scan_ts": 1779666056018
+  }
+}
