@@ -18,11 +18,14 @@ NEGATIVE_STORE_PATH        = "reports/learning_memory/negative_memory.jsonl"
 DECAY_RATE                 = 0.90
 PERMANENT_BAN_AFTER        = 3      # rollbacks before permanent ban
 TEMP_REMOVAL_THRESHOLD     = 0.10  # remove temporary entry when score < this
-# During sparse early-phase learning a pattern may accumulate 3 rollbacks before
+# During sparse early-phase learning a pattern may accumulate rollbacks before
 # meaningful positive evidence can form.  Require a minimum sample count before
-# the ban becomes irreversible so the engine cannot permanently exclude a context
-# on fewer than 5 executed-outcome observations.
-MIN_SAMPLES_FOR_PERMANENT_BAN = 5
+# the ban becomes irreversible.
+# Floor raised from 5 → 10: empirical bans at 6-9 samples had WRs of 12-33%
+# (all below break-even), so the floor was not preventing bad bans — but future
+# patterns near break-even WR (~35%) deserve a larger evidence window before
+# irreversible exclusion.
+MIN_SAMPLES_FOR_PERMANENT_BAN = 10
 
 
 class NegativeMemory:
