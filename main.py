@@ -5556,6 +5556,277 @@ async def economic_truth_orchestration():
     )
 
 
+@app.get("/api/economic-truth/dashboard")
+async def economic_truth_dashboard():
+    """
+    Economic Truth Command Center — all 9 dashboard sections in one fast call.
+    Computes directly from trade records; no heavy orchestration modules invoked.
+    Primary data source for the Economic Truth landing tab.
+    """
+    import time as _t
+
+    trades = _build_eco_trades()
+    n = len(trades)
+
+    # ── Core vectors ──────────────────────────────────────────────────────────
+    nets    = [t.get("net_pnl",   0.0) for t in trades]
+    grosses = [t.get("gross_pnl", 0.0) for t in trades]
+    fees    = [t.get("fee_entry", 0.0) + t.get("fee_exit", 0.0) for t in trades]
+
+    wins    = [p for p in nets if p > 0]
+    losses  = [p for p in nets if p < 0]
+    be      = [p for p in nets if p == 0.0]
+
+    total_net   = sum(nets)
+    total_gross = sum(grosses)
+    total_fees  = sum(fees)
+
+    wr  = len(wins) / n if n else 0.0
+    pf  = sum(wins) / abs(sum(losses)) if losses else (99.99 if wins else 0.0)
+    avg_win  = sum(wins)   / len(wins)   if wins   else 0.0
+    avg_loss = sum(losses) / len(losses) if losses else 0.0
+
+    # Running equity curve + max drawdown (from initial capital)
+    _initial_cap = pnl_calc._initial_capital
+    running      = _initial_cap
+    peak         = _initial_cap
+    mdd          = 0.0
+    eq_curve: list = []
+    for net in nets:
+        running += net
+        eq_curve.append(round(running, 4))
+        if running > peak:
+            peak = running
+        dd = (peak - running) / peak if peak > 0 else 0.0
+        if dd > mdd:
+            mdd = dd
+
+    # ── §1 Executive Snapshot ─────────────────────────────────────────────────
+    rr_ratio = abs(avg_win / avg_loss) if avg_loss != 0 else 0.0
+    kelly    = max(0.0, min(1.0, wr - (1 - wr) / rr_ratio if rr_ratio > 0 else 0.0))
+
+    if   pf >= 1.5 and wr >= 0.45: alpha_tier = "ALPHA"
+    elif pf >= 1.2 and wr >= 0.38: alpha_tier = "POSITIVE"
+    elif pf >= 1.0:                alpha_tier = "BREAK_EVEN"
+    else:                           alpha_tier = "NEGATIVE"
+
+    # ── §2 Trade Truth ────────────────────────────────────────────────────────
+    gross_pos  = [t for t in trades if t.get("gross_pnl", 0.0) > 0]
+    fee_destr  = [t for t in gross_pos  if t.get("net_pnl", 0.0) <= 0]
+
+    # ── §3 Fee Analysis ───────────────────────────────────────────────────────
+    avg_fee          = total_fees / n if n else 0.0
+    fee_pct_gross    = (total_fees / abs(total_gross) * 100) if total_gross else 0.0
+
+    if   fee_pct_gross > 50: fee_severity = "CRITICAL"
+    elif fee_pct_gross > 30: fee_severity = "HIGH"
+    elif fee_pct_gross > 15: fee_severity = "MODERATE"
+    else:                     fee_severity = "LOW"
+
+    if n >= 40:
+        r20 = sum(fees[-20:]) / 20
+        p20 = sum(fees[-40:-20]) / 20
+        fee_trend = "INCREASING" if r20 > p20 * 1.1 else ("DECREASING" if r20 < p20 * 0.9 else "STABLE")
+    else:
+        fee_trend = "INSUFFICIENT_DATA"
+
+    # ── §4 Win/Loss Geometry ──────────────────────────────────────────────────
+    def _hold_s(t: dict) -> float:
+        return max(0.0, (t.get("exit_ts", 0) - t.get("entry_ts", 0)) / 1000.0)
+
+    win_trades  = [t for t in trades if t.get("net_pnl", 0.0) > 0]
+    loss_trades = [t for t in trades if t.get("net_pnl", 0.0) < 0]
+
+    avg_win_hold  = (sum(_hold_s(t) for t in win_trades)  / len(win_trades))  if win_trades  else 0.0
+    avg_loss_hold = (sum(_hold_s(t) for t in loss_trades) / len(loss_trades)) if loss_trades else 0.0
+
+    largest_win  = max(nets) if nets else 0.0
+    largest_loss = min(nets) if nets else 0.0
+
+    # ── §5 Survivability ──────────────────────────────────────────────────────
+    deploy_ready = pf >= 1.5 and wr >= 0.45 and mdd < 0.10 and n >= 50
+
+    # ── §6 Session & Regime Truth ─────────────────────────────────────────────
+    sess_map: dict   = {}
+    regime_map: dict = {}
+    for t in trades:
+        sess = t.get("origin_session") or "UNKNOWN"
+        sess_map.setdefault(sess, []).append(t.get("net_pnl", 0.0))
+        reg = t.get("regime") or "UNKNOWN"
+        regime_map.setdefault(reg, []).append(t.get("net_pnl", 0.0))
+
+    def _stats(pnls: list) -> dict:
+        sw = [p for p in pnls if p > 0]
+        return {
+            "count":   len(pnls),
+            "net_pnl": round(sum(pnls), 4),
+            "win_rate": round(len(sw) / len(pnls), 4) if pnls else 0.0,
+            "avg_pnl": round(sum(pnls) / len(pnls), 4) if pnls else 0.0,
+        }
+
+    session_stats  = {k: _stats(v) for k, v in sess_map.items()}
+    regime_stats   = {k: _stats(v) for k, v in regime_map.items()}
+
+    cb_trades = [t for t in trades if t.get("crossed_session_boundary")]
+    cb_losses = [t for t in cb_trades if t.get("net_pnl", 0.0) <= 0]
+
+    # Best / worst session by net_pnl
+    best_sess  = max(session_stats, key=lambda k: session_stats[k]["net_pnl"]) if session_stats else "—"
+    worst_sess = min(session_stats, key=lambda k: session_stats[k]["net_pnl"]) if session_stats else "—"
+
+    # ── §7 RL Intelligence ────────────────────────────────────────────────────
+    try:
+        rl_ev       = rl_engine.get_evolution_state()
+        rl_ld       = rl_ev.get("learning_dynamics", {})
+        rl_ctx      = rl_ev.get("context_maturity", {})
+        toxic_c     = rl_ld.get("toxic_count",   0)
+        mature_c    = rl_ctx.get("mature",        0)
+        avg_q       = rl_ld.get("avg_q",          0.0)
+        exp_r       = rl_ld.get("explore_ratio",  1.0)
+        intell_s    = rl_ev.get("intelligence_score", 0.0)
+        total_ctx   = rl_ev.get("total_contexts", 0)
+        total_pulls = rl_engine._total_pulls
+    except Exception:
+        toxic_c = mature_c = total_ctx = total_pulls = 0
+        avg_q = exp_r = intell_s = 0.0
+
+    if   total_pulls == 0:                         adapt_state = "IDLE"
+    elif avg_q < -0.3:                             adapt_state = "NEGATIVE_DRIFT"
+    elif exp_r > 0.6:                              adapt_state = "EXPLORING"
+    elif mature_c >= 10 and avg_q > 0:             adapt_state = "CONVERGING"
+    else:                                           adapt_state = "LEARNING"
+
+    # ── §8 Danger Radar ───────────────────────────────────────────────────────
+    threats: list = []
+    if n < 30:
+        threats.append({"code": "LOW_SAMPLE",      "message": f"Only {n} trades — insufficient data for reliable conclusions"})
+    if pf < 1.0 and n >= 30:
+        threats.append({"code": "NEGATIVE_PF",     "message": f"Profit factor {pf:.3f} < 1.0 — system is losing money"})
+    if mdd > 0.15:
+        threats.append({"code": "HIGH_DRAWDOWN",   "message": f"Max drawdown {mdd*100:.1f}% exceeds 15% threshold"})
+    if fee_pct_gross > 40 and n >= 10:
+        threats.append({"code": "FEE_DESTRUCTION", "message": f"Fees consuming {fee_pct_gross:.1f}% of gross PnL"})
+    if wr < 0.30 and n >= 30:
+        threats.append({"code": "LOW_WIN_RATE",    "message": f"Win rate {wr*100:.1f}% — below 30% survival floor"})
+    if toxic_c > 5:
+        threats.append({"code": "TOXIC_CONTEXTS",  "message": f"{toxic_c} RL contexts classified toxic"})
+    if len(fee_destr) > len(gross_pos) * 0.3 and len(gross_pos) >= 10:
+        threats.append({"code": "FEE_KILLS_WINS",  "message": f"{len(fee_destr)}/{len(gross_pos)} gross-wins turned net-negative by fees"})
+
+    if   len(threats) == 0: danger_verdict = "HEALTHY"
+    elif len(threats) == 1: danger_verdict = "STRESSED"
+    elif len(threats) == 2: danger_verdict = "DEGRADED"
+    elif len(threats) <= 4: danger_verdict = "CRITICAL"
+    else:                   danger_verdict = "SURVIVAL_MODE"
+
+    # ── §9 Long-Horizon Truth ─────────────────────────────────────────────────
+    rolling_exp: list = []
+    W = 20
+    for i in range(W - 1, n):
+        window = nets[max(0, i - W + 1): i + 1]
+        rolling_exp.append(round(sum(window) / len(window), 4))
+
+    net_exp_per_trade   = round(total_net   / n, 4) if n else 0.0
+    gross_exp_per_trade = round(total_gross / n, 4) if n else 0.0
+    fee_drag_per_trade  = round(total_fees  / n, 4) if n else 0.0
+
+    return {
+        "ts":       int(_t.time() * 1000),
+        "version":  APP_VERSION,
+        "n_trades": n,
+
+        "executive_snapshot": {
+            "net_pnl":                  round(total_net,  4),
+            "gross_pnl":                round(total_gross, 4),
+            "total_fees":               round(total_fees,  4),
+            "profit_factor":            round(pf,   4),
+            "win_rate":                 round(wr,   4),
+            "avg_win_usdt":             round(avg_win,  4),
+            "avg_loss_usdt":            round(avg_loss, 4),
+            "max_drawdown_pct":         round(mdd * 100, 2),
+            "alpha_tier":               alpha_tier,
+            "net_expectancy_per_trade": net_exp_per_trade,
+            "kelly_fraction":           round(kelly, 4),
+        },
+
+        "trade_truth": {
+            "total":              n,
+            "wins":               len(wins),
+            "losses":             len(losses),
+            "breakeven":          len(be),
+            "gross_positive":     len(gross_pos),
+            "fee_destroyed":      len(fee_destr),
+            "fee_destruction_pct": round(len(fee_destr) / len(gross_pos) * 100, 1) if gross_pos else 0.0,
+        },
+
+        "fee_analysis": {
+            "total_fees":         round(total_fees,   4),
+            "fee_as_pct_gross":   round(fee_pct_gross, 2),
+            "avg_fee_per_trade":  round(avg_fee,       4),
+            "severity":           fee_severity,
+            "trend":              fee_trend,
+        },
+
+        "winloss_geometry": {
+            "avg_win_usdt":       round(avg_win,        4),
+            "avg_loss_usdt":      round(avg_loss,       4),
+            "rr_ratio":           round(rr_ratio,        4),
+            "avg_win_hold_sec":   round(avg_win_hold,    1),
+            "avg_loss_hold_sec":  round(avg_loss_hold,   1),
+            "hold_asymmetry":     "CORRECT" if avg_win_hold > avg_loss_hold else ("INVERTED" if loss_trades else "UNKNOWN"),
+            "largest_win":        round(largest_win,    4),
+            "largest_loss":       round(largest_loss,   4),
+        },
+
+        "survivability": {
+            "alpha_tier":         alpha_tier,
+            "kelly_fraction":     round(kelly, 4),
+            "max_drawdown_pct":   round(mdd * 100, 2),
+            "profit_factor":      round(pf,  4),
+            "win_rate":           round(wr,  4),
+            "rr_ratio":           round(rr_ratio, 4),
+            "deployment_ready":   deploy_ready,
+        },
+
+        "session_regime": {
+            "sessions":                  session_stats,
+            "regimes":                   regime_stats,
+            "cross_boundary_count":      len(cb_trades),
+            "cross_boundary_losses":     len(cb_losses),
+            "cross_boundary_loss_pnl":   round(sum(t.get("net_pnl", 0.0) for t in cb_losses), 4),
+            "best_session":              best_sess,
+            "worst_session":             worst_sess,
+        },
+
+        "rl_intelligence": {
+            "adaptation_state":   adapt_state,
+            "intelligence_score": round(intell_s, 2),
+            "avg_q":              round(avg_q,    4),
+            "explore_ratio":      round(exp_r,    4),
+            "toxic_contexts":     toxic_c,
+            "mature_contexts":    mature_c,
+            "total_contexts":     total_ctx,
+            "total_pulls":        total_pulls,
+        },
+
+        "danger_radar": {
+            "verdict":      danger_verdict,
+            "threat_count": len(threats),
+            "threats":      threats,
+        },
+
+        "long_horizon": {
+            "equity_curve":              eq_curve[-200:],
+            "rolling_expectancy_20":     rolling_exp[-100:],
+            "net_expectancy_per_trade":  net_exp_per_trade,
+            "gross_expectancy_per_trade": gross_exp_per_trade,
+            "fee_drag_per_trade":        fee_drag_per_trade,
+            "max_drawdown_pct":          round(mdd * 100, 2),
+            "initial_capital":           _initial_cap,
+        },
+    }
+
+
 # ── Phase-E: Survivability Evolution Program API ─────────────────────────────
 
 @app.get("/api/survivability/expectancy-stability")
@@ -10648,6 +10919,189 @@ async def lio_report_bundle():
         "download_center_governance":          _udca,
         "institutional_reporting_experience":  _irel,
     }
+
+
+# ── Economic Truth Export Modes 1 / 3 / 4 ────────────────────────────────────
+
+@app.get("/api/economic-truth/export/executive")
+async def export_executive_snapshot():
+    """
+    Export Mode 1 — Executive Snapshot.
+    Compact JSON: net PnL, fees, WR, PF, alpha tier, danger verdict.
+    Suitable for management reporting or quick health check.
+    """
+    import json as _json
+    import time as _t
+    from fastapi.responses import Response
+
+    dash = await economic_truth_dashboard()
+    snap = {
+        "export_mode":    "EXECUTIVE_SNAPSHOT",
+        "version":        APP_VERSION,
+        "captured_at":    time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "n_trades":       dash["n_trades"],
+        "net_pnl":        dash["executive_snapshot"]["net_pnl"],
+        "gross_pnl":      dash["executive_snapshot"]["gross_pnl"],
+        "total_fees":     dash["executive_snapshot"]["total_fees"],
+        "profit_factor":  dash["executive_snapshot"]["profit_factor"],
+        "win_rate_pct":   round(dash["executive_snapshot"]["win_rate"] * 100, 2),
+        "max_drawdown_pct": dash["executive_snapshot"]["max_drawdown_pct"],
+        "alpha_tier":     dash["executive_snapshot"]["alpha_tier"],
+        "danger_verdict": dash["danger_radar"]["verdict"],
+        "threat_count":   dash["danger_radar"]["threat_count"],
+        "threats":        dash["danger_radar"]["threats"],
+        "kelly_fraction": dash["executive_snapshot"]["kelly_fraction"],
+        "adaptation_state": dash["rl_intelligence"]["adaptation_state"],
+        "best_session":   dash["session_regime"]["best_session"],
+        "worst_session":  dash["session_regime"]["worst_session"],
+    }
+    ts_str   = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+    filename = f"PHOENIX_Executive_Snapshot_{ts_str}.json"
+    payload  = _json.dumps(_sanitize(snap), indent=2, ensure_ascii=False).encode("utf-8")
+    return Response(
+        content=payload,
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/api/economic-truth/export/replay-safe")
+async def export_replay_safe_snapshot():
+    """
+    Export Mode 3 — Replay-Safe Snapshot.
+    Full trade list + RL Q-table in deterministic format for offline replay.
+    Includes all fields needed to recreate the session's performance without
+    a live engine connection.
+    """
+    import json as _json
+    import time as _t
+    from fastapi.responses import Response
+
+    trades_raw = _build_eco_trades()
+    rl_qtable  = {}
+    try:
+        rl_qtable = {
+            k: {
+                "q_value":   round(s.q_value, 5),
+                "n_visits":  s.n_visits,
+                "n_wins":    s.n_wins,
+                "total_pnl": round(s.total_pnl, 4),
+                "win_rate":  round(s.win_rate,  4),
+                "toxic":     k in rl_engine._toxic_contexts,
+            }
+            for k, s in rl_engine._table.items()
+        }
+    except Exception:
+        pass
+
+    snap = {
+        "export_mode":    "REPLAY_SAFE_SNAPSHOT",
+        "version":        APP_VERSION,
+        "captured_at":    time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "captured_at_ms": int(time.time() * 1000),
+        "bypass_mode":    cfg.BYPASS_ALL_GATES,
+        "initial_capital": pnl_calc._initial_capital,
+        "n_trades":       len(trades_raw),
+        "trades":         [_sanitize(t) for t in trades_raw],
+        "rl_qtable":      rl_qtable,
+        "session_stats":  _sanitize(pnl_calc.session_stats),
+    }
+    ts_str   = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+    filename = f"PHOENIX_Replay_Safe_{ts_str}.json"
+    payload  = _json.dumps(_sanitize(snap), indent=2, ensure_ascii=False).encode("utf-8")
+    return Response(
+        content=payload,
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/api/economic-truth/export/economic-truth")
+async def export_economic_truth_bundle():
+    """
+    Export Mode 4 — Economic Truth Export.
+    ZIP bundle focused on economic accounting: dashboard summary, per-trade
+    ledger, fee ledger, session breakdown, and danger verdict.
+    """
+    import zipfile, io as _io, hashlib, json as _json
+    from fastapi.responses import StreamingResponse
+
+    ts_str     = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+    captured   = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
+
+    dash       = await economic_truth_dashboard()
+    trades_raw = _build_eco_trades()
+
+    # Per-trade economic ledger
+    ledger = []
+    for t in trades_raw:
+        ledger.append({
+            "trade_id":    t.get("trade_id", ""),
+            "symbol":      t.get("symbol",   ""),
+            "side":        t.get("side",     ""),
+            "strategy_id": t.get("strategy_id", ""),
+            "regime":      t.get("regime",   ""),
+            "session":     t.get("origin_session", ""),
+            "gross_pnl":   t.get("gross_pnl", 0.0),
+            "fee_entry":   t.get("fee_entry", 0.0),
+            "fee_exit":    t.get("fee_exit",  0.0),
+            "net_pnl":     t.get("net_pnl",   0.0),
+            "hold_sec":    max(0.0, (t.get("exit_ts", 0) - t.get("entry_ts", 0)) / 1000.0),
+            "entry_ts":    t.get("entry_ts",  0),
+            "exit_ts":     t.get("exit_ts",   0),
+        })
+
+    def _jb(obj: object) -> bytes:
+        try:
+            return _json.dumps(_sanitize(obj), indent=2, ensure_ascii=False).encode("utf-8")
+        except Exception as e:
+            return _json.dumps({"error": str(e)}).encode("utf-8")
+
+    file_map = {
+        "economic_truth_dashboard.json":    _jb(dash),
+        "trade_economic_ledger.json":       _jb(ledger),
+        "session_breakdown.json":           _jb(dash["session_regime"]),
+        "fee_analysis.json":                _jb(dash["fee_analysis"]),
+        "danger_radar.json":                _jb(dash["danger_radar"]),
+        "winloss_geometry.json":            _jb(dash["winloss_geometry"]),
+        "survivability.json":               _jb(dash["survivability"]),
+        "rl_intelligence.json":             _jb(dash["rl_intelligence"]),
+    }
+
+    manifest = {
+        "export_mode":   "ECONOMIC_TRUTH_BUNDLE",
+        "version":        APP_VERSION,
+        "captured_at":    captured,
+        "n_trades":       dash["n_trades"],
+        "net_pnl":        dash["executive_snapshot"]["net_pnl"],
+        "alpha_tier":     dash["executive_snapshot"]["alpha_tier"],
+        "danger_verdict": dash["danger_radar"]["verdict"],
+        "files": {
+            path: {
+                "size_bytes": len(content),
+                "sha256":     hashlib.sha256(content).hexdigest(),
+            }
+            for path, content in file_map.items()
+        },
+    }
+    file_map["00_MANIFEST.json"] = _jb(manifest)
+
+    buf = _io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as _zf:
+        for _path, _content in file_map.items():
+            _zf.writestr(_path, _content)
+    buf.seek(0)
+
+    filename = f"PHOENIX_Economic_Truth_{ts_str}.zip"
+    logger.info(
+        f"[ECO-TRUTH-EXPORT] bundle assembled | trades={dash['n_trades']} "
+        f"verdict={dash['danger_radar']['verdict']} version={APP_VERSION}"
+    )
+    return StreamingResponse(
+        buf,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 # ── One-Click Unified Intelligence Export ─────────────────────────────────────
