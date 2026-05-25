@@ -150,20 +150,22 @@ class LearningMemoryEngine:
                     old_conf, new_conf = self._forgetter.apply_rollback_penalty(
                         self._engine, pat.pattern_id
                     )
-                    self._neg.record_rollback(pat.pattern_id)
+                    _rb_samples = getattr(pat, "samples", 0)
+                    self._neg.record_rollback((pat.pattern_id,), current_samples=_rb_samples)
                     # Release in-flight guard
                     self._applier.release_inflight(param)
+                    _rb_entry = self._neg._entries.get(pat.pattern_id, {})
                     logger.warning(
                         f"[FTD-030B] Rollback recorded for pattern={pat.pattern_id} "
                         f"conf {old_conf:.1f}→{new_conf:.1f} "
-                        f"rollbacks={self._neg._entries.get(pat.pattern_id, object).__class__}"
+                        f"rollbacks={_rb_entry.get('rollbacks', 1)}"
                     )
 
         # Run forgetting cycle (decay all patterns)
         forget_result = self._forgetter.run_cycle(self._engine)
 
         # Decay negative memory blacklist entries
-        self._neg.decay_cycle()
+        self._neg.advance_cycle()
 
         # Flush updated pattern index
         self._indexer.flush_index()
@@ -178,7 +180,7 @@ class LearningMemoryEngine:
             "valid_patterns":   len(self._engine.valid_patterns()),
             "decayed":          len(forget_result["decayed"]),
             "removed":          len(forget_result["removed"]),
-            "blacklisted":      self._neg.blacklisted_count(),
+            "blacklisted":      self._neg.count().get("total", 0),
             "ts":               int(time.time() * 1000),
         }
 
