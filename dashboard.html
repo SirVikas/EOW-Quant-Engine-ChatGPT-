@@ -554,7 +554,8 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 <!-- ══ TAB NAVIGATION ════════════════════════════════════════════════════════ -->
 <nav class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('overview')" id="tab-btn-overview">⚔ Battle Overview</button>
+  <button class="tab-btn active" onclick="switchTab('etcc')"     id="tab-btn-etcc">💹 Economic Truth</button>
+  <button class="tab-btn"        onclick="switchTab('overview')" id="tab-btn-overview">⚔ Battle Overview</button>
   <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">🧠 Strategic Truth</button>
   <button class="tab-btn"        onclick="switchTab('combat')"   id="tab-btn-combat">🎮 Combat Controls</button>
   <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
@@ -564,8 +565,169 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
 </nav>
 
+<!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
+<div id="tab-etcc" class="tab-panel active">
+<div style="padding:16px 20px;">
+
+<!-- §1 Danger Radar — always first so threat state is immediately visible -->
+<div id="etcc-danger" style="border-radius:12px;padding:14px 18px;margin-bottom:12px;border:2px solid #ccc;background:#fff;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6B8A8A;margin-bottom:6px;">§8 · Danger Radar — Unified Threat Verdict</div>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div id="etcc-verdict" style="font-size:22px;font-weight:700;letter-spacing:.04em;">—</div>
+    <div id="etcc-threats-summary" style="font-size:12px;color:#6B8A8A;"></div>
+  </div>
+  <div id="etcc-threat-list" style="margin-top:8px;display:flex;flex-direction:column;gap:4px;"></div>
+</div>
+
+<!-- §1 Executive Snapshot -->
+<div style="margin-bottom:12px;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6B8A8A;margin-bottom:6px;">§1 · Executive Economic Snapshot</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
+    <div class="card"><div class="label">Net PnL</div><div class="big" id="etcc-net-pnl" style="color:#2B6CB0;">—</div><div class="sub">After all fees</div></div>
+    <div class="card"><div class="label">Gross PnL</div><div class="big" id="etcc-gross-pnl" style="font-size:18px;">—</div><div class="sub">Before fees</div></div>
+    <div class="card"><div class="label">Total Fees</div><div class="big" id="etcc-fees" style="font-size:18px;color:#7B6100;">—</div><div class="sub">Fee destruction</div></div>
+    <div class="card"><div class="label">Profit Factor</div><div class="big" id="etcc-pf" style="font-size:18px;">—</div><div class="sub">Gross win / gross loss</div></div>
+    <div class="card"><div class="label">Win Rate</div><div class="big" id="etcc-wr" style="font-size:18px;">—</div><div class="sub">Net winners</div></div>
+    <div class="card"><div class="label">Avg Win</div><div class="big" id="etcc-avg-win" style="font-size:16px;color:#276749;">—</div><div class="sub">Per winning trade</div></div>
+    <div class="card"><div class="label">Avg Loss</div><div class="big" id="etcc-avg-loss" style="font-size:16px;color:#9B2C2C;">—</div><div class="sub">Per losing trade</div></div>
+    <div class="card"><div class="label">Max Drawdown</div><div class="big" id="etcc-mdd" style="font-size:16px;">—</div><div class="sub">Peak-to-trough</div></div>
+    <div class="card"><div class="label">Alpha Tier</div><div class="big" id="etcc-alpha-tier" style="font-size:14px;letter-spacing:.02em;">—</div><div class="sub">Economic classification</div></div>
+    <div class="card"><div class="label">Kelly Fraction</div><div class="big" id="etcc-kelly" style="font-size:16px;">—</div><div class="sub">Optimal bet fraction</div></div>
+    <div class="card"><div class="label">Expectancy/Trade</div><div class="big" id="etcc-exp" style="font-size:16px;">—</div><div class="sub">Net per trade</div></div>
+    <div class="card"><div class="label">Total Trades</div><div class="big" id="etcc-n-trades" style="font-size:18px;color:#553C9A;">—</div><div class="sub">Combined history</div></div>
+  </div>
+</div>
+
+<!-- §2 Trade Truth Layer + §3 Fee Destruction -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+  <div class="card">
+    <div class="label">§2 · Trade Truth Layer</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+      <div><div style="font-size:10px;color:#6B8A8A;">Total</div><div style="font-weight:700;" id="etcc-tt-total">—</div></div>
+      <div><div style="font-size:10px;color:#276749;">Wins</div><div style="font-weight:700;color:#276749;" id="etcc-tt-wins">—</div></div>
+      <div><div style="font-size:10px;color:#9B2C2C;">Losses</div><div style="font-weight:700;color:#9B2C2C;" id="etcc-tt-losses">—</div></div>
+      <div><div style="font-size:10px;color:#6B8A8A;">Breakeven</div><div style="font-weight:700;" id="etcc-tt-be">—</div></div>
+      <div><div style="font-size:10px;color:#6B8A8A;">Gross+</div><div style="font-weight:700;" id="etcc-tt-gpos">—</div></div>
+      <div><div style="font-size:10px;color:#7B6100;">Fee-Destroyed</div><div style="font-weight:700;color:#7B6100;" id="etcc-tt-fd">—</div></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;" id="etcc-tt-fd-pct"></div>
+  </div>
+  <div class="card">
+    <div class="label">§3 · Fee Destruction Analysis</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+      <div><div style="font-size:10px;color:#6B8A8A;">Total Fees</div><div style="font-weight:700;color:#7B6100;" id="etcc-fee-total">—</div></div>
+      <div><div style="font-size:10px;color:#6B8A8A;">% of Gross</div><div style="font-weight:700;" id="etcc-fee-pct">—</div></div>
+      <div><div style="font-size:10px;color:#6B8A8A;">Avg Fee/Trade</div><div style="font-weight:700;" id="etcc-fee-avg">—</div></div>
+      <div><div style="font-size:10px;color:#6B8A8A;">Severity</div><div style="font-weight:700;" id="etcc-fee-sev">—</div></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:#6B8A8A;">Trend: <span id="etcc-fee-trend" style="font-weight:600;">—</span></div>
+  </div>
+</div>
+
+<!-- §4 Win/Loss Geometry + §5 Survivability -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+  <div class="card">
+    <div class="label">§4 · Win/Loss Geometry</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;">
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Avg Win</td><td style="font-weight:700;color:#276749;text-align:right;" id="etcc-geom-aw">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Avg Loss</td><td style="font-weight:700;color:#9B2C2C;text-align:right;" id="etcc-geom-al">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">R/R Ratio</td><td style="font-weight:700;text-align:right;" id="etcc-geom-rr">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Win Hold</td><td style="font-weight:700;text-align:right;" id="etcc-geom-wh">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Loss Hold</td><td style="font-weight:700;text-align:right;" id="etcc-geom-lh">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Hold Asymmetry</td><td style="font-weight:700;text-align:right;" id="etcc-geom-asym">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Largest Win</td><td style="font-weight:700;color:#276749;text-align:right;" id="etcc-geom-lwin">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Largest Loss</td><td style="font-weight:700;color:#9B2C2C;text-align:right;" id="etcc-geom-lloss">—</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <div class="label">§5 · Survivability Layer</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;">
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Alpha Tier</td><td style="font-weight:700;text-align:right;" id="etcc-surv-tier">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Profit Factor</td><td style="font-weight:700;text-align:right;" id="etcc-surv-pf">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Win Rate</td><td style="font-weight:700;text-align:right;" id="etcc-surv-wr">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">R/R Ratio</td><td style="font-weight:700;text-align:right;" id="etcc-surv-rr">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Kelly Fraction</td><td style="font-weight:700;text-align:right;" id="etcc-surv-kelly">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Max Drawdown</td><td style="font-weight:700;text-align:right;" id="etcc-surv-mdd">—</td></tr>
+      <tr><td style="color:#6B8A8A;padding:3px 0;">Deployment Ready</td><td style="font-weight:700;text-align:right;" id="etcc-surv-deploy">—</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- §6 Session & Regime Truth -->
+<div class="card" style="margin-bottom:12px;">
+  <div class="label">§6 · Session &amp; Regime Truth</div>
+  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+    <div style="font-size:11px;">Best: <strong id="etcc-sess-best" style="color:#276749;">—</strong></div>
+    <div style="font-size:11px;">Worst: <strong id="etcc-sess-worst" style="color:#9B2C2C;">—</strong></div>
+    <div style="font-size:11px;">Cross-boundary losses: <strong id="etcc-cb-losses">—</strong></div>
+    <div style="font-size:11px;">Cross-boundary PnL: <strong id="etcc-cb-pnl">—</strong></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#6B8A8A;margin-bottom:4px;">BY SESSION</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:#F7FBFB;"><th style="text-align:left;padding:4px 6px;">Session</th><th style="text-align:right;padding:4px 6px;">Trades</th><th style="text-align:right;padding:4px 6px;">WR</th><th style="text-align:right;padding:4px 6px;">Net PnL</th></tr></thead>
+        <tbody id="etcc-sess-table"></tbody>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#6B8A8A;margin-bottom:4px;">BY REGIME</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:#F7FBFB;"><th style="text-align:left;padding:4px 6px;">Regime</th><th style="text-align:right;padding:4px 6px;">Trades</th><th style="text-align:right;padding:4px 6px;">WR</th><th style="text-align:right;padding:4px 6px;">Net PnL</th></tr></thead>
+        <tbody id="etcc-regime-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- §7 RL Intelligence Layer -->
+<div class="card" style="margin-bottom:12px;">
+  <div class="label">§7 · RL Intelligence Layer</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:6px;">
+    <div><div style="font-size:10px;color:#6B8A8A;">Adaptation State</div><div style="font-weight:700;font-size:13px;" id="etcc-rl-state">—</div></div>
+    <div><div style="font-size:10px;color:#6B8A8A;">Intelligence Score</div><div style="font-weight:700;" id="etcc-rl-intel">—</div></div>
+    <div><div style="font-size:10px;color:#6B8A8A;">Avg Q-Value</div><div style="font-weight:700;" id="etcc-rl-q">—</div></div>
+    <div><div style="font-size:10px;color:#6B8A8A;">Explore Ratio</div><div style="font-weight:700;" id="etcc-rl-exp">—</div></div>
+    <div><div style="font-size:10px;color:#9B2C2C;">Toxic Contexts</div><div style="font-weight:700;color:#9B2C2C;" id="etcc-rl-toxic">—</div></div>
+    <div><div style="font-size:10px;color:#276749;">Mature Contexts</div><div style="font-weight:700;color:#276749;" id="etcc-rl-mature">—</div></div>
+    <div><div style="font-size:10px;color:#6B8A8A;">Total Contexts</div><div style="font-weight:700;" id="etcc-rl-total">—</div></div>
+    <div><div style="font-size:10px;color:#6B8A8A;">Total Pulls</div><div style="font-weight:700;" id="etcc-rl-pulls">—</div></div>
+  </div>
+</div>
+
+<!-- §9 Long-Horizon Truth — Equity Curve -->
+<div class="card" style="margin-bottom:12px;">
+  <div class="label">§9 · Long-Horizon Truth — Equity Curve &amp; Rolling Expectancy</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:8px 0;">
+    <div><div style="font-size:10px;color:#6B8A8A;">Net Exp/Trade</div><div style="font-weight:700;" id="etcc-lh-exp">—</div></div>
+    <div><div style="font-size:10px;color:#6B8A8A;">Gross Exp/Trade</div><div style="font-weight:700;" id="etcc-lh-gexp">—</div></div>
+    <div><div style="font-size:10px;color:#7B6100;">Fee Drag/Trade</div><div style="font-weight:700;color:#7B6100;" id="etcc-lh-fdrag">—</div></div>
+    <div><div style="font-size:10px;color:#6B8A8A;">Max Drawdown</div><div style="font-weight:700;" id="etcc-lh-mdd">—</div></div>
+  </div>
+  <canvas id="etcc-equity-chart" style="width:100%;max-height:180px;"></canvas>
+  <div style="margin-top:8px;">
+    <div style="font-size:10px;color:#6B8A8A;margin-bottom:4px;">Rolling 20-Trade Expectancy</div>
+    <canvas id="etcc-rolling-chart" style="width:100%;max-height:110px;"></canvas>
+  </div>
+</div>
+
+<!-- Export buttons -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+  <button class="btn" onclick="downloadEtccExec()"   style="border-color:#276749;background:#F0FFF4;color:#276749;font-weight:700;" title="Mode 1: Executive Snapshot JSON">📊 Export Executive</button>
+  <button class="btn" onclick="downloadEtccReplay()" style="border-color:#2B6CB0;background:#EBF8FF;color:#2B6CB0;font-weight:700;" title="Mode 3: Replay-Safe Snapshot JSON">🔁 Export Replay-Safe</button>
+  <button class="btn" onclick="downloadEtccBundle()" style="border-color:#553C9A;background:#FAF5FF;color:#553C9A;font-weight:700;" title="Mode 4: Economic Truth ZIP Bundle">📦 Export Economic Bundle</button>
+  <button class="btn" onclick="downloadUnifiedExport()" style="border-color:#7B6100;background:#FEFCBF;color:#7B6100;font-weight:700;" title="Mode 2: Full Institutional ZIP (27 files)">🏛 Full Institutional ZIP</button>
+  <button class="btn" onclick="loadEconomicTruth()" style="border-color:#0F6E56;background:#B2F5EA;color:#0F6E56;font-weight:700;">↺ Refresh</button>
+</div>
+
+<div id="etcc-error" style="display:none;color:#9B2C2C;font-size:11px;margin-top:4px;"></div>
+<div id="etcc-last-updated" style="font-size:10px;color:#6B8A8A;margin-top:2px;"></div>
+
+</div><!-- /etcc inner -->
+</div><!-- /tab-etcc -->
+
 <!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
-<div id="tab-overview" class="tab-panel active">
+<div id="tab-overview" class="tab-panel">
 <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════════ -->
 <div class="main">
 
@@ -2698,12 +2860,15 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['overview','dbo','combat','report','perf','lio','institutional','prp'].forEach(t => {
+  ['etcc','overview','dbo','combat','report','perf','lio','institutional','prp'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
     if (btn)   btn.classList.toggle('active',   t === name);
   });
+  if (name === 'etcc') {
+    loadEconomicTruth();
+  }
   if (name === 'prp') {
     loadPRP();
   }
@@ -5869,6 +6034,461 @@ function _buildLIOReportHTML(d) {
 </body>
 </html>`;
 }
+</script>
+
+<script>
+// ── Economic Truth Command Center (ETCC) ─────────────────────────────────────
+
+let _etccEquityChart   = null;
+let _etccRollingChart  = null;
+let _etccLastLoad      = 0;
+
+const _DANGER_STYLES = {
+  HEALTHY:       { bg: '#F0FFF4', border: '#9AE6B4', color: '#276749' },
+  STRESSED:      { bg: '#FEFCBF', border: '#F6E05E', color: '#744210' },
+  DEGRADED:      { bg: '#FFF5F5', border: '#FEB2B2', color: '#9B2C2C' },
+  CRITICAL:      { bg: '#FFF5F5', border: '#FC8181', color: '#9B2C2C' },
+  SURVIVAL_MODE: { bg: '#FFF5F5', border: '#E53E3E', color: '#822727' },
+};
+
+const _ALPHA_COLORS = {
+  ALPHA:      { color: '#276749', bg: '#C6F6D5' },
+  POSITIVE:   { color: '#2B6CB0', bg: '#BEE3F8' },
+  BREAK_EVEN: { color: '#744210', bg: '#FEFCBF' },
+  NEGATIVE:   { color: '#9B2C2C', bg: '#FED7D7' },
+};
+
+function _fmt$(v) {
+  if (v == null) return '—';
+  const s = v >= 0 ? '+' : '';
+  return s + v.toFixed(2) + ' $';
+}
+function _fmt2(v) { return v != null ? v.toFixed(2) : '—'; }
+function _fmtPct(v) { return v != null ? (v * 100).toFixed(1) + '%' : '—'; }
+function _fmtSec(v) {
+  if (v == null) return '—';
+  if (v < 60)   return v.toFixed(0) + 's';
+  if (v < 3600) return (v / 60).toFixed(1) + 'm';
+  return (v / 3600).toFixed(1) + 'h';
+}
+
+async function loadEconomicTruth() {
+  const errEl = document.getElementById('etcc-error');
+  const updEl = document.getElementById('etcc-last-updated');
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    const r = await fetch(API + '/api/economic-truth/dashboard', {
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    _etccLastLoad = Date.now();
+    _renderEtcc(d);
+    if (updEl) updEl.textContent = 'Last refreshed: ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    if (errEl) { errEl.style.display = ''; errEl.textContent = 'Failed to load economic truth: ' + e.message; }
+  }
+}
+
+function _renderEtcc(d) {
+  const es  = d.executive_snapshot || {};
+  const tt  = d.trade_truth        || {};
+  const fa  = d.fee_analysis       || {};
+  const wlg = d.winloss_geometry   || {};
+  const sv  = d.survivability      || {};
+  const sr  = d.session_regime     || {};
+  const rl  = d.rl_intelligence    || {};
+  const dr  = d.danger_radar       || {};
+  const lh  = d.long_horizon       || {};
+
+  // §8 Danger Radar — top of page
+  const dangerEl = document.getElementById('etcc-danger');
+  const st = _DANGER_STYLES[dr.verdict] || _DANGER_STYLES.DEGRADED;
+  if (dangerEl) {
+    dangerEl.style.background    = st.bg;
+    dangerEl.style.borderColor   = st.border;
+  }
+  const verdEl = document.getElementById('etcc-verdict');
+  if (verdEl) {
+    verdEl.textContent  = dr.verdict || '—';
+    verdEl.style.color  = st.color;
+  }
+  const sumEl = document.getElementById('etcc-threats-summary');
+  if (sumEl) sumEl.textContent = (dr.threat_count || 0) + ' active threat(s)';
+
+  const tlEl = document.getElementById('etcc-threat-list');
+  if (tlEl) {
+    if (!dr.threats || dr.threats.length === 0) {
+      tlEl.innerHTML = '<span style="font-size:12px;color:#276749;">✓ No active threats detected</span>';
+    } else {
+      tlEl.innerHTML = (dr.threats || []).map(t =>
+        `<div style="font-size:11px;padding:3px 8px;background:rgba(0,0,0,.06);border-radius:6px;">
+          <strong style="color:${st.color};">[${t.code}]</strong> ${t.message}
+        </div>`
+      ).join('');
+    }
+  }
+
+  // §1 Executive Snapshot
+  const pnlEl = document.getElementById('etcc-net-pnl');
+  if (pnlEl) {
+    pnlEl.textContent = _fmt$(es.net_pnl);
+    pnlEl.style.color = es.net_pnl >= 0 ? '#276749' : '#9B2C2C';
+  }
+  _setText('etcc-gross-pnl', _fmt$(es.gross_pnl));
+  const feesEl = document.getElementById('etcc-fees');
+  if (feesEl) {
+    feesEl.textContent = _fmt$(-(es.total_fees || 0));
+    feesEl.style.color = '#7B6100';
+  }
+  const pfEl = document.getElementById('etcc-pf');
+  if (pfEl) {
+    pfEl.textContent = es.profit_factor != null ? es.profit_factor.toFixed(3) : '—';
+    pfEl.style.color = (es.profit_factor || 0) >= 1 ? '#276749' : '#9B2C2C';
+  }
+  _setText('etcc-wr',        _fmtPct(es.win_rate));
+  const awEl = document.getElementById('etcc-avg-win');
+  if (awEl) { awEl.textContent = _fmt$(es.avg_win_usdt); awEl.style.color='#276749'; }
+  const alEl = document.getElementById('etcc-avg-loss');
+  if (alEl) { alEl.textContent = _fmt$(es.avg_loss_usdt); alEl.style.color='#9B2C2C'; }
+  const mddEl = document.getElementById('etcc-mdd');
+  if (mddEl) {
+    mddEl.textContent = es.max_drawdown_pct != null ? es.max_drawdown_pct.toFixed(1) + '%' : '—';
+    mddEl.style.color  = (es.max_drawdown_pct || 0) > 15 ? '#9B2C2C' : '#1A2B2B';
+  }
+
+  const atEl = document.getElementById('etcc-alpha-tier');
+  if (atEl) {
+    const ac = _ALPHA_COLORS[es.alpha_tier] || {};
+    atEl.textContent   = es.alpha_tier || '—';
+    atEl.style.color   = ac.color || '#1A2B2B';
+    atEl.style.background = ac.bg || 'transparent';
+    atEl.style.padding    = ac.bg ? '2px 8px' : '0';
+    atEl.style.borderRadius = '12px';
+  }
+  _setText('etcc-kelly',    es.kelly_fraction != null ? (es.kelly_fraction * 100).toFixed(1) + '%' : '—');
+  const expEl = document.getElementById('etcc-exp');
+  if (expEl) {
+    expEl.textContent = _fmt$(es.net_expectancy_per_trade);
+    expEl.style.color = (es.net_expectancy_per_trade || 0) >= 0 ? '#276749' : '#9B2C2C';
+  }
+  _setText('etcc-n-trades', d.n_trades != null ? d.n_trades.toLocaleString() : '—');
+
+  // §2 Trade Truth
+  _setText('etcc-tt-total',  tt.total);
+  _setText('etcc-tt-wins',   tt.wins);
+  _setText('etcc-tt-losses', tt.losses);
+  _setText('etcc-tt-be',     tt.breakeven);
+  _setText('etcc-tt-gpos',   tt.gross_positive);
+  _setText('etcc-tt-fd',     tt.fee_destroyed);
+  const fdpEl = document.getElementById('etcc-tt-fd-pct');
+  if (fdpEl && tt.fee_destruction_pct != null) {
+    fdpEl.innerHTML = `<span style="color:#7B6100;font-weight:600;">${tt.fee_destruction_pct.toFixed(1)}%</span> of gross-winners turned net-negative by fees`;
+  }
+
+  // §3 Fee Analysis
+  const ftEl = document.getElementById('etcc-fee-total');
+  if (ftEl) { ftEl.textContent = _fmt$(-(fa.total_fees||0)); ftEl.style.color='#7B6100'; }
+  const fpEl = document.getElementById('etcc-fee-pct');
+  if (fpEl) {
+    fpEl.textContent = fa.fee_as_pct_gross != null ? fa.fee_as_pct_gross.toFixed(1)+'%' : '—';
+    fpEl.style.color  = (fa.fee_as_pct_gross||0) > 30 ? '#9B2C2C' : '#1A2B2B';
+  }
+  _setText('etcc-fee-avg',   fa.avg_fee_per_trade != null ? fa.avg_fee_per_trade.toFixed(4)+' $' : '—');
+  const fsEl = document.getElementById('etcc-fee-sev');
+  if (fsEl) {
+    const sevColors = { CRITICAL:'#9B2C2C', HIGH:'#C05621', MODERATE:'#744210', LOW:'#276749' };
+    fsEl.textContent = fa.severity || '—';
+    fsEl.style.color  = sevColors[fa.severity] || '#1A2B2B';
+  }
+  _setText('etcc-fee-trend',  fa.trend || '—');
+
+  // §4 Win/Loss Geometry
+  _setText('etcc-geom-aw',    _fmt$(wlg.avg_win_usdt));
+  _setText('etcc-geom-al',    _fmt$(wlg.avg_loss_usdt));
+  _setText('etcc-geom-rr',    wlg.rr_ratio != null ? wlg.rr_ratio.toFixed(3) : '—');
+  _setText('etcc-geom-wh',    _fmtSec(wlg.avg_win_hold_sec));
+  _setText('etcc-geom-lh',    _fmtSec(wlg.avg_loss_hold_sec));
+  const asymEl = document.getElementById('etcc-geom-asym');
+  if (asymEl) {
+    asymEl.textContent = wlg.hold_asymmetry || '—';
+    asymEl.style.color  = wlg.hold_asymmetry === 'CORRECT' ? '#276749' : '#9B2C2C';
+  }
+  _setText('etcc-geom-lwin',  _fmt$(wlg.largest_win));
+  _setText('etcc-geom-lloss', _fmt$(wlg.largest_loss));
+
+  // §5 Survivability
+  _setText('etcc-surv-tier',  sv.alpha_tier || '—');
+  const spfEl = document.getElementById('etcc-surv-pf');
+  if (spfEl) {
+    spfEl.textContent = sv.profit_factor != null ? sv.profit_factor.toFixed(3) : '—';
+    spfEl.style.color  = (sv.profit_factor||0) >= 1 ? '#276749' : '#9B2C2C';
+  }
+  _setText('etcc-surv-wr',    _fmtPct(sv.win_rate));
+  _setText('etcc-surv-rr',    sv.rr_ratio != null ? sv.rr_ratio.toFixed(3) : '—');
+  _setText('etcc-surv-kelly', sv.kelly_fraction != null ? (sv.kelly_fraction*100).toFixed(1)+'%' : '—');
+  const smddEl = document.getElementById('etcc-surv-mdd');
+  if (smddEl) {
+    smddEl.textContent = sv.max_drawdown_pct != null ? sv.max_drawdown_pct.toFixed(1)+'%' : '—';
+    smddEl.style.color  = (sv.max_drawdown_pct||0) > 15 ? '#9B2C2C' : '#1A2B2B';
+  }
+  const depEl = document.getElementById('etcc-surv-deploy');
+  if (depEl) {
+    depEl.textContent = sv.deployment_ready ? '✓ YES' : '✗ NOT YET';
+    depEl.style.color  = sv.deployment_ready ? '#276749' : '#9B2C2C';
+  }
+
+  // §6 Session & Regime
+  _setText('etcc-sess-best',   sr.best_session  || '—');
+  _setText('etcc-sess-worst',  sr.worst_session || '—');
+  _setText('etcc-cb-losses',   sr.cross_boundary_losses != null ? sr.cross_boundary_losses : '—');
+  const cbpEl = document.getElementById('etcc-cb-pnl');
+  if (cbpEl) {
+    const v = sr.cross_boundary_loss_pnl;
+    cbpEl.textContent = v != null ? _fmt$(v) : '—';
+    cbpEl.style.color  = (v||0) < 0 ? '#9B2C2C' : '#1A2B2B';
+  }
+
+  const stEl = document.getElementById('etcc-sess-table');
+  if (stEl) {
+    const rows = Object.entries(sr.sessions || {})
+      .sort((a,b) => b[1].net_pnl - a[1].net_pnl)
+      .map(([sess, s]) =>
+        `<tr>
+          <td style="padding:3px 6px;">${sess}</td>
+          <td style="text-align:right;padding:3px 6px;">${s.count}</td>
+          <td style="text-align:right;padding:3px 6px;">${_fmtPct(s.win_rate)}</td>
+          <td style="text-align:right;padding:3px 6px;color:${s.net_pnl>=0?'#276749':'#9B2C2C'};font-weight:600;">${_fmt$(s.net_pnl)}</td>
+        </tr>`
+      ).join('');
+    stEl.innerHTML = rows || '<tr><td colspan="4" style="color:#6B8A8A;padding:4px 6px;">No session data</td></tr>';
+  }
+
+  const rtEl = document.getElementById('etcc-regime-table');
+  if (rtEl) {
+    const rows = Object.entries(sr.regimes || {})
+      .sort((a,b) => b[1].net_pnl - a[1].net_pnl)
+      .map(([reg, s]) =>
+        `<tr>
+          <td style="padding:3px 6px;">${reg}</td>
+          <td style="text-align:right;padding:3px 6px;">${s.count}</td>
+          <td style="text-align:right;padding:3px 6px;">${_fmtPct(s.win_rate)}</td>
+          <td style="text-align:right;padding:3px 6px;color:${s.net_pnl>=0?'#276749':'#9B2C2C'};font-weight:600;">${_fmt$(s.net_pnl)}</td>
+        </tr>`
+      ).join('');
+    rtEl.innerHTML = rows || '<tr><td colspan="4" style="color:#6B8A8A;padding:4px 6px;">No regime data</td></tr>';
+  }
+
+  // §7 RL Intelligence
+  const rlStateEl = document.getElementById('etcc-rl-state');
+  if (rlStateEl) {
+    const stateColors = {
+      CONVERGING:'#276749', LEARNING:'#2B6CB0', EXPLORING:'#553C9A',
+      NEGATIVE_DRIFT:'#9B2C2C', IDLE:'#6B8A8A'
+    };
+    rlStateEl.textContent = rl.adaptation_state || '—';
+    rlStateEl.style.color  = stateColors[rl.adaptation_state] || '#1A2B2B';
+  }
+  _setText('etcc-rl-intel',  rl.intelligence_score != null ? rl.intelligence_score.toFixed(1) : '—');
+  _setText('etcc-rl-q',      rl.avg_q != null ? rl.avg_q.toFixed(4) : '—');
+  _setText('etcc-rl-exp',    rl.explore_ratio != null ? _fmtPct(rl.explore_ratio) : '—');
+  _setText('etcc-rl-toxic',  rl.toxic_contexts != null ? rl.toxic_contexts : '—');
+  _setText('etcc-rl-mature', rl.mature_contexts != null ? rl.mature_contexts : '—');
+  _setText('etcc-rl-total',  rl.total_contexts != null ? rl.total_contexts : '—');
+  _setText('etcc-rl-pulls',  rl.total_pulls != null ? rl.total_pulls.toLocaleString() : '—');
+
+  // §9 Long-Horizon Truth
+  const lhExpEl = document.getElementById('etcc-lh-exp');
+  if (lhExpEl) {
+    lhExpEl.textContent = _fmt$(lh.net_expectancy_per_trade);
+    lhExpEl.style.color  = (lh.net_expectancy_per_trade||0) >= 0 ? '#276749' : '#9B2C2C';
+  }
+  _setText('etcc-lh-gexp',   _fmt$(lh.gross_expectancy_per_trade));
+  _setText('etcc-lh-fdrag',  lh.fee_drag_per_trade != null ? lh.fee_drag_per_trade.toFixed(4)+' $' : '—');
+  _setText('etcc-lh-mdd',    lh.max_drawdown_pct != null ? lh.max_drawdown_pct.toFixed(1)+'%' : '—');
+
+  // Equity curve chart
+  _renderEtccEquityChart(lh.equity_curve || [], lh.initial_capital || 10000);
+  _renderEtccRollingChart(lh.rolling_expectancy_20 || []);
+}
+
+function _setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = (val != null ? val : '—');
+}
+
+function _renderEtccEquityChart(curve, initialCap) {
+  const canvas = document.getElementById('etcc-equity-chart');
+  if (!canvas) return;
+  if (_etccEquityChart) { _etccEquityChart.destroy(); _etccEquityChart = null; }
+  if (!curve.length) return;
+  const labels = curve.map((_, i) => i + 1);
+  _etccEquityChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Equity',
+          data:  curve,
+          borderColor: '#2B6CB0',
+          backgroundColor: 'rgba(43,108,176,.08)',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: 'Initial',
+          data:  curve.map(() => initialCap),
+          borderColor: 'rgba(0,0,0,.15)',
+          borderWidth: 1,
+          borderDash: [4, 4],
+          pointRadius: 0,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 4,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { display: false },
+        y: {
+          grid:  { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 10 }, maxTicksLimit: 5,
+            callback: v => '$' + v.toFixed(0) },
+        },
+      },
+    },
+  });
+}
+
+function _renderEtccRollingChart(rollExp) {
+  const canvas = document.getElementById('etcc-rolling-chart');
+  if (!canvas) return;
+  if (_etccRollingChart) { _etccRollingChart.destroy(); _etccRollingChart = null; }
+  if (!rollExp.length) return;
+  const labels = rollExp.map((_, i) => i + 1);
+  _etccRollingChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Rolling 20-Trade Expectancy',
+        data:  rollExp,
+        backgroundColor: rollExp.map(v => v >= 0 ? 'rgba(39,103,73,.45)' : 'rgba(155,44,44,.45)'),
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 5,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { display: false },
+        y: {
+          grid:  { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 9 }, maxTicksLimit: 4,
+            callback: v => v.toFixed(2) },
+        },
+      },
+    },
+  });
+}
+
+// ── ETCC Export Downloads ─────────────────────────────────────────────────────
+
+async function downloadUnifiedExport() {
+  addThought('⏳ Building Full Institutional ZIP…', 'SYSTEM');
+  try {
+    const r = await fetch(API + '/api/unified-intelligence/export', {
+      signal: AbortSignal.timeout(120000),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || 'PHOENIX_Intelligence.zip';
+    _triggerDownload(blob, fn);
+    addThought('✅ Full Institutional ZIP downloaded: ' + fn, 'SYSTEM');
+  } catch(e) {
+    addThought('❌ Institutional ZIP failed: ' + e.message, 'HALT');
+  }
+}
+
+async function downloadEtccExec() {
+  addThought('⏳ Generating Executive Snapshot…', 'SYSTEM');
+  try {
+    const r = await fetch(API + '/api/economic-truth/export/executive', {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || 'PHOENIX_Executive.json';
+    _triggerDownload(blob, fn);
+    addThought('✅ Executive Snapshot downloaded: ' + fn, 'SYSTEM');
+  } catch(e) {
+    addThought('❌ Executive Snapshot failed: ' + e.message, 'HALT');
+  }
+}
+
+async function downloadEtccReplay() {
+  addThought('⏳ Building Replay-Safe Snapshot…', 'SYSTEM');
+  try {
+    const r = await fetch(API + '/api/economic-truth/export/replay-safe', {
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || 'PHOENIX_Replay_Safe.json';
+    _triggerDownload(blob, fn);
+    addThought('✅ Replay-Safe Snapshot downloaded: ' + fn, 'SYSTEM');
+  } catch(e) {
+    addThought('❌ Replay-Safe Snapshot failed: ' + e.message, 'HALT');
+  }
+}
+
+async function downloadEtccBundle() {
+  addThought('⏳ Building Economic Truth Bundle…', 'SYSTEM');
+  try {
+    const r = await fetch(API + '/api/economic-truth/export/economic-truth', {
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const cd   = r.headers.get('Content-Disposition') || '';
+    const fn   = cd.match(/filename="([^"]+)"/)?.[1] || 'PHOENIX_Economic_Truth.zip';
+    _triggerDownload(blob, fn);
+    addThought('✅ Economic Truth Bundle downloaded: ' + fn, 'SYSTEM');
+  } catch(e) {
+    addThought('❌ Economic Truth Bundle failed: ' + e.message, 'HALT');
+  }
+}
+
+function _triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Auto-load ETCC on page start (it's the default tab)
+document.addEventListener('DOMContentLoaded', () => {
+  // Delay slightly to allow the API polling to stabilize
+  setTimeout(loadEconomicTruth, 1200);
+});
 </script>
 
 </body>
