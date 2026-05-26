@@ -146,18 +146,30 @@ FEE_QUALITY_MIN_MULT  = 0.60   # reward multiplier floor from fee penalty
 LOW_R_QUALITY_THRESH  = 0.80   # R < 0.80 on a win → low-quality win
 LOW_R_QUALITY_MULT    = 0.90   # mild penalty for scraped low-R wins
 
+# WR-aware reward penalty — prevents fat-tailed win distributions from keeping
+# Q near zero while the context systematically bleeds (e.g. WR=18%, Q≈+0.005).
+WR_PENALTY_THRESHOLD  = 0.30   # context WR below this → scale down wins
+WR_PENALTY_MIN_VISITS = 50     # only mature contexts (avoids cold-start penalty)
+WR_PENALTY_MIN_MULT   = 0.50   # floor for WR-based reward scaling
 
-def _shape_reward(net_pnl: float, fee_cost: float, r_multiple: float) -> float:
+
+def _shape_reward(
+    net_pnl: float,
+    fee_cost: float,
+    r_multiple: float,
+    context_win_rate: float = 0.5,
+    context_visits: int = 0,
+) -> float:
     """
     Shape raw net_pnl into a quality-adjusted reward signal.
 
     Rules (causal, post-close data only):
       1. Fee-heavy profitable trades: fee > 30% of gross → reduce reward.
-         Teaches the bandit to value fee-efficient profits over noise wins.
       2. Low R-multiple wins (R < 0.80): mild 10% penalty.
-         Discourages chasing weak signals that barely break even.
-      3. Losses: passed through unchanged (no reward inflation on losses).
-         The system must experience real loss pain to learn what not to do.
+      3. WR-aware penalty: wins from chronically low-WR mature contexts (50+
+         visits, WR < 30%) are scaled down proportionally.  Prevents fat-tailed
+         win distributions from compressing Q near zero despite systematic losses.
+      4. Losses: passed through unchanged.
 
     Returns shaped reward (float). Never makes a loss look profitable.
     """
@@ -178,6 +190,14 @@ def _shape_reward(net_pnl: float, fee_cost: float, r_multiple: float) -> float:
         # Low R-multiple penalty (catch marginal winners)
         if 0.0 < r_multiple < LOW_R_QUALITY_THRESH:
             reward *= LOW_R_QUALITY_MULT
+
+        # WR-aware penalty: chronically low-WR mature contexts get wins scaled
+        # down so occasional large wins can't mask systematic loss patterns.
+        if (context_visits >= WR_PENALTY_MIN_VISITS
+                and context_win_rate < WR_PENALTY_THRESHOLD):
+            wr_mult = max(WR_PENALTY_MIN_MULT,
+                          context_win_rate / WR_PENALTY_THRESHOLD)
+            reward *= wr_mult
 
     # Safety: shaped reward must never turn a loss into a profit or vice versa
     if net_pnl < 0 and reward >= 0:
@@ -240,8 +260,16 @@ def _bootstrap_q(table: Dict[str, "ContextState"], new_key: str) -> float:
 
 # ── Toxic context detection ───────────────────────────────────────────────────
 
-TOXIC_Q_THRESH    = -0.30   # Q below this → candidate for toxic flag
+TOXIC_Q_THRESH    = -0.20   # Q below this → candidate for toxic flag (tightened from -0.30)
 TOXIC_MIN_VISITS  = 8       # minimum trades before toxic classification
+
+# ── Economic reality gate ─────────────────────────────────────────────────────
+# Catches Q-compressed contexts: fat-tailed wins keep Q near zero while
+# systematic losses accumulate (avg_pnl < 0).  Fires independently of Q-value.
+
+EV_ECO_THRESHOLD  = -0.15  # avg PnL/trade must be below this → ECO_TOXIC candidate
+EV_ECO_MIN_VISITS = 50     # only mature contexts — no cold-start false positives
+EV_ECO_WR_CEILING = 0.25   # WR must be below this (combined with low avg_pnl)
 
 # ── Minimum Exploration Floor ─────────────────────────────────────────────────
 # Tags immature contexts in the mildly-negative Q zone before the UCB gate so
@@ -317,8 +345,9 @@ class RLContextualBandit:
     VERSION = "2.0"
 
     def __init__(self):
-        self._table:          Dict[str, ContextState] = {}
-        self._toxic_contexts: Set[str]                = set()
+        self._table:             Dict[str, ContextState] = {}
+        self._toxic_contexts:    Set[str]                = set()
+        self._eco_toxic_contexts: Set[str]               = set()
         self._total_pulls:    int   = 0
         self._total_updates:  int   = 0
         self._total_blocked:  int   = 0
@@ -361,6 +390,7 @@ class RLContextualBandit:
                 "version":  self.VERSION,
                 "saved_at": int(time.time() * 1000),
                 "toxic_contexts": list(self._toxic_contexts),
+                "eco_toxic_contexts": list(self._eco_toxic_contexts),
                 "table": {
                     k: {
                         "context":   s.context,
@@ -403,11 +433,13 @@ class RLContextualBandit:
                     last_q    = float(v["last_q"]),
                     bootstrap = float(v.get("bootstrap", 0.0)),
                 )
-            self._toxic_contexts = set(payload.get("toxic_contexts", []))
+            self._toxic_contexts     = set(payload.get("toxic_contexts", []))
+            self._eco_toxic_contexts = set(payload.get("eco_toxic_contexts", []))
             logger.info(
                 f"[RL-ENGINE] State restored from {target} — "
                 f"{len(self._table)} contexts, "
-                f"{len(self._toxic_contexts)} toxic"
+                f"{len(self._toxic_contexts)} Q-toxic, "
+                f"{len(self._eco_toxic_contexts)} ECO-toxic"
             )
             return True
         except Exception as _e:
@@ -461,12 +493,13 @@ class RLContextualBandit:
                 pass
             return True, f"RL_EXPLORE(visits={state.n_visits}<{MIN_VISITS_EXPLORE})"
 
-        # Rule 2: toxic context block (after sufficient visits)
-        if ctx_key in self._toxic_contexts:
+        # Rule 2: toxic context block (Q-toxic or ECO_TOXIC)
+        if ctx_key in self._toxic_contexts or ctx_key in self._eco_toxic_contexts:
+            toxic_label = "ECO_TOXIC" if ctx_key in self._eco_toxic_contexts else "RL_TOXIC"
             self._total_blocked += 1
             self._toxic_blocks  += 1
             return False, (
-                f"RL_TOXIC(q={state.q_value:+.3f} "
+                f"{toxic_label}(q={state.q_value:+.3f} "
                 f"wr={state.win_rate:.0%} n={state.n_visits})"
             )
 
@@ -540,8 +573,12 @@ class RLContextualBandit:
         # Step 1: Time decay of stale Q-value
         old_q = _apply_time_decay(state.q_value, state.last_ts, now_ms)
 
-        # Step 2: Multi-factor reward shaping
-        reward = _shape_reward(net_pnl, fee_cost, r_multiple)
+        # Step 2: Multi-factor reward shaping (pass context history for WR penalty)
+        reward = _shape_reward(
+            net_pnl, fee_cost, r_multiple,
+            context_win_rate=state.win_rate,
+            context_visits=state.n_visits,
+        )
 
         # Step 3: Adaptive TD(0) update
         alpha = _alpha(state.n_visits)
@@ -560,8 +597,9 @@ class RLContextualBandit:
         state.last_ts = now_ms
         self._total_updates += 1
 
-        # Step 5: Toxic context check
+        # Step 5: Toxic context checks (Q-based and economic reality)
         self._check_toxic(ctx_key, state)
+        self._check_eco_toxic(ctx_key, state)
 
         # Persist updated knowledge so restarts don't wipe learning
         self.save_state()
@@ -675,21 +713,27 @@ class RLContextualBandit:
     # ── Toxic context ─────────────────────────────────────────────────────────
 
     def is_toxic(self, regime: str, utc_hour: int, strategy: str) -> bool:
-        """Return True if this context has been flagged as toxic."""
-        return make_context(regime, utc_hour, strategy) in self._toxic_contexts
+        """Return True if this context has been flagged as Q-toxic or ECO_TOXIC."""
+        key = make_context(regime, utc_hour, strategy)
+        return key in self._toxic_contexts or key in self._eco_toxic_contexts
 
     def get_toxic_contexts(self) -> List[dict]:
-        """Return all flagged toxic contexts with current stats."""
+        """Return all flagged toxic contexts (Q-toxic + ECO_TOXIC) with current stats."""
+        all_toxic = self._toxic_contexts | self._eco_toxic_contexts
         result = []
-        for key in self._toxic_contexts:
+        for key in all_toxic:
             state = self._table.get(key)
             if state:
                 result.append({
-                    "context":   key,
-                    "q_value":   round(state.q_value, 4),
-                    "win_rate":  round(state.win_rate, 3),
-                    "n_visits":  state.n_visits,
-                    "total_pnl": round(state.total_pnl, 4),
+                    "context":    key,
+                    "q_value":    round(state.q_value, 4),
+                    "win_rate":   round(state.win_rate, 3),
+                    "n_visits":   state.n_visits,
+                    "total_pnl":  round(state.total_pnl, 4),
+                    "toxic_type": (
+                        "ECO_TOXIC" if key in self._eco_toxic_contexts
+                        else "Q_TOXIC"
+                    ),
                 })
         return sorted(result, key=lambda x: x["q_value"])
 
@@ -791,6 +835,7 @@ class RLContextualBandit:
                 "explore_ratio":      round(explore_ratio, 3),
                 "floor_explore_pct":  round(self._floor_explores / max(explored, 1) * 100, 1),
                 "toxic_count":        len(self._toxic_contexts),
+                "eco_toxic_count":    len(self._eco_toxic_contexts),
                 "explore_floor_cfg":  {
                     "enabled":    EXPLORE_FLOOR_ENABLED,
                     "max_visits": EXPLORE_FLOOR_MAX_VISITS,
@@ -858,6 +903,42 @@ class RLContextualBandit:
                         f"[RL-ENGINE] TOXIC_CONTEXT recovered: {ctx_key} "
                         f"q={state.q_value:+.4f}"
                     )
+
+    def _check_eco_toxic(self, ctx_key: str, state: ContextState) -> None:
+        """
+        Flag a context as ECO_TOXIC when its economic reality is bad regardless
+        of Q-value.  Catches the Q-compression anomaly: fat-tailed win
+        distributions keep Q near zero while avg PnL per trade is negative.
+
+        Conditions (all must hold):
+          • avg_pnl_per_trade < EV_ECO_THRESHOLD  (-$0.15)
+          • n_visits >= EV_ECO_MIN_VISITS          (50)
+          • win_rate < EV_ECO_WR_CEILING           (25%)
+
+        Recovery: any condition improving enough removes the flag.
+        """
+        if state.n_visits < EV_ECO_MIN_VISITS:
+            return
+        avg_pnl = state.total_pnl / state.n_visits
+        eco_bad = (
+            avg_pnl < EV_ECO_THRESHOLD
+            and state.win_rate < EV_ECO_WR_CEILING
+        )
+        if eco_bad:
+            if ctx_key not in self._eco_toxic_contexts:
+                self._eco_toxic_contexts.add(ctx_key)
+                logger.warning(
+                    f"[RL-ENGINE] ECO_TOXIC flagged: {ctx_key} "
+                    f"avg_pnl={avg_pnl:+.4f} wr={state.win_rate:.0%} "
+                    f"q={state.q_value:+.4f} n={state.n_visits}"
+                )
+        else:
+            if ctx_key in self._eco_toxic_contexts:
+                self._eco_toxic_contexts.discard(ctx_key)
+                logger.info(
+                    f"[RL-ENGINE] ECO_TOXIC recovered: {ctx_key} "
+                    f"avg_pnl={avg_pnl:+.4f} wr={state.win_rate:.0%}"
+                )
 
     # ── Reporting ─────────────────────────────────────────────────────────────
 

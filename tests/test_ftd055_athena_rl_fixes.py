@@ -110,7 +110,8 @@ def _make_engine(save_path: pathlib.Path) -> RLContextualBandit:
     """Create a fresh engine isolated to a custom save path (not production path)."""
     engine = RLContextualBandit.__new__(RLContextualBandit)
     engine._table          = {}
-    engine._toxic_contexts = set()
+    engine._toxic_contexts     = set()
+    engine._eco_toxic_contexts = set()
     engine._total_pulls    = 0
     engine._total_updates  = 0
     engine._total_blocked  = 0
@@ -121,6 +122,7 @@ def _make_engine(save_path: pathlib.Path) -> RLContextualBandit:
     engine._floor_lowers   = 0
     engine._floor_raises   = 0
     engine._toxic_blocks   = 0
+    engine._floor_explores = 0
     engine._init_ts        = time.time()
     # Pre-bind state_path so auto-saves in update() use the temp path, not production
     engine._state_path     = save_path
