@@ -260,8 +260,18 @@ def _bootstrap_q(table: Dict[str, "ContextState"], new_key: str) -> float:
 
 # ── Toxic context detection ───────────────────────────────────────────────────
 
-TOXIC_Q_THRESH    = -0.20   # Q below this → candidate for toxic flag (tightened from -0.30)
+TOXIC_Q_THRESH    = -0.20   # default Q floor (used for unknown/new regimes)
 TOXIC_MIN_VISITS  = 8       # minimum trades before toxic classification
+
+# Regime-aware toxic thresholds — each regime has different expected WR profile.
+# MR strategies need high WR to cover the R-profile; Q < -0.15 is genuinely bad.
+# TF strategies run at lower WR but with larger wins; they need more patience.
+# VE (volatility expansion) is inherently noisy; Q must drop further to confirm.
+REGIME_TOXIC_THRESHOLDS: Dict[str, float] = {
+    "MEAN_REVERTING":       -0.15,   # strict — MR must maintain decent WR
+    "TRENDING":             -0.25,   # patient — momentum strategies have variance
+    "VOLATILITY_EXPANSION": -0.30,   # most patient — high-noise, high-variance regime
+}
 
 # ── Economic reality gate ─────────────────────────────────────────────────────
 # Catches Q-compressed contexts: fat-tailed wins keep Q near zero while
@@ -836,6 +846,7 @@ class RLContextualBandit:
                 "floor_explore_pct":  round(self._floor_explores / max(explored, 1) * 100, 1),
                 "toxic_count":        len(self._toxic_contexts),
                 "eco_toxic_count":    len(self._eco_toxic_contexts),
+                "regime_toxic_thresholds": REGIME_TOXIC_THRESHOLDS,
                 "explore_floor_cfg":  {
                     "enabled":    EXPLORE_FLOOR_ENABLED,
                     "max_visits": EXPLORE_FLOOR_MAX_VISITS,
@@ -883,25 +894,29 @@ class RLContextualBandit:
     def _check_toxic(self, ctx_key: str, state: ContextState) -> None:
         """
         Flag a context as toxic when it has enough data and a deep negative Q.
-        A toxic context is still shown in reports but blocked in should_trade().
-        Can recover: if Q rises above TOXIC_Q_THRESH after more trades, deflag.
+        Uses regime-aware thresholds: MR is strict (-0.15), TF is patient (-0.25),
+        VE is most patient (-0.30).  Unknown regimes fall back to TOXIC_Q_THRESH.
+        Can recover: if Q rises above the regime threshold, deflag.
         """
+        regime_prefix = ctx_key.split("|")[0]
+        q_thresh = REGIME_TOXIC_THRESHOLDS.get(regime_prefix, TOXIC_Q_THRESH)
+
         if state.n_visits >= TOXIC_MIN_VISITS:
-            if state.q_value < TOXIC_Q_THRESH:
+            if state.q_value < q_thresh:
                 if ctx_key not in self._toxic_contexts:
                     self._toxic_contexts.add(ctx_key)
                     logger.warning(
                         f"[RL-ENGINE] TOXIC_CONTEXT flagged: {ctx_key} "
-                        f"q={state.q_value:+.4f} n={state.n_visits} "
-                        f"wr={state.win_rate:.0%}"
+                        f"q={state.q_value:+.4f} thresh={q_thresh:+.2f} "
+                        f"n={state.n_visits} wr={state.win_rate:.0%}"
                     )
             else:
-                # Recovery: context improved — deflag
+                # Recovery: Q rose above the regime-specific threshold — deflag
                 if ctx_key in self._toxic_contexts:
                     self._toxic_contexts.discard(ctx_key)
                     logger.info(
                         f"[RL-ENGINE] TOXIC_CONTEXT recovered: {ctx_key} "
-                        f"q={state.q_value:+.4f}"
+                        f"q={state.q_value:+.4f} (thresh={q_thresh:+.2f})"
                     )
 
     def _check_eco_toxic(self, ctx_key: str, state: ContextState) -> None:
