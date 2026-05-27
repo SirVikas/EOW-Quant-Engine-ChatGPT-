@@ -2190,7 +2190,12 @@ async def on_tick(tick: Tick):
                     initial_risk=sizing.usdt_risk,
                     regime=regime.value,
                 )
-                if risk_ctrl.open_position(pos, order_type="MARKET"):
+                if not risk_ctrl.open_position(pos, order_type="MARKET"):
+                    _thought(
+                        f"🚫 POSITION_EXISTS {sym}: already open — new signal discarded",
+                        "FILTER",
+                    )
+                else:
                     # FTD-DECISION-SNAP: preserve causal ontology state at approval time
                     _pending_decision_snapshots[sym] = _capture_decision_snapshot(
                         sym=sym, strategy_id=sig.strategy_id, strategy_type=strategy_type,
@@ -2205,34 +2210,41 @@ async def on_tick(tick: Tick):
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
                     execution_drive_policy.record_trade(sym)   # EDP: reset idle timer
-                    # PRP-001: record signal context at trade open for truth tracking
+                    # PRP-001: record signal context at trade open for truth tracking.
+                    # context_quality_engine is separate try/except so its failure never
+                    # silently prevents signal_truth_engine from recording the trade.
+                    _cq_score   = 0.0
+                    _atr_pct_st = 0.0
                     try:
-                        _re_state_st   = regime_det.state(sym)
-                        _atr_pct_st    = getattr(_re_state_st, "atr_pct", 0.0) or 0.0
-                        _cq_score      = context_quality_engine.score_signal(
+                        _re_state_st = regime_det.state(sym)
+                        _atr_pct_st  = getattr(_re_state_st, "atr_pct", 0.0) or 0.0
+                        _cq_score    = context_quality_engine.score_signal(
                             signal_id   = pos.position_id,
                             regime      = regime.value,
                             strategy_id = sig.strategy_id,
                             side        = sig.signal.value,
                             confidence  = sig.confidence,
-                            rsi_val     = _rsi_val if "_rsi_val" in dir() else 50.0,
-                            above_sma   = _above_sma if "_above_sma" in dir() else True,
+                            rsi_val     = _rsi_val,
+                            above_sma   = _above_sma,
                             atr_pct     = _atr_pct_st,
                         )
+                    except Exception:
+                        pass
+                    try:
                         signal_truth_engine.record_signal(
-                            signal_id    = pos.position_id,
-                            symbol       = sym,
-                            strategy_id  = sig.strategy_id,
-                            regime       = regime.value,
-                            side         = sig.signal.value,
-                            confidence   = sig.confidence,
-                            entry_price  = sig.entry_price,
-                            stop_loss    = sig.stop_loss,
-                            take_profit  = sig.take_profit,
-                            utc_hour     = __import__("datetime").datetime.utcnow().hour,
-                            rsi_val      = _rsi_val if "_rsi_val" in dir() else 50.0,
-                            above_sma    = _above_sma if "_above_sma" in dir() else True,
-                            atr_pct      = _atr_pct_st,
+                            signal_id     = pos.position_id,
+                            symbol        = sym,
+                            strategy_id   = sig.strategy_id,
+                            regime        = regime.value,
+                            side          = sig.signal.value,
+                            confidence    = sig.confidence,
+                            entry_price   = sig.entry_price,
+                            stop_loss     = sig.stop_loss,
+                            take_profit   = sig.take_profit,
+                            utc_hour      = __import__("datetime").datetime.utcnow().hour,
+                            rsi_val       = _rsi_val,
+                            above_sma     = _above_sma,
+                            atr_pct       = _atr_pct_st,
                             context_score = _cq_score,
                         )
                     except Exception:
@@ -6659,31 +6671,34 @@ def _generate_forensic_reports(
     tlog = [str(t.get("msg", "")) for t in list(thoughts)]
     def _cnt(kw): return sum(1 for m in tlog if kw in m)
 
-    signals_gen  = _cnt("🔔 Signal")
-    trades_open  = _cnt("✅ Opened")
-    rsi_blocked  = _cnt("RSI filter blocked")
-    rsi_crash_g  = _cnt("RSI_CRASH_GUARD")
-    aie_suppress = _cnt("AIE INVERSE suppressed")
-    fee_blocked  = _cnt("FEE_HEAVY")
-    sl_blocked   = _cnt("SL_TOO_TIGHT")
-    rr_blocked   = _cnt("RR_LOW")
-    dd_blocked   = _cnt("DAILY_DD")
-    streak_block = _cnt("LOSS_STREAK")
-    lcc_blocked  = _cnt("LCC_OVERRIDE") + _cnt("LCC_PAUSED") + _cnt("LCC_REDUCING")
-    zero_qty     = _cnt("ZERO_QTY")
-    rl_blocked   = _cnt("RL_GATE")
-    alloc_zero   = _cnt("ALLOC_ZERO")
+    signals_gen   = _cnt("🔔 Signal")
+    trades_open   = _cnt("✅ Opened")
+    rsi_blocked   = _cnt("RSI filter blocked")
+    rsi_crash_g   = _cnt("RSI_CRASH_GUARD")
+    aie_suppress  = _cnt("AIE INVERSE suppressed")
+    fee_blocked   = _cnt("FEE_HEAVY")
+    sl_blocked    = _cnt("SL_TOO_TIGHT")
+    rr_blocked    = _cnt("RR_LOW")
+    dd_blocked    = _cnt("DAILY_DD")
+    streak_block  = _cnt("LOSS_STREAK")
+    lcc_blocked   = _cnt("LCC_OVERRIDE") + _cnt("LCC_PAUSED") + _cnt("LCC_REDUCING")
+    zero_qty      = _cnt("ZERO_QTY")
+    rl_blocked    = _cnt("RL_GATE")
+    alloc_zero    = _cnt("ALLOC_ZERO")
+    pos_exists    = _cnt("POSITION_EXISTS")
 
+    # ALLOC_ZERO is informational in bypass mode (trade continues via orchestrator bypass).
+    # It is NOT included in all_blockers — in non-bypass mode ALLOC_ZERO shows as ZERO_QTY.
     all_blockers = [
-        ("RSI_FILTER",     rsi_blocked),
+        ("RSI_FILTER",      rsi_blocked),
         ("RSI_CRASH_GUARD", rsi_crash_g),
-        ("FEE_GATE",       fee_blocked),
-        ("SL_GATE",        sl_blocked),
-        ("RR_GATE",        rr_blocked),
-        ("LCC",            lcc_blocked),
-        ("ZERO_QTY",       zero_qty),
-        ("RL_GATE",        rl_blocked),
-        ("ALLOC_ZERO",     alloc_zero),
+        ("FEE_GATE",        fee_blocked),
+        ("SL_GATE",         sl_blocked),
+        ("RR_GATE",         rr_blocked),
+        ("LCC",             lcc_blocked),
+        ("ZERO_QTY",        zero_qty),
+        ("RL_GATE",         rl_blocked),
+        ("POSITION_EXISTS", pos_exists),
     ]
     files["signal_funnel.json"] = json.dumps({
         "title":         "Signal Pipeline Funnel — Where Trade Ideas Are Filtered",
@@ -6702,7 +6717,8 @@ def _generate_forensic_reports(
             "4_lcc_blocked":               lcc_blocked,
             "4_rl_gate_blocked":           rl_blocked,
             "4_zero_qty_killed":           zero_qty,
-            "4_alloc_zero_override":       alloc_zero,
+            "4_alloc_zero_bypass_noted":   alloc_zero,
+            "4_position_exists_skipped":   pos_exists,
             "5_trades_executed":           trades_open,
         },
         "conversion_rate_pct": round(trades_open / max(signals_gen, 1) * 100, 1),
