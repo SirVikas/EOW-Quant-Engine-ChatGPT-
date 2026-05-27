@@ -1,0 +1,93 @@
+{
+  "title": "Strategy Forensics \u2014 Per-Strategy Performance Breakdown",
+  "generated_at": "2026-05-27 02:17:58 UTC",
+  "total_strategies": 6,
+  "best_strategy": "NONE \u2014 all strategies losing",
+  "strategies": [
+    {
+      "strategy_id": "ALPHA_TCB_v1",
+      "n_trades": 220,
+      "win_rate_pct": 25.0,
+      "profit_factor": 0.538,
+      "net_pnl_usdt": -16.6585,
+      "avg_win_usdt": 0.3529,
+      "avg_loss_usdt": 0.2186,
+      "actual_rr": 1.614,
+      "total_fees_usdt": 6.8497,
+      "fee_pct_of_gp": 35.3,
+      "avg_r_multiple": -0.019,
+      "verdict": "NOISE"
+    },
+    {
+      "strategy_id": "ALPHA_PBE_v1",
+      "n_trades": 178,
+      "win_rate_pct": 24.72,
+      "profit_factor": 0.43,
+      "net_pnl_usdt": -21.096,
+      "avg_win_usdt": 0.3611,
+      "avg_loss_usdt": 0.276,
+      "actual_rr": 1.308,
+      "total_fees_usdt": 6.5467,
+      "fee_pct_of_gp": 41.2,
+      "avg_r_multiple": -0.028,
+      "verdict": "NOISE"
+    },
+    {
+      "strategy_id": "MR_BB_RSI_v1",
+      "n_trades": 77,
+      "win_rate_pct": 19.48,
+      "profit_factor": 0.419,
+      "net_pnl_usdt": -9.3444,
+      "avg_win_usdt": 0.4497,
+      "avg_loss_usdt": 0.2595,
+      "actual_rr": 1.733,
+      "total_fees_usdt": 4.9361,
+      "fee_pct_of_gp": 73.2,
+      "avg_r_multiple": -0.031,
+      "verdict": "NOISE"
+    },
+    {
+      "strategy_id": "TrendFollowing_PAPER_SPEED",
+      "n_trades": 192,
+      "win_rate_pct": 16.15,
+      "profit_factor": 0.419,
+      "net_pnl_usdt": -22.6954,
+      "avg_win_usdt": 0.5273,
+      "avg_loss_usdt": 0.2425,
+      "actual_rr": 2.174,
+      "total_fees_usdt": 12.7338,
+      "fee_pct_of_gp": 77.9,
+      "avg_r_multiple": -0.022,
+      "verdict": "NOISE"
+    },
+    {
+      "strategy_id": "MeanReversion_PAPER_SPEED",
+      "n_trades": 561,
+      "win_rate_pct": 19.25,
+      "profit_factor": 0.397,
+      "net_pnl_usdt": -156.2856,
+      "avg_win_usdt": 0.9537,
+      "avg_loss_usdt": 0.5724,
+      "actual_rr": 1.666,
+      "total_fees_usdt": 80.7583,
+      "fee_pct_of_gp": 78.4,
+      "avg_r_multiple": -0.056,
+      "verdict": "NOISE"
+    },
+    {
+      "strategy_id": "TF_EMA_RSI_v1",
+      "n_trades": 56,
+      "win_rate_pct": 16.07,
+      "profit_factor": 0.213,
+      "net_pnl_usdt": -6.5545,
+      "avg_win_usdt": 0.1975,
+      "avg_loss_usdt": 0.1773,
+      "actual_rr": 1.114,
+      "total_fees_usdt": 1.5939,
+      "fee_pct_of_gp": 89.7,
+      "avg_r_multiple": -0.027,
+      "verdict": "NOISE"
+    }
+  ],
+  "action": "RSI filter + real strategies needed before any strategy is viable"
+}

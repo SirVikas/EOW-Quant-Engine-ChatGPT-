@@ -1,0 +1,2246 @@
+{
+  "records": [
+    {
+      "cycle_id": "741e2dee",
+      "timestamp": 1779814151.6846662,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "16",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ATOMUSDT net_pnl=-0.2169 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779814151684
+    },
+    {
+      "cycle_id": "a8ce150e",
+      "timestamp": 1779814798.3099258,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "16",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.3513 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779814798309
+    },
+    {
+      "cycle_id": "8207f662",
+      "timestamp": 1779815001.5065188,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT INJUSDT net_pnl=-0.3101 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779815001506
+    },
+    {
+      "cycle_id": "6202e7d6",
+      "timestamp": 1779815019.8493583,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "APTUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT APTUSDT net_pnl=-0.3775 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779815019849
+    },
+    {
+      "cycle_id": "410d32fe",
+      "timestamp": 1779815091.584982,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ATOMUSDT net_pnl=-0.2154 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779815091584
+    },
+    {
+      "cycle_id": "a1570bc7",
+      "timestamp": 1779815110.901169,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "ARBUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ARBUSDT net_pnl=+0.3656 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779815110901
+    },
+    {
+      "cycle_id": "45cbad2d",
+      "timestamp": 1779815353.7673237,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT DOTUSDT net_pnl=+0.3043 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779815353767
+    },
+    {
+      "cycle_id": "9a8ab0fb",
+      "timestamp": 1779816042.810628,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG UNIUSDT net_pnl=-0.3953 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779816042810
+    },
+    {
+      "cycle_id": "2c912500",
+      "timestamp": 1779816110.4879558,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "OPUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT OPUSDT net_pnl=-0.0372 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816110487
+    },
+    {
+      "cycle_id": "21bc5c79",
+      "timestamp": 1779816121.766332,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT LTCUSDT net_pnl=-0.1171 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816121766
+    },
+    {
+      "cycle_id": "9ad67083",
+      "timestamp": 1779816183.005258,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ATOMUSDT net_pnl=-0.2196 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816183005
+    },
+    {
+      "cycle_id": "726eafda",
+      "timestamp": 1779816230.6857405,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG DOTUSDT net_pnl=-0.4330 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779816230685
+    },
+    {
+      "cycle_id": "4ed7f721",
+      "timestamp": 1779816324.0020554,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=+0.1635 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816324002
+    },
+    {
+      "cycle_id": "e28899d2",
+      "timestamp": 1779816548.5672548,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "ETHUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ETHUSDT net_pnl=+0.0546 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816548567
+    },
+    {
+      "cycle_id": "89da65e1",
+      "timestamp": 1779816799.1255515,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT INJUSDT net_pnl=-0.0744 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816799125
+    },
+    {
+      "cycle_id": "184d7e6c",
+      "timestamp": 1779816945.5738466,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT DOTUSDT net_pnl=-0.2335 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816945573
+    },
+    {
+      "cycle_id": "4aa32fd3",
+      "timestamp": 1779816947.3338373,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "APTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT APTUSDT net_pnl=-0.2991 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816947333
+    },
+    {
+      "cycle_id": "44a8c9ee",
+      "timestamp": 1779816948.3186753,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ATOMUSDT net_pnl=-0.2908 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816948318
+    },
+    {
+      "cycle_id": "ded434a8",
+      "timestamp": 1779816953.1124032,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT UNIUSDT net_pnl=-0.2396 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816953112
+    },
+    {
+      "cycle_id": "e892ef2e",
+      "timestamp": 1779816954.1121125,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "LTCUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT LTCUSDT net_pnl=-0.1355 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779816954112
+    },
+    {
+      "cycle_id": "1d24144d",
+      "timestamp": 1779817767.9789824,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "ARBUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ARBUSDT net_pnl=-0.2094 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779817767978
+    },
+    {
+      "cycle_id": "6d60f8fb",
+      "timestamp": 1779817954.908694,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "17",
+        "instrument": "APTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT APTUSDT net_pnl=-0.2008 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779817954908
+    },
+    {
+      "cycle_id": "653224fe",
+      "timestamp": 1779819490.96261,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT DOTUSDT net_pnl=-0.2625 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779819490962
+    },
+    {
+      "cycle_id": "2be8b4f2",
+      "timestamp": 1779819583.1852963,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG INJUSDT net_pnl=-0.1977 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779819583185
+    },
+    {
+      "cycle_id": "393b618a",
+      "timestamp": 1779820158.4911845,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ATOMUSDT net_pnl=-0.1364 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779820158492
+    },
+    {
+      "cycle_id": "f9452c08",
+      "timestamp": 1779820199.6916203,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "OPUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT OPUSDT net_pnl=-0.2555 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779820199691
+    },
+    {
+      "cycle_id": "fb1c53b4",
+      "timestamp": 1779820205.49455,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT DOTUSDT net_pnl=-0.2620 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779820205494
+    },
+    {
+      "cycle_id": "9f5c925f",
+      "timestamp": 1779820234.4829586,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.3180 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779820234482
+    },
+    {
+      "cycle_id": "c3122825",
+      "timestamp": 1779820607.8308454,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "APTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG APTUSDT net_pnl=-0.1995 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779820607830
+    },
+    {
+      "cycle_id": "bb290ad6",
+      "timestamp": 1779820802.975279,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.6154 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779820802975
+    },
+    {
+      "cycle_id": "9540e55a",
+      "timestamp": 1779820822.9681227,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG INJUSDT net_pnl=-0.4095 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779820822968
+    },
+    {
+      "cycle_id": "193968d8",
+      "timestamp": 1779821072.2621965,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT UNIUSDT net_pnl=-0.1524 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779821072262
+    },
+    {
+      "cycle_id": "c97d43cc",
+      "timestamp": 1779821551.9135554,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.3204 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779821551913
+    },
+    {
+      "cycle_id": "c07f32d9",
+      "timestamp": 1779821667.435004,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ATOMUSDT net_pnl=-0.0093 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779821667435
+    },
+    {
+      "cycle_id": "f68154d7",
+      "timestamp": 1779821999.1567109,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "18",
+        "instrument": "UNIUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT UNIUSDT net_pnl=+0.0763 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779821999156
+    },
+    {
+      "cycle_id": "e89df76a",
+      "timestamp": 1779822034.759542,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "ARBUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ARBUSDT net_pnl=-0.3013 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779822034759
+    },
+    {
+      "cycle_id": "8f4c3f46",
+      "timestamp": 1779822073.061281,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.2842 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779822073061
+    },
+    {
+      "cycle_id": "6ebe052b",
+      "timestamp": 1779822246.7164738,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT INJUSDT net_pnl=+0.7370 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779822246716
+    },
+    {
+      "cycle_id": "3ceec3ba",
+      "timestamp": 1779822626.1243808,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT DOTUSDT net_pnl=-0.0259 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779822626124
+    },
+    {
+      "cycle_id": "146de322",
+      "timestamp": 1779822990.169086,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "APTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT APTUSDT net_pnl=+0.0586 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779822990169
+    },
+    {
+      "cycle_id": "97d433ce",
+      "timestamp": 1779823003.659902,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "OPUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT OPUSDT net_pnl=-0.1089 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779823003659
+    },
+    {
+      "cycle_id": "094e1adb",
+      "timestamp": 1779823491.8866844,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ATOMUSDT net_pnl=-0.1444 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779823491886
+    },
+    {
+      "cycle_id": "96463558",
+      "timestamp": 1779823744.5349925,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=+0.4379 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779823744535
+    },
+    {
+      "cycle_id": "6b50841a",
+      "timestamp": 1779824183.9169614,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ATOMUSDT net_pnl=-0.1253 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779824183916
+    },
+    {
+      "cycle_id": "b2b6fafe",
+      "timestamp": 1779825338.9882753,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "APTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG APTUSDT net_pnl=-0.2255 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779825338988
+    },
+    {
+      "cycle_id": "317f0e38",
+      "timestamp": 1779825546.5153134,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG DOTUSDT net_pnl=-0.1294 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779825546515
+    },
+    {
+      "cycle_id": "259c4abe",
+      "timestamp": 1779825589.3246064,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "19",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG INJUSDT net_pnl=-0.1055 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779825589324
+    },
+    {
+      "cycle_id": "03541f47",
+      "timestamp": 1779826651.5391006,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "20",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG NEARUSDT net_pnl=-0.1711 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779826651540
+    },
+    {
+      "cycle_id": "67979fb6",
+      "timestamp": 1779826767.029884,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "20",
+        "instrument": "ARBUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ARBUSDT net_pnl=-0.1453 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779826767029
+    },
+    {
+      "cycle_id": "34e43c1a",
+      "timestamp": 1779827013.955712,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "20",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT INJUSDT net_pnl=+0.1301 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779827013955
+    },
+    {
+      "cycle_id": "758cf99b",
+      "timestamp": 1779827215.5951517,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "20",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.1780 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779827215595
+    },
+    {
+      "cycle_id": "9a00ad81",
+      "timestamp": 1779828984.628281,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "20",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.2148 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779828984628
+    },
+    {
+      "cycle_id": "b726db55",
+      "timestamp": 1779829642.1607256,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG NEARUSDT net_pnl=-0.0432 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779829642160
+    },
+    {
+      "cycle_id": "d7a737ae",
+      "timestamp": 1779829961.8741467,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG INJUSDT net_pnl=-0.2744 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779829961874
+    },
+    {
+      "cycle_id": "15d40f0a",
+      "timestamp": 1779830072.6434007,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "ARBUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ARBUSDT net_pnl=-0.1862 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779830072643
+    },
+    {
+      "cycle_id": "f15f0b07",
+      "timestamp": 1779830082.7828336,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.1795 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779830082782
+    },
+    {
+      "cycle_id": "449fe2d0",
+      "timestamp": 1779830279.8735693,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ATOMUSDT net_pnl=-0.0657 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779830279873
+    },
+    {
+      "cycle_id": "7b5859de",
+      "timestamp": 1779831182.21477,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ATOMUSDT net_pnl=-0.1234 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779831182214
+    },
+    {
+      "cycle_id": "5f842fcf",
+      "timestamp": 1779832057.73146,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "ATOMUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ATOMUSDT net_pnl=-0.1230 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779832057731
+    },
+    {
+      "cycle_id": "50dc440f",
+      "timestamp": 1779832768.1972923,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.1307 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779832768200
+    },
+    {
+      "cycle_id": "40d17d52",
+      "timestamp": 1779832787.4027617,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "DOTUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT DOTUSDT net_pnl=-0.1297 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779832787402
+    },
+    {
+      "cycle_id": "c45fb5af",
+      "timestamp": 1779832795.7267106,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "21",
+        "instrument": "INJUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT INJUSDT net_pnl=-0.0635 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779832795726
+    },
+    {
+      "cycle_id": "90461d2b",
+      "timestamp": 1779840611.90957,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.1270 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779840611909
+    },
+    {
+      "cycle_id": "667193b8",
+      "timestamp": 1779840687.6442473,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "FETUSDT"
+      },
+      "change": {
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG FETUSDT net_pnl=-0.1823 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779840687644
+    },
+    {
+      "cycle_id": "81f5d1e4",
+      "timestamp": 1779841016.561047,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT TONUSDT net_pnl=-0.1262 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779841016561
+    },
+    {
+      "cycle_id": "06e2f3d8",
+      "timestamp": 1779841200.2946377,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "RENDERUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT RENDERUSDT net_pnl=+0.1356 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779841200294
+    },
+    {
+      "cycle_id": "2f56f4b0",
+      "timestamp": 1779841218.1410081,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT NEARUSDT net_pnl=-0.1138 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779841218141
+    },
+    {
+      "cycle_id": "3a956ab7",
+      "timestamp": 1779841260.256858,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "ONDOUSDT"
+      },
+      "change": {
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ONDOUSDT net_pnl=+0.2089 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779841260256
+    },
+    {
+      "cycle_id": "627a27a9",
+      "timestamp": 1779841296.6512375,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "WLDUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT WLDUSDT net_pnl=-0.0309 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779841296651
+    },
+    {
+      "cycle_id": "1165d031",
+      "timestamp": 1779841835.4529831,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "FETUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT FETUSDT net_pnl=-0.0307 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779841835453
+    },
+    {
+      "cycle_id": "d22890ce",
+      "timestamp": 1779841861.4336083,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "RENDERUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG RENDERUSDT net_pnl=+0.3733 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779841861433
+    },
+    {
+      "cycle_id": "e340b087",
+      "timestamp": 1779842118.5722058,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "WLDUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT WLDUSDT net_pnl=-0.3397 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779842118572
+    },
+    {
+      "cycle_id": "b9a769b1",
+      "timestamp": 1779842147.1293266,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "OPGUSDT"
+      },
+      "change": {
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT OPGUSDT net_pnl=-0.0925 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779842147129
+    },
+    {
+      "cycle_id": "73e8f7df",
+      "timestamp": 1779842361.7753866,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "NEARUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG NEARUSDT net_pnl=-0.1427 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779842361775
+    },
+    {
+      "cycle_id": "30cb41e7",
+      "timestamp": 1779842566.6640873,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "SPKUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG SPKUSDT net_pnl=-0.0308 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779842566665
+    },
+    {
+      "cycle_id": "e68a3a3f",
+      "timestamp": 1779842635.6241229,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "ONDOUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ONDOUSDT net_pnl=-0.2015 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779842635624
+    },
+    {
+      "cycle_id": "3ffe64a6",
+      "timestamp": 1779843013.5420535,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "RENDERUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG RENDERUSDT net_pnl=-0.2163 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779843013542
+    },
+    {
+      "cycle_id": "5c303766",
+      "timestamp": 1779843117.1284058,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "ONDOUSDT"
+      },
+      "change": {
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT ONDOUSDT net_pnl=-0.2377 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779843117129
+    },
+    {
+      "cycle_id": "605a889b",
+      "timestamp": 1779843281.811877,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "TONUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG TONUSDT net_pnl=-0.0748 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779843281811
+    },
+    {
+      "cycle_id": "52439426",
+      "timestamp": 1779843363.4068067,
+      "context": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "timeframe": "0",
+        "instrument": "OPGUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT OPGUSDT net_pnl=-0.1538 conf=0.510 regime=MEAN_REVERTING"
+      },
+      "_stored_ts": 1779843363406
+    },
+    {
+      "cycle_id": "ccb4c68a",
+      "timestamp": 1779843676.7644742,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "ONDOUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG ONDOUSDT net_pnl=-0.1871 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779843676764
+    },
+    {
+      "cycle_id": "35195deb",
+      "timestamp": 1779843993.4514043,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "FETUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "outcome": {
+        "score_delta": 10.0,
+        "rollback": false
+      },
+      "validation": {
+        "meta_score": 61.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "LONG FETUSDT net_pnl=+0.0492 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779843993451
+    },
+    {
+      "cycle_id": "8f9f7cd1",
+      "timestamp": 1779844380.1706338,
+      "context": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "timeframe": "1",
+        "instrument": "FETUSDT"
+      },
+      "change": {
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "outcome": {
+        "score_delta": -10.0,
+        "rollback": true
+      },
+      "validation": {
+        "meta_score": 41.0,
+        "contradiction": false
+      },
+      "decision": {
+        "ai_mode": "TRADE",
+        "rationale": "SHORT FETUSDT net_pnl=-0.1691 conf=0.510 regime=TRENDING"
+      },
+      "_stored_ts": 1779844380170
+    }
+  ],
+  "phase": "030B"
+}

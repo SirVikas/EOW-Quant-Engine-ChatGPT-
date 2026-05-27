@@ -1,0 +1,119 @@
+{
+  "mode": "NORMAL",
+  "decision": "MONITOR \u2014 assess next candle",
+  "regime": {
+    "window": 50,
+    "pairs": 2,
+    "regimes": {
+      "TrendFollowing@TRENDING": {
+        "n": 14,
+        "fit": 0.107,
+        "win_rate": 0.214,
+        "avg_r": -0.075
+      },
+      "MeanReversion@MEAN_REVERTING": {
+        "n": 7,
+        "fit": 0.071,
+        "win_rate": 0.143,
+        "avg_r": -0.092
+      }
+    },
+    "module": "REGIME_MEMORY",
+    "phase": 5
+  },
+  "learning": {
+    "window_size": 50,
+    "min_samples": 5,
+    "recency_decay": 0.93,
+    "thresholds": {
+      "wr_high": 0.55,
+      "wr_low": 0.45,
+      "weight_at_low": 0.8
+    },
+    "regimes": {
+      "TRENDING": {
+        "n_trades": 14,
+        "win_rate": 0.217,
+        "weight": 0.5
+      },
+      "MEAN_REVERTING": {
+        "n_trades": 7,
+        "win_rate": 0.122,
+        "weight": 0.5
+      }
+    }
+  },
+  "edge": {
+    "window_size": 50,
+    "min_trades": 20,
+    "emergency_min_trades": 5,
+    "emergency_kill_at": -0.3,
+    "edge_boost_at": 0.15,
+    "edge_kill_at": 0.0,
+    "boost_mult": 1.25,
+    "strategies": {
+      "TRENDING@ALPHA_PBE_v1": {
+        "n_trades": 3,
+        "edge": -0.2276,
+        "win_rate": 0.0,
+        "size_mult": 1.0,
+        "disabled": false,
+        "kill_age_s": null
+      },
+      "TRENDING@TF_EMA_RSI_v1": {
+        "n_trades": 3,
+        "edge": -0.022,
+        "win_rate": 0.333,
+        "size_mult": 1.0,
+        "disabled": false,
+        "kill_age_s": null
+      },
+      "MEAN_REVERTING@ALPHA_PBE_v1": {
+        "n_trades": 3,
+        "edge": -0.1605,
+        "win_rate": 0.0,
+        "size_mult": 1.0,
+        "disabled": false,
+        "kill_age_s": null
+      },
+      "MEAN_REVERTING@MR_BB_RSI_v1": {
+        "n_trades": 4,
+        "edge": -0.0409,
+        "win_rate": 0.25,
+        "size_mult": 1.0,
+        "disabled": false,
+        "kill_age_s": null
+      },
+      "TRENDING@ALPHA_TCB_v1": {
+        "n_trades": 8,
+        "edge": -0.037,
+        "win_rate": 0.25,
+        "size_mult": 1.0,
+        "disabled": false,
+        "kill_age_s": null
+      }
+    }
+  },
+  "drawdown": {
+    "peak_equity": 769.1624,
+    "current_equity": 767.3658,
+    "drawdown_pct": 0.23,
+    "tier_thresholds": {
+      "soft_cut": 0.05,
+      "hard_cut": 0.1,
+      "stop": 0.15
+    },
+    "module": "DRAWDOWN_CONTROLLER",
+    "phase": 5
+  },
+  "streak": {
+    "win_streak_min": 3,
+    "loss_streak_min": 3,
+    "hot_score_adj": -0.03,
+    "cold_score_adj": 0.05,
+    "module": "STREAK_INTELLIGENCE_ENGINE",
+    "phase": 6
+  },
+  "module": "AI_BRAIN",
+  "phase": "023"
+}

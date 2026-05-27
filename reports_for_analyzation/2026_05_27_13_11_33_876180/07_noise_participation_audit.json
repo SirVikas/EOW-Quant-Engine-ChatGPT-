@@ -1,0 +1,46 @@
+{
+  "report": "07_noise_participation_audit",
+  "prp": "001",
+  "by_hour": [
+    {
+      "hour": 0,
+      "total": 18,
+      "fp": 15,
+      "fp_rate": 0.8333
+    },
+    {
+      "hour": 1,
+      "total": 3,
+      "fp": 2,
+      "fp_rate": 0.6667
+    }
+  ],
+  "by_regime_side": {
+    "TRENDING": {
+      "LONG": {
+        "total": 7,
+        "fp": 5,
+        "fp_rate": 0.7143
+      },
+      "SHORT": {
+        "total": 7,
+        "fp": 6,
+        "fp_rate": 0.8571
+      }
+    },
+    "MEAN_REVERTING": {
+      "LONG": {
+        "total": 1,
+        "fp": 1,
+        "fp_rate": 1.0
+      },
+      "SHORT": {
+        "total": 6,
+        "fp": 5,
+        "fp_rate": 0.8333
+      }
+    }
+  },
+  "confidence_traps": 0,
+  "ts": 1779848254483
+}

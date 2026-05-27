@@ -140,7 +140,7 @@ def build_raw_snapshot(
         "total_net_pnl":  _safe(lambda: float(raw_ss.get("total_net_pnl", 0.0)), 0.0),
         "n_trades":       _safe(lambda: int(raw_ss.get("total_trades", 0)), 0),
         "profit_factor":  _safe(lambda: float(raw_ss.get("profit_factor", 0.0)), 0.0),
-        "win_rate":       _safe(lambda: float(raw_ss.get("win_rate", 0.0)), 0.0),
+        "win_rate":       _safe(lambda: float(raw_ss.get("win_rate", 0.0)) / 100.0, 0.0),
     }
 
     # ── rl engine ─────────────────────────────────────────────────────────────
