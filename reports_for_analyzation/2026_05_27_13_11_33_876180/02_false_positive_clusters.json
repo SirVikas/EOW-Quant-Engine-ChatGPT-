@@ -1,0 +1,56 @@
+{
+  "report": "02_false_positive_clusters",
+  "prp": "001",
+  "total_false_positives": 17,
+  "total_outcomes": 21,
+  "false_positive_rate": 0.8095,
+  "clusters": [
+    {
+      "regime": "MEAN_REVERTING",
+      "strategy": "ALPHA_PBE_v1",
+      "rsi_zone": "EXTREME_LOW",
+      "conf_tier": "LOW",
+      "side": "SHORT",
+      "count": 3,
+      "avg_pnl": -0.1605,
+      "symbols": [
+        "TONUSDT",
+        "ONDOUSDT",
+        "OPGUSDT"
+      ],
+      "last_ts": 1779843363390
+    },
+    {
+      "regime": "TRENDING",
+      "strategy": "ALPHA_TCB_v1",
+      "rsi_zone": "EXTREME_LOW",
+      "conf_tier": "LOW",
+      "side": "SHORT",
+      "count": 3,
+      "avg_pnl": -0.1046,
+      "symbols": [
+        "WLDUSDT",
+        "FETUSDT",
+        "NEARUSDT"
+      ],
+      "last_ts": 1779844380157
+    },
+    {
+      "regime": "TRENDING",
+      "strategy": "ALPHA_TCB_v1",
+      "rsi_zone": "EXTREME_LOW",
+      "conf_tier": "LOW",
+      "side": "LONG",
+      "count": 3,
+      "avg_pnl": -0.1348,
+      "symbols": [
+        "TONUSDT",
+        "ONDOUSDT",
+        "NEARUSDT"
+      ],
+      "last_ts": 1779843676751
+    }
+  ],
+  "confidence_traps": [],
+  "ts": 1779848254483
+}

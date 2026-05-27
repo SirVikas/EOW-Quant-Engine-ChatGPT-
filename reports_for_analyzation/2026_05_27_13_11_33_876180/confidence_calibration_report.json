@@ -1,0 +1,102 @@
+{
+  "title": "Confidence Calibration \u2014 Q-Value Prediction Accuracy (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-27 02:17:58 UTC",
+  "methodology": "Directional calibration: Q > 0 predicts winning context (WR > 50%).",
+  "n_evaluated": 8,
+  "n_correct": 8,
+  "accuracy_pct": 100.0,
+  "brier_score": 0.023,
+  "brier_interpretation": "Well-calibrated (< 0.25)",
+  "context_calibration": [
+    {
+      "context": "MEAN_REVERTING|NY|MeanReversion",
+      "n_visits": 493,
+      "q_value": -0.1678,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 18.7,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0182
+    },
+    {
+      "context": "TRENDING|NY|TrendFollowing",
+      "n_visits": 193,
+      "q_value": -0.1838,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 22.3,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0174
+    },
+    {
+      "context": "TRENDING|LATE|TrendFollowing",
+      "n_visits": 159,
+      "q_value": -0.114,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 15.7,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0038
+    },
+    {
+      "context": "MEAN_REVERTING|LATE|MeanReversion",
+      "n_visits": 341,
+      "q_value": -0.1374,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 17.0,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0071
+    },
+    {
+      "context": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 312,
+      "q_value": -0.1129,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 18.3,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0031
+    },
+    {
+      "context": "TRENDING|ASIA|TrendFollowing",
+      "n_visits": 141,
+      "q_value": -0.1069,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 23.4,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0047
+    },
+    {
+      "context": "TRENDING|LONDON|TrendFollowing",
+      "n_visits": 120,
+      "q_value": -0.0774,
+      "q_tier": "NEUTRAL",
+      "actual_wr_pct": 25.8,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.0033
+    },
+    {
+      "context": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 238,
+      "q_value": -0.2044,
+      "q_tier": "PENALIZED",
+      "actual_wr_pct": 21.4,
+      "q_predicts_winning": false,
+      "actually_winning": false,
+      "directionally_correct": true,
+      "q_velocity": 0.034
+    }
+  ],
+  "verdict": "WELL_CALIBRATED \u2014 Q reliably predicts context quality",
+  "note": "Calibration improves naturally as visits accumulate. Expect reliable calibration after 50+ visits per context (MATURE stage)."
+}

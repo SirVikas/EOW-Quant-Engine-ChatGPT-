@@ -1,0 +1,22 @@
+{
+  "report": "09_regime_signal_validity",
+  "prp": "001",
+  "global_legit_score": 0.3333,
+  "by_regime": {
+    "TRENDING": {
+      "total": 14,
+      "legit_rate": 0.4286,
+      "status": "INVALID",
+      "LONG_valid": true,
+      "SHORT_valid": false
+    },
+    "MEAN_REVERTING": {
+      "total": 7,
+      "legit_rate": 0.1429,
+      "status": "INVALID",
+      "LONG_valid": false,
+      "SHORT_valid": false
+    }
+  },
+  "ts": 1779848254483
+}

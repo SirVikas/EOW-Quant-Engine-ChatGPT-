@@ -1,0 +1,343 @@
+{
+  "captured_at": "2026-05-27T02:17:58.756Z",
+  "total_contexts": 22,
+  "meta": {
+    "module": "RL_CONTEXTUAL_BANDIT",
+    "version": "2.0",
+    "total_contexts": 22,
+    "profitable_pct": 0.0,
+    "toxic_contexts": 1,
+    "total_pulls": 23,
+    "total_updates": 21,
+    "total_allowed": 17,
+    "total_blocked": 6,
+    "allow_rate": 0.739,
+    "explore_trades": 0,
+    "exploit_trades": 17,
+    "explore_ratio": 0.0,
+    "boost_fires": 0,
+    "floor_lowers": 0,
+    "floor_raises": 0,
+    "toxic_blocks": 6,
+    "uptime_min": 130.0,
+    "top_contexts": [
+      {
+        "context": "TRENDING|NY|MeanReversion",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0,
+        "maturity": 0.0
+      },
+      {
+        "context": "VOLATILITY_EXPANSION|NY|TrendFollowing",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0,
+        "maturity": 0.0
+      },
+      {
+        "context": "VOLATILITY_EXPANSION|NY|MeanReversion",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0,
+        "maturity": 0.0
+      },
+      {
+        "context": "TRENDING|LATE|MeanReversion",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0,
+        "maturity": 0.0
+      },
+      {
+        "context": "VOLATILITY_EXPANSION|LATE|TrendFollowing",
+        "q_value": 0.0,
+        "ucb_bonus": Infinity,
+        "win_rate": 0.0,
+        "n_visits": 0,
+        "total_pnl": 0.0,
+        "maturity": 0.0
+      }
+    ],
+    "bottom_contexts": [
+      {
+        "context": "MEAN_REVERTING|LONDON|MeanReversion",
+        "q_value": -0.2044,
+        "ucb_score": -0.0323,
+        "win_rate": 0.214,
+        "n_visits": 238,
+        "total_pnl": -50.8501,
+        "near_block": false,
+        "toxic": false
+      },
+      {
+        "context": "TRENDING|NY|TrendFollowing",
+        "q_value": -0.1838,
+        "ucb_score": 0.0074,
+        "win_rate": 0.223,
+        "n_visits": 193,
+        "total_pnl": -27.3441,
+        "near_block": false,
+        "toxic": false
+      },
+      {
+        "context": "MEAN_REVERTING|NY|MeanReversion",
+        "q_value": -0.1678,
+        "ucb_score": -0.0482,
+        "win_rate": 0.187,
+        "n_visits": 493,
+        "total_pnl": -108.9062,
+        "near_block": false,
+        "toxic": true
+      }
+    ],
+    "hyper": {
+      "learning_rate_adaptive": "0.07\u21920.25 (by maturity)",
+      "ev_floor": -0.3,
+      "ucb_coeff": 1.5,
+      "min_visits": 3,
+      "q_bounds": [
+        -2.0,
+        5.0
+      ],
+      "decay_per_day": 0.98,
+      "bootstrap_dampen": 0.5,
+      "regime_ucb_mult": {
+        "TRENDING": 1.2,
+        "MEAN_REVERTING": 1.0,
+        "VOLATILITY_EXPANSION": 0.8,
+        "UNKNOWN": 1.1
+      }
+    }
+  },
+  "contexts": [
+    {
+      "context_key": "MEAN_REVERTING|NY|MeanReversion",
+      "n_visits": 493,
+      "q_value": -0.1678,
+      "ucb_score": -0.0482,
+      "win_rate": 0.1866,
+      "n_wins": 92,
+      "total_pnl": -108.9062,
+      "last_ts": 1779820822962
+    },
+    {
+      "context_key": "MEAN_REVERTING|LATE|MeanReversion",
+      "n_visits": 341,
+      "q_value": -0.1374,
+      "ucb_score": 0.0064,
+      "win_rate": 0.1701,
+      "n_wins": 58,
+      "total_pnl": -78.4093,
+      "last_ts": 1779829642133
+    },
+    {
+      "context_key": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 312,
+      "q_value": -0.1129,
+      "ucb_score": 0.0375,
+      "win_rate": 0.1827,
+      "n_wins": 57,
+      "total_pnl": -65.5459,
+      "last_ts": 1779843363382
+    },
+    {
+      "context_key": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 238,
+      "q_value": -0.2044,
+      "ucb_score": -0.0323,
+      "win_rate": 0.2143,
+      "n_wins": 51,
+      "total_pnl": -50.8501,
+      "last_ts": 1779799328399
+    },
+    {
+      "context_key": "TRENDING|NY|TrendFollowing",
+      "n_visits": 193,
+      "q_value": -0.1838,
+      "ucb_score": 0.0074,
+      "win_rate": 0.2228,
+      "n_wins": 43,
+      "total_pnl": -27.3441,
+      "last_ts": 1779821999143
+    },
+    {
+      "context_key": "TRENDING|LATE|TrendFollowing",
+      "n_visits": 159,
+      "q_value": -0.114,
+      "ucb_score": 0.0966,
+      "win_rate": 0.1572,
+      "n_wins": 25,
+      "total_pnl": -16.1802,
+      "last_ts": 1779832795719
+    },
+    {
+      "context_key": "TRENDING|ASIA|TrendFollowing",
+      "n_visits": 141,
+      "q_value": -0.1069,
+      "ucb_score": 0.1168,
+      "win_rate": 0.234,
+      "n_wins": 33,
+      "total_pnl": -8.7213,
+      "last_ts": 1779844380140
+    },
+    {
+      "context_key": "TRENDING|LONDON|TrendFollowing",
+      "n_visits": 120,
+      "q_value": -0.0774,
+      "ucb_score": 0.1651,
+      "win_rate": 0.2583,
+      "n_wins": 31,
+      "total_pnl": -11.61,
+      "last_ts": 1779800383990
+    },
+    {
+      "context_key": "TRENDING|NY|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|NY|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|NY|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "TRENDING|LATE|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|LATE|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|LATE|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "TRENDING|ASIA|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|ASIA|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|ASIA|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "TRENDING|LONDON|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|LONDON|TrendFollowing",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "VOLATILITY_EXPANSION|LONDON|MeanReversion",
+      "n_visits": 0,
+      "q_value": 0.0,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "MEAN_REVERTING|ASIA|TrendFollowing",
+      "n_visits": 0,
+      "q_value": -0.1039,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    },
+    {
+      "context_key": "MEAN_REVERTING|NY|TrendFollowing",
+      "n_visits": 0,
+      "q_value": -0.2,
+      "ucb_score": 999.0,
+      "win_rate": 0.0,
+      "n_wins": 0,
+      "total_pnl": 0.0,
+      "last_ts": 0
+    }
+  ]
+}

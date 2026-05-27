@@ -1,0 +1,160 @@
+{
+  "title": "Alpha Persistence Report \u2014 Is Discovered Edge Durable? (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-27 02:17:58 UTC",
+  "alpha_summary": {
+    "contexts_analyzed": 8,
+    "positive_alpha": 0,
+    "alpha_developing": 0,
+    "negative_alpha": 1,
+    "q_spread": 0.127,
+    "differentiation_active": true,
+    "best_context": "TRENDING|LONDON|TrendFollowing",
+    "best_context_q": -0.0774,
+    "worst_context": "MEAN_REVERTING|LONDON|MeanReversion",
+    "worst_context_q": -0.2044
+  },
+  "context_alpha": [
+    {
+      "context": "MEAN_REVERTING|NY|MeanReversion",
+      "n_visits": 493,
+      "q_value": -0.1678,
+      "q_trend": "DEGRADING",
+      "q_stable": true,
+      "q_velocity": 0.0182,
+      "actual_wr_pct": 18.7,
+      "bayesian_wr_pct": 18.8,
+      "wr_ci_90": [
+        16.0,
+        21.7
+      ],
+      "total_pnl": -108.9062,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    },
+    {
+      "context": "MEAN_REVERTING|LATE|MeanReversion",
+      "n_visits": 341,
+      "q_value": -0.1374,
+      "q_trend": "IMPROVING",
+      "q_stable": true,
+      "q_velocity": 0.0071,
+      "actual_wr_pct": 17.0,
+      "bayesian_wr_pct": 17.2,
+      "wr_ci_90": [
+        13.9,
+        20.6
+      ],
+      "total_pnl": -78.4093,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    },
+    {
+      "context": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 312,
+      "q_value": -0.1129,
+      "q_trend": "STABLE",
+      "q_stable": true,
+      "q_velocity": 0.0031,
+      "actual_wr_pct": 18.3,
+      "bayesian_wr_pct": 18.5,
+      "wr_ci_90": [
+        14.9,
+        22.1
+      ],
+      "total_pnl": -65.5459,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    },
+    {
+      "context": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 238,
+      "q_value": -0.2044,
+      "q_trend": "IMPROVING",
+      "q_stable": false,
+      "q_velocity": 0.034,
+      "actual_wr_pct": 21.4,
+      "bayesian_wr_pct": 21.7,
+      "wr_ci_90": [
+        17.4,
+        26.1
+      ],
+      "total_pnl": -50.8501,
+      "alpha_status": "NEGATIVE_ALPHA",
+      "persistent": false
+    },
+    {
+      "context": "TRENDING|NY|TrendFollowing",
+      "n_visits": 193,
+      "q_value": -0.1838,
+      "q_trend": "IMPROVING",
+      "q_stable": true,
+      "q_velocity": 0.0174,
+      "actual_wr_pct": 22.3,
+      "bayesian_wr_pct": 22.6,
+      "wr_ci_90": [
+        17.8,
+        27.6
+      ],
+      "total_pnl": -27.3441,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    },
+    {
+      "context": "TRENDING|LATE|TrendFollowing",
+      "n_visits": 159,
+      "q_value": -0.114,
+      "q_trend": "STABLE",
+      "q_stable": true,
+      "q_velocity": 0.0038,
+      "actual_wr_pct": 15.7,
+      "bayesian_wr_pct": 16.1,
+      "wr_ci_90": [
+        11.6,
+        21.0
+      ],
+      "total_pnl": -16.1802,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    },
+    {
+      "context": "TRENDING|ASIA|TrendFollowing",
+      "n_visits": 141,
+      "q_value": -0.1069,
+      "q_trend": "STABLE",
+      "q_stable": true,
+      "q_velocity": 0.0047,
+      "actual_wr_pct": 23.4,
+      "bayesian_wr_pct": 23.8,
+      "wr_ci_90": [
+        18.1,
+        29.7
+      ],
+      "total_pnl": -8.7213,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    },
+    {
+      "context": "TRENDING|LONDON|TrendFollowing",
+      "n_visits": 120,
+      "q_value": -0.0774,
+      "q_trend": "STABLE",
+      "q_stable": true,
+      "q_velocity": 0.0033,
+      "actual_wr_pct": 25.8,
+      "bayesian_wr_pct": 26.2,
+      "wr_ci_90": [
+        19.8,
+        32.9
+      ],
+      "total_pnl": -11.61,
+      "alpha_status": "NO_ALPHA_YET",
+      "persistent": false
+    }
+  ],
+  "persistence_verdict": "DIFFERENTIATION_ACTIVE_NO_ALPHA \u2014 RL correctly ranks contexts, all still negative",
+  "gap_to_profitability": {
+    "best_q": -0.0774,
+    "gap_to_zero": 0.0774,
+    "interpretation": "All contexts negative. Best Q=-0.0774. Requires signal quality improvement or continued exploration."
+  }
+}

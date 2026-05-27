@@ -1,0 +1,58 @@
+{
+  "report": "03_directional_legitimacy_report",
+  "prp": "001",
+  "global_score": 0.3333,
+  "rolling_score": 0.3333,
+  "label": "DIRECTIONAL_BIAS",
+  "by_regime": {
+    "TRENDING": {
+      "total": 14,
+      "correct": 6,
+      "legit_rate": 0.4286,
+      "LONG_rate": 0.7143,
+      "SHORT_rate": 0.1429,
+      "label": "DIRECTIONAL_BIAS"
+    },
+    "MEAN_REVERTING": {
+      "total": 7,
+      "correct": 1,
+      "legit_rate": 0.1429,
+      "LONG_rate": 0.0,
+      "SHORT_rate": 0.1667,
+      "label": "DIRECTIONAL_BIAS"
+    }
+  },
+  "by_strategy": {
+    "ALPHA_PBE_v1": {
+      "total": 6,
+      "correct": 1,
+      "legit_rate": 0.1667
+    },
+    "TF_EMA_RSI_v1": {
+      "total": 3,
+      "correct": 2,
+      "legit_rate": 0.6667
+    },
+    "MR_BB_RSI_v1": {
+      "total": 4,
+      "correct": 1,
+      "legit_rate": 0.25
+    },
+    "ALPHA_TCB_v1": {
+      "total": 8,
+      "correct": 3,
+      "legit_rate": 0.375
+    }
+  },
+  "by_hour": {
+    "0": {
+      "total": 18,
+      "legit_rate": 0.3333
+    },
+    "1": {
+      "total": 3,
+      "legit_rate": 0.3333
+    }
+  },
+  "ts": 1779848254483
+}

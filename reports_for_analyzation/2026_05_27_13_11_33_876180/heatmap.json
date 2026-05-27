@@ -1,0 +1,35 @@
+{
+  "heatmap": [
+    {
+      "regime": "MEAN_REVERTING",
+      "parameter": "ALPHA_PBE_v1",
+      "avg_conf": 0.0,
+      "count": 8
+    },
+    {
+      "regime": "MEAN_REVERTING",
+      "parameter": "MR_BB_RSI_v1",
+      "avg_conf": 25.0,
+      "count": 12
+    },
+    {
+      "regime": "TRENDING",
+      "parameter": "ALPHA_PBE_v1",
+      "avg_conf": 13.6,
+      "count": 11
+    },
+    {
+      "regime": "TRENDING",
+      "parameter": "ALPHA_TCB_v1",
+      "avg_conf": 16.1,
+      "count": 21
+    },
+    {
+      "regime": "TRENDING",
+      "parameter": "TF_EMA_RSI_v1",
+      "avg_conf": 20.0,
+      "count": 5
+    }
+  ],
+  "phase": "030B"
+}
