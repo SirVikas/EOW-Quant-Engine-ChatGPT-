@@ -1,0 +1,125 @@
+{
+  "title": "Adaptive Decision Audit \u2014 RL Policy Explainability (FTD-056-ODYSSEY)",
+  "generated_at": "2026-05-28 15:23:02 UTC",
+  "total_contexts_audited": 8,
+  "tier_distribution": {
+    "ELITE": 0,
+    "HIGH": 0,
+    "NEUTRAL": 8,
+    "PENALIZED": 0
+  },
+  "toxic_contexts": 2,
+  "policy_summary": {
+    "floor_raises_active": 0,
+    "floor_lowers_active": 0,
+    "boosts_active": 0,
+    "penalties_active": 0,
+    "net_posture": "BALANCED \u2014 mixed policy adjustments across contexts"
+  },
+  "context_decisions": [
+    {
+      "context": "MEAN_REVERTING|NY|MeanReversion",
+      "n_visits": 525,
+      "q_value": -0.1815,
+      "tier": "NEUTRAL",
+      "is_toxic": true,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "STABLE",
+      "policy_effect": "HARD_BLOCK (paper bypass active)",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.1815 tier=NEUTRAL visits=525 WR=19.0% | floor_delta=+0.00 boost=1.00x | TOXIC \u2192 hard-block in LIVE mode (bypassed while BYPASS_ALL_GATES=True)"
+    },
+    {
+      "context": "MEAN_REVERTING|LATE|MeanReversion",
+      "n_visits": 354,
+      "q_value": -0.0728,
+      "tier": "NEUTRAL",
+      "is_toxic": false,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "IMPROVING",
+      "policy_effect": "NEUTRAL \u2014 no gate or confidence adjustment",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.0728 tier=NEUTRAL visits=354 WR=17.8% | floor_delta=+0.00 boost=1.00x | bootstrap_prior=-0.155"
+    },
+    {
+      "context": "MEAN_REVERTING|ASIA|MeanReversion",
+      "n_visits": 327,
+      "q_value": -0.1122,
+      "tier": "NEUTRAL",
+      "is_toxic": false,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "DEGRADING",
+      "policy_effect": "NEUTRAL \u2014 no gate or confidence adjustment",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.1122 tier=NEUTRAL visits=327 WR=18.3% | floor_delta=+0.00 boost=1.00x | bootstrap_prior=-0.0962"
+    },
+    {
+      "context": "TRENDING|NY|TrendFollowing",
+      "n_visits": 309,
+      "q_value": -0.111,
+      "tier": "NEUTRAL",
+      "is_toxic": false,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "STABLE",
+      "policy_effect": "NEUTRAL \u2014 no gate or confidence adjustment",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.111 tier=NEUTRAL visits=309 WR=23.3% | floor_delta=+0.00 boost=1.00x"
+    },
+    {
+      "context": "MEAN_REVERTING|LONDON|MeanReversion",
+      "n_visits": 285,
+      "q_value": -0.1501,
+      "tier": "NEUTRAL",
+      "is_toxic": true,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "STABLE",
+      "policy_effect": "HARD_BLOCK (paper bypass active)",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.1501 tier=NEUTRAL visits=285 WR=22.5% | floor_delta=+0.00 boost=1.00x | TOXIC \u2192 hard-block in LIVE mode (bypassed while BYPASS_ALL_GATES=True) | bootstrap_prior=-0.102"
+    },
+    {
+      "context": "TRENDING|LONDON|TrendFollowing",
+      "n_visits": 279,
+      "q_value": -0.0483,
+      "tier": "NEUTRAL",
+      "is_toxic": false,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "DEGRADING",
+      "policy_effect": "NEUTRAL \u2014 no gate or confidence adjustment",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.0483 tier=NEUTRAL visits=279 WR=25.1% | floor_delta=+0.00 boost=1.00x"
+    },
+    {
+      "context": "TRENDING|ASIA|TrendFollowing",
+      "n_visits": 235,
+      "q_value": -0.0067,
+      "tier": "NEUTRAL",
+      "is_toxic": false,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "IMPROVING",
+      "policy_effect": "NEUTRAL \u2014 no gate or confidence adjustment",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.0067 tier=NEUTRAL visits=235 WR=27.2% | floor_delta=+0.00 boost=1.00x"
+    },
+    {
+      "context": "TRENDING|LATE|TrendFollowing",
+      "n_visits": 230,
+      "q_value": -0.0679,
+      "tier": "NEUTRAL",
+      "is_toxic": false,
+      "floor_delta": 0.0,
+      "confidence_mult": 1.0,
+      "q_direction": "IMPROVING",
+      "policy_effect": "NEUTRAL \u2014 no gate or confidence adjustment",
+      "wins_to_neutral_tier": null,
+      "explanation": "Q=-0.0679 tier=NEUTRAL visits=230 WR=20.9% | floor_delta=+0.00 boost=1.00x"
+    }
+  ]
+}

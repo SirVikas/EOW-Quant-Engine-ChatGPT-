@@ -1,0 +1,4224 @@
+{
+  "active": [
+    {
+      "escalation_id": "d431510a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 33% | MEAN_REVERTING win rate dangerously low: 23%",
+      "anomaly_ids": [
+        "8508738d",
+        "a43fffe9",
+        "320af12e",
+        "914bd47b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779947586921,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8d89ad00",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "856570c9",
+        "3626b2e2",
+        "350d40e1"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779947948735,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "79ea73b4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "89a329b9",
+        "95e53d88",
+        "fccdd0ce"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779948309465,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3bd24e35",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 22% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "464798b4",
+        "9a4c8abc",
+        "6852cc7f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779948670266,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0e64e4a0",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 34% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "eb0ff448",
+        "78112761",
+        "774f53eb",
+        "53becf05"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779948916128,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "afd849b3",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 27% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "b42fb7d9",
+        "9946b556",
+        "dcf8aced"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779949036544,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c63a895b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 27% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "48cf7afb",
+        "270ba7a2",
+        "24e7b221"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779949410072,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d4c5da25",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 26% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "d7a99ac4",
+        "3e5039ce",
+        "ac517757"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779949772161,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "db8619d3",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 26% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "ff8032e2",
+        "a655772c",
+        "b5b983c6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779950132981,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8f0f9e3d",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 31% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "195ba44e",
+        "5eb81c73",
+        "5c461fe6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779950493713,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "b4cfdcae",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 28% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "4214f4d0",
+        "a35d597e",
+        "677de8d3"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779950854992,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "37d228ff",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 24% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "11edc371",
+        "b85e7846",
+        "b111bce4"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779951215887,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d8591697",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 24% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "3c13a620",
+        "338b0439",
+        "6e8baadf"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779951581988,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3952ec48",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "9368d55c",
+        "20fb5000",
+        "9cb0483b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779951943238,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "5c1d59a8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "13de9852",
+        "38a3cd5a",
+        "aceee1a6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779952303978,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "82be586d",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 33%",
+      "anomaly_ids": [
+        "75845e4f",
+        "d1442ca8",
+        "176c6d51",
+        "6b2c58df",
+        "f46ebede"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779952424113,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "4509416a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "dc84ba22",
+        "b51bd263",
+        "0295237f",
+        "aaff8179",
+        "f09fc45c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779952785284,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6ae54c1c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "a2ee8f6c",
+        "d5876bd2",
+        "24629086",
+        "1728d0ee"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779953030750,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "bbcc80e1",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30% | MEAN_REVERTING win rate dangerously low: 26%",
+      "anomaly_ids": [
+        "c408acbf",
+        "a6b4debc",
+        "706ca564",
+        "7dcc562e"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779953392391,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2e8da7a5",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 26%",
+      "anomaly_ids": [
+        "285a9bc2",
+        "df2a5264",
+        "64dc4d0a",
+        "130df6fd"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779953770694,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0b5c27c1",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 26%",
+      "anomaly_ids": [
+        "8ebd4b6e",
+        "2dda8dec",
+        "0df0d714",
+        "2657e89a"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779954131945,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ff593338",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "f56d824d",
+        "77b42b28",
+        "bb389e82",
+        "0ef7c176",
+        "2cf361a7"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779954372471,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "16cb53f8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "27106159",
+        "01b71309",
+        "73f5c7c5",
+        "1aa4d60e",
+        "60afed39"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779954737309,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "279d702b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "39942914",
+        "bbe22fb3",
+        "1c2b5032",
+        "b7a33560",
+        "d1a73d41"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779955098401,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2b7ef737",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "1249317d",
+        "18e57c01",
+        "c2b1a379",
+        "ca36317d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779955219336,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "b0dfcec8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "645f7e86",
+        "fe331130",
+        "3576c020",
+        "aa3af565"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779955580444,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e16b55f3",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 21%",
+      "anomaly_ids": [
+        "55290988",
+        "b42af05e",
+        "c92700b0",
+        "e2911967"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779955941157,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "a32f57f7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 21%",
+      "anomaly_ids": [
+        "1816b303",
+        "9440d345",
+        "af8591a9",
+        "fb1e12c8"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779956317362,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8fc7fe12",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 31% | MEAN_REVERTING win rate dangerously low: 17%",
+      "anomaly_ids": [
+        "fdc011a6",
+        "13ecf245",
+        "1732e8ee",
+        "662c3362"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779956799893,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "146ea388",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 29% | MEAN_REVERTING win rate dangerously low: 16%",
+      "anomaly_ids": [
+        "94c0853a",
+        "0f2fe027",
+        "c618025e",
+        "42a81420"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779957176848,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c754efe7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 16%",
+      "anomaly_ids": [
+        "05f180de",
+        "e281f65b",
+        "29208509",
+        "28bc7268"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779957545209,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "29442c64",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 16%",
+      "anomaly_ids": [
+        "d743be57",
+        "d59b6c08",
+        "629a1588",
+        "01178754"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779957906460,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7dc3dcf8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 23%",
+      "anomaly_ids": [
+        "629e1eb1",
+        "f660227c",
+        "db72423f",
+        "09453cf5",
+        "ddcd1d31"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779958026630,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3a544612",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 23%",
+      "anomaly_ids": [
+        "3a7e0576",
+        "fcd53816",
+        "17dbe2d5",
+        "6985e6af",
+        "0cad0958"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779958405575,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c04d4620",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 23% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "cf09516d",
+        "a978eb93",
+        "1a546d45",
+        "6bac5cb2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779958525980,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "532e3ac4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "95189e2d",
+        "8d4bf05c",
+        "63886e98",
+        "96129e6f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779958907121,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "eeebee16",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "226bf20f",
+        "8b25530e",
+        "901e1c61",
+        "4c880d87"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779959269004,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "275c2aa6",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "db88d02c",
+        "f4461c73",
+        "d01deb57",
+        "faf945eb"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779959645447,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d58b0430",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "dff6ca78",
+        "e5edc8b2",
+        "12ed4c2f",
+        "71a9f4d2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779960006134,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "b9a885a7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 20%",
+      "anomaly_ids": [
+        "8852bd33",
+        "6a7b4912",
+        "ea43602e",
+        "0f841ada"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779960372834,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "34705fbe",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 20%",
+      "anomaly_ids": [
+        "4584069b",
+        "f8cf0a75",
+        "93a5110c",
+        "1fbd1190"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779960733618,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "863d30f8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 20%",
+      "anomaly_ids": [
+        "755046f4",
+        "8a192f57",
+        "b409744a",
+        "83010d19",
+        "7b5f5117"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779961105688,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ec495de2",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 23% | MEAN_REVERTING win rate dangerously low: 19%",
+      "anomaly_ids": [
+        "f8be0292",
+        "3a110585",
+        "aa6ca942",
+        "28753342"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779961827342,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "15f36d6c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 22% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "bb2c5277",
+        "b5a1e1ab",
+        "42202f1e",
+        "c4b4a475"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779962191005,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "fb2ff02f",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "2b0d6919",
+        "50075fc0",
+        "209444b9",
+        "f7fc5672"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779962553281,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2c00e338",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "145e9fd7",
+        "04e3a9e1",
+        "5481af5e",
+        "e2adf6c2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779962930106,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3d775322",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 18% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "e3877004",
+        "8da3e683",
+        "ecad552d",
+        "37e52a07"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779963292475,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "372ca6de",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 16% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "973335ee",
+        "6454c51e",
+        "261f58ca",
+        "f9654795"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779963663276,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0ca6d925",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 22% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "8eedc190",
+        "1f5a1f28",
+        "fa6c4af6",
+        "cb7c5415"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779964052636,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "070f5d65",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "b566c4c2",
+        "5ae7f36c",
+        "6ca4e1bf",
+        "9a2cbcd3"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779964434713,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "471a80a6",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "c50830a4",
+        "b21235d9",
+        "42d2a526",
+        "50fefae9"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779964812547,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "06b89041",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "4ee174bb",
+        "53cde8bb",
+        "aca9b4b6",
+        "bab1d71c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779965224842,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0d2eedf5",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "4ccde51b",
+        "c6af1bc0",
+        "3623ac64",
+        "04a27bd9"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779965594473,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ce62a857",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | MEAN_REVERTING win rate dangerously low: 25% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "17d10f3c",
+        "30772588",
+        "bfb070bf"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779965851677,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "243af88c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | MEAN_REVERTING win rate dangerously low: 25% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "abf2a6f8",
+        "f4eb4e2d",
+        "f67de9d8"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779966259870,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2c924e42",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | MEAN_REVERTING win rate dangerously low: 25% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "c88be3b7",
+        "36428e23",
+        "611e6817"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779966652674,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3b01a851",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 33% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "a8011163",
+        "1f53a657",
+        "e68db54c",
+        "15b55d1a"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779966913135,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "9d06148a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 31% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "ff1ae940",
+        "6db7d810",
+        "0d31b902",
+        "36b4472f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779967321298,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ad1bb5ba",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 21/100 | TRENDING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "9d4102ab",
+        "bcb89e72",
+        "b810a668",
+        "d43f31aa",
+        "e43774bd"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779967720753,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3dda104c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 21% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "9d660e8d",
+        "c4509df4",
+        "73bf920e",
+        "643254a5"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779969437767,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6316d8e7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "9b0366bd",
+        "a91c2708",
+        "01270db5",
+        "5b513757"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779969847609,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7a938509",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "63b7d6df",
+        "c56255f3",
+        "a041b9b9",
+        "30760fb1"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779970248059,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "53c27d72",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "653ea2d2",
+        "48395458",
+        "fad78cff",
+        "ea8d2987"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779970611367,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "484879d9",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 23% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "ef99e070",
+        "d640aba4",
+        "f0566ce3",
+        "a6a9b29c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779970989942,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2bb531ab",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "6f5457b6",
+        "7138c516",
+        "972babba",
+        "e353c206"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779971353158,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7c53e1c0",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "b1189841",
+        "b224f3ee",
+        "c0d117ec",
+        "1747c81d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779971761063,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d026ae8b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "fb005a5d",
+        "d8ba3a6f",
+        "4d37d492",
+        "5fd53169"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779972148321,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "af6bc8f4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "f38774d2",
+        "2c6c1507",
+        "b9de85ea",
+        "6adb5e9b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779972524461,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6418f4e0",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "dd3ef57a",
+        "c0d39a2f",
+        "893b4afa",
+        "3273edcb"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779972924428,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ff172eab",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "14398604",
+        "a532382b",
+        "52fec119",
+        "47681f5d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779973321846,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "475d8944",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "66c67e56",
+        "69b49cf9",
+        "1f351d0f",
+        "3bfe6c8b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779973693147,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3b04a497",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "671ca0ca",
+        "6c341fbd",
+        "dd6f1a67",
+        "3567d052",
+        "6da42946"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779974099167,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "5664d510",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "1a0904b3",
+        "a22f6c29",
+        "b6f8074d",
+        "7a02bb39"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779974910424,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e3daf926",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 21% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "9e39ecc3",
+        "2e3da04c",
+        "46dfb0c8",
+        "5054dec5"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779975277900,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c3566713",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 21% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "962fed7e",
+        "823f101f",
+        "62551ab8",
+        "97dcd5e4"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779975640781,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e5680cbc",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "577ce2b4",
+        "1e1108ab",
+        "1d4e18d3",
+        "5fd827e5"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779976055388,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "a5d5657b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 29%",
+      "anomaly_ids": [
+        "9d5643cf",
+        "807c2eb6",
+        "8800d645",
+        "a90d2fd6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779976436177,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "5208f3da",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 18% | MEAN_REVERTING win rate dangerously low: 29%",
+      "anomaly_ids": [
+        "03df1605",
+        "b6d1b107",
+        "4de29b11",
+        "275df37d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779976797490,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c3fe26b9",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 16% | MEAN_REVERTING win rate dangerously low: 27%",
+      "anomaly_ids": [
+        "3dff9a72",
+        "8052a02e",
+        "a8ca7013",
+        "92ff589d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779977159408,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "f900d190",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 14%",
+      "anomaly_ids": [
+        "c21fd1ab",
+        "74d48bca",
+        "1c355bad",
+        "2b685570",
+        "a1781e14"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779977419191,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "f94d8911",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 18% | MEAN_REVERTING win rate dangerously low: 27%",
+      "anomaly_ids": [
+        "55ef77e3",
+        "da50d61b",
+        "3a7e1d67",
+        "630309fa"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779977665719,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "42c13955",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 17% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "e3c9df55",
+        "ee6581e7",
+        "7fdd58c7",
+        "e0cc766e"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779978028015,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "51b54d6a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "3181928c",
+        "eb2543a4",
+        "d70ead21",
+        "b11eda68"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779978389056,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0d5e5a64",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "6c631851",
+        "84e6d39a",
+        "2a2baea5",
+        "a9ff9c37"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779978750710,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "cbcdbf1e",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "d606affd",
+        "93df48e2",
+        "1910a6e6",
+        "1d52584b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779979135365,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e4f6741c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "9efc9763",
+        "9c8f9eca",
+        "48accbb1",
+        "f229ad4d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779979496443,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c8df7d26",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "afad581c",
+        "54423096",
+        "9c94d570",
+        "1abb965e"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779979858537,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "4a56a929",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "b865fc3e",
+        "67d5f39b",
+        "3d16d8cf",
+        "310f1c88"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779980219987,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "1c58d1e4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "8c46f675",
+        "d0390086",
+        "44b48184",
+        "26ff7b6c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779980582366,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7197e6ee",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "3f961c14",
+        "be6be0e8",
+        "e1b4cb7c",
+        "419de9f0"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779980943751,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ce9d2735",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "b6cd9afc",
+        "68c3a1cc",
+        "a9c243f4",
+        "619d3b6b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779981304567,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "754269ed",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "7b38f1f8",
+        "05b12128",
+        "9a7635ff",
+        "b933ab3a"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779981681238,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    }
+  ],
+  "history": [
+    {
+      "escalation_id": "754269ed",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "7b38f1f8",
+        "05b12128",
+        "9a7635ff",
+        "b933ab3a"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779981681238,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ce9d2735",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "b6cd9afc",
+        "68c3a1cc",
+        "a9c243f4",
+        "619d3b6b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779981304567,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7197e6ee",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "3f961c14",
+        "be6be0e8",
+        "e1b4cb7c",
+        "419de9f0"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779980943751,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "1c58d1e4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "8c46f675",
+        "d0390086",
+        "44b48184",
+        "26ff7b6c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779980582366,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "4a56a929",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "b865fc3e",
+        "67d5f39b",
+        "3d16d8cf",
+        "310f1c88"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779980219987,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c8df7d26",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 31%",
+      "anomaly_ids": [
+        "afad581c",
+        "54423096",
+        "9c94d570",
+        "1abb965e"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779979858537,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e4f6741c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "9efc9763",
+        "9c8f9eca",
+        "48accbb1",
+        "f229ad4d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779979496443,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "cbcdbf1e",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "d606affd",
+        "93df48e2",
+        "1910a6e6",
+        "1d52584b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779979135365,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0d5e5a64",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "6c631851",
+        "84e6d39a",
+        "2a2baea5",
+        "a9ff9c37"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779978750710,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "51b54d6a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "3181928c",
+        "eb2543a4",
+        "d70ead21",
+        "b11eda68"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779978389056,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "42c13955",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 17% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "e3c9df55",
+        "ee6581e7",
+        "7fdd58c7",
+        "e0cc766e"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779978028015,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "f94d8911",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 18% | MEAN_REVERTING win rate dangerously low: 27%",
+      "anomaly_ids": [
+        "55ef77e3",
+        "da50d61b",
+        "3a7e1d67",
+        "630309fa"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779977665719,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6c55a4ac",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 7 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "74faa83b"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779977543224,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779977665753
+    },
+    {
+      "escalation_id": "f900d190",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 14%",
+      "anomaly_ids": [
+        "c21fd1ab",
+        "74d48bca",
+        "1c355bad",
+        "2b685570",
+        "a1781e14"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779977419191,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c3fe26b9",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 16% | MEAN_REVERTING win rate dangerously low: 27%",
+      "anomaly_ids": [
+        "3dff9a72",
+        "8052a02e",
+        "a8ca7013",
+        "92ff589d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779977159408,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "5208f3da",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 18% | MEAN_REVERTING win rate dangerously low: 29%",
+      "anomaly_ids": [
+        "03df1605",
+        "b6d1b107",
+        "4de29b11",
+        "275df37d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779976797490,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "a5d5657b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 29%",
+      "anomaly_ids": [
+        "9d5643cf",
+        "807c2eb6",
+        "8800d645",
+        "a90d2fd6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779976436177,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e5680cbc",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "577ce2b4",
+        "1e1108ab",
+        "1d4e18d3",
+        "5fd827e5"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779976055388,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c3566713",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 21% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "962fed7e",
+        "823f101f",
+        "62551ab8",
+        "97dcd5e4"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779975640781,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e3daf926",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 21% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "9e39ecc3",
+        "2e3da04c",
+        "46dfb0c8",
+        "5054dec5"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779975277900,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "5664d510",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "1a0904b3",
+        "a22f6c29",
+        "b6f8074d",
+        "7a02bb39"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779974910424,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "1ed69e06",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 7 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "169dc320"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779974497944,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779974910677
+    },
+    {
+      "escalation_id": "3b04a497",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "671ca0ca",
+        "6c341fbd",
+        "dd6f1a67",
+        "3567d052",
+        "6da42946"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779974099167,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "475d8944",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "66c67e56",
+        "69b49cf9",
+        "1f351d0f",
+        "3bfe6c8b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779973693147,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ff172eab",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "14398604",
+        "a532382b",
+        "52fec119",
+        "47681f5d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779973321846,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6418f4e0",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "dd3ef57a",
+        "c0d39a2f",
+        "893b4afa",
+        "3273edcb"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779972924428,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "af6bc8f4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "f38774d2",
+        "2c6c1507",
+        "b9de85ea",
+        "6adb5e9b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779972524461,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d026ae8b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "fb005a5d",
+        "d8ba3a6f",
+        "4d37d492",
+        "5fd53169"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779972148321,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7c53e1c0",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "b1189841",
+        "b224f3ee",
+        "c0d117ec",
+        "1747c81d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779971761063,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2bb531ab",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "6f5457b6",
+        "7138c516",
+        "972babba",
+        "e353c206"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779971353158,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "484879d9",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 23% | MEAN_REVERTING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "ef99e070",
+        "d640aba4",
+        "f0566ce3",
+        "a6a9b29c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779970989942,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "53c27d72",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "653ea2d2",
+        "48395458",
+        "fad78cff",
+        "ea8d2987"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779970611367,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7a938509",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "63b7d6df",
+        "c56255f3",
+        "a041b9b9",
+        "30760fb1"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779970248059,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6316d8e7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "9b0366bd",
+        "a91c2708",
+        "01270db5",
+        "5b513757"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779969847609,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3dda104c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 21% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "9d660e8d",
+        "c4509df4",
+        "73bf920e",
+        "643254a5"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779969437767,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "de49f0f3",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 12 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "4ed2c206"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779969314143,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779969437777
+    },
+    {
+      "escalation_id": "f666ef7d",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 11 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "d7b01fce"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779968902436,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779969437777
+    },
+    {
+      "escalation_id": "ef0bbe31",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 9 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "bdfac5fe"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779968513501,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779969437777
+    },
+    {
+      "escalation_id": "228f56c2",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 8 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "f8264916"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779968118579,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779969437777
+    },
+    {
+      "escalation_id": "ad1bb5ba",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 21/100 | TRENDING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "9d4102ab",
+        "bcb89e72",
+        "b810a668",
+        "d43f31aa",
+        "e43774bd"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779967720753,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "9d06148a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 31% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "ff1ae940",
+        "6db7d810",
+        "0d31b902",
+        "36b4472f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779967321298,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3b01a851",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 33% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "a8011163",
+        "1f53a657",
+        "e68db54c",
+        "15b55d1a"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779966913135,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2c924e42",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | MEAN_REVERTING win rate dangerously low: 25% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "c88be3b7",
+        "36428e23",
+        "611e6817"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779966652674,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "243af88c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | MEAN_REVERTING win rate dangerously low: 25% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "abf2a6f8",
+        "f4eb4e2d",
+        "f67de9d8"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779966259870,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ce62a857",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | MEAN_REVERTING win rate dangerously low: 25% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "17d10f3c",
+        "30772588",
+        "bfb070bf"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779965851677,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0d2eedf5",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "4ccde51b",
+        "c6af1bc0",
+        "3623ac64",
+        "04a27bd9"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779965594473,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "06b89041",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "4ee174bb",
+        "53cde8bb",
+        "aca9b4b6",
+        "bab1d71c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779965224842,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "471a80a6",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "c50830a4",
+        "b21235d9",
+        "42d2a526",
+        "50fefae9"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779964812547,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "070f5d65",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "b566c4c2",
+        "5ae7f36c",
+        "6ca4e1bf",
+        "9a2cbcd3"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779964434713,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0ca6d925",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 22% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "8eedc190",
+        "1f5a1f28",
+        "fa6c4af6",
+        "cb7c5415"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779964052636,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "372ca6de",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 16% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "973335ee",
+        "6454c51e",
+        "261f58ca",
+        "f9654795"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779963663276,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3d775322",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 18% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "e3877004",
+        "8da3e683",
+        "ecad552d",
+        "37e52a07"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779963292475,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2c00e338",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "145e9fd7",
+        "04e3a9e1",
+        "5481af5e",
+        "e2adf6c2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779962930106,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "fb2ff02f",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 20% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "2b0d6919",
+        "50075fc0",
+        "209444b9",
+        "f7fc5672"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779962553281,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "15f36d6c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 22% | MEAN_REVERTING win rate dangerously low: 25%",
+      "anomaly_ids": [
+        "bb2c5277",
+        "b5a1e1ab",
+        "42202f1e",
+        "c4b4a475"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779962191005,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ec495de2",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 23% | MEAN_REVERTING win rate dangerously low: 19%",
+      "anomaly_ids": [
+        "f8be0292",
+        "3a110585",
+        "aa6ca942",
+        "28753342"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779961827342,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "a35c10f1",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 7 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "0ead835d"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779961466429,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779961827346
+    },
+    {
+      "escalation_id": "863d30f8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 20%",
+      "anomaly_ids": [
+        "755046f4",
+        "8a192f57",
+        "b409744a",
+        "83010d19",
+        "7b5f5117"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779961105688,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "34705fbe",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 20%",
+      "anomaly_ids": [
+        "4584069b",
+        "f8cf0a75",
+        "93a5110c",
+        "1fbd1190"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779960733618,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "b9a885a7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 21/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 20%",
+      "anomaly_ids": [
+        "8852bd33",
+        "6a7b4912",
+        "ea43602e",
+        "0f841ada"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779960372834,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d58b0430",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "dff6ca78",
+        "e5edc8b2",
+        "12ed4c2f",
+        "71a9f4d2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779960006134,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "275c2aa6",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "db88d02c",
+        "f4461c73",
+        "d01deb57",
+        "faf945eb"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779959645447,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "eeebee16",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "226bf20f",
+        "8b25530e",
+        "901e1c61",
+        "4c880d87"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779959269004,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "532e3ac4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "95189e2d",
+        "8d4bf05c",
+        "63886e98",
+        "96129e6f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779958907121,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c04d4620",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 23% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "cf09516d",
+        "a978eb93",
+        "1a546d45",
+        "6bac5cb2"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779958525980,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3a544612",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 23%",
+      "anomaly_ids": [
+        "3a7e0576",
+        "fcd53816",
+        "17dbe2d5",
+        "6985e6af",
+        "0cad0958"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779958405575,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "7dc3dcf8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 23%",
+      "anomaly_ids": [
+        "629e1eb1",
+        "f660227c",
+        "db72423f",
+        "09453cf5",
+        "ddcd1d31"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779958026630,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "29442c64",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 25% | MEAN_REVERTING win rate dangerously low: 16%",
+      "anomaly_ids": [
+        "d743be57",
+        "d59b6c08",
+        "629a1588",
+        "01178754"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779957906460,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c754efe7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 27% | MEAN_REVERTING win rate dangerously low: 16%",
+      "anomaly_ids": [
+        "05f180de",
+        "e281f65b",
+        "29208509",
+        "28bc7268"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779957545209,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "146ea388",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 29% | MEAN_REVERTING win rate dangerously low: 16%",
+      "anomaly_ids": [
+        "94c0853a",
+        "0f2fe027",
+        "c618025e",
+        "42a81420"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779957176848,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8fc7fe12",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 31% | MEAN_REVERTING win rate dangerously low: 17%",
+      "anomaly_ids": [
+        "fdc011a6",
+        "13ecf245",
+        "1732e8ee",
+        "662c3362"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779956799893,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "b5cddb39",
+      "level": "L3_SYNC",
+      "severity": "CRITICAL",
+      "trigger": "CRITICAL: LOSS_STREAK",
+      "description": "[L3_SYNC] 7 consecutive losses \u2014 risk controls may need review",
+      "anomaly_ids": [
+        "6600ae9d"
+      ],
+      "anomaly_categories": [
+        "LOSS_STREAK"
+      ],
+      "ts": 1779956438793,
+      "status": "RESOLVED",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 1779956799909
+    },
+    {
+      "escalation_id": "a32f57f7",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 21%",
+      "anomaly_ids": [
+        "1816b303",
+        "9440d345",
+        "af8591a9",
+        "fb1e12c8"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779956317362,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "e16b55f3",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 21%",
+      "anomaly_ids": [
+        "55290988",
+        "b42af05e",
+        "c92700b0",
+        "e2911967"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779955941157,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "b0dfcec8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "645f7e86",
+        "fe331130",
+        "3576c020",
+        "aa3af565"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779955580444,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2b7ef737",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 28% | MEAN_REVERTING win rate dangerously low: 24%",
+      "anomaly_ids": [
+        "1249317d",
+        "18e57c01",
+        "c2b1a379",
+        "ca36317d"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779955219336,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "279d702b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "39942914",
+        "bbe22fb3",
+        "1c2b5032",
+        "b7a33560",
+        "d1a73d41"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779955098401,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "16cb53f8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "27106159",
+        "01b71309",
+        "73f5c7c5",
+        "1aa4d60e",
+        "60afed39"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779954737309,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "ff593338",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "f56d824d",
+        "77b42b28",
+        "bb389e82",
+        "0ef7c176",
+        "2cf361a7"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779954372471,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0b5c27c1",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 24% | MEAN_REVERTING win rate dangerously low: 26%",
+      "anomaly_ids": [
+        "8ebd4b6e",
+        "2dda8dec",
+        "0df0d714",
+        "2657e89a"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779954131945,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "2e8da7a5",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 26% | MEAN_REVERTING win rate dangerously low: 26%",
+      "anomaly_ids": [
+        "285a9bc2",
+        "df2a5264",
+        "64dc4d0a",
+        "130df6fd"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779953770694,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "bbcc80e1",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30% | MEAN_REVERTING win rate dangerously low: 26%",
+      "anomaly_ids": [
+        "c408acbf",
+        "a6b4debc",
+        "706ca564",
+        "7dcc562e"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779953392391,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "6ae54c1c",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30% | MEAN_REVERTING win rate dangerously low: 28%",
+      "anomaly_ids": [
+        "a2ee8f6c",
+        "d5876bd2",
+        "24629086",
+        "1728d0ee"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779953030750,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "4509416a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 6 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 30%",
+      "anomaly_ids": [
+        "dc84ba22",
+        "b51bd263",
+        "0295237f",
+        "aaff8179",
+        "f09fc45c"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779952785284,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "82be586d",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, LOSS_STREAK, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] 5 consecutive losses \u2014 significant losing streak | Intelligence score low: 22/100 | TRENDING win rate dangerously low: 33%",
+      "anomaly_ids": [
+        "75845e4f",
+        "d1442ca8",
+        "176c6d51",
+        "6b2c58df",
+        "f46ebede"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION",
+        "LOSS_STREAK"
+      ],
+      "ts": 1779952424113,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "5c1d59a8",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "13de9852",
+        "38a3cd5a",
+        "aceee1a6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779952303978,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3952ec48",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "9368d55c",
+        "20fb5000",
+        "9cb0483b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779951943238,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d8591697",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 24% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "3c13a620",
+        "338b0439",
+        "6e8baadf"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779951581988,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "37d228ff",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 24% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "11edc371",
+        "b85e7846",
+        "b111bce4"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779951215887,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "b4cfdcae",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 28% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "4214f4d0",
+        "a35d597e",
+        "677de8d3"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779950854992,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8f0f9e3d",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 31% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "195ba44e",
+        "5eb81c73",
+        "5c461fe6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779950493713,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "db8619d3",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 26% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "ff8032e2",
+        "a655772c",
+        "b5b983c6"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779950132981,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d4c5da25",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 26% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "d7a99ac4",
+        "3e5039ce",
+        "ac517757"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779949772161,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "c63a895b",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 27% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "48cf7afb",
+        "270ba7a2",
+        "24e7b221"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779949410072,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "afd849b3",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 27% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "b42fb7d9",
+        "9946b556",
+        "dcf8aced"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779949036544,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "0e64e4a0",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 34% | MEAN_REVERTING win rate dangerously low: 22%",
+      "anomaly_ids": [
+        "eb0ff448",
+        "78112761",
+        "774f53eb",
+        "53becf05"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779948916128,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "3bd24e35",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 22% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "464798b4",
+        "9a4c8abc",
+        "6852cc7f"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779948670266,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "79ea73b4",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "89a329b9",
+        "95e53d88",
+        "fccdd0ce"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779948309465,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "8d89ad00",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | MEAN_REVERTING win rate dangerously low: 23% | VOLATILITY_EXPANSION win rate dangerously low: 0%",
+      "anomaly_ids": [
+        "856570c9",
+        "3626b2e2",
+        "350d40e1"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779947948735,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    },
+    {
+      "escalation_id": "d431510a",
+      "level": "L2_RECORD",
+      "severity": "HIGH",
+      "trigger": "HIGH: IQ_REGRESSION, WIN_RATE_EROSION",
+      "description": "[L2_RECORD] Intelligence score low: 22/100 | TRENDING win rate dangerously low: 33% | MEAN_REVERTING win rate dangerously low: 23%",
+      "anomaly_ids": [
+        "8508738d",
+        "a43fffe9",
+        "320af12e",
+        "914bd47b"
+      ],
+      "anomaly_categories": [
+        "IQ_REGRESSION",
+        "WIN_RATE_EROSION"
+      ],
+      "ts": 1779947586921,
+      "status": "ACTIVE",
+      "ack_reason": "",
+      "ack_ts": 0,
+      "resolved_ts": 0
+    }
+  ],
+  "stats": {
+    "module": "ESCALATION_ENGINE",
+    "version": "1.0",
+    "total_evaluated": 916,
+    "total_escalated": 344,
+    "total_suppressed": 572,
+    "total_acked": 0,
+    "total_resolved": 34,
+    "l1_count": 1,
+    "l2_count": 292,
+    "l3_count": 51,
+    "active_count": 92,
+    "last_escalation_ts": 1779981681238
+  }
+}

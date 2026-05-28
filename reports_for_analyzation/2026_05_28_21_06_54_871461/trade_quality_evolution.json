@@ -1,0 +1,290 @@
+{
+  "title": "Trade Quality Evolution \u2014 Are Later Trades Smarter? (FTD-055-ATHENA)",
+  "generated_at": "2026-05-28 15:23:02 UTC",
+  "session_trades": 538,
+  "verdict": "FLAT",
+  "overall_session": {
+    "n": 538,
+    "wr_pct": 27.5,
+    "pf": 0.737,
+    "avg_pnl": -0.0432,
+    "ev": -0.0432
+  },
+  "early_vs_late": {
+    "early_half": {
+      "n": 269,
+      "wr_pct": 26.8,
+      "pf": 0.845,
+      "avg_pnl": -0.0305,
+      "ev": -0.0305
+    },
+    "late_half": {
+      "n": 269,
+      "wr_pct": 28.3,
+      "pf": 0.575,
+      "avg_pnl": -0.0559,
+      "ev": -0.0559
+    },
+    "wr_delta_pct": 1.5,
+    "pf_delta": -0.27,
+    "trend": "FLAT",
+    "interpretation": "Win rate improved by 1.5pp in the second half. No measurable improvement yet \u2014 need more session volume."
+  },
+  "rolling_windows": [
+    {
+      "n": 20,
+      "wr_pct": 30.0,
+      "pf": 2.296,
+      "avg_pnl": 0.2602,
+      "ev": 0.2602,
+      "window_start": 1,
+      "window_end": 20
+    },
+    {
+      "n": 20,
+      "wr_pct": 20.0,
+      "pf": 0.407,
+      "avg_pnl": -0.2076,
+      "ev": -0.2076,
+      "window_start": 21,
+      "window_end": 40
+    },
+    {
+      "n": 20,
+      "wr_pct": 25.0,
+      "pf": 2.495,
+      "avg_pnl": 0.282,
+      "ev": 0.282,
+      "window_start": 41,
+      "window_end": 60
+    },
+    {
+      "n": 20,
+      "wr_pct": 20.0,
+      "pf": 0.201,
+      "avg_pnl": -0.2734,
+      "ev": -0.2734,
+      "window_start": 61,
+      "window_end": 80
+    },
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.662,
+      "avg_pnl": -0.117,
+      "ev": -0.117,
+      "window_start": 81,
+      "window_end": 100
+    },
+    {
+      "n": 20,
+      "wr_pct": 30.0,
+      "pf": 0.314,
+      "avg_pnl": -0.1183,
+      "ev": -0.1183,
+      "window_start": 101,
+      "window_end": 120
+    },
+    {
+      "n": 20,
+      "wr_pct": 25.0,
+      "pf": 1.062,
+      "avg_pnl": 0.0092,
+      "ev": 0.0092,
+      "window_start": 121,
+      "window_end": 140
+    },
+    {
+      "n": 20,
+      "wr_pct": 30.0,
+      "pf": 1.061,
+      "avg_pnl": 0.0106,
+      "ev": 0.0106,
+      "window_start": 141,
+      "window_end": 160
+    },
+    {
+      "n": 20,
+      "wr_pct": 10.0,
+      "pf": 0.206,
+      "avg_pnl": -0.1604,
+      "ev": -0.1604,
+      "window_start": 161,
+      "window_end": 180
+    },
+    {
+      "n": 20,
+      "wr_pct": 40.0,
+      "pf": 0.721,
+      "avg_pnl": -0.0445,
+      "ev": -0.0445,
+      "window_start": 181,
+      "window_end": 200
+    },
+    {
+      "n": 20,
+      "wr_pct": 30.0,
+      "pf": 0.881,
+      "avg_pnl": -0.0139,
+      "ev": -0.0139,
+      "window_start": 201,
+      "window_end": 220
+    },
+    {
+      "n": 20,
+      "wr_pct": 30.0,
+      "pf": 0.585,
+      "avg_pnl": -0.0495,
+      "ev": -0.0495,
+      "window_start": 221,
+      "window_end": 240
+    },
+    {
+      "n": 20,
+      "wr_pct": 40.0,
+      "pf": 1.595,
+      "avg_pnl": 0.0454,
+      "ev": 0.0454,
+      "window_start": 241,
+      "window_end": 260
+    },
+    {
+      "n": 20,
+      "wr_pct": 35.0,
+      "pf": 0.676,
+      "avg_pnl": -0.0363,
+      "ev": -0.0363,
+      "window_start": 261,
+      "window_end": 280
+    },
+    {
+      "n": 20,
+      "wr_pct": 25.0,
+      "pf": 0.279,
+      "avg_pnl": -0.0588,
+      "ev": -0.0588,
+      "window_start": 281,
+      "window_end": 300
+    },
+    {
+      "n": 20,
+      "wr_pct": 20.0,
+      "pf": 0.21,
+      "avg_pnl": -0.0692,
+      "ev": -0.0692,
+      "window_start": 301,
+      "window_end": 320
+    },
+    {
+      "n": 20,
+      "wr_pct": 40.0,
+      "pf": 0.784,
+      "avg_pnl": -0.0215,
+      "ev": -0.0215,
+      "window_start": 321,
+      "window_end": 340
+    },
+    {
+      "n": 20,
+      "wr_pct": 30.0,
+      "pf": 0.879,
+      "avg_pnl": -0.0098,
+      "ev": -0.0098,
+      "window_start": 341,
+      "window_end": 360
+    },
+    {
+      "n": 20,
+      "wr_pct": 40.0,
+      "pf": 1.644,
+      "avg_pnl": 0.056,
+      "ev": 0.056,
+      "window_start": 361,
+      "window_end": 380
+    },
+    {
+      "n": 20,
+      "wr_pct": 30.0,
+      "pf": 0.545,
+      "avg_pnl": -0.0509,
+      "ev": -0.0509,
+      "window_start": 381,
+      "window_end": 400
+    },
+    {
+      "n": 20,
+      "wr_pct": 35.0,
+      "pf": 0.544,
+      "avg_pnl": -0.0739,
+      "ev": -0.0739,
+      "window_start": 401,
+      "window_end": 420
+    },
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.273,
+      "avg_pnl": -0.1622,
+      "ev": -0.1622,
+      "window_start": 421,
+      "window_end": 440
+    },
+    {
+      "n": 20,
+      "wr_pct": 25.0,
+      "pf": 0.245,
+      "avg_pnl": -0.1089,
+      "ev": -0.1089,
+      "window_start": 441,
+      "window_end": 460
+    },
+    {
+      "n": 20,
+      "wr_pct": 40.0,
+      "pf": 1.061,
+      "avg_pnl": 0.0071,
+      "ev": 0.0071,
+      "window_start": 461,
+      "window_end": 480
+    },
+    {
+      "n": 20,
+      "wr_pct": 20.0,
+      "pf": 0.6,
+      "avg_pnl": -0.049,
+      "ev": -0.049,
+      "window_start": 481,
+      "window_end": 500
+    },
+    {
+      "n": 20,
+      "wr_pct": 15.0,
+      "pf": 0.518,
+      "avg_pnl": -0.0926,
+      "ev": -0.0926,
+      "window_start": 501,
+      "window_end": 520
+    }
+  ],
+  "regime_evolution": {
+    "TRENDING": {
+      "total_trades": 434,
+      "early_wr_pct": 26.7,
+      "late_wr_pct": 29.0,
+      "wr_delta_pct": 2.3,
+      "early_pf": 0.826,
+      "late_pf": 0.65,
+      "trend": "FLAT"
+    },
+    "MEAN_REVERTING": {
+      "total_trades": 104,
+      "early_wr_pct": 25.0,
+      "late_wr_pct": 26.9,
+      "wr_delta_pct": 1.9,
+      "early_pf": 0.901,
+      "late_pf": 0.393,
+      "trend": "FLAT"
+    }
+  },
+  "action": "Performance stable \u2014 no improvement trend yet. More session volume needed."
+}

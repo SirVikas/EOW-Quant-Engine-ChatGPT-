@@ -1,0 +1,146 @@
+{
+  "report": "03_directional_legitimacy_report",
+  "prp": "001",
+  "global_score": 0.487,
+  "rolling_score": 0.44,
+  "label": "WEAK",
+  "by_regime": {
+    "TRENDING": {
+      "total": 434,
+      "correct": 213,
+      "legit_rate": 0.4908,
+      "LONG_rate": 0.7697,
+      "SHORT_rate": 0.3404,
+      "label": "WEAK"
+    },
+    "MEAN_REVERTING": {
+      "total": 104,
+      "correct": 49,
+      "legit_rate": 0.4712,
+      "LONG_rate": 0.68,
+      "SHORT_rate": 0.2778,
+      "label": "WEAK"
+    }
+  },
+  "by_strategy": {
+    "ALPHA_TCB_v1": {
+      "total": 233,
+      "correct": 110,
+      "legit_rate": 0.4721
+    },
+    "ALPHA_PBE_v1": {
+      "total": 214,
+      "correct": 101,
+      "legit_rate": 0.472
+    },
+    "MR_BB_RSI_v1": {
+      "total": 56,
+      "correct": 31,
+      "legit_rate": 0.5536
+    },
+    "TF_EMA_RSI_v1": {
+      "total": 35,
+      "correct": 20,
+      "legit_rate": 0.5714
+    }
+  },
+  "by_hour": {
+    "8": {
+      "total": 35,
+      "legit_rate": 0.4857
+    },
+    "9": {
+      "total": 37,
+      "legit_rate": 0.5135
+    },
+    "10": {
+      "total": 25,
+      "legit_rate": 0.56
+    },
+    "11": {
+      "total": 36,
+      "legit_rate": 0.5
+    },
+    "12": {
+      "total": 30,
+      "legit_rate": 0.6
+    },
+    "13": {
+      "total": 32,
+      "legit_rate": 0.4688
+    },
+    "14": {
+      "total": 37,
+      "legit_rate": 0.4595
+    },
+    "15": {
+      "total": 22,
+      "legit_rate": 0.4091
+    },
+    "16": {
+      "total": 19,
+      "legit_rate": 0.4211
+    },
+    "17": {
+      "total": 18,
+      "legit_rate": 0.3333
+    },
+    "18": {
+      "total": 20,
+      "legit_rate": 0.6
+    },
+    "19": {
+      "total": 16,
+      "legit_rate": 0.75
+    },
+    "20": {
+      "total": 18,
+      "legit_rate": 0.3333
+    },
+    "21": {
+      "total": 20,
+      "legit_rate": 0.6
+    },
+    "22": {
+      "total": 12,
+      "legit_rate": 0.25
+    },
+    "23": {
+      "total": 18,
+      "legit_rate": 0.3889
+    },
+    "0": {
+      "total": 17,
+      "legit_rate": 0.4706
+    },
+    "1": {
+      "total": 21,
+      "legit_rate": 0.381
+    },
+    "2": {
+      "total": 18,
+      "legit_rate": 0.3889
+    },
+    "3": {
+      "total": 18,
+      "legit_rate": 0.3333
+    },
+    "4": {
+      "total": 20,
+      "legit_rate": 0.4
+    },
+    "5": {
+      "total": 15,
+      "legit_rate": 0.4667
+    },
+    "6": {
+      "total": 21,
+      "legit_rate": 0.619
+    },
+    "7": {
+      "total": 13,
+      "legit_rate": 0.9231
+    }
+  },
+  "ts": 1779981790859
+}

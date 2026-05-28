@@ -1,0 +1,18 @@
+{
+  "module": "LEARNING_MEMORY",
+  "phase": "030B",
+  "enabled": true,
+  "status": "ACTIVE",
+  "total_records": 539,
+  "total_patterns": 105,
+  "formed_patterns": 0,
+  "negative_memory": {
+    "permanent": 3,
+    "temporary": 13,
+    "total": 16
+  },
+  "cycle_count": 538,
+  "top_patterns": [],
+  "snapshot_ts": 1779981784813,
+  "exploration_boost": false
+}

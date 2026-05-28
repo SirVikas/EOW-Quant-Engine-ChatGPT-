@@ -1,0 +1,257 @@
+{
+  "module": "AUTO_INTELLIGENCE_ENGINE",
+  "phase": "030",
+  "enabled": true,
+  "interval_min": 5.0,
+  "min_trades": 30,
+  "min_score": 55.0,
+  "cycles_run": 371,
+  "daily_cycles": 0,
+  "max_daily": 12,
+  "last_run_ts": null,
+  "pending_check": false,
+  "last_cycle": {
+    "cycle_num": 371,
+    "ts_start": 1779981556805,
+    "ts_end": 1779981556814,
+    "phase": "BLOCKED",
+    "meta_score": 42.3,
+    "blocked": true,
+    "block_reason": "META_SCORE_TOO_LOW(42.3<55.0)",
+    "correction_verdict": "\u2014",
+    "applied_count": 0,
+    "rollback_count": 0
+  },
+  "evolution": {
+    "module": "EVOLUTION_TRACKER",
+    "total_correction_pairs": 0,
+    "drift_paused": false,
+    "paused_until_cycle": 0,
+    "current_cycle": 0,
+    "recent_corrections": [],
+    "total_alerts": 0,
+    "active_alerts": [],
+    "recent_alerts": [],
+    "reactive_adjustments": {
+      "total": 203,
+      "by_diagnosis": {
+        "NORMAL_SL": 188,
+        "VOLATILITY_SLIP": 5,
+        "FEE_TOXIC": 10
+      },
+      "recent": [
+        {
+          "ts": 1779974218012,
+          "ts_fmt": "2026-05-28 13:16:58 UTC",
+          "symbol": "NEARUSDT",
+          "strategy_id": "ALPHA_TCB_v1",
+          "trade_pnl": -0.0474,
+          "r_multiple": -0.0474,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.6,
+              "to": 0.6
+            },
+            "atr_tp": {
+              "from": 3.42,
+              "to": 3.5
+            }
+          },
+          "note": "Micro-adjustment: sl 0.6\u21920.6 tp 3.42\u21923.5 RR=5.83x."
+        },
+        {
+          "ts": 1779977023952,
+          "ts_fmt": "2026-05-28 14:03:43 UTC",
+          "symbol": "RENDERUSDT",
+          "strategy_id": "ALPHA_TCB_v1",
+          "trade_pnl": -0.3321,
+          "r_multiple": -0.3321,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.6,
+              "to": 0.6
+            },
+            "atr_tp": {
+              "from": 3.35,
+              "to": 3.43
+            }
+          },
+          "note": "Micro-adjustment: sl 0.6\u21920.6 tp 3.35\u21923.43 RR=5.72x."
+        },
+        {
+          "ts": 1779977342493,
+          "ts_fmt": "2026-05-28 14:09:02 UTC",
+          "symbol": "ETHUSDT",
+          "strategy_id": "ALPHA_TCB_v1",
+          "trade_pnl": -0.1564,
+          "r_multiple": -0.1564,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.75,
+              "to": 0.7
+            },
+            "atr_tp": {
+              "from": 2.4,
+              "to": 2.48
+            }
+          },
+          "note": "Micro-adjustment: sl 0.75\u21920.7 tp 2.4\u21922.48 RR=3.54x."
+        },
+        {
+          "ts": 1779977347692,
+          "ts_fmt": "2026-05-28 14:09:07 UTC",
+          "symbol": "BTCUSDT",
+          "strategy_id": "ALPHA_TCB_v1",
+          "trade_pnl": -0.1396,
+          "r_multiple": -0.1396,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.85,
+              "to": 0.8
+            },
+            "atr_tp": {
+              "from": 2.24,
+              "to": 2.32
+            }
+          },
+          "note": "Micro-adjustment: sl 0.85\u21920.8 tp 2.24\u21922.32 RR=2.9x."
+        },
+        {
+          "ts": 1779977833492,
+          "ts_fmt": "2026-05-28 14:17:13 UTC",
+          "symbol": "ONDOUSDT",
+          "strategy_id": "MR_BB_RSI_v1",
+          "trade_pnl": -0.9701,
+          "r_multiple": -0.9701,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.6,
+              "to": 0.6
+            },
+            "atr_tp": {
+              "from": 3.39,
+              "to": 3.47
+            }
+          },
+          "note": "Micro-adjustment: sl 0.6\u21920.6 tp 3.39\u21923.47 RR=5.78x."
+        },
+        {
+          "ts": 1779978150001,
+          "ts_fmt": "2026-05-28 14:22:30 UTC",
+          "symbol": "ETHUSDT",
+          "strategy_id": "ALPHA_TCB_v1",
+          "trade_pnl": -0.0857,
+          "r_multiple": -0.0857,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.7,
+              "to": 0.65
+            },
+            "atr_tp": {
+              "from": 2.48,
+              "to": 2.56
+            }
+          },
+          "note": "Micro-adjustment: sl 0.7\u21920.65 tp 2.48\u21922.56 RR=3.94x."
+        },
+        {
+          "ts": 1779978151323,
+          "ts_fmt": "2026-05-28 14:22:31 UTC",
+          "symbol": "BTCUSDT",
+          "strategy_id": "ALPHA_TCB_v1",
+          "trade_pnl": -0.1785,
+          "r_multiple": -0.1785,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.8,
+              "to": 0.75
+            },
+            "atr_tp": {
+              "from": 2.32,
+              "to": 2.4
+            }
+          },
+          "note": "Micro-adjustment: sl 0.8\u21920.75 tp 2.32\u21922.4 RR=3.2x."
+        },
+        {
+          "ts": 1779980574751,
+          "ts_fmt": "2026-05-28 15:02:54 UTC",
+          "symbol": "WLDUSDT",
+          "strategy_id": "ALPHA_PBE_v1",
+          "trade_pnl": -0.3835,
+          "r_multiple": -0.3835,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.6,
+              "to": 0.6
+            },
+            "atr_tp": {
+              "from": 3.07,
+              "to": 3.15
+            }
+          },
+          "note": "Micro-adjustment: sl 0.6\u21920.6 tp 3.07\u21923.15 RR=5.25x."
+        },
+        {
+          "ts": 1779981400096,
+          "ts_fmt": "2026-05-28 15:16:40 UTC",
+          "symbol": "WLDUSDT",
+          "strategy_id": "ALPHA_PBE_v1",
+          "trade_pnl": -0.1605,
+          "r_multiple": -0.1605,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.6,
+              "to": 0.6
+            },
+            "atr_tp": {
+              "from": 3.15,
+              "to": 3.23
+            }
+          },
+          "note": "Micro-adjustment: sl 0.6\u21920.6 tp 3.15\u21923.23 RR=5.38x."
+        },
+        {
+          "ts": 1779981465527,
+          "ts_fmt": "2026-05-28 15:17:45 UTC",
+          "symbol": "TONUSDT",
+          "strategy_id": "ALPHA_PBE_v1",
+          "trade_pnl": -0.1452,
+          "r_multiple": -0.1452,
+          "diagnosis": "NORMAL_SL",
+          "category": "ENTRY_REFINEMENT",
+          "changes": {
+            "atr_sl": {
+              "from": 0.6,
+              "to": 0.6
+            },
+            "atr_tp": {
+              "from": 2.8,
+              "to": 2.88
+            }
+          },
+          "note": "Micro-adjustment: sl 0.6\u21920.6 tp 2.8\u21922.88 RR=4.8x."
+        }
+      ]
+    },
+    "snapshot_ts": 1779981784804
+  }
+}

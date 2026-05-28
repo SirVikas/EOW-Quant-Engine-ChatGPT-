@@ -1,0 +1,24 @@
+{
+  "module": "GITHUB_SYNC_ENGINE",
+  "version": "1.0",
+  "batch_size": 18,
+  "syncs_last_hour": 4,
+  "rate_limit": 4,
+  "secs_since_sync": 2289.0,
+  "sync_interval": 900,
+  "should_flush": true,
+  "stats": {
+    "total_queued": 916,
+    "total_flushed": 124,
+    "total_suppressed": 1369,
+    "total_errors": 0,
+    "last_sync_ts": 1779979496459,
+    "last_checksum": "883b69259525ca25"
+  },
+  "governance": {
+    "max_batch_size": 20,
+    "high_flush_threshold": 3,
+    "max_syncs_per_hour": 4,
+    "min_cooldown_secs": 120
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "report": "06_asymmetry_validation_report",
+  "prp": "001",
+  "total_outcomes": 538,
+  "global_achievement_ratio": 0.1468,
+  "optimism_bias_rate": 0.9312,
+  "asymmetry_health": "BROKEN",
+  "by_strategy": {
+    "ALPHA_TCB_v1": {
+      "count": 233,
+      "avg_rr_declared": 6.092,
+      "avg_rr_achieved": 0.785,
+      "achievement_ratio": 0.129,
+      "achievable_count": 160,
+      "achievable_rate": 0.6867
+    },
+    "ALPHA_PBE_v1": {
+      "count": 214,
+      "avg_rr_declared": 5.804,
+      "avg_rr_achieved": 0.742,
+      "achievement_ratio": 0.128,
+      "achievable_count": 160,
+      "achievable_rate": 0.7477
+    },
+    "MR_BB_RSI_v1": {
+      "count": 56,
+      "avg_rr_declared": 5.38,
+      "avg_rr_achieved": 0.889,
+      "achievement_ratio": 0.165,
+      "achievable_count": 43,
+      "achievable_rate": 0.7679
+    },
+    "TF_EMA_RSI_v1": {
+      "count": 35,
+      "avg_rr_declared": 5.077,
+      "avg_rr_achieved": 0.938,
+      "achievement_ratio": 0.185,
+      "achievable_count": 26,
+      "achievable_rate": 0.7429
+    }
+  },
+  "by_regime": {
+    "TRENDING": {
+      "count": 434,
+      "avg_rr_declared": 5.89,
+      "avg_rr_achieved": 0.793,
+      "achievement_ratio": 0.135
+    },
+    "MEAN_REVERTING": {
+      "count": 104,
+      "avg_rr_declared": 5.616,
+      "avg_rr_achieved": 0.773,
+      "achievement_ratio": 0.138
+    }
+  },
+  "ts": 1779981790859
+}

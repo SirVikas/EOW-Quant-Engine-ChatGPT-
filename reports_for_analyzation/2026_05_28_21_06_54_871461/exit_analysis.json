@@ -1,0 +1,37 @@
+{
+  "title": "Exit Analysis \u2014 How and Why Trades Close",
+  "generated_at": "2026-05-28 15:23:02 UTC",
+  "summary": {
+    "stop_loss_exits": 793,
+    "profitable_exits": 234,
+    "sl_to_win_ratio": 3.39,
+    "diagnosis": "DIRECTION_WRONG \u2014 SL hit 2\u00d7 more than TP. Fix signal direction."
+  },
+  "by_exit_type": [
+    {
+      "exit_type": "BREAKEVEN",
+      "count": 804,
+      "pct_of_total": 43.9,
+      "total_pnl_usdt": -71.516,
+      "avg_pnl_usdt": -0.089,
+      "avg_r_multiple": -0.0176
+    },
+    {
+      "exit_type": "STOP_LOSS",
+      "count": 793,
+      "pct_of_total": 43.3,
+      "total_pnl_usdt": -394.8042,
+      "avg_pnl_usdt": -0.4979,
+      "avg_r_multiple": -0.1099
+    },
+    {
+      "exit_type": "TRAILING_STOP_WIN",
+      "count": 234,
+      "pct_of_total": 12.8,
+      "total_pnl_usdt": 211.7689,
+      "avg_pnl_usdt": 0.905,
+      "avg_r_multiple": 0.2062
+    }
+  ],
+  "action": "Improve entry direction \u2014 too many full SL hits."
+}

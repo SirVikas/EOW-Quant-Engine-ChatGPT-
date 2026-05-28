@@ -1,0 +1,2125 @@
+{
+  "failed_patterns": [
+    {
+      "pattern_id": "d67bf509-d85",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ATOMUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/8"
+      ],
+      "last_seen": 1,
+      "created_at": 1779870125.0045092
+    },
+    {
+      "pattern_id": "41d23fc5-0c9",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 7,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/17"
+      ],
+      "last_seen": 225,
+      "created_at": 1779870675.4176323
+    },
+    {
+      "pattern_id": "e19c779b-f38",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/8"
+      ],
+      "last_seen": 147,
+      "created_at": 1779870875.995869
+    },
+    {
+      "pattern_id": "95264b07-96f",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/11",
+        "MEAN_REVERTING/LOW/6"
+      ],
+      "last_seen": 411,
+      "created_at": 1779871165.0508745
+    },
+    {
+      "pattern_id": "e37e569e-b6b",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "TONUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 8,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 460,
+      "created_at": 1779871250.317874
+    },
+    {
+      "pattern_id": "f1d50c6e-0d6",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "MEDIUM",
+        "instrument": "ALTUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/MEDIUM/8"
+      ],
+      "last_seen": 8,
+      "created_at": 1779871543.6915674
+    },
+    {
+      "pattern_id": "01141bde-303",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/12"
+      ],
+      "last_seen": 71,
+      "created_at": 1779871693.650194
+    },
+    {
+      "pattern_id": "025e5c82-3ad",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/8"
+      ],
+      "last_seen": 485,
+      "created_at": 1779871753.3399918
+    },
+    {
+      "pattern_id": "6883f90d-e39",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 117,
+      "created_at": 1779871876.1607468
+    },
+    {
+      "pattern_id": "b51f8f77-73a",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ICPUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 5,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/8"
+      ],
+      "last_seen": 135,
+      "created_at": 1779871884.6383488
+    },
+    {
+      "pattern_id": "57264772-491",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 11,
+      "success": 2,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/17"
+      ],
+      "last_seen": 354,
+      "created_at": 1779872287.4543571
+    },
+    {
+      "pattern_id": "6fedf20d-bfd",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 5,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/4"
+      ],
+      "last_seen": 377,
+      "created_at": 1779873461.3287206
+    },
+    {
+      "pattern_id": "7bf9503f-2a6",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "MEDIUM",
+        "instrument": "ALTUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/MEDIUM/9"
+      ],
+      "last_seen": 24,
+      "created_at": 1779874686.536141
+    },
+    {
+      "pattern_id": "fbf72625-f4a",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "TONUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/18",
+        "MEAN_REVERTING/LOW/11",
+        "MEAN_REVERTING/LOW/9"
+      ],
+      "last_seen": 190,
+      "created_at": 1779875246.1743991
+    },
+    {
+      "pattern_id": "a1679fd6-acf",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/6",
+        "MEAN_REVERTING/LOW/9"
+      ],
+      "last_seen": 418,
+      "created_at": 1779875350.750668
+    },
+    {
+      "pattern_id": "6755227f-102",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 4,
+      "success": 2,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12"
+      ],
+      "last_seen": 214,
+      "created_at": 1779875501.048657
+    },
+    {
+      "pattern_id": "da650500-c43",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ICPUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 145,
+      "created_at": 1779875528.9392025
+    },
+    {
+      "pattern_id": "e3247796-649",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "MEDIUM",
+        "instrument": "ALTUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/MEDIUM/9"
+      ],
+      "last_seen": 34,
+      "created_at": 1779875759.0503988
+    },
+    {
+      "pattern_id": "a2beb094-c7a",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/9"
+      ],
+      "last_seen": 35,
+      "created_at": 1779875791.753206
+    },
+    {
+      "pattern_id": "3182caeb-2d9",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/17",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/10",
+        "TRENDING/LOW/6"
+      ],
+      "last_seen": 402,
+      "created_at": 1779878773.830897
+    },
+    {
+      "pattern_id": "ff810c13-407",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 234,
+      "created_at": 1779879303.1499224
+    },
+    {
+      "pattern_id": "7c639a5d-a69",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/11",
+        "MEAN_REVERTING/LOW/13"
+      ],
+      "last_seen": 126,
+      "created_at": 1779879849.7932622
+    },
+    {
+      "pattern_id": "7926689a-381",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/8"
+      ],
+      "last_seen": 435,
+      "created_at": 1779881409.771145
+    },
+    {
+      "pattern_id": "a1d8a523-bab",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ICPUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 4,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/11",
+        "MEAN_REVERTING/LOW/20",
+        "MEAN_REVERTING/LOW/7"
+      ],
+      "last_seen": 430,
+      "created_at": 1779882017.7148414
+    },
+    {
+      "pattern_id": "a1605f82-edd",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/11"
+      ],
+      "last_seen": 444,
+      "created_at": 1779882828.3921394
+    },
+    {
+      "pattern_id": "5a8af7d8-e00",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "TONUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 10,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 359,
+      "created_at": 1779883478.5172472
+    },
+    {
+      "pattern_id": "c81e8f17-801",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ICPUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/12"
+      ],
+      "last_seen": 506,
+      "created_at": 1779884470.3544695
+    },
+    {
+      "pattern_id": "ee5ca1fb-0a7",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/12"
+      ],
+      "last_seen": 309,
+      "created_at": 1779885513.1024804
+    },
+    {
+      "pattern_id": "13a7a6d0-4ca",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/7"
+      ],
+      "last_seen": 503,
+      "created_at": 1779887644.4790564
+    },
+    {
+      "pattern_id": "e0a4ee97-4f5",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/3"
+      ],
+      "last_seen": 352,
+      "created_at": 1779887704.6841202
+    },
+    {
+      "pattern_id": "26b274ff-f54",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 4,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/1",
+        "MEAN_REVERTING/LOW/4",
+        "MEAN_REVERTING/LOW/13",
+        "MEAN_REVERTING/LOW/17"
+      ],
+      "last_seen": 381,
+      "created_at": 1779888143.546953
+    },
+    {
+      "pattern_id": "e62579ab-cc8",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/22",
+        "MEAN_REVERTING/LOW/13",
+        "MEAN_REVERTING/LOW/17"
+      ],
+      "last_seen": 263,
+      "created_at": 1779888818.0416088
+    },
+    {
+      "pattern_id": "a857cb9f-503",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/13"
+      ],
+      "last_seen": 105,
+      "created_at": 1779889752.4579103
+    },
+    {
+      "pattern_id": "5edf9eaa-a43",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ICPUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 2,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 338,
+      "created_at": 1779890069.696784
+    },
+    {
+      "pattern_id": "b86dcff8-7ae",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "BTCUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/1"
+      ],
+      "last_seen": 323,
+      "created_at": 1779890419.9951122
+    },
+    {
+      "pattern_id": "a9de14dd-e97",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ALTUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/17"
+      ],
+      "last_seen": 177,
+      "created_at": 1779890946.6378422
+    },
+    {
+      "pattern_id": "e0591826-009",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/16"
+      ],
+      "last_seen": 314,
+      "created_at": 1779891357.3035078
+    },
+    {
+      "pattern_id": "4a7d8828-131",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "BTCUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 114,
+      "created_at": 1779891418.935505
+    },
+    {
+      "pattern_id": "9f0f7065-f66",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/15"
+      ],
+      "last_seen": 133,
+      "created_at": 1779891601.9001238
+    },
+    {
+      "pattern_id": "d66df44d-178",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/7"
+      ],
+      "last_seen": 423,
+      "created_at": 1779893234.24408
+    },
+    {
+      "pattern_id": "72eec4e8-afa",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/15"
+      ],
+      "last_seen": 205,
+      "created_at": 1779894020.625044
+    },
+    {
+      "pattern_id": "30383044-56e",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/16"
+      ],
+      "last_seen": 163,
+      "created_at": 1779900321.0511177
+    },
+    {
+      "pattern_id": "62aa2f01-b90",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/6",
+        "MEAN_REVERTING/LOW/17"
+      ],
+      "last_seen": 520,
+      "created_at": 1779901343.1664724
+    },
+    {
+      "pattern_id": "5a72151d-2f8",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 4,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/18",
+        "MEAN_REVERTING/LOW/4",
+        "MEAN_REVERTING/LOW/20",
+        "MEAN_REVERTING/LOW/0"
+      ],
+      "last_seen": 380,
+      "created_at": 1779906636.6097426
+    },
+    {
+      "pattern_id": "ebde3bd0-187",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FILUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/18",
+        "MEAN_REVERTING/LOW/2"
+      ],
+      "last_seen": 330,
+      "created_at": 1779907330.7540932
+    },
+    {
+      "pattern_id": "81142cc1-a46",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/20",
+        "MEAN_REVERTING/LOW/9"
+      ],
+      "last_seen": 463,
+      "created_at": 1779912076.5252552
+    },
+    {
+      "pattern_id": "ec203cb5-d9e",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/23",
+        "MEAN_REVERTING/LOW/21"
+      ],
+      "last_seen": 275,
+      "created_at": 1779916417.5163856
+    },
+    {
+      "pattern_id": "9946c927-22d",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ETHUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/22"
+      ],
+      "last_seen": 262,
+      "created_at": 1779920825.944809
+    },
+    {
+      "pattern_id": "ce0932d2-cf5",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/22"
+      ],
+      "last_seen": 270,
+      "created_at": 1779922727.3972573
+    },
+    {
+      "pattern_id": "9bfbfcef-61c",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/0"
+      ],
+      "last_seen": 293,
+      "created_at": 1779926966.7105072
+    },
+    {
+      "pattern_id": "5a716fc0-0f5",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ALTUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 4,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/9",
+        "MEAN_REVERTING/LOW/2"
+      ],
+      "last_seen": 457,
+      "created_at": 1779933620.0181494
+    },
+    {
+      "pattern_id": "1e7e462b-f66",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/2"
+      ],
+      "last_seen": 437,
+      "created_at": 1779936253.5345433
+    },
+    {
+      "pattern_id": "f8fdfc04-614",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/4"
+      ],
+      "last_seen": 378,
+      "created_at": 1779943802.1160374
+    },
+    {
+      "pattern_id": "dad2fd36-e78",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/6"
+      ],
+      "last_seen": 405,
+      "created_at": 1779949442.4356182
+    },
+    {
+      "pattern_id": "e63401b2-3e0",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14"
+      ],
+      "last_seen": 529,
+      "created_at": 1779977833.5129206
+    },
+    {
+      "pattern_id": "f5c20ef4-b22",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "BTCUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 1,
+      "success": 0,
+      "confidence": 0.0,
+      "contexts": [
+        "TRENDING/LOW/14"
+      ],
+      "last_seen": 532,
+      "created_at": 1779978151.3484292
+    },
+    {
+      "pattern_id": "9abf7834-ac8",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 1,
+      "confidence": 0.01,
+      "contexts": [
+        "MEAN_REVERTING/LOW/3",
+        "MEAN_REVERTING/LOW/18",
+        "MEAN_REVERTING/LOW/4"
+      ],
+      "last_seen": 375,
+      "created_at": 1779907659.5326111
+    },
+    {
+      "pattern_id": "77d4bf1e-e83",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 1,
+      "success": 1,
+      "confidence": 0.01,
+      "contexts": [
+        "TRENDING/LOW/3"
+      ],
+      "last_seen": 351,
+      "created_at": 1779938329.7355509
+    },
+    {
+      "pattern_id": "8108cd6b-d0c",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 1,
+      "confidence": 0.03,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/13",
+        "MEAN_REVERTING/LOW/6",
+        "MEAN_REVERTING/LOW/9"
+      ],
+      "last_seen": 404,
+      "created_at": 1779873080.3870916
+    },
+    {
+      "pattern_id": "e17a68f9-c14",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 1,
+      "confidence": 0.06,
+      "contexts": [
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/6"
+      ],
+      "last_seen": 416,
+      "created_at": 1779870436.3306198
+    },
+    {
+      "pattern_id": "d7efc2f7-fe7",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 1,
+      "confidence": 0.07,
+      "contexts": [
+        "MEAN_REVERTING/LOW/4",
+        "MEAN_REVERTING/LOW/11",
+        "MEAN_REVERTING/LOW/6"
+      ],
+      "last_seen": 409,
+      "created_at": 1779880498.6315022
+    },
+    {
+      "pattern_id": "f48d680b-d4d",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 3,
+      "confidence": 0.07,
+      "contexts": [
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/17",
+        "TRENDING/LOW/16"
+      ],
+      "last_seen": 397,
+      "created_at": 1779897699.85867
+    },
+    {
+      "pattern_id": "89e8b3e8-b02",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 0.07,
+      "contexts": [
+        "MEAN_REVERTING/LOW/23",
+        "MEAN_REVERTING/LOW/6"
+      ],
+      "last_seen": 401,
+      "created_at": 1779924471.299752
+    },
+    {
+      "pattern_id": "1666dbfa-084",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 1,
+      "confidence": 0.1,
+      "contexts": [
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/17",
+        "TRENDING/LOW/6"
+      ],
+      "last_seen": 417,
+      "created_at": 1779882245.165499
+    },
+    {
+      "pattern_id": "8c2286da-a33",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 1,
+      "confidence": 0.12,
+      "contexts": [
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/7",
+        "TRENDING/LOW/8"
+      ],
+      "last_seen": 431,
+      "created_at": 1779871401.4262116
+    },
+    {
+      "pattern_id": "4736fa74-b31",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 4,
+      "success": 2,
+      "confidence": 0.12,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/12",
+        "MEAN_REVERTING/LOW/6"
+      ],
+      "last_seen": 412,
+      "created_at": 1779872054.735294
+    },
+    {
+      "pattern_id": "a881ac48-298",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "ALTUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 1,
+      "confidence": 0.22,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/12",
+        "MEAN_REVERTING/LOW/11"
+      ],
+      "last_seen": 432,
+      "created_at": 1779880840.8384478
+    },
+    {
+      "pattern_id": "54b8d8f0-d2d",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 8,
+      "success": 2,
+      "confidence": 0.43,
+      "contexts": [
+        "TRENDING/LOW/22",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/6",
+        "TRENDING/LOW/5"
+      ],
+      "last_seen": 451,
+      "created_at": 1779884687.1072195
+    },
+    {
+      "pattern_id": "ac6e9b66-0ba",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 3,
+      "success": 3,
+      "confidence": 0.44,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/19",
+        "MEAN_REVERTING/LOW/7"
+      ],
+      "last_seen": 424,
+      "created_at": 1779892455.586241
+    },
+    {
+      "pattern_id": "06c0916c-f6a",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 8,
+      "success": 2,
+      "confidence": 0.66,
+      "contexts": [
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/7",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 459,
+      "created_at": 1779877747.6071582
+    },
+    {
+      "pattern_id": "b0b85adf-227",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ALTUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 7,
+      "success": 1,
+      "confidence": 0.73,
+      "contexts": [
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 472,
+      "created_at": 1779882496.9485614
+    },
+    {
+      "pattern_id": "4eb30794-a1d",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ICPUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 8,
+      "success": 2,
+      "confidence": 1.15,
+      "contexts": [
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/6",
+        "TRENDING/LOW/7",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 470,
+      "created_at": 1779896385.4504461
+    },
+    {
+      "pattern_id": "2d59a70b-188",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 14,
+      "success": 1,
+      "confidence": 1.31,
+      "contexts": [
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/10",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 497,
+      "created_at": 1779874916.2154908
+    },
+    {
+      "pattern_id": "406a3bd1-b83",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ALTUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 2,
+      "confidence": 1.5,
+      "contexts": [
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 466,
+      "created_at": 1779879217.6080842
+    },
+    {
+      "pattern_id": "de8603f0-7f1",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 2.08,
+      "contexts": [
+        "MEAN_REVERTING/LOW/9",
+        "MEAN_REVERTING/LOW/7"
+      ],
+      "last_seen": 468,
+      "created_at": 1779953303.9128335
+    },
+    {
+      "pattern_id": "2751f774-5cd",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 9,
+      "success": 2,
+      "confidence": 2.45,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 487,
+      "created_at": 1779877994.8846748
+    },
+    {
+      "pattern_id": "98bf3c96-6cd",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 10,
+      "success": 2,
+      "confidence": 2.57,
+      "contexts": [
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/22",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/4"
+      ],
+      "last_seen": 490,
+      "created_at": 1779875541.0793018
+    },
+    {
+      "pattern_id": "339ee43f-d51",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 8,
+      "success": 1,
+      "confidence": 3.29,
+      "contexts": [
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/7",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 504,
+      "created_at": 1779875531.3825119
+    },
+    {
+      "pattern_id": "387ab765-6cb",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 7,
+      "success": 1,
+      "confidence": 4.39,
+      "contexts": [
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/7",
+        "TRENDING/LOW/6",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/5"
+      ],
+      "last_seen": 507,
+      "created_at": 1779895432.149105
+    },
+    {
+      "pattern_id": "d87ce66a-299",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 10,
+      "success": 5,
+      "confidence": 6.1,
+      "contexts": [
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 489,
+      "created_at": 1779883636.4818845
+    },
+    {
+      "pattern_id": "ac92096d-59f",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 1,
+      "confidence": 6.47,
+      "contexts": [
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/5",
+        "MEAN_REVERTING/LOW/13",
+        "MEAN_REVERTING/LOW/21"
+      ],
+      "last_seen": 508,
+      "created_at": 1779917724.176954
+    },
+    {
+      "pattern_id": "6d67a194-7b6",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "TONUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 7,
+      "success": 3,
+      "confidence": 6.76,
+      "contexts": [
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/17"
+      ],
+      "last_seen": 494,
+      "created_at": 1779900066.9059477
+    },
+    {
+      "pattern_id": "1c7a5085-f01",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 12,
+      "success": 5,
+      "confidence": 6.92,
+      "contexts": [
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/17",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 495,
+      "created_at": 1779875925.4156086
+    },
+    {
+      "pattern_id": "1aaf407a-38f",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "UP"
+      },
+      "samples": 5,
+      "success": 1,
+      "confidence": 7.94,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/7"
+      ],
+      "last_seen": 512,
+      "created_at": 1779896233.2205653
+    },
+    {
+      "pattern_id": "4909128e-ab7",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ONDOUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 16,
+      "success": 8,
+      "confidence": 11.3,
+      "contexts": [
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/22",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 501,
+      "created_at": 1779872733.9197335
+    },
+    {
+      "pattern_id": "53a8cf78-554",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 11,
+      "success": 4,
+      "confidence": 13.04,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 510,
+      "created_at": 1779878755.2330072
+    },
+    {
+      "pattern_id": "ba59c42e-1e0",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 16,
+      "success": 5,
+      "confidence": 15.24,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/10",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 516,
+      "created_at": 1779874783.1548078
+    },
+    {
+      "pattern_id": "6cb7f945-3cd",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ALTUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 8,
+      "success": 3,
+      "confidence": 16.5,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/19",
+        "TRENDING/LOW/6",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/21"
+      ],
+      "last_seen": 514,
+      "created_at": 1779909181.9451125
+    },
+    {
+      "pattern_id": "73f06773-8dc",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "FETUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 18,
+      "success": 5,
+      "confidence": 17.51,
+      "contexts": [
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/10",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 521,
+      "created_at": 1779876554.2688305
+    },
+    {
+      "pattern_id": "9b6caabc-148",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 7,
+      "success": 3,
+      "confidence": 17.92,
+      "contexts": [
+        "MEAN_REVERTING/LOW/12",
+        "MEAN_REVERTING/LOW/20",
+        "MEAN_REVERTING/LOW/3",
+        "MEAN_REVERTING/LOW/8",
+        "MEAN_REVERTING/LOW/13",
+        "MEAN_REVERTING/LOW/21"
+      ],
+      "last_seen": 513,
+      "created_at": 1779886782.8736637
+    },
+    {
+      "pattern_id": "8bd21310-ecf",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "BTCUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 4,
+      "success": 1,
+      "confidence": 18.38,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/14"
+      ],
+      "last_seen": 524,
+      "created_at": 1779889695.3956342
+    },
+    {
+      "pattern_id": "8ab58e77-1bb",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 15,
+      "success": 4,
+      "confidence": 21.72,
+      "contexts": [
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/6",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 526,
+      "created_at": 1779899364.9173799
+    },
+    {
+      "pattern_id": "f26cfed1-841",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "WLDUSDT",
+        "parameter": "ALPHA_PBE_v1",
+        "direction": "DOWN"
+      },
+      "samples": 14,
+      "success": 5,
+      "confidence": 25.0,
+      "contexts": [
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/17",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 538,
+      "created_at": 1779873341.2375355
+    },
+    {
+      "pattern_id": "da27287e-900",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "OPGUSDT",
+        "parameter": "TF_EMA_RSI_v1",
+        "direction": "DOWN"
+      },
+      "samples": 2,
+      "success": 1,
+      "confidence": 25.67,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/16"
+      ],
+      "last_seen": 517,
+      "created_at": 1779898412.3821094
+    },
+    {
+      "pattern_id": "42c1fdf1-ce0",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "SEIUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 17,
+      "success": 6,
+      "confidence": 27.31,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/3",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/22",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/17",
+        "TRENDING/LOW/10"
+      ],
+      "last_seen": 525,
+      "created_at": 1779876641.0029864
+    },
+    {
+      "pattern_id": "d7c78a0c-abe",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ICPUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 16,
+      "success": 5,
+      "confidence": 28.2,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/22",
+        "TRENDING/LOW/0",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/5",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/4",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/17"
+      ],
+      "last_seen": 528,
+      "created_at": 1779899843.739552
+    },
+    {
+      "pattern_id": "b457412d-5f8",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ETHUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 7,
+      "success": 3,
+      "confidence": 29.93,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/22",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/18",
+        "TRENDING/LOW/17"
+      ],
+      "last_seen": 523,
+      "created_at": 1779889187.0792263
+    },
+    {
+      "pattern_id": "f042d970-354",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "ETHUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 1,
+      "confidence": 33.33,
+      "contexts": [
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/15",
+        "TRENDING/LOW/12"
+      ],
+      "last_seen": 531,
+      "created_at": 1779884530.3618858
+    },
+    {
+      "pattern_id": "47f97b1f-27e",
+      "key": {
+        "regime": "MEAN_REVERTING",
+        "volatility": "LOW",
+        "instrument": "RENDERUSDT",
+        "parameter": "MR_BB_RSI_v1",
+        "direction": "UP"
+      },
+      "samples": 3,
+      "success": 2,
+      "confidence": 36.02,
+      "contexts": [
+        "MEAN_REVERTING/LOW/14",
+        "MEAN_REVERTING/LOW/15",
+        "MEAN_REVERTING/LOW/13"
+      ],
+      "last_seen": 518,
+      "created_at": 1779892249.3123193
+    },
+    {
+      "pattern_id": "145096ac-520",
+      "key": {
+        "regime": "TRENDING",
+        "volatility": "LOW",
+        "instrument": "NEARUSDT",
+        "parameter": "ALPHA_TCB_v1",
+        "direction": "DOWN"
+      },
+      "samples": 19,
+      "success": 7,
+      "confidence": 36.84,
+      "contexts": [
+        "TRENDING/LOW/13",
+        "TRENDING/LOW/1",
+        "TRENDING/LOW/22",
+        "TRENDING/LOW/9",
+        "TRENDING/LOW/11",
+        "TRENDING/LOW/14",
+        "TRENDING/LOW/16",
+        "TRENDING/LOW/6",
+        "TRENDING/LOW/20",
+        "TRENDING/LOW/23",
+        "TRENDING/LOW/8",
+        "TRENDING/LOW/21",
+        "TRENDING/LOW/2"
+      ],
+      "last_seen": 536,
+      "created_at": 1779872079.890604
+    }
+  ],
+  "phase": "030B"
+}
