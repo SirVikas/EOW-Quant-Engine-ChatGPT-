@@ -1,0 +1,679 @@
+# PHOENIX Institutional Report
+
+_Generated: 2026-05-28T15:25:59Z_
+
+## Constitutional Notice
+
+> All outputs are research instruments only. Human authority required for all governance decisions. auto_authorized=False.
+
+## COGNITIVE
+
+### Negative Memory Archive
+
+**ID:** `NEGATIVE_MEMORY` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Aversion catalog — high-loss patterns and adverse regime memory_
+
+Data present — 6 fields.
+
+### Pattern Library
+
+**ID:** `PATTERNS` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Learned strategy patterns and regime-specific pattern library_
+
+Data present — 4 fields.
+
+### Cognitive State
+
+**ID:** `COGNITION` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Cognitive architecture state — ontology drift, belief updating, adaptation velocity_
+
+Data present — 12 fields.
+
+### Memory Pressure Dynamics
+
+**ID:** `MEMORY_PRESSURE` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Memory buffer pressure — eviction dynamics, aversion memory saturation_
+
+Data present — 6 fields.
+
+### Strategy Topology
+
+**ID:** `TOPOLOGY` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Strategy relationship topology — decision surface mapping_
+
+Data present — 3 fields.
+
+## CONTINUITY
+
+### Constitutional Recovery Observatory
+
+**ID:** `CKPD` | **Tier:** CONTINUITY | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_FTD-CKPD: Knowledge preservation & catastrophic recovery readiness — 7 recovery metrics_
+
+Data present — 12 fields.
+
+### Long-Horizon Evolution
+
+**ID:** `LHEO` | **Tier:** CONTINUITY | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Long-horizon cognitive evolution — ontology drift, belief continuity, adaptation lineage_
+
+Data present — 12 fields.
+
+### Cross-Regime Continuity Engine
+
+**ID:** `CROSS_REGIME_CONTINUITY` | **Tier:** CONTINUITY | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Cross-regime continuity — H.5 UNIVERSAL/BROAD/NARROW/FRAGILE verdicts across 6 environment types_
+
+_Data pending — endpoint not yet called._
+
+### Long-Horizon Entropy Engine
+
+**ID:** `LONG_HORIZON_ENTROPY` | **Tier:** CONTINUITY | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Long-horizon entropy engine — H.3 slow-degradation detection with DURABLE/AGING/FRAGILE/EXHAUSTED states_
+
+_Data pending — endpoint not yet called._
+
+### Multi-Cycle Survivability Memory
+
+**ID:** `MULTI_CYCLE_SURVIVABILITY` | **Tier:** CONTINUITY | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Multi-cycle survivability memory — H.1 era detection with DURABLE/CYCLICAL/DETERIORATING verdicts_
+
+_Data pending — endpoint not yet called._
+
+### Evolutionary Doctrine Memory
+
+**ID:** `EVOLUTIONARY_DOCTRINE` | **Tier:** CONTINUITY | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Evolutionary doctrine memory — H.2 quartile drift analysis with STABLE/DRIFTING/REGRESSED/EVOLVING states_
+
+_Data pending — endpoint not yet called._
+
+### Institutional Recovery Inheritance
+
+**ID:** `RECOVERY_INHERITANCE` | **Tier:** CONTINUITY | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Recovery inheritance — H.4 crossover-based inheritance with RICH/MODERATE/SPARSE/NO_INHERITANCE states_
+
+_Data pending — endpoint not yet called._
+
+### Institutional Identity Stability
+
+**ID:** `INSTITUTIONAL_IDENTITY` | **Tier:** CONTINUITY | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Institutional identity stability — H.6 detects HIDDEN_SOVEREIGNTY_DRIFT and GOVERNANCE_EROSION with STABLE→COMPROMISED states_
+
+_Data pending — endpoint not yet called._
+
+### Institutional Continuity Orchestration
+
+**ID:** `INSTITUTIONAL_CONTINUITY` | **Tier:** CONTINUITY | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Institutional continuity orchestration — Phase-H ENDURING/PERSISTENT/FRAGILE/DECAYING tiers with CONT lineage_
+
+_Data pending — endpoint not yet called._
+
+## ECONOMIC
+
+### Economic Ground Truth
+
+**ID:** `ECONOMIC_GROUND_TRUTH` | **Tier:** CORE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Ground truth economic performance — fees, slippage, net/gross PnL, Sharpe-family_
+
+Data present — 11 fields.
+
+### Capital Utilization Engine
+
+**ID:** `CAPITAL_UTILIZATION` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Capital utilization — PnL-per-unit efficiency and sizing coefficient of variation with EFFICIENT/ADEQUATE/UNDERUTILIZED/OVEREXTENDED states_
+
+_Data pending — endpoint not yet called._
+
+### Discipline Cost Engine
+
+**ID:** `DISCIPLINE_COST` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Discipline cost — quantifies economic cost of over-caution and under-discipline with COST_MINIMAL/MODERATE/SIGNIFICANT/SEVERE states_
+
+_Data pending — endpoint not yet called._
+
+### Drawdown Dynamics Engine
+
+**ID:** `DRAWDOWN_DYNAMICS` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Drawdown dynamics — multi-phase peak/trough/recovery analysis with STABLE/RECOVERING/DETERIORATING/CRITICAL states_
+
+_Data pending — endpoint not yet called._
+
+### Equilibrium Band Engine
+
+**ID:** `EQUILIBRIUM_BAND` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Equilibrium band — 2.5-sigma statistical band detection with IN_BAND/APPROACHING/OUTSIDE_BAND/FAR_OUTSIDE states_
+
+_Data pending — endpoint not yet called._
+
+### Expectancy Reconstruction
+
+**ID:** `EXPECTANCY_RECONSTRUCTION` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Expectancy reconstruction — fee-adjusted, regime-segmented expectancy with survivability tiers_
+
+_Data pending — endpoint not yet called._
+
+### Expectancy Stability Engine
+
+**ID:** `EXPECTANCY_STABILITY` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Expectancy stability engine — rolling variance, trend, and regime-conditional stability scoring_
+
+_Data pending — endpoint not yet called._
+
+### Confidence Realism Engine
+
+**ID:** `CONFIDENCE_REALISM` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Confidence realism engine — calibration of strategy confidence against realized outcomes_
+
+_Data pending — endpoint not yet called._
+
+### Fee Drag Intelligence
+
+**ID:** `FEE_DRAG_INTELLIGENCE` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Fee drag intelligence — true cost of trading with slippage, commissions, and drag decomposition_
+
+_Data pending — endpoint not yet called._
+
+### Adaptive Signal Filtration
+
+**ID:** `ADAPTIVE_FILTRATION` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Adaptive signal filtration — regime-aware signal quality scoring and noise suppression_
+
+_Data pending — endpoint not yet called._
+
+### Kelly Capital Efficiency
+
+**ID:** `KELLY_EFFICIENCY` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Kelly capital efficiency — optimal vs actual position sizing with OPTIMAL/ADEQUATE/SUBOPTIMAL/NEGLIGENT states_
+
+_Data pending — endpoint not yet called._
+
+### Return Consistency Engine
+
+**ID:** `RETURN_CONSISTENCY` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Return consistency — rolling window variance and positive-ratio scoring with CONSISTENT/ADEQUATE/VARIABLE/ERRATIC states_
+
+_Data pending — endpoint not yet called._
+
+### Adaptive Equilibrium Orchestration
+
+**ID:** `ADAPTIVE_EQUILIBRIUM` | **Tier:** CORE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Adaptive equilibrium orchestration — Phase-F EQ lineage, BALANCED/ADAPTING/STRESSED/CRITICAL tiers (capital mathematics layer)_
+
+_Data pending — endpoint not yet called._
+
+### Trading Summary
+
+**ID:** `SUMMARY` | **Tier:** CORE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Core economic performance summary — PnL, win rate, session stats_
+
+Data present — 13 fields.
+
+### Strategy Ecology
+
+**ID:** `ECOLOGY` | **Tier:** CORE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Strategy ecosystem health — regime distribution, strategy population balance_
+
+Data present — 18 fields.
+
+### Alpha Discovery
+
+**ID:** `ALPHA_DISCOVERY` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Alpha signal discovery — edge identification and regime-specific alpha_
+
+Data present — 16 fields.
+
+### RL Learning Intelligence
+
+**ID:** `RL_LEARNING` | **Tier:** CORE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_RL policy learning state — Q-values, reward shaping, policy evolution_
+
+Data present — 18 fields.
+
+### Survivable Alpha Detection
+
+**ID:** `SURVIVABLE_ALPHA` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Survivable alpha detection — identifies edge that survives fees, regime shifts, and drawdown_
+
+_Data pending — endpoint not yet called._
+
+### Alpha Persistence Tracker
+
+**ID:** `ALPHA_PERSISTENCE` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Alpha persistence tracker — measures alpha decay rate and long-term edge persistence_
+
+_Data pending — endpoint not yet called._
+
+### Ecological Collapse Detection
+
+**ID:** `ECONOMIC_ECOLOGICAL_COLLAPSE` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Ecological collapse detection — strategy ecosystem degradation and collapse risk signals_
+
+_Data pending — endpoint not yet called._
+
+### Ecological Self-Preservation Engine
+
+**ID:** `ECOLOGICAL_PRESERVATION` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Ecological self-preservation — detects strategy extinction risk and self-correcting mechanisms_
+
+_Data pending — endpoint not yet called._
+
+### Entropy Resistance Engine
+
+**ID:** `ENTROPY_RESISTANCE` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Entropy resistance engine — measures strategy information degradation and disorder accumulation_
+
+_Data pending — endpoint not yet called._
+
+### Timeframe Survivability
+
+**ID:** `TIMEFRAME_SURVIVABILITY` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Survivability across holding periods — how strategy performance degrades over time_
+
+Data present — 9 fields.
+
+### Regime Survivability Cartography
+
+**ID:** `REGIME_CARTOGRAPHY` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Regime-indexed survivability map — performance across market regimes_
+
+Data present — 14 fields.
+
+### Regime Survivability Engine
+
+**ID:** `REGIME_SURVIVABILITY` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Regime survivability engine — strategy viability across market regimes with transition mapping_
+
+_Data pending — endpoint not yet called._
+
+### Economic Truth Orchestration
+
+**ID:** `ECONOMIC_TRUTH` | **Tier:** CORE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Economic truth orchestration — Phase-D unified verdict with ECO lineage and constitutional invariants_
+
+_Data pending — endpoint not yet called._
+
+### Regime Adaptation Memory
+
+**ID:** `REGIME_MEMORY` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Regime adaptation memory — historical regime performance retained for cross-cycle comparison_
+
+_Data pending — endpoint not yet called._
+
+### Survivability Evolution Orchestration
+
+**ID:** `SURVIVABILITY_EVOLUTION` | **Tier:** CORE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Survivability evolution orchestration — Phase-E unified verdict with SURV lineage, EVOLVING→COLLAPSING tiers_
+
+_Data pending — endpoint not yet called._
+
+## EPISTEMIC
+
+### Drawdown Tolerance Engine
+
+**ID:** `DRAWDOWN_TOLERANCE` | **Tier:** EPISTEMIC | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Drawdown tolerance — DD ratio, recovery ratio, Calmar proxy with live-deployment thresholds; DEPLOYMENT_READY/BORDERLINE/EXCESSIVE_DRAWDOWN/DISQUALIFYING_
+
+_Data pending — endpoint not yet called._
+
+### Fee-Survival Certification Engine
+
+**ID:** `FEE_SURVIVAL_CERT` | **Tier:** EPISTEMIC | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Fee-survival certification — rolling 20-trade net-PnL window survival rate; FEE_CERTIFIED/MARGINAL/FEE_ERODED/FEE_DESTROYED_
+
+_Data pending — endpoint not yet called._
+
+### Statistical Significance Engine
+
+**ID:** `STATISTICAL_SIGNIFICANCE` | **Tier:** EPISTEMIC | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Statistical significance — binomial z-test (win rate) + t-test (mean PnL) with p-values; PROVEN/INDICATIVE/INSUFFICIENT_EVIDENCE/NO_EDGE_
+
+_Data pending — endpoint not yet called._
+
+### Out-of-Sample Validation Engine
+
+**ID:** `OOS_VALIDATION` | **Tier:** EPISTEMIC | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Out-of-sample validation — 60/40 IS/OOS chronological split with degradation ratio; OOS_CONSISTENT/MINOR_DEGRADATION/SIGNIFICANT_DEGRADATION/OOS_FAILURE_
+
+_Data pending — endpoint not yet called._
+
+### Epistemic Integrity Observatory
+
+**ID:** `EIOD` | **Tier:** EPISTEMIC | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_FTD-EIOD: Scientific method governance — 8 epistemic metrics, 6 classifications_
+
+Data present — 10 fields.
+
+### Regime Robustness Engine
+
+**ID:** `REGIME_ROBUSTNESS` | **Tier:** EPISTEMIC | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Regime robustness — qualifying profitable regimes (≥10 trades each) and concentration risk; ROBUST/ADEQUATE/CONCENTRATED/FRAGILE_
+
+_Data pending — endpoint not yet called._
+
+### Alpha Confirmation Orchestration
+
+**ID:** `ALPHA_CONFIRMATION` | **Tier:** EPISTEMIC | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Alpha confirmation orchestration — Phase-I ALPHA lineage, CONFIRMED/CANDIDATE/DEVELOPING/UNPROVEN tiers; live_deployment_authorized=False on all outputs_
+
+_Data pending — endpoint not yet called._
+
+## FORENSICS
+
+### Session Attribution
+
+**ID:** `SESSION_ATTRIBUTION` | **Tier:** FORENSICS | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Session-level forensics — NY/LN/AS/EU attribution and performance breakdown_
+
+Data present — 9 fields.
+
+## GOVERNANCE
+
+### Compression Executive Summary
+
+**ID:** `COMPRESSION_EXECUTIVE` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Compression executive summary — high-level context compression health and key metrics_
+
+_Data pending — endpoint not yet called._
+
+### Compression Health
+
+**ID:** `COMPRESSION_HEALTH` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Compression subsystem health — operational status and buffer pressure diagnostics_
+
+_Data pending — endpoint not yet called._
+
+### Compression Anomalies
+
+**ID:** `COMPRESSION_ANOMALIES` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Compression anomaly detection — identifies pathological compression patterns and overloads_
+
+_Data pending — endpoint not yet called._
+
+### Compression Ecology
+
+**ID:** `COMPRESSION_ECOLOGY` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Compression ecology — regime-indexed compression distribution and ecological balance_
+
+_Data pending — endpoint not yet called._
+
+### Compression Governance
+
+**ID:** `COMPRESSION_GOVERNANCE` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Compression governance compliance — constitutional alignment of compression operations_
+
+_Data pending — endpoint not yet called._
+
+### Compression Visibility
+
+**ID:** `COMPRESSION_VISIBILITY` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Compression visibility diagnostics — operator-facing compression state transparency_
+
+_Data pending — endpoint not yet called._
+
+### Compression Orchestration
+
+**ID:** `COMPRESSION_ORCHESTRATION` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Compression orchestration synthesis — unified compression intelligence across all sub-engines_
+
+_Data pending — endpoint not yet called._
+
+### Reality Verification
+
+**ID:** `GRVL` | **Tier:** GOVERNANCE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Reality gate verification — alignment of engine assumptions with market ground truth_
+
+Data present — 12 fields.
+
+### Sovereign Readiness
+
+**ID:** `SOVEREIGN_READINESS` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Governance readiness diagnostics — sovereignty gate assessment_
+
+Data present — 5 fields.
+
+### Adaptive Governance Simulator
+
+**ID:** `GAGS` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Governance parameter simulation — threshold sensitivity and adaptive governance scenarios_
+
+Data present — 10 fields.
+
+### Governed Adaptive Doctrine
+
+**ID:** `GADD` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Active governance doctrine — current adaptive doctrine state and constitutional compliance_
+
+Data present — 11 fields.
+
+### Guarded Micro Pilot
+
+**ID:** `GMPD` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Micro-pilot deployment governance — staged live readiness gating_
+
+Data present — 15 fields.
+
+### Live Readiness Gate
+
+**ID:** `LIVE_READINESS_GATE` | **Tier:** GOVERNANCE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Live readiness constitutional gate — hard block if ANY sub-engine fails; READY_FOR_CONSIDERATION/CONDITIONAL/BLOCKED/INSUFFICIENT_DATA; live_deployment_authorized=False always_
+
+_Data pending — endpoint not yet called._
+
+### Restraint Advisory Engine
+
+**ID:** `RESTRAINT_ADVISORY` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Restraint advisory engine — G.1 execution advisory with TRADE_ALLOWED→ENTROPY_ALERT states_
+
+_Data pending — endpoint not yet called._
+
+### Capital Discipline Gate
+
+**ID:** `DISCIPLINE_GATE` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Capital discipline gate — G.2 constitutional execution gate with PASS/CAUTION/DEFENSIVE/UNSAFE states_
+
+_Data pending — endpoint not yet called._
+
+### Execution Discipline Memory
+
+**ID:** `DISCIPLINE_MEMORY` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Execution discipline memory — G.5 behavioral memory with DISCIPLINED→UNCONTROLLED tiers_
+
+_Data pending — endpoint not yet called._
+
+### Equilibrium Resumption Engine
+
+**ID:** `EQUILIBRIUM_RESUMPTION` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Equilibrium resumption engine — G.3 recovery readiness with ACTIVE→LOCKDOWN states and 6 dimensions_
+
+_Data pending — endpoint not yet called._
+
+### Adaptive Execution Civilization
+
+**ID:** `EXECUTION_CIVILIZATION` | **Tier:** GOVERNANCE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Adaptive execution civilization — Phase-G SOVEREIGN/OPERATIONAL/GUARDED/COMPROMISED tiers with EXEC lineage_
+
+_Data pending — endpoint not yet called._
+
+### Wiring Archive Audit
+
+**ID:** `WIRING_ARCHIVE` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Archive wiring audit — verifies QPR bundle keys and report registry alignment_
+
+_Data pending — endpoint not yet called._
+
+### Wiring Compression Audit
+
+**ID:** `WIRING_COMPRESSION` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Compression wiring audit — verifies compression subsystem integration with main PRP chain_
+
+_Data pending — endpoint not yet called._
+
+### Wiring Constitution Audit
+
+**ID:** `WIRING_CONSTITUTION` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Constitutional wiring audit — verifies all constitutional invariants are propagated correctly_
+
+_Data pending — endpoint not yet called._
+
+### Wiring Dependencies Audit
+
+**ID:** `WIRING_DEPENDENCIES` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Cross-module dependency wiring audit — verifies import chains are clean and fail-open_
+
+_Data pending — endpoint not yet called._
+
+### Wiring Propagation Audit
+
+**ID:** `WIRING_PROPAGATION` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Signal propagation wiring audit — verifies data flows correctly across all PRP phases_
+
+_Data pending — endpoint not yet called._
+
+### Wiring Rendering Audit
+
+**ID:** `WIRING_RENDERING` | **Tier:** GOVERNANCE | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Rendering wiring audit — verifies dashboard endpoints and UI tile wiring correctness_
+
+_Data pending — endpoint not yet called._
+
+### Cross-PRP Full Wiring Report
+
+**ID:** `WIRING_FULL_REPORT` | **Tier:** GOVERNANCE | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_Full cross-PRP wiring audit synthesis — comprehensive integration health across all phases_
+
+_Data pending — endpoint not yet called._
+
+### Wiring Audit Health
+
+**ID:** `WIRING_HEALTH` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Wiring audit subsystem health — single-line operational status for boot visibility_
+
+_Data pending — endpoint not yet called._
+
+## HUMAN_ALIGNMENT
+
+### Human Meaning Alignment Observatory
+
+**ID:** `HMAO` | **Tier:** CONTINUITY | **Priority:** CRITICAL | **Health:** UNKNOWN
+
+_FTD-HMAO: Human purpose alignment governance — 8 alignment metrics, 6 classifications_
+
+Data present — 11 fields.
+
+### Operator Override Transparency
+
+**ID:** `OVERRIDE_TRANSPARENCY` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Operator override transparency — G.4 detects explicit and inferred overrides with human-visible audit trail_
+
+_Data pending — endpoint not yet called._
+
+### Human Governance Safety Engine
+
+**ID:** `GOVERNANCE_SAFETY` | **Tier:** GOVERNANCE | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Human governance safety — G.6 validates G.1–G.5 integrity with CERTIFIED/VIOLATION_DETECTED states_
+
+_Data pending — endpoint not yet called._
+
+## REPLAY
+
+### Exploration Diagnostics
+
+**ID:** `EXPLORATION_DIAGNOSTICS` | **Tier:** RESEARCH | **Priority:** HIGH | **Health:** UNKNOWN
+
+_Exploration health — epsilon decay, trial diversity, exploration effectiveness_
+
+Data present — 3 fields.
+
+### Exploration Economic Attribution
+
+**ID:** `EXPLORATION_ECONOMIC_ATTRIBUTION` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Economic cost/benefit of exploration — PnL attribution to exploration vs exploitation_
+
+Data present — 11 fields.
+
+### Counterfactual Interventions
+
+**ID:** `COUNTERFACTUAL_LAB` | **Tier:** RESEARCH | **Priority:** MEDIUM | **Health:** UNKNOWN
+
+_Counterfactual analysis — what-if interventions on strategy parameters_
+
+Data present — 10 fields.

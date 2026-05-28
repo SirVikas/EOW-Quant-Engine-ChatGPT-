@@ -1,0 +1,9 @@
+{
+  "report": "08_predictive_integrity_monitor",
+  "prp": "001",
+  "global_truth_density": 0.0,
+  "recent_win_rate": 0.0,
+  "rolling_drift": 0.0,
+  "confidence_calibration": [],
+  "ts": 1779981790859
+}

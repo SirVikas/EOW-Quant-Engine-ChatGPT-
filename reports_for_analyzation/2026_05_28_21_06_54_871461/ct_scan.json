@@ -1,0 +1,10 @@
+{
+  "system_health": "CRITICAL",
+  "issues": [
+    "Low profit factor (0.48 < 1.0)",
+    "High fees (28.9% of gross profit)",
+    "Low win rate (22.6% < 40%)"
+  ],
+  "action": "Reduce trades + improve RR | Avoid small-notional trades to reduce fee drag",
+  "score": 25
+}

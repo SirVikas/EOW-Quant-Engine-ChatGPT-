@@ -1,0 +1,178 @@
+{
+  "report": "07_noise_participation_audit",
+  "prp": "001",
+  "by_hour": [
+    {
+      "hour": 0,
+      "total": 17,
+      "fp": 13,
+      "fp_rate": 0.7647
+    },
+    {
+      "hour": 1,
+      "total": 21,
+      "fp": 16,
+      "fp_rate": 0.7619
+    },
+    {
+      "hour": 2,
+      "total": 18,
+      "fp": 12,
+      "fp_rate": 0.6667
+    },
+    {
+      "hour": 3,
+      "total": 18,
+      "fp": 11,
+      "fp_rate": 0.6111
+    },
+    {
+      "hour": 4,
+      "total": 20,
+      "fp": 13,
+      "fp_rate": 0.65
+    },
+    {
+      "hour": 5,
+      "total": 15,
+      "fp": 10,
+      "fp_rate": 0.6667
+    },
+    {
+      "hour": 6,
+      "total": 21,
+      "fp": 13,
+      "fp_rate": 0.619
+    },
+    {
+      "hour": 7,
+      "total": 13,
+      "fp": 11,
+      "fp_rate": 0.8462
+    },
+    {
+      "hour": 8,
+      "total": 35,
+      "fp": 26,
+      "fp_rate": 0.7429
+    },
+    {
+      "hour": 9,
+      "total": 37,
+      "fp": 30,
+      "fp_rate": 0.8108
+    },
+    {
+      "hour": 10,
+      "total": 25,
+      "fp": 17,
+      "fp_rate": 0.68
+    },
+    {
+      "hour": 11,
+      "total": 36,
+      "fp": 30,
+      "fp_rate": 0.8333
+    },
+    {
+      "hour": 12,
+      "total": 30,
+      "fp": 21,
+      "fp_rate": 0.7
+    },
+    {
+      "hour": 13,
+      "total": 32,
+      "fp": 26,
+      "fp_rate": 0.8125
+    },
+    {
+      "hour": 14,
+      "total": 37,
+      "fp": 28,
+      "fp_rate": 0.7568
+    },
+    {
+      "hour": 15,
+      "total": 22,
+      "fp": 16,
+      "fp_rate": 0.7273
+    },
+    {
+      "hour": 16,
+      "total": 19,
+      "fp": 13,
+      "fp_rate": 0.6842
+    },
+    {
+      "hour": 17,
+      "total": 18,
+      "fp": 16,
+      "fp_rate": 0.8889
+    },
+    {
+      "hour": 18,
+      "total": 20,
+      "fp": 12,
+      "fp_rate": 0.6
+    },
+    {
+      "hour": 19,
+      "total": 16,
+      "fp": 11,
+      "fp_rate": 0.6875
+    },
+    {
+      "hour": 20,
+      "total": 18,
+      "fp": 13,
+      "fp_rate": 0.7222
+    },
+    {
+      "hour": 21,
+      "total": 20,
+      "fp": 11,
+      "fp_rate": 0.55
+    },
+    {
+      "hour": 22,
+      "total": 12,
+      "fp": 9,
+      "fp_rate": 0.75
+    },
+    {
+      "hour": 23,
+      "total": 18,
+      "fp": 12,
+      "fp_rate": 0.6667
+    }
+  ],
+  "by_regime_side": {
+    "TRENDING": {
+      "LONG": {
+        "total": 152,
+        "fp": 121,
+        "fp_rate": 0.7961
+      },
+      "SHORT": {
+        "total": 282,
+        "fp": 192,
+        "fp_rate": 0.6809
+      }
+    },
+    "MEAN_REVERTING": {
+      "LONG": {
+        "total": 50,
+        "fp": 37,
+        "fp_rate": 0.74
+      },
+      "SHORT": {
+        "total": 54,
+        "fp": 40,
+        "fp_rate": 0.7407
+      }
+    }
+  },
+  "confidence_traps": 0,
+  "ts": 1779981790859
+}

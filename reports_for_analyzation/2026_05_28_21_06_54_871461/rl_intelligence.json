@@ -1,0 +1,220 @@
+{
+  "title": "RL Learning Intelligence \u2014 Contextual Bandit Evolution (FTD-055-ATHENA)",
+  "generated_at": "2026-05-28 15:23:02 UTC",
+  "verdict": "LEARNING_ACTIVE_NO_ALPHA",
+  "verdict_detail": "RL correctly flagged 4 toxic context(s). No profitable contexts yet \u2014 signal quality is the limiting factor, not the RL.",
+  "intelligence_score": 21.5,
+  "learning_velocity": {
+    "updates_per_min": 0.289,
+    "updates_per_hour": 17.3,
+    "total_updates": 538,
+    "total_pulls": 789,
+    "avg_q_velocity": 0.0167,
+    "uptime_min": 1860.9
+  },
+  "context_coverage": {
+    "total_contexts_seen": 23,
+    "contexts_visited_3plus": 8,
+    "contexts_unvisited": 15,
+    "coverage_pct": 34.8,
+    "exploration_status": "DEVELOPING",
+    "unvisited_contexts": [
+      "TRENDING|NY|MeanReversion",
+      "VOLATILITY_EXPANSION|NY|TrendFollowing",
+      "VOLATILITY_EXPANSION|NY|MeanReversion",
+      "TRENDING|LATE|MeanReversion",
+      "VOLATILITY_EXPANSION|LATE|TrendFollowing",
+      "VOLATILITY_EXPANSION|LATE|MeanReversion",
+      "TRENDING|ASIA|MeanReversion",
+      "VOLATILITY_EXPANSION|ASIA|MeanReversion",
+      "VOLATILITY_EXPANSION|ASIA|TrendFollowing",
+      "TRENDING|LONDON|MeanReversion"
+    ]
+  },
+  "alpha_discovery": {
+    "profitable_contexts": [],
+    "toxic_contexts": [
+      {
+        "context": "MEAN_REVERTING|NY|MeanReversion",
+        "q_value": -0.1815,
+        "win_rate": 0.19,
+        "n_visits": 525,
+        "total_pnl": -113.8262,
+        "toxic_type": "ECO_TOXIC"
+      },
+      {
+        "context": "MEAN_REVERTING|LONDON|MeanReversion",
+        "q_value": -0.1501,
+        "win_rate": 0.225,
+        "n_visits": 285,
+        "total_pnl": -50.459,
+        "toxic_type": "ECO_TOXIC"
+      },
+      {
+        "context": "MEAN_REVERTING|ASIA|MeanReversion",
+        "q_value": -0.1122,
+        "win_rate": 0.183,
+        "n_visits": 327,
+        "total_pnl": -66.4028,
+        "toxic_type": "ECO_TOXIC"
+      },
+      {
+        "context": "MEAN_REVERTING|LATE|MeanReversion",
+        "q_value": -0.0728,
+        "win_rate": 0.178,
+        "n_visits": 354,
+        "total_pnl": -78.1365,
+        "toxic_type": "ECO_TOXIC"
+      }
+    ],
+    "differentiation_by_session": {
+      "NY": [
+        {
+          "context": "TRENDING|NY|TrendFollowing",
+          "q": -0.111,
+          "wr_pct": 23.3,
+          "n": 309,
+          "pnl": -31.8318
+        },
+        {
+          "context": "MEAN_REVERTING|NY|MeanReversion",
+          "q": -0.1815,
+          "wr_pct": 19.0,
+          "n": 525,
+          "pnl": -113.8262
+        }
+      ],
+      "LATE": [
+        {
+          "context": "TRENDING|LATE|TrendFollowing",
+          "q": -0.0679,
+          "wr_pct": 20.9,
+          "n": 230,
+          "pnl": -17.5669
+        },
+        {
+          "context": "MEAN_REVERTING|LATE|MeanReversion",
+          "q": -0.0728,
+          "wr_pct": 17.8,
+          "n": 354,
+          "pnl": -78.1365
+        }
+      ],
+      "ASIA": [
+        {
+          "context": "TRENDING|ASIA|TrendFollowing",
+          "q": -0.0067,
+          "wr_pct": 27.2,
+          "n": 235,
+          "pnl": -9.9611
+        },
+        {
+          "context": "MEAN_REVERTING|ASIA|MeanReversion",
+          "q": -0.1122,
+          "wr_pct": 18.3,
+          "n": 327,
+          "pnl": -66.4028
+        }
+      ],
+      "LONDON": [
+        {
+          "context": "TRENDING|LONDON|TrendFollowing",
+          "q": -0.0483,
+          "wr_pct": 25.1,
+          "n": 279,
+          "pnl": -21.2998
+        },
+        {
+          "context": "MEAN_REVERTING|LONDON|MeanReversion",
+          "q": -0.1501,
+          "wr_pct": 22.5,
+          "n": 285,
+          "pnl": -50.459
+        }
+      ]
+    }
+  },
+  "strategy_coverage": {
+    "MeanReversion": {
+      "visited_contexts": 4,
+      "total_contexts": 12,
+      "avg_q": -0.1291,
+      "coverage_pct": 33.3
+    },
+    "TrendFollowing": {
+      "visited_contexts": 4,
+      "total_contexts": 11,
+      "avg_q": -0.0585,
+      "coverage_pct": 36.4
+    }
+  },
+  "convergence_estimate": {
+    "max_visits_any_context": 525,
+    "visits_for_full_maturity": 50,
+    "visits_needed_top_context": 0,
+    "updates_per_min": 0.289,
+    "projected_minutes_to_mature_top_ctx": 0.0,
+    "note": "50 visits \u2192 LR=0.07 (stable), Q-values reliable for policy decisions."
+  },
+  "maturity_distribution": {
+    "fresh": 15,
+    "accel": 0,
+    "standard": 0,
+    "mature": 8
+  },
+  "quality_distribution": {
+    "elite": 0,
+    "high": 0,
+    "neutral": 23,
+    "penalized": 0,
+    "profitable_pct": 0.0
+  },
+  "session_intelligence": {
+    "ASIA": {
+      "n_contexts": 2,
+      "avg_q": -0.0594,
+      "profitable": 0
+    },
+    "LONDON": {
+      "n_contexts": 2,
+      "avg_q": -0.0992,
+      "profitable": 0
+    },
+    "NY": {
+      "n_contexts": 2,
+      "avg_q": -0.1463,
+      "profitable": 0
+    },
+    "LATE": {
+      "n_contexts": 2,
+      "avg_q": -0.0703,
+      "profitable": 0
+    }
+  },
+  "policy_evolution": {
+    "allow_rate": 0.726,
+    "explore_ratio": 0.0,
+    "toxic_block_rate": 0.274,
+    "floor_raise_rate": 0.044,
+    "floor_lower_rate": 0.0,
+    "boost_fire_rate": 0.0
+  },
+  "hyperparameters": {
+    "learning_rate_adaptive": "0.07\u21920.25 (by maturity)",
+    "ev_floor": -0.3,
+    "ucb_coeff": 1.5,
+    "min_visits": 3,
+    "q_bounds": [
+      -2.0,
+      5.0
+    ],
+    "decay_per_day": 0.98,
+    "bootstrap_dampen": 0.5,
+    "regime_ucb_mult": {
+      "TRENDING": 1.2,
+      "MEAN_REVERTING": 1.0,
+      "VOLATILITY_EXPANSION": 0.8,
+      "UNKNOWN": 1.1
+    }
+  }
+}

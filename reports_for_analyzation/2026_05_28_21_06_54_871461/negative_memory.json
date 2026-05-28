@@ -1,0 +1,133 @@
+{
+  "negative_memory": [
+    {
+      "key_str": "TRENDING|LOW|FETUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 9,
+      "permanent": true,
+      "score": 1.0,
+      "last_cycle": 519,
+      "created_at": 1779931476.7639341
+    },
+    {
+      "key_str": "TRENDING|LOW|FILUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 3,
+      "permanent": true,
+      "score": 1.0,
+      "last_cycle": 352,
+      "created_at": 1779937418.2720428
+    },
+    {
+      "key_str": "TRENDING|LOW|OPGUSDT|ALPHA_PBE_v1|DOWN",
+      "rollbacks": 5,
+      "permanent": true,
+      "score": 1.0,
+      "last_cycle": 514,
+      "created_at": 1779957354.7283986
+    },
+    {
+      "key_str": "TRENDING|LOW|NEARUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 2,
+      "permanent": false,
+      "score": 0.10941898913151242,
+      "last_cycle": 517,
+      "created_at": 1779974218.080583
+    },
+    {
+      "key_str": "TRENDING|LOW|ICPUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 2,
+      "permanent": false,
+      "score": 0.2824295364810001,
+      "last_cycle": 526,
+      "created_at": 1779975008.2719688
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|FILUSDT|MR_BB_RSI_v1|UP",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.12157665459056935,
+      "last_cycle": 518,
+      "created_at": 1779976955.7690341
+    },
+    {
+      "key_str": "TRENDING|LOW|RENDERUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 2,
+      "permanent": false,
+      "score": 0.2287679245496101,
+      "last_cycle": 524,
+      "created_at": 1779977023.9777505
+    },
+    {
+      "key_str": "TRENDING|LOW|ETHUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.16677181699666577,
+      "last_cycle": 521,
+      "created_at": 1779977342.5396106
+    },
+    {
+      "key_str": "TRENDING|LOW|BTCUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.18530201888518416,
+      "last_cycle": 522,
+      "created_at": 1779977347.7166111
+    },
+    {
+      "key_str": "TRENDING|LOW|SEIUSDT|ALPHA_TCB_v1|DOWN",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.20589113209464907,
+      "last_cycle": 523,
+      "created_at": 1779977535.0948153
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|ONDOUSDT|MR_BB_RSI_v1|DOWN",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.31381059609000006,
+      "last_cycle": 527,
+      "created_at": 1779977833.5129206
+    },
+    {
+      "key_str": "TRENDING|LOW|NEARUSDT|TF_EMA_RSI_v1|UP",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.3486784401000001,
+      "last_cycle": 528,
+      "created_at": 1779978040.0077014
+    },
+    {
+      "key_str": "TRENDING|LOW|ETHUSDT|ALPHA_TCB_v1|UP",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.3874204890000001,
+      "last_cycle": 529,
+      "created_at": 1779978150.0322785
+    },
+    {
+      "key_str": "TRENDING|LOW|BTCUSDT|ALPHA_TCB_v1|UP",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.4304672100000001,
+      "last_cycle": 530,
+      "created_at": 1779978151.3484292
+    },
+    {
+      "key_str": "TRENDING|LOW|WLDUSDT|ALPHA_PBE_v1|DOWN",
+      "rollbacks": 2,
+      "permanent": false,
+      "score": 0.81,
+      "last_cycle": 536,
+      "created_at": 1779980574.7814894
+    },
+    {
+      "key_str": "MEAN_REVERTING|LOW|TONUSDT|ALPHA_PBE_v1|DOWN",
+      "rollbacks": 1,
+      "permanent": false,
+      "score": 0.9,
+      "last_cycle": 537,
+      "created_at": 1779981465.553267
+    }
+  ],
+  "phase": "030B"
+}

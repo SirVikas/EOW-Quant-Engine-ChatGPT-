@@ -1,0 +1,13 @@
+{
+  "report": "10_truth_density_summary",
+  "prp": "001",
+  "total_signals": 0,
+  "total_outcomes": 0,
+  "truth_density": 0.0,
+  "directional_legit": 0.0,
+  "noise_ratio": 0.0,
+  "avg_net_pnl": 0.0,
+  "total_net_pnl": 0.0,
+  "data_sufficient": false,
+  "ts": 1779981790859
+}

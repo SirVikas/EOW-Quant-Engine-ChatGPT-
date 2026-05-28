@@ -1,0 +1,2507 @@
+{
+  "captured_at": "2026-05-28T15:23:03.906Z",
+  "snapshot_id": "a77ea9b6-07bf-4390-8ae4-4411a432e265",
+  "total_entries": 500,
+  "entries": [
+    {
+      "ts": 1779978692175,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978692176,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass ICPUSDT: SLEEP_MODE(vol=618=10%_of_avg=6476,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779978694626,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978698545,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978700689,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978759621,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978759975,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978760212,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978761020,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978761165,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978761289,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978761995,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978762048,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978762536,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978762966,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978764373,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978764892,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978765075,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978804964,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978852027,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #362: meta_score=42.3 verdict=\u2014"
+    },
+    {
+      "ts": 1779978859016,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978859121,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978859239,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978859311,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978859360,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978859406,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978860075,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978860249,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978860321,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978860975,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978861094,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978861781,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978862914,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978872757,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978959986,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978960233,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978960255,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TONUSDT score=0.506 rr=4.00"
+    },
+    {
+      "ts": 1779978960256,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE TONUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779978960256,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT TONUSDT | PBE: EMA_DIST=0.22% RSI=56.0 RR=4.00 SCORE=0.506"
+    },
+    {
+      "ts": 1779978960258,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) TONUSDT"
+    },
+    {
+      "ts": 1779978960260,
+      "level": "FILTER",
+      "msg": "\ud83e\udd16 RL_GATE TONUSDT: ECO_TOXIC(q=-0.202 wr=19% n=523)"
+    },
+    {
+      "ts": 1779978960263,
+      "level": "SIGNAL",
+      "msg": "\u26a1 RL_OVERRIDE TONUSDT: TOXIC context MEAN_REVERTING|MeanReversion [bypass=active, learning continues]"
+    },
+    {
+      "ts": 1779978960267,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE TONUSDT: state=PAUSED cl=0 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779978960270,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV TONUSDT: ev=0.3819 p_win=25.0% n=20"
+    },
+    {
+      "ts": 1779978960271,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO TONUSDT: score=0.398 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779978960273,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY TONUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779978960275,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator TONUSDT: score=0.398 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=85.691566"
+    },
+    {
+      "ts": 1779978960289,
+      "level": "TRADE",
+      "msg": "\ud83d\udccb Limit SHORT TONUSDT @ 1.7415 qty=85.691566 risk=3.73U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779978960531,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978960567,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978960627,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978960925,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978961040,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978962210,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978962314,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978963809,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978964122,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978965558,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779978967624,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979062008,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090178,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090303,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090373,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090577,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090623,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090696,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090762,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090805,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979090834,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout NEARUSDT score=0.693 rr=4.00"
+    },
+    {
+      "ts": 1779979090834,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE NEARUSDT: ALPHA_TCB_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779979090835,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT NEARUSDT | TCB: ADX=29.6 VOL=2.0x RR=4.00 SCORE=0.693"
+    },
+    {
+      "ts": 1779979090837,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) NEARUSDT"
+    },
+    {
+      "ts": 1779979090840,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE NEARUSDT: state=PAUSED cl=0 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779979090842,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV NEARUSDT: ev=0.5962 p_win=30.8% n=26"
+    },
+    {
+      "ts": 1779979090842,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO NEARUSDT: score=0.525 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779979090843,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY NEARUSDT: mode=PAUSED ce_mult=0.00\u00d7 reason=MODE_PAUSED"
+    },
+    {
+      "ts": 1779979090844,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator NEARUSDT: score=0.525 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=38.986676"
+    },
+    {
+      "ts": 1779979090861,
+      "level": "TRADE",
+      "msg": "\ud83d\udccb Limit SHORT NEARUSDT @ 2.2967 qty=38.986676 risk=3.73U [TrendFollowing | TRENDING]"
+    },
+    {
+      "ts": 1779979152044,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #363: meta_score=42.3 verdict=\u2014"
+    },
+    {
+      "ts": 1779979456532,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #364: meta_score=42.3 verdict=\u2014"
+    },
+    {
+      "ts": 1779979499932,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979500070,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979500368,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979500448,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979500713,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979501102,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979501519,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979503465,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979506421,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979510094,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979512628,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979524977,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979598448,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979598606,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979599238,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979599347,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979600016,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979600319,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979600564,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979600613,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979603513,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979604397,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979604558,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979612637,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979639432,
+      "level": "TRADE",
+      "msg": "[TM] TONUSDT TIME_EXIT @ 1.7390 (Stale: 11.3min r=0.108<0.15)"
+    },
+    {
+      "ts": 1779979641955,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] TONUSDT @ 1.739"
+    },
+    {
+      "ts": 1779979703686,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979703781,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979703847,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979703891,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979703979,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979704252,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979704457,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979707145,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979708004,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979708315,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979711843,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979713146,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979756557,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #365: meta_score=42.4 verdict=\u2014"
+    },
+    {
+      "ts": 1779979785433,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979785520,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979785634,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979785940,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979785940,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass FETUSDT: SLEEP_MODE(vol=5416=6%_of_avg=87916,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779979786748,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979786842,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979789937,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979813898,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979814675,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979831253,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979832205,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979845447,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779979982064,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979982065,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979982173,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979982174,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979982248,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979982249,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979982370,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979982371,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979982640,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979982641,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979982755,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979982756,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979983558,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979983559,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979983744,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979983745,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979985986,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979985995,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979986973,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979986977,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779979987140,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779979987141,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980031006,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980031007,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980034841,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980034842,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980056619,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #366: meta_score=42.4 verdict=\u2014"
+    },
+    {
+      "ts": 1779980065599,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980065600,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980065655,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980065656,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980065716,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980065716,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980065797,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980065798,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980066052,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980066054,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980066163,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980066175,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980066254,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980066255,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980066674,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980066675,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980066943,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980066944,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980067011,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980067012,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980067029,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry FETUSDT score=0.534 rr=5.00"
+    },
+    {
+      "ts": 1779980067030,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE FETUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980067030,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG FETUSDT | PBE: EMA_DIST=0.25% RSI=35.9 RR=5.00 SCORE=0.534"
+    },
+    {
+      "ts": 1779980067032,
+      "level": "FILTER",
+      "msg": "\ud83e\udd16 RL_GATE FETUSDT: ECO_TOXIC(q=-0.184 wr=19% n=524)"
+    },
+    {
+      "ts": 1779980067034,
+      "level": "SIGNAL",
+      "msg": "\u26a1 RL_OVERRIDE FETUSDT: TOXIC context MEAN_REVERTING|MeanReversion [bypass=active, learning continues]"
+    },
+    {
+      "ts": 1779980067044,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV FETUSDT: ev=-0.0009 p_win=14.3% n=21"
+    },
+    {
+      "ts": 1779980067393,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980067394,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980071016,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980071017,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980089364,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980089365,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980115710,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980115711,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980115916,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980115918,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980116107,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980116108,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980116196,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980116198,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980116401,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980116401,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980116464,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980116465,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980117129,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980117130,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980117199,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980117200,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980117573,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980117574,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980118567,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980118568,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980118568,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass ICPUSDT: SLEEP_MODE(vol=47=2%_of_avg=3138,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779980121514,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980121515,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980123496,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980123497,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980141192,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980141193,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980172015,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980172016,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980172069,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980172070,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980172188,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980172189,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980172218,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980172219,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980172343,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980172344,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980172591,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980172593,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980173908,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980173908,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980174527,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980174529,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980176329,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980176330,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980177320,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980177321,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980178365,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980178366,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980179506,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980179508,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980180246,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980180247,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=3 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980184391,
+      "level": "TRADE",
+      "msg": "[TM] NEARUSDT TIME_EXIT @ 2.2920 (Stale: 18.2min r=0.129<0.15)"
+    },
+    {
+      "ts": 1779980184395,
+      "level": "TRADE",
+      "msg": "Position closed [TSL+] NEARUSDT @ 2.292"
+    },
+    {
+      "ts": 1779980227862,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980227902,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980227969,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980228094,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980228107,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry FETUSDT score=0.554 rr=5.00"
+    },
+    {
+      "ts": 1779980228107,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE FETUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980228108,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal LONG FETUSDT | PBE: EMA_DIST=0.24% RSI=43.6 RR=5.00 SCORE=0.554"
+    },
+    {
+      "ts": 1779980228110,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) FETUSDT"
+    },
+    {
+      "ts": 1779980228126,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV FETUSDT: ev=-0.0131 p_win=14.3% n=21"
+    },
+    {
+      "ts": 1779980228285,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980229353,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980229354,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass RENDERUSDT: SLEEP_MODE(vol=950=10%_of_avg=9929,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779980230026,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980230221,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980234747,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980235613,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980240634,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980242812,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980268675,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980286611,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980287371,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980287600,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980287669,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980287986,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980288127,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980289050,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980289321,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980289500,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980290409,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980291536,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980292340,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980300156,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980356622,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #367: meta_score=42.4 verdict=\u2014"
+    },
+    {
+      "ts": 1779980360107,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980360145,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK WLDUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980360157,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry WLDUSDT score=0.480 rr=5.00"
+    },
+    {
+      "ts": 1779980360157,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE WLDUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980360158,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT WLDUSDT | PBE: EMA_DIST=0.00% RSI=62.9 RR=5.00 SCORE=0.480"
+    },
+    {
+      "ts": 1779980360162,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV WLDUSDT: ev=0.3722 p_win=33.3% n=21"
+    },
+    {
+      "ts": 1779980360162,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO WLDUSDT: score=0.388 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779980360177,
+      "level": "SIGNAL",
+      "msg": "\ud83c\udfaf CONSISTENCY WLDUSDT: mode=NORMAL ce_mult=0.90\u00d7 reason=WIN_BRAKE(4 wins\u219290%\u00d7)"
+    },
+    {
+      "ts": 1779980360179,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator WLDUSDT: score=0.388 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=312.082822"
+    },
+    {
+      "ts": 1779980360181,
+      "level": "TRADE",
+      "msg": "\ud83d\udccb Limit SHORT WLDUSDT @ 0.2870 qty=312.082822 risk=5.60U [TrendFollowing | TRENDING]"
+    },
+    {
+      "ts": 1779980360330,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980360365,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980360461,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980360515,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980360778,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980361487,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980361488,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass ALTUSDT: SLEEP_MODE(vol=38923=9%_of_avg=420155,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779980362561,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980363709,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980366363,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980367096,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980372827,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980403846,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980403975,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980404217,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980405026,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980405059,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980405449,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980405489,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980406425,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980411255,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980415548,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980416072,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980418849,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779980441239,
+      "level": "TRADE",
+      "msg": "[TM] WLDUSDT TIME_EXIT @ 0.2876 (Fast-fail: 1.4min r=-0.500<-0.45)"
+    },
+    {
+      "ts": 1779980500436,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980500437,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980500525,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980500526,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980500731,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980500732,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980500936,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980500937,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980501188,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980501189,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980501339,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980501340,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980501739,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980501740,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980502210,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980502220,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980502482,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980502483,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980503379,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980503380,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980503711,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980503712,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ALTUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980504153,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980504154,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK TONUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980505530,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980505539,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: HOT len=4 score_adj=-0.03 \u2192 eff_min=0.430"
+    },
+    {
+      "ts": 1779980574719,
+      "level": "TRADE",
+      "msg": "Position closed [SL] WLDUSDT @ 0.2881"
+    },
+    {
+      "ts": 1779980656646,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #368: meta_score=42.3 verdict=\u2014"
+    },
+    {
+      "ts": 1779980704326,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass ONDOUSDT: SLEEP_MODE(vol=4260=6%_of_avg=74382,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779980704357,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass RENDERUSDT: SLEEP_MODE(vol=283=3%_of_avg=9333,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779980705126,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry NEARUSDT score=0.612 rr=5.00"
+    },
+    {
+      "ts": 1779980705127,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE NEARUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980705127,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT NEARUSDT | PBE: EMA_DIST=0.14% RSI=67.6 RR=5.00 SCORE=0.612"
+    },
+    {
+      "ts": 1779980705146,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV NEARUSDT: ev=-0.1399 p_win=10.0% n=10"
+    },
+    {
+      "ts": 1779980724384,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass ALTUSDT: SLEEP_MODE(vol=0=0%_of_avg=399877,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779980889939,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP WLDUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980889953,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry WLDUSDT score=0.671 rr=5.00"
+    },
+    {
+      "ts": 1779980889953,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE WLDUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980889954,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT WLDUSDT | PBE: EMA_DIST=0.09% RSI=58.8 RR=5.00 SCORE=0.671"
+    },
+    {
+      "ts": 1779980889964,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV WLDUSDT: ev=0.3866 p_win=31.8% n=22"
+    },
+    {
+      "ts": 1779980889972,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO WLDUSDT: score=0.555 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779980889973,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator WLDUSDT: score=0.555 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=311.922404"
+    },
+    {
+      "ts": 1779980889980,
+      "level": "TRADE",
+      "msg": "\ud83d\udccb Limit SHORT WLDUSDT @ 0.2870 qty=311.922404 risk=3.73U [TrendFollowing | TRENDING]"
+    },
+    {
+      "ts": 1779980890018,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980890140,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980890176,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980890197,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE RENDERUSDT: MR_BB_RSI_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980890198,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT RENDERUSDT | BB upper touch | RSI=82.6 | Mean=1.9491 | TP=1.9446"
+    },
+    {
+      "ts": 1779980890199,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) RENDERUSDT"
+    },
+    {
+      "ts": 1779980890201,
+      "level": "FILTER",
+      "msg": "\ud83e\udd16 RL_GATE RENDERUSDT: ECO_TOXIC(q=-0.184 wr=19% n=524)"
+    },
+    {
+      "ts": 1779980890202,
+      "level": "SIGNAL",
+      "msg": "\u26a1 RL_OVERRIDE RENDERUSDT: TOXIC context MEAN_REVERTING|MeanReversion [bypass=active, learning continues]"
+    },
+    {
+      "ts": 1779980890202,
+      "level": "FILTER",
+      "msg": "\ud83d\udeab LEAN_GATE RENDERUSDT: SL_TOO_TIGHT(0.1200%<0.15%) (rr=0.00 sl=0.120%)"
+    },
+    {
+      "ts": 1779980890345,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980890576,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980890701,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980890828,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980891517,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980892950,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980893037,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ALTUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980893055,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry ALTUSDT score=0.482 rr=5.00"
+    },
+    {
+      "ts": 1779980893056,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE ALTUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980893057,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT ALTUSDT | PBE: EMA_DIST=0.15% RSI=57.1 RR=5.00 SCORE=0.482"
+    },
+    {
+      "ts": 1779980893059,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) ALTUSDT"
+    },
+    {
+      "ts": 1779980893060,
+      "level": "FILTER",
+      "msg": "\ud83e\udd16 RL_GATE ALTUSDT: ECO_TOXIC(q=-0.184 wr=19% n=524)"
+    },
+    {
+      "ts": 1779980893064,
+      "level": "SIGNAL",
+      "msg": "\u26a1 RL_OVERRIDE ALTUSDT: TOXIC context MEAN_REVERTING|MeanReversion [bypass=active, learning continues]"
+    },
+    {
+      "ts": 1779980893074,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV ALTUSDT: ev=0.4399 p_win=31.0% n=29"
+    },
+    {
+      "ts": 1779980893074,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO ALTUSDT: score=0.410 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779980893075,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator ALTUSDT: score=0.410 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=21584.789609"
+    },
+    {
+      "ts": 1779980893077,
+      "level": "TRADE",
+      "msg": "\ud83d\udccb Limit SHORT ALTUSDT @ 0.0069 qty=21584.789609 risk=3.73U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779980893832,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980900674,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980924753,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980956826,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #369: meta_score=42.3 verdict=\u2014"
+    },
+    {
+      "ts": 1779980964796,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980964904,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980964953,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP TONUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980964966,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry TONUSDT score=0.537 rr=5.00"
+    },
+    {
+      "ts": 1779980964966,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE TONUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779980964967,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT TONUSDT | PBE: EMA_DIST=0.00% RSI=65.4 RR=5.00 SCORE=0.537"
+    },
+    {
+      "ts": 1779980964969,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd04 AIE INVERSE suppressed (bypass) TONUSDT"
+    },
+    {
+      "ts": 1779980964970,
+      "level": "FILTER",
+      "msg": "\ud83e\udd16 RL_GATE TONUSDT: ECO_TOXIC(q=-0.184 wr=19% n=524)"
+    },
+    {
+      "ts": 1779980964971,
+      "level": "SIGNAL",
+      "msg": "\u26a1 RL_OVERRIDE TONUSDT: TOXIC context MEAN_REVERTING|MeanReversion [bypass=active, learning continues]"
+    },
+    {
+      "ts": 1779980964988,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV TONUSDT: ev=0.4569 p_win=28.6% n=21"
+    },
+    {
+      "ts": 1779980964988,
+      "level": "SIGNAL",
+      "msg": "\u26a0\ufe0f ALLOC_ZERO TONUSDT: score=0.560 below min allocator band [bypass=active, orchestrator BYPASS override]"
+    },
+    {
+      "ts": 1779980964991,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcb0 Orchestrator TONUSDT: score=0.560 upstream_mult=0.00\u00d7 conc_mult=1.00\u00d7 band=BYPASS rank=1.000 amplified=False explore=False qty=85.522303"
+    },
+    {
+      "ts": 1779980964997,
+      "level": "TRADE",
+      "msg": "\ud83d\udccb Limit SHORT TONUSDT @ 1.7445 qty=85.522303 risk=3.73U [MeanReversion | MEAN_REVERTING]"
+    },
+    {
+      "ts": 1779980965072,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980965592,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980965891,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980966092,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980967481,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779980969953,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981027206,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981028033,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981035778,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981123632,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981123787,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981124456,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981124551,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981124704,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981124964,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981125197,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981127687,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981127704,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout FILUSDT score=0.820 rr=5.00"
+    },
+    {
+      "ts": 1779981127704,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE FILUSDT: ALPHA_TCB_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779981127705,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT FILUSDT | TCB: ADX=31.9 VOL=3.6x RR=5.00 SCORE=0.820"
+    },
+    {
+      "ts": 1779981127715,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV FILUSDT: ev=-0.0113 p_win=14.3% n=14"
+    },
+    {
+      "ts": 1779981127949,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981130144,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981130145,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass UUSDT: SLEEP_MODE(vol=464=8%_of_avg=5762,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779981136308,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981136309,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass RENDERUSDT: SLEEP_MODE(vol=218=3%_of_avg=8042,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779981183648,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981183766,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981183887,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981183951,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981185113,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981185202,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981186140,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981187189,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981188481,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981189588,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981194234,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_1 af=RELAX score_min=0.430 vol_mult=0.50\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981194234,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass RENDERUSDT: SLEEP_MODE(vol=628=8%_of_avg=7763,min=10%[base=45%\u00d70.20])"
+    },
+    {
+      "ts": 1779981256818,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #370: meta_score=42.3 verdict=\u2014"
+    },
+    {
+      "ts": 1779981299900,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981300055,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981300313,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981300423,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981300452,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981300677,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981301272,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981301682,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981306401,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981308387,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981314280,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981360414,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP SEIUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981360487,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP NEARUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981360565,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ONDOUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981360604,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ETHUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981360633,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP BTCUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981360755,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP OPGUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981362602,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FETUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981364100,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP ICPUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981367228,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP RENDERUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981368354,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP UUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981377763,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DTP FILUSDT: tier=TIER_2 af=RELAX score_min=0.400 vol_mult=0.30\u00d7 fee_tol=0.10"
+    },
+    {
+      "ts": 1779981400066,
+      "level": "TRADE",
+      "msg": "[TM] WLDUSDT TIME_EXIT @ 0.2869 (Stale: 8.5min r=0.073<0.15)"
+    },
+    {
+      "ts": 1779981400076,
+      "level": "TRADE",
+      "msg": "Position closed [SL] WLDUSDT @ 0.2869"
+    },
+    {
+      "ts": 1779981465427,
+      "level": "TRADE",
+      "msg": "[TM] TONUSDT TIME_EXIT @ 1.7440 (Stale: 8.3min r=0.086<0.15)"
+    },
+    {
+      "ts": 1779981465515,
+      "level": "TRADE",
+      "msg": "Position closed [SL] TONUSDT @ 1.744"
+    },
+    {
+      "ts": 1779981556817,
+      "level": "SYSTEM",
+      "msg": "\ud83e\udde0 [FTD-030] Auto-intelligence cycle #371: meta_score=42.3 verdict=\u2014"
+    },
+    {
+      "ts": 1779981558815,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981558840,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA TrendBreakout FILUSDT score=0.832 rr=5.00"
+    },
+    {
+      "ts": 1779981558840,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE FILUSDT: ALPHA_TCB_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779981558841,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT FILUSDT | TCB: ADX=33.1 VOL=3.1x RR=5.00 SCORE=0.832"
+    },
+    {
+      "ts": 1779981558846,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE FILUSDT: state=REDUCING cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779981558851,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV FILUSDT: ev=-0.0097 p_win=14.3% n=14"
+    },
+    {
+      "ts": 1779981559128,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981559290,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981559396,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981559692,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981559784,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981559822,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981559909,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981559927,
+      "level": "SIGNAL",
+      "msg": "\u26a1 ALPHA PullbackEntry NEARUSDT score=0.573 rr=5.00"
+    },
+    {
+      "ts": 1779981559927,
+      "level": "SIGNAL",
+      "msg": "\u26a1 DISABLED_OVERRIDE NEARUSDT: ALPHA_PBE_v1 allowed [bypass=active \u2014 RL needs outcomes; Q-decay will deprioritise if losing]"
+    },
+    {
+      "ts": 1779981559928,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udd14 Signal SHORT NEARUSDT | PBE: EMA_DIST=0.08% RSI=57.4 RR=5.00 SCORE=0.573"
+    },
+    {
+      "ts": 1779981559932,
+      "level": "SIGNAL",
+      "msg": "\u26a1 LCC_OVERRIDE NEARUSDT: state=REDUCING cl=3 [bypass=active, size not reduced]"
+    },
+    {
+      "ts": 1779981559934,
+      "level": "SIGNAL",
+      "msg": "\ud83e\uddee EV NEARUSDT: ev=-0.1384 p_win=10.0% n=10"
+    },
+    {
+      "ts": 1779981561378,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981562167,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981564419,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981610483,
+      "level": "TRADE",
+      "msg": "[TM] ALTUSDT BE: SL\u21920.0069 (R=1.63\u22651.5 mode=TREND_FOLLOW \u2192 SL\u2192BE)"
+    },
+    {
+      "ts": 1779981621380,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ICPUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981621470,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ETHUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981621582,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK BTCUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981621628,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK SEIUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981621720,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FILUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981622339,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK OPGUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981623765,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK ONDOUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981624024,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK RENDERUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981624167,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK FETUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981625884,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK NEARUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981626638,
+      "level": "SIGNAL",
+      "msg": "\ud83d\udcc8 STREAK UUSDT: COLD len=3 score_adj=+0.05 \u2192 eff_min=0.480"
+    },
+    {
+      "ts": 1779981626639,
+      "level": "FILTER",
+      "msg": "\u26a1 PAPER_SPEED bypass UUSDT: SLEEP_MODE(vol=475=5%_of_avg=9120,min=10%[base=45%\u00d70.20])"
+    }
+  ]
+}

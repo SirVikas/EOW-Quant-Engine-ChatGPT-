@@ -1,0 +1,524 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R 6 0 R 7 0 R 8 0 R 9 0 R] /Count 7 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 11 0 R /Resources << /Font << /F1 10 0 R /F2 10 0 R >> >> >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 12 0 R /Resources << /Font << /F1 10 0 R /F2 10 0 R >> >> >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 13 0 R /Resources << /Font << /F1 10 0 R /F2 10 0 R >> >> >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 14 0 R /Resources << /Font << /F1 10 0 R /F2 10 0 R >> >> >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 15 0 R /Resources << /Font << /F1 10 0 R /F2 10 0 R >> >> >>
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 16 0 R /Resources << /Font << /F1 10 0 R /F2 10 0 R >> >> >>
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 17 0 R /Resources << /Font << /F1 10 0 R /F2 10 0 R >> >> >>
+endobj
+10 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+11 0 obj
+<< /Length 1750 >>
+stream
+BT /F1 18 Tf 60.0 782.0 Td 0.3 Tw (EOW Quant Engine ? Full System Report) Tj 0 Tw ET
+BT /F1 9 Tf 60.0 756.0 Td (Generated: 2026-05-28 15:22 UTC Mode: TIER 2: LIVE PAPER ? VIRTUAL CAPITAL Phase: FTD-025A) Tj ET
+60 728.0 m 535 728.0 l S
+BT /F1 13 Tf 60.0 726.0 Td 0.3 Tw (1. Executive Summary) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 706.0 Td (Total Trades                    1831) Tj ET
+BT /F1 10 Tf 60.0 693.0 Td (Net PnL \(USDT\)                  -254.5513) Tj ET
+BT /F1 10 Tf 60.0 680.0 Td (Win Rate                        22.6%) Tj ET
+BT /F1 10 Tf 60.0 667.0 Td (Profit Factor                   0.476) Tj ET
+BT /F1 10 Tf 60.0 654.0 Td (Sharpe                          -3.567) Tj ET
+BT /F1 10 Tf 60.0 641.0 Td (Max Drawdown                    25.50%) Tj ET
+60 624.0 m 535 624.0 l S
+BT /F1 13 Tf 60.0 622.0 Td 0.3 Tw (2. Performance) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 602.0 Td (Final Capital                   745.45) Tj ET
+BT /F1 10 Tf 60.0 589.0 Td (Sortino                         -4.692) Tj ET
+BT /F1 10 Tf 60.0 576.0 Td (Calmar                          -0.137) Tj ET
+BT /F1 10 Tf 60.0 563.0 Td (Risk of Ruin                    100.00%) Tj ET
+BT /F1 10 Tf 60.0 550.0 Td (Deployability                   45/100 \(NOT READY\)) Tj ET
+BT /F1 10 Tf 60.0 537.0 Td (Fees Paid                       132.6213) Tj ET
+BT /F1 10 Tf 60.0 524.0 Td (Slippage                        71.8621) Tj ET
+60 507.0 m 535 507.0 l S
+BT /F1 13 Tf 60.0 505.0 Td 0.3 Tw (3. Signal Pipeline) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 485.0 Td (Signals / hour                  405.00) Tj ET
+BT /F1 10 Tf 60.0 472.0 Td (Trades / hour                   7.00) Tj ET
+BT /F1 10 Tf 60.0 459.0 Td (Rejection Rate                  0.0%) Tj ET
+BT /F1 10 Tf 60.0 446.0 Td (Mins since trade                5.2) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Length 5645 >>
+stream
+60 778.0 m 535 778.0 l S
+BT /F1 13 Tf 60.0 776.0 Td 0.3 Tw (4. Decision Trace \(last 30 thoughts\)) Tj 0 Tw ET
+0.92 0.92 0.92 rg 60 753 475 14 re f 0 0 0 rg
+BT /F1 9 Tf 62.0 756.0 Td 0.3 Tw (Time) Tj 0 Tw ET
+BT /F1 9 Tf 122.0 756.0 Td 0.3 Tw (Level) Tj 0 Tw ET
+BT /F1 9 Tf 182.0 756.0 Td 0.3 Tw (Message) Tj 0 Tw ET
+BT /F1 9 Tf 62.0 742.0 Td (15:19:18) Tj ET
+BT /F1 9 Tf 122.0 742.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 742.0 Td (? LCC_OVERRIDE FILUSDT: state=REDUCING cl=3 [bypass=activ?) Tj ET
+BT /F1 9 Tf 62.0 728.0 Td (15:19:18) Tj ET
+BT /F1 9 Tf 122.0 728.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 728.0 Td (? EV FILUSDT: ev=-0.0097 p_win=14.3% n=14) Tj ET
+BT /F1 9 Tf 62.0 714.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 714.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 714.0 Td (? STREAK ETHUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 700.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 700.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 700.0 Td (? STREAK OPGUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 686.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 686.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 686.0 Td (? STREAK BTCUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 672.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 672.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 672.0 Td (? STREAK FETUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 658.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 658.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 658.0 Td (? STREAK RENDERUSDT: COLD len=3 score_adj=+0.05 ? eff_min?) Tj ET
+BT /F1 9 Tf 62.0 644.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 644.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 644.0 Td (? STREAK SEIUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 630.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 630.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 630.0 Td (? STREAK NEARUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0?) Tj ET
+BT /F1 9 Tf 62.0 616.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 616.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 616.0 Td (? ALPHA PullbackEntry NEARUSDT score=0.573 rr=5.00) Tj ET
+BT /F1 9 Tf 62.0 602.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 602.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 602.0 Td (? DISABLED_OVERRIDE NEARUSDT: ALPHA_PBE_v1 allowed [bypas?) Tj ET
+BT /F1 9 Tf 62.0 588.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 588.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 588.0 Td (? Signal SHORT NEARUSDT | PBE: EMA_DIST=0.08% RSI=57.4 RR?) Tj ET
+BT /F1 9 Tf 62.0 574.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 574.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 574.0 Td (? LCC_OVERRIDE NEARUSDT: state=REDUCING cl=3 [bypass=acti?) Tj ET
+BT /F1 9 Tf 62.0 560.0 Td (15:19:19) Tj ET
+BT /F1 9 Tf 122.0 560.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 560.0 Td (? EV NEARUSDT: ev=-0.1384 p_win=10.0% n=10) Tj ET
+BT /F1 9 Tf 62.0 546.0 Td (15:19:21) Tj ET
+BT /F1 9 Tf 122.0 546.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 546.0 Td (? STREAK UUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.480) Tj ET
+BT /F1 9 Tf 62.0 532.0 Td (15:19:22) Tj ET
+BT /F1 9 Tf 122.0 532.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 532.0 Td (? STREAK ICPUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 518.0 Td (15:19:24) Tj ET
+BT /F1 9 Tf 122.0 518.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 518.0 Td (? STREAK ONDOUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0?) Tj ET
+BT /F1 9 Tf 62.0 504.0 Td (15:20:10) Tj ET
+BT /F1 9 Tf 122.0 504.0 Td (TRADE) Tj ET
+BT /F1 9 Tf 182.0 504.0 Td ([TM] ALTUSDT BE: SL?0.0069 \(R=1.63?1.5 mode=TREND_FOLLOW ?) Tj ET
+BT /F1 9 Tf 62.0 490.0 Td (15:20:21) Tj ET
+BT /F1 9 Tf 122.0 490.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 490.0 Td (? STREAK ICPUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 476.0 Td (15:20:21) Tj ET
+BT /F1 9 Tf 122.0 476.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 476.0 Td (? STREAK ETHUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 462.0 Td (15:20:21) Tj ET
+BT /F1 9 Tf 122.0 462.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 462.0 Td (? STREAK BTCUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 448.0 Td (15:20:21) Tj ET
+BT /F1 9 Tf 122.0 448.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 448.0 Td (? STREAK SEIUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 434.0 Td (15:20:21) Tj ET
+BT /F1 9 Tf 122.0 434.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 434.0 Td (? STREAK FILUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 420.0 Td (15:20:22) Tj ET
+BT /F1 9 Tf 122.0 420.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 420.0 Td (? STREAK OPGUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 406.0 Td (15:20:23) Tj ET
+BT /F1 9 Tf 122.0 406.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 406.0 Td (? STREAK ONDOUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0?) Tj ET
+BT /F1 9 Tf 62.0 392.0 Td (15:20:24) Tj ET
+BT /F1 9 Tf 122.0 392.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 392.0 Td (? STREAK RENDERUSDT: COLD len=3 score_adj=+0.05 ? eff_min?) Tj ET
+BT /F1 9 Tf 62.0 378.0 Td (15:20:24) Tj ET
+BT /F1 9 Tf 122.0 378.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 378.0 Td (? STREAK FETUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.?) Tj ET
+BT /F1 9 Tf 62.0 364.0 Td (15:20:25) Tj ET
+BT /F1 9 Tf 122.0 364.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 364.0 Td (? STREAK NEARUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0?) Tj ET
+BT /F1 9 Tf 62.0 350.0 Td (15:20:26) Tj ET
+BT /F1 9 Tf 122.0 350.0 Td (SIGNAL) Tj ET
+BT /F1 9 Tf 182.0 350.0 Td (? STREAK UUSDT: COLD len=3 score_adj=+0.05 ? eff_min=0.480) Tj ET
+BT /F1 9 Tf 62.0 336.0 Td (15:20:26) Tj ET
+BT /F1 9 Tf 122.0 336.0 Td (FILTER) Tj ET
+BT /F1 9 Tf 182.0 336.0 Td (? PAPER_SPEED bypass UUSDT: SLEEP_MODE\(vol=475=5%_of_avg=?) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Length 5692 >>
+stream
+60 778.0 m 535 778.0 l S
+BT /F1 13 Tf 60.0 776.0 Td 0.3 Tw (5. Risk State) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 756.0 Td (Equity                          745.45) Tj ET
+BT /F1 10 Tf 60.0 743.0 Td (Halted                          False) Tj ET
+BT /F1 10 Tf 60.0 730.0 Td (Open Positions                  [{'position_id': 'f90a676a', 'symbol': 'ALTUSDT', 'side': 'SHORT', 'entry_price': 0.0069, 'qty': 21584.789609, 'stop_loss': 0.006902396097800001, 'take_profit': 0.006774285714285716, 'entry_ts': 1779980893076, 'strategy_id': 'ALPHA_PBE_v1', 'trailing_sl': True, 'peak_price': 0.00688, 'initial_risk': 3.7288, 'initial_stop_loss': 0.006931714285714286, 'regime': 'MEAN_REVERTING', 'order_type': 'LIMIT', 'breakeven_armed': False, 'peak_r': 0.6306306306306274, 'ticks_since_peak': 16}]) Tj ET
+BT /F1 10 Tf 60.0 717.0 Td (Daily PnL                       ?) Tj ET
+BT /F1 10 Tf 60.0 704.0 Td (Current Drawdown                0.00%) Tj ET
+BT /F1 10 Tf 60.0 691.0 Td (DD State                        ?) Tj ET
+BT /F1 10 Tf 60.0 678.0 Td (DD Risk Multiplier              ?) Tj ET
+60 661.0 m 535 661.0 l S
+BT /F1 13 Tf 60.0 659.0 Td 0.3 Tw (6. Portfolio ? Recent Trades \(last 20\)) Tj 0 Tw ET
+0.92 0.92 0.92 rg 60 636 475 14 re f 0 0 0 rg
+BT /F1 9 Tf 62.0 639.0 Td 0.3 Tw (Symbol) Tj 0 Tw ET
+BT /F1 9 Tf 137.0 639.0 Td 0.3 Tw (Side) Tj 0 Tw ET
+BT /F1 9 Tf 192.0 639.0 Td 0.3 Tw (Net PnL) Tj 0 Tw ET
+BT /F1 9 Tf 272.0 639.0 Td 0.3 Tw (R) Tj 0 Tw ET
+BT /F1 9 Tf 342.0 639.0 Td 0.3 Tw (Regime) Tj 0 Tw ET
+BT /F1 9 Tf 62.0 625.0 Td (FILUSDT) Tj ET
+BT /F1 9 Tf 137.0 625.0 Td (LONG) Tj ET
+BT /F1 9 Tf 192.0 625.0 Td (-0.17) Tj ET
+BT /F1 9 Tf 272.0 625.0 Td (-0.046) Tj ET
+BT /F1 9 Tf 342.0 625.0 Td (MEAN_REVER) Tj ET
+BT /F1 9 Tf 62.0 611.0 Td (FETUSDT) Tj ET
+BT /F1 9 Tf 137.0 611.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 611.0 Td (-0.21) Tj ET
+BT /F1 9 Tf 272.0 611.0 Td (-0.057) Tj ET
+BT /F1 9 Tf 342.0 611.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 597.0 Td (RENDERUSDT) Tj ET
+BT /F1 9 Tf 137.0 597.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 597.0 Td (-0.33) Tj ET
+BT /F1 9 Tf 272.0 597.0 Td (-0.089) Tj ET
+BT /F1 9 Tf 342.0 597.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 583.0 Td (ETHUSDT) Tj ET
+BT /F1 9 Tf 137.0 583.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 583.0 Td (-0.16) Tj ET
+BT /F1 9 Tf 272.0 583.0 Td (-0.042) Tj ET
+BT /F1 9 Tf 342.0 583.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 569.0 Td (BTCUSDT) Tj ET
+BT /F1 9 Tf 137.0 569.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 569.0 Td (-0.14) Tj ET
+BT /F1 9 Tf 272.0 569.0 Td (-0.037) Tj ET
+BT /F1 9 Tf 342.0 569.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 555.0 Td (SEIUSDT) Tj ET
+BT /F1 9 Tf 137.0 555.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 555.0 Td (-0.32) Tj ET
+BT /F1 9 Tf 272.0 555.0 Td (-0.085) Tj ET
+BT /F1 9 Tf 342.0 555.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 541.0 Td (RENDERUSDT) Tj ET
+BT /F1 9 Tf 137.0 541.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 541.0 Td (-0.41) Tj ET
+BT /F1 9 Tf 272.0 541.0 Td (-0.109) Tj ET
+BT /F1 9 Tf 342.0 541.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 527.0 Td (ALTUSDT) Tj ET
+BT /F1 9 Tf 137.0 527.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 527.0 Td (+0.61) Tj ET
+BT /F1 9 Tf 272.0 527.0 Td (0.163) Tj ET
+BT /F1 9 Tf 342.0 527.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 513.0 Td (ICPUSDT) Tj ET
+BT /F1 9 Tf 137.0 513.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 513.0 Td (-0.55) Tj ET
+BT /F1 9 Tf 272.0 513.0 Td (-0.148) Tj ET
+BT /F1 9 Tf 342.0 513.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 499.0 Td (ONDOUSDT) Tj ET
+BT /F1 9 Tf 137.0 499.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 499.0 Td (-0.97) Tj ET
+BT /F1 9 Tf 272.0 499.0 Td (-0.260) Tj ET
+BT /F1 9 Tf 342.0 499.0 Td (MEAN_REVER) Tj ET
+BT /F1 9 Tf 62.0 485.0 Td (NEARUSDT) Tj ET
+BT /F1 9 Tf 137.0 485.0 Td (LONG) Tj ET
+BT /F1 9 Tf 192.0 485.0 Td (-0.16) Tj ET
+BT /F1 9 Tf 272.0 485.0 Td (-0.043) Tj ET
+BT /F1 9 Tf 342.0 485.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 471.0 Td (ETHUSDT) Tj ET
+BT /F1 9 Tf 137.0 471.0 Td (LONG) Tj ET
+BT /F1 9 Tf 192.0 471.0 Td (-0.09) Tj ET
+BT /F1 9 Tf 272.0 471.0 Td (-0.023) Tj ET
+BT /F1 9 Tf 342.0 471.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 457.0 Td (BTCUSDT) Tj ET
+BT /F1 9 Tf 137.0 457.0 Td (LONG) Tj ET
+BT /F1 9 Tf 192.0 457.0 Td (-0.18) Tj ET
+BT /F1 9 Tf 272.0 457.0 Td (-0.048) Tj ET
+BT /F1 9 Tf 342.0 457.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 443.0 Td (FETUSDT) Tj ET
+BT /F1 9 Tf 137.0 443.0 Td (LONG) Tj ET
+BT /F1 9 Tf 192.0 443.0 Td (+0.31) Tj ET
+BT /F1 9 Tf 272.0 443.0 Td (0.084) Tj ET
+BT /F1 9 Tf 342.0 443.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 429.0 Td (WLDUSDT) Tj ET
+BT /F1 9 Tf 137.0 429.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 429.0 Td (+0.59) Tj ET
+BT /F1 9 Tf 272.0 429.0 Td (0.157) Tj ET
+BT /F1 9 Tf 342.0 429.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 415.0 Td (TONUSDT) Tj ET
+BT /F1 9 Tf 137.0 415.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 415.0 Td (+0.11) Tj ET
+BT /F1 9 Tf 272.0 415.0 Td (0.030) Tj ET
+BT /F1 9 Tf 342.0 415.0 Td (MEAN_REVER) Tj ET
+BT /F1 9 Tf 62.0 401.0 Td (NEARUSDT) Tj ET
+BT /F1 9 Tf 137.0 401.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 401.0 Td (+0.08) Tj ET
+BT /F1 9 Tf 272.0 401.0 Td (0.022) Tj ET
+BT /F1 9 Tf 342.0 401.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 387.0 Td (WLDUSDT) Tj ET
+BT /F1 9 Tf 137.0 387.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 387.0 Td (-0.38) Tj ET
+BT /F1 9 Tf 272.0 387.0 Td (-0.069) Tj ET
+BT /F1 9 Tf 342.0 387.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 373.0 Td (WLDUSDT) Tj ET
+BT /F1 9 Tf 137.0 373.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 373.0 Td (-0.16) Tj ET
+BT /F1 9 Tf 272.0 373.0 Td (-0.043) Tj ET
+BT /F1 9 Tf 342.0 373.0 Td (TRENDING) Tj ET
+BT /F1 9 Tf 62.0 359.0 Td (TONUSDT) Tj ET
+BT /F1 9 Tf 137.0 359.0 Td (SHORT) Tj ET
+BT /F1 9 Tf 192.0 359.0 Td (-0.15) Tj ET
+BT /F1 9 Tf 272.0 359.0 Td (-0.039) Tj ET
+BT /F1 9 Tf 342.0 359.0 Td (MEAN_REVER) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Length 1620 >>
+stream
+60 778.0 m 535 778.0 l S
+BT /F1 13 Tf 60.0 776.0 Td 0.3 Tw (7. AI Brain ? Decision & Regime) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 756.0 Td (Mode                            NORMAL) Tj ET
+BT /F1 10 Tf 60.0 743.0 Td (Decision                        MONITOR ? assess next candle) Tj ET
+BT /F1 10 Tf 60.0 718.0 Td (Regime                          ?) Tj ET
+BT /F1 10 Tf 60.0 705.0 Td (Confidence                      ?) Tj ET
+BT /F1 10 Tf 60.0 692.0 Td (Stable ticks                    ?) Tj ET
+BT /F1 10 Tf 60.0 667.0 Td (Learning engine summary:) Tj ET
+BT /F1 10 Tf 60.0 654.0 Td (window_size                     50) Tj ET
+BT /F1 10 Tf 60.0 641.0 Td (min_samples                     5) Tj ET
+BT /F1 10 Tf 60.0 628.0 Td (recency_decay                   0.93) Tj ET
+BT /F1 10 Tf 60.0 615.0 Td (thresholds                      {'wr_high': 0.55, 'wr_low': 0.45, 'weight_at_low': 0.8}) Tj ET
+BT /F1 10 Tf 60.0 602.0 Td (regimes                         {'TRENDING': {'n_trades': 50, 'win_rate': 0.261, 'weight': 0.5}, 'MEAN_REVERTING': {'n_trades': 50, 'win_rate': 0.285, 'weight': 0.5}}) Tj ET
+60 585.0 m 535 585.0 l S
+BT /F1 13 Tf 60.0 583.0 Td 0.3 Tw (8. Suggestions \(CT-Scan\)) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 563.0 Td (Health                          CRITICAL) Tj ET
+BT /F1 10 Tf 60.0 550.0 Td (Score                           25) Tj ET
+BT /F1 10 Tf 60.0 537.0 Td (CT-001 / CRITICAL               Low profit factor \(0.48 < 1.0\)) Tj ET
+BT /F1 10 Tf 60.0 524.0 Td (CT-002 / CRITICAL               High fees \(34.2% of gross profit\)) Tj ET
+BT /F1 10 Tf 60.0 511.0 Td (CT-003 / CRITICAL               Low win rate \(22.6% < 40%\)) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Length 2331 >>
+stream
+60 778.0 m 535 778.0 l S
+BT /F1 13 Tf 60.0 776.0 Td 0.3 Tw (9. Auto-Tuning \(Dynamic Thresholds\)) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 756.0 Td (score_min                       0.43) Tj ET
+BT /F1 10 Tf 60.0 743.0 Td (volume_multiplier               0.5) Tj ET
+BT /F1 10 Tf 60.0 730.0 Td (fee_tolerance                   0.1) Tj ET
+BT /F1 10 Tf 60.0 717.0 Td (dd_allowed                      True) Tj ET
+BT /F1 10 Tf 60.0 704.0 Td (dd_size_mult                    1.0) Tj ET
+BT /F1 10 Tf 60.0 691.0 Td (tier                            TIER_1) Tj ET
+BT /F1 10 Tf 60.0 678.0 Td (af_state                        RELAX) Tj ET
+BT /F1 10 Tf 60.0 665.0 Td (module                          DYNAMIC_THRESHOLD_PROVIDER) Tj ET
+BT /F1 10 Tf 60.0 652.0 Td (phase                           5.2) Tj ET
+BT /F1 10 Tf 60.0 627.0 Td (Streak state:) Tj ET
+BT /F1 10 Tf 60.0 614.0 Td (win_streak_min                  3) Tj ET
+BT /F1 10 Tf 60.0 601.0 Td (loss_streak_min                 3) Tj ET
+BT /F1 10 Tf 60.0 588.0 Td (hot_score_adj                   -0.03) Tj ET
+BT /F1 10 Tf 60.0 575.0 Td (cold_score_adj                  0.05) Tj ET
+BT /F1 10 Tf 60.0 562.0 Td (module                          STREAK_INTELLIGENCE_ENGINE) Tj ET
+BT /F1 10 Tf 60.0 549.0 Td (phase                           6) Tj ET
+60 532.0 m 535 532.0 l S
+BT /F1 13 Tf 60.0 530.0 Td 0.3 Tw (10. Evolution \(Genome\)) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 510.0 Td (Generation                      500) Tj ET
+BT /F1 10 Tf 60.0 497.0 Td (Fitness                         ?) Tj ET
+BT /F1 10 Tf 60.0 484.0 Td (Active DNA                      3) Tj ET
+60 467.0 m 535 467.0 l S
+BT /F1 13 Tf 60.0 465.0 Td 0.3 Tw (11. Capital Allocation) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 445.0 Td (max_capital_pct                 0.05) Tj ET
+BT /F1 10 Tf 60.0 432.0 Td (daily_risk_cap                  0.06) Tj ET
+BT /F1 10 Tf 60.0 419.0 Td (daily_risk_used                 1114.0879) Tj ET
+BT /F1 10 Tf 60.0 406.0 Td (daily_risk_cap_usdt             44.7269) Tj ET
+BT /F1 10 Tf 60.0 393.0 Td (daily_risk_remaining            0.0) Tj ET
+BT /F1 10 Tf 60.0 380.0 Td (score_bands                     {'>0.90': '2.0x', '>0.80': '1.5x', '>0.70': '1.0x', '>0.60': '0.5x'}) Tj ET
+BT /F1 10 Tf 60.0 367.0 Td (module                          CAPITAL_ALLOCATOR) Tj ET
+BT /F1 10 Tf 60.0 354.0 Td (phase                           4) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Length 5168 >>
+stream
+60 778.0 m 535 778.0 l S
+BT /F1 13 Tf 60.0 776.0 Td 0.3 Tw (12. Audit \(Error Registry, last 25\)) Tj 0 Tw ET
+0.92 0.92 0.92 rg 60 753 475 14 re f 0 0 0 rg
+BT /F1 9 Tf 62.0 756.0 Td 0.3 Tw (Time) Tj 0 Tw ET
+BT /F1 9 Tf 142.0 756.0 Td 0.3 Tw (Code) Tj 0 Tw ET
+BT /F1 9 Tf 227.0 756.0 Td 0.3 Tw (Symbol) Tj 0 Tw ET
+BT /F1 9 Tf 307.0 756.0 Td 0.3 Tw (Extra) Tj 0 Tw ET
+BT /F1 9 Tf 62.0 742.0 Td (1779975482.8) Tj ET
+BT /F1 9 Tf 142.0 742.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 742.0 Td () Tj ET
+BT /F1 9 Tf 307.0 742.0 Td (gap=63.7s attempt=32) Tj ET
+BT /F1 9 Tf 62.0 728.0 Td (1779975452.2) Tj ET
+BT /F1 9 Tf 142.0 728.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 728.0 Td () Tj ET
+BT /F1 9 Tf 307.0 728.0 Td (gap=33.0s) Tj ET
+BT /F1 9 Tf 62.0 714.0 Td (1779975230.5) Tj ET
+BT /F1 9 Tf 142.0 714.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 714.0 Td () Tj ET
+BT /F1 9 Tf 307.0 714.0 Td (gap=62.1s attempt=31) Tj ET
+BT /F1 9 Tf 62.0 700.0 Td (1779975206.3) Tj ET
+BT /F1 9 Tf 142.0 700.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 700.0 Td () Tj ET
+BT /F1 9 Tf 307.0 700.0 Td (gap=38.0s) Tj ET
+BT /F1 9 Tf 62.0 686.0 Td (1779974923.6) Tj ET
+BT /F1 9 Tf 142.0 686.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 686.0 Td () Tj ET
+BT /F1 9 Tf 307.0 686.0 Td (gap=62.7s attempt=30) Tj ET
+BT /F1 9 Tf 62.0 672.0 Td (1779974898.7) Tj ET
+BT /F1 9 Tf 142.0 672.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 672.0 Td () Tj ET
+BT /F1 9 Tf 307.0 672.0 Td (gap=37.8s) Tj ET
+BT /F1 9 Tf 62.0 658.0 Td (1779974643.1) Tj ET
+BT /F1 9 Tf 142.0 658.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 658.0 Td () Tj ET
+BT /F1 9 Tf 307.0 658.0 Td (gap=61.3s attempt=29) Tj ET
+BT /F1 9 Tf 62.0 644.0 Td (1779974614.8) Tj ET
+BT /F1 9 Tf 142.0 644.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 644.0 Td () Tj ET
+BT /F1 9 Tf 307.0 644.0 Td (gap=33.1s) Tj ET
+BT /F1 9 Tf 62.0 630.0 Td (1779974360.2) Tj ET
+BT /F1 9 Tf 142.0 630.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 630.0 Td () Tj ET
+BT /F1 9 Tf 307.0 630.0 Td (gap=67.5s attempt=28) Tj ET
+BT /F1 9 Tf 62.0 616.0 Td (1779974329.0) Tj ET
+BT /F1 9 Tf 142.0 616.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 616.0 Td () Tj ET
+BT /F1 9 Tf 307.0 616.0 Td (gap=36.4s) Tj ET
+BT /F1 9 Tf 62.0 602.0 Td (1779974069.0) Tj ET
+BT /F1 9 Tf 142.0 602.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 602.0 Td () Tj ET
+BT /F1 9 Tf 307.0 602.0 Td (gap=32.7s) Tj ET
+BT /F1 9 Tf 62.0 588.0 Td (1779973814.3) Tj ET
+BT /F1 9 Tf 142.0 588.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 588.0 Td () Tj ET
+BT /F1 9 Tf 307.0 588.0 Td (gap=61.0s attempt=27) Tj ET
+BT /F1 9 Tf 62.0 574.0 Td (1779973784.3) Tj ET
+BT /F1 9 Tf 142.0 574.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 574.0 Td () Tj ET
+BT /F1 9 Tf 307.0 574.0 Td (gap=31.0s) Tj ET
+BT /F1 9 Tf 62.0 560.0 Td (1779973563.2) Tj ET
+BT /F1 9 Tf 142.0 560.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 560.0 Td () Tj ET
+BT /F1 9 Tf 307.0 560.0 Td (gap=61.9s attempt=26) Tj ET
+BT /F1 9 Tf 62.0 546.0 Td (1779973539.6) Tj ET
+BT /F1 9 Tf 142.0 546.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 546.0 Td () Tj ET
+BT /F1 9 Tf 307.0 546.0 Td (gap=38.3s) Tj ET
+BT /F1 9 Tf 62.0 532.0 Td (1779973093.2) Tj ET
+BT /F1 9 Tf 142.0 532.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 532.0 Td () Tj ET
+BT /F1 9 Tf 307.0 532.0 Td (gap=66.1s attempt=25) Tj ET
+BT /F1 9 Tf 62.0 518.0 Td (1779973059.2) Tj ET
+BT /F1 9 Tf 142.0 518.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 518.0 Td () Tj ET
+BT /F1 9 Tf 307.0 518.0 Td (gap=32.1s) Tj ET
+BT /F1 9 Tf 62.0 504.0 Td (1779972778.0) Tj ET
+BT /F1 9 Tf 142.0 504.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 504.0 Td () Tj ET
+BT /F1 9 Tf 307.0 504.0 Td (gap=74.1s attempt=24) Tj ET
+BT /F1 9 Tf 62.0 490.0 Td (1779972748.9) Tj ET
+BT /F1 9 Tf 142.0 490.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 490.0 Td () Tj ET
+BT /F1 9 Tf 307.0 490.0 Td (gap=45.0s) Tj ET
+BT /F1 9 Tf 62.0 476.0 Td (1779972521.6) Tj ET
+BT /F1 9 Tf 142.0 476.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 476.0 Td () Tj ET
+BT /F1 9 Tf 307.0 476.0 Td (gap=60.3s attempt=23) Tj ET
+BT /F1 9 Tf 62.0 462.0 Td (1779972496.0) Tj ET
+BT /F1 9 Tf 142.0 462.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 462.0 Td () Tj ET
+BT /F1 9 Tf 307.0 462.0 Td (gap=34.7s) Tj ET
+BT /F1 9 Tf 62.0 448.0 Td (1779972282.0) Tj ET
+BT /F1 9 Tf 142.0 448.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 448.0 Td () Tj ET
+BT /F1 9 Tf 307.0 448.0 Td (gap=31.6s) Tj ET
+BT /F1 9 Tf 62.0 434.0 Td (1779972009.1) Tj ET
+BT /F1 9 Tf 142.0 434.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 434.0 Td () Tj ET
+BT /F1 9 Tf 307.0 434.0 Td (gap=32.9s) Tj ET
+BT /F1 9 Tf 62.0 420.0 Td (1779971750.1) Tj ET
+BT /F1 9 Tf 142.0 420.0 Td (WS_002) Tj ET
+BT /F1 9 Tf 227.0 420.0 Td () Tj ET
+BT /F1 9 Tf 307.0 420.0 Td (gap=65.4s attempt=22) Tj ET
+BT /F1 9 Tf 62.0 406.0 Td (1779971717.6) Tj ET
+BT /F1 9 Tf 142.0 406.0 Td (WS_001) Tj ET
+BT /F1 9 Tf 227.0 406.0 Td () Tj ET
+BT /F1 9 Tf 307.0 406.0 Td (gap=32.9s) Tj ET
+60 388.0 m 535 388.0 l S
+BT /F1 13 Tf 60.0 386.0 Td 0.3 Tw (13. Alerts) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 366.0 Td (Gate can_trade                  ?) Tj ET
+BT /F1 10 Tf 60.0 353.0 Td (Gate safe_mode                  ?) Tj ET
+BT /F1 10 Tf 60.0 340.0 Td (Gate reason                     ?) Tj ET
+BT /F1 10 Tf 60.0 327.0 Td (Halt active                     False) Tj ET
+BT /F1 10 Tf 60.0 314.0 Td (Halt reason                     ?) Tj ET
+endstream
+endobj
+17 0 obj
+<< /Length 2245 >>
+stream
+60 778.0 m 535 778.0 l S
+BT /F1 13 Tf 60.0 776.0 Td 0.3 Tw (14. Final Diagnosis) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 756.0 Td (? **PRIMARY ISSUE:** SYSTEM IN LOSS ? profit_factor=0.476 \(negative expectancy\)) Tj ET
+BT /F1 10 Tf 60.0 743.0 Td (? Detail ? 1831 trades; win_rate=22.6%. Every trade destroys capital on average. Immediate) Tj ET
+BT /F1 10 Tf 60.0 730.0 Td (action required.) Tj ET
+BT /F1 10 Tf 60.0 717.0 Td (? Fix ? Widen RR target to ?1.5R; tighten entry criteria; reduce trade frequency until PF) Tj ET
+BT /F1 10 Tf 60.0 704.0 Td (recovers above 1.0. Review Section 3 \(Signal Pipeline\) and Section 8 \(Suggestions\).) Tj ET
+BT /F1 10 Tf 60.0 691.0 Td (?) Tj ET
+BT /F1 10 Tf 60.0 678.0 Td (? **SECONDARY ISSUE:** RISK OF RUIN = 100.0% ? CAPITAL IN DANGER) Tj ET
+BT /F1 10 Tf 60.0 665.0 Td (? Detail ? System controls active: DD state=NORMAL, risk_multiplier=1.00 \(NOT yet reduced\),) Tj ET
+BT /F1 10 Tf 60.0 652.0 Td (halted=False.) Tj ET
+BT /F1 10 Tf 60.0 639.0 Td (? Fix ? Halve base_risk immediately. drawdown_controller auto-reduces sizing when) Tj ET
+BT /F1 10 Tf 60.0 626.0 Td (risk_multiplier < 1.0. Activate DEFENSIVE mode. Do not add new positions until RoR drops below) Tj ET
+BT /F1 10 Tf 60.0 613.0 Td (50%.) Tj ET
+BT /F1 10 Tf 60.0 600.0 Td (?) Tj ET
+BT /F1 10 Tf 60.0 587.0 Td (? **ACTIONABLE FIX \(primary\):** Widen RR target to ?1.5R; tighten entry criteria; reduce trade) Tj ET
+BT /F1 10 Tf 60.0 574.0 Td (frequency until PF recovers above 1.0. Review Section 3 \(Signal Pipeline\) and Section 8) Tj ET
+BT /F1 10 Tf 60.0 561.0 Td (\(Suggestions\).) Tj ET
+BT /F1 10 Tf 60.0 548.0 Td (?) Tj ET
+BT /F1 10 Tf 60.0 535.0 Td (? **Also noted \(requires attention\):**) Tj ET
+BT /F1 10 Tf 60.0 522.0 Td (? - 50 ERRORS recorded in audit log: High error count may indicate WS connectivity or data) Tj ET
+BT /F1 10 Tf 60.0 509.0 Td (quality issues.) Tj ET
+60 492.0 m 535 492.0 l S
+BT /F1 13 Tf 60.0 490.0 Td 0.3 Tw (15. Action Checklist) Tj 0 Tw ET
+BT /F1 10 Tf 60.0 470.0 Td ([ ] Review Section 4 \(Decision Trace\) for last 30 thoughts.) Tj ET
+BT /F1 10 Tf 60.0 457.0 Td ([ ] Archive this report under /reports/<date>/ for audit trail.) Tj ET
+BT /F1 9 Tf 60.0 420.0 Td (? End of report \(FTD-025A Export Engine v1.0\) ?) Tj ET
+endstream
+endobj
+xref
+0 18
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000157 00000 n 
+0000000296 00000 n 
+0000000435 00000 n 
+0000000574 00000 n 
+0000000713 00000 n 
+0000000852 00000 n 
+0000000991 00000 n 
+0000001130 00000 n 
+0000001228 00000 n 
+0000003031 00000 n 
+0000008729 00000 n 
+0000014474 00000 n 
+0000016147 00000 n 
+0000018531 00000 n 
+0000023752 00000 n 
+trailer
+<< /Size 18 /Root 1 0 R >>
+startxref
+26050
+%%EOF
