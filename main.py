@@ -1102,6 +1102,11 @@ async def on_tick(tick: Tick):
         # Without this, real strategies only fire on EMA crossover / BB touch which can
         # be absent for hours → complete NO TRADE dry spells.
         _paper_speed = (cfg.TRADE_MODE == "PAPER" and cfg.PAPER_SPEED_MODE)
+        # Safe defaults — signal_truth_engine.record_signal() needs these regardless
+        # of whether the PAPER_SPEED block fires. Without defaults, non-PAPER_SPEED
+        # code paths raise NameError at record_signal() → total_signals stays 0.
+        _rsi_val:   float = 50.0
+        _above_sma: bool  = True
         _vol_mult = thresholds.volume_multiplier
         if _paper_speed:
             # Aggressive paper throughput mode: relax sleep gate to its floor.
@@ -1432,6 +1437,24 @@ async def on_tick(tick: Tick):
                     f"(rsi={_rsi_val:.1f} above_sma={_above_sma} regime={regime.value})",
                     "FILTER",
                 )
+
+        # RSI_CRASH_GUARD: block alpha/primary signals in RSI extreme zones.
+        # Forensic evidence: 72.5% false-positive rate at EXTREME_LOW RSI (<20) from
+        # ALPHA_TCB_v1 SHORTs — shorting into already-oversold crashes is backwards.
+        # Similarly, LONG entries at EXTREME_HIGH RSI (>80) chase blow-offs.
+        # PAPER_SPEED signals are already governed by AdaptiveRSIGovernor (PRP-002).
+        if (sig and sig.signal != Signal.NONE
+                and not sig.strategy_id.endswith("_PAPER_SPEED")
+                and len(closes) >= cfg.RSI_PERIOD + 1):
+            _guard_rsi = _rsi(closes, cfg.RSI_PERIOD)
+            if (sig.signal.value == "SHORT" and _guard_rsi < 20) or \
+               (sig.signal.value == "LONG"  and _guard_rsi > 80):
+                _thought(
+                    f"🚫 RSI_CRASH_GUARD {sym}: {sig.signal.value} blocked "
+                    f"(rsi={_guard_rsi:.1f})",
+                    "FILTER",
+                )
+                sig = None
 
         if sig and sig.signal != Signal.NONE:
             # FTD-037: Disabled strategy_id check — surgically blocks all NOISE strategies
