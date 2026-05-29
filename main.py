@@ -2927,6 +2927,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHASE-I] Alpha confirmation boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── FTD-AIL-001: Autonomous Intelligence Layer ────────────────────────────
+    try:
+        from core.autonomous_intelligence.ail_engine import ail_engine
+        await ail_engine.boot()
+        _thought("🤖 [AIL] Autonomous Intelligence Layer booted | FTD-AIL-001", "SYSTEM")
+    except Exception as _e:
+        _thought(f"⚠ [AIL] Boot failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -2941,6 +2949,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     await api_manager.close()
     if cfg.PERF_ENABLED:
         await task_queue.shutdown()
+    try:
+        from core.autonomous_intelligence.ail_engine import ail_engine as _ail
+        await _ail.shutdown()
+    except Exception:
+        pass
 
 
 # ── FastAPI App ───────────────────────────────────────────────────────────────
@@ -5889,6 +5902,113 @@ async def promotion_watch():
             "⏳ WATCHING — no promotion yet. Check best_candidate_by_strategy.gaps for distance."
         ),
     }
+
+
+# ── FTD-AIL-001: Autonomous Intelligence Layer API ────────────────────────────
+
+@app.get("/api/autonomous-intelligence/status")
+async def ail_status():
+    """AIL — current status: enabled flag, collection stats, finding counts by severity/status."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    return await ail_engine.get_status()
+
+
+@app.get("/api/autonomous-intelligence/findings")
+async def ail_findings(status: str | None = None):
+    """AIL — list all findings, optionally filtered by status (PENDING|APPROVED|REJECTED|NEEDS_MORE_EVIDENCE)."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    return {"findings": await ail_engine.get_findings(status)}
+
+
+@app.get("/api/autonomous-intelligence/findings/{finding_id}")
+async def ail_finding_detail(finding_id: str):
+    """AIL — get full detail for a single finding by lineage_id."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    f = await ail_engine.get_finding(finding_id)
+    if f is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"Finding {finding_id} not found")
+    return f
+
+
+@app.post("/api/autonomous-intelligence/finding/{finding_id}/approve")
+async def ail_approve(finding_id: str):
+    """AIL — approve a finding (human action, no auto-code-change)."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    try:
+        return await ail_engine.approve_finding(finding_id)
+    except KeyError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/autonomous-intelligence/finding/{finding_id}/reject")
+async def ail_reject(finding_id: str, reason: str = ""):
+    """AIL — reject a finding (human action)."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    try:
+        return await ail_engine.reject_finding(finding_id, reason)
+    except KeyError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/autonomous-intelligence/finding/{finding_id}/needs-evidence")
+async def ail_needs_evidence(finding_id: str, reason: str = ""):
+    """AIL — mark finding as needing more evidence before decision."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    try:
+        return await ail_engine.needs_evidence(finding_id, reason)
+    except KeyError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/autonomous-intelligence/history")
+async def ail_history(limit: int = 100):
+    """AIL — immutable approval/rejection history timeline."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    return {"history": await ail_engine.get_history(limit)}
+
+
+@app.get("/api/autonomous-intelligence/daily-brief")
+async def ail_daily_brief():
+    """AIL — daily intelligence brief: top pending findings by evidence score."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    return await ail_engine.get_daily_brief()
+
+
+@app.post("/api/autonomous-intelligence/force-collect")
+async def ail_force_collect():
+    """AIL — force an immediate collection + analysis cycle."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    result = await ail_engine.force_collect()
+    return {"status": "ok", "result": result}
+
+
+@app.post("/api/autonomous-intelligence/enable")
+async def ail_enable():
+    """AIL — enable the autonomous intelligence layer."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    ail_engine.enable()
+    return {"status": "enabled"}
+
+
+@app.post("/api/autonomous-intelligence/disable")
+async def ail_disable():
+    """AIL — disable the autonomous intelligence layer (stops scheduler)."""
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    ail_engine.disable()
+    return {"status": "disabled"}
 
 
 async def prp002_download():

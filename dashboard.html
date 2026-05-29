@@ -564,6 +564,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
   <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
   <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
+  <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
 </nav>
 
 <!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
@@ -2961,6 +2962,22 @@ const APIX_CATEGORIES = [
       { method:'GET',  path:'/api/guardian/status',   desc:'Guardian system ki sthiti' },
     ]
   },
+  {
+    id: 'ailmonitor', name: '🤖 AIL Monitor', emoji: '🤖', color: '#6B46C1',
+    endpoints: [
+      { method:'GET',  path:'/api/autonomous-intelligence/status',                      desc:'AIL current status — enabled flag, collection stats, findings count by severity & status' },
+      { method:'GET',  path:'/api/autonomous-intelligence/findings',                    desc:'All findings list — optional ?status=PENDING|APPROVED|REJECTED|NEEDS_MORE_EVIDENCE filter' },
+      { method:'GET',  path:'/api/autonomous-intelligence/findings/{finding_id}',       desc:'Single finding full detail by lineage_id (AIL-YYYYMMDD...)' },
+      { method:'POST', path:'/api/autonomous-intelligence/finding/{finding_id}/approve',desc:'Approve a finding (human action — no auto code change)' },
+      { method:'POST', path:'/api/autonomous-intelligence/finding/{finding_id}/reject', desc:'Reject a finding with optional reason' },
+      { method:'POST', path:'/api/autonomous-intelligence/finding/{finding_id}/needs-evidence', desc:'Mark finding as needing more evidence before decision' },
+      { method:'GET',  path:'/api/autonomous-intelligence/history',                     desc:'Immutable approval/rejection history timeline' },
+      { method:'GET',  path:'/api/autonomous-intelligence/daily-brief',                 desc:'Daily intelligence brief — top pending findings by evidence score' },
+      { method:'POST', path:'/api/autonomous-intelligence/force-collect',               desc:'Force an immediate collection + analysis cycle' },
+      { method:'POST', path:'/api/autonomous-intelligence/enable',                      desc:'Enable the AIL scheduler' },
+      { method:'POST', path:'/api/autonomous-intelligence/disable',                     desc:'Disable the AIL scheduler (no auto changes, observability only paused)' },
+    ]
+  },
 ];
 
 // ── State ───────────────────────────────────────────────────────────────────
@@ -3273,6 +3290,192 @@ function initApiExplorer() {
 }
 </script>
 </div><!-- /tab-apiexplorer -->
+
+<!-- ── 🤖 AIL Monitor Tab ──────────────────────────────────────────────────── -->
+<div id="tab-ailmonitor" class="tab-panel">
+<style>
+.ail-status-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.ail-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:130px;text-align:center;}
+.ail-stat .val{font-size:1.4em;font-weight:700;color:var(--c-blue);}
+.ail-stat .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+.ail-finding{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;}
+.ail-finding .sev{display:inline-block;padding:2px 9px;border-radius:4px;font-size:11px;font-weight:700;margin-right:8px;}
+.sev-CRITICAL{background:#742A2A;color:#FED7D7;}
+.sev-HIGH{background:#7B341E;color:#FEEBC8;}
+.sev-MEDIUM{background:#744210;color:#FEFCBF;}
+.sev-LOW{background:#1A365D;color:#BEE3F8;}
+.sev-INFO{background:#1D4044;color:#B2F5EA;}
+.ail-finding-actions{display:flex;gap:8px;margin-top:10px;}
+.ail-btn{padding:5px 12px;border-radius:5px;border:none;cursor:pointer;font-size:12px;font-weight:600;}
+.ail-btn-approve{background:#276749;color:#fff;}
+.ail-btn-reject{background:#742A2A;color:#fff;}
+.ail-btn-evidence{background:#2D3748;color:#CBD5E0;}
+.ail-ftd-draft{background:#0D1117;border:1px solid #2D3748;border-radius:6px;padding:10px;margin-top:8px;font-family:monospace;font-size:11px;color:#68D391;white-space:pre-wrap;display:none;}
+.ail-history-item{padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+</style>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+  <h2 style="margin:0;font-size:1.1em;">🤖 Autonomous Intelligence Layer — FTD-AIL-001</h2>
+  <div style="display:flex;gap:8px;">
+    <button class="btn blue" onclick="ailForceCollect()" style="font-size:12px;padding:5px 12px;">⚡ Force Collect</button>
+    <button class="btn" onclick="loadAILStatus();loadAILFindings();" style="font-size:12px;padding:5px 12px;">🔄 Refresh</button>
+  </div>
+</div>
+
+<!-- Status Bar -->
+<div class="ail-status-bar" id="ail-status-bar">
+  <div class="ail-stat"><div class="val" id="ail-status-enabled">—</div><div class="lbl">Status</div></div>
+  <div class="ail-stat"><div class="val" id="ail-stat-pending">—</div><div class="lbl">Pending</div></div>
+  <div class="ail-stat"><div class="val" id="ail-stat-critical">—</div><div class="lbl">Critical+High</div></div>
+  <div class="ail-stat"><div class="val" id="ail-stat-approved">—</div><div class="lbl">Approved</div></div>
+  <div class="ail-stat"><div class="val" id="ail-stat-rejected">—</div><div class="lbl">Rejected</div></div>
+  <div class="ail-stat"><div class="val" id="ail-stat-collections">—</div><div class="lbl">Collections</div></div>
+  <div class="ail-stat"><div class="val" id="ail-stat-last">—</div><div class="lbl">Last Collect</div></div>
+</div>
+
+<!-- Filter -->
+<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+  <label style="font-size:12px;color:var(--muted);">Filter:</label>
+  <button class="btn active" id="ail-filter-ALL"      onclick="setAILFilter('ALL')"      style="font-size:11px;padding:3px 10px;">All</button>
+  <button class="btn"        id="ail-filter-PENDING"  onclick="setAILFilter('PENDING')"  style="font-size:11px;padding:3px 10px;">Pending</button>
+  <button class="btn"        id="ail-filter-APPROVED" onclick="setAILFilter('APPROVED')" style="font-size:11px;padding:3px 10px;">Approved</button>
+  <button class="btn"        id="ail-filter-REJECTED" onclick="setAILFilter('REJECTED')" style="font-size:11px;padding:3px 10px;">Rejected</button>
+</div>
+
+<!-- Findings -->
+<div id="ail-findings-list" style="margin-bottom:24px;"></div>
+
+<!-- History -->
+<h3 style="font-size:0.95em;margin:0 0 8px;color:var(--muted);">📋 Approval History</h3>
+<div id="ail-history-list"></div>
+
+<script>
+let _ailFindings = [];
+let _ailFilter = 'ALL';
+
+async function loadAILStatus() {
+  try {
+    const r = await fetch('/api/autonomous-intelligence/status');
+    const d = await r.json();
+    const enabled = d.enabled ? '✅ ACTIVE' : '⛔ DISABLED';
+    document.getElementById('ail-status-enabled').textContent = enabled;
+    const bs = d.findings_by_status || {};
+    const sv = d.findings_by_severity || {};
+    document.getElementById('ail-stat-pending').textContent   = bs.PENDING || 0;
+    document.getElementById('ail-stat-critical').textContent  = (sv.CRITICAL||0) + (sv.HIGH||0);
+    document.getElementById('ail-stat-approved').textContent  = bs.APPROVED || 0;
+    document.getElementById('ail-stat-rejected').textContent  = bs.REJECTED || 0;
+    document.getElementById('ail-stat-collections').textContent = d.collection_count || 0;
+    const lc = d.last_collection_ts;
+    document.getElementById('ail-stat-last').textContent = lc ? new Date(lc*1000).toLocaleTimeString() : 'Never';
+  } catch(e) {
+    document.getElementById('ail-status-enabled').textContent = '❌ Offline';
+  }
+}
+
+async function loadAILFindings() {
+  try {
+    const r = await fetch('/api/autonomous-intelligence/findings');
+    const d = await r.json();
+    _ailFindings = d.findings || [];
+    renderAILFindings();
+    loadAILHistory();
+  } catch(e) {
+    document.getElementById('ail-findings-list').innerHTML = '<div style="color:var(--muted);font-size:12px;">AIL not available — engine may be starting up.</div>';
+  }
+}
+
+function setAILFilter(f) {
+  _ailFilter = f;
+  ['ALL','PENDING','APPROVED','REJECTED'].forEach(k => {
+    const b = document.getElementById('ail-filter-'+k);
+    if (b) b.classList.toggle('active', k === f);
+  });
+  renderAILFindings();
+}
+
+function renderAILFindings() {
+  const list = document.getElementById('ail-findings-list');
+  let findings = _ailFilter === 'ALL' ? _ailFindings : _ailFindings.filter(f => f.status === _ailFilter);
+  if (!findings.length) {
+    list.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:20px;text-align:center;">No findings${_ailFilter !== 'ALL' ? ' with status ' + _ailFilter : ''}.</div>`;
+    return;
+  }
+  list.innerHTML = findings.map(f => {
+    const score = f.evidence_score ?? 0;
+    const scoreBar = `<div style="display:inline-block;width:${score}px;max-width:100px;height:4px;background:${score>70?'#68D391':score>40?'#F6E05E':'#FC8181'};border-radius:2px;vertical-align:middle;margin-left:6px;"></div>`;
+    const hasDraft = f.ftd_draft ? `<button class="ail-btn" style="background:#2D3748;color:#A0AEC0;" onclick="toggleFTDDraft('${f.lineage_id}')">📄 FTD Draft</button>` : '';
+    const actions = f.status === 'PENDING' || f.status === 'NEEDS_MORE_EVIDENCE' ? `
+      <button class="ail-btn ail-btn-approve"   onclick="ailDecide('${f.lineage_id}','approve')">✅ Approve</button>
+      <button class="ail-btn ail-btn-reject"    onclick="ailReject('${f.lineage_id}')">❌ Reject</button>
+      <button class="ail-btn ail-btn-evidence"  onclick="ailDecide('${f.lineage_id}','needs-evidence')">🔍 More Evidence</button>
+      ${hasDraft}` : `<span style="font-size:11px;color:var(--muted);">Status: ${f.status}</span>${hasDraft}`;
+    const evidenceHtml = (f.evidence||[]).map(e => `<div style="font-size:11px;color:var(--muted);font-family:monospace;">${JSON.stringify(e).slice(0,200)}</div>`).join('');
+    const ftdDiv = f.ftd_draft ? `<div class="ail-ftd-draft" id="ftd-${f.lineage_id}">${f.ftd_draft}</div>` : '';
+    return `<div class="ail-finding">
+      <div>
+        <span class="sev sev-${f.severity}">${f.severity}</span>
+        <strong style="font-size:13px;">${f.title}</strong>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">#${f.lineage_id}</span>
+      </div>
+      <div style="margin:6px 0 4px;font-size:12px;color:var(--muted);">
+        Category: ${f.category} | Rule: ${f.rule||'—'} | Sample: ${f.sample_size} | Confidence: ${(f.confidence_score*100).toFixed(0)}%
+        | Evidence Score: ${score}/100 ${scoreBar}
+      </div>
+      <div style="font-size:12px;margin-bottom:6px;">${f.recommendation}</div>
+      ${evidenceHtml}
+      ${ftdDiv}
+      <div class="ail-finding-actions">${actions}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFTDDraft(id) {
+  const el = document.getElementById('ftd-'+id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function ailDecide(id, action) {
+  try {
+    await fetch(`/api/autonomous-intelligence/finding/${id}/${action}`, {method:'POST'});
+    loadAILStatus(); loadAILFindings();
+  } catch(e) { alert('Action failed: ' + e.message); }
+}
+
+async function ailReject(id) {
+  const reason = prompt('Rejection reason (optional):') || '';
+  try {
+    await fetch(`/api/autonomous-intelligence/finding/${id}/reject?reason=${encodeURIComponent(reason)}`, {method:'POST'});
+    loadAILStatus(); loadAILFindings();
+  } catch(e) { alert('Reject failed: ' + e.message); }
+}
+
+async function ailForceCollect() {
+  try {
+    const r = await fetch('/api/autonomous-intelligence/force-collect', {method:'POST'});
+    const d = await r.json();
+    alert(`Collection complete: ${d.result?.new_findings ?? 0} new finding(s)`);
+    loadAILStatus(); loadAILFindings();
+  } catch(e) { alert('Force collect failed: ' + e.message); }
+}
+
+async function loadAILHistory() {
+  try {
+    const r = await fetch('/api/autonomous-intelligence/history?limit=20');
+    const d = await r.json();
+    const items = d.history || [];
+    const el = document.getElementById('ail-history-list');
+    if (!items.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;">No history yet.</div>'; return; }
+    el.innerHTML = items.map(h => `<div class="ail-history-item">
+      <strong>${h.action}</strong>
+      <span style="color:var(--muted);margin:0 8px;">${h.lineage_id}</span>
+      <span style="color:var(--muted);">${h.reason ? '— ' + h.reason : ''}</span>
+      <span style="float:right;color:var(--muted);">${new Date(h.ts).toLocaleString()}</span>
+    </div>`).join('');
+  } catch(e) {}
+}
+</script>
+</div><!-- /tab-ailmonitor -->
 
 <script>
 // ── PRP Chain tab ─────────────────────────────────────────────────────────────
@@ -3776,7 +3979,7 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['etcc','overview','dbo','combat','report','perf','lio','institutional','prp','apiexplorer'].forEach(t => {
+  ['etcc','overview','dbo','combat','report','perf','lio','institutional','prp','apiexplorer','ailmonitor'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
@@ -3790,6 +3993,10 @@ function switchTab(name) {
   }
   if (name === 'apiexplorer') {
     initApiExplorer();
+  }
+  if (name === 'ailmonitor') {
+    loadAILStatus();
+    loadAILFindings();
   }
   if (name === 'dbo') {
     initGrowthChart();
