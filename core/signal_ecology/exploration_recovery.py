@@ -73,6 +73,12 @@ class ExplorationRecoveryGovernor:
 
     # ── Primary API ────────────────────────────────────────────────────────────
 
+    @property
+    def is_active(self) -> bool:
+        """True when a recovery cycle is currently open."""
+        with self._lock:
+            return self._active_cycle_id is not None
+
     def on_signal_blocked(self) -> None:
         """Call every time a signal is blocked (any reason)."""
         with self._lock:

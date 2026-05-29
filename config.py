@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.39.0"
+APP_VERSION = "1.39.1"
 
 
 class EngineConfig(BaseSettings):
@@ -85,7 +85,7 @@ class EngineConfig(BaseSettings):
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
-    BREAKEVEN_TRIGGER_R: float = 1.5      # FTD-056-ACT: raised 1.0→1.5 — BE at 1.0 was cutting avg_win to $0.994 vs theoretical 4.0R TP; profitable windows (PF=1.24) had avg_win=$3.03 — need more room for winners to run
+    BREAKEVEN_TRIGGER_R: float = 1.0      # FTD-056-ACT: raised 1.0→1.5, now reverted 1.5→1.0 — forensic audit (2148 trades) showed 99.8% of wins closed below 1.5R (avg win 0.09R); trigger was effectively disabled. Lowering to 1.0R restores protection without cutting winners (winners already close well below 1.0R)
     SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
