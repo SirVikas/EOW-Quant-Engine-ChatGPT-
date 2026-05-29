@@ -46,6 +46,11 @@ class TradeRecord:
     net_pnl_pct:    float = 0.0
     r_multiple:     float = 0.0   # net_pnl / initial_risk
 
+    # FTD-PEAK-R: highest favourable R reached during the trade's lifetime.
+    # Captured from OpenPosition.peak_r at close time — not recomputable after.
+    # Required for: "trade reached Xr then reversed to SL" forensic analysis.
+    peak_r:         float = 0.0
+
     # FTD-PATH-ATTR: which execution pipeline originated this trade
     origin_pipeline: str = "UNKNOWN"  # "PAPER_SPEED" | "PRIMARY_STRATEGY" | "UNKNOWN"
 
