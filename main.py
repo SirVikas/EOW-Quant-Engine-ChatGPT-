@@ -5609,7 +5609,288 @@ async def recovery_cycle_audit():
     }
 
 
-@app.get("/api/prp/002/download")
+# ── FORENSIC: Genome Exposure Audit ──────────────────────────────────────────
+@app.get("/api/forensics/genome-exposure-audit")
+async def genome_exposure_audit():
+    """
+    Pipeline audit: how many genomes pass each stage
+    Generated → Activated → Executed → Evaluated → Promoted.
+    Identifies where evolution is stalling.
+    """
+    state = genome.get_state()
+    gen_log   = state.get("recent_genomes", [])   # last 500 in memory
+    promo_log = state.get("promotion_log", [])
+
+    total_generated = state.get("generation", len(gen_log))
+
+    # Activated = appeared in generation_log (backtest ran)
+    activated = len(gen_log)
+
+    # Executed = had at least 1 simulated trade in backtest
+    executed = [g for g in gen_log if g.get("trades", 0) >= 1]
+
+    # Evaluated = had enough trades for meaningful gate check (≥5 per gate 1)
+    evaluated = [g for g in gen_log if g.get("trades", 0) >= 5]
+
+    # Promoted = decision == PROMOTED in promotion_log
+    promoted  = [p for p in promo_log if p.get("decision") == "PROMOTED"]
+    rejected  = [p for p in promo_log if p.get("decision") == "REJECTED"]
+
+    # Rejection breakdown
+    rejection_reasons: dict = {}
+    for p in rejected:
+        reason = p.get("reason", "UNKNOWN")
+        # Extract gate names
+        gates = []
+        if "train_gate" in reason: gates.append("TRAIN_GATE")
+        if "r_gate"     in reason: gates.append("R_GATE")
+        if "overfit"    in reason: gates.append("OVERFIT")
+        if "oos_gate"   in reason: gates.append("OOS_GATE")
+        key = "+".join(gates) if gates else reason[:40]
+        rejection_reasons[key] = rejection_reasons.get(key, 0) + 1
+
+    # By strategy breakdown
+    by_strategy: dict = {}
+    for stype in ["TrendFollowing", "MeanReversion", "VolatilityExpansion"]:
+        sg = [g for g in gen_log if g.get("strategy_type") == stype]
+        se = [g for g in sg if g.get("trades", 0) >= 1]
+        sv = [g for g in sg if g.get("trades", 0) >= 5]
+        sp = [p for p in promoted if p.get("strategy_type") == stype]
+        avg_cost_drag = round(
+            sum(g.get("cost_drag_pct", 0) for g in se) / max(len(se), 1), 1
+        )
+        by_strategy[stype] = {
+            "generated":    len(sg),
+            "executed":     len(se),
+            "evaluated":    len(sv),
+            "promoted":     len(sp),
+            "avg_cost_drag_pct": avg_cost_drag,
+            "bottleneck": (
+                "NO_TRADES — backtest finds no setups in available candle window"
+                if len(se) == 0 else
+                "INSUFFICIENT_TRADES — fewer than 5 trades per backtest"
+                if len(sv) == 0 else
+                "GATE_REJECTION — trades exist but quality gates block promotion"
+                if len(sp) == 0 else
+                "HEALTHY"
+            ),
+        }
+
+    # What is blocking promotion right now?
+    current_bottleneck = (
+        "NO_PROMOTIONS_YET — engine evolving; first promotion requires: "
+        f"WinRate≥{cfg.GENOME_PROMOTE_WIN_RATE*100:.0f}% "
+        f"PF≥{cfg.GENOME_PROMOTE_PF} "
+        f"AvgR≥{cfg.GENOME_MIN_AVG_R} "
+        f"OOS_PF≥1.0 "
+        f"Overfit≤{cfg.GENOME_OVERFITTING_MAX_RATIO}"
+    ) if not promoted else f"FIRST_PROMOTION_AT_GENERATION_{promoted[0].get('ts', '?')}"
+
+    return {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "pipeline": {
+            "generated":  total_generated,
+            "activated":  activated,
+            "executed":   len(executed),
+            "evaluated":  len(evaluated),
+            "promoted":   len(promoted),
+            "rejected":   len(rejected),
+        },
+        "funnel_pct": {
+            "executed_of_activated":  round(len(executed)  / max(activated, 1) * 100, 1),
+            "evaluated_of_executed":  round(len(evaluated) / max(len(executed), 1) * 100, 1),
+            "promoted_of_evaluated":  round(len(promoted)  / max(len(evaluated), 1) * 100, 1),
+        },
+        "rejection_breakdown": rejection_reasons,
+        "by_strategy":         by_strategy,
+        "promotion_gate_thresholds": {
+            "win_rate_min_pct": cfg.GENOME_PROMOTE_WIN_RATE * 100,
+            "profit_factor_min": cfg.GENOME_PROMOTE_PF,
+            "avg_r_min":         cfg.GENOME_MIN_AVG_R,
+            "oos_pf_min":        1.0,
+            "overfit_ratio_max": cfg.GENOME_OVERFITTING_MAX_RATIO,
+            "min_trades":        5,
+        },
+        "current_bottleneck": current_bottleneck,
+        "watch_for": "First ACCEPTED in promotion_log — use /api/forensics/promotion-watch",
+    }
+
+
+# ── FORENSIC: Breakeven Impact Audit ─────────────────────────────────────────
+@app.get("/api/forensics/breakeven-impact-audit")
+async def breakeven_impact_audit():
+    """
+    Before/after comparison of Fix A (BREAKEVEN_TRIGGER_R 1.5→1.0).
+    Segments trades by whether BE was armed. Tracks avg win size,
+    cost drag, and PF to confirm Fix A is having the intended effect.
+    """
+    _boot_replay = getattr(pnl_calc, "_boot_replay_count", 0)
+    all_trades   = pnl_calc.trades
+    session_trades = all_trades[_boot_replay:]
+
+    def _safe_avg(vals):
+        return round(sum(vals) / len(vals), 4) if vals else 0.0
+
+    # Segment: trades where BE fired (breakeven_armed captured via peak_r ≥ trigger)
+    # We approximate: peak_r >= current trigger → BE armed; peak_r < trigger → not armed
+    trigger = cfg.BREAKEVEN_TRIGGER_R
+
+    has_peak_data = [t for t in all_trades if getattr(t, "peak_r", 0.0) > 0]
+    be_armed   = [t for t in has_peak_data if t.peak_r >= trigger]
+    be_unarmed = [t for t in has_peak_data if t.peak_r < trigger]
+
+    # Win/loss split for each segment
+    def _seg_stats(trades):
+        wins   = [t for t in trades if t.net_pnl >= 0]
+        losses = [t for t in trades if t.net_pnl <  0]
+        fees   = [getattr(t, "fee_entry", 0) + getattr(t, "fee_exit", 0) for t in trades]
+        gross  = [getattr(t, "gross_pnl", t.net_pnl) for t in trades]
+        total_gross = sum(gross)
+        total_fees  = sum(fees)
+        cost_drag   = round(total_fees / max(abs(total_gross), 1e-9) * 100, 1) if total_gross > 0 else 999.9
+        return {
+            "n":            len(trades),
+            "wins":         len(wins),
+            "losses":       len(losses),
+            "win_rate_pct": round(len(wins) / max(len(trades), 1) * 100, 1),
+            "avg_net_pnl":  _safe_avg([t.net_pnl for t in trades]),
+            "avg_peak_r":   _safe_avg([t.peak_r for t in trades]),
+            "avg_r_multiple": _safe_avg([getattr(t, "r_multiple", 0) for t in trades]),
+            "total_fees":   round(total_fees, 4),
+            "cost_drag_pct": cost_drag,
+        }
+
+    # Session-level stats (after boot — most recent trades)
+    session_wins   = [t for t in session_trades if t.net_pnl >= 0]
+    session_losses = [t for t in session_trades if t.net_pnl <  0]
+
+    # Peak_r distribution — are trades now reaching 1.0R?
+    peak_buckets = {
+        "never_reached_0_5r":   sum(1 for t in has_peak_data if t.peak_r < 0.5),
+        "reached_0_5r":         sum(1 for t in has_peak_data if 0.5 <= t.peak_r < 1.0),
+        "reached_1r":           sum(1 for t in has_peak_data if 1.0 <= t.peak_r < 1.5),
+        "reached_1_5r_plus":    sum(1 for t in has_peak_data if t.peak_r >= 1.5),
+    }
+
+    return {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "fix_a_config": {
+            "current_be_trigger_r":    trigger,
+            "previous_be_trigger_r":   1.5,
+            "status": "APPLIED" if trigger < 1.5 else "PENDING",
+        },
+        "peak_r_sample_size": len(has_peak_data),
+        "peak_r_note": (
+            f"Sufficient for trend analysis ({len(has_peak_data)} trades)"
+            if len(has_peak_data) >= 300 else
+            f"Growing — need {300 - len(has_peak_data)} more trades for Fix C confidence"
+        ),
+        "peak_r_distribution": peak_buckets,
+        "be_armed_trades":   _seg_stats(be_armed),
+        "be_unarmed_trades": _seg_stats(be_unarmed),
+        "session_overview": {
+            "total":          len(session_trades),
+            "wins":           len(session_wins),
+            "losses":         len(session_losses),
+            "win_rate_pct":   round(len(session_wins) / max(len(session_trades), 1) * 100, 1),
+            "avg_net_pnl":    _safe_avg([t.net_pnl for t in session_trades]),
+        },
+        "fix_a_verdict": (
+            "ACTIVE — monitor be_armed_trades vs be_unarmed_trades over next 300+ trades"
+            if len(has_peak_data) < 300 else
+            "MEASURABLE — compare be_armed_trades.avg_net_pnl vs be_unarmed_trades.avg_net_pnl"
+        ),
+        "fix_c_readiness": {
+            "peak_r_trades_needed": 300,
+            "peak_r_trades_have":   len(has_peak_data),
+            "ready": len(has_peak_data) >= 300,
+        },
+    }
+
+
+# ── FORENSIC: First Promotion Watch ──────────────────────────────────────────
+@app.get("/api/forensics/promotion-watch")
+async def promotion_watch():
+    """
+    Real-time watch for the first genome promotion.
+    Shows what the best candidate so far achieved vs what is needed,
+    and how far from promotion each strategy type is.
+    """
+    state     = genome.get_state()
+    gen_log   = state.get("recent_genomes", [])
+    promo_log = state.get("promotion_log", [])
+    promoted  = [p for p in promo_log if p.get("decision") == "PROMOTED"]
+    rejected  = [p for p in promo_log if p.get("decision") == "REJECTED"]
+
+    gates = {
+        "win_rate_pct":   cfg.GENOME_PROMOTE_WIN_RATE * 100,
+        "profit_factor":  cfg.GENOME_PROMOTE_PF,
+        "avg_r_multiple": cfg.GENOME_MIN_AVG_R,
+        "oos_pf":         1.0,
+        "overfit_ratio":  cfg.GENOME_OVERFITTING_MAX_RATIO,
+        "min_trades":     5,
+    }
+
+    # Best candidate per strategy (by fitness: WR × PF − cost_drag/100)
+    best_by_strategy = {}
+    for stype in ["TrendFollowing", "MeanReversion", "VolatilityExpansion"]:
+        sg = [g for g in gen_log if g.get("strategy_type") == stype and g.get("trades", 0) >= 1]
+        if not sg:
+            best_by_strategy[stype] = {"status": "NO_EXECUTED_GENOMES"}
+            continue
+        best = max(sg, key=lambda g: (
+            g.get("win_rate", 0) * g.get("profit_factor", 0) - g.get("cost_drag_pct", 100) / 100
+        ))
+        wr  = best.get("win_rate", 0) * 100
+        pf  = best.get("profit_factor", 0)
+        ar  = best.get("avg_r_multiple", 0)
+        oos = best.get("oos_pf", 0)
+        trd = best.get("trades", 0)
+        best_by_strategy[stype] = {
+            "genome_id":        best.get("genome_id", "?"),
+            "trades":           trd,
+            "win_rate_pct":     round(wr, 1),
+            "profit_factor":    round(pf, 3),
+            "avg_r_multiple":   round(ar, 3),
+            "oos_pf":           round(oos, 3),
+            "cost_drag_pct":    best.get("cost_drag_pct", 0),
+            "gates_passing": {
+                "win_rate":    wr   >= gates["win_rate_pct"],
+                "profit_factor": pf >= gates["profit_factor"],
+                "avg_r":       ar   >= gates["avg_r_multiple"],
+                "oos_pf":      oos  >= gates["oos_pf"],
+                "min_trades":  trd  >= gates["min_trades"],
+            },
+            "gaps": {
+                "win_rate_gap":   round(max(gates["win_rate_pct"] - wr,  0), 1),
+                "pf_gap":         round(max(gates["profit_factor"] - pf,  0), 3),
+                "avg_r_gap":      round(max(gates["avg_r_multiple"] - ar, 0), 3),
+                "oos_pf_gap":     round(max(gates["oos_pf"] - oos, 0), 3),
+            },
+        }
+
+    # Recent rejection pattern
+    recent_rejections = promo_log[-9:] if promo_log else []
+
+    return {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "promotion_status": {
+            "first_promotion_achieved": len(promoted) > 0,
+            "total_promoted":  len(promoted),
+            "total_rejected":  len(rejected),
+            "total_cycles":    state.get("generation", 0),
+        },
+        "first_promotion": promoted[0] if promoted else None,
+        "promotion_gate_thresholds": gates,
+        "best_candidate_by_strategy": best_by_strategy,
+        "recent_rejection_log": recent_rejections,
+        "watch_signal": (
+            "🎉 FIRST PROMOTION ACHIEVED" if promoted else
+            "⏳ WATCHING — no promotion yet. Check best_candidate_by_strategy.gaps for distance."
+        ),
+    }
+
+
 async def prp002_download():
     """PRP-002 — All Signal Ecology reports as a single downloadable ZIP."""
     import zipfile, io as _io, json as _json
