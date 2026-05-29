@@ -2699,6 +2699,9 @@ const APIX_CATEGORIES = [
     id: 'forensics', name: 'Forensics & Diagnostics', emoji: '🔬', color: '#C05621',
     endpoints: [
       { method:'GET', path:'/api/forensics/recovery-cycle-audit',          desc:'Recovery cycles ka forensic audit — har recovery kadam ki poori jaanch' },
+      { method:'GET', path:'/api/forensics/genome-exposure-audit',         desc:'Genome pipeline funnel — Generated→Activated→Executed→Evaluated→Promoted — kahan evolution ruk raha hai' },
+      { method:'GET', path:'/api/forensics/breakeven-impact-audit',        desc:'Fix A (BE trigger 1.5→1.0) ka before/after impact — avg win size, cost drag, peak_r distribution' },
+      { method:'GET', path:'/api/forensics/promotion-watch',               desc:'Pehle genome promotion ka real-time watch — har strategy ka best candidate aur gate gaps' },
       { method:'GET', path:'/api/diagnostics/pipeline-break-forensics',    desc:'Pipeline break ka forensic analysis — kahan aur kyun tuta' },
       { method:'GET', path:'/api/ct-scan',                                 desc:'Deep system CT scan — andar ki har cheez ki sthiti' },
       { method:'GET', path:'/api/consistency',                             desc:'System consistency check — sab theek hai ya nahi' },
