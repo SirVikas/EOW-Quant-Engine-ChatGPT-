@@ -394,6 +394,7 @@ class RiskController:
             order_type=order_type,
             stop_loss=pos.initial_stop_loss,   # FTD-REF-055: preserve initial SL
             take_profit=pos.take_profit,        # FTD-REF-055: preserve TP
+            peak_r=round(pos.peak_r, 4),        # FTD-PEAK-R: forensic — highest R seen during trade
         )
         result = self.pnl_calc.calculate(record, initial_risk_usdt=pos.initial_risk)
         self.scaler.record_trade(result.net_pnl)

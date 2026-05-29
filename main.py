@@ -5505,6 +5505,34 @@ async def recovery_cycle_audit():
                 if pct_unprotected > 50 else
                 "Hold — current 1.5R trigger may be appropriate"
             ),
+            # FTD-PEAK-R: peak_r is now captured — these counts become meaningful
+            # from the next session onward. Legacy trades default to peak_r=0.0.
+            "peak_r_analysis": {
+                "note": "Requires trades recorded after peak_r instrumentation (v1.38.6+)",
+                "trades_with_peak_r_data": sum(
+                    1 for t in trades_sorted if getattr(t, "peak_r", 0.0) > 0
+                ),
+                # Core Fix A question: reached meaningful R, had no BE protection, reversed to loss
+                "reached_1r_then_loss": sum(
+                    1 for t in trades_sorted
+                    if getattr(t, "peak_r", 0.0) >= 1.0
+                    and getattr(t, "net_pnl", 0.0) <= 0
+                ),
+                "reached_0_5r_then_loss": sum(
+                    1 for t in trades_sorted
+                    if getattr(t, "peak_r", 0.0) >= 0.5
+                    and getattr(t, "net_pnl", 0.0) <= 0
+                ),
+                "never_reached_0_5r": sum(
+                    1 for t in trades_sorted
+                    if getattr(t, "peak_r", 0.0) < 0.5
+                ),
+                "avg_peak_r_of_losing_trades": _avg([
+                    getattr(t, "peak_r", 0.0) for t in trades_sorted
+                    if getattr(t, "net_pnl", 0.0) <= 0
+                    and getattr(t, "peak_r", 0.0) > 0
+                ]),
+            },
         },
 
         "section_3_recovery_vs_normal": {

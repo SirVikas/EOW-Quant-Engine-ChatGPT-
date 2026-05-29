@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.38.5"
+APP_VERSION = "1.38.6"
 
 
 class EngineConfig(BaseSettings):
