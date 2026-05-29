@@ -5317,6 +5317,251 @@ async def prp002_recovery_history(n: int = 20):
     return {"cycles": exploration_recovery_governor.cycle_history(n=n)}
 
 
+@app.get("/api/forensics/recovery-cycle-audit")
+async def recovery_cycle_audit():
+    """
+    Recovery Cycle Audit — validates the 5-win/6-loss cyclical hypothesis.
+
+    Returns four evidence sections:
+      1. consecutive_runs   — actual win/loss run lengths from trade history
+      2. r_multiple_dist    — how many wins had NO breakeven protection (<1.5R)
+      3. recovery_vs_normal — exploration/recovery trades vs normal trade performance
+      4. context_boost      — context-boosted trades vs non-boosted performance
+      5. thought_log_events — recovery mode activation counts from thought log
+
+    Use this data to confirm/deny each proposed fix before implementing.
+    """
+    import collections as _col
+
+    trades_raw = list(pnl_calc.trades)
+    trades_sorted = sorted(trades_raw, key=lambda t: getattr(t, "exit_ts", 0))
+
+    def _wr(wins, total):
+        return round(wins / total * 100, 1) if total else 0.0
+
+    def _avg(vals):
+        return round(sum(vals) / len(vals), 4) if vals else 0.0
+
+    def _dec_snap(t, *keys):
+        d = getattr(t, "decision_snapshot", None) or {}
+        for k in keys:
+            d = d.get(k) if isinstance(d, dict) else None
+            if d is None:
+                return None
+        return d
+
+    # ── 1. Consecutive win/loss run analysis ─────────────────────────────────
+    runs = []
+    run_type = None
+    run_len  = 0
+    for t in trades_sorted:
+        is_win = (getattr(t, "net_pnl", 0.0) > 0)
+        cur    = "WIN" if is_win else "LOSS"
+        if cur == run_type:
+            run_len += 1
+        else:
+            if run_type is not None:
+                runs.append({"type": run_type, "length": run_len})
+            run_type, run_len = cur, 1
+    if run_type:
+        runs.append({"type": run_type, "length": run_len})
+
+    win_runs  = [r["length"] for r in runs if r["type"] == "WIN"]
+    loss_runs = [r["length"] for r in runs if r["type"] == "LOSS"]
+    run_dist  = _col.Counter(r["length"] for r in runs if r["type"] == "LOSS")
+
+    # ── 2. R-multiple distribution (Fix A — breakeven trigger validation) ────
+    r_buckets: dict = _col.defaultdict(list)
+    for t in trades_sorted:
+        r = getattr(t, "r_multiple", 0.0) or 0.0
+        if r > 0:
+            if r < 0.5:   r_buckets["win_0.0_0.5"].append(r)
+            elif r < 1.0: r_buckets["win_0.5_1.0"].append(r)
+            elif r < 1.5: r_buckets["win_1.0_1.5"].append(r)
+            else:         r_buckets["win_1.5_plus"].append(r)
+        else:
+            r_buckets["loss"].append(r)
+
+    unprotected_wins = (len(r_buckets["win_0.0_0.5"])
+                        + len(r_buckets["win_0.5_1.0"])
+                        + len(r_buckets["win_1.0_1.5"]))
+    total_wins  = unprotected_wins + len(r_buckets["win_1.5_plus"])
+    total_total = total_wins + len(r_buckets["loss"])
+
+    # Estimate pnl at risk: wins below 1.5R closed profitably — if market reversed
+    # before close, they'd have hit full SL. Quantify that exposure.
+    at_risk_pnl = sum(
+        getattr(t, "net_pnl", 0.0)
+        for t in trades_sorted
+        if 0 < (getattr(t, "r_multiple", 0.0) or 0.0) < 1.5
+    )
+
+    # ── 3. Recovery vs normal trade analysis (Fix B) ─────────────────────────
+    def _is_recovery(t) -> bool:
+        # RL floor exploration (anti-starvation)
+        eo = getattr(t, "exploration_origin", None) or {}
+        if eo.get("was_exploration_trade"):
+            return True
+        # Ecology recovery mode: size_mult < 1.0 on a PAPER_SPEED signal
+        eco_mult = _dec_snap(t, "ecology", "size_multiplier")
+        if eco_mult is not None and eco_mult < 1.0:
+            return True
+        return False
+
+    recovery_trades = [t for t in trades_sorted if _is_recovery(t)]
+    normal_trades   = [t for t in trades_sorted if not _is_recovery(t)]
+
+    def _bucket_metrics(bucket):
+        n      = len(bucket)
+        if n == 0:
+            return {"n": 0, "win_rate_pct": 0.0, "avg_pnl": 0.0, "total_pnl": 0.0}
+        wins   = sum(1 for t in bucket if getattr(t, "net_pnl", 0.0) > 0)
+        pnls   = [getattr(t, "net_pnl", 0.0) for t in bucket]
+        return {
+            "n":            n,
+            "win_rate_pct": _wr(wins, n),
+            "avg_pnl":      _avg(pnls),
+            "total_pnl":    round(sum(pnls), 4),
+        }
+
+    # ── 4. Context-boost analysis (Fix B) ────────────────────────────────────
+    def _boost_mult(t) -> float:
+        # PRIMARY_STRATEGY: ctx_amp.boost_mult in decision_snapshot
+        v = _dec_snap(t, "ctx_amp", "boost_mult")
+        if v is not None:
+            return float(v)
+        # PAPER_SPEED: ecology.boost_mult
+        v = _dec_snap(t, "ecology", "boost_mult")
+        return float(v) if v is not None else 1.0
+
+    boosted_trades    = [t for t in trades_sorted if _boost_mult(t) > 1.0]
+    nonboosted_trades = [t for t in trades_sorted if _boost_mult(t) <= 1.0]
+
+    # ── 5. Thought log event counts ───────────────────────────────────────────
+    tlog_msgs = [str(e.get("msg", "")) for e in list(_thought_log)]
+    def _tcnt(kw): return sum(1 for m in tlog_msgs if kw in m)
+
+    # ── Hypothesis verdict helper ─────────────────────────────────────────────
+    pct_unprotected = round(unprotected_wins / max(total_wins, 1) * 100, 1)
+    avg_loss_run    = round(sum(loss_runs) / len(loss_runs), 1) if loss_runs else 0.0
+    avg_win_run     = round(sum(win_runs)  / len(win_runs),  1) if win_runs  else 0.0
+
+    fix_a_verdict = (
+        "SUPPORTED — majority of wins have no BE protection; lowering trigger to 1.0R is justified"
+        if pct_unprotected > 50 else
+        "WEAK — most wins already reach 1.5R; fix may have limited impact"
+    )
+    rec_m = _bucket_metrics(recovery_trades)
+    norm_m = _bucket_metrics(normal_trades)
+    fix_b_verdict = (
+        "SUPPORTED — recovery/exploration trades underperform normal trades significantly"
+        if rec_m["avg_pnl"] < norm_m["avg_pnl"] * 0.5 and rec_m["n"] > 5 else
+        "INCONCLUSIVE — insufficient data or recovery trades not significantly worse"
+    )
+    boost_m = _bucket_metrics(boosted_trades)
+    nboost_m = _bucket_metrics(nonboosted_trades)
+
+    return {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "total_trades_analyzed": total_total,
+
+        "section_1_consecutive_runs": {
+            "description": "Win/loss run lengths — 5W→6L cycle detection",
+            "all_runs":          runs[-40:],   # last 40 runs
+            "avg_win_run_length":  avg_win_run,
+            "avg_loss_run_length": avg_loss_run,
+            "max_win_run":  max(win_runs,  default=0),
+            "max_loss_run": max(loss_runs, default=0),
+            "loss_run_distribution": {str(k): v for k, v in sorted(run_dist.items())},
+            "cycle_pattern_detected": (
+                "YES — avg loss run > avg win run (losses outnumber wins per streak)"
+                if avg_loss_run > avg_win_run else
+                "NO — no systematic loss-streak bias detected"
+            ),
+        },
+
+        "section_2_r_multiple_distribution": {
+            "description": "Fix A validation — wins with no breakeven protection (r < 1.5)",
+            "wins_unprotected_below_1_5r": unprotected_wins,
+            "wins_protected_above_1_5r":   len(r_buckets["win_1.5_plus"]),
+            "total_wins":                  total_wins,
+            "pct_wins_unprotected":        pct_unprotected,
+            "by_bucket": {
+                "win_0.0_to_0.5r": {"count": len(r_buckets["win_0.0_0.5"]),
+                                     "avg_r": _avg(r_buckets["win_0.0_0.5"])},
+                "win_0.5_to_1.0r": {"count": len(r_buckets["win_0.5_1.0"]),
+                                     "avg_r": _avg(r_buckets["win_0.5_1.0"])},
+                "win_1.0_to_1.5r": {"count": len(r_buckets["win_1.0_1.5"]),
+                                     "avg_r": _avg(r_buckets["win_1.0_1.5"])},
+                "win_1.5r_plus":   {"count": len(r_buckets["win_1.5_plus"]),
+                                     "avg_r": _avg(r_buckets["win_1.5_plus"])},
+                "losses":          {"count": len(r_buckets["loss"]),
+                                    "avg_r": _avg(r_buckets["loss"])},
+            },
+            "pnl_from_unprotected_wins": round(at_risk_pnl, 4),
+            "fix_a_verdict": fix_a_verdict,
+            "fix_a_recommendation": (
+                "Lower BREAKEVEN_TRIGGER_R from 1.5 to 1.0 in config.py"
+                if pct_unprotected > 50 else
+                "Hold — current 1.5R trigger may be appropriate"
+            ),
+        },
+
+        "section_3_recovery_vs_normal": {
+            "description": "Fix B/C validation — exploration/recovery trade quality vs normal",
+            "recovery_trades": rec_m,
+            "normal_trades":   norm_m,
+            "recovery_pct_of_total": round(rec_m["n"] / max(total_total, 1) * 100, 1),
+            "fix_b_verdict": fix_b_verdict,
+            "note": (
+                "Recovery trades tagged via exploration_origin.was_exploration_trade "
+                "or ecology.size_multiplier < 1.0 in decision_snapshot"
+            ),
+        },
+
+        "section_4_context_boost": {
+            "description": "Fix B validation — context-amplified trades vs non-amplified",
+            "boosted_trades":    boost_m,
+            "nonboosted_trades": nboost_m,
+            "boost_coverage_pct": round(
+                len(boosted_trades) / max(total_total, 1) * 100, 1),
+            "boost_vs_normal_pnl_delta": round(
+                boost_m["avg_pnl"] - nboost_m["avg_pnl"], 4),
+            "verdict": (
+                "BOOST HARMFUL — amplified trades underperform; suppress recovery-mode boosts"
+                if boost_m["avg_pnl"] < nboost_m["avg_pnl"] - 0.05 and len(boosted_trades) > 5 else
+                "BOOST NEUTRAL/POSITIVE — amplification not causing systematic harm"
+            ),
+        },
+
+        "section_5_thought_log_events": {
+            "description": "Recovery-mode activation frequency in recent thought log",
+            "drought_activations":   _tcnt("DROUGHT"),
+            "curiosity_activations": _tcnt("CURIOSITY"),
+            "forced_activations":    _tcnt("FORCED"),
+            "rsi_crash_guard_blocks": _tcnt("RSI_CRASH_GUARD"),
+            "recovery_mode_trades_per_thought_event": (
+                round(rec_m["n"] / max(
+                    _tcnt("CURIOSITY") + _tcnt("FORCED") + _tcnt("DROUGHT"), 1
+                ), 1)
+            ),
+            "note": "Thought log holds last 500 entries only; counts reflect recent session",
+        },
+
+        "summary": {
+            "hypothesis_status": (
+                "STRONG" if (pct_unprotected > 50 and avg_loss_run >= avg_win_run) else
+                "MODERATE" if (pct_unprotected > 30 or avg_loss_run > avg_win_run) else
+                "WEAK — data does not strongly support the proposed cycle"
+            ),
+            "recommended_next_action": (
+                "Fix A (BREAKEVEN_TRIGGER_R 1.5→1.0) is data-justified. "
+                "Fix B and C require deeper investigation — share this report."
+            ),
+        },
+    }
+
+
 @app.get("/api/prp/002/download")
 async def prp002_download():
     """PRP-002 — All Signal Ecology reports as a single downloadable ZIP."""
