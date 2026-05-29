@@ -563,6 +563,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('lio')"      id="tab-btn-lio">🧬 LIO</button>
   <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
   <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
+  <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
 </nav>
 
 <!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
@@ -2358,6 +2359,918 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 </div>
 </div><!-- /tab-prp -->
 
+<!-- ══ TAB: API EXPLORER ══════════════════════════════════════════════════════ -->
+<div id="tab-apiexplorer" class="tab-panel">
+<style>
+/* ── API Explorer Styles ── */
+.apix-wrap { padding: 16px 20px; max-width: 1400px; margin: 0 auto; }
+.apix-hero {
+  background: linear-gradient(135deg, #0F2027 0%, #1A3A4A 50%, #0F2027 100%);
+  border-radius: 18px; padding: 28px 32px; margin-bottom: 20px;
+  color: #fff; position: relative; overflow: hidden;
+}
+.apix-hero::before {
+  content: ''; position: absolute; top: -40px; right: -40px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(99,179,237,.25) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.apix-hero-title { font-size: 22px; font-weight: 700; letter-spacing: .01em; }
+.apix-hero-sub   { font-size: 13px; opacity: .75; margin-top: 6px; }
+.apix-stats-row  { display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap; }
+.apix-stat { background: rgba(255,255,255,.1); border-radius: 10px; padding: 10px 18px; }
+.apix-stat-num { font-size: 22px; font-weight: 700; }
+.apix-stat-lbl { font-size: 10px; opacity: .7; text-transform: uppercase; letter-spacing: .07em; }
+
+/* Controls */
+.apix-controls {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  align-items: center; margin-bottom: 18px;
+}
+.apix-search {
+  flex: 1; min-width: 220px;
+  padding: 9px 14px 9px 36px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: #fff;
+  font-family: var(--ff); font-size: 13px; outline: none;
+  transition: border-color .2s;
+}
+.apix-search:focus { border-color: #63B3ED; }
+.apix-search-wrap { position: relative; flex: 1; min-width: 220px; }
+.apix-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+.apix-filter-btn {
+  padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600;
+  border: 1.5px solid var(--border); background: #fff; cursor: pointer;
+  transition: all .15s; color: var(--text);
+}
+.apix-filter-btn:hover, .apix-filter-btn.active { background: #2B6CB0; color: #fff; border-color: #2B6CB0; }
+.apix-method-badge {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 6px; letter-spacing: .04em;
+}
+.apix-method-GET  { background: #C6F6D5; color: #22543D; }
+.apix-method-POST { background: #FEF3C7; color: #78350F; }
+
+/* Category sections */
+.apix-section { margin-bottom: 20px; }
+.apix-section-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  cursor: pointer; user-select: none;
+}
+.apix-section-title { font-size: 13px; font-weight: 700; }
+.apix-section-count { font-size: 11px; color: var(--muted); }
+.apix-section-toggle { font-size: 12px; color: var(--muted); margin-left: auto; }
+.apix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 10px;
+}
+.apix-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px 15px;
+  cursor: pointer; transition: all .18s;
+  position: relative; overflow: hidden;
+}
+.apix-card:hover { border-color: #63B3ED; box-shadow: 0 3px 14px rgba(43,108,176,.12); transform: translateY(-1px); }
+.apix-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.apix-card-path {
+  font-family: var(--fm); font-size: 12px; font-weight: 600;
+  color: #2B6CB0; flex: 1; word-break: break-all;
+}
+.apix-card-desc { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.apix-card-actions {
+  display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+  opacity: 0; transform: translateY(4px); transition: all .18s;
+}
+.apix-card:hover .apix-card-actions { opacity: 1; transform: translateY(0); }
+.apix-act-btn {
+  font-size: 10px; font-weight: 600; padding: 4px 9px;
+  border-radius: 7px; border: 1px solid var(--border);
+  background: #F7FAFC; cursor: pointer; transition: all .15s;
+  font-family: var(--ff);
+}
+.apix-act-btn:hover { background: #EBF8FF; border-color: #90CDF4; color: #2B6CB0; }
+.apix-act-btn.run  { background: #F0FFF4; border-color: #9AE6B4; color: #276749; }
+.apix-act-btn.copy { background: var(--lav); border-color: #D6BCFA; color: #553C9A; }
+.apix-act-btn.dl   { background: #FEFCBF; border-color: #ECC94B; color: #7B6100; }
+.apix-cat-stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 12px 0 0 12px; }
+
+/* Response Modal */
+.apix-modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.55); z-index: 9000;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(3px);
+}
+.apix-modal-overlay.open { display: flex; }
+.apix-modal {
+  background: #fff; border-radius: 18px; padding: 0;
+  width: min(860px, 96vw); max-height: 90vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0,0,0,.3);
+  animation: apix-slide-up .22s ease;
+}
+@keyframes apix-slide-up {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.apix-modal-head {
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.apix-modal-title { font-size: 15px; font-weight: 700; flex: 1; word-break: break-all; }
+.apix-modal-close {
+  font-size: 20px; cursor: pointer; color: var(--muted);
+  line-height: 1; background: none; border: none; padding: 0;
+}
+.apix-modal-close:hover { color: var(--text); }
+.apix-modal-url-bar {
+  padding: 10px 22px;
+  background: #F7FAFC;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.apix-modal-url-text {
+  font-family: var(--fm); font-size: 12px; color: #2B6CB0;
+  flex: 1; word-break: break-all;
+}
+.apix-modal-btns { display: flex; gap: 7px; flex-wrap: wrap; padding: 12px 22px; border-bottom: 1px solid var(--border); }
+.apix-mbt {
+  font-size: 12px; font-weight: 600; padding: 7px 14px;
+  border-radius: 9px; border: 1.5px solid var(--border);
+  cursor: pointer; font-family: var(--ff); transition: all .15s;
+}
+.apix-mbt.run  { background: #F0FFF4; border-color: #9AE6B4; color: #276749; }
+.apix-mbt.copy { background: var(--lav); border-color: #D6BCFA; color: #553C9A; }
+.apix-mbt.dl   { background: #FEFCBF; border-color: #ECC94B; color: #7B6100; }
+.apix-mbt.newtab { background: var(--sky); border-color: #90CDF4; color: #2B6CB0; }
+.apix-mbt:hover { opacity: .8; transform: translateY(-1px); }
+.apix-modal-body { flex: 1; overflow-y: auto; padding: 16px 22px; }
+.apix-response-box {
+  background: #1A202C; border-radius: 10px; padding: 16px;
+  font-family: var(--fm); font-size: 12px; color: #E2E8F0;
+  white-space: pre-wrap; word-break: break-all;
+  max-height: 420px; overflow-y: auto;
+  line-height: 1.7;
+}
+.apix-response-box.loading { color: #90CDF4; }
+.apix-response-box.error   { color: #FC8181; }
+.apix-desc-box {
+  background: #F0FFF4; border: 1px solid #9AE6B4;
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 12px;
+  font-size: 13px; color: #276749; line-height: 1.55;
+}
+.apix-status-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px; flex-wrap: wrap;
+}
+.apix-status-badge {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 8px;
+}
+.apix-status-200 { background: #C6F6D5; color: #22543D; }
+.apix-status-err { background: #FED7D7; color: #C53030; }
+.apix-timing { font-size: 11px; color: var(--muted); font-family: var(--fm); }
+
+/* No-results */
+.apix-no-results { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+/* Saved panel */
+.apix-saved-panel {
+  background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 18px; margin-bottom: 16px;
+}
+.apix-saved-list { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.apix-saved-chip {
+  background: var(--sky); border: 1px solid #90CDF4; color: #2B6CB0;
+  border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: var(--fm); display: flex; align-items: center; gap: 6px;
+}
+.apix-saved-chip:hover { background: #BEE3F8; }
+.apix-saved-del { color: #FC8181; cursor: pointer; font-weight: 700; }
+</style>
+
+<div class="apix-wrap">
+
+  <!-- Hero Header -->
+  <div class="apix-hero">
+    <div class="apix-hero-title">🗂 EOW API Command Explorer</div>
+    <div class="apix-hero-sub">Sabhi 204+ live API endpoints — interactive, searchable, clickable. Fetch, download, copy — sab ek jagah.</div>
+    <div class="apix-stats-row">
+      <div class="apix-stat"><div class="apix-stat-num" id="apix-total-count">204</div><div class="apix-stat-lbl">Total Endpoints</div></div>
+      <div class="apix-stat"><div class="apix-stat-num">22</div><div class="apix-stat-lbl">Categories</div></div>
+      <div class="apix-stat"><div class="apix-stat-num" id="apix-visible-count">204</div><div class="apix-stat-lbl">Visible</div></div>
+      <div class="apix-stat"><div class="apix-stat-num" id="apix-saved-count">0</div><div class="apix-stat-lbl">Saved</div></div>
+    </div>
+  </div>
+
+  <!-- Saved Bookmarks -->
+  <div class="apix-saved-panel" id="apix-saved-panel" style="display:none;">
+    <div style="font-size:12px;font-weight:700;color:var(--c-blue);">⭐ Saved Endpoints</div>
+    <div class="apix-saved-list" id="apix-saved-list"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="apix-controls">
+    <div class="apix-search-wrap">
+      <span class="apix-search-icon">🔍</span>
+      <input class="apix-search" id="apix-search" placeholder="Search endpoints, descriptions... (e.g. forensics, pnl, recovery)" oninput="apixFilter()" />
+    </div>
+    <button class="apix-filter-btn active" id="apix-f-all"  onclick="apixSetMethod('all')">All Methods</button>
+    <button class="apix-filter-btn" id="apix-f-get"  onclick="apixSetMethod('GET')"><span class="apix-method-badge apix-method-GET">GET</span> Only</button>
+    <button class="apix-filter-btn" id="apix-f-post" onclick="apixSetMethod('POST')"><span class="apix-method-badge apix-method-POST">POST</span> Only</button>
+    <button class="apix-filter-btn" onclick="apixClearSearch()" style="color:var(--c-red);border-color:#FEB2B2;">✕ Clear</button>
+  </div>
+
+  <!-- Category pills quick-jump -->
+  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;" id="apix-cat-pills"></div>
+
+  <!-- Endpoint Grid -->
+  <div id="apix-sections"></div>
+  <div class="apix-no-results" id="apix-no-results" style="display:none;">😶 Koi endpoint nahi mila. Search badlein.</div>
+
+</div>
+
+<!-- Response Modal -->
+<div class="apix-modal-overlay" id="apix-modal" onclick="apixCloseModal(event)">
+  <div class="apix-modal" onclick="event.stopPropagation()">
+    <div class="apix-modal-head">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;" id="apix-modal-cat"></div>
+        <div class="apix-modal-title" id="apix-modal-title"></div>
+      </div>
+      <button class="apix-modal-close" onclick="apixCloseModal()">✕</button>
+    </div>
+    <div class="apix-modal-url-bar">
+      <span class="apix-method-badge" id="apix-modal-method-badge"></span>
+      <span class="apix-modal-url-text" id="apix-modal-url"></span>
+    </div>
+    <div class="apix-modal-btns">
+      <button class="apix-mbt run"    onclick="apixFetch()">▶ Fetch &amp; View</button>
+      <button class="apix-mbt newtab" onclick="apixOpenTab()">↗ Open in New Tab</button>
+      <button class="apix-mbt copy"   onclick="apixCopyUrl()">⧉ Copy URL</button>
+      <button class="apix-mbt dl"     onclick="apixDownload()">⬇ Download JSON</button>
+      <button class="apix-mbt"        onclick="apixSaveEndpoint()" style="background:#FFF5F5;border-color:#FEB2B2;color:#C53030;">⭐ Save</button>
+    </div>
+    <div class="apix-modal-body">
+      <div class="apix-desc-box" id="apix-modal-desc"></div>
+      <div class="apix-status-row" id="apix-status-row" style="display:none;">
+        <span class="apix-status-badge" id="apix-status-badge"></span>
+        <span class="apix-timing" id="apix-timing"></span>
+        <button class="apix-mbt copy" style="font-size:10px;padding:3px 9px;" onclick="apixCopyResponse()">⧉ Copy Response</button>
+      </div>
+      <div class="apix-response-box" id="apix-response-box" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── API Explorer Data ───────────────────────────────────────────────────────
+const APIX_CATEGORIES = [
+  {
+    id: 'core', name: 'Core System', emoji: '⚙', color: '#2B6CB0',
+    endpoints: [
+      { method:'GET',  path:'/api/boot-status',        desc:'Engine boot ki sthiti — kya sab components start hue hain' },
+      { method:'GET',  path:'/api/status',             desc:'Engine ki samanya sthiti (live / stopped / paused)' },
+      { method:'GET',  path:'/api/version',            desc:'Current application version (APP_VERSION)' },
+      { method:'GET',  path:'/api/health',             desc:'System swasthya — sabhi subsystems ka health check' },
+      { method:'GET',  path:'/api/mode-info',          desc:'Current trading mode ki jaankari (paper / live / bypass)' },
+      { method:'GET',  path:'/api/engine/status',      desc:'Engine ka vistrit operational status' },
+      { method:'GET',  path:'/api/engine/aggression',  desc:'Current aggression level dekhna' },
+      { method:'POST', path:'/api/engine/aggression',  desc:'Aggression level set karna' },
+      { method:'POST', path:'/api/engine/start',       desc:'Engine shuru karna' },
+      { method:'POST', path:'/api/engine/stop/graceful',desc:'Engine ko seedha (graceful) band karna' },
+      { method:'POST', path:'/api/engine/reset',       desc:'Engine reset karna — state clear hogi' },
+    ]
+  },
+  {
+    id: 'trading', name: 'Trading Data', emoji: '📈', color: '#276749',
+    endpoints: [
+      { method:'GET', path:'/api/pnl',              desc:'Profit & Loss ka live real-time summary' },
+      { method:'GET', path:'/api/market',           desc:'Live market data aur tick stream' },
+      { method:'GET', path:'/api/positions',        desc:'Khuli (open) positions ki poori list' },
+      { method:'GET', path:'/api/trades',           desc:'Completed trades ka sampoorna itihaas' },
+      { method:'GET', path:'/api/candles/{symbol}', desc:'Kisi bhi symbol ke OHLCV candle data — URL mein symbol daalen' },
+      { method:'GET', path:'/api/lake',             desc:'Data lake ka live snapshot' },
+      { method:'GET', path:'/api/strategy-usage',   desc:'Kaunsi strategy kitni baar use hui' },
+    ]
+  },
+  {
+    id: 'risk', name: 'Risk & Guard', emoji: '🛡', color: '#9B2C2C',
+    endpoints: [
+      { method:'GET',  path:'/api/risk-engine',     desc:'Risk engine ki current state aur parameters' },
+      { method:'GET',  path:'/api/risk-state',      desc:'Risk thresholds aur active limits' },
+      { method:'GET',  path:'/api/profit-guard',    desc:'Profit protection gate ki sthiti' },
+      { method:'GET',  path:'/api/perf-status',     desc:'Performance guard ka status' },
+      { method:'POST', path:'/api/perf-guard/reset',desc:'Performance guard reset karna' },
+      { method:'GET',  path:'/api/signal-filter',   desc:'Signal filtering rules aur effectiveness' },
+      { method:'GET',  path:'/api/deployability',   desc:'Kya engine live deploy karne layak hai' },
+      { method:'GET',  path:'/api/alert-state',     desc:'Sabhi active alerts aur warnings' },
+      { method:'GET',  path:'/api/inverse-engine',  desc:'Inverse engine ka analysis' },
+    ]
+  },
+  {
+    id: 'reporting', name: 'Reports & Export', emoji: '📋', color: '#553C9A',
+    endpoints: [
+      { method:'GET', path:'/api/report',                                          desc:'HTML format mein sampoorna trading report (browser mein khulti hai)' },
+      { method:'GET', path:'/api/report/archive',                                  desc:'Archive ki gayi purani reports ki list' },
+      { method:'GET', path:'/api/report/full-system',                              desc:'Poore system ka JSON format mein report' },
+      { method:'GET', path:'/api/report/full-system-v2',                           desc:'System report ka upgraded naया version (v2)' },
+      { method:'GET', path:'/api/reports/bundle',                                  desc:'Sabhi reports ek bundle mein — ZIP download' },
+      { method:'GET', path:'/api/scorecard',                                       desc:'Trading performance scorecard — quick summary' },
+      { method:'GET', path:'/api/analytics',                                       desc:'Vistrit trading analytics aur metrics' },
+      { method:'GET', path:'/api/audit-log',                                       desc:'System audit trail — kya kab hua' },
+      { method:'GET', path:'/api/perf-explorer/summary',                           desc:'Performance explorer — executive summary view' },
+      { method:'GET', path:'/api/perf-explorer/trades',                            desc:'Performance explorer — har trade ki detail' },
+      { method:'GET', path:'/api/perf-explorer/visuals',                           desc:'Performance explorer — visual charts ke liye data' },
+      { method:'GET', path:'/api/perf-explorer/export/csv',                        desc:'Performance data CSV format mein download karo' },
+      { method:'GET', path:'/api/perf-explorer/export/json',                       desc:'Performance data JSON format mein download karo' },
+      { method:'POST',path:'/api/perf-explorer/backup',                            desc:'Performance data ka backup banana' },
+      { method:'GET', path:'/api/learning-intelligence/institutional-report-html', desc:'Institutional grade HTML report — print ready' },
+      { method:'GET', path:'/api/learning-intelligence/institutional-report-markdown', desc:'Institutional report Markdown format mein' },
+      { method:'GET', path:'/api/learning-intelligence/institutional-report-bundle',desc:'Institutional report — poora bundle download' },
+      { method:'GET', path:'/api/learning-intelligence/report-bundle',             desc:'Learning intelligence ki sampoorna report bundle' },
+      { method:'GET', path:'/api/economic-truth/export/executive',                 desc:'Economic truth — executive summary export' },
+      { method:'GET', path:'/api/economic-truth/export/replay-safe',               desc:'Replay-safe economic truth export' },
+      { method:'GET', path:'/api/economic-truth/export/economic-truth',            desc:'Full economic truth data export' },
+      { method:'GET', path:'/api/unified-intelligence/export',                     desc:'Unified intelligence — sampoorna export' },
+    ]
+  },
+  {
+    id: 'forensics', name: 'Forensics & Diagnostics', emoji: '🔬', color: '#C05621',
+    endpoints: [
+      { method:'GET', path:'/api/forensics/recovery-cycle-audit',          desc:'Recovery cycles ka forensic audit — har recovery kadam ki poori jaanch' },
+      { method:'GET', path:'/api/diagnostics/pipeline-break-forensics',    desc:'Pipeline break ka forensic analysis — kahan aur kyun tuta' },
+      { method:'GET', path:'/api/ct-scan',                                 desc:'Deep system CT scan — andar ki har cheez ki sthiti' },
+      { method:'GET', path:'/api/consistency',                             desc:'System consistency check — sab theek hai ya nahi' },
+      { method:'GET', path:'/api/errors',                                  desc:'Recent errors aur exceptions ki list' },
+      { method:'GET', path:'/api/ws-truth',                                desc:'WebSocket connection ki satya sthiti' },
+      { method:'GET', path:'/api/last-skip',                               desc:'Aakhri skip kiya gaya signal aur skip karne ka karan' },
+      { method:'GET', path:'/api/halt-audit',                              desc:'Halt events ka sampoorna audit log' },
+      { method:'GET', path:'/api/snapshot/live-process',                   desc:'Live running process ka ek-pal ka snapshot' },
+      { method:'GET', path:'/api/observability/anomalies',                 desc:'Detected anomalies — kya anaam cheezein ho rahi hain' },
+      { method:'GET', path:'/api/observability/escalations',               desc:'Active escalations — kya urgent hai' },
+      { method:'GET', path:'/api/observability/events',                    desc:'Recent system events ki chronological list' },
+    ]
+  },
+  {
+    id: 'intelligence', name: 'AI & Learning Intelligence', emoji: '🧠', color: '#2C7A7B',
+    endpoints: [
+      { method:'GET', path:'/api/ai-brain',                                          desc:'AI brain ki current cognitive state' },
+      { method:'GET', path:'/api/rl-intelligence',                                   desc:'Reinforcement Learning engine ki sthiti' },
+      { method:'GET', path:'/api/evolution',                                         desc:'Strategy evolution ka progress' },
+      { method:'GET', path:'/api/evolution-status',                                  desc:'Evolution ka vistrit status' },
+      { method:'GET', path:'/api/learning-intelligence/summary',                     desc:'Learning intelligence — sampoorna executive summary' },
+      { method:'GET', path:'/api/learning-intelligence/patterns',                    desc:'Seekhe gaye successful patterns' },
+      { method:'GET', path:'/api/learning-intelligence/negative-memory',             desc:'Negative patterns jo avoid kiye jaate hain' },
+      { method:'GET', path:'/api/learning-intelligence/ecology',                     desc:'Learning ecology — kaisa mahaul hai seekhne ka' },
+      { method:'GET', path:'/api/learning-intelligence/rl',                          desc:'RL engine state — Q-table, rewards, episodes' },
+      { method:'GET', path:'/api/learning-intelligence/session-attribution',         desc:'Trade attribution — kis session mein kya hua' },
+      { method:'GET', path:'/api/learning-intelligence/topology',                    desc:'Learning topology map — connections aur flows' },
+      { method:'GET', path:'/api/learning-intelligence/cognition',                   desc:'Cognitive state analysis' },
+      { method:'GET', path:'/api/learning-intelligence/sovereign-readiness',         desc:'Autonomous readiness — kya self-govern kar sakta hai' },
+      { method:'GET', path:'/api/learning-intelligence/alpha-discovery',             desc:'Naya alpha dhundhna — market ka chhupta faayda' },
+      { method:'GET', path:'/api/learning-intelligence/economic-ground-truth',       desc:'Economic ground truth — vastavik aarthik sthiti' },
+      { method:'GET', path:'/api/learning-intelligence/counterfactual-interventions',desc:'Counterfactual — agar yeh karte to kya hota' },
+      { method:'GET', path:'/api/learning-intelligence/reality-verification',        desc:'Model vs reality — kitna sahi tha engine' },
+      { method:'GET', path:'/api/learning-intelligence/memory-pressure-dynamics',    desc:'Memory pressure dynamics — kya bhool raha hai' },
+      { method:'GET', path:'/api/learning-intelligence/long-horizon-evolution',      desc:'Long-horizon evolution tracking' },
+      { method:'GET', path:'/api/learning-intelligence/constitutional-recovery-observatory', desc:'Constitutional recovery observatory' },
+      { method:'GET', path:'/api/learning-intelligence/epistemic-integrity-observatory',desc:'Epistemic integrity — kya jaanta hai aur kya nahi' },
+      { method:'GET', path:'/api/learning-intelligence/human-meaning-alignment',    desc:'Human meaning alignment — AI aur insan ka sambandh' },
+    ]
+  },
+  {
+    id: 'memory', name: 'Memory System', emoji: '💾', color: '#744210',
+    endpoints: [
+      { method:'GET',  path:'/api/memory/state',              desc:'Memory engine ki sampoorna sthiti' },
+      { method:'GET',  path:'/api/memory/patterns',           desc:'Memory mein stored successful patterns' },
+      { method:'GET',  path:'/api/memory/logs',               desc:'Memory activity logs' },
+      { method:'GET',  path:'/api/memory/suggestions',        desc:'Memory se nikle trading suggestions' },
+      { method:'POST', path:'/api/memory/learn',              desc:'Naya pattern memory ko sikhana' },
+      { method:'POST', path:'/api/memory/reset',              desc:'Poori memory reset karna (dhyan se!)' },
+      { method:'GET',  path:'/api/learning-memory/summary',   desc:'Learning memory ka summary view' },
+      { method:'GET',  path:'/api/learning-memory/patterns',  desc:'Successful patterns ki list' },
+      { method:'GET',  path:'/api/learning-memory/failed-patterns', desc:'Failed patterns jo avoid kiye jaate hain' },
+      { method:'GET',  path:'/api/learning-memory/negative-memory', desc:'Negative memory — nuksaan ki yaadein' },
+      { method:'GET',  path:'/api/learning-memory/log',       desc:'Memory activity ka chronological log' },
+      { method:'GET',  path:'/api/learning-memory/history',   desc:'Poori learning history' },
+      { method:'GET',  path:'/api/learning-memory/heatmap',   desc:'Pattern frequency heatmap' },
+      { method:'GET',  path:'/api/learning-memory/bridge',    desc:'Memory se strategy mein bridge connection' },
+    ]
+  },
+  {
+    id: 'selfcorrect', name: 'Self-Correction', emoji: '🔄', color: '#1D9E75',
+    endpoints: [
+      { method:'GET',  path:'/api/self-correction/state',           desc:'Auto-correction system ki current sthiti' },
+      { method:'GET',  path:'/api/self-correction/logs',            desc:'Correction events ka detailed log' },
+      { method:'GET',  path:'/api/self-correction/last-change',     desc:'Aakhri automatic correction kya tha' },
+      { method:'POST', path:'/api/self-correction/run',             desc:'Abhi manual correction chalana' },
+      { method:'POST', path:'/api/self-correction/enable',          desc:'Self-correction enable karna' },
+      { method:'POST', path:'/api/self-correction/disable',         desc:'Self-correction disable karna' },
+      { method:'POST', path:'/api/self-correction/override/stop',   desc:'Override se rokna' },
+      { method:'POST', path:'/api/self-correction/override/resume', desc:'Override ke baad dobara shuru karna' },
+      { method:'POST', path:'/api/self-correction/override/clear',  desc:'Override clear karna' },
+      { method:'POST', path:'/api/self-correction/manual-override', desc:'Manual override dena' },
+    ]
+  },
+  {
+    id: 'autoint', name: 'Auto Intelligence', emoji: '🤖', color: '#2B6CB0',
+    endpoints: [
+      { method:'GET',  path:'/api/auto-intelligence/state',       desc:'Auto intelligence system ki sthiti' },
+      { method:'GET',  path:'/api/auto-intelligence/history',     desc:'Past auto intelligence decisions' },
+      { method:'POST', path:'/api/auto-intelligence/force-run',   desc:'Abhi force run karna' },
+      { method:'POST', path:'/api/auto-intelligence/enable',      desc:'Enable karna' },
+      { method:'POST', path:'/api/auto-intelligence/disable',     desc:'Disable karna' },
+      { method:'POST', path:'/api/auto-intelligence/reset-daily', desc:'Daily counter reset karna' },
+    ]
+  },
+  {
+    id: 'genome', name: 'Genome & Strategy DNA', emoji: '🧬', color: '#553C9A',
+    endpoints: [
+      { method:'GET',  path:'/api/genome',         desc:'Current strategy genome / DNA ki state' },
+      { method:'POST', path:'/api/genome/trigger', desc:'Genome mutation trigger karna' },
+      { method:'GET',  path:'/api/regime',          desc:'Current market regime' },
+      { method:'GET',  path:'/api/thoughts',        desc:'Engine ke thought log — recent decisions' },
+      { method:'GET',  path:'/api/suggestions',     desc:'Auto-generated trading suggestions' },
+      { method:'GET',  path:'/api/auto-tuning',     desc:'Auto-tuning parameters ki sthiti' },
+    ]
+  },
+  {
+    id: 'prp001', name: 'PRP-001: Signal Quality', emoji: '📡', color: '#276749',
+    endpoints: [
+      { method:'GET', path:'/api/prp/001/summary',              desc:'Signal quality ka sampoorna summary' },
+      { method:'GET', path:'/api/prp/001/reports',              desc:'Signal quality reports ki list' },
+      { method:'GET', path:'/api/prp/001/signal-truth',         desc:'Signal ki satya jaanch — kya sach hai' },
+      { method:'GET', path:'/api/prp/001/false-positives',      desc:'Galat signals ki list — false positives' },
+      { method:'GET', path:'/api/prp/001/directional-legitimacy',desc:'Signal ki disha ki vaidhata' },
+      { method:'GET', path:'/api/prp/001/asymmetry',            desc:'Buy/sell asymmetry analysis' },
+      { method:'GET', path:'/api/prp/001/context-quality',      desc:'Signal context ki gunvatta (quality)' },
+      { method:'GET', path:'/api/prp/001/recent-signals',       desc:'Haali signals ki list' },
+      { method:'GET', path:'/api/prp/001/download',             desc:'Poora PRP-001 dataset download karna' },
+    ]
+  },
+  {
+    id: 'prp002', name: 'PRP-002: Recovery & Density', emoji: '🔱', color: '#C05621',
+    endpoints: [
+      { method:'GET', path:'/api/prp/002/summary',                  desc:'Recovery system ka sampoorna summary' },
+      { method:'GET', path:'/api/prp/002/ecology',                  desc:'Recovery ecology analysis' },
+      { method:'GET', path:'/api/prp/002/density',                  desc:'Trade density analysis' },
+      { method:'GET', path:'/api/prp/002/rsi-governor',             desc:'RSI governor ki sthiti' },
+      { method:'GET', path:'/api/prp/002/recovery',                 desc:'Active recovery cycles' },
+      { method:'GET', path:'/api/prp/002/context-memory',           desc:'Recovery context memory' },
+      { method:'GET', path:'/api/prp/002/context-clusters',         desc:'Context clusters visualization data' },
+      { method:'GET', path:'/api/prp/002/rsi-decisions',            desc:'RSI ke faisale aur unka asar' },
+      { method:'GET', path:'/api/prp/002/recovery-history',         desc:'Recovery ka poora itihaas' },
+      { method:'GET', path:'/api/prp/002/download',                 desc:'Poora PRP-002 dataset download karna' },
+      { method:'GET', path:'/api/prp/002/analytics/density-reports',desc:'Density analytics report' },
+      { method:'GET', path:'/api/prp/002/analytics/exploration-reports',desc:'Exploration analytics report' },
+      { method:'GET', path:'/api/prp/002/analytics/context-reports', desc:'Context analytics report' },
+      { method:'GET', path:'/api/prp/002/analytics/full-bundle',    desc:'Sabhi PRP-002 analytics ek bundle mein' },
+    ]
+  },
+  {
+    id: 'econtruth', name: 'Economic Truth', emoji: '💡', color: '#7B6100',
+    endpoints: [
+      { method:'GET', path:'/api/economic-truth/expectancy',   desc:'Expected return per trade — kya milega' },
+      { method:'GET', path:'/api/economic-truth/fee-drag',     desc:'Fees ka trading performance pe asar' },
+      { method:'GET', path:'/api/economic-truth/alpha',        desc:'Real alpha measurement — vastavik faayda' },
+      { method:'GET', path:'/api/economic-truth/ecology',      desc:'Market ecology analysis' },
+      { method:'GET', path:'/api/economic-truth/regime',       desc:'Current market regime assessment' },
+      { method:'GET', path:'/api/economic-truth/filtration',   desc:'Signal filtration ki effectiveness' },
+      { method:'GET', path:'/api/economic-truth/orchestration',desc:'Sabhi economic truth ek dashboard mein' },
+      { method:'GET', path:'/api/economic-truth/dashboard',    desc:'Economic truth ka visual dashboard' },
+    ]
+  },
+  {
+    id: 'survivability', name: 'Survivability', emoji: '🏔', color: '#2C7A7B',
+    endpoints: [
+      { method:'GET', path:'/api/survivability/expectancy-stability', desc:'Expectancy ki sthirta over time' },
+      { method:'GET', path:'/api/survivability/ecology-preservation', desc:'Ecology preservation ki sthiti' },
+      { method:'GET', path:'/api/survivability/regime-memory',       desc:'Regime memory aur adaptability' },
+      { method:'GET', path:'/api/survivability/alpha-persistence',   desc:'Alpha ki tikaau kshamata' },
+      { method:'GET', path:'/api/survivability/confidence-realism',  desc:'Confidence ki vastavikta — kitna sahi hai' },
+      { method:'GET', path:'/api/survivability/entropy',             desc:'System entropy level' },
+      { method:'GET', path:'/api/survivability/orchestration',       desc:'Survivability ka dashboard view' },
+    ]
+  },
+  {
+    id: 'execgov', name: 'Execution Governance', emoji: '⚖', color: '#9B2C2C',
+    endpoints: [
+      { method:'GET', path:'/api/execution-governance/restraint',        desc:'Trade restraint analysis — kitna roka' },
+      { method:'GET', path:'/api/execution-governance/discipline-gate',  desc:'Discipline gate ki sthiti' },
+      { method:'GET', path:'/api/execution-governance/equilibrium',      desc:'Execution equilibrium' },
+      { method:'GET', path:'/api/execution-governance/overrides',        desc:'Active overrides ki list' },
+      { method:'GET', path:'/api/execution-governance/discipline-memory',desc:'Discipline memory — kab kab roka' },
+      { method:'GET', path:'/api/execution-governance/governance-safety',desc:'Governance safety assessment' },
+      { method:'GET', path:'/api/execution-governance/orchestration',    desc:'Execution governance ka dashboard' },
+    ]
+  },
+  {
+    id: 'continuity', name: 'Continuity', emoji: '🔗', color: '#553C9A',
+    endpoints: [
+      { method:'GET', path:'/api/continuity/survivability-memory', desc:'Survivability memory continuity' },
+      { method:'GET', path:'/api/continuity/doctrine',             desc:'Continuity doctrine — niyam aur sidhant' },
+      { method:'GET', path:'/api/continuity/entropy',              desc:'Continuity entropy level' },
+      { method:'GET', path:'/api/continuity/recovery',             desc:'Recovery continuity tracking' },
+      { method:'GET', path:'/api/continuity/cross-regime',         desc:'Cross-regime continuity analysis' },
+      { method:'GET', path:'/api/continuity/identity',             desc:'System identity continuity' },
+      { method:'GET', path:'/api/continuity/orchestration',        desc:'Continuity ka sampoorna dashboard' },
+    ]
+  },
+  {
+    id: 'equilibrium', name: 'Equilibrium', emoji: '⚖', color: '#276749',
+    endpoints: [
+      { method:'GET', path:'/api/equilibrium/kelly',           desc:'Kelly criterion analysis — optimal sizing' },
+      { method:'GET', path:'/api/equilibrium/drawdown',        desc:'Drawdown equilibrium status' },
+      { method:'GET', path:'/api/equilibrium/consistency',     desc:'Performance consistency measure' },
+      { method:'GET', path:'/api/equilibrium/utilization',     desc:'Capital utilization analysis' },
+      { method:'GET', path:'/api/equilibrium/band',            desc:'Equilibrium band — normal range' },
+      { method:'GET', path:'/api/equilibrium/discipline-cost', desc:'Discipline ki laagat — kya chhoda' },
+      { method:'GET', path:'/api/equilibrium/orchestration',   desc:'Equilibrium ka dashboard view' },
+    ]
+  },
+  {
+    id: 'alpha', name: 'Alpha Confirmation', emoji: '✅', color: '#1D9E75',
+    endpoints: [
+      { method:'GET', path:'/api/alpha-confirmation/statistics',       desc:'Alpha ke statistical proofs' },
+      { method:'GET', path:'/api/alpha-confirmation/oos',              desc:'Out-of-sample testing results' },
+      { method:'GET', path:'/api/alpha-confirmation/fee-survival',     desc:'Fees ke baad alpha bachne ki sthiti' },
+      { method:'GET', path:'/api/alpha-confirmation/regime-robustness',desc:'Alag-alag regimes mein robustness' },
+      { method:'GET', path:'/api/alpha-confirmation/drawdown-tolerance',desc:'Drawdown tolerance assessment' },
+      { method:'GET', path:'/api/alpha-confirmation/gate',             desc:'Alpha confirmation gate — pass/fail' },
+      { method:'GET', path:'/api/alpha-confirmation/orchestration',    desc:'Alpha confirmation ka dashboard' },
+    ]
+  },
+  {
+    id: 'observability', name: 'Observability', emoji: '👁', color: '#2B6CB0',
+    endpoints: [
+      { method:'GET',  path:'/api/observability/status',           desc:'Observability system ka status' },
+      { method:'GET',  path:'/api/observability/health',           desc:'Observability health check' },
+      { method:'GET',  path:'/api/observability/feeds',            desc:'Data feeds ki sthiti' },
+      { method:'GET',  path:'/api/observability/summary',          desc:'Observability summary report' },
+      { method:'GET',  path:'/api/observability/sync',             desc:'Sync status' },
+      { method:'POST', path:'/api/observability/escalation/{esc_id}/acknowledge', desc:'Escalation acknowledge karna — ID URL mein daalen' },
+    ]
+  },
+  {
+    id: 'capital', name: 'Capital & Portfolio', emoji: '💰', color: '#7B6100',
+    endpoints: [
+      { method:'GET', path:'/api/capital-allocator',      desc:'Capital allocation strategy ka view' },
+      { method:'GET', path:'/api/capital-flow/state',     desc:'Capital flow ki current sthiti' },
+      { method:'GET', path:'/api/capital-flow/allocations',desc:'Active capital allocations' },
+      { method:'GET', path:'/api/portfolio-state',        desc:'Portfolio ki sampoorna sthiti' },
+      { method:'GET', path:'/api/aee/state',              desc:'AEE (Adaptive Equity Engine) state' },
+      { method:'GET', path:'/api/aee/strategy/{strategy_id}', desc:'AEE ki specific strategy ki sthiti — ID URL mein daalen' },
+    ]
+  },
+  {
+    id: 'wiring', name: 'Wiring Audit', emoji: '🔌', color: '#C05621',
+    endpoints: [
+      { method:'GET', path:'/api/wiring-audit/constitution', desc:'System constitution check — niyam sahi hain ya nahi' },
+      { method:'GET', path:'/api/wiring-audit/propagation',  desc:'Signal propagation audit — signal kahan jaata hai' },
+      { method:'GET', path:'/api/wiring-audit/dependencies', desc:'Component dependencies map' },
+      { method:'GET', path:'/api/wiring-audit/archive',      desc:'Wiring audit archive' },
+      { method:'GET', path:'/api/wiring-audit/rendering',    desc:'Rendering audit' },
+      { method:'GET', path:'/api/wiring-audit/compression',  desc:'Compression audit' },
+      { method:'GET', path:'/api/wiring-audit/full-report',  desc:'Sampoorna wiring report' },
+      { method:'GET', path:'/api/wiring-audit/health',       desc:'Wiring health check' },
+      { method:'GET', path:'/api/compression/executive',     desc:'Compression executive summary' },
+      { method:'GET', path:'/api/compression/health',        desc:'Compression health' },
+      { method:'GET', path:'/api/compression/anomalies',     desc:'Compression anomalies' },
+      { method:'GET', path:'/api/compression/ecology',       desc:'Compression ecology' },
+      { method:'GET', path:'/api/compression/governance',    desc:'Compression governance' },
+      { method:'GET', path:'/api/compression/orchestration', desc:'Compression orchestration dashboard' },
+    ]
+  },
+  {
+    id: 'controls', name: 'Control Actions', emoji: '🎮', color: '#9B2C2C',
+    endpoints: [
+      { method:'POST', path:'/api/mode/{mode}',       desc:'Trading mode badalna — path mein mode daalen (paper/live)' },
+      { method:'POST', path:'/api/export',            desc:'Engine data export karna' },
+      { method:'POST', path:'/api/import-dna',        desc:'Strategy DNA import karna' },
+      { method:'POST', path:'/api/emergency-close',   desc:'⚠ Sabhi positions turant band karna — emergency only' },
+      { method:'POST', path:'/api/resume',            desc:'Ruke hue engine ko dobara shuru karna' },
+      { method:'POST', path:'/api/reset-session',     desc:'Trading session reset karna' },
+      { method:'POST', path:'/api/deep-validation/run',desc:'Deep validation chalana — poori system check' },
+      { method:'GET',  path:'/api/vault/status',      desc:'Vault ki sthiti' },
+      { method:'POST', path:'/api/vault/setup',       desc:'Vault setup karna' },
+      { method:'POST', path:'/api/vault/switch',      desc:'Active vault switch karna' },
+      { method:'GET',  path:'/api/guardian/status',   desc:'Guardian system ki sthiti' },
+    ]
+  },
+];
+
+// ── State ───────────────────────────────────────────────────────────────────
+let _apixMethod = 'all';
+let _apixSaved  = JSON.parse(localStorage.getItem('apix_saved') || '[]');
+let _apixCurrentEndpoint = null;
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function apixRender() {
+  const search = (document.getElementById('apix-search')?.value || '').toLowerCase();
+  const sections = document.getElementById('apix-sections');
+  const pills    = document.getElementById('apix-cat-pills');
+  if (!sections) return;
+
+  sections.innerHTML = '';
+  pills.innerHTML    = '';
+
+  let totalVisible = 0;
+
+  APIX_CATEGORIES.forEach(cat => {
+    const filtered = cat.endpoints.filter(ep => {
+      if (_apixMethod !== 'all' && ep.method !== _apixMethod) return false;
+      if (search && !ep.path.toLowerCase().includes(search) && !ep.desc.toLowerCase().includes(search) && !cat.name.toLowerCase().includes(search)) return false;
+      return true;
+    });
+
+    // Category pill
+    const pill = document.createElement('button');
+    pill.className = 'apix-filter-btn';
+    pill.style.cssText = `border-color:${cat.color}20;color:${cat.color};padding:5px 12px;font-size:11px;`;
+    pill.textContent = `${cat.emoji} ${cat.name} (${filtered.length})`;
+    pill.onclick = () => {
+      const el = document.getElementById('apix-sec-' + cat.id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    pills.appendChild(pill);
+
+    if (filtered.length === 0) return;
+    totalVisible += filtered.length;
+
+    const sec = document.createElement('div');
+    sec.className = 'apix-section';
+    sec.id = 'apix-sec-' + cat.id;
+
+    sec.innerHTML = `
+      <div class="apix-section-header" onclick="apixToggleSection('${cat.id}')">
+        <span style="font-size:18px;">${cat.emoji}</span>
+        <span class="apix-section-title" style="color:${cat.color}">${cat.name}</span>
+        <span class="apix-section-count">${filtered.length} endpoints</span>
+        <span class="apix-section-toggle" id="apix-tog-${cat.id}">▼</span>
+      </div>
+      <div class="apix-grid" id="apix-grid-${cat.id}"></div>
+    `;
+
+    const grid = sec.querySelector('.apix-grid');
+    filtered.forEach(ep => {
+      const card = document.createElement('div');
+      card.className = 'apix-card';
+      const highlight = search && (ep.path.toLowerCase().includes(search) || ep.desc.toLowerCase().includes(search));
+      if (highlight) card.style.borderColor = '#63B3ED';
+
+      card.innerHTML = `
+        <div class="apix-cat-stripe" style="background:${cat.color}"></div>
+        <div class="apix-card-top">
+          <span class="apix-method-badge apix-method-${ep.method}">${ep.method}</span>
+          <span class="apix-card-path">${ep.path}</span>
+        </div>
+        <div class="apix-card-desc">${ep.desc}</div>
+        <div class="apix-card-actions">
+          <button class="apix-act-btn run"  onclick="event.stopPropagation();apixOpenModal(${JSON.stringify(ep).replace(/"/g,'&quot;')}, '${cat.name}', '${cat.color}');apixFetch()">▶ Fetch</button>
+          <button class="apix-act-btn copy" onclick="event.stopPropagation();apixQuickCopy('${ep.path}')">⧉ Copy URL</button>
+          <button class="apix-act-btn dl"   onclick="event.stopPropagation();apixOpenModal(${JSON.stringify(ep).replace(/"/g,'&quot;')}, '${cat.name}', '${cat.color}');apixDownload()">⬇ Download</button>
+          <button class="apix-act-btn"      onclick="event.stopPropagation();apixOpenModal(${JSON.stringify(ep).replace(/"/g,'&quot;')}, '${cat.name}', '${cat.color}')">🔍 Detail</button>
+        </div>
+      `;
+      card.addEventListener('click', () => apixOpenModal(ep, cat.name, cat.color));
+      grid.appendChild(card);
+    });
+
+    sections.appendChild(sec);
+  });
+
+  const noRes = document.getElementById('apix-no-results');
+  if (noRes) noRes.style.display = totalVisible === 0 ? 'block' : 'none';
+
+  const vc = document.getElementById('apix-visible-count');
+  if (vc) vc.textContent = totalVisible;
+}
+
+function apixToggleSection(catId) {
+  const grid = document.getElementById('apix-grid-' + catId);
+  const tog  = document.getElementById('apix-tog-' + catId);
+  if (!grid) return;
+  const hidden = grid.style.display === 'none';
+  grid.style.display = hidden ? 'grid' : 'none';
+  if (tog) tog.textContent = hidden ? '▼' : '▶';
+}
+
+function apixFilter() { apixRender(); }
+
+function apixSetMethod(m) {
+  _apixMethod = m;
+  ['all','GET','POST'].forEach(x => {
+    const btn = document.getElementById('apix-f-' + x);
+    if (btn) btn.classList.toggle('active', x === m);
+  });
+  apixRender();
+}
+
+function apixClearSearch() {
+  const el = document.getElementById('apix-search');
+  if (el) el.value = '';
+  _apixMethod = 'all';
+  ['all','GET','POST'].forEach(x => {
+    const btn = document.getElementById('apix-f-' + x);
+    if (btn) btn.classList.toggle('active', x === 'all');
+  });
+  apixRender();
+}
+
+// ── Modal ────────────────────────────────────────────────────────────────────
+function apixOpenModal(ep, catName, catColor) {
+  _apixCurrentEndpoint = ep;
+  const base = window.location.origin;
+  const fullUrl = base + ep.path;
+
+  document.getElementById('apix-modal-cat').textContent   = catName;
+  document.getElementById('apix-modal-title').textContent = ep.path;
+  document.getElementById('apix-modal-url').textContent   = fullUrl;
+  const mb = document.getElementById('apix-modal-method-badge');
+  mb.textContent  = ep.method;
+  mb.className    = 'apix-method-badge apix-method-' + ep.method;
+  document.getElementById('apix-modal-desc').textContent  = ep.desc;
+  document.getElementById('apix-status-row').style.display  = 'none';
+  document.getElementById('apix-response-box').style.display = 'none';
+  document.getElementById('apix-modal').classList.add('open');
+}
+
+function apixCloseModal(e) {
+  if (e && e.target !== document.getElementById('apix-modal')) return;
+  if (!e) document.getElementById('apix-modal').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('apix-modal')?.classList.remove('open'); });
+
+async function apixFetch() {
+  if (!_apixCurrentEndpoint) return;
+  if (_apixCurrentEndpoint.method === 'POST') {
+    apixShowResponse('⚠ POST endpoints seedhe fetch nahi ho sakte. Inhe form data ke saath call karna padega.\n\nURL: ' + window.location.origin + _apixCurrentEndpoint.path, 'error');
+    return;
+  }
+  const box = document.getElementById('apix-response-box');
+  const statusRow = document.getElementById('apix-status-row');
+  box.className = 'apix-response-box loading';
+  box.textContent = '⏳ Fetch ho raha hai...';
+  box.style.display = 'block';
+  statusRow.style.display = 'none';
+
+  const url = window.location.origin + _apixCurrentEndpoint.path;
+  const t0  = Date.now();
+  try {
+    const res  = await fetch(url);
+    const ms   = Date.now() - t0;
+    const text = await res.text();
+    let pretty = text;
+    try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch(e) { /* leave as-is */ }
+
+    const badge = document.getElementById('apix-status-badge');
+    badge.textContent  = res.status + ' ' + res.statusText;
+    badge.className    = 'apix-status-badge ' + (res.ok ? 'apix-status-200' : 'apix-status-err');
+    document.getElementById('apix-timing').textContent = ms + ' ms';
+    statusRow.style.display = 'flex';
+
+    box.className   = 'apix-response-box' + (res.ok ? '' : ' error');
+    box.textContent = pretty;
+  } catch(err) {
+    const ms = Date.now() - t0;
+    document.getElementById('apix-timing').textContent = ms + ' ms';
+    statusRow.style.display = 'flex';
+    const badge = document.getElementById('apix-status-badge');
+    badge.textContent = 'Network Error'; badge.className = 'apix-status-badge apix-status-err';
+    box.className   = 'apix-response-box error';
+    box.textContent = '❌ ' + err.message;
+  }
+}
+
+function apixShowResponse(text, type) {
+  const box = document.getElementById('apix-response-box');
+  box.className = 'apix-response-box' + (type === 'error' ? ' error' : '');
+  box.textContent = text;
+  box.style.display = 'block';
+}
+
+function apixOpenTab() {
+  if (!_apixCurrentEndpoint) return;
+  window.open(window.location.origin + _apixCurrentEndpoint.path, '_blank');
+}
+
+function apixCopyUrl() {
+  if (!_apixCurrentEndpoint) return;
+  const url = window.location.origin + _apixCurrentEndpoint.path;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.apix-mbt.copy');
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 1500); }
+  });
+}
+
+function apixQuickCopy(path) {
+  const url = window.location.origin + path;
+  navigator.clipboard.writeText(url).then(() => {
+    const notice = document.createElement('div');
+    notice.textContent = '✓ URL Copied!';
+    notice.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#276749;color:#fff;padding:10px 18px;border-radius:10px;font-weight:700;z-index:99999;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+    document.body.appendChild(notice);
+    setTimeout(() => notice.remove(), 1800);
+  });
+}
+
+function apixCopyResponse() {
+  const box = document.getElementById('apix-response-box');
+  if (!box) return;
+  navigator.clipboard.writeText(box.textContent);
+}
+
+async function apixDownload() {
+  if (!_apixCurrentEndpoint) return;
+  const ep  = _apixCurrentEndpoint;
+  const url = window.location.origin + ep.path;
+
+  if (ep.method === 'POST') {
+    alert('POST endpoints ke liye direct download nahi ho sakta.');
+    return;
+  }
+
+  try {
+    const res  = await fetch(url);
+    const text = await res.text();
+    let content = text;
+    try { content = JSON.stringify(JSON.parse(text), null, 2); } catch(e) {}
+    const filename = ep.path.replace(/\//g, '_').replace(/^_/, '') + '_' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.json';
+    const blob = new Blob([content], { type: 'application/json' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  } catch(err) {
+    alert('Download failed: ' + err.message);
+  }
+}
+
+function apixSaveEndpoint() {
+  if (!_apixCurrentEndpoint) return;
+  const path = _apixCurrentEndpoint.path;
+  if (!_apixSaved.includes(path)) {
+    _apixSaved.push(path);
+    localStorage.setItem('apix_saved', JSON.stringify(_apixSaved));
+    apixRenderSaved();
+    const btn = document.querySelector('.apix-mbt:last-child');
+    if (btn && btn.textContent.includes('Save')) { btn.textContent = '⭐ Saved!'; setTimeout(() => btn.textContent = '⭐ Save', 1500); }
+  }
+}
+
+function apixRenderSaved() {
+  const panel = document.getElementById('apix-saved-panel');
+  const list  = document.getElementById('apix-saved-list');
+  const count = document.getElementById('apix-saved-count');
+  if (!panel || !list) return;
+
+  if (count) count.textContent = _apixSaved.length;
+  panel.style.display = _apixSaved.length > 0 ? 'block' : 'none';
+  list.innerHTML = '';
+
+  _apixSaved.forEach((path, idx) => {
+    const ep = APIX_CATEGORIES.flatMap(c => c.endpoints).find(e => e.path === path);
+    const chip = document.createElement('div');
+    chip.className = 'apix-saved-chip';
+    chip.innerHTML = `
+      ${ep ? '<span class="apix-method-badge apix-method-' + ep.method + '">' + ep.method + '</span>' : ''}
+      <span onclick="apixOpenFromSaved('${path}')">${path}</span>
+      <span class="apix-saved-del" onclick="apixUnsave(${idx})">✕</span>
+    `;
+    list.appendChild(chip);
+  });
+}
+
+function apixOpenFromSaved(path) {
+  const ep = APIX_CATEGORIES.flatMap(c => c.endpoints).find(e => e.path === path);
+  const cat = APIX_CATEGORIES.find(c => c.endpoints.some(e => e.path === path));
+  if (ep && cat) apixOpenModal(ep, cat.name, cat.color);
+}
+
+function apixUnsave(idx) {
+  _apixSaved.splice(idx, 1);
+  localStorage.setItem('apix_saved', JSON.stringify(_apixSaved));
+  apixRenderSaved();
+  const count = document.getElementById('apix-saved-count');
+  if (count) count.textContent = _apixSaved.length;
+}
+
+// Init when tab is activated
+function initApiExplorer() {
+  apixRender();
+  apixRenderSaved();
+  // Update total count
+  const total = APIX_CATEGORIES.reduce((s, c) => s + c.endpoints.length, 0);
+  const tc = document.getElementById('apix-total-count');
+  if (tc) tc.textContent = total;
+  const vc = document.getElementById('apix-visible-count');
+  if (vc) vc.textContent = total;
+}
+</script>
+</div><!-- /tab-apiexplorer -->
+
 <script>
 // ── PRP Chain tab ─────────────────────────────────────────────────────────────
 
@@ -2860,7 +3773,7 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['etcc','overview','dbo','combat','report','perf','lio','institutional','prp'].forEach(t => {
+  ['etcc','overview','dbo','combat','report','perf','lio','institutional','prp','apiexplorer'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
@@ -2871,6 +3784,9 @@ function switchTab(name) {
   }
   if (name === 'prp') {
     loadPRP();
+  }
+  if (name === 'apiexplorer') {
+    initApiExplorer();
   }
   if (name === 'dbo') {
     initGrowthChart();
