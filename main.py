@@ -5455,6 +5455,9 @@ async def recovery_cycle_audit():
     avg_win_run     = round(sum(win_runs)  / len(win_runs),  1) if win_runs  else 0.0
 
     fix_a_verdict = (
+        f"APPLIED — BREAKEVEN_TRIGGER_R is now {cfg.BREAKEVEN_TRIGGER_R}R (was 1.5R). "
+        f"{pct_unprotected}% of wins still close below 1.5R; monitor for win-rate improvement."
+        if cfg.BREAKEVEN_TRIGGER_R < 1.5 else
         "SUPPORTED — majority of wins have no BE protection; lowering trigger to 1.0R is justified"
         if pct_unprotected > 50 else
         "WEAK — most wins already reach 1.5R; fix may have limited impact"
@@ -5509,6 +5512,9 @@ async def recovery_cycle_audit():
             "pnl_from_unprotected_wins": round(at_risk_pnl, 4),
             "fix_a_verdict": fix_a_verdict,
             "fix_a_recommendation": (
+                f"Fix already applied — BREAKEVEN_TRIGGER_R={cfg.BREAKEVEN_TRIGGER_R}R. "
+                "Monitor: watch win_0.5_to_1.0r bucket and peak_r data across next 200+ trades."
+                if cfg.BREAKEVEN_TRIGGER_R < 1.5 else
                 "Lower BREAKEVEN_TRIGGER_R from 1.5 to 1.0 in config.py"
                 if pct_unprotected > 50 else
                 "Hold — current 1.5R trigger may be appropriate"
@@ -5591,6 +5597,11 @@ async def recovery_cycle_audit():
                 "WEAK — data does not strongly support the proposed cycle"
             ),
             "recommended_next_action": (
+                f"Fix A APPLIED (BREAKEVEN_TRIGGER_R={cfg.BREAKEVEN_TRIGGER_R}R). "
+                "Fix B APPLIED (recovery boost suppressed). "
+                "Monitor peak_r data — need 300+ peak_r trades before Fix C evaluation. "
+                "Fix C (recovery trade causality) on hold."
+                if cfg.BREAKEVEN_TRIGGER_R < 1.5 else
                 "Fix A (BREAKEVEN_TRIGGER_R 1.5→1.0) is data-justified. "
                 "Fix B and C require deeper investigation — share this report."
             ),
