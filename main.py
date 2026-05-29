@@ -1495,7 +1495,15 @@ async def on_tick(tick: Tick):
                 _ctx_amp = alpha_context_memory.get_amplification(
                     regime=regime.value, utc_hour=_utc_hr_ec, strategy=strategy_type,
                 )
-                _prp002_size_mult = _ctx_amp["boost_mult"] if _ctx_amp["boost_mult"] > 0 else 1.0
+                # Fix B (FTD-BOOST-SUPPRESS): forensic audit showed context-boosted trades
+                # during recovery cycles avg -0.20 PnL vs -0.12 for normal trades.
+                # Suppress upward boost (>1.0) when a recovery cycle is active; reductions
+                # (<1.0) still pass through — they are protective, not harmful.
+                _raw_mult = _ctx_amp["boost_mult"] if _ctx_amp["boost_mult"] > 0 else 1.0
+                if exploration_recovery_governor.is_active and _raw_mult > 1.0:
+                    _prp002_size_mult = 1.0
+                else:
+                    _prp002_size_mult = _raw_mult
             _thought(f"🔔 Signal {sig.signal.value} {sym} | {sig.reason}", "SIGNAL")
             logger.info(
                 f"[SCAN] Signal generated: {sig.signal.value} {sym} "
