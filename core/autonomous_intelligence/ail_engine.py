@@ -57,17 +57,18 @@ class AILEngine:
 
     # ── Core analysis pipeline ────────────────────────────────────────────────
 
-    def _analyze_snapshots(self, snapshots: dict[str, Any]) -> dict:
-        """Called by scheduler (in thread). Returns summary dict."""
+    async def _analyze_snapshots(self, snapshots: dict[str, Any]) -> dict:
+        """
+        Async analysis pipeline — called directly from scheduler (not via to_thread).
+        Must be async so storage awaits work on the event loop.
+        """
         self._last_collection_ts = time.time()
         self._collection_count  += 1
 
-        # Archive all snapshots
+        # Archive all snapshots (non-blocking)
         for label, data in snapshots.items():
             try:
-                asyncio.get_event_loop().run_until_complete(
-                    archive_store.archive(label, data)
-                )
+                await archive_store.archive(label, data)
             except Exception:
                 pass
 
@@ -79,10 +80,10 @@ class AILEngine:
             if len(self._win_rate_history) > 20:
                 self._win_rate_history = self._win_rate_history[-20:]
 
-        # Run rules
+        # Run rules (synchronous CPU work — fast enough to not need threading)
         rule_hits = analyze(snapshots, self._win_rate_history)
 
-        # Generate findings
+        # Generate findings and persist each one
         findings = generate_findings(rule_hits)
         new_count = 0
         for f in findings:
@@ -94,7 +95,7 @@ class AILEngine:
             d = f.to_dict()
             d["evidence_score"] = ev_score
             try:
-                asyncio.get_event_loop().run_until_complete(findings_store.save_finding(d))
+                await findings_store.save_finding(d)
                 new_count += 1
             except Exception as exc:
                 logger.warning(f"[AIL] Failed to save finding: {exc}")
