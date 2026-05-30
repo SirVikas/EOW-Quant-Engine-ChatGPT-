@@ -5919,7 +5919,7 @@ async def promotion_failure_audit():
       Gate 3 — R:     avg_r_multiple ≥ GENOME_MIN_AVG_R
       Gate 4 — Overfit: train_pf / oos_pf ≤ GENOME_OVERFITTING_MAX_RATIO
     """
-    state     = genome.get_state()
+    state     = genome.export_state()
     promo_log = state.get("promotion_log", [])
 
     rejected  = [p for p in promo_log if p.get("decision") == "REJECTED"]
