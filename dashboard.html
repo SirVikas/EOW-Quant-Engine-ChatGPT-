@@ -3320,6 +3320,19 @@ function initApiExplorer() {
   <div style="display:flex;gap:8px;">
     <button class="btn blue" onclick="ailForceCollect()" style="font-size:12px;padding:5px 12px;">⚡ Force Collect</button>
     <button class="btn" onclick="loadAILStatus();loadAILFindings();" style="font-size:12px;padding:5px 12px;">🔄 Refresh</button>
+    <button class="btn" onclick="ailExportForAI()" style="font-size:12px;padding:5px 12px;background:#2D3748;color:#A0AEC0;">📋 Export for AI</button>
+  </div>
+</div>
+
+<!-- AI Export Modal -->
+<div id="ail-export-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#1A202C;border:1px solid #2D3748;border-radius:10px;padding:20px;max-width:700px;width:95%;max-height:80vh;display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <strong style="font-size:13px;">📋 AIL Export — paste this to Claude for analysis</strong>
+      <button onclick="document.getElementById('ail-export-modal').style.display='none'" style="background:none;border:none;color:#A0AEC0;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <textarea id="ail-export-text" style="flex:1;min-height:300px;background:#0D1117;color:#A0AEC0;border:1px solid #2D3748;border-radius:6px;padding:10px;font-family:monospace;font-size:11px;resize:vertical;" readonly></textarea>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('ail-export-text').value).then(()=>alert('Copied!'))" style="margin-top:10px;padding:8px 16px;background:#2B6CB0;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">📋 Copy to Clipboard</button>
   </div>
 </div>
 
@@ -3474,6 +3487,48 @@ async function loadAILHistory() {
       <span style="float:right;color:var(--muted);">${new Date(h.ts).toLocaleString()}</span>
     </div>`).join('');
   } catch(e) {}
+}
+
+async function ailExportForAI() {
+  try {
+    const [statusR, findingsR, historyR] = await Promise.all([
+      fetch('/api/autonomous-intelligence/status').then(r=>r.json()),
+      fetch('/api/autonomous-intelligence/findings').then(r=>r.json()),
+      fetch('/api/autonomous-intelligence/history?limit=10').then(r=>r.json()),
+    ]);
+    const findings = findingsR.findings || [];
+    const history  = historyR.history || [];
+    const status   = statusR;
+
+    const lines = [
+      `=== AIL MONITOR EXPORT === ${new Date().toLocaleString()}`,
+      `Status: ${status.enabled ? 'ACTIVE' : 'DISABLED'}`,
+      `Collections: ${status.collection_count || 0}`,
+      `Last Collect: ${status.last_collection_ts ? new Date(status.last_collection_ts*1000).toLocaleString() : 'Never'}`,
+      `Findings by status: PENDING=${status.findings_by_status?.PENDING||0} APPROVED=${status.findings_by_status?.APPROVED||0} REJECTED=${status.findings_by_status?.REJECTED||0}`,
+      `Findings by severity: CRITICAL=${status.findings_by_severity?.CRITICAL||0} HIGH=${status.findings_by_severity?.HIGH||0} MEDIUM=${status.findings_by_severity?.MEDIUM||0} LOW=${status.findings_by_severity?.LOW||0} INFO=${status.findings_by_severity?.INFO||0}`,
+      ``,
+      `=== FINDINGS (${findings.length}) ===`,
+    ];
+    findings.forEach((f,i) => {
+      lines.push(`[${i+1}] ${f.severity} | ${f.rule} | status=${f.status}`);
+      lines.push(`    title: ${f.title}`);
+      lines.push(`    sample=${f.sample_size} confidence=${(f.confidence_score*100).toFixed(0)}% evidence_score=${f.evidence_score}/100`);
+      lines.push(`    recommendation: ${f.recommendation}`);
+      lines.push(`    evidence: ${JSON.stringify(f.evidence?.[0]||{})}`);
+      lines.push(`    id: ${f.lineage_id}`);
+      lines.push(``);
+    });
+    lines.push(`=== RECENT APPROVAL HISTORY (last ${history.length}) ===`);
+    history.forEach(h => {
+      lines.push(`  ${h.action} ${h.lineage_id?.slice(0,40)}... ${h.ts}`);
+    });
+
+    document.getElementById('ail-export-text').value = lines.join('\n');
+    document.getElementById('ail-export-modal').style.display = 'flex';
+  } catch(e) {
+    alert('Export failed: ' + e.message);
+  }
 }
 </script>
 </div><!-- /tab-ailmonitor -->
