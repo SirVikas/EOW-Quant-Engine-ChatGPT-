@@ -53,6 +53,7 @@ class AILEngine:
         )
         self._scheduler.start()
         logger.info("[AIL] Autonomous Intelligence Layer booted | FTD-AIL-001")
+        logger.info("[AIL] AIL Diagnostic Expansion Loaded | FTD-PHOENIX-AIL-INVESTIGATION-001 | Deliverables: train_gate_matrix, oos_diagnostics, sentinel_report, quality_distribution, DATA_SUFFICIENCY_FAILURE rule")
 
     async def shutdown(self) -> None:
         if self._scheduler:
