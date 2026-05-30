@@ -3491,14 +3491,16 @@ async function loadAILHistory() {
 
 async function ailExportForAI() {
   try {
-    const [statusR, findingsR, historyR] = await Promise.all([
+    const [statusR, findingsR, historyR, promoAuditR] = await Promise.all([
       fetch('/api/autonomous-intelligence/status').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/findings').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/history?limit=10').then(r=>r.json()),
+      fetch('/api/forensics/promotion-failure-audit').then(r=>r.json()).catch(()=>null),
     ]);
     const findings = findingsR.findings || [];
     const history  = historyR.history || [];
     const status   = statusR;
+    const pa       = promoAuditR;
 
     const lines = [
       `=== AIL MONITOR EXPORT === ${new Date().toLocaleString()}`,
@@ -3508,15 +3510,59 @@ async function ailExportForAI() {
       `Findings by status: PENDING=${status.findings_by_status?.PENDING||0} APPROVED=${status.findings_by_status?.APPROVED||0} REJECTED=${status.findings_by_status?.REJECTED||0}`,
       `Findings by severity: CRITICAL=${status.findings_by_severity?.CRITICAL||0} HIGH=${status.findings_by_severity?.HIGH||0} MEDIUM=${status.findings_by_severity?.MEDIUM||0} LOW=${status.findings_by_severity?.LOW||0} INFO=${status.findings_by_severity?.INFO||0}`,
       ``,
-      `=== FINDINGS (${findings.length}) ===`,
+      `=== PROMOTION FAILURE AUDIT ===`,
     ];
-    findings.forEach((f,i) => {
+    if (pa && !pa.detail) {
+      const s = pa.summary || {};
+      lines.push(`Total decisions: ${s.total_decisions}  Rejected: ${s.total_rejected}  Promoted: ${s.total_promoted}  Promotion rate: ${s.promotion_rate_pct}%`);
+      lines.push(`Verdict: ${pa.verdict}`);
+      lines.push(`Verdict detail: ${pa.verdict_detail}`);
+      lines.push(`Thresholds: Gate1 WR≥${pa.thresholds?.Gate1_win_rate_pct}%  PF≥${pa.thresholds?.Gate1_profit_factor}  trades≥${pa.thresholds?.Gate1_min_trades}  Gate2 OOS_PF≥${pa.thresholds?.Gate2_oos_pf}  Gate3 avgR≥${pa.thresholds?.Gate3_avg_r_multiple}  Gate4 overfit≤${pa.thresholds?.Gate4_overfit_max_ratio}`);
+      const gf = pa.gate_failure_breakdown || {};
+      lines.push(`Gate failure breakdown:`);
+      lines.push(`  train_gate: ${gf.train_gate_failures?.count} (${gf.train_gate_failures?.pct_of_rejected}% of rejected)`);
+      lines.push(`  oos_gate:   ${gf.oos_gate_failures?.count} (${gf.oos_gate_failures?.pct_of_rejected}% of rejected)`);
+      lines.push(`  r_gate:     ${gf.r_gate_failures?.count} (${gf.r_gate_failures?.pct_of_rejected}% of rejected)`);
+      lines.push(`  overfit:    ${gf.overfit_failures?.count} (${gf.overfit_failures?.pct_of_rejected}% of rejected)`);
+      lines.push(`  multi_gate: ${gf.multi_gate_failures?.count} (${gf.multi_gate_failures?.pct_of_rejected}% of rejected)`);
+      const m = pa.rejected_candidate_metrics || {};
+      lines.push(`Rejected candidate metrics (avg | pct_below_threshold):`);
+      lines.push(`  train_PF: avg=${m.train_pf?.avg}  pct_below_threshold=${m.train_pf?.pct_below_threshold}%`);
+      lines.push(`  oos_PF:   avg=${m.oos_pf?.avg}    pct_below_threshold=${m.oos_pf?.pct_below_threshold}%`);
+      lines.push(`  avg_R:    avg=${m.avg_r?.avg}      pct_below_threshold=${m.avg_r?.pct_below_threshold}%`);
+      lines.push(`  overfit_ratio: avg=${m.overfit_ratio?.avg}  pct_above_threshold=${m.overfit_ratio?.pct_above_threshold}%`);
+      const bs = pa.by_strategy || {};
+      lines.push(`By strategy:`);
+      Object.entries(bs).forEach(([strat, sd]) => {
+        const blockers = (sd.primary_blockers||[]).map(b=>`${b.gate}(${b.count})`).join(', ') || '—';
+        lines.push(`  ${strat}: rejected=${sd.rejected} promoted=${sd.promoted} primary_blockers=[${blockers}] avg_train_pf=${sd.avg_train_pf} avg_r=${sd.avg_r}`);
+      });
+      if (pa.recent_rejections?.length) {
+        lines.push(`Recent rejections (last ${Math.min(5,pa.recent_rejections.length)}):`);
+        pa.recent_rejections.slice(-5).forEach(r => {
+          lines.push(`  ${r.strategy} train_pf=${r.train_pf} oos_pf=${r.oos_pf} avg_r=${r.avg_r} | ${r.reason}`);
+        });
+      }
+    } else {
+      lines.push(`  (not available or engine not reachable)`);
+    }
+
+    lines.push(``);
+    lines.push(`=== FINDINGS (${findings.length}) ===`);
+    // Deduplicate findings display — show only most recent per rule
+    const seenRules = {};
+    const uniqueFindings = findings.filter(f => {
+      if (seenRules[f.rule]) return false;
+      seenRules[f.rule] = true;
+      return true;
+    });
+    lines.push(`(showing ${uniqueFindings.length} unique rules; ${findings.length - uniqueFindings.length} older duplicates hidden)`);
+    uniqueFindings.forEach((f,i) => {
       lines.push(`[${i+1}] ${f.severity} | ${f.rule} | status=${f.status}`);
       lines.push(`    title: ${f.title}`);
       lines.push(`    sample=${f.sample_size} confidence=${(f.confidence_score*100).toFixed(0)}% evidence_score=${f.evidence_score}/100`);
       lines.push(`    recommendation: ${f.recommendation}`);
       lines.push(`    evidence: ${JSON.stringify(f.evidence?.[0]||{})}`);
-      lines.push(`    id: ${f.lineage_id}`);
       lines.push(``);
     });
     lines.push(`=== RECENT APPROVAL HISTORY (last ${history.length}) ===`);
