@@ -5972,21 +5972,21 @@ async def promotion_failure_audit():
         if ar:
             avg_rs.append(ar)
         if pf > 0 and oos > 0:
-            overfit_ratios.append(pf / oos)
+            overfit_ratios.append(_safe_num(pf / oos))
 
     def _pct(n): return round(n / len(rejected) * 100, 1) if rejected else 0.0
-    def _avg(lst): return round(sum(lst) / len(lst), 3) if lst else 0.0
+    def _avg(lst): return _safe_num(round(sum(_safe_num(x) for x in lst) / len(lst), 3)) if lst else 0.0
     def _med(lst):
         if not lst: return 0.0
-        s = sorted(lst)
+        s = sorted(_safe_num(x) for x in lst)
         m = len(s) // 2
-        return round(s[m], 3)
+        return _safe_num(round(s[m], 3))
     def _pct_below(lst, thresh):
         if not lst: return 0.0
-        return round(sum(1 for x in lst if x < thresh) / len(lst) * 100, 1)
+        return round(sum(1 for x in lst if _safe_num(x) < thresh) / len(lst) * 100, 1)
     def _pct_above(lst, thresh):
         if not lst: return 0.0
-        return round(sum(1 for x in lst if x > thresh) / len(lst) * 100, 1)
+        return round(sum(1 for x in lst if _safe_num(x) > thresh) / len(lst) * 100, 1)
 
     # ── Per-strategy breakdown ────────────────────────────────────────────────
     by_strategy: dict = {}
@@ -6096,10 +6096,10 @@ async def promotion_failure_audit():
                 "ts":          p.get("ts"),
                 "strategy":    p.get("strategy_type"),
                 "reason":      p.get("reason"),
-                "train_pf":    round(p.get("train_pf", 0), 3),
-                "oos_pf":      round(p.get("oos_pf", 0), 3),
-                "avg_r":       round(p.get("avg_r_multiple", 0), 3),
-                "cost_drag":   round(p.get("cost_drag_pct", 0), 1),
+                "train_pf":    _safe_num(round(_safe_num(p.get("train_pf", 0)), 3)),
+                "oos_pf":      _safe_num(round(_safe_num(p.get("oos_pf", 0)), 3)),
+                "avg_r":       _safe_num(round(_safe_num(p.get("avg_r_multiple", 0)), 3)),
+                "cost_drag":   _safe_num(round(_safe_num(p.get("cost_drag_pct", 0)), 1)),
             }
             for p in rejected[-20:]
         ],
