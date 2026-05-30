@@ -3495,7 +3495,7 @@ async function ailExportForAI() {
       fetch('/api/autonomous-intelligence/status').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/findings').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/history?limit=10').then(r=>r.json()),
-      fetch('/api/forensics/promotion-failure-audit').then(r=>r.json()).catch(()=>null),
+      fetch('/api/forensics/promotion-failure-audit').then(r=>r.json()).catch(e=>({_fetch_error: String(e)})),
     ]);
     const findings = findingsR.findings || [];
     const history  = historyR.history || [];
@@ -3512,7 +3512,17 @@ async function ailExportForAI() {
       ``,
       `=== PROMOTION FAILURE AUDIT ===`,
     ];
-    if (pa && !pa.detail) {
+    if (pa?._fetch_error) {
+      lines.push(`  (fetch error: ${pa._fetch_error})`);
+    } else if (pa?.detail) {
+      lines.push(`  (endpoint error: ${pa.detail})`);
+    } else if (pa?.verdict === 'INSUFFICIENT_DATA') {
+      lines.push(`  Verdict: INSUFFICIENT_DATA`);
+      lines.push(`  Detail: ${pa.verdict_detail}`);
+      lines.push(`  Total decisions in current session: ${pa.summary?.total_decisions || 0}`);
+      lines.push(`  Note: promotion_log is in-memory and resets on engine restart.`);
+      lines.push(`  Wait for genome engine to complete evolution cycles, then re-export.`);
+    } else if (pa) {
       const s = pa.summary || {};
       lines.push(`Total decisions: ${s.total_decisions}  Rejected: ${s.total_rejected}  Promoted: ${s.total_promoted}  Promotion rate: ${s.promotion_rate_pct}%`);
       lines.push(`Verdict: ${pa.verdict}`);
@@ -3544,7 +3554,7 @@ async function ailExportForAI() {
         });
       }
     } else {
-      lines.push(`  (not available or engine not reachable)`);
+      lines.push(`  (response was null — unexpected)`);
     }
 
     lines.push(``);
