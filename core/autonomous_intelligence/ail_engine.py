@@ -42,6 +42,10 @@ class AILEngine:
             return
         self._booted  = True
         self._boot_ts = time.time()
+        # Restore last_collection_ts from DB so dashboard shows correct time after restart
+        persisted_ts = await findings_store.latest_collection_ts()
+        if persisted_ts:
+            self._last_collection_ts = persisted_ts
         self._scheduler = AILScheduler(
             collect_fn=collect_all,
             analyze_fn=self._analyze_snapshots,
@@ -83,10 +87,19 @@ class AILEngine:
         # Run rules (synchronous CPU work — fast enough to not need threading)
         rule_hits = analyze(snapshots, self._win_rate_history)
 
-        # Generate findings and persist each one
+        # Generate findings and persist each one — skip duplicates
         findings = generate_findings(rule_hits)
         new_count = 0
+        skipped_count = 0
         for f in findings:
+            # Deduplication: if an active (PENDING/APPROVED) finding for this rule
+            # already exists, do not create a duplicate across collection cycles.
+            try:
+                if await findings_store.active_finding_exists_for_rule(f.rule):
+                    skipped_count += 1
+                    continue
+            except Exception:
+                pass
             f = enrich_recommendation(f)
             draft = maybe_draft_ftd(f)
             if draft:
@@ -102,9 +115,10 @@ class AILEngine:
 
         logger.info(
             f"[AIL] Cycle #{self._collection_count} | "
-            f"snapshots={len(snapshots)} rules_fired={len(rule_hits)} new_findings={new_count}"
+            f"snapshots={len(snapshots)} rules_fired={len(rule_hits)} "
+            f"new_findings={new_count} skipped_duplicates={skipped_count}"
         )
-        return {"new_findings": new_count, "rules_fired": len(rule_hits)}
+        return {"new_findings": new_count, "rules_fired": len(rule_hits), "skipped_duplicates": skipped_count}
 
     # ── Public API ────────────────────────────────────────────────────────────
 
