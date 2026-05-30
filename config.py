@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.41.0"
+APP_VERSION = "1.42.0"
 
 
 class EngineConfig(BaseSettings):
@@ -108,6 +108,8 @@ class EngineConfig(BaseSettings):
     GENOME_OOS_MIN_PF: float = 1.0             # OOS profit-factor floor
     GENOME_OVERFITTING_MAX_RATIO: float = 2.5  # Relaxed 2.0→2.5: avoid over-penalising good fits
     GENOME_MIN_AVG_R: float = 0.50             # raised 0.20→0.50: only promote DNA with meaningful avg R
+    # FTD-PHOENIX-GENOME-READINESS-001: minimum candles per symbol before evaluation is allowed
+    GENOME_MIN_CANDLES_TO_EVALUATE: int = 50   # must have ≥ warmup_bars candles to run any meaningful backtest
 
     # ── Self-Healing ─────────────────────────────────────────────────────────
     HEAL_INTERVAL_SECONDS: int = 45       # Reduced 60→45: faster ping accumulation for Network score

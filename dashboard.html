@@ -3491,12 +3491,13 @@ async function loadAILHistory() {
 
 async function ailExportForAI() {
   try {
-    const [statusR, findingsR, historyR, promoAuditR, versionR] = await Promise.all([
+    const [statusR, findingsR, historyR, promoAuditR, versionR, genomeR] = await Promise.all([
       fetch('/api/autonomous-intelligence/status').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/findings').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/history?limit=10').then(r=>r.json()),
       fetch('/api/forensics/promotion-failure-audit').then(r=>r.json()).catch(e=>({_fetch_error: String(e)})),
       fetch('/api/version').then(r=>r.json()).catch(()=>({version:'unknown'})),
+      fetch('/api/genome').then(r=>r.json()).catch(()=>null),
     ]);
     const findings = findingsR.findings || [];
     const history  = historyR.history || [];
@@ -3606,6 +3607,18 @@ async function ailExportForAI() {
       }
     } else {
       lines.push(`  (response was null — unexpected)`);
+    }
+
+    // GENOME READINESS REPORT
+    lines.push(``);
+    lines.push(`=== GENOME READINESS REPORT ===`);
+    const gr = genomeR?.readiness_report;
+    if (!gr) {
+      lines.push(`  (not available — genome state endpoint unreachable)`);
+    } else {
+      lines.push(`Status: ${gr.ready ? 'READY' : 'NOT_READY'}  seed_source=${gr.seed_source}  seed_count=${gr.seed_count}`);
+      lines.push(`Symbols in store: ${gr.symbols_in_store}  max_candles=${gr.max_candles}  avg_candles=${gr.avg_candles}  min_candles=${gr.min_candles}  min_required=${gr.min_required}`);
+      lines.push(`Evaluation attempts: ${gr.eval_attempts}  skips=${gr.eval_skips}  sufficient=${gr.eval_with_sufficient}  insufficient=${gr.eval_with_insufficient}`);
     }
 
     lines.push(``);

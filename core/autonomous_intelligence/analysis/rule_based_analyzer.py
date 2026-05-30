@@ -214,15 +214,21 @@ def _data_sufficiency_failure(snapshots: dict, hits: list) -> None:
     have train_trades below the minimum evaluation threshold (5 trades).
     This indicates genome candidates are being evaluated on insufficient data,
     not that strategy edge is absent.
+
+    FTD-PHOENIX-GENOME-READINESS-001 D5: Rule is intentionally decoupled from
+    the collector's verdict string — collector uses total<20 for INSUFFICIENT_DATA
+    but this rule fires at total_rejected>=10 to catch problems earlier.
     """
     audit = snapshots.get("Promotion Failure Audit", {})
-    if audit.get("verdict") == "INSUFFICIENT_DATA" or "error" in audit:
+    if "error" in audit:
         return
-    oos_diag = audit.get("oos_diagnostics", {})
-    trade_dist = audit.get("candidate_quality_distribution", {}).get("trade_count_distribution", {})
+    # Do NOT skip on INSUFFICIENT_DATA verdict — that suppressed the finding when
+    # total=15 (which is meaningful evidence). Only skip if no data at all.
     total_rejected = audit.get("summary", {}).get("total_rejected", 0)
     if total_rejected < 10:
         return
+    oos_diag = audit.get("oos_diagnostics", {})
+    trade_dist = audit.get("candidate_quality_distribution", {}).get("trade_count_distribution", {})
     zero_t = trade_dist.get("zero_trades", {}).get("count", 0)
     low_t  = trade_dist.get("1_to_4",     {}).get("count", 0)
     insufficient = zero_t + low_t
