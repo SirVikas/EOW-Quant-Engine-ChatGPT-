@@ -3,6 +3,7 @@ ENDPOINTS = [
   {"path": "/api/forensics/breakeven-impact-audit",  "interval_min": 120, "label": "Breakeven Impact Audit"},
   {"path": "/api/forensics/genome-exposure-audit",   "interval_min": 120, "label": "Genome Exposure Audit"},
   {"path": "/api/forensics/promotion-watch",         "interval_min": 30,  "label": "Promotion Watch"},
+  {"path": "/api/forensics/promotion-failure-audit", "interval_min": 60,  "label": "Promotion Failure Audit"},
   {"path": "/api/alpha-confirmation/orchestration",  "interval_min": 60,  "label": "Alpha Confirmation"},
   {"path": "/api/equilibrium/orchestration",         "interval_min": 60,  "label": "Equilibrium"},
   {"path": "/api/continuity/orchestration",          "interval_min": 120, "label": "Continuity"},
