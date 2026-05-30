@@ -6300,6 +6300,23 @@ async def ail_needs_evidence(finding_id: str, reason: str = ""):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/api/autonomous-intelligence/finding/{finding_id}/supersede")
+async def ail_supersede(finding_id: str, reason: str = ""):
+    """AIL — supersede a stale APPROVED/PENDING finding (governance hygiene).
+    Removes the finding from the active dedup set so AIL can generate a fresh
+    finding from current data. Original finding is preserved in history.
+    """
+    from core.autonomous_intelligence.ail_engine import ail_engine
+    try:
+        return await ail_engine.supersede_finding(finding_id, reason)
+    except KeyError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @app.get("/api/autonomous-intelligence/history")
 async def ail_history(limit: int = 100):
     """AIL — immutable approval/rejection history timeline."""

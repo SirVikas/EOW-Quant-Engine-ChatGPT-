@@ -125,7 +125,7 @@ class AILEngine:
 
     async def get_status(self) -> dict:
         findings = await findings_store.list_findings()
-        counts = {"PENDING": 0, "APPROVED": 0, "REJECTED": 0, "NEEDS_MORE_EVIDENCE": 0}
+        counts = {"PENDING": 0, "APPROVED": 0, "REJECTED": 0, "NEEDS_MORE_EVIDENCE": 0, "SUPERSEDED": 0}
         severity_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "INFO": 0}
         for f in findings:
             counts[f.get("status", "PENDING")] = counts.get(f.get("status", "PENDING"), 0) + 1
@@ -178,6 +178,27 @@ class AILEngine:
         apply_decision(f, "NEEDS_MORE_EVIDENCE", reason)
         await findings_store.update_status(lineage_id, "NEEDS_MORE_EVIDENCE")
         await history_store.record(lineage_id, "NEEDS_MORE_EVIDENCE", reason)
+        return f
+
+    async def supersede_finding(self, lineage_id: str, reason: str = "") -> dict:
+        """Mark an APPROVED finding as SUPERSEDED — governance hygiene action.
+        Removes it from the active dedup set so AIL can generate a fresh finding
+        from current data. The original finding is preserved in history.
+        """
+        f = await findings_store.get_finding(lineage_id)
+        if not f:
+            raise KeyError(f"Finding {lineage_id} not found")
+        if f.get("status") not in ("APPROVED", "PENDING"):
+            raise ValueError(f"Only APPROVED or PENDING findings can be superseded (current: {f.get('status')})")
+        now = datetime.now(timezone.utc).isoformat()
+        await findings_store.update_status(
+            lineage_id, "SUPERSEDED",
+            rejected_at=now,
+            rejection_reason=reason or "Superseded by governance — stale evidence, new data available",
+        )
+        await history_store.record(lineage_id, "SUPERSEDED", reason or "governance_cleanup")
+        logger.info(f"[AIL] Finding SUPERSEDED: {lineage_id} | {reason or 'governance_cleanup'}")
+        f["status"] = "SUPERSEDED"
         return f
 
     async def get_history(self, limit: int = 100) -> list[dict]:
