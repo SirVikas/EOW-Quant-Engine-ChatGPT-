@@ -5904,6 +5904,213 @@ async def promotion_watch():
     }
 
 
+@app.get("/api/forensics/promotion-failure-audit")
+async def promotion_failure_audit():
+    """
+    Promotion Failure Audit — answers WHY genomes are not being promoted.
+
+    Parses the full promotion_log and breaks down every REJECTED decision
+    by which gate(s) caused the failure. Shows actual metric distributions
+    vs the required thresholds so the gap is quantified, not just identified.
+
+    Gate structure (ALL must pass for promotion):
+      Gate 1 — Train: win_rate ≥ GENOME_PROMOTE_WIN_RATE, PF ≥ GENOME_PROMOTE_PF, trades ≥ 5
+      Gate 2 — OOS:   oos_pf ≥ GENOME_OOS_MIN_PF (when OOS data available)
+      Gate 3 — R:     avg_r_multiple ≥ GENOME_MIN_AVG_R
+      Gate 4 — Overfit: train_pf / oos_pf ≤ GENOME_OVERFITTING_MAX_RATIO
+    """
+    state     = genome.get_state()
+    promo_log = state.get("promotion_log", [])
+
+    rejected  = [p for p in promo_log if p.get("decision") == "REJECTED"]
+    promoted  = [p for p in promo_log if p.get("decision") == "PROMOTED"]
+    total     = len(rejected) + len(promoted)
+
+    # ── Gate failure counters ─────────────────────────────────────────────────
+    gate_fails = {
+        "train_gate":  0,  # win_rate / PF / trades below threshold
+        "oos_gate":    0,  # oos_pf below floor
+        "r_gate":      0,  # avg_r_multiple below min
+        "overfit":     0,  # train_pf / oos_pf ratio too high
+        "multi_gate":  0,  # failed 2+ gates simultaneously
+    }
+    # track how many failed each specific count
+    gate_fail_counts: list[int] = []
+
+    # ── Metric distributions for rejected candidates ──────────────────────────
+    train_pfs:   list[float] = []
+    oos_pfs:     list[float] = []
+    avg_rs:      list[float] = []
+    overfit_ratios: list[float] = []
+
+    for p in rejected:
+        reason = p.get("reason", "")
+        gates_hit = 0
+        if "train_gate" in reason:
+            gate_fails["train_gate"] += 1
+            gates_hit += 1
+        if "oos_gate" in reason:
+            gate_fails["oos_gate"] += 1
+            gates_hit += 1
+        if "r_gate" in reason:
+            gate_fails["r_gate"] += 1
+            gates_hit += 1
+        if "overfit" in reason:
+            gate_fails["overfit"] += 1
+            gates_hit += 1
+        if gates_hit >= 2:
+            gate_fails["multi_gate"] += 1
+        gate_fail_counts.append(gates_hit)
+
+        pf = p.get("train_pf", 0)
+        oos = p.get("oos_pf", 0)
+        ar  = p.get("avg_r_multiple", 0)
+        if pf:
+            train_pfs.append(pf)
+        if oos:
+            oos_pfs.append(oos)
+        if ar:
+            avg_rs.append(ar)
+        if pf > 0 and oos > 0:
+            overfit_ratios.append(pf / oos)
+
+    def _pct(n): return round(n / len(rejected) * 100, 1) if rejected else 0.0
+    def _avg(lst): return round(sum(lst) / len(lst), 3) if lst else 0.0
+    def _med(lst):
+        if not lst: return 0.0
+        s = sorted(lst)
+        m = len(s) // 2
+        return round(s[m], 3)
+    def _pct_below(lst, thresh):
+        if not lst: return 0.0
+        return round(sum(1 for x in lst if x < thresh) / len(lst) * 100, 1)
+    def _pct_above(lst, thresh):
+        if not lst: return 0.0
+        return round(sum(1 for x in lst if x > thresh) / len(lst) * 100, 1)
+
+    # ── Per-strategy breakdown ────────────────────────────────────────────────
+    by_strategy: dict = {}
+    for stype in ["TrendFollowing", "MeanReversion", "VolatilityExpansion"]:
+        sr = [p for p in rejected if p.get("strategy_type") == stype]
+        sp = [p for p in promoted if p.get("strategy_type") == stype]
+        if not sr:
+            by_strategy[stype] = {"rejected": 0, "promoted": len(sp), "primary_blockers": []}
+            continue
+        # Find primary blocker (most common gate failure for this strategy)
+        sg_fails = {"train_gate": 0, "oos_gate": 0, "r_gate": 0, "overfit": 0}
+        for p in sr:
+            r = p.get("reason", "")
+            for g in sg_fails:
+                if g in r:
+                    sg_fails[g] += 1
+        primary = sorted(sg_fails.items(), key=lambda x: -x[1])
+        sr_pfs = [p["train_pf"] for p in sr if p.get("train_pf", 0) > 0]
+        sr_oos = [p["oos_pf"]   for p in sr if p.get("oos_pf",   0) > 0]
+        sr_r   = [p["avg_r_multiple"] for p in sr if p.get("avg_r_multiple", 0) > 0]
+        by_strategy[stype] = {
+            "rejected": len(sr),
+            "promoted": len(sp),
+            "primary_blockers": [{"gate": g, "count": c} for g, c in primary if c > 0],
+            "avg_train_pf": _avg(sr_pfs),
+            "avg_oos_pf":   _avg(sr_oos),
+            "avg_r":        _avg(sr_r),
+            "pct_below_train_pf_threshold": _pct_below(sr_pfs, cfg.GENOME_PROMOTE_PF),
+            "pct_below_r_threshold":        _pct_below(sr_r,  cfg.GENOME_MIN_AVG_R),
+        }
+
+    # ── Verdict ───────────────────────────────────────────────────────────────
+    if not rejected:
+        verdict = "INSUFFICIENT_DATA"
+        verdict_detail = "No rejection events recorded yet — genome engine may be in early warmup."
+    else:
+        top_gate = max(gate_fails, key=gate_fails.get) if any(gate_fails.values()) else None
+        top_count = gate_fails.get(top_gate, 0)
+        top_pct = _pct(top_count)
+
+        # Determine if gates are protecting correctly or are structurally impossible
+        # Impossible = >90% of rejections fail the same gate AND avg metric is far from threshold
+        if top_gate == "r_gate" and _avg(avg_rs) < cfg.GENOME_MIN_AVG_R * 0.5:
+            verdict = "GATE_MAY_BE_STRUCTURALLY_IMPOSSIBLE"
+            verdict_detail = (
+                f"{top_pct}% of rejections fail {top_gate}. "
+                f"Avg avg_R={_avg(avg_rs):.3f} vs threshold {cfg.GENOME_MIN_AVG_R} — "
+                f"candidates are achieving less than 50% of required R. "
+                f"Investigate whether market conditions support this R threshold."
+            )
+        elif top_gate == "train_gate" and _avg(train_pfs) < cfg.GENOME_PROMOTE_PF * 0.7:
+            verdict = "GATE_MAY_BE_STRUCTURALLY_IMPOSSIBLE"
+            verdict_detail = (
+                f"{top_pct}% of rejections fail {top_gate}. "
+                f"Avg train_PF={_avg(train_pfs):.3f} vs threshold {cfg.GENOME_PROMOTE_PF} — "
+                f"candidates are well below required PF. "
+                f"May indicate strategy edge is insufficient in current regime."
+            )
+        elif top_pct > 60:
+            verdict = "SINGLE_GATE_DOMINATES"
+            verdict_detail = (
+                f"{top_pct}% of all rejections blocked by {top_gate}. "
+                f"This gate is the primary bottleneck. Review whether threshold is calibrated correctly."
+            )
+        else:
+            verdict = "MULTI_GATE_FAILURE"
+            verdict_detail = (
+                f"No single gate dominates (highest={top_pct}% on {top_gate}). "
+                f"Candidates are failing multiple gates — likely a fundamental edge problem "
+                f"rather than a threshold calibration issue."
+            )
+
+    return {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "summary": {
+            "total_decisions":  total,
+            "total_rejected":   len(rejected),
+            "total_promoted":   len(promoted),
+            "promotion_rate_pct": round(len(promoted) / total * 100, 2) if total else 0.0,
+        },
+        "thresholds": {
+            "Gate1_win_rate_pct":      cfg.GENOME_PROMOTE_WIN_RATE * 100,
+            "Gate1_profit_factor":     cfg.GENOME_PROMOTE_PF,
+            "Gate1_min_trades":        5,
+            "Gate2_oos_pf":            cfg.GENOME_OOS_MIN_PF,
+            "Gate3_avg_r_multiple":    cfg.GENOME_MIN_AVG_R,
+            "Gate4_overfit_max_ratio": cfg.GENOME_OVERFITTING_MAX_RATIO,
+        },
+        "gate_failure_breakdown": {
+            "train_gate_failures": {"count": gate_fails["train_gate"], "pct_of_rejected": _pct(gate_fails["train_gate"])},
+            "oos_gate_failures":   {"count": gate_fails["oos_gate"],   "pct_of_rejected": _pct(gate_fails["oos_gate"])},
+            "r_gate_failures":     {"count": gate_fails["r_gate"],     "pct_of_rejected": _pct(gate_fails["r_gate"])},
+            "overfit_failures":    {"count": gate_fails["overfit"],    "pct_of_rejected": _pct(gate_fails["overfit"])},
+            "multi_gate_failures": {"count": gate_fails["multi_gate"], "pct_of_rejected": _pct(gate_fails["multi_gate"])},
+        },
+        "rejected_candidate_metrics": {
+            "train_pf":   {"avg": _avg(train_pfs), "median": _med(train_pfs), "pct_below_threshold": _pct_below(train_pfs, cfg.GENOME_PROMOTE_PF)},
+            "oos_pf":     {"avg": _avg(oos_pfs),   "median": _med(oos_pfs),   "pct_below_threshold": _pct_below(oos_pfs,   cfg.GENOME_OOS_MIN_PF)},
+            "avg_r":      {"avg": _avg(avg_rs),    "median": _med(avg_rs),    "pct_below_threshold": _pct_below(avg_rs,    cfg.GENOME_MIN_AVG_R)},
+            "overfit_ratio": {"avg": _avg(overfit_ratios), "median": _med(overfit_ratios), "pct_above_threshold": _pct_above(overfit_ratios, cfg.GENOME_OVERFITTING_MAX_RATIO)},
+        },
+        "by_strategy": by_strategy,
+        "verdict": verdict,
+        "verdict_detail": verdict_detail,
+        "recent_rejections": [
+            {
+                "ts":          p.get("ts"),
+                "strategy":    p.get("strategy_type"),
+                "reason":      p.get("reason"),
+                "train_pf":    round(p.get("train_pf", 0), 3),
+                "oos_pf":      round(p.get("oos_pf", 0), 3),
+                "avg_r":       round(p.get("avg_r_multiple", 0), 3),
+                "cost_drag":   round(p.get("cost_drag_pct", 0), 1),
+            }
+            for p in rejected[-20:]
+        ],
+        "interpretation": {
+            "A_gates_protecting_correctly": "All gates failing at reasonable rates — system is working as designed. No threshold change needed.",
+            "B_structurally_impossible":    "One or more gates rejecting >90% of candidates with metrics far below threshold — threshold may need review after further data accumulation.",
+            "current_verdict":             verdict,
+        },
+    }
+
+
 # ── FTD-AIL-001: Autonomous Intelligence Layer API ────────────────────────────
 
 @app.get("/api/autonomous-intelligence/status")

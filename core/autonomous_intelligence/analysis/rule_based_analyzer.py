@@ -22,6 +22,7 @@ def analyze(snapshots: dict[str, Any], win_rate_history: list[float] | None = No
     _no_promotions(snapshots, hits)
     _recovery_boost_harmful(snapshots, hits)
     _peak_r_insufficient(snapshots, hits)
+    _promotion_gate_impossible(snapshots, hits)
     return hits
 
 
@@ -204,3 +205,37 @@ def _peak_r_insufficient(snapshots: dict, hits: list) -> None:
             ),
             "source_reports": ["Performance Status"],
         })
+
+
+def _promotion_gate_impossible(snapshots: dict, hits: list) -> None:
+    """
+    PROMOTION_GATE_IMPOSSIBLE: fires when promotion_failure_audit verdict indicates
+    a gate is structurally blocking every candidate, not just the unlucky ones.
+    Requires Promotion Failure Audit snapshot to be present.
+    """
+    audit = snapshots.get("Promotion Failure Audit", {})
+    verdict = audit.get("verdict", "")
+    if verdict != "GATE_MAY_BE_STRUCTURALLY_IMPOSSIBLE":
+        return
+    metrics = audit.get("rejected_candidate_metrics", {})
+    gate_breakdown = audit.get("gate_failure_breakdown", {})
+    total_rejected = audit.get("summary", {}).get("total_rejected", 0)
+    if total_rejected < 20:  # need meaningful sample before flagging
+        return
+    hits.append({
+        "rule": "PROMOTION_GATE_IMPOSSIBLE",
+        "category": "GENOME",
+        "severity": "HIGH",
+        "title": f"Genome promotion gate may be structurally impossible — {total_rejected} rejections, 0 promotions",
+        "evidence": [{"verdict": verdict, "gate_breakdown": gate_breakdown, "metrics": metrics}],
+        "confidence_score": 0.80,
+        "sample_size": total_rejected,
+        "economic_impact_est": "HIGH",
+        "risk_level": "HIGH",
+        "recommendation": (
+            f"{audit.get('verdict_detail', '')} "
+            "Human review required: determine whether threshold calibration is justified "
+            "for current market conditions before any change."
+        ),
+        "source_reports": ["Promotion Failure Audit"],
+    })
