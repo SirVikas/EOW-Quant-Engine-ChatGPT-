@@ -168,6 +168,13 @@ class GenomeEngine:
         self._started_at_ms = int(time.time() * 1000)
         self._last_no_candle_warning_ms = 0
         self._trade_close_count = 0   # 50-trade evolution trigger counter
+        # FTD-PHOENIX-GENOME-READINESS-001: evaluation readiness tracking
+        self._eval_attempts   = 0    # total _evolution_cycle() calls attempted
+        self._eval_skips      = 0    # cycles skipped due to insufficient candles
+        self._eval_sufficient = 0    # cycles that had sufficient candles
+        self._eval_insufficient = 0  # cycles that ran but had <GENOME_MIN_CANDLES_TO_EVALUATE
+        self._seed_source: str = "none"           # "data_lake" | "market_data" | "none"
+        self._seed_count:  int = 0                # symbols successfully seeded at startup
         self._backtester = DeterministicBacktestEngine(
             fill=FillModelConfig(
                 taker_fee=cfg.TAKER_FEE,
@@ -226,6 +233,53 @@ class GenomeEngine:
                 f"(avg {sum(len(v) for v in self._candle_store.values()) // max(1, seeded)} bars/symbol)."
             )
 
+    def seed_from_data_lake(self, data_lake) -> dict:
+        """
+        FTD-PHOENIX-GENOME-READINESS-001: Persistent startup seeding.
+
+        Seeds candle_store from the SQLite data_lake which survives restart.
+        Called once at startup before any evolution cycle fires.
+        Returns a dict of {symbol: candle_count} for boot visibility report.
+        """
+        symbols = data_lake.get_symbols("1m")
+        seeded: dict = {}
+        for sym in symbols:
+            candles = data_lake.get_candles(sym, "1m", limit=1440)
+            if len(candles) >= 10:
+                self._candle_store[sym] = candles
+                seeded[sym] = len(candles)
+        if seeded:
+            total_candles = sum(seeded.values())
+            avg_candles   = total_candles // len(seeded)
+            self._seed_source = "data_lake"
+            self._seed_count  = len(seeded)
+            logger.info(
+                f"[GENOME] GENOME STARTUP READINESS — Seeded {len(seeded)} symbols from data_lake "
+                f"(avg {avg_candles} bars/symbol, max {max(seeded.values())} bars)"
+            )
+        else:
+            logger.warning("[GENOME] GENOME STARTUP READINESS — data_lake has no candle history; "
+                           "candle store will fill from live stream.")
+        self._log_readiness_status()
+        return seeded
+
+    def _log_readiness_status(self) -> None:
+        """D6 — Boot-time readiness status log."""
+        if not self._candle_store:
+            logger.info("[GENOME] GENOME STARTUP STATUS: NOT_READY — no candles loaded")
+            return
+        max_c = max(len(c) for c in self._candle_store.values())
+        avg_c = sum(len(c) for c in self._candle_store.values()) // len(self._candle_store)
+        ready = max_c >= cfg.GENOME_MIN_CANDLES_TO_EVALUATE
+        status = "READY" if ready else "NOT_READY"
+        logger.info(
+            f"[GENOME] GENOME STARTUP STATUS: {status} | "
+            f"symbols={len(self._candle_store)} | "
+            f"max_candles={max_c} | avg_candles={avg_c} | "
+            f"seed_source={self._seed_source} | "
+            f"min_required={cfg.GENOME_MIN_CANDLES_TO_EVALUATE}"
+        )
+
     # ── Main Loop ─────────────────────────────────────────────────────────────
 
     async def start(self):
@@ -261,6 +315,7 @@ class GenomeEngine:
     async def _evolution_cycle(self):
         logger.info("[GENOME] Starting evolution cycle…")
         async with self._lock:
+            self._eval_attempts += 1
             symbols = list(self._candle_store.keys())
             if not symbols:
                 now_ms = int(time.time() * 1000)
@@ -269,9 +324,25 @@ class GenomeEngine:
                 past_grace = (now_ms - self._started_at_ms) >= grace_ms
                 can_warn = (now_ms - self._last_no_candle_warning_ms) >= grace_ms
                 if past_grace and can_warn:
-                    logger.warning("[GENOME] No candle data yet — skipping cycle.")
+                    logger.warning("[GENOME] GENOME_WAITING_FOR_HISTORY — no candle data yet, skipping cycle.")
                     self._last_no_candle_warning_ms = now_ms
+                self._eval_skips += 1
+                self._eval_insufficient += 1
                 return
+
+            # FTD-PHOENIX-GENOME-READINESS-001: D2 Readiness Guard
+            max_candles = max(len(c) for c in self._candle_store.values())
+            if max_candles < cfg.GENOME_MIN_CANDLES_TO_EVALUATE:
+                self._eval_skips += 1
+                self._eval_insufficient += 1
+                logger.info(
+                    f"[GENOME] GENOME_SKIPPED_INSUFFICIENT_DATA — "
+                    f"max_candles={max_candles} < min_required={cfg.GENOME_MIN_CANDLES_TO_EVALUATE} "
+                    f"(attempt #{self._eval_attempts})"
+                )
+                return
+            self._eval_sufficient += 1
+            logger.info(f"[GENOME] GENOME_READY — max_candles={max_candles} symbols={len(symbols)}")
 
             # Sample up to 5 symbols and bucket them by recent market regime.
             sample = random.sample(symbols, min(5, len(symbols)))
@@ -672,17 +743,31 @@ class GenomeEngine:
     # ── State Export ──────────────────────────────────────────────────────────
 
     def export_state(self) -> dict:
+        candle_counts = {sym: len(c) for sym, c in self._candle_store.items()}
+        candle_vals   = list(candle_counts.values())
         return {
             "active_dna":      self.active_dna,
             "per_regime_dna":  self.per_regime_dna,
             "active_metrics":  {k: asdict(v) for k, v in self.active_metrics.items()},
             "recent_genomes":  [asdict(g) for g in self.generation_log[-50:]],
             "promotion_log":   [asdict(p) for p in self.promotion_log[-50:]],
-            # Number of evaluated genomes — used by deployability_index() to determine
-            # whether the genome has run at least one evolution cycle (+10 pts RR Edge).
             "generation":      len(self.generation_log),
-            # Per-symbol candle counts in the in-memory store (diagnostics).
-            "candle_counts":   {sym: len(c) for sym, c in self._candle_store.items()},
+            "candle_counts":   candle_counts,
+            # FTD-PHOENIX-GENOME-READINESS-001: D3 Readiness Report
+            "readiness_report": {
+                "eval_attempts":          self._eval_attempts,
+                "eval_skips":             self._eval_skips,
+                "eval_with_sufficient":   self._eval_sufficient,
+                "eval_with_insufficient": self._eval_insufficient,
+                "symbols_in_store":       len(self._candle_store),
+                "avg_candles":            (sum(candle_vals) // len(candle_vals)) if candle_vals else 0,
+                "max_candles":            max(candle_vals) if candle_vals else 0,
+                "min_candles":            min(candle_vals) if candle_vals else 0,
+                "min_required":           cfg.GENOME_MIN_CANDLES_TO_EVALUATE,
+                "seed_source":            self._seed_source,
+                "seed_count":             self._seed_count,
+                "ready":                  (max(candle_vals) >= cfg.GENOME_MIN_CANDLES_TO_EVALUATE) if candle_vals else False,
+            },
         }
 
 

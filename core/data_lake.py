@@ -106,6 +106,15 @@ class DataLake:
         rows = cur.fetchall()
         return [dict(r) for r in reversed(rows)]
 
+    def get_symbols(self, interval: str = "1m") -> List[str]:
+        """Return all distinct symbols that have candle data in the lake."""
+        if not self._conn:
+            return []
+        cur = self._conn.execute(
+            "SELECT DISTINCT symbol FROM candles WHERE interval=?", (interval,)
+        )
+        return [r[0] for r in cur.fetchall()]
+
     def get_trades(self, symbol: str = "", limit: int = 500) -> List[dict]:
         if not self._conn:
             return []

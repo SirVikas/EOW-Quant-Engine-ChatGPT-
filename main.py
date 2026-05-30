@@ -2574,15 +2574,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     _thought(f"🕐 [SESSION_ROUTER] Timezone Authority=UTC | {_sess_log}", "SYSTEM")
     logger.info(f"[SESSION_ROUTER] Timezone=UTC | {_sess_log} | source=datetime.utcnow().hour")
 
-    # ── Pre-seed genome candle store after bootstrap completes ────────────────
+    # ── Pre-seed genome candle store ──────────────────────────────────────────
+    # FTD-PHOENIX-GENOME-READINESS-001: D1 Persistent Seeding
+    # Step 1: seed from data_lake first (SQLite — survives restart, up to 1440 bars/symbol)
+    # Step 2: seed from mdp bootstrap buffers (in-memory — supplements live candles)
+    logger.info("[GENOME] GENOME READINESS MODULE LOADED | FTD-PHOENIX-GENOME-READINESS-001")
+    _lake_seeded = genome.seed_from_data_lake(data_lake)
+    logger.info(
+        f"[GENOME] data_lake seed complete — "
+        f"{len(_lake_seeded)} symbols | "
+        f"counts: { {s: n for s, n in _lake_seeded.items()} if _lake_seeded else 'none'}"
+    )
+
     async def _seed_genome_from_bootstrap():
-        """Wait for mdp bootstrap to complete, then inject candles into genome."""
-        for _ in range(90):   # wait up to 90s for mdp._running to be True
+        """Wait for mdp bootstrap, then supplement genome with any additional candle history."""
+        for _ in range(90):
             if getattr(mdp, "_running", False):
                 genome.seed_from_market_data(mdp)
                 return
             await asyncio.sleep(1)
-        logger.warning("[GENOME] Bootstrap seed timeout — candle store will fill naturally from live stream.")
+        logger.warning("[GENOME] Bootstrap seed timeout — live stream will fill candle store.")
 
     tasks.append(asyncio.create_task(_seed_genome_from_bootstrap()))
 
