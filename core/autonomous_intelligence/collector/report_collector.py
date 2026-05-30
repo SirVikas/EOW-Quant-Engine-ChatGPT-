@@ -70,6 +70,46 @@ def collect_all() -> dict[str, Any]:
     except Exception as exc:
         snapshots["Promotion Watch"] = {"error": str(exc), "_ts": ts}
 
+    # ── Promotion Failure Audit ───────────────────────────────────────────────
+    try:
+        import main as _main  # type: ignore
+        g = getattr(_main, "genome", None)
+        if g is not None:
+            state = g.get_state()
+            promo_log = state.get("promotion_log", [])
+            rejected  = [p for p in promo_log if p.get("decision") == "REJECTED"]
+            promoted  = [p for p in promo_log if p.get("decision") == "PROMOTED"]
+            total     = len(rejected) + len(promoted)
+            gate_fails = {"train_gate": 0, "oos_gate": 0, "r_gate": 0, "overfit": 0}
+            train_pfs, oos_pfs, avg_rs = [], [], []
+            for p in rejected:
+                r = p.get("reason", "")
+                for g_name in gate_fails:
+                    if g_name in r:
+                        gate_fails[g_name] += 1
+                if p.get("train_pf", 0): train_pfs.append(p["train_pf"])
+                if p.get("oos_pf",   0): oos_pfs.append(p["oos_pf"])
+                if p.get("avg_r_multiple", 0): avg_rs.append(p["avg_r_multiple"])
+            def _avg(lst): return round(sum(lst)/len(lst), 3) if lst else 0.0
+            snapshots["Promotion Failure Audit"] = {
+                "summary": {"total_decisions": total, "total_rejected": len(rejected), "total_promoted": len(promoted)},
+                "gate_failure_breakdown": gate_fails,
+                "rejected_candidate_metrics": {
+                    "train_pf": {"avg": _avg(train_pfs)},
+                    "oos_pf":   {"avg": _avg(oos_pfs)},
+                    "avg_r":    {"avg": _avg(avg_rs)},
+                },
+                "verdict": "INSUFFICIENT_DATA" if total < 20 else (
+                    "GATE_MAY_BE_STRUCTURALLY_IMPOSSIBLE"
+                    if max(gate_fails.values()) > total * 0.9 else "MULTI_GATE_FAILURE"
+                ),
+                "_ts": ts,
+            }
+        else:
+            snapshots["Promotion Failure Audit"] = {"error": "genome not available", "_ts": ts}
+    except Exception as exc:
+        snapshots["Promotion Failure Audit"] = {"error": str(exc), "_ts": ts}
+
     # ── Alpha Confirmation ────────────────────────────────────────────────────
     try:
         from core.alpha_confirmation.alpha_confirmation_orchestrator import get_alpha_health  # type: ignore
