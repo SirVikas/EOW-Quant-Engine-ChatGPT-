@@ -127,6 +127,10 @@ class PromotionEvent:
     avg_r_multiple: float
     cost_drag_pct:  float
     dna:            dict
+    # Observability fields added for FTD-PHOENIX-AIL-INVESTIGATION-001
+    train_trades:   int = 0
+    oos_trades:     int = 0
+    win_rate:       float = 0.0
 
 
 # ── Genome Engine ─────────────────────────────────────────────────────────────
@@ -579,6 +583,9 @@ class GenomeEngine:
                 avg_r_multiple=candidate.avg_r_multiple,
                 cost_drag_pct=candidate.cost_drag_pct,
                 dna=copy.deepcopy(candidate.dna),
+                train_trades=candidate.trades,
+                oos_trades=candidate.oos_trades,
+                win_rate=candidate.win_rate,
             )
         )
         self.promotion_log = self.promotion_log[-500:]

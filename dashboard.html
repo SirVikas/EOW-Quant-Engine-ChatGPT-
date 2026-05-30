@@ -3544,6 +3544,54 @@ async function ailExportForAI() {
       lines.push(`  oos_PF:   avg=${m.oos_pf?.avg}    pct_below_threshold=${m.oos_pf?.pct_below_threshold}%`);
       lines.push(`  avg_R:    avg=${m.avg_r?.avg}      pct_below_threshold=${m.avg_r?.pct_below_threshold}%`);
       lines.push(`  overfit_ratio: avg=${m.overfit_ratio?.avg}  pct_above_threshold=${m.overfit_ratio?.pct_above_threshold}%`);
+      // DELIVERABLE 1: Train Gate Root Cause Matrix
+      const tg = pa.train_gate_root_cause_matrix || {};
+      if (Object.keys(tg).length) {
+        lines.push(`Train Gate Root Cause Matrix (of train_gate failures):`);
+        lines.push(`  PF only fails:    ${tg.pf_failures?.count} (${tg.pf_failures?.pct}%)`);
+        lines.push(`  WR only fails:    ${tg.wr_failures?.count} (${tg.wr_failures?.pct}%)`);
+        lines.push(`  Trades <5 fails:  ${tg.trade_count_failures?.count} (${tg.trade_count_failures?.pct}%)`);
+        lines.push(`  PF+WR combo:      ${tg.pf_and_wr?.count} (${tg.pf_and_wr?.pct}%)`);
+        lines.push(`  PF+Trades combo:  ${tg.pf_and_trades?.count} (${tg.pf_and_trades?.pct}%)`);
+        lines.push(`  WR+Trades combo:  ${tg.wr_and_trades?.count} (${tg.wr_and_trades?.pct}%)`);
+        lines.push(`  All 3 fail:       ${tg.all_three?.count} (${tg.all_three?.pct}%)`);
+      }
+      // DELIVERABLE 2: OOS Diagnostics
+      const od = pa.oos_diagnostics || {};
+      if (Object.keys(od).length) {
+        lines.push(`OOS Diagnostics:`);
+        lines.push(`  Candidates evaluated:   ${od.candidates_evaluated}`);
+        lines.push(`  OOS Trades = 0:         ${od.oos_trades_zero?.count} (${od.oos_trades_zero?.pct}%)`);
+        lines.push(`  OOS Trades 1-5:         ${od.oos_trades_1_to_5?.count} (${od.oos_trades_1_to_5?.pct}%)`);
+        lines.push(`  OOS Trades 6-20:        ${od.oos_trades_6_to_20?.count} (${od.oos_trades_6_to_20?.pct}%)`);
+        lines.push(`  OOS Trades >20:         ${od.oos_trades_above_20?.count} (${od.oos_trades_above_20?.pct}%)`);
+        lines.push(`  Avg OOS Trades:         ${od.avg_oos_trades}`);
+        lines.push(`  Avg OOS PF:             ${od.avg_oos_pf}`);
+        lines.push(`  Avg Train Trades:       ${od.avg_train_trades}`);
+        lines.push(`  Interpretation: ${od.interpretation}`);
+      }
+      // DELIVERABLE 3: Sentinel Value Report
+      const sv = pa.sentinel_value_report || {};
+      if (Object.keys(sv).length) {
+        lines.push(`Sentinel Value Report:`);
+        lines.push(`  PF=999 (sentinel):      ${sv.pf_sentinel_999_count?.count} (${sv.pf_sentinel_999_count?.pct}%)`);
+        lines.push(`  OOS_PF=0 (no OOS data): ${sv.oos_pf_zero_count?.count} (${sv.oos_pf_zero_count?.pct}%)`);
+        lines.push(`  overfit=999 (sentinel): ${sv.overfit_sentinel_999_count?.count} (${sv.overfit_sentinel_999_count?.pct}%)`);
+        lines.push(`  None substitutions:     ${sv.none_substitutions?.count} (${sv.none_substitutions?.pct}%)`);
+        lines.push(`  Zero-PF fallback:       ${sv.zero_pf_fallback_count?.count} (${sv.zero_pf_fallback_count?.pct}%)`);
+        lines.push(`  Interpretation: ${sv.interpretation}`);
+      }
+      // DELIVERABLE 4: Candidate Quality Distribution
+      const qd = pa.candidate_quality_distribution || {};
+      const ar = qd.avg_r_distribution || {};
+      const pfd = qd.train_pf_distribution || {};
+      const tcd = qd.trade_count_distribution || {};
+      if (Object.keys(qd).length) {
+        lines.push(`Candidate Quality Distribution:`);
+        lines.push(`  avg_R distribution: <0=${ar.below_zero?.pct}%  0-0.5=${ar.zero_to_0_5?.pct}%  0.5-1.0=${ar['0_5_to_1_0']?.pct}%  >1.0=${ar.above_1_0?.pct}%`);
+        lines.push(`  train_PF dist:      <1=${pfd.below_1_0?.pct}%  1-1.2=${pfd['1_0_to_1_2']?.pct}%  1.2-2=${pfd['1_2_to_2_0']?.pct}%  >2=${pfd.above_2_0?.pct}%`);
+        lines.push(`  train_trades dist:  T=0=${tcd.zero_trades?.pct}%  T=1-4=${tcd['1_to_4']?.pct}%  T=5-10=${tcd['5_to_10']?.pct}%  T>10=${tcd.above_10?.pct}%`);
+      }
       const bs = pa.by_strategy || {};
       lines.push(`By strategy:`);
       Object.entries(bs).forEach(([strat, sd]) => {
@@ -3553,7 +3601,7 @@ async function ailExportForAI() {
       if (pa.recent_rejections?.length) {
         lines.push(`Recent rejections (last ${Math.min(5,pa.recent_rejections.length)}):`);
         pa.recent_rejections.slice(-5).forEach(r => {
-          lines.push(`  ${r.strategy} train_pf=${r.train_pf} oos_pf=${r.oos_pf} avg_r=${r.avg_r} | ${r.reason}`);
+          lines.push(`  ${r.strategy} train_pf=${r.train_pf} oos_pf=${r.oos_pf} avg_r=${r.avg_r} T=${r.train_trades} WR=${r.win_rate}% | ${r.reason}`);
         });
       }
     } else {

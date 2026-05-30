@@ -6059,6 +6059,108 @@ async def promotion_failure_audit():
                 f"rather than a threshold calibration issue."
             )
 
+    # ── DELIVERABLE 1: Train Gate Root Cause Matrix ───────────────────────────
+    # Decompose train_gate failures into PF/WR/Trades individual and combo failures
+    _tg_min_trades = 5
+    tg_pf_fail = tg_wr_fail = tg_tr_fail = 0
+    tg_pf_wr = tg_pf_tr = tg_wr_tr = tg_all3 = 0
+    for p in rejected:
+        if "train_gate" not in p.get("reason", ""):
+            continue
+        pf_f  = _safe_num(p.get("train_pf", 0)) < cfg.GENOME_PROMOTE_PF
+        wr_f  = _safe_num(p.get("win_rate", 0)) < cfg.GENOME_PROMOTE_WIN_RATE * 100
+        tr_f  = p.get("train_trades", 0) < _tg_min_trades
+        combo = sum([pf_f, wr_f, tr_f])
+        if pf_f: tg_pf_fail += 1
+        if wr_f: tg_wr_fail += 1
+        if tr_f: tg_tr_fail += 1
+        if pf_f and wr_f and not tr_f: tg_pf_wr += 1
+        if pf_f and tr_f and not wr_f: tg_pf_tr += 1
+        if wr_f and tr_f and not pf_f: tg_wr_tr += 1
+        if combo == 3: tg_all3 += 1
+    tg_total = gate_fails["train_gate"] or 1  # avoid div/0
+    train_gate_breakdown = {
+        "pf_failures":          {"count": tg_pf_fail, "pct": round(tg_pf_fail / tg_total * 100, 1)},
+        "wr_failures":          {"count": tg_wr_fail, "pct": round(tg_wr_fail / tg_total * 100, 1)},
+        "trade_count_failures": {"count": tg_tr_fail, "pct": round(tg_tr_fail / tg_total * 100, 1)},
+        "pf_and_wr":            {"count": tg_pf_wr,   "pct": round(tg_pf_wr   / tg_total * 100, 1)},
+        "pf_and_trades":        {"count": tg_pf_tr,   "pct": round(tg_pf_tr   / tg_total * 100, 1)},
+        "wr_and_trades":        {"count": tg_wr_tr,   "pct": round(tg_wr_tr   / tg_total * 100, 1)},
+        "all_three":            {"count": tg_all3,    "pct": round(tg_all3    / tg_total * 100, 1)},
+    }
+
+    # ── DELIVERABLE 2: OOS Diagnostics ────────────────────────────────────────
+    oos_t_vals  = [p.get("oos_trades", 0) for p in rejected]
+    all_t_vals  = [p.get("train_trades", 0) for p in rejected]
+    oos_zero    = sum(1 for t in oos_t_vals if t == 0)
+    oos_1_5     = sum(1 for t in oos_t_vals if 1 <= t <= 5)
+    oos_6_20    = sum(1 for t in oos_t_vals if 6 <= t <= 20)
+    oos_gt20    = sum(1 for t in oos_t_vals if t > 20)
+    avg_oos_trades = _avg(oos_t_vals) if oos_t_vals else 0.0
+    avg_oos_pf     = _avg(oos_pfs)
+    avg_train_trades = _avg(all_t_vals) if all_t_vals else 0.0
+    oos_diagnostics = {
+        "candidates_evaluated":      len(rejected),
+        "oos_trades_zero":           {"count": oos_zero,  "pct": round(oos_zero  / len(rejected) * 100, 1) if rejected else 0.0},
+        "oos_trades_1_to_5":         {"count": oos_1_5,   "pct": round(oos_1_5   / len(rejected) * 100, 1) if rejected else 0.0},
+        "oos_trades_6_to_20":        {"count": oos_6_20,  "pct": round(oos_6_20  / len(rejected) * 100, 1) if rejected else 0.0},
+        "oos_trades_above_20":       {"count": oos_gt20,  "pct": round(oos_gt20  / len(rejected) * 100, 1) if rejected else 0.0},
+        "avg_oos_trades":            avg_oos_trades,
+        "avg_oos_pf":                avg_oos_pf,
+        "avg_train_trades":          avg_train_trades,
+        "interpretation": (
+            "OOS path is NOT producing data — candidates have insufficient candle history."
+            if oos_zero > len(rejected) * 0.8 else
+            "OOS path is producing some data — further accumulation needed for full analysis."
+        ),
+    }
+
+    # ── DELIVERABLE 3: Sentinel Value Report ──────────────────────────────────
+    _SENTINEL_PF      = 999.0
+    _SENTINEL_OVERFIT = 999.0
+    sentinel_pf_count      = sum(1 for p in rejected if _safe_num(p.get("train_pf", 0)) >= _SENTINEL_PF)
+    sentinel_oos_zero      = oos_zero
+    sentinel_overfit_count = sum(1 for p in rejected if "overfit(ratio=999" in p.get("reason", ""))
+    sentinel_none_sub      = sum(1 for p in rejected if p.get("train_pf") is None or p.get("oos_pf") is None)
+    sentinel_zero_pf_sub   = sum(1 for p in rejected if p.get("train_pf", -1) == 0)
+    sentinel_report = {
+        "pf_sentinel_999_count":        {"count": sentinel_pf_count,      "pct": round(sentinel_pf_count      / len(rejected) * 100, 1) if rejected else 0.0},
+        "oos_pf_zero_count":            {"count": sentinel_oos_zero,       "pct": round(sentinel_oos_zero      / len(rejected) * 100, 1) if rejected else 0.0},
+        "overfit_sentinel_999_count":   {"count": sentinel_overfit_count,  "pct": round(sentinel_overfit_count / len(rejected) * 100, 1) if rejected else 0.0},
+        "none_substitutions":           {"count": sentinel_none_sub,       "pct": round(sentinel_none_sub      / len(rejected) * 100, 1) if rejected else 0.0},
+        "zero_pf_fallback_count":       {"count": sentinel_zero_pf_sub,    "pct": round(sentinel_zero_pf_sub   / len(rejected) * 100, 1) if rejected else 0.0},
+        "interpretation": (
+            "HIGH sentinel prevalence — majority of candidates are placeholder-valued, "
+            "indicating data insufficiency rather than genuine strategy failure."
+            if (sentinel_pf_count + sentinel_oos_zero) > len(rejected) * 0.5 else
+            "Sentinel values within acceptable range — majority of candidates have real metric values."
+        ),
+    }
+
+    # ── DELIVERABLE 4: Candidate Quality Distribution ─────────────────────────
+    all_rs  = [_safe_num(p.get("avg_r_multiple", 0)) for p in rejected]
+    all_pfs = [_safe_num(p.get("train_pf", 0)) for p in rejected]
+    quality_distribution = {
+        "avg_r_distribution": {
+            "below_zero":    {"count": sum(1 for r in all_rs  if r < 0),                      "pct": round(sum(1 for r in all_rs  if r < 0)             / len(rejected) * 100, 1) if rejected else 0.0},
+            "zero_to_0_5":   {"count": sum(1 for r in all_rs  if 0 <= r < 0.5),               "pct": round(sum(1 for r in all_rs  if 0 <= r < 0.5)      / len(rejected) * 100, 1) if rejected else 0.0},
+            "0_5_to_1_0":    {"count": sum(1 for r in all_rs  if 0.5 <= r < 1.0),             "pct": round(sum(1 for r in all_rs  if 0.5 <= r < 1.0)    / len(rejected) * 100, 1) if rejected else 0.0},
+            "above_1_0":     {"count": sum(1 for r in all_rs  if r >= 1.0),                   "pct": round(sum(1 for r in all_rs  if r >= 1.0)          / len(rejected) * 100, 1) if rejected else 0.0},
+        },
+        "train_pf_distribution": {
+            "below_1_0":     {"count": sum(1 for p in all_pfs if p < 1.0),                    "pct": round(sum(1 for p in all_pfs if p < 1.0)           / len(rejected) * 100, 1) if rejected else 0.0},
+            "1_0_to_1_2":    {"count": sum(1 for p in all_pfs if 1.0 <= p < 1.2),             "pct": round(sum(1 for p in all_pfs if 1.0 <= p < 1.2)    / len(rejected) * 100, 1) if rejected else 0.0},
+            "1_2_to_2_0":    {"count": sum(1 for p in all_pfs if 1.2 <= p < 2.0),             "pct": round(sum(1 for p in all_pfs if 1.2 <= p < 2.0)    / len(rejected) * 100, 1) if rejected else 0.0},
+            "above_2_0":     {"count": sum(1 for p in all_pfs if p >= 2.0),                   "pct": round(sum(1 for p in all_pfs if p >= 2.0)          / len(rejected) * 100, 1) if rejected else 0.0},
+        },
+        "trade_count_distribution": {
+            "zero_trades":   {"count": sum(1 for p in rejected if p.get("train_trades", 0) == 0), "pct": round(sum(1 for p in rejected if p.get("train_trades", 0) == 0) / len(rejected) * 100, 1) if rejected else 0.0},
+            "1_to_4":        {"count": sum(1 for p in rejected if 1 <= p.get("train_trades", 0) <= 4), "pct": round(sum(1 for p in rejected if 1 <= p.get("train_trades", 0) <= 4) / len(rejected) * 100, 1) if rejected else 0.0},
+            "5_to_10":       {"count": sum(1 for p in rejected if 5 <= p.get("train_trades", 0) <= 10), "pct": round(sum(1 for p in rejected if 5 <= p.get("train_trades", 0) <= 10) / len(rejected) * 100, 1) if rejected else 0.0},
+            "above_10":      {"count": sum(1 for p in rejected if p.get("train_trades", 0) > 10), "pct": round(sum(1 for p in rejected if p.get("train_trades", 0) > 10) / len(rejected) * 100, 1) if rejected else 0.0},
+        },
+    }
+
     return {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "summary": {
@@ -6082,6 +6184,10 @@ async def promotion_failure_audit():
             "overfit_failures":    {"count": gate_fails["overfit"],    "pct_of_rejected": _pct(gate_fails["overfit"])},
             "multi_gate_failures": {"count": gate_fails["multi_gate"], "pct_of_rejected": _pct(gate_fails["multi_gate"])},
         },
+        "train_gate_root_cause_matrix": train_gate_breakdown,
+        "oos_diagnostics": oos_diagnostics,
+        "sentinel_value_report": sentinel_report,
+        "candidate_quality_distribution": quality_distribution,
         "rejected_candidate_metrics": {
             "train_pf":   {"avg": _avg(train_pfs), "median": _med(train_pfs), "pct_below_threshold": _pct_below(train_pfs, cfg.GENOME_PROMOTE_PF)},
             "oos_pf":     {"avg": _avg(oos_pfs),   "median": _med(oos_pfs),   "pct_below_threshold": _pct_below(oos_pfs,   cfg.GENOME_OOS_MIN_PF)},
@@ -6093,13 +6199,16 @@ async def promotion_failure_audit():
         "verdict_detail": verdict_detail,
         "recent_rejections": [
             {
-                "ts":          p.get("ts"),
-                "strategy":    p.get("strategy_type"),
-                "reason":      p.get("reason"),
-                "train_pf":    _safe_num(round(_safe_num(p.get("train_pf", 0)), 3)),
-                "oos_pf":      _safe_num(round(_safe_num(p.get("oos_pf", 0)), 3)),
-                "avg_r":       _safe_num(round(_safe_num(p.get("avg_r_multiple", 0)), 3)),
-                "cost_drag":   _safe_num(round(_safe_num(p.get("cost_drag_pct", 0)), 1)),
+                "ts":           p.get("ts"),
+                "strategy":     p.get("strategy_type"),
+                "reason":       p.get("reason"),
+                "train_pf":     _safe_num(round(_safe_num(p.get("train_pf", 0)), 3)),
+                "oos_pf":       _safe_num(round(_safe_num(p.get("oos_pf", 0)), 3)),
+                "avg_r":        _safe_num(round(_safe_num(p.get("avg_r_multiple", 0)), 3)),
+                "cost_drag":    _safe_num(round(_safe_num(p.get("cost_drag_pct", 0)), 1)),
+                "train_trades": p.get("train_trades", 0),
+                "oos_trades":   p.get("oos_trades", 0),
+                "win_rate":     _safe_num(round(_safe_num(p.get("win_rate", 0)), 1)),
             }
             for p in rejected[-20:]
         ],

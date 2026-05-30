@@ -75,13 +75,14 @@ def collect_all() -> dict[str, Any]:
         import main as _main  # type: ignore
         g = getattr(_main, "genome", None)
         if g is not None:
-            state = g.get_state()
+            state = g.export_state()
             promo_log = state.get("promotion_log", [])
             rejected  = [p for p in promo_log if p.get("decision") == "REJECTED"]
             promoted  = [p for p in promo_log if p.get("decision") == "PROMOTED"]
             total     = len(rejected) + len(promoted)
             gate_fails = {"train_gate": 0, "oos_gate": 0, "r_gate": 0, "overfit": 0}
             train_pfs, oos_pfs, avg_rs = [], [], []
+            oos_t_vals, train_t_vals = [], []
             for p in rejected:
                 r = p.get("reason", "")
                 for g_name in gate_fails:
@@ -90,7 +91,14 @@ def collect_all() -> dict[str, Any]:
                 if p.get("train_pf", 0): train_pfs.append(p["train_pf"])
                 if p.get("oos_pf",   0): oos_pfs.append(p["oos_pf"])
                 if p.get("avg_r_multiple", 0): avg_rs.append(p["avg_r_multiple"])
+                oos_t_vals.append(p.get("oos_trades", 0))
+                train_t_vals.append(p.get("train_trades", 0))
             def _avg(lst): return round(sum(lst)/len(lst), 3) if lst else 0.0
+            # Trade-count distribution for DATA_SUFFICIENCY_FAILURE rule
+            _n = len(rejected) or 1
+            oos_zero = sum(1 for t in oos_t_vals if t == 0)
+            tr_zero  = sum(1 for t in train_t_vals if t == 0)
+            tr_low   = sum(1 for t in train_t_vals if 1 <= t <= 4)
             snapshots["Promotion Failure Audit"] = {
                 "summary": {"total_decisions": total, "total_rejected": len(rejected), "total_promoted": len(promoted)},
                 "gate_failure_breakdown": gate_fails,
@@ -98,6 +106,17 @@ def collect_all() -> dict[str, Any]:
                     "train_pf": {"avg": _avg(train_pfs)},
                     "oos_pf":   {"avg": _avg(oos_pfs)},
                     "avg_r":    {"avg": _avg(avg_rs)},
+                },
+                "oos_diagnostics": {
+                    "oos_trades_zero": {"count": oos_zero, "pct": round(oos_zero / _n * 100, 1)},
+                    "avg_oos_trades":  _avg(oos_t_vals),
+                    "avg_train_trades": _avg(train_t_vals),
+                },
+                "candidate_quality_distribution": {
+                    "trade_count_distribution": {
+                        "zero_trades": {"count": tr_zero, "pct": round(tr_zero / _n * 100, 1)},
+                        "1_to_4":      {"count": tr_low,  "pct": round(tr_low  / _n * 100, 1)},
+                    },
                 },
                 "verdict": "INSUFFICIENT_DATA" if total < 20 else (
                     "GATE_MAY_BE_STRUCTURALLY_IMPOSSIBLE"

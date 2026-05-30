@@ -22,6 +22,7 @@ def analyze(snapshots: dict[str, Any], win_rate_history: list[float] | None = No
     _no_promotions(snapshots, hits)
     _recovery_boost_harmful(snapshots, hits)
     _peak_r_insufficient(snapshots, hits)
+    _data_sufficiency_failure(snapshots, hits)
     _promotion_gate_impossible(snapshots, hits)
     return hits
 
@@ -205,6 +206,55 @@ def _peak_r_insufficient(snapshots: dict, hits: list) -> None:
             ),
             "source_reports": ["Performance Status"],
         })
+
+
+def _data_sufficiency_failure(snapshots: dict, hits: list) -> None:
+    """
+    DATA_SUFFICIENCY_FAILURE: fires when >80% of recent rejected candidates
+    have train_trades below the minimum evaluation threshold (5 trades).
+    This indicates genome candidates are being evaluated on insufficient data,
+    not that strategy edge is absent.
+    """
+    audit = snapshots.get("Promotion Failure Audit", {})
+    if audit.get("verdict") == "INSUFFICIENT_DATA" or "error" in audit:
+        return
+    oos_diag = audit.get("oos_diagnostics", {})
+    trade_dist = audit.get("candidate_quality_distribution", {}).get("trade_count_distribution", {})
+    total_rejected = audit.get("summary", {}).get("total_rejected", 0)
+    if total_rejected < 10:
+        return
+    zero_t = trade_dist.get("zero_trades", {}).get("count", 0)
+    low_t  = trade_dist.get("1_to_4",     {}).get("count", 0)
+    insufficient = zero_t + low_t
+    if insufficient / total_rejected < 0.80:
+        return
+    oos_zero_pct = oos_diag.get("oos_trades_zero", {}).get("pct", 0)
+    hits.append({
+        "rule": "DATA_SUFFICIENCY_FAILURE",
+        "category": "GENOME",
+        "severity": "HIGH",
+        "title": f"Data sufficiency failure: {round(insufficient/total_rejected*100,1)}% of candidates have <5 training trades",
+        "evidence": [{
+            "total_rejected": total_rejected,
+            "insufficient_trade_count": insufficient,
+            "pct_insufficient": round(insufficient / total_rejected * 100, 1),
+            "oos_zero_pct": oos_zero_pct,
+            "trade_distribution": trade_dist,
+        }],
+        "confidence_score": 0.90,
+        "sample_size": total_rejected,
+        "economic_impact_est": "HIGH",
+        "risk_level": "HIGH",
+        "recommendation": (
+            f"{round(insufficient/total_rejected*100,1)}% of genome candidates have fewer than 5 training trades. "
+            f"OOS data unavailable in {oos_zero_pct}% of cases. "
+            "This indicates the genome backtest window has insufficient candle history, "
+            "not that strategy edge is absent. "
+            "ADVISORY ONLY — do not modify gates or thresholds based on this finding alone. "
+            "Human review required: investigate candle accumulation rate and backtest window length."
+        ),
+        "source_reports": ["Promotion Failure Audit"],
+    })
 
 
 def _promotion_gate_impossible(snapshots: dict, hits: list) -> None:
