@@ -3491,19 +3491,22 @@ async function loadAILHistory() {
 
 async function ailExportForAI() {
   try {
-    const [statusR, findingsR, historyR, promoAuditR] = await Promise.all([
+    const [statusR, findingsR, historyR, promoAuditR, versionR] = await Promise.all([
       fetch('/api/autonomous-intelligence/status').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/findings').then(r=>r.json()),
       fetch('/api/autonomous-intelligence/history?limit=10').then(r=>r.json()),
       fetch('/api/forensics/promotion-failure-audit').then(r=>r.json()).catch(e=>({_fetch_error: String(e)})),
+      fetch('/api/version').then(r=>r.json()).catch(()=>({version:'unknown'})),
     ]);
     const findings = findingsR.findings || [];
     const history  = historyR.history || [];
     const status   = statusR;
     const pa       = promoAuditR;
+    const appVersion = versionR.version || 'unknown';
 
     const lines = [
       `=== AIL MONITOR EXPORT === ${new Date().toLocaleString()}`,
+      `Engine Version: ${appVersion}`,
       `Status: ${status.enabled ? 'ACTIVE' : 'DISABLED'}`,
       `Collections: ${status.collection_count || 0}`,
       `Last Collect: ${status.last_collection_ts ? new Date(status.last_collection_ts*1000).toLocaleString() : 'Never'}`,
