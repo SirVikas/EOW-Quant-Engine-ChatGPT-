@@ -62,7 +62,8 @@ class AILScheduler:
         self._last_run = time.time()
         self._run_count += 1
         snapshots = await asyncio.to_thread(self._collect_fn)
-        result    = await asyncio.to_thread(self._analyze_fn, snapshots)
+        # analyze_fn is async — call directly, NOT via to_thread, so it can await storage ops
+        result = await self._analyze_fn(snapshots)
         logger.debug(
             f"[AIL-SCHEDULER] Cycle #{self._run_count} complete | "
             f"findings={result.get('new_findings', 0)}"
