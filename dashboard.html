@@ -3310,6 +3310,7 @@ function initApiExplorer() {
 .ail-btn{padding:5px 12px;border-radius:5px;border:none;cursor:pointer;font-size:12px;font-weight:600;}
 .ail-btn-approve{background:#276749;color:#fff;}
 .ail-btn-reject{background:#742A2A;color:#fff;}
+.ail-btn-supersede{background:#553C9A;color:#fff;}
 .ail-btn-evidence{background:#2D3748;color:#CBD5E0;}
 .ail-ftd-draft{background:#0D1117;border:1px solid #2D3748;border-radius:6px;padding:10px;margin-top:8px;font-family:monospace;font-size:11px;color:#68D391;white-space:pre-wrap;display:none;}
 .ail-history-item{padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
@@ -3343,6 +3344,7 @@ function initApiExplorer() {
   <div class="ail-stat"><div class="val" id="ail-stat-critical">—</div><div class="lbl">Critical+High</div></div>
   <div class="ail-stat"><div class="val" id="ail-stat-approved">—</div><div class="lbl">Approved</div></div>
   <div class="ail-stat"><div class="val" id="ail-stat-rejected">—</div><div class="lbl">Rejected</div></div>
+  <div class="ail-stat"><div class="val" id="ail-stat-superseded">—</div><div class="lbl">Superseded</div></div>
   <div class="ail-stat"><div class="val" id="ail-stat-collections">—</div><div class="lbl">Collections</div></div>
   <div class="ail-stat"><div class="val" id="ail-stat-last">—</div><div class="lbl">Last Collect</div></div>
 </div>
@@ -3353,7 +3355,8 @@ function initApiExplorer() {
   <button class="btn active" id="ail-filter-ALL"      onclick="setAILFilter('ALL')"      style="font-size:11px;padding:3px 10px;">All</button>
   <button class="btn"        id="ail-filter-PENDING"  onclick="setAILFilter('PENDING')"  style="font-size:11px;padding:3px 10px;">Pending</button>
   <button class="btn"        id="ail-filter-APPROVED" onclick="setAILFilter('APPROVED')" style="font-size:11px;padding:3px 10px;">Approved</button>
-  <button class="btn"        id="ail-filter-REJECTED" onclick="setAILFilter('REJECTED')" style="font-size:11px;padding:3px 10px;">Rejected</button>
+  <button class="btn"        id="ail-filter-REJECTED"   onclick="setAILFilter('REJECTED')"   style="font-size:11px;padding:3px 10px;">Rejected</button>
+  <button class="btn"        id="ail-filter-SUPERSEDED" onclick="setAILFilter('SUPERSEDED')" style="font-size:11px;padding:3px 10px;">Superseded</button>
 </div>
 
 <!-- Findings -->
@@ -3377,8 +3380,9 @@ async function loadAILStatus() {
     const sv = d.findings_by_severity || {};
     document.getElementById('ail-stat-pending').textContent   = bs.PENDING || 0;
     document.getElementById('ail-stat-critical').textContent  = (sv.CRITICAL||0) + (sv.HIGH||0);
-    document.getElementById('ail-stat-approved').textContent  = bs.APPROVED || 0;
-    document.getElementById('ail-stat-rejected').textContent  = bs.REJECTED || 0;
+    document.getElementById('ail-stat-approved').textContent   = bs.APPROVED || 0;
+    document.getElementById('ail-stat-rejected').textContent   = bs.REJECTED || 0;
+    document.getElementById('ail-stat-superseded').textContent = bs.SUPERSEDED || 0;
     document.getElementById('ail-stat-collections').textContent = d.collection_count || 0;
     const lc = d.last_collection_ts;
     document.getElementById('ail-stat-last').textContent = lc ? new Date(lc*1000).toLocaleTimeString() : 'Never';
@@ -3423,7 +3427,10 @@ function renderAILFindings() {
       <button class="ail-btn ail-btn-approve"   onclick="ailDecide('${f.lineage_id}','approve')">✅ Approve</button>
       <button class="ail-btn ail-btn-reject"    onclick="ailReject('${f.lineage_id}')">❌ Reject</button>
       <button class="ail-btn ail-btn-evidence"  onclick="ailDecide('${f.lineage_id}','needs-evidence')">🔍 More Evidence</button>
-      ${hasDraft}` : `<span style="font-size:11px;color:var(--muted);">Status: ${f.status}</span>${hasDraft}`;
+      ${hasDraft}` : f.status === 'APPROVED' ? `
+      <button class="ail-btn ail-btn-supersede" onclick="ailSupersede('${f.lineage_id}')">🔄 Supersede</button>
+      <span style="font-size:11px;color:var(--muted);margin-left:8px;">Status: ${f.status}</span>${hasDraft}` :
+      `<span style="font-size:11px;color:var(--muted);">Status: ${f.status}</span>${hasDraft}`;
     const evidenceHtml = (f.evidence||[]).map(e => `<div style="font-size:11px;color:var(--muted);font-family:monospace;">${JSON.stringify(e).slice(0,200)}</div>`).join('');
     const ftdDiv = f.ftd_draft ? `<div class="ail-ftd-draft" id="ftd-${f.lineage_id}">${f.ftd_draft}</div>` : '';
     return `<div class="ail-finding">
@@ -3462,6 +3469,15 @@ async function ailReject(id) {
     await fetch(`/api/autonomous-intelligence/finding/${id}/reject?reason=${encodeURIComponent(reason)}`, {method:'POST'});
     loadAILStatus(); loadAILFindings();
   } catch(e) { alert('Reject failed: ' + e.message); }
+}
+
+async function ailSupersede(id) {
+  const reason = prompt('Supersede reason (optional):\n\nThis marks the finding as stale — AIL will generate a fresh finding from current data.') || '';
+  if (reason === null) return; // user cancelled
+  try {
+    await fetch(`/api/autonomous-intelligence/finding/${id}/supersede?reason=${encodeURIComponent(reason)}`, {method:'POST'});
+    loadAILStatus(); loadAILFindings();
+  } catch(e) { alert('Supersede failed: ' + e.message); }
 }
 
 async function ailForceCollect() {
