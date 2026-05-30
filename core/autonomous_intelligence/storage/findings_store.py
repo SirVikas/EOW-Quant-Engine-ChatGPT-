@@ -92,6 +92,40 @@ async def list_findings(status: str | None = None) -> list[dict]:
     return await asyncio.to_thread(_list)
 
 
+async def active_finding_exists_for_rule(rule: str) -> bool:
+    """Return True if a PENDING or APPROVED finding for this rule already exists.
+    Used to prevent duplicate findings across collection cycles.
+    """
+    def _check():
+        _init_db()
+        with _conn() as con:
+            row = con.execute(
+                "SELECT 1 FROM findings WHERE rule=? AND status IN ('PENDING','APPROVED') LIMIT 1",
+                (rule,)
+            ).fetchone()
+            return row is not None
+    return await asyncio.to_thread(_check)
+
+
+async def latest_collection_ts() -> float | None:
+    """Return the most recent created_at timestamp from findings (for status display after restart)."""
+    def _get():
+        _init_db()
+        with _conn() as con:
+            row = con.execute(
+                "SELECT created_at FROM findings ORDER BY created_at DESC LIMIT 1"
+            ).fetchone()
+            return row[0] if row else None
+    val = await asyncio.to_thread(_get)
+    if val is None:
+        return None
+    try:
+        from datetime import datetime, timezone
+        return datetime.fromisoformat(val).replace(tzinfo=timezone.utc).timestamp()
+    except Exception:
+        return None
+
+
 async def update_status(lineage_id: str, status: str, approved_at: str | None = None,
                          rejected_at: str | None = None, rejection_reason: str | None = None) -> None:
     def _update():
