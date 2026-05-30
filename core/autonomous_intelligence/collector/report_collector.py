@@ -195,6 +195,34 @@ def collect_all() -> dict[str, Any]:
     except Exception as exc:
         snapshots["Auto Intelligence State"] = {"error": str(exc), "_ts": ts}
 
+    # ── Genome Readiness Report ───────────────────────────────────────────────
+    # FTD-PHOENIX-GENOME-READINESS-001: D4 AIL Integration
+    try:
+        import main as _main  # type: ignore
+        g = getattr(_main, "genome", None)
+        if g is not None:
+            state = g.export_state()
+            rr = state.get("readiness_report", {})
+            snapshots["Genome Readiness"] = {
+                "eval_attempts":          rr.get("eval_attempts", 0),
+                "eval_skips":             rr.get("eval_skips", 0),
+                "eval_with_sufficient":   rr.get("eval_with_sufficient", 0),
+                "eval_with_insufficient": rr.get("eval_with_insufficient", 0),
+                "symbols_in_store":       rr.get("symbols_in_store", 0),
+                "avg_candles":            rr.get("avg_candles", 0),
+                "max_candles":            rr.get("max_candles", 0),
+                "min_candles":            rr.get("min_candles", 0),
+                "min_required":           rr.get("min_required", 50),
+                "seed_source":            rr.get("seed_source", "none"),
+                "seed_count":             rr.get("seed_count", 0),
+                "ready":                  rr.get("ready", False),
+                "_ts": ts,
+            }
+        else:
+            snapshots["Genome Readiness"] = {"error": "genome not available", "_ts": ts}
+    except Exception as exc:
+        snapshots["Genome Readiness"] = {"error": str(exc), "_ts": ts}
+
     # ── Performance Status ────────────────────────────────────────────────────
     try:
         import main as _main  # type: ignore
