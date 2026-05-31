@@ -2579,6 +2579,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # Step 1: seed from data_lake first (SQLite — survives restart, up to 1440 bars/symbol)
     # Step 2: seed from mdp bootstrap buffers (in-memory — supplements live candles)
     logger.info("[GENOME] GENOME READINESS MODULE LOADED | FTD-PHOENIX-GENOME-READINESS-001")
+    logger.info("[VOLVE] VOLATILITYEXPANSION MODULE LOADED | VE_BREAKOUT_ATR_v1 | FTD-PHOENIX-VOLVE-REACTIVATION-001")
     _lake_seeded = genome.seed_from_data_lake(data_lake)
     logger.info(
         f"[GENOME] data_lake seed complete — "
