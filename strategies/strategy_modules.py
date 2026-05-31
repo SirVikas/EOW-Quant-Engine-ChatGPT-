@@ -293,35 +293,55 @@ class VolatilityExpansionStrategy:
         highs: List[float], lows: List[float],
     ) -> Optional[TradeSignal]:
         # Forensics 2026-05-03: 2 trades, 0% WR, avg loss $4.86/trade.
-        # Breakout entries trigger at price extremes which are already exhausted.
-        # Disabled until a confirmed-breakout + retrace entry is designed.
-        return None
-        atr            = _atr(highs, lows, closes, self.atr_period)
+        # Breakout entries triggered at price extremes already exhausted.
+        # Disabled 2026-05-03 pending redesign.
+        # FTD-PHOENIX-VOLVE-REACTIVATION-001 (2026-05-31): root cause confirmed
+        # by aFTD — unconditional return None + 5 dead-code defects. All repaired:
+        #   Bug A: price/data-length undefined → added guard + price = closes[-1]
+        #   Bug B: period_high undefined → max(highs[-(lookback+1):-1])
+        #   Bug C: period_low undefined  → min(lows[-(lookback+1):-1])
+        #   Bug D: period_high/low included current bar's own high/low, making
+        #          breakout mathematically impossible (close ≤ high always).
+        #          Fixed by excluding current bar from the lookback window.
+        #   Bug E: O(n²) ATR loop replaced with single O(lookback) _atr call.
 
-        # Volatility guard — VE strategy needs even more movement
-        atr_pct = (atr / price * 100) if price else 0
-        if atr_pct < MIN_ATR_PCT * 2:   # stricter: 0.20% minimum for breakouts
+        # Bug A — data length guard
+        min_len = self.lookback + self.atr_period + 2
+        if len(closes) < min_len:
             return None
 
-        # ATR average over lookback
-        avg_atr        = sum(
-            _atr(highs[i:i+self.atr_period+1], lows[i:i+self.atr_period+1],
-                 closes[i:i+self.atr_period+1], self.atr_period)
-            for i in range(max(0, len(closes) - self.lookback), len(closes) - self.atr_period)
-        ) / max(1, self.lookback - self.atr_period)
+        # Bug A — price was undefined before the volatility guard
+        price = closes[-1]
+        atr   = _atr(highs, lows, closes, self.atr_period)
 
-        # Volume/volatility filter
+        # Volatility guard — VE needs higher minimum than other strategies
+        atr_pct = (atr / price * 100) if price else 0
+        if atr_pct < MIN_ATR_PCT * 2:   # 0.20% minimum for breakout trades
+            return None
+
+        # Bug E — single O(lookback) ATR call replaces O(n²) per-bar loop
+        avg_atr = _atr(highs, lows, closes, self.lookback)
+
+        # Volatility expansion filter
         if atr < avg_atr * self.vol_filter:
-            return None   # not enough volatility for breakout trade
+            return None   # current ATR not expanded vs lookback baseline
+
+        # Bug B+D / Bug C+D — period_high/low must exclude the current bar.
+        # Including highs[-1] in the max made breakout impossible because
+        # close[-1] ≤ high[-1] always. Using [-(lookback+1):-1] gives the
+        # genuine prior-period baseline for breakout comparison.
+        period_high = max(highs[-(self.lookback + 1):-1])
+        period_low  = min(lows[-(self.lookback + 1):-1])
 
         if price > period_high:
+            # Bug D fix: distance past breakout level is positive, confidence valid
             return TradeSignal(
                 symbol=symbol, signal=Signal.LONG, entry_price=price,
                 stop_loss=price - atr * self.atr_sl,
                 take_profit=price + atr * self.atr_tp,
                 confidence=min(0.8, (price - period_high) / atr + 0.4),
                 strategy_id=self.ID,
-                reason=f"Breakout HIGH={period_high:.4f} | ATR={atr:.4f}",
+                reason=f"Breakout HIGH={period_high:.4f} | ATR={atr:.4f} | vol={self.vol_filter}",
             )
         if price < period_low:
             return TradeSignal(
@@ -330,7 +350,7 @@ class VolatilityExpansionStrategy:
                 take_profit=price - atr * self.atr_tp,
                 confidence=min(0.8, (period_low - price) / atr + 0.4),
                 strategy_id=self.ID,
-                reason=f"Breakdown LOW={period_low:.4f} | ATR={atr:.4f}",
+                reason=f"Breakdown LOW={period_low:.4f} | ATR={atr:.4f} | vol={self.vol_filter}",
             )
         return None
 
