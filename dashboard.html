@@ -3433,6 +3433,13 @@ function renderAILFindings() {
       `<span style="font-size:11px;color:var(--muted);">Status: ${f.status}</span>${hasDraft}`;
     const evidenceHtml = (f.evidence||[]).map(e => `<div style="font-size:11px;color:var(--muted);font-family:monospace;">${JSON.stringify(e).slice(0,200)}</div>`).join('');
     const ftdDiv = f.ftd_draft ? `<div class="ail-ftd-draft" id="ftd-${f.lineage_id}">${f.ftd_draft}</div>` : '';
+    const fmtTs = iso => { try { return new Date(iso).toLocaleString(); } catch(e) { return iso; } };
+    const createdAt  = f.created_at  ? `Created: ${fmtTs(f.created_at)}`   : '';
+    const approvedAt = f.approved_at ? ` · Approved: ${fmtTs(f.approved_at)}` : '';
+    const rejectedAt = f.rejected_at ? ` · Retired: ${fmtTs(f.rejected_at)}` : '';
+    const dateBar = (createdAt || approvedAt || rejectedAt)
+      ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${createdAt}${approvedAt}${rejectedAt}</div>`
+      : '';
     return `<div class="ail-finding">
       <div>
         <span class="sev sev-${f.severity}">${f.severity}</span>
@@ -3443,6 +3450,7 @@ function renderAILFindings() {
         Category: ${f.category} | Rule: ${f.rule||'—'} | Sample: ${f.sample_size} | Confidence: ${(f.confidence_score*100).toFixed(0)}%
         | Evidence Score: ${score}/100 ${scoreBar}
       </div>
+      ${dateBar}
       <div style="font-size:12px;margin-bottom:6px;">${f.recommendation}</div>
       ${evidenceHtml}
       ${ftdDiv}
