@@ -128,6 +128,7 @@ from core.rl_engine import rl_engine                              # RL Contextua
 from core.live_process_access import live_process_access          # FTD-LPA: runtime observability
 from core.observability.orchestrator import obs_orchestrator, OBS_TICK_INTERVAL_SECS  # FTD-053-GAIA Phase 6
 from core.observability.snapshot_builder import build_raw_snapshot                    # FTD-053-GAIA Phase 6
+from core.observability.rcaf_engine import rcaf_engine                                # FTD-RCAF-001
 from core.signal_truth.signal_truth_engine    import signal_truth_engine              # PRP-001
 from core.signal_truth.false_positive_forensics import false_positive_forensics       # PRP-001
 from core.signal_truth.directional_legitimacy  import directional_legitimacy         # PRP-001
@@ -292,6 +293,9 @@ _last_skip: dict = {}
 # FTD-DECISION-SNAP: bridge open-time snapshot to close-time persistence
 # Keyed by symbol; written at execution approval, consumed at DataLake persist.
 _pending_decision_snapshots: dict[str, dict] = {}
+
+# FTD-RCAF-001: bridge open-time signal_id to close-time trade for PnL attribution
+_pending_rcaf_signal_ids: dict[str, str] = {}
 
 # FTD-EXPLORE-ATTR: bridge RL exploration provenance to close-time TradeRecord persistence
 # Keyed by symbol; written at execution approval, consumed at DataLake persist.
@@ -540,6 +544,15 @@ async def on_tick(tick: Tick):
             except Exception:
                 pass
             data_lake.save_trade(asdict(last_trade))
+            # FTD-RCAF-001: attribute closed trade PnL back to shadow gate stats
+            if cfg.RCAF_ENABLED:
+                _rcaf_fee_closed = (getattr(last_trade, "fee_entry", 0.0)
+                                    + getattr(last_trade, "fee_exit",  0.0))
+                _rcaf_tid = getattr(last_trade, "trade_id", "")
+                _rcaf_sid = _pending_rcaf_signal_ids.pop(sym, None)
+                if _rcaf_sid:
+                    rcaf_engine.mark_executed(_rcaf_sid, _rcaf_tid)
+                    rcaf_engine.record_pnl(_rcaf_sid, last_trade.net_pnl, _rcaf_fee_closed)
             # MASTER-001: update signal filter loss/win tracker
             if last_trade.net_pnl >= 0:
                 signal_filter.record_win(sym)
@@ -928,15 +941,34 @@ async def on_tick(tick: Tick):
         return
     if sym not in risk_ctrl.positions and not _halted_blocked and not risk_ctrl.graceful_stop:
 
+        # ── FTD-RCAF-001: open shadow record for this signal ─────────────────
+        _rcaf_signal_id = f"{sym}_{now_ms}"
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.open_signal(
+                signal_id=_rcaf_signal_id,
+                symbol=sym,
+                ts_ms=now_ms,
+                strategy=strategy_type,
+                regime=regime.value if hasattr(regime, "value") else str(regime),
+            )
+
         # ── Throttle A: per-symbol cooldown (30 min between trades) ──────────
         last_ts = _last_trade_ts.get(sym, 0)
         cooldown_remaining = SYMBOL_COOLDOWN_SEC - (now_ms - last_ts) / 1000
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("frequency_cooldown", _rcaf_signal_id,
+                                 would_block=cooldown_remaining > 0,
+                                 reason=f"cooldown_remaining={cooldown_remaining:.1f}s" if cooldown_remaining > 0 else "")
         if cooldown_remaining > 0:
             return   # too soon after last trade on this symbol
 
         # ── Throttle B: max 12 trades per hour across all symbols ─────────────
         one_hour_ago = now_ms - 3_600_000
         _trades_this_hour[:] = [t for t in _trades_this_hour if t > one_hour_ago]
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("frequency_hourly_cap", _rcaf_signal_id,
+                                 would_block=len(_trades_this_hour) >= MAX_TRADES_PER_HOUR,
+                                 reason=f"trades_this_hour={len(_trades_this_hour)}/{MAX_TRADES_PER_HOUR}")
         if len(_trades_this_hour) >= MAX_TRADES_PER_HOUR:
             return   # hourly cap reached
 
@@ -956,6 +988,10 @@ async def on_tick(tick: Tick):
         # sparse → bandit explores fewer dimensions → slower convergence.
         # In LIVE mode this gate remains active (historical -ve PnL hours are hard-blocked).
         _current_utc_hour = _session_utc_hour  # reuse value computed at strategy-build time
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("hour_avoidance", _rcaf_signal_id,
+                                 would_block=_current_utc_hour in _AVOID_HOURS_UTC,
+                                 reason=f"utc_hour={_current_utc_hour}" if _current_utc_hour in _AVOID_HOURS_UTC else "")
         if not cfg.BYPASS_ALL_GATES and _current_utc_hour in _AVOID_HOURS_UTC:
             # Calculate next allowed hour so the user knows when to expect trades.
             _allowed_hours = sorted(set(range(24)) - _AVOID_HOURS_UTC)
@@ -1022,7 +1058,13 @@ async def on_tick(tick: Tick):
         # current ATR > 2× slow EMA — high-volatility = STOP_LOSS_SLIP risk.
         # ATR EMA needs a few candles to stabilise; is_high_volatility() returns False
         # until the EMA is seeded, so paper warmup is safe.
-        if not cfg.BYPASS_ALL_GATES and reactive_evolution_engine.is_high_volatility(sym, atr_pct):
+        _rcaf_atr_high = reactive_evolution_engine.is_high_volatility(sym, atr_pct)
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("atr_volatility", _rcaf_signal_id,
+                                 would_block=_rcaf_atr_high,
+                                 reason=f"ATR_SPIKE(atr={atr_pct:.4f}%)" if _rcaf_atr_high else "",
+                                 details={"atr_pct": round(atr_pct, 4)})
+        if not cfg.BYPASS_ALL_GATES and _rcaf_atr_high:
             _last_skip = {
                 "ts": now_ms, "symbol": sym,
                 "reason": f"ATR_SPIKE(atr={atr_pct:.4f}%)",
@@ -1120,6 +1162,10 @@ async def on_tick(tick: Tick):
                 "FILTER",
             )
             vol_active = True
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("volume_sleep", _rcaf_signal_id,
+                                 would_block=not vol_active,
+                                 reason=vol_reason if not vol_active else "")
         if not cfg.BYPASS_ALL_GATES and not vol_active:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": vol_reason, "regime": regime.value}
             trade_flow_monitor.record_skip(sym, vol_reason)
@@ -1127,6 +1173,10 @@ async def on_tick(tick: Tick):
 
         # Phase 3: Sector Correlation Guard — max 2 open positions from same sector.
         sector_ok, sector_reason = sector_guard.check(sym, risk_ctrl.positions)
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("sector_correlation", _rcaf_signal_id,
+                                 would_block=not sector_ok,
+                                 reason=sector_reason if not sector_ok else "")
         if not cfg.BYPASS_ALL_GATES and not sector_ok:
             _last_skip = {"ts": now_ms, "symbol": sym, "reason": sector_reason, "regime": regime.value}
             return
@@ -1137,6 +1187,10 @@ async def on_tick(tick: Tick):
             if any(k in risk_reason for k in ("HALTED:", "MAX_DAILY_LOSS", "DAILY_TRADE_CAP")):
                 _thought(f"⚡ PAPER_SPEED bypass risk gate {sym}: {risk_reason}", "FILTER")
                 risk_allowed = True
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("risk_engine", _rcaf_signal_id,
+                                 would_block=not risk_allowed,
+                                 reason=risk_reason if not risk_allowed else "")
         if not cfg.BYPASS_ALL_GATES and not risk_allowed:
             return   # daily risk limit reached
 
@@ -1145,6 +1199,11 @@ async def on_tick(tick: Tick):
         ms_result = market_structure_detector.detect(
             adx=guard.adx, bb_width=_bb_width, atr_pct=guard.atr_pct,
         )
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("market_structure", _rcaf_signal_id,
+                                 would_block=not ms_result.tradeable,
+                                 reason=ms_result.block_reason if not ms_result.tradeable else "",
+                                 details={"adx": round(guard.adx, 2), "bb_width": round(_bb_width, 4)})
         if not cfg.BYPASS_ALL_GATES and not ms_result.tradeable:
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
@@ -1155,6 +1214,10 @@ async def on_tick(tick: Tick):
 
         # FTD-REF-024: edge engine kill switch
         edge_allowed, edge_reason = edge_engine.check_trade(regime.value, strategy_type)
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("edge_engine", _rcaf_signal_id,
+                                 would_block=not edge_allowed,
+                                 reason=edge_reason if not edge_allowed else "")
         if not cfg.BYPASS_ALL_GATES and not edge_allowed:
             error_registry.log("STRAT_002", symbol=sym, extra=edge_reason)  # FTD-REF-025
             _last_skip = {
@@ -1166,6 +1229,10 @@ async def on_tick(tick: Tick):
 
         # FTD-037: Adaptive Edge Engine kill switch (state-machine + cost filter)
         _aee_ok, _aee_reason = adaptive_edge_engine.check_trade(strategy_type)
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("adaptive_edge_engine", _rcaf_signal_id,
+                                 would_block=not _aee_ok,
+                                 reason=_aee_reason if not _aee_ok else "")
         if not cfg.BYPASS_ALL_GATES and not _aee_ok:
             error_registry.log("STRAT_037", symbol=sym, extra=_aee_reason)
             _last_skip = {
@@ -1202,6 +1269,11 @@ async def on_tick(tick: Tick):
             )
 
         # FTD-REF-026: regime stability gate — block if conf <0.50 or <3 stable ticks
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("regime_stability", _rcaf_signal_id,
+                                 would_block=r_ai.block_trade,
+                                 reason=f"conf={r_ai.confidence:.2f} ticks={r_ai.stability_ticks}" if r_ai.block_trade else "",
+                                 details={"confidence": round(r_ai.confidence, 3), "stability_ticks": r_ai.stability_ticks})
         if not cfg.BYPASS_ALL_GATES and r_ai.block_trade:
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
@@ -1236,6 +1308,10 @@ async def on_tick(tick: Tick):
             n_trades=_session_trade_count,
             consecutive_losses=_consecutive_losses,
         )
+        if cfg.RCAF_ENABLED:
+            rcaf_engine.log_gate("profit_guard", _rcaf_signal_id,
+                                 would_block=_pg_hard_stop,
+                                 reason=_pg_hard_reason if _pg_hard_stop else "")
         if not cfg.BYPASS_ALL_GATES and _pg_hard_stop:
             _last_skip = {
                 "ts": int(time.time() * 1000), "symbol": sym,
@@ -1890,6 +1966,11 @@ async def on_tick(tick: Tick):
                     rr=_rr_result.rr, gross_tp=_gross_tp, fee_cost=cost_usdt,
                     normal_max_override=thresholds.fee_tolerance,  # dynamic
                 )
+                if cfg.RCAF_ENABLED:
+                    rcaf_engine.log_gate("smart_fee_guard", _rcaf_signal_id,
+                                         would_block=not _sfg_result.ok,
+                                         reason=_sfg_result.reason if not _sfg_result.ok else "",
+                                         details={"rr": round(_rr_result.rr, 3), "cost_usdt": round(cost_usdt, 4)})
                 if not cfg.BYPASS_ALL_GATES and not _sfg_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
@@ -1909,6 +1990,11 @@ async def on_tick(tick: Tick):
                     drawdown=drawdown_controller.current_drawdown(),           # Phase 7B
                     regime_confidence=r_ai.confidence,                         # Phase 7B
                 )
+                if cfg.RCAF_ENABLED:
+                    rcaf_engine.log_gate("ev_engine", _rcaf_signal_id,
+                                         would_block=not _ev_result.ok,
+                                         reason=_ev_result.reason if not _ev_result.ok else "",
+                                         details={"ev": round(_ev_result.ev, 4)})
                 if not cfg.BYPASS_ALL_GATES and not _ev_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
@@ -1927,6 +2013,11 @@ async def on_tick(tick: Tick):
 
                 # ── Phase 6: EV Confidence Engine — tier-based size mult ──────
                 _evc_result = ev_confidence_engine.classify(_ev_result.ev)
+                if cfg.RCAF_ENABLED:
+                    rcaf_engine.log_gate("ev_confidence", _rcaf_signal_id,
+                                         would_block=not _evc_result.ok,
+                                         reason=_evc_result.reason if not _evc_result.ok else "",
+                                         details={"tier": _evc_result.tier, "size_mult": _evc_result.size_mult})
                 if not cfg.BYPASS_ALL_GATES and not _evc_result.ok:
                     _last_skip = {
                         "ts": int(time.time() * 1000), "symbol": sym,
@@ -1950,6 +2041,11 @@ async def on_tick(tick: Tick):
             # ── Common path: Drawdown Controller + Capital Allocator ──────────
             # DrawdownController is always re-checked fresh (not from cached DTP)
             _dd_result = drawdown_controller.check()
+            if cfg.RCAF_ENABLED:
+                rcaf_engine.log_gate("drawdown_controller", _rcaf_signal_id,
+                                     would_block=not _dd_result.allowed,
+                                     reason=_dd_result.reason if not _dd_result.allowed else "",
+                                     details={"dd_pct": round(drawdown_controller.current_drawdown(), 3)})
             if not cfg.BYPASS_ALL_GATES and not _dd_result.allowed:
                 _last_skip = {
                     "ts": int(time.time() * 1000), "symbol": sym,
@@ -2186,6 +2282,8 @@ async def on_tick(tick: Tick):
                         ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
                         ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
                     )
+                    # FTD-RCAF-001: preserve signal_id for PnL attribution at close
+                    _pending_rcaf_signal_ids[sym] = _rcaf_signal_id
                     # FTD-EXPLORE-ATTR: persist RL exploration provenance at approval time
                     _pending_exploration_origins[sym] = _build_eo(_rl_reason)
                     _trades_this_hour.append(now_ms)
@@ -2235,6 +2333,8 @@ async def on_tick(tick: Tick):
                         ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
                         ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
                     )
+                    # FTD-RCAF-001: preserve signal_id for PnL attribution at close
+                    _pending_rcaf_signal_ids[sym] = _rcaf_signal_id
                     # FTD-EXPLORE-ATTR: persist RL exploration provenance at approval time
                     _pending_exploration_origins[sym] = _build_eo(_rl_reason)
                     _trades_this_hour.append(now_ms)
@@ -2399,6 +2499,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             _thought("⚠ Function Registry not found at core/registry/function_registry.json", "HALT")
     except Exception as _e:
         _thought(f"⚠ Function Registry load error: {_e}", "HALT")
+
+    # ── FTD-RCAF-001: Root Cause Attribution Framework — boot confirmation ──────
+    _rcaf_health = rcaf_engine.get_health()
+    _thought(
+        f"📊 Root Cause Attribution Framework: "
+        f"{'ACTIVE' if _rcaf_health['status'] == 'ACTIVE' else 'DISABLED'} | "
+        f"gates={len(cfg.RCAF_GATES)} | "
+        f"buffer_cap={_rcaf_health['buffer_cap']}",
+        "SYSTEM",
+    )
 
     # ── Fix A: Reload promoted DNA so genome doesn't reset on restart ─────────
     genome.load_persisted_dna()
@@ -5913,6 +6023,52 @@ async def promotion_watch():
             "🎉 FIRST PROMOTION ACHIEVED" if promoted else
             "⏳ WATCHING — no promotion yet. Check best_candidate_by_strategy.gaps for distance."
         ),
+    }
+
+
+# ── FTD-RCAF-001: Root Cause Attribution Framework Endpoints ─────────────────
+
+@app.get("/api/rcaf/health")
+async def rcaf_health():
+    """FTD-RCAF-001: RCAF health check — confirms attribution tracking is operational."""
+    return rcaf_engine.get_health()
+
+
+@app.get("/api/rcaf/attribution")
+async def rcaf_attribution():
+    """
+    FTD-RCAF-001: Full attribution report.
+
+    For every governance gate, shows:
+      - would_block_count  : how many signals it would have blocked
+      - would_allow_count  : how many signals it would have passed
+      - block_rate_pct     : % of signals it would block
+      - est_pnl_improvement: estimated PnL gain if gate had been enforced
+      - est_fee_savings    : estimated fees saved if gate had been enforced
+      - trades_avoided_count: trades that executed despite would_block=True
+      - confidence         : LOW / MEDIUM / HIGH based on sample count
+      - status             : ACTIVE_BYPASSED / ACTIVE_NO_BLOCKS / NO_DATA
+    """
+    return rcaf_engine.get_attribution_report()
+
+
+@app.get("/api/rcaf/shadow-log")
+async def rcaf_shadow_log(limit: int = 200):
+    """
+    FTD-RCAF-001: Recent per-signal shadow decisions.
+    Shows last `limit` signals with per-gate would_block verdicts.
+    """
+    return rcaf_engine.get_shadow_log(limit=min(limit, 1000))
+
+
+@app.get("/api/rcaf/anomalies")
+async def rcaf_anomalies():
+    """FTD-RCAF-001: Anomaly log — gates behaving outside expected range."""
+    report = rcaf_engine.get_attribution_report()
+    return {
+        "status":   report.get("status"),
+        "anomalies": report.get("anomalies", []),
+        "count":    report.get("anomalies_logged", 0),
     }
 
 

@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.43.0"
+APP_VERSION = "1.44.0"
 
 
 class EngineConfig(BaseSettings):
@@ -540,6 +540,28 @@ class EngineConfig(BaseSettings):
 
     # ── FTD-031C: Diagnostics (disabled by default — developer use only) ──────
     DIAGNOSTICS_ENDPOINT_ENABLED: bool = False      # Enable /api/diagnostics/* endpoints
+
+    # ── FTD-RCAF-001: Root Cause Attribution Framework ───────────────────────
+    RCAF_ENABLED: bool = Field(default=True, env="RCAF_ENABLED")
+    # Gates to shadow-log (all active by default; remove any to stop tracking it)
+    RCAF_GATES: list = [
+        "frequency_cooldown",
+        "frequency_hourly_cap",
+        "hour_avoidance",
+        "atr_volatility",
+        "volume_sleep",
+        "sector_correlation",
+        "risk_engine",
+        "market_structure",
+        "edge_engine",
+        "adaptive_edge_engine",
+        "regime_stability",
+        "profit_guard",
+        "smart_fee_guard",
+        "ev_engine",
+        "ev_confidence",
+        "drawdown_controller",
+    ]
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 
