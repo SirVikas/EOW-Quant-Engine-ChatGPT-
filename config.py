@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.44.0"
+APP_VERSION = "1.45.0"
 
 
 class EngineConfig(BaseSettings):
@@ -56,7 +56,7 @@ class EngineConfig(BaseSettings):
 
     # ── Risk / Capital ───────────────────────────────────────────────────────
     INITIAL_CAPITAL: float = 1000.0        # USDT starting bankroll (paper)
-    MAX_RISK_PER_TRADE: float = 0.022      # 2.2% of equity per trade (larger notional → lower fee % drag)
+    MAX_RISK_PER_TRADE: float = 0.015      # 1.5% of equity per trade — reduced from 2.2% to cut fee drag and per-trade loss on fast-fails
     MIN_NOTIONAL_USDT: float = 20.0        # FTD-056-ACT: minimum trade notional floor — prevents micro-trades where $0.008 fee eats disproportionate share of small wins
     MAX_DRAWDOWN_HALT: float = 0.15        # Halt engine at 15% MDD
     KELLY_FRACTION: float = 0.25           # Conservative quarter-Kelly
@@ -298,7 +298,7 @@ class EngineConfig(BaseSettings):
     SE_WIN_STREAK_MIN: int = 3          # Consecutive wins to declare HOT streak
     SE_LOSS_STREAK_MIN: int = 3         # Consecutive losses to declare COLD streak
     SE_HOT_SCORE_ADJ: float = -0.03     # Score_min delta on HOT (negative = relax)
-    SE_COLD_SCORE_ADJ: float = 0.05     # Score_min delta on COLD (positive = tighten)
+    SE_COLD_SCORE_ADJ: float = 0.07     # Score_min delta on COLD (raised 0.05→0.07 — firmer tightening during losing streaks)
 
     # Capital Recovery Engine — intelligent size restoration after drawdown
     CRE_DEFENSIVE_DD: float = 0.05      # Begin defensive sizing above this DD
