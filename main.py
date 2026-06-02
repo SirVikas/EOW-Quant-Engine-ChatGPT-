@@ -1117,10 +1117,13 @@ async def on_tick(tick: Tick):
             consecutive_wins=_p52_cw, consecutive_losses=_p52_cl,
         )
         # Effective score_min = DTP base ± streak delta, floored at 0.40.
-        # In BYPASS mode the COLD adjustment is zeroed out: consecutive losses create
-        # a death spiral (losses → +0.05/loss → eff_min 0.56→0.61→0.66 → no trades
-        # → miss the recovery signal → more losses). In production mode it stays on.
-        _streak_adj = 0.0 if cfg.BYPASS_ALL_GATES else _streak_result.score_adjustment
+        # SE_COLD_SCORE_ADJ is a flat value (not cumulative per loss), so there is no
+        # death-spiral risk.  In BYPASS mode apply 50% of the adjustment: enough to
+        # filter low-quality entries during COLD streaks while still feeding the RL
+        # engine with outcomes.  Full zeroing was letting all COLD-streak trades through
+        # unchecked, compounding fee drag across 8+ consecutive losing symbols.
+        _streak_bypass_factor = 0.5 if cfg.BYPASS_ALL_GATES else 1.0
+        _streak_adj = _streak_result.score_adjustment * _streak_bypass_factor
         _eff_score_min = max(0.40, round(
             thresholds.score_min + _streak_adj, 4
         ))
@@ -1760,20 +1763,34 @@ async def on_tick(tick: Tick):
                 }
                 trade_flow_monitor.record_skip(sym, _lcc_result.reason)
                 return
-            # FTD-054-PHOENIX: LCC size reduction must also be gated by BYPASS_ALL_GATES.
-            # Previously, size_mult=0.0 (PAUSED) silently zeroed sizing.qty even in bypass
-            # mode, causing a 90+ minute trade drought after 5+ consecutive session losses.
-            # In bypass mode the RL engine needs trades to learn; LCC pause defeats that.
-            if not cfg.BYPASS_ALL_GATES and _lcc_result.size_mult < 1.0:
-                sizing.qty = round(sizing.qty * _lcc_result.size_mult, 8)
-                if sizing.qty <= 0:
-                    return
-            if cfg.BYPASS_ALL_GATES and _lcc_result.size_mult < 1.0:
-                _thought(
-                    f"⚡ LCC_OVERRIDE {sym}: state={_lcc_result.state} "
-                    f"cl={_p52_cl} [bypass=active, size not reduced]",
-                    "SIGNAL",
-                )
+            # LCC size reduction applies in both normal and BYPASS mode.
+            # In BYPASS mode the full PAUSE is converted to a 50% size reduction so the
+            # RL engine still receives outcomes while capital is protected during loss clusters.
+            # Previously full zeroing in BYPASS let all LCC-flagged trades run at full size,
+            # adding compounding fee drag across consecutive losers.
+            if _lcc_result.size_mult < 1.0:
+                if cfg.BYPASS_ALL_GATES and _lcc_result.state == "PAUSED":
+                    # Convert hard pause to half-size: RL needs data, not silence
+                    _bypass_mult = cfg.LCC_REDUCE_SIZE_MULT
+                    sizing.qty = round(sizing.qty * _bypass_mult, 8)
+                    if sizing.qty <= 0:
+                        return
+                    _thought(
+                        f"⚡ LCC_OVERRIDE {sym}: state={_lcc_result.state} "
+                        f"cl={_p52_cl} [bypass: PAUSE→{_bypass_mult:.0%} size]",
+                        "SIGNAL",
+                    )
+                else:
+                    # REDUCING state or production mode: apply size_mult directly
+                    sizing.qty = round(sizing.qty * _lcc_result.size_mult, 8)
+                    if sizing.qty <= 0:
+                        return
+                    if cfg.BYPASS_ALL_GATES:
+                        _thought(
+                            f"⚡ LCC_OVERRIDE {sym}: state={_lcc_result.state} "
+                            f"cl={_p52_cl} [bypass: size_mult={_lcc_result.size_mult:.0%} applied]",
+                            "SIGNAL",
+                        )
 
             # ── Phase 5.2 + 6: Exploration Hard Injection (guarded) ──────────
             # ExplorationGuard pre-checks daily loss cap before slot allocation.

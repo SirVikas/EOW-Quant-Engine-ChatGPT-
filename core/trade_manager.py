@@ -3,7 +3,7 @@ EOW Quant Engine — Trade Manager (Adaptive Profit Protection)
 Maximizes winners and minimizes losers through dynamic SL/TP management.
 
 Lifecycle actions:
-  1. FAST_FAIL   — exit within 5 min if r_mult < -0.45 (trend reversed at entry)
+  1. FAST_FAIL   — exit within 5 min if r_mult < -0.35 (trend reversed at entry)
   2. TIME_EXIT   — exit stalling trades after 8 min with < 0.15R progress
   3. MOVE_BE     — move SL to break-even at BREAKEVEN_TRIGGER_R profit
   4. PARTIAL_TP  — book 50% of qty at PARTIAL_TP_R
@@ -58,7 +58,7 @@ _TIME_EXIT_SECONDS = 8 * 60    # tightened 12→8 min: exit stalling trades fast
 _TIME_EXIT_MIN_R   = 0.15      # tightened 0.20→0.15R: earlier exit when momentum fails to develop
 
 # FTD-LOSS: Early trend-failure fast exit — fires when trending signal reverses immediately
-_FAST_FAIL_R       = -0.45     # if r_mult drops below -45% of risk within first 5 min, bail out
+_FAST_FAIL_R       = -0.35     # tightened -0.45→-0.35: exit trend-failures sooner, cutting per-trade loss by ~0.10R
 _FAST_FAIL_SECONDS = 5 * 60    # 5-minute window for fast-fail check
 
 # VTP: Volatile Take-Profit thresholds

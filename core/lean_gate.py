@@ -24,7 +24,7 @@ from config import cfg
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
 
-MIN_SL_DIST_PCT   = 0.15    # SL must be ≥ 0.15% from entry (raised from 0.05 — ultra-tight SLs are fee-eaten at any notional)
+MIN_SL_DIST_PCT   = 0.20    # SL must be ≥ 0.20% from entry (raised 0.15→0.20 — tighter SLs fast-fail immediately and pay full fees for near-zero move)
 MIN_RR            = 2.5     # Sniper Mode (FTD-SNP-001): raised 1.8→2.5 — only setups with real RR edge; raw RR=4.0 safely clears this
 MAX_FEE_RATIO     = 0.25    # fees must be < 25% of expected TP profit
 MAX_CONSEC_LOSSES = 6       # pause after this many consecutive session losses
