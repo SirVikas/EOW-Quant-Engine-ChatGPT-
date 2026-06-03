@@ -75,6 +75,14 @@ class TradeRecord:
     #       risk_reward_realized, economic_classification, payoff_geometry
     economic_truth:           Optional[dict] = None
 
+    # FTD-PHOENIX-EXIT-ATTR-001: Exit Attribution Layer
+    # Permanent record of HOW and WHY this trade was closed.
+    # exit_method: canonical constant from core.exit_attribution
+    #   FAST_FAIL | TIME_EXIT | STOP_LOSS | TAKE_PROFIT | TRAILING_STOP |
+    #   BREAK_EVEN | VTP_EXIT | PARTIAL_TP | SPEED_EXIT | EMERGENCY | MANUAL | UNKNOWN
+    exit_method:              str = "UNKNOWN"
+    exit_reason:              str = ""
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 
