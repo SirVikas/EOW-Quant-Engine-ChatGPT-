@@ -390,6 +390,8 @@ def _capture_decision_snapshot(
     rl_reason: str,
     ps_ec_dec=None,    # EcologyDecision — present for PAPER_SPEED only
     ctx_amp: dict | None = None,  # alpha amplification — present for PRIMARY_STRATEGY only
+    raw_confidence: float = 0.0,
+    adjusted_confidence: float = 0.0,
 ) -> dict:
     """
     Collect the exact subsystem states that approved this trade at execution time.
@@ -401,9 +403,11 @@ def _capture_decision_snapshot(
     from core.time.session_definitions import make_context as _mc
     is_ps = strategy_id.endswith("_PAPER_SPEED")
     snap: dict = {
-        "pipeline":      "PAPER_SPEED" if is_ps else "PRIMARY_STRATEGY",
-        "utc_hour":      utc_hour,
-        "session_label": _get_session_label(utc_hour),
+        "pipeline":            "PAPER_SPEED" if is_ps else "PRIMARY_STRATEGY",
+        "utc_hour":            utc_hour,
+        "session_label":       _get_session_label(utc_hour),
+        "confidence":          round(adjusted_confidence, 4),
+        "raw_confidence":      round(raw_confidence, 4),
     }
 
     # ── RL block ──────────────────────────────────────────────────────────────
@@ -2323,6 +2327,8 @@ async def on_tick(tick: Tick):
                         rl_ok=_rl_ok, rl_reason=_rl_reason,
                         ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
                         ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
+                        raw_confidence=sig.confidence,
+                        adjusted_confidence=_p52_conf,
                     )
                     # FTD-RCAF-001: preserve signal_id for PnL attribution at close
                     _pending_rcaf_signal_ids[sym] = _rcaf_signal_id
@@ -2333,12 +2339,19 @@ async def on_tick(tick: Tick):
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
                     execution_drive_policy.record_trade(sym)   # EDP: reset idle timer
                     # Phase 4: register with trade manager for lifecycle tracking
+                    # MR regime uses RANGE_SCALP mode: BE triggers at 0.5R (vs 1.0R)
+                    # to protect the near-zero-gross-edge setup faster.
+                    _tm_exec_mode = (
+                        "RANGE_SCALP" if regime.value == "MEAN_REVERTING"
+                        else "TREND_FOLLOW"
+                    )
                     trade_manager.register(ManagedPosition(
                         symbol=sym, side=sig.signal.value,
                         entry_price=limit_px, stop_loss=sig.stop_loss,
                         take_profit=sig.take_profit,
                         initial_risk=abs(limit_px - sig.stop_loss),
                         qty=sizing.qty,
+                        exec_mode=_tm_exec_mode,
                     ))
                     capital_allocator.record_risk_used(sizing.usdt_risk)
                     _thought(
@@ -2374,6 +2387,8 @@ async def on_tick(tick: Tick):
                         rl_ok=_rl_ok, rl_reason=_rl_reason,
                         ps_ec_dec=_ps_ec_dec if sig.strategy_id.endswith("_PAPER_SPEED") else None,
                         ctx_amp=None if sig.strategy_id.endswith("_PAPER_SPEED") else _ctx_amp,
+                        raw_confidence=sig.confidence,
+                        adjusted_confidence=_p52_conf,
                     )
                     # FTD-RCAF-001: preserve signal_id for PnL attribution at close
                     _pending_rcaf_signal_ids[sym] = _rcaf_signal_id
@@ -2423,12 +2438,17 @@ async def on_tick(tick: Tick):
                     except Exception:
                         pass
                     # Phase 4: register with trade manager for lifecycle tracking
+                    _tm_exec_mode = (
+                        "RANGE_SCALP" if regime.value == "MEAN_REVERTING"
+                        else "TREND_FOLLOW"
+                    )
                     trade_manager.register(ManagedPosition(
                         symbol=sym, side=sig.signal.value,
                         entry_price=sig.entry_price, stop_loss=sig.stop_loss,
                         take_profit=sig.take_profit,
                         initial_risk=abs(sig.entry_price - sig.stop_loss),
                         qty=sizing.qty,
+                        exec_mode=_tm_exec_mode,
                     ))
                     capital_allocator.record_risk_used(sizing.usdt_risk)
                     _thought(
