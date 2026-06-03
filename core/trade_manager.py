@@ -58,8 +58,10 @@ _TIME_EXIT_SECONDS = 8 * 60    # tightened 12→8 min: exit stalling trades fast
 _TIME_EXIT_MIN_R   = 0.15      # tightened 0.20→0.15R: earlier exit when momentum fails to develop
 
 # FTD-LOSS: Early trend-failure fast exit — fires when trending signal reverses immediately
-_FAST_FAIL_R       = -0.35     # tightened -0.45→-0.35: exit trend-failures sooner, cutting per-trade loss by ~0.10R
-_FAST_FAIL_SECONDS = 5 * 60    # 5-minute window for fast-fail check
+_FAST_FAIL_R           = -0.35     # tightened -0.45→-0.35: exit trend-failures sooner, cutting per-trade loss by ~0.10R
+_FAST_FAIL_SECONDS     = 5 * 60    # 5-minute window for fast-fail check
+# FTD-PHOENIX-ESR-001 P3/P6: sub-1-min trade eradication — mirrors cfg.TRADE_MIN_HOLD_FAST_FAIL_SEC
+_FAST_FAIL_MIN_ELAPSED = 90.0      # FAST_FAIL cannot fire before 90s; prevents the <1-min loss-exit cluster
 
 # VTP: Volatile Take-Profit thresholds
 _VTP_HISTORY_LEN     = 5       # R-multiple ticks to maintain for velocity calc
@@ -162,8 +164,10 @@ class TradeManager:
 
         # ── FTD-LOSS: Fast-fail exit ──────────────────────────────────────────
         # Trend reversed immediately after entry — cap drawdown before full SL.
+        # FTD-PHOENIX-ESR-001 P3: _FAST_FAIL_MIN_ELAPSED floor prevents sub-90s exits.
         if (not pos.breakeven_set
                 and pos.open_ts > 0
+                and elapsed >= _FAST_FAIL_MIN_ELAPSED
                 and elapsed < _FAST_FAIL_SECONDS
                 and r_mult < _FAST_FAIL_R):
             logger.info(

@@ -60,12 +60,13 @@ class ExplorationEngine:
 
     def should_explore(
         self,
-        symbol:        str,
-        score:         float,
-        equity:        float,
-        ev_ok:         bool  = False,
-        est_risk:      float = 0.0,
-        system_pf:     float = 1.0,   # FIX: system profit factor — block exploration when losing
+        symbol:            str,
+        score:             float,
+        equity:            float,
+        ev_ok:             bool  = False,
+        est_risk:          float = 0.0,
+        system_pf:         float = 1.0,   # FIX: system profit factor — block exploration when losing
+        genome_cost_drag:  float = 0.0,   # FTD-PHOENIX-ESR-001 P4: active genome cost drag %
     ) -> ExploreResult:
         """
         Determine if this signal should be an exploration trade.
@@ -108,6 +109,17 @@ class ExplorationEngine:
                 is_exploration=False, size_mult=1.0,
                 daily_loss_used_pct=self._daily_loss_pct(equity),
                 reason="EV_OK_NO_EXPLORE_NEEDED",
+            )
+
+        # FTD-PHOENIX-ESR-001 P4: block exploration when active genome is fee-toxic
+        if genome_cost_drag > cfg.EXPLORE_MAX_COST_DRAG_PCT:
+            return ExploreResult(
+                is_exploration=False, size_mult=1.0,
+                daily_loss_used_pct=self._daily_loss_pct(equity),
+                reason=(
+                    f"EXPLORE_BLOCKED_FEE_TOXIC"
+                    f"(cost_drag={genome_cost_drag:.1f}%>{cfg.EXPLORE_MAX_COST_DRAG_PCT}%)"
+                ),
             )
 
         # Score floor check
