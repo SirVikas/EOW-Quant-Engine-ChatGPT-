@@ -140,6 +140,7 @@ from core.signal_ecology.exploration_recovery  import exploration_recovery_gover
 from core.signal_ecology.alpha_context_memory  import alpha_context_memory            # PRP-002
 from core.signal_ecology.adaptive_rsi_governor import adaptive_rsi_governor           # PRP-002
 from core.learning_memory.trade_memory_bridge  import trade_memory_bridge              # LRN-001
+from core.exit_attribution import resolve_exit_method, compute_exit_attribution_report # FTD-PHOENIX-EXIT-ATTR-001
 
 
 def _safe_num(v):
@@ -300,6 +301,11 @@ _pending_rcaf_signal_ids: dict[str, str] = {}
 # FTD-EXPLORE-ATTR: bridge RL exploration provenance to close-time TradeRecord persistence
 # Keyed by symbol; written at execution approval, consumed at DataLake persist.
 _pending_exploration_origins: dict[str, dict] = {}
+
+# FTD-PHOENIX-EXIT-ATTR-001: bridge trade_manager exit attribution to close-time persistence.
+# Set when TIME_EXIT fires (FAST_FAIL or TIME_EXIT); consumed on the next tick when
+# risk_ctrl.on_price_update fires the SL-at-price close.
+_pending_exit_attributions: dict[str, dict] = {}
 
 # FTD-DECISION-SNAP: append-only suppression event log
 _supp_log = SuppressionEventLog()
@@ -498,6 +504,9 @@ async def on_tick(tick: Tick):
     action = risk_ctrl.on_price_update(sym, price)
     if action:
         _thought(f"Position closed [{action}] {sym} @ {price}", "TRADE")
+        # FTD-PHOENIX-EXIT-ATTR-001: resolve attribution before enrichment block
+        _exit_attr = _pending_exit_attributions.pop(sym, None)
+        _resolved_exit_method, _resolved_exit_reason = resolve_exit_method(action, _exit_attr)
         if pnl_calc.trades:
             last_trade = pnl_calc.trades[-1]
             # FTD-PATH-ATTR: tag origin pipeline before persisting to DataLake
@@ -543,6 +552,9 @@ async def on_tick(tick: Tick):
                 })
             except Exception:
                 pass
+            # FTD-PHOENIX-EXIT-ATTR-001: persist exit attribution to TradeRecord
+            last_trade.exit_method = _resolved_exit_method
+            last_trade.exit_reason = _resolved_exit_reason
             data_lake.save_trade(asdict(last_trade))
             # FTD-RCAF-001: attribute closed trade PnL back to shadow gate stats
             if cfg.RCAF_ENABLED:
@@ -777,6 +789,12 @@ async def on_tick(tick: Tick):
                 _pos.stop_loss = price
                 trade_manager.deregister(sym)
                 _thought(f"[TM] {sym} TIME_EXIT @ {price:.4f} ({_tm_action.reason})", "TRADE")
+                # FTD-PHOENIX-EXIT-ATTR-001: capture attribution before SL fires next tick
+                _exit_m = "FAST_FAIL" if "Fast-fail" in (_tm_action.reason or "") else "TIME_EXIT"
+                _pending_exit_attributions[sym] = {
+                    "exit_method": _exit_m,
+                    "exit_reason": _tm_action.reason or "",
+                }
 
     # 2. Get candle data for strategy
     candle = mdp.latest_closed_candle(sym)
@@ -2944,6 +2962,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         )
     except Exception as _e:
         _thought(f"⚠ [PHASE-D] Economic truth boot check failed (non-fatal): {_e}", "SYSTEM")
+
+    # ── FTD-PHOENIX-EXIT-ATTR-001: Exit Attribution Layer boot registration ───
+    _thought(
+        "EXIT ATTRIBUTION LAYER ACTIVE | "
+        "exit_method + exit_reason persisted to every TradeRecord | "
+        "methods: FAST_FAIL, TIME_EXIT, STOP_LOSS, TAKE_PROFIT, TRAILING_STOP, "
+        "BREAK_EVEN, VTP_EXIT, SPEED_EXIT, EMERGENCY, MANUAL, UNKNOWN | "
+        "endpoint: /api/exit-attribution",
+        "SYSTEM",
+    )
 
     # ── Phase-E: Survivability Evolution Program boot registration ────────────
     try:
@@ -6820,6 +6848,20 @@ async def economic_truth_orchestration():
     except Exception as _et_fb_exc:
         logger.warning(f"[ET-FEEDBACK] apply_economic_truth_feedback failed: {_et_fb_exc}")
     return result
+
+
+@app.get("/api/exit-attribution")
+async def exit_attribution():
+    """
+    FTD-PHOENIX-EXIT-ATTR-001 — Exit Attribution Report.
+    Per-exit-method performance breakdown: FAST_FAIL, TIME_EXIT, STOP_LOSS,
+    TAKE_PROFIT, TRAILING_STOP, BREAK_EVEN, VTP_EXIT, SPEED_EXIT, EMERGENCY, UNKNOWN.
+    Identifies top destroyer and top alpha-source exit types.
+    """
+    trades = _build_eco_trades()
+    return await asyncio.get_event_loop().run_in_executor(
+        None, compute_exit_attribution_report, trades
+    )
 
 
 @app.get("/api/economic-truth/dashboard")

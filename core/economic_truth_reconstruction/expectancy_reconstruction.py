@@ -151,17 +151,20 @@ def compute_expectancy_reconstruction(trades: List[dict]) -> dict:
             "regime":         defaultdict(list),
             "strategy":       defaultdict(list),
             "hold_bucket":    defaultdict(list),
+            "exit_method":    defaultdict(list),   # FTD-PHOENIX-EXIT-ATTR-001
         }
         for t in trades:
-            sess     = t.get("origin_session", "UNKNOWN") or "UNKNOWN"
-            regime   = t.get("regime", "UNKNOWN")         or "UNKNOWN"
-            strategy = t.get("strategy_id", "default")    or "default"
-            bucket   = _hold_bucket(t)
+            sess        = t.get("origin_session", "UNKNOWN") or "UNKNOWN"
+            regime      = t.get("regime", "UNKNOWN")         or "UNKNOWN"
+            strategy    = t.get("strategy_id", "default")    or "default"
+            bucket      = _hold_bucket(t)
+            exit_method = t.get("exit_method", "UNKNOWN")    or "UNKNOWN"
 
             axes["session"][sess].append(t)
             axes["regime"][regime].append(t)
             axes["strategy"][strategy].append(t)
             axes["hold_bucket"][bucket].append(t)
+            axes["exit_method"][exit_method].append(t)
 
         decomposition: Dict[str, Dict[str, Any]] = {}
         false_expectancy_groups: List[dict] = []
