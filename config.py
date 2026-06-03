@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.45.0"
+APP_VERSION = "1.46.0"
 
 
 class EngineConfig(BaseSettings):
@@ -89,6 +89,8 @@ class EngineConfig(BaseSettings):
     SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
+    # FTD-PHOENIX-ESR-001 Phase 3/6: Trade Duration Protection
+    TRADE_MIN_HOLD_FAST_FAIL_SEC: float = 90.0  # FAST_FAIL cannot fire before 90s — eradicates sub-90s loss exits
 
     # ── Adaptive Mode Engine (tri-modal execution) ───────────────────────────
     # Range Scalper — fires in MEAN_REVERTING regime; eliminates NO_TRADE_SESSION
@@ -110,6 +112,14 @@ class EngineConfig(BaseSettings):
     GENOME_MIN_AVG_R: float = 0.50             # raised 0.20→0.50: only promote DNA with meaningful avg R
     # FTD-PHOENIX-GENOME-READINESS-001: minimum candles per symbol before evaluation is allowed
     GENOME_MIN_CANDLES_TO_EVALUATE: int = 50   # must have ≥ warmup_bars candles to run any meaningful backtest
+    # FTD-PHOENIX-ESR-001 Phase 1: OOS Validation Hardening
+    GENOME_OOS_PASSTHROUGH_ENABLED: bool = False  # False → insufficient OOS data = REJECTED (not auto-pass)
+    GENOME_OOS_MIN_TRADES: int = 10               # minimum OOS trades required for oos_valid = True
+    # FTD-PHOENIX-ESR-001 Phase 5: Fee Destruction Governance
+    GENOME_PROMOTE_MAX_COST_DRAG_PCT: float = 30.0     # Gate 5: reject if fees consume >30% of gross PnL in backtest
+    GENOME_ET_FDR_FREEZE_THRESHOLD: float = 50.0       # live fee_destruction_ratio above this → freeze DNA evolution
+    GENOME_ET_NET_EXP_FREEZE_THRESHOLD: float = -0.15  # live net_expectancy below this → freeze DNA evolution
+    GENOME_ET_FREEZE_MIN_TRADES: int = 100             # min live trades before ET feedback freeze activates
 
     # ── Self-Healing ─────────────────────────────────────────────────────────
     HEAL_INTERVAL_SECONDS: int = 45       # Reduced 60→45: faster ping accumulation for Network score
@@ -247,6 +257,8 @@ class EngineConfig(BaseSettings):
     EXPLORE_EV_FLOOR: float = 0.50       # Max allowed EV negative fraction of est_risk
     EXPLORE_DAILY_LOSS_CAP: float = 0.02 # Max daily equity loss from exploration
     EXPLORE_MAX_TRADES_PER_DAY: int = 50 # EDP: 20→50 — learning mode needs more daily exploration
+    # FTD-PHOENIX-ESR-001 Phase 4: Exploration Economics Review
+    EXPLORE_MAX_COST_DRAG_PCT: float = 20.0  # block exploration when the strategy's backtest cost_drag exceeds 20%
 
     # Adaptive Filter Engine — dynamic threshold tuning
     # EDP: 20→5 min — adaptive filter must respond within minutes, not tens of minutes

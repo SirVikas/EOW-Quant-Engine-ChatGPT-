@@ -1799,10 +1799,17 @@ async def on_tick(tick: Tick):
             _eg_result = exploration_guard.check(
                 daily_loss_pct=exploration_engine.daily_loss_pct(scaler.equity),
             )
+            # FTD-PHOENIX-ESR-001 P4: pass active genome cost_drag so exploration is blocked for fee-toxic strategies
+            _active_genome_metric = genome.active_metrics.get(
+                "TrendFollowing" if "TF" in (sig.strategy_id or "") or "ALPHA" in (sig.strategy_id or "") or "Trend" in (sig.strategy_id or "")
+                else "MeanReversion" if "MR" in (sig.strategy_id or "") or "Mean" in (sig.strategy_id or "")
+                else "TrendFollowing"
+            )
+            _genome_cost_drag = getattr(_active_genome_metric, "cost_drag_pct", 0.0)
             _explore_inject = (
                 exploration_engine.should_explore(
                     symbol=sym, score=_p52_conf, equity=scaler.equity,
-                    ev_ok=False, est_risk=0.0,
+                    ev_ok=False, est_risk=0.0, genome_cost_drag=_genome_cost_drag,
                 )
                 if _eg_result.allowed
                 else ExploreResult(
@@ -6797,9 +6804,22 @@ async def economic_truth_orchestration():
     """Phase-D Orchestration — Unified ECONOMIC_TRUTH_REPORT across all 6 engines."""
     from core.economic_truth_reconstruction.economic_truth_orchestrator import run_economic_truth
     trades = _build_eco_trades()
-    return await asyncio.get_event_loop().run_in_executor(
+    result = await asyncio.get_event_loop().run_in_executor(
         None, run_economic_truth, trades
     )
+    # FTD-PHOENIX-ESR-001 P2: feed strategy-level economics back to genome governance
+    try:
+        strategy_decomp = (
+            result.get("domain_reports", {})
+                  .get("expectancy", {})
+                  .get("decomposition", {})
+                  .get("strategy", {})
+        )
+        if strategy_decomp:
+            genome.apply_economic_truth_feedback(strategy_decomp)
+    except Exception as _et_fb_exc:
+        logger.warning(f"[ET-FEEDBACK] apply_economic_truth_feedback failed: {_et_fb_exc}")
+    return result
 
 
 @app.get("/api/economic-truth/dashboard")

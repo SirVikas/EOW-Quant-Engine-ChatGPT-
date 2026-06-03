@@ -168,6 +168,9 @@ class GenomeEngine:
         self._started_at_ms = int(time.time() * 1000)
         self._last_no_candle_warning_ms = 0
         self._trade_close_count = 0   # 50-trade evolution trigger counter
+        # FTD-PHOENIX-ESR-001 Phase 2: Economic Truth → Genome feedback state
+        self.frozen_strategies: Dict[str, str] = {}   # strategy_type → freeze reason
+        self.et_feedback_log:   List[dict]     = []   # bounded audit trail (200 entries)
         # FTD-PHOENIX-GENOME-READINESS-001: evaluation readiness tracking
         self._eval_attempts   = 0    # total _evolution_cycle() calls attempted
         self._eval_skips      = 0    # cycles skipped due to insufficient candles
@@ -349,6 +352,14 @@ class GenomeEngine:
             regime_buckets = self._classify_symbol_regimes(sample)
 
             for strategy_type in ["TrendFollowing", "MeanReversion", "VolatilityExpansion"]:
+                # FTD-PHOENIX-ESR-001 P2: skip evolution for ET-frozen strategies
+                if strategy_type in self.frozen_strategies:
+                    logger.warning(
+                        f"[GENOME] {strategy_type} FROZEN — skipping evolution cycle. "
+                        f"Reason: {self.frozen_strategies[strategy_type]}"
+                    )
+                    continue
+
                 target_regime = _STRATEGY_TARGET_REGIME[strategy_type]
 
                 # Use regime-matched symbols when available; fall back to full sample.
@@ -523,10 +534,12 @@ class GenomeEngine:
                 and oos_trades >= 2
             )
         else:
-            # Insufficient history — OOS gate is skipped (treated as passing).
+            # FTD-PHOENIX-ESR-001 P1: Insufficient OOS history.
+            # GENOME_OOS_PASSTHROUGH_ENABLED=False (default) → REJECTED, not auto-pass.
+            # The engine uses default DNA until sufficient candle history accumulates.
             oos_pf = oos_win_rate = 0.0
             oos_trades = 0
-            oos_valid  = True  # pass-through; early-session safety valve
+            oos_valid  = cfg.GENOME_OOS_PASSTHROUGH_ENABLED
 
         return GenomeResult(
             genome_id=str(uuid.uuid4())[:8],
@@ -586,7 +599,11 @@ class GenomeEngine:
             overfit_ratio = 999.0
         passes_overfit = overfit_ratio <= cfg.GENOME_OVERFITTING_MAX_RATIO
 
-        all_pass = passes_train and passes_oos and passes_r and passes_overfit
+        # Gate 5 (FTD-PHOENIX-ESR-001 P5): Fee destruction governance.
+        # Reject candidates where backtest fees consume >GENOME_PROMOTE_MAX_COST_DRAG_PCT of gross PnL.
+        passes_fee = candidate.cost_drag_pct <= cfg.GENOME_PROMOTE_MAX_COST_DRAG_PCT
+
+        all_pass = passes_train and passes_oos and passes_r and passes_overfit and passes_fee
 
         if not all_pass:
             reasons = []
@@ -605,6 +622,11 @@ class GenomeEngine:
                 reasons.append(f"r_gate(avg_R={candidate.avg_r_multiple:.2f})")
             if not passes_overfit:
                 reasons.append(f"overfit(ratio={overfit_ratio:.1f})")
+            if not passes_fee:
+                reasons.append(
+                    f"fee_gate(cost_drag={candidate.cost_drag_pct:.1f}%"
+                    f">limit={cfg.GENOME_PROMOTE_MAX_COST_DRAG_PCT}%)"
+                )
 
             self._record_promotion(candidate, "REJECTED", ", ".join(reasons))
             return
@@ -663,6 +685,104 @@ class GenomeEngine:
         # Auto-save winning DNA to disk immediately (Fix A — survives Redis loss)
         if decision == "PROMOTED":
             self._persist_dna()
+
+    # ── FTD-PHOENIX-ESR-001 Phase 2: Economic Truth → Genome Feedback ────────
+
+    def apply_economic_truth_feedback(self, strategy_decomp: dict) -> dict:
+        """
+        Accepts the strategy breakdown from expectancy_reconstruction and freezes
+        any strategy whose live economics breach survivability thresholds.
+
+        Frozen strategies are excluded from future evolution cycles until an
+        operator explicitly calls unfreeze_strategy().
+
+        Args:
+            strategy_decomp: domain_reports["expectancy"]["decomposition"]["strategy"]
+        Returns:
+            feedback summary for audit/reporting
+        """
+        # Map Economic Truth strategy IDs to GenomeEngine strategy types.
+        # A single genome type may cover multiple ET strategy variants.
+        _ET_TO_GENOME: Dict[str, str] = {
+            "TrendFollowing_PAPER_SPEED": "TrendFollowing",
+            "MeanReversion_PAPER_SPEED":  "MeanReversion",
+            "ALPHA_PBE_v1":               "TrendFollowing",
+            "ALPHA_TCB_v1":               "TrendFollowing",
+            "TF_EMA_RSI_v1":              "TrendFollowing",
+            "MR_BB_RSI_v1":               "MeanReversion",
+        }
+
+        events = []
+        ts_ms  = int(time.time() * 1000)
+
+        for et_strategy, stats in strategy_decomp.items():
+            genome_type = _ET_TO_GENOME.get(et_strategy)
+            if not genome_type:
+                continue
+
+            count          = stats.get("count", 0)
+            net_expectancy = stats.get("net_expectancy", 0.0)
+            fee_dr         = stats.get("fee_destruction_ratio", 0.0)
+
+            if count < cfg.GENOME_ET_FREEZE_MIN_TRADES:
+                continue  # insufficient live evidence; defer judgement
+
+            breach = []
+            if fee_dr > cfg.GENOME_ET_FDR_FREEZE_THRESHOLD:
+                breach.append(
+                    f"live_FDR={fee_dr:.1f}>{cfg.GENOME_ET_FDR_FREEZE_THRESHOLD}"
+                )
+            if net_expectancy < cfg.GENOME_ET_NET_EXP_FREEZE_THRESHOLD:
+                breach.append(
+                    f"live_net_exp={net_expectancy:.4f}"
+                    f"<{cfg.GENOME_ET_NET_EXP_FREEZE_THRESHOLD}"
+                )
+
+            if breach and genome_type not in self.frozen_strategies:
+                reason = (
+                    f"ET_FEEDBACK({et_strategy}): {', '.join(breach)}, trades={count}"
+                )
+                self.frozen_strategies[genome_type] = reason
+                event = {
+                    "ts":                   ts_ms,
+                    "action":               "FREEZE",
+                    "strategy_type":        genome_type,
+                    "et_strategy":          et_strategy,
+                    "reason":               reason,
+                    "count":                count,
+                    "net_expectancy":       net_expectancy,
+                    "fee_destruction_ratio": fee_dr,
+                }
+                self.et_feedback_log.append(event)
+                events.append(event)
+                logger.warning(f"[GENOME-ET] FREEZE {genome_type} ← {reason}")
+
+        self.et_feedback_log = self.et_feedback_log[-200:]
+
+        return {
+            "ts":                ts_ms,
+            "events":            events,
+            "frozen_count":      len(self.frozen_strategies),
+            "frozen_strategies": dict(self.frozen_strategies),
+        }
+
+    def unfreeze_strategy(self, strategy_type: str, operator: str = "SYSTEM") -> bool:
+        """
+        Operator override to unfreeze a strategy frozen by ET feedback.
+        Returns True if the strategy was frozen and is now unfrozen.
+        """
+        if strategy_type not in self.frozen_strategies:
+            return False
+        prior_reason = self.frozen_strategies.pop(strategy_type)
+        self.et_feedback_log.append({
+            "ts":                int(time.time() * 1000),
+            "action":            "UNFREEZE",
+            "strategy_type":     strategy_type,
+            "operator":          operator,
+            "prior_freeze_reason": prior_reason,
+        })
+        logger.info(f"[GENOME-ET] UNFREEZE {strategy_type} by operator={operator}")
+        return True
 
     # ── DNA Persistence (Fix A) ───────────────────────────────────────────────
 
@@ -767,6 +887,16 @@ class GenomeEngine:
                 "seed_source":            self._seed_source,
                 "seed_count":             self._seed_count,
                 "ready":                  (max(candle_vals) >= cfg.GENOME_MIN_CANDLES_TO_EVALUATE) if candle_vals else False,
+            },
+            # FTD-PHOENIX-ESR-001 Phase 7: ET feedback observability
+            "et_governance": {
+                "frozen_strategies":    dict(self.frozen_strategies),
+                "frozen_count":         len(self.frozen_strategies),
+                "oos_passthrough":      cfg.GENOME_OOS_PASSTHROUGH_ENABLED,
+                "promote_max_cost_drag": cfg.GENOME_PROMOTE_MAX_COST_DRAG_PCT,
+                "et_fdr_threshold":     cfg.GENOME_ET_FDR_FREEZE_THRESHOLD,
+                "et_net_exp_threshold": cfg.GENOME_ET_NET_EXP_FREEZE_THRESHOLD,
+                "et_feedback_log":      self.et_feedback_log[-20:],
             },
         }
 
