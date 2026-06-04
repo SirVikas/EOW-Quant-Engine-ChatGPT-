@@ -83,6 +83,12 @@ class TradeRecord:
     exit_method:              str = "UNKNOWN"
     exit_reason:              str = ""
 
+    # qFTD-PHOENIX-ECOLOGICAL-ALPHA-RECONSTRUCTION-001: direct confidence field.
+    # Adjusted confidence from decision_snapshot at entry time.
+    # -1.0 means not captured (pre-attribution or missing snapshot).
+    # Avoids unpacking decision_snapshot for confidence analysis.
+    entry_confidence:         float = -1.0
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 

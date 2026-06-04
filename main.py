@@ -559,6 +559,10 @@ async def on_tick(tick: Tick):
             # FTD-PHOENIX-EXIT-ATTR-001: persist exit attribution to TradeRecord
             last_trade.exit_method = _resolved_exit_method
             last_trade.exit_reason = _resolved_exit_reason
+            # qFTD-PHOENIX-ECOLOGICAL-ALPHA-RECONSTRUCTION-001: capture adjusted
+            # confidence as a top-level field (not only inside decision_snapshot).
+            if _snap is not None:
+                last_trade.entry_confidence = round(_snap.get("confidence", -1.0), 4)
             data_lake.save_trade(asdict(last_trade))
             # FTD-RCAF-001: attribute closed trade PnL back to shadow gate stats
             if cfg.RCAF_ENABLED:
@@ -4109,9 +4113,15 @@ async def import_dna_endpoint(body: dict, _auth=Depends(require_roles("operator"
 @app.post("/api/emergency-close")
 async def emergency_close(_auth=Depends(require_roles("admin"))):
     prices = {sym: tick.price for sym, tick in mdp.ticks.items()}
-    risk_ctrl.emergency_close_all(prices)
+    closed_records = risk_ctrl.emergency_close_all(prices)
     _thought("🚨 EMERGENCY CLOSE ALL triggered", "HALT")
-    return {"closed": len(prices)}
+    # Persist emergency-closed trades to DataLake.  Without this, they exist only
+    # in pnl_calc.trades in memory and are lost on restart — attribution gap.
+    for _rec in closed_records:
+        _rec.exit_method = "EMERGENCY"
+        _rec.exit_reason  = "API emergency_close_all"
+        data_lake.save_trade(asdict(_rec))
+    return {"closed": len(closed_records)}
 
 
 @app.post("/api/resume")
