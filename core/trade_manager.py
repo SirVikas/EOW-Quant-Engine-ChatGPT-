@@ -175,7 +175,7 @@ class TradeManager:
                 f"(r={r_mult:.3f})"
             )
             return ManagementAction(
-                action="TIME_EXIT",
+                action="FAST_FAIL",
                 reason=f"Fast-fail: {elapsed/60:.1f}min r={r_mult:.3f}<{_FAST_FAIL_R}",
             )
 

@@ -783,20 +783,38 @@ async def on_tick(tick: Tick):
             _pos = risk_ctrl.positions.get(sym)
             if _pos:
                 _pos.stop_loss = _tm_action.new_sl
+        elif _tm_action.action == "EXTEND_TP" and _tm_action.new_tp > 0:
+            # FTD-VTP-001: propagate TP extension to risk_ctrl so the enforcement
+            # layer actually triggers on the new target (not the original one).
+            _pos = risk_ctrl.positions.get(sym)
+            if _pos:
+                _pos.take_profit = _tm_action.new_tp
+                _thought(f"[TM] {sym} EXTEND_TP → {_tm_action.new_tp:.4f} ({_tm_action.reason})", "TRADE")
+        elif _tm_action.action == "VTP_EXIT":
+            # FTD-VTP-001: velocity stall after partial booking — force close by
+            # setting SL to current price; risk_ctrl fires on the next tick.
+            _pos = risk_ctrl.positions.get(sym)
+            if _pos:
+                _pos.stop_loss = price
+                trade_manager.deregister(sym)
+                _thought(f"[TM] {sym} VTP_EXIT @ {price:.4f} ({_tm_action.reason})", "TRADE")
+                _pending_exit_attributions[sym] = {
+                    "exit_method": "VTP_EXIT",
+                    "exit_reason": _tm_action.reason or "",
+                }
         elif _tm_action.action == "PARTIAL_TP":
             _thought(f"[TM] {sym} PARTIAL_TP {_tm_action.partial_qty:.6f} @ {price:.4f} ({_tm_action.reason})", "TRADE")
-        elif _tm_action.action == "TIME_EXIT":
-            # FTD-037: stale trade — force close by moving SL to current price.
+        elif _tm_action.action in ("TIME_EXIT", "FAST_FAIL"):
+            # FTD-037: stale trade or fast-fail — force close by moving SL to current price.
             # Next tick: risk_ctrl.on_price_update fires SL at ~market price.
             _pos = risk_ctrl.positions.get(sym)
             if _pos:
                 _pos.stop_loss = price
                 trade_manager.deregister(sym)
-                _thought(f"[TM] {sym} TIME_EXIT @ {price:.4f} ({_tm_action.reason})", "TRADE")
+                _thought(f"[TM] {sym} {_tm_action.action} @ {price:.4f} ({_tm_action.reason})", "TRADE")
                 # FTD-PHOENIX-EXIT-ATTR-001: capture attribution before SL fires next tick
-                _exit_m = "FAST_FAIL" if "Fast-fail" in (_tm_action.reason or "") else "TIME_EXIT"
                 _pending_exit_attributions[sym] = {
-                    "exit_method": _exit_m,
+                    "exit_method": _tm_action.action,
                     "exit_reason": _tm_action.reason or "",
                 }
 
