@@ -400,13 +400,15 @@ class RiskController:
         self.scaler.record_trade(result.net_pnl)
 
         close_tag = reason
-        if reason in ("SL", "SPEED"):
+        if reason == "SL":
+            # Refine SL tag based on actual PnL: plain SL, break-even, or trailing stop profit.
             if abs(result.net_pnl) <= cfg.BREAKEVEN_EPSILON_USDT:
                 close_tag = "BE"
             elif result.net_pnl > 0:
                 close_tag = "TSL+"
-            else:
-                close_tag = "SL"
+        # "SPEED" (velocity-stall exit) is intentionally preserved — it maps to
+        # SPEED_EXIT in CLOSE_TAG_MAP.  Relabeling it SL/BE/TSL+ was masking
+        # the velocity-stall mechanism entirely (0 SPEED_EXIT in reports).
 
         self._emit(
             "INFO", symbol,
@@ -434,12 +436,16 @@ class RiskController:
 
     # ── Force Close All ─────────────────────────────────────────────────────
 
-    def emergency_close_all(self, prices: Dict[str, float]):
+    def emergency_close_all(self, prices: Dict[str, float]) -> list:
+        """Close all open positions at current prices.  Returns the list of TradeRecord
+        objects that were closed so the caller can persist them to DataLake."""
         symbols = list(self.positions.keys())
+        before = len(self.pnl_calc.trades)
         for sym in symbols:
             price = prices.get(sym, self.positions[sym].entry_price)
             self._close_position(sym, price, "EMERGENCY")
         self._emit("HALT", "PORTFOLIO", "Emergency close — all positions liquidated.")
+        return list(self.pnl_calc.trades[before:])
 
     # ── Event Log ───────────────────────────────────────────────────────────
 

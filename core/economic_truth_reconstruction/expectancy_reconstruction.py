@@ -200,8 +200,14 @@ def compute_expectancy_reconstruction(trades: List[dict]) -> dict:
         # ── Confidence bucket analysis ────────────────────────────────────────
         conf_buckets: Dict[str, List[dict]] = defaultdict(list)
         for t in trades:
-            ds = t.get("decision_snapshot") or {}
-            conf = ds.get("confidence", None)
+            # Prefer the top-level entry_confidence field (qFTD-PHOENIX-ECOLOGICAL-
+            # ALPHA-RECONSTRUCTION-001); fall back to decision_snapshot for older trades.
+            ec = t.get("entry_confidence", -1.0)
+            if ec is not None and ec >= 0.0:
+                conf = ec
+            else:
+                ds = t.get("decision_snapshot") or {}
+                conf = ds.get("confidence", None)
             if conf is None:
                 bucket = "NO_CONFIDENCE_DATA"
             elif conf >= 0.80:
