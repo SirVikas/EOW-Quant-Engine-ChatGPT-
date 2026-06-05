@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.50.0"
+APP_VERSION = "1.50.1"
 
 
 class EngineConfig(BaseSettings):
@@ -85,7 +85,7 @@ class EngineConfig(BaseSettings):
     USE_LIMIT_ORDERS: bool = True         # Use limit orders to save fees & eliminate slippage
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
-    BREAKEVEN_TRIGGER_R: float = 1.0      # FTD-056-ACT: raised 1.0→1.5, now reverted 1.5→1.0 — forensic audit (2148 trades) showed 99.8% of wins closed below 1.5R (avg win 0.09R); trigger was effectively disabled. Lowering to 1.0R restores protection without cutting winners (winners already close well below 1.0R)
+    BREAKEVEN_TRIGGER_R: float = 0.40     # lowered 1.0→0.40: avg winning trade = 0.09R; BE at 1.0R never armed (99.8% of wins below 1.0R). 0.40R arms BE on trades that develop past the noise floor, protecting gains via trailing stop.
     SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
@@ -154,16 +154,20 @@ class EngineConfig(BaseSettings):
     # Size scale compensates for higher relative fee drag at lower ATR: smaller
     # position → same dollar risk → lower fee % of notional move.
     SESSION_MIN_ATR_PCT: dict = {
-        "ASIA":   0.06,   # stablecoins ATR < 0.01%; 0.06% still filters noise
-        "LONDON": 0.10,   # baseline
-        "NY":     0.10,   # baseline
-        "LATE":   0.07,   # slightly relaxed; lower vol than NY but not ASIA-thin
+        # Expectancy audit (4647 trades): ASIA fee_destruction_ratio=143.5 (fees 143× gross PnL),
+        # LONDON FDR=28.1. Both sessions have positive gross_expectancy but fees annihilate it.
+        # Root cause: low-ATR moves are smaller than round-trip fee cost. Raising ATR floors
+        # blocks setups where the potential move cannot overcome the fee burden.
+        "ASIA":   0.20,   # raised 0.06→0.20: FDR=143.5 — ASIA setups are fee-annihilated at low ATR
+        "LONDON": 0.15,   # raised 0.10→0.15: FDR=28.1 — LONDON fee-collapsed; require meaningful volatility
+        "NY":     0.10,   # unchanged — NY is TRUE_NEGATIVE but not fee-collapsed; FDR=1.23
+        "LATE":   0.07,   # unchanged — LATE is TRUE_NEGATIVE; lower vol but not fee-collapsed
     }
     SESSION_SIZE_SCALE: dict = {
-        "ASIA":   0.50,   # half-size: ASIA vol → fee drag % of move doubles vs NY
-        "LONDON": 1.00,
-        "NY":     1.00,
-        "LATE":   0.70,   # 70%: post-NY liquidity drop; limit slippage exposure
+        "ASIA":   0.30,   # reduced 0.50→0.30: further cut ASIA exposure; FDR=143.5 demands minimal size on surviving setups
+        "LONDON": 0.75,   # reduced 1.00→0.75: LONDON FDR=28.1; reduce size until fee-adjusted edge is proven
+        "NY":     1.00,   # unchanged
+        "LATE":   0.70,   # unchanged — 70%: post-NY liquidity drop
     }
 
     # ── Phase 4: Profit Engine ───────────────────────────────────────────────

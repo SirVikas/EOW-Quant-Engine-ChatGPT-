@@ -54,12 +54,21 @@ class ManagedPosition:
 
 
 # FTD-037: Time-based exit thresholds
-_TIME_EXIT_SECONDS = 8 * 60    # tightened 12→8 min: exit stalling trades faster, reducing fee drag
-_TIME_EXIT_MIN_R   = 0.15      # tightened 0.20→0.15R: earlier exit when momentum fails to develop
+# Expectancy audit (4647 trades): holds <5 min → WR 10-20%, net_exp -0.16 to -0.22 (negative).
+# Holds 5-15 min → WR 50.3%, net_exp +0.07 (survivable). Holds 15-30 min → WR 81.7%.
+# The 8-min / 0.15R TIME_EXIT was cutting trades at avg_win=0.09R (below the 0.15R threshold),
+# turning slow winners into exits. Extended to 20 min; threshold lowered to -0.05R so only
+# genuinely losing (not just slow) trades get cut.
+_TIME_EXIT_SECONDS = 20 * 60   # extended 8→20 min: survivable zone is 5-15 min; don't cut slow winners
+_TIME_EXIT_MIN_R   = -0.05     # lowered 0.15→-0.05R: only TIME_EXIT if trade is actually losing, not just slow
 
 # FTD-LOSS: Early trend-failure fast exit — fires when trending signal reverses immediately
-_FAST_FAIL_R           = -0.35     # tightened -0.45→-0.35: exit trend-failures sooner, cutting per-trade loss by ~0.10R
-_FAST_FAIL_SECONDS     = 5 * 60    # 5-minute window for fast-fail check
+# Expectancy audit: FAST_FAIL exits (1.2% WR) and <5-min exits (10-20% WR) are the primary
+# value destroyers. -0.35R threshold was cutting trades that recovered to winners in the 5-15 min
+# window. Loosened to -0.55R and window narrowed to 3 min — only true entry disasters are cut,
+# normal post-entry noise is now allowed to resolve.
+_FAST_FAIL_R           = -0.55     # loosened -0.35→-0.55: <5-min exits have 1.2% WR; give trades room to breathe
+_FAST_FAIL_SECONDS     = 3 * 60    # narrowed 5→3 min: only catch true entry disasters, not 3-5 min recoverable wiggles
 # FTD-PHOENIX-ESR-001 P3/P6: sub-1-min trade eradication — mirrors cfg.TRADE_MIN_HOLD_FAST_FAIL_SEC
 _FAST_FAIL_MIN_ELAPSED = 90.0      # FAST_FAIL cannot fire before 90s; prevents the <1-min loss-exit cluster
 
