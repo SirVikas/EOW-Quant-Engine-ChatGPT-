@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.50.1"
+APP_VERSION = "1.50.2"
 
 
 class EngineConfig(BaseSettings):
@@ -211,7 +211,7 @@ class EngineConfig(BaseSettings):
     # Trade Manager
     # Raised 2.0→3.0 — with TP at 4.0R, booking 50% at 3.0R preserves upside while locking gains.
     # Previous 2.0R partial TP was dragging down avg win before the full TP move completed.
-    PARTIAL_TP_R: float = 3.0            # raised 2.0→3.0 — book 50% at 3.0R; TP target is now 4.0R
+    PARTIAL_TP_R: float = 1.5            # lowered 3.0→1.5 — with corrected R denominator (actual SL risk), 1.5R is reachable; 3.0R was dead code (TP_R < 3.0 for notional-capped trades)
 
     # ── Phase 5: EV Engine + Adaptive Intelligence ───────────────────────────
     # EV Engine
