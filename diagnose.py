@@ -60,7 +60,9 @@ kv("Engine Version", ver.get("version") or ver.get("app_version") or str(ver))
 hr("2. PnL SUMMARY")
 p = get("/api/pnl")
 kv("Net PnL",        f"${p.get('total_net_pnl', 0):.4f}", warn=lambda v: float(v.strip('$')) < 0)
-kv("Win Rate",       f"{p.get('win_rate', 0)*100:.1f}%", warn=lambda v: float(v.strip('%')) < 45)
+_wr_raw = p.get('win_rate', 0) or 0
+_wr_pct = _wr_raw if _wr_raw > 1 else _wr_raw * 100   # API may return 33.3 or 0.333
+kv("Win Rate",       f"{_wr_pct:.1f}%", warn=lambda v: float(v.strip('%')) < 45)
 kv("Profit Factor",  f"{p.get('profit_factor', 0):.2f}", warn=lambda v: float(v) < 1.0)
 kv("Avg Win",        f"${p.get('avg_win_usdt', 0):.4f}")
 kv("Avg Loss",       f"${p.get('avg_loss_usdt', 0):.4f}")
@@ -85,7 +87,7 @@ if isinstance(trades, list) and trades:
     print()
     sessions = {}
     for t in trades:
-        sess = t.get("session", "UNKNOWN")
+        sess = t.get("origin_session") or t.get("session") or "UNKNOWN"
         if sess not in sessions:
             sessions[sess] = {"pnl": 0, "fee": 0, "count": 0, "wins": 0}
         sessions[sess]["count"] += 1
@@ -101,6 +103,25 @@ if isinstance(trades, list) and trades:
         wr   = d["wins"] / d["count"] * 100 if d["count"] else 0
         flag = " ⚠" if fdr > 5 else ""
         print(f"  {sess:<12} {d['count']:>7} {wr:>6.1f}% {d['pnl']:>10.4f} {d['fee']:>10.4f} {fdr:>7.1f}x{flag}")
+
+    # Fee vs Win analysis
+    avg_win  = p.get("avg_win_usdt", 0) or 0
+    avg_loss = p.get("avg_loss_usdt", 0) or 0
+    n_trades = len(trades)
+    total_fee= p.get("total_fees_paid", 0) or 0
+    fee_per_trade = total_fee / n_trades if n_trades else 0
+    print()
+    print(f"  FEE DRAG ANALYSIS:")
+    print(f"  {'Avg Win':<30} ${avg_win:.4f}")
+    print(f"  {'Avg Loss':<30} ${avg_loss:.4f}")
+    print(f"  {'Fee per trade':<30} ${fee_per_trade:.4f}" + (" ⚠ fee >= avg win!" if fee_per_trade >= abs(avg_win) and avg_win > 0 else ""))
+    rr = abs(avg_win / avg_loss) if avg_loss else 0
+    print(f"  {'Practical R:R':<30} {rr:.2f}" + (" ⚠ need > 0.5" if rr < 0.5 else ""))
+    # Duration stats
+    durations = [(t.get("duration_sec") or t.get("hold_seconds") or 0) for t in trades if t.get("duration_sec") or t.get("hold_seconds")]
+    if durations:
+        avg_dur = sum(durations)/len(durations)
+        print(f"  {'Avg trade duration':<30} {avg_dur:.0f}s ({avg_dur/60:.1f}min)" + (" ⚠ too short" if avg_dur < 180 else ""))
 else:
     print("  No trades yet — waiting for first trade")
 
