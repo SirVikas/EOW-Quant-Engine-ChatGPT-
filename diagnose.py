@@ -219,7 +219,8 @@ kv("Reconnect Attempts", ws.get("reconnect_attempts"), warn=lambda v: v and int(
 # ── 12. LAST 10 TRADES DETAIL ───────────────────────────────
 hr("12. LAST 10 TRADES — DETAIL")
 if isinstance(trades, list) and trades:
-    last10 = trades[-10:]
+    # API returns newest-first; take first 10 = most recent trades
+    last10 = trades[:10]
     hdr = f"  {'#':<3} {'SYM':<10} {'SIDE':<5} {'QTY':>8} {'ENTRY':>10} {'EXIT':>10} {'SL':>10} {'TP':>10} {'NET_PNL':>9} {'FEE':>7} {'R':>6} {'PEAK_R':>7} {'EXIT_REASON':<35} {'SESSION'}"
     print(hdr)
     print(f"  {'-'*len(hdr)}")
