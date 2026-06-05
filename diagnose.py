@@ -90,10 +90,13 @@ if isinstance(trades, list) and trades:
         sess = t.get("origin_session") or t.get("session") or "UNKNOWN"
         if sess not in sessions:
             sessions[sess] = {"pnl": 0, "fee": 0, "count": 0, "wins": 0}
+        _net = t.get("net_pnl") or t.get("pnl") or 0
+        _fee = (t.get("fee_entry") or 0) + (t.get("fee_exit") or 0)
+        if _fee == 0: _fee = t.get("fee") or 0
         sessions[sess]["count"] += 1
-        sessions[sess]["pnl"]   += t.get("pnl", 0) or 0
-        sessions[sess]["fee"]   += t.get("fee", 0) or 0
-        if (t.get("pnl") or 0) > 0:
+        sessions[sess]["pnl"]   += _net
+        sessions[sess]["fee"]   += _fee
+        if _net > 0:
             sessions[sess]["wins"] += 1
 
     print(f"  {'SESSION':<12} {'TRADES':>7} {'WIN%':>7} {'PnL':>10} {'FEE':>10} {'FDR':>8}")
@@ -212,6 +215,33 @@ ws = get("/api/ws-truth")
 kv("State",              ws.get("state"), warn=lambda v: "CONNECTED" not in str(v))
 kv("Gap Seconds",        ws.get("gap_seconds"), warn=lambda v: v and float(v) > 30)
 kv("Reconnect Attempts", ws.get("reconnect_attempts"), warn=lambda v: v and int(v) > 3)
+
+# ── 12. LAST 10 TRADES DETAIL ───────────────────────────────
+hr("12. LAST 10 TRADES — DETAIL")
+if isinstance(trades, list) and trades:
+    last10 = trades[-10:]
+    hdr = f"  {'#':<3} {'SYM':<10} {'SIDE':<5} {'QTY':>8} {'ENTRY':>10} {'EXIT':>10} {'SL':>10} {'TP':>10} {'NET_PNL':>9} {'FEE':>7} {'R':>6} {'PEAK_R':>7} {'EXIT_REASON':<35} {'SESSION'}"
+    print(hdr)
+    print(f"  {'-'*len(hdr)}")
+    for i, t in enumerate(last10, 1):
+        sym      = t.get("symbol", "?")[:9]
+        side     = t.get("side", "?")[:4]
+        qty      = t.get("qty", 0)
+        entry    = t.get("entry_price", 0)
+        exit_p   = t.get("exit_price", 0)
+        sl       = t.get("stop_loss", 0)
+        tp       = t.get("take_profit", 0)
+        net_pnl  = t.get("net_pnl") or t.get("pnl") or 0
+        fee      = (t.get("fee_entry") or 0) + (t.get("fee_exit") or 0)
+        if fee == 0: fee = t.get("fee") or 0
+        r        = t.get("r_multiple", 0) or 0
+        peak_r   = t.get("peak_r", 0) or 0
+        reason   = (t.get("exit_reason") or t.get("exit_method") or "?")[:34]
+        sess     = t.get("origin_session") or t.get("session") or "?"
+        flag     = " ✓" if net_pnl > 0 else " ✗"
+        print(f"  {i:<3} {sym:<10} {side:<5} {qty:>8.4f} {entry:>10.4f} {exit_p:>10.4f} {sl:>10.4f} {tp:>10.4f} {net_pnl:>9.4f} {fee:>7.4f} {r:>6.3f} {peak_r:>7.3f} {reason:<35} {sess}{flag}")
+else:
+    print("  No trades yet")
 
 # ── DONE ────────────────────────────────────────────────────
 print(f"\n{'#'*60}")
