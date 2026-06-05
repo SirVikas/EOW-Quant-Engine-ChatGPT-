@@ -118,6 +118,11 @@ class CapitalScaler:
                     f"(≤{self.MAX_NOTIONAL_PCT*100:.0f}% equity)"
                 )
                 qty = max_qty
+                # Recalculate actual risk after cap — notional cap shrinks qty so actual
+                # SL risk < budget risk. All R-based thresholds (BE, fast-fail, partial TP,
+                # trail) must use actual risk as denominator, not the uncapped budget.
+                if sl_dist > 0:
+                    usdt_risk = qty * sl_dist
 
         logger.debug(
             f"[SCALER] {symbol} | Equity={equity:.2f} DD={drawdown*100:.1f}% "
