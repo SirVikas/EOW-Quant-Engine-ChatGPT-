@@ -32,7 +32,7 @@ def kv(label, value, warn=None):
 
 print(f"\n{'#'*60}")
 print(f"  EOW QUANT ENGINE — DIAGNOSTIC REPORT")
-print(f"  Generated: {datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC")
+print(f"  Generated: {datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC")
 print(f"{'#'*60}")
 
 # ── 1. ENGINE STATUS ────────────────────────────────────────
@@ -72,7 +72,7 @@ kv("Total Fees Paid",f"${p.get('total_fees_paid', 0):.4f}")
 kv("Total Trades",   p.get("n_trades"))
 
 # ── 3. EXIT TYPE BREAKDOWN ──────────────────────────────────
-hr("3. EXIT TYPE BREAKDOWN  (v1.50.1 key fix area)")
+hr("3. EXIT TYPE BREAKDOWN  (v1.50.2 key fix area)")
 trades = get("/api/trades")
 if isinstance(trades, list) and trades:
     exits = Counter(t.get("exit_reason") or t.get("exit_method") or "UNKNOWN" for t in trades)
