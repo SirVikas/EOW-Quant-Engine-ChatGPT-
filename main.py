@@ -238,8 +238,10 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
 #   MeanReversion_PAPER_SPEED: 1287+ visits across RL contexts, WR 16-19%, -$293.75 total;
 #     RL classified MEAN_REVERTING|LONDON (Q=-0.422) and MEAN_REVERTING|ASIA (Q=-0.344) toxic
 _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
-    "TF_EMA_RSI_v1",
-    "MR_BB_RSI_v1",
+    # TF_EMA_RSI_v1 and MR_BB_RSI_v1 intentionally removed — primary strategies
+    # restored to active status so they trade with full quality-gate stack rather
+    # than bypassing all filters via BYPASS_ALL_GATES.  PAPER_SPEED variants and
+    # inverse/alpha noise generators remain disabled.
     "ALPHA_TCB_v1",
     "ALPHA_PBE_v1",
     "VE_BREAKOUT_ATR_v1",
@@ -525,10 +527,17 @@ async def on_tick(tick: Tick):
             # FTD-SESSION-FORENSICS: assign origin + close session attribution
             _close_utc_h = __import__("datetime").datetime.utcnow().hour
             _close_sess  = _get_session_label(_close_utc_h)
-            _origin_sess = (_snap.get("session_label", "UNKNOWN")
-                            if _snap is not None else "UNKNOWN")
-            _origin_utc_h = (_snap.get("utc_hour", -1)
-                             if _snap is not None else -1)
+            if _snap is not None:
+                _origin_sess  = _snap.get("session_label", "UNKNOWN")
+                _origin_utc_h = _snap.get("utc_hour", -1)
+            else:
+                # Fallback: snapshot missing (restart between open/close, or execution
+                # path that skipped snapshot save).  Derive session from entry_ts so
+                # these trades are attributable and RL context is correct.
+                _origin_utc_h = __import__("datetime").datetime.utcfromtimestamp(
+                    last_trade.entry_ts / 1000
+                ).hour
+                _origin_sess  = _get_session_label(_origin_utc_h)
             _crossed = (_origin_sess != "UNKNOWN") and (_origin_sess != _close_sess)
             last_trade.origin_session           = _origin_sess
             last_trade.close_session            = _close_sess
