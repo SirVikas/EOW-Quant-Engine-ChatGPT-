@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.50.3"
+APP_VERSION = "1.51.0"
 
 
 class EngineConfig(BaseSettings):
@@ -415,7 +415,11 @@ class EngineConfig(BaseSettings):
     # True = bypass all 38 inline quality gates; only hard risk limits apply
     # (max drawdown halt, max leverage cap). Lean gate handles essential safety.
     # Paper mode: safe to run True. Flip False to re-engage full gate chain.
-    BYPASS_ALL_GATES: bool = Field(default=True, env="BYPASS_ALL_GATES")
+    # False = full quality-gate stack active (signal filter, RR gate, hour gate,
+    # confidence threshold, fee check, sector guard).  True = paper warmup / data
+    # collection mode — all gates bypassed, disabled strategy IDs allowed to trade.
+    # Root cause of 29% WR: True lets noise generators trade without any filtering.
+    BYPASS_ALL_GATES: bool = Field(default=False, env="BYPASS_ALL_GATES")
 
     # ── Phase 7: Profit Maximization + Edge Amplification ─────────────────────
     # Trade Ranker — edge prioritization engine
