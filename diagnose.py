@@ -108,7 +108,8 @@ if "_error" in s:
     sys.exit(1)
 
 kv("Mode",           s.get("mode"))
-kv("WS Status",      s.get("ws_status"), warn=lambda v: "CONNECTED" not in str(v))
+kv("WS Status",      s.get("ws_status"),
+   warn=lambda v: "CONNECTED" not in str(v) and "LIVE" not in str(v))
 kv("Capital",        f"${s.get('capital', 0):.2f}")
 kv("Open Positions", s.get("open_positions"))
 kv("Total Trades",   s.get("total_trades"), warn=lambda v: v == 0)
@@ -649,8 +650,8 @@ _health.append(("Engine",   "OK" if not s.get("halted") else "HALTED",
 
 # WS
 _ws_state = s.get("ws_status", "?")
-_health.append(("WebSocket", "OK" if "CONNECTED" in str(_ws_state) else "WARN",
-                 str(_ws_state)[:40]))
+_ws_ok    = "CONNECTED" in str(_ws_state) or "LIVE" in str(_ws_state)
+_health.append(("WebSocket", "OK" if _ws_ok else "WARN", str(_ws_state)[:40]))
 
 # Scaler / Capital
 _cap = safe_float(s.get("capital", 0))
