@@ -259,9 +259,9 @@ ec = get("/api/prp/002/ecology")
 if "_error" not in ec:
     kv("Total Evaluated",     ec.get("total_evaluated"))
     kv("Total Approved",      ec.get("total_approved"), warn=lambda v: v == 0)
-    kv("RSI Blocked",         ec.get("total_rsi_blocked"), warn=lambda v: v and v > 0)
-    kv("Context Blocked",     ec.get("total_ctx_blocked"), warn=lambda v: v and v > 0)
-    kv("Recovery Trades",     ec.get("total_recovery_trades"))
+    kv("RSI Blocked",         ec.get("rsi_blocked") or ec.get("total_rsi_blocked"), warn=lambda v: v and v > 0)
+    kv("Context Blocked",     ec.get("context_blocked") or ec.get("total_ctx_blocked"), warn=lambda v: v and v > 0)
+    kv("Recovery Trades",     ec.get("recovery_trades") or ec.get("total_recovery_trades"))
     sr = ec.get("survival_rate") or ec.get("overall_survival_rate")
     if sr is not None:
         kv("Survival Rate",   f"{safe_float(sr)*100:.1f}%", warn=lambda v: float(v.strip('%')) < 5)
@@ -305,7 +305,7 @@ if "_error" not in rg:
                 sym_    = d.get("symbol", "?")
                 regime_ = d.get("regime", "?")
                 rsi_    = d.get("rsi", "?")
-                side_   = d.get("side", "NONE")
+                side_   = d.get("side") or "NONE"
                 blocked_= "BLOCKED" if d.get("blocked") else "PASS"
                 reason_ = (d.get("reason", "") or "")[:50]
                 print(f"    {sym_:<10} {regime_:<15} rsi={rsi_:<6} → {side_:<5} {blocked_:<8} {reason_}")
