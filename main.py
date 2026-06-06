@@ -1609,12 +1609,23 @@ async def on_tick(tick: Tick):
                     "SIGNAL",
                 )
             else:
+                _ps_block_reason = (
+                    _ps_ec_dec.rsi_block_reason or _ps_ec_dec.block_reason
+                    or "RSI_FILTER_BLOCKED"
+                )
                 _thought(
-                    f"⚡ PAPER_SPEED {sym}: "
-                    f"{_ps_ec_dec.rsi_block_reason or _ps_ec_dec.block_reason or 'RSI filter blocked'} "
+                    f"⚡ PAPER_SPEED {sym}: {_ps_block_reason} "
                     f"(rsi={_rsi_val:.1f} above_sma={_above_sma} regime={regime.value})",
                     "FILTER",
                 )
+                # Record skip so section 7 shows PAPER_SPEED block reason (was silent)
+                _last_skip = {
+                    "ts": now_ms, "symbol": sym,
+                    "reason": f"PS_RSI({_ps_block_reason[:60]})",
+                    "rsi": round(_rsi_val, 1), "above_sma": _above_sma,
+                    "regime": regime.value, "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, f"PS_RSI_BLOCK")
 
         # RSI_CRASH_GUARD: block alpha/primary signals in RSI extreme zones.
         # Forensic evidence: 72.5% false-positive rate at EXTREME_LOW RSI (<20) from
