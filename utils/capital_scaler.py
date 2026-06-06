@@ -66,15 +66,20 @@ class CapitalScaler:
 
         # ── Emergency Halt ─────────────────────────────────────────────────
         if drawdown >= cfg.MAX_DRAWDOWN_HALT:
-            if cfg.BYPASS_ALL_GATES:
-                # Paper / dev mode: reset peak so we don't stay permanently halted
+            if cfg.BYPASS_ALL_GATES or cfg.TRADE_MODE == "PAPER":
+                # In PAPER mode: reset peak to current equity so accumulated
+                # historical losses (often from a prior BYPASS=True era) don't
+                # permanently prevent the engine from taking new trades.
+                # Only hard-halt in LIVE mode where real capital is at risk.
+                _orig_dd = drawdown
                 self._peak = self._equity
                 drawdown = 0.0
                 logger.warning(
-                    f"[SCALER] MDD bypass: peak reset to {self._equity:.2f} (BYPASS_ALL_GATES)"
+                    f"[SCALER] MDD {_orig_dd*100:.1f}% ≥ halt in PAPER mode: "
+                    f"peak reset to {self._equity:.2f} — trading continues"
                 )
             else:
-                logger.critical(f"[SCALER] ⛔ MDD {drawdown*100:.1f}% — ENGINE HALTED")
+                logger.critical(f"[SCALER] ⛔ MDD {drawdown*100:.1f}% — ENGINE HALTED (LIVE)")
                 return SizingDecision(
                     symbol=symbol, usdt_risk=0, qty=0,
                     position_pct=0, method="HALT",
