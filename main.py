@@ -248,7 +248,9 @@ _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
     "ALPHA_VSE_v1",
     "MR_BB_RSI_v1_INV",
     "TrendFollowing_PAPER_SPEED_INV",
-    "TrendFollowing_PAPER_SPEED",    # 117 trades, PF 0.657, -$16.20
+    # TrendFollowing_PAPER_SPEED re-enabled (v1.51.3): was silently blocking all
+    # PAPER_SPEED fallback signals → 0 trades with BYPASS_ALL_GATES=False.
+    # Historical PF 0.657 was under bypass (no gates); quality-gate stack now active.
     "MeanReversion_PAPER_SPEED",     # 1287+ visits, WR 16-19%, -$293.75; RL TOXIC
 })
 # Paper-speed fallback block (prevents synthesizing signals for bad strategy types).
@@ -1602,6 +1604,12 @@ async def on_tick(tick: Tick):
             # drought → ALLOW_COLLAPSE (same failure mode as LCC + RL-TOXIC, FTD-054-PHOENIX).
             if sig.strategy_id in _DISABLED_STRATEGY_IDS:
                 if not cfg.BYPASS_ALL_GATES:
+                    _ds_reason = f"DISABLED_STRATEGY({sig.strategy_id})"
+                    _last_skip = {
+                        "ts": now_ms, "symbol": sym, "reason": _ds_reason,
+                        "strategy_id": sig.strategy_id,
+                    }
+                    trade_flow_monitor.record_skip(sym, _ds_reason)
                     return
                 _thought(
                     f"⚡ DISABLED_OVERRIDE {sym}: {sig.strategy_id} allowed "
