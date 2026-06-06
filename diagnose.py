@@ -110,7 +110,9 @@ if isinstance(trades, list) and trades:
     # Fee vs Win analysis
     avg_win  = p.get("avg_win_usdt", 0) or 0
     avg_loss = p.get("avg_loss_usdt", 0) or 0
-    n_trades = len(trades)
+    # Use authoritative total-trade count from PnL stats; len(trades) is capped
+    # at the /api/trades limit (200) and would inflate fee-per-trade by ~24×.
+    n_trades = p.get("n_trades") or p.get("total_trades") or len(trades)
     total_fee= p.get("total_fees_paid", 0) or 0
     fee_per_trade = total_fee / n_trades if n_trades else 0
     print()
@@ -195,14 +197,23 @@ if failed:
 hr("10. STRATEGY USAGE")
 su = get("/api/strategy-usage")
 if isinstance(su, dict):
-    for strat, data in su.items():
-        if isinstance(data, dict):
-            count = data.get("count", data.get("trades", 0))
-            wr    = data.get("win_rate", 0)
-            pnl   = data.get("pnl", data.get("net_pnl", 0))
-            print(f"  {strat:<30} trades={count}  WR={wr*100:.1f}%  PnL={pnl:.4f}")
+    print(f"  total_trades (current session): {su.get('total_trades', 0)}")
+    fractions = su.get("usage_fractions") or {}
+    if isinstance(fractions, dict) and any(v > 0 for v in fractions.values()):
+        for strat, frac in fractions.items():
+            print(f"  {strat:<30} {frac*100:.1f}%")
+    else:
+        usage_strs = su.get("strategy_usage") or {}
+        if isinstance(usage_strs, dict):
+            for strat, pct in usage_strs.items():
+                print(f"  {strat:<30} {pct}")
         else:
-            print(f"  {strat}: {data}")
+            print(f"  (no usage data)")
+    active = su.get("active_strategies", [])
+    print(f"  active_strategies: {active}")
+    warn = su.get("warning", "")
+    if warn:
+        print(f"  ⚠ {warn}")
 elif isinstance(su, list):
     for item in su:
         print(f"  {item}")
