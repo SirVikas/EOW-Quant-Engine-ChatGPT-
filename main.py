@@ -4389,10 +4389,15 @@ async def get_last_skip():
 async def get_skip_reasons():
     """All-session skip reason counts — consolidated No-Trade audit log."""
     summary = trade_flow_monitor.summary()
+    # Return all skip reasons (not just top 5) for full forensic audit
+    all_reasons = dict(
+        sorted(trade_flow_monitor._skip_reasons.items(), key=lambda x: -x[1])
+    )
     return {
-        "top_rejection_reasons": summary.get("top_rejection_reasons", {}),
-        "total_skips":           summary.get("total_skips", 0),
-        "rejection_rate_pct":    summary.get("rejection_rate_pct", 0),
+        "all_rejection_reasons":    all_reasons,
+        "top_rejection_reasons":    dict(list(all_reasons.items())[:5]),
+        "total_skips":              summary.get("total_skips", 0),
+        "rejection_rate_pct":       summary.get("rejection_rate_pct", 0),
         "minutes_since_last_trade": summary.get("minutes_since_last_trade", 0),
         "ts": int(time.time() * 1000),
     }
