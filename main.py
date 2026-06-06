@@ -1721,6 +1721,7 @@ async def on_tick(tick: Tick):
                     "reason": _inv.reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, f"AIE_CALIBRATE")
                 return
             if _inv.inverted:
                 if cfg.BYPASS_ALL_GATES:
@@ -1750,12 +1751,22 @@ async def on_tick(tick: Tick):
                     f"(equity={sizing.current_equity:.2f} method={sizing.method})",
                     "FILTER",
                 )
+                _last_skip = {
+                    "ts": int(time.time() * 1000), "symbol": sym,
+                    "reason": f"ZERO_QTY: {sizing.reason}",
+                    "equity": round(sizing.current_equity, 2),
+                    "method": sizing.method,
+                    "regime": regime.value, "strategy": strategy_type,
+                }
+                trade_flow_monitor.record_skip(sym, "ZERO_QTY")
                 return
             _edge_mult = edge_engine.get_size_multiplier(regime.value, strategy_type)
             _aee_mult  = adaptive_edge_engine.get_size_mult(strategy_type)
-            if cfg.BYPASS_ALL_GATES and _aee_mult == 0.0:
-                # AEE disabled → would zero out qty; in bypass mode keep trading
-                # so the engine can recover stats and re-enable the strategy
+            if _aee_mult == 0.0:
+                # AEE disabled (strategy below PF/win-rate floor) → keep trading
+                # in PAPER_SPEED/PAPER mode so the engine accumulates data to
+                # re-enable the strategy; without this all PAPER_SPEED trades are
+                # silently zeroed out whenever AEE hasn't calibrated yet.
                 _aee_mult = 1.0
             # Combine: take the lower bound as a safety floor, then apply edge boost
             # AEE SCALING (>1×) stacks with edge_engine boost; REDUCED (<1×) overrides
@@ -1867,6 +1878,7 @@ async def on_tick(tick: Tick):
                     "reason": _fee_reason, "regime": regime.value,
                     "strategy": strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, f"FEE_REJECT")
                 return
 
             # ── Phase 6: Loss Cluster Controller — gates ALL trades ──────────
@@ -2408,6 +2420,7 @@ async def on_tick(tick: Tick):
                     "net_if_tp":   round(edge.get("net_if_tp", 0), 4),
                     "strategy":    strategy_type,
                 }
+                trade_flow_monitor.record_skip(sym, "WEAK_EDGE")
                 return
 
             # 7. PAPER MODE EXECUTION LOCK (qFTD-009 §FIX5 — non-negotiable)
