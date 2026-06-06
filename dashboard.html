@@ -565,6 +565,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
   <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
   <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
+  <button class="tab-btn"        onclick="switchTab('truth')"        id="tab-btn-truth">🔬 Truth Engine</button>
 </nav>
 
 <!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
@@ -3676,6 +3677,177 @@ async function ailExportForAI() {
 }
 </script>
 </div><!-- /tab-ailmonitor -->
+
+<!-- ══ TAB: TRUTH ENGINE ═══════════════════════════════════════════════════ -->
+<div id="tab-truth" class="tab-panel">
+<div style="padding:16px 20px;">
+
+<!-- ETE Status Card -->
+<div class="card" style="margin-bottom:14px;">
+  <div class="card-title">Entry Truth Engine (ETE) — Observation Mode</div>
+  <div id="ete-status-body" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+    <span id="ete-mode-badge" style="padding:4px 10px;border-radius:4px;font-size:12px;font-weight:700;background:#C6F6D5;color:#276749;">OBSERVATION</span>
+    <span style="font-size:13px;">Last Score: <b id="ete-last-score">—</b></span>
+    <span style="font-size:13px;">Evals: <b id="ete-eval-count">0</b></span>
+    <span style="font-size:13px;">Gate: <b id="ete-gate">Disabled</b></span>
+    <span style="font-size:13px;">Min Score: <b id="ete-min-score">45</b></span>
+  </div>
+  <div style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap;" id="ete-components">
+    <span style="font-size:12px;">Structure: <b id="ete-c-structure">—</b></span>
+    <span style="font-size:12px;">Regime: <b id="ete-c-regime">—</b></span>
+    <span style="font-size:12px;">Momentum: <b id="ete-c-momentum">—</b></span>
+    <span style="font-size:12px;">Volatility: <b id="ete-c-volatility">—</b></span>
+    <span style="font-size:12px;">Liquidity: <b id="ete-c-liquidity">—</b></span>
+    <span style="font-size:12px;">Cost: <b id="ete-c-cost">—</b></span>
+  </div>
+</div>
+
+<!-- Alpha Discovery Matrix -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+  <div class="card">
+    <div class="card-title">Top Alpha Sources</div>
+    <table class="bm-table" id="truth-alpha-sources-table">
+      <thead><tr><th>Component</th><th>Win Count</th><th>Avg Score</th></tr></thead>
+      <tbody id="truth-alpha-sources-body"><tr><td colspan="3" style="color:#718096;font-style:italic;">Loading...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">Top Alpha Destroyers</div>
+    <table class="bm-table" id="truth-destroyers-table">
+      <thead><tr><th>Component</th><th>Loss Count</th><th>Avg Score</th></tr></thead>
+      <tbody id="truth-destroyers-body"><tr><td colspan="3" style="color:#718096;font-style:italic;">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Score vs Expectancy -->
+<div class="card" style="margin-bottom:14px;">
+  <div class="card-title">Score vs Expectancy</div>
+  <table class="bm-table">
+    <thead><tr><th>Score Bucket</th><th>Avg PnL (USDT)</th><th>Trades</th></tr></thead>
+    <tbody id="truth-sve-body"><tr><td colspan="3" style="color:#718096;font-style:italic;">Loading...</td></tr></tbody>
+  </table>
+</div>
+
+<!-- Truth Calibration -->
+<div class="card" style="margin-bottom:14px;">
+  <div class="card-title">Truth Calibration (ETE Score Decile → Win Rate)</div>
+  <table class="bm-table">
+    <thead><tr><th>Decile</th><th>Avg PnL</th><th>Win Rate</th><th>Trades</th></tr></thead>
+    <tbody id="truth-calibration-body"><tr><td colspan="4" style="color:#718096;font-style:italic;">Loading...</td></tr></tbody>
+  </table>
+</div>
+
+<!-- Recent Truth Snapshots -->
+<div class="card">
+  <div class="card-title">Recent Truth Snapshots (last 20 trades)</div>
+  <div style="overflow-x:auto;">
+  <table class="bm-table">
+    <thead><tr><th>Symbol</th><th>ETE Score</th><th>Structure</th><th>Regime</th><th>Momentum</th><th>Vol</th><th>Liq</th><th>Cost</th><th>Net PnL</th><th>R-Mult</th></tr></thead>
+    <tbody id="truth-recent-body"><tr><td colspan="10" style="color:#718096;font-style:italic;">Loading...</td></tr></tbody>
+  </table>
+  </div>
+</div>
+
+</div><!-- /padding -->
+<script>
+// ── Truth Engine tab ──────────────────────────────────────────────────────────
+let _truthRefreshTimer = null;
+
+function loadTruthStatus() {
+  fetch('/api/truth/ete-status').then(r=>r.json()).then(d=>{
+    document.getElementById('ete-eval-count').textContent = d.eval_count ?? 0;
+    document.getElementById('ete-last-score').textContent = d.last_score != null ? d.last_score.toFixed(1) : '—';
+    document.getElementById('ete-gate').textContent = d.gate_enabled ? 'Enabled' : 'Disabled';
+    document.getElementById('ete-min-score').textContent = d.min_score ?? 45;
+    const badge = document.getElementById('ete-mode-badge');
+    if (d.observation_mode) {
+      badge.textContent = 'OBSERVATION'; badge.style.background='#C6F6D5'; badge.style.color='#276749';
+    } else {
+      badge.textContent = 'GATE ACTIVE'; badge.style.background='#FED7D7'; badge.style.color='#C53030';
+    }
+    document.getElementById('ete-c-structure').textContent = d.last_structure != null ? d.last_structure.toFixed(0) : '—';
+    document.getElementById('ete-c-regime').textContent = d.last_regime != null ? d.last_regime.toFixed(0) : '—';
+    document.getElementById('ete-c-momentum').textContent = d.last_momentum != null ? d.last_momentum.toFixed(0) : '—';
+    document.getElementById('ete-c-volatility').textContent = d.last_volatility != null ? d.last_volatility.toFixed(0) : '—';
+    document.getElementById('ete-c-liquidity').textContent = d.last_liquidity != null ? d.last_liquidity.toFixed(0) : '—';
+    document.getElementById('ete-c-cost').textContent = d.last_cost != null ? d.last_cost.toFixed(0) : '—';
+  }).catch(()=>{});
+}
+
+function loadAlphaMatrix() {
+  fetch('/api/truth/alpha-matrix').then(r=>r.json()).then(d=>{
+    const srcBody = document.getElementById('truth-alpha-sources-body');
+    const desBody = document.getElementById('truth-destroyers-body');
+    const sveBody = document.getElementById('truth-sve-body');
+    srcBody.innerHTML = (d.top_alpha_sources||[]).map(x=>
+      `<tr><td>${x.component}</td><td>${x.win_count}</td><td>${x.avg_score}</td></tr>`
+    ).join('') || '<tr><td colspan="3" style="color:#718096;">No data</td></tr>';
+    desBody.innerHTML = (d.top_destroyers||[]).map(x=>
+      `<tr><td>${x.component}</td><td>${x.loss_count}</td><td>${x.avg_score}</td></tr>`
+    ).join('') || '<tr><td colspan="3" style="color:#718096;">No data</td></tr>';
+    sveBody.innerHTML = (d.score_vs_expectancy||[]).map(x=>{
+      const pnlColor = x.avg_pnl >= 0 ? '#276749' : '#C53030';
+      return `<tr><td>${x.score_bucket}</td><td style="color:${pnlColor};font-weight:600;">${x.avg_pnl.toFixed(4)}</td><td>${x.trade_count}</td></tr>`;
+    }).join('') || '<tr><td colspan="3" style="color:#718096;">No data</td></tr>';
+  }).catch(()=>{});
+}
+
+function loadCalibration() {
+  fetch('/api/truth/calibration').then(r=>r.json()).then(d=>{
+    const body = document.getElementById('truth-calibration-body');
+    body.innerHTML = (d.calibration||[]).map(x=>{
+      const pnlColor = x.avg_pnl >= 0 ? '#276749' : '#C53030';
+      const wrColor = x.win_rate >= 0.5 ? '#276749' : (x.win_rate >= 0.35 ? '#744210' : '#C53030');
+      return `<tr><td>${x.decile}</td><td style="color:${pnlColor};">${x.avg_pnl.toFixed(4)}</td><td style="color:${wrColor};">${(x.win_rate*100).toFixed(1)}%</td><td>${x.trade_count}</td></tr>`;
+    }).join('') || '<tr><td colspan="4" style="color:#718096;">No data</td></tr>';
+  }).catch(()=>{});
+}
+
+function loadRecentSnapshots() {
+  fetch('/api/truth/recent').then(r=>r.json()).then(rows=>{
+    const body = document.getElementById('truth-recent-body');
+    const show = rows.slice(0, 20);
+    body.innerHTML = show.map(r=>{
+      const pnlColor = r.net_pnl >= 0 ? '#276749' : '#C53030';
+      const scoreColor = r.entry_truth_score >= 70 ? '#276749' : (r.entry_truth_score >= 45 ? '#744210' : '#C53030');
+      return `<tr>
+        <td>${r.symbol||'—'}</td>
+        <td style="color:${scoreColor};font-weight:600;">${(r.entry_truth_score||0).toFixed(1)}</td>
+        <td>${(r.structure_score||0).toFixed(0)}</td>
+        <td>${(r.regime_score||0).toFixed(0)}</td>
+        <td>${(r.momentum_score||0).toFixed(0)}</td>
+        <td>${(r.volatility_score||0).toFixed(0)}</td>
+        <td>${(r.liquidity_score||0).toFixed(0)}</td>
+        <td>${(r.cost_score||0).toFixed(0)}</td>
+        <td style="color:${pnlColor};font-weight:600;">${(r.net_pnl||0).toFixed(4)}</td>
+        <td>${(r.r_multiple||0).toFixed(2)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="10" style="color:#718096;">No trades yet</td></tr>';
+  }).catch(()=>{});
+}
+
+function refreshTruthTab() {
+  loadTruthStatus();
+  loadAlphaMatrix();
+  loadCalibration();
+  loadRecentSnapshots();
+}
+
+// Hook into tab switch
+const _origSwitchTab = typeof switchTab === 'function' ? switchTab : null;
+document.addEventListener('DOMContentLoaded', () => {
+  const truthBtn = document.getElementById('tab-btn-truth');
+  if (truthBtn) {
+    truthBtn.addEventListener('click', () => {
+      refreshTruthTab();
+      if (_truthRefreshTimer) clearInterval(_truthRefreshTimer);
+      _truthRefreshTimer = setInterval(refreshTruthTab, 30000);
+    });
+  }
+});
+</script>
+</div><!-- /tab-truth -->
 
 <script>
 // ── PRP Chain tab ─────────────────────────────────────────────────────────────
