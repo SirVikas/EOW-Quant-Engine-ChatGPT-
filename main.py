@@ -1050,12 +1050,18 @@ async def on_tick(tick: Tick):
             _allowed_hours = sorted(set(range(24)) - _AVOID_HOURS_UTC)
             _next_open = next((h for h in _allowed_hours if h > _current_utc_hour),
                               _allowed_hours[0])
+            _hg_reason = f"HOUR_GATE({_current_utc_hour:02d}h_UTC_blocked,next={_next_open:02d}h)"
             _thought(
                 f"⏸ HOUR_GATE {sym}: {_current_utc_hour:02d}h UTC BLOCKED — "
                 f"next open: {_next_open:02d}h UTC | "
                 f"golden hours (positive PnL): 07h 10h 14h UTC",
                 "FILTER",
             )
+            _last_skip = {
+                "ts": now_ms, "symbol": sym, "reason": _hg_reason,
+                "regime": regime.value, "strategy": strategy_type,
+            }
+            trade_flow_monitor.record_skip(sym, _hg_reason)
             return
 
         # No session hard blocks. ASIA/LATE are allowed to trade with session-calibrated
