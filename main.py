@@ -4431,7 +4431,7 @@ async def get_profit_guard():
     stats = pnl_calc.session_stats
     return profit_guard.summary(
         profit_factor=stats.get("profit_factor", 0.0),
-        n_trades=len(pnl_calc.trades),
+        n_trades=len(pnl_calc.trades) - _boot_replay_count,
     )
 
 

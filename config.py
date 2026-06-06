@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.52.6"
+APP_VERSION = "1.52.7"
 
 
 class EngineConfig(BaseSettings):
@@ -182,7 +182,9 @@ class EngineConfig(BaseSettings):
     # and wider TP (10×ATR = 4.0× RR). A lower score-min + higher RR is superior to
     # high score-min + no trades. Math: TRENDING+ADX18+1.5xVol+RSI0 → score≈0.47.
     # Score formula: regime(25%) + volume(20%) + adx(20%) + rsi_slope(15%) + vol_exp(10%) + cost(10%)
-    MIN_TRADE_SCORE: float = 0.48        # lowered 0.55→0.48 — quiet-market floor; quality via RR gate
+    # Lowered 0.48→0.40: RSI governor requires RSI pullback for LONG (slope typically 0),
+    # combined with low ADX, legitimate signals score 0.43–0.46 — all blocked at 0.48.
+    MIN_TRADE_SCORE: float = 0.40        # lowered 0.48→0.40 — RSI pullback entries score ~0.43–0.46
     # qFTD-011: 0.10→0.15 — tighter cost ceiling was blocking small-notional valid trades.
     MAX_COST_FRACTION: float = 0.15      # qFTD-011: 0.10→0.15 — realistic fee ceiling
 

@@ -33,8 +33,12 @@ _BAND_SAVE_INTERVAL = 60.0   # seconds between auto-saves
 _MR_LONG_RSI_MIN   = 20.0   # MEAN_REVERTING long: RSI must be below this
 _MR_SHORT_RSI_MAX  = 80.0   # MEAN_REVERTING short: RSI must be above this
 _MR_PREV_MARGIN    = 3.0    # crash-guard: prev RSI must be within this margin of band
-_TR_LONG_RSI_MAX   = 58.0   # TRENDING long pullback: RSI must be below this
-_TR_SHORT_RSI_MIN  = 42.0   # TRENDING short bounce: RSI must be above this
+_TR_LONG_RSI_MAX   = 58.0   # TRENDING long pullback: RSI must be below this (relax limit)
+_TR_SHORT_RSI_MIN  = 42.0   # TRENDING short bounce: RSI must be above this (relax limit)
+# Tightening floors for TRENDING: prevent bands from squeezing to RSI≈50 territory.
+# Below 44/above 56 would filter >95% of trend signals — a pathological outcome.
+_TR_LONG_RSI_TIGHT_MIN  = 44.0   # TRENDING long_rsi never tightens below this
+_TR_SHORT_RSI_TIGHT_MAX = 56.0   # TRENDING short_rsi never tightens above this
 
 # Starting bands (same as hardcoded legacy)
 _MR_LONG_RSI_START  = 30.0
@@ -369,8 +373,8 @@ class AdaptiveRSIGovernor:
             b["prev_long"]  = b["long_rsi"]  + 2.0
             b["prev_short"] = b["short_rsi"] - 2.0
         else:
-            b["long_rsi"]  = max(b["long_rsi"]  - _ADAPT_STEP, _MR_LONG_RSI_MIN + 5)
-            b["short_rsi"] = min(b["short_rsi"] + _ADAPT_STEP, _MR_SHORT_RSI_MAX - 5)
+            b["long_rsi"]  = max(b["long_rsi"]  - _ADAPT_STEP, _TR_LONG_RSI_TIGHT_MIN)
+            b["short_rsi"] = min(b["short_rsi"] + _ADAPT_STEP, _TR_SHORT_RSI_TIGHT_MAX)
 
     # ── Survival rate ──────────────────────────────────────────────────────────
 
