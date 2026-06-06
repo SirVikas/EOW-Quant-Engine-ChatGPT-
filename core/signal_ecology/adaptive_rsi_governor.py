@@ -17,10 +17,17 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple, Dict, Any
 
+import json
+from pathlib import Path
+
 from loguru import logger
 
 from config import cfg
 
+
+# ── Persistence ────────────────────────────────────────────────────────────────
+_BAND_PERSIST_PATH = Path("data/rsi_governor_bands.json")
+_BAND_SAVE_INTERVAL = 60.0   # seconds between auto-saves
 
 # ── Safety bounds — never cross these regardless of adaptive pressure ──────────
 _MR_LONG_RSI_MIN   = 20.0   # MEAN_REVERTING long: RSI must be below this
@@ -111,12 +118,16 @@ class AdaptiveRSIGovernor:
         }
 
         self._last_adapt_ts: float = 0.0
+        self._last_save_ts:  float = 0.0
         self._total_evaluated: int = 0
         self._total_passed:    int = 0
 
         # History for forensic telemetry
         self._decision_log: deque = deque(maxlen=500)
         self._adapt_log:    deque = deque(maxlen=100)
+
+        # Restore learned bands from previous session so cold-start is instant
+        self._load_bands()
 
     # ── Primary API ────────────────────────────────────────────────────────────
 
@@ -330,6 +341,10 @@ class AdaptiveRSIGovernor:
                 f"action={entry['action']} bands={new_bands}"
             )
 
+        # Auto-save after any adaptation pass
+        if time.time() - self._last_save_ts >= _BAND_SAVE_INTERVAL:
+            self._save_bands()
+
     def _relax_bands(self, regime: str) -> None:
         b = self._bands[regime]
         if regime == "MEAN_REVERTING":
@@ -399,6 +414,38 @@ class AdaptiveRSIGovernor:
     def recent_decisions(self, n: int = 50) -> list:
         with self._lock:
             return list(self._decision_log)[-n:]
+
+    # ── Band persistence ───────────────────────────────────────────────────────
+
+    def _load_bands(self) -> None:
+        if not _BAND_PERSIST_PATH.exists():
+            return
+        try:
+            raw = json.loads(_BAND_PERSIST_PATH.read_text())
+            for regime, vals in raw.items():
+                if regime in self._bands and isinstance(vals, dict):
+                    # Only restore keys that already exist for this regime
+                    for k in self._bands[regime]:
+                        if k in vals:
+                            self._bands[regime][k] = float(vals[k])
+            logger.info(f"[FTD-057][RSI_GOV] Restored bands from {_BAND_PERSIST_PATH}")
+        except Exception as exc:
+            logger.warning(f"[FTD-057][RSI_GOV] Band load failed (using defaults): {exc}")
+
+    def _save_bands(self) -> None:
+        try:
+            _BAND_PERSIST_PATH.parent.mkdir(parents=True, exist_ok=True)
+            _BAND_PERSIST_PATH.write_text(
+                json.dumps({k: dict(v) for k, v in self._bands.items()}, indent=2)
+            )
+            self._last_save_ts = time.time()
+        except Exception as exc:
+            logger.warning(f"[FTD-057][RSI_GOV] Band save failed: {exc}")
+
+    def save_bands(self) -> None:
+        """Force save (call on engine shutdown)."""
+        with self._lock:
+            self._save_bands()
 
     def reset_bands(self) -> None:
         """Reset all bands to starting values (for testing/override)."""
