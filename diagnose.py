@@ -124,7 +124,11 @@ kv("Engine Version", ver.get("version") or ver.get("app_version") or str(ver))
 
 # ── 2. PnL SUMMARY ───────────────────────────────────────────────────────────
 hr("2. PnL SUMMARY")
-p = get("/api/pnl")
+p  = get("/api/pnl")
+su = get("/api/strategy-usage")   # has session_stats via total_trades current session
+
+# All-time stats (includes BYPASS era — reference only)
+print("  [ALL-TIME — includes pre-BYPASS era trades]")
 kv("Net PnL",        f"${p.get('total_net_pnl', 0):.4f}",
    warn=lambda v: safe_float(v.strip('$')) < 0)
 _wr_raw = p.get('win_rate', 0) or 0
@@ -141,6 +145,11 @@ kv("Sharpe Ratio",   f"{p.get('sharpe_ratio', 0):.2f}",
    warn=lambda v: safe_float(v) < 0.5)
 kv("Total Fees Paid",f"${p.get('total_fees_paid', 0):.4f}")
 kv("Total Trades",   p.get("n_trades"))
+
+# Current session stats (since last restart — meaningful signal of current behavior)
+_sess_trades = su.get("total_trades", 0) if isinstance(su, dict) else 0
+print(f"\n  [CURRENT SESSION — since last restart]")
+kv("Session Trades", _sess_trades, warn=lambda v: v == 0)
 
 # ── 3. EXIT TYPE BREAKDOWN ───────────────────────────────────────────────────
 hr("3. EXIT TYPE BREAKDOWN")
@@ -390,9 +399,12 @@ if "_error" not in rg:
             if isinstance(band_vals, dict):
                 lo   = band_vals.get("long_rsi",  band_vals.get("lo", "?"))
                 hi   = band_vals.get("short_rsi", band_vals.get("hi", "?"))
-                # survival from survival_by_regime dict, keyed by regime name
                 surv = surv_by_regime.get(regime_name, band_vals.get("survival_rate", "?"))
-                print(f"  {regime_name:<20} LONG≤{lo:<6}  SHORT≥{hi:<6}  survival={surv}")
+                if regime_name in ("TRENDING", "UNKNOWN"):
+                    # Unified band: both LONG and SHORT use long_rsi threshold
+                    print(f"  {regime_name:<20} BOTH≤{lo:<6}  (unified band)  survival={surv}")
+                else:
+                    print(f"  {regime_name:<20} LONG≤{lo:<6}  SHORT≥{hi:<6}  survival={surv}")
             else:
                 print(f"  {regime_name}: {band_vals}")
     kv("Total Evaluated", rg.get("total_evaluated"))

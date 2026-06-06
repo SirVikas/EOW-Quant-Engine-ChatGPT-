@@ -247,18 +247,21 @@ class AdaptiveRSIGovernor:
                     f"bands=[{long_band:.1f},{short_band:.1f}]"
                 )
 
-        else:  # TRENDING / UNKNOWN
-            long_band  = bands["long_rsi"]
-            short_band = bands["short_rsi"]
+        else:  # TRENDING / UNKNOWN — unified RSI band for both directions
+            long_band = bands["long_rsi"]
 
             if above_sma and rsi_val <= long_band:
                 return "LONG", False, ""
-            elif not above_sma and rsi_val >= short_band:
+            elif not above_sma and rsi_val <= long_band:
+                # SHORT fires when RSI ≤ band AND below SMA — confirms downtrend momentum.
+                # Previous logic (rsi >= short_rsi) required a bounce to overbought levels
+                # while below SMA, which never occurs in sustained downtrends, blocking all
+                # trend-following short entries. Unified threshold resolves this.
                 return "SHORT", False, ""
             else:
                 return None, True, (
                     f"RSI_LEVEL: rsi={rsi_val:.1f} above_sma={above_sma} "
-                    f"bands=[{long_band:.1f},{short_band:.1f}]"
+                    f"band=[{long_band:.1f}]"
                 )
 
     def _check_persistence_long(
@@ -361,9 +364,8 @@ class AdaptiveRSIGovernor:
             b["prev_long"]  = b["long_rsi"]  + 2.0
             b["prev_short"] = b["short_rsi"] - 2.0
         else:
-            # Widen: raise long_rsi, lower short_rsi (toward 50)
-            b["long_rsi"]  = min(b["long_rsi"]  + _ADAPT_STEP, _TR_LONG_RSI_MAX)
-            b["short_rsi"] = max(b["short_rsi"] - _ADAPT_STEP, _TR_SHORT_RSI_MIN)
+            # TRENDING/UNKNOWN: unified threshold — raise long_rsi to allow more signals
+            b["long_rsi"] = min(b["long_rsi"] + _ADAPT_STEP, _TR_LONG_RSI_MAX)
 
     def _tighten_bands(self, regime: str) -> None:
         b = self._bands[regime]
@@ -373,8 +375,8 @@ class AdaptiveRSIGovernor:
             b["prev_long"]  = b["long_rsi"]  + 2.0
             b["prev_short"] = b["short_rsi"] - 2.0
         else:
-            b["long_rsi"]  = max(b["long_rsi"]  - _ADAPT_STEP, _TR_LONG_RSI_TIGHT_MIN)
-            b["short_rsi"] = min(b["short_rsi"] + _ADAPT_STEP, _TR_SHORT_RSI_TIGHT_MAX)
+            # TRENDING/UNKNOWN: unified threshold — lower long_rsi to be more selective
+            b["long_rsi"] = max(b["long_rsi"] - _ADAPT_STEP, _TR_LONG_RSI_TIGHT_MIN)
 
     # ── Survival rate ──────────────────────────────────────────────────────────
 
@@ -421,17 +423,32 @@ class AdaptiveRSIGovernor:
 
     # ── Band persistence ───────────────────────────────────────────────────────
 
+    # Schema version guards against loading stale band files after logic changes.
+    # Bump when the interpretation of any persisted band key changes.
+    _PERSIST_SCHEMA_VER = 2   # v2: TRENDING SHORT uses long_rsi (unified threshold)
+
     def _load_bands(self) -> None:
         if not _BAND_PERSIST_PATH.exists():
             return
         try:
             raw = json.loads(_BAND_PERSIST_PATH.read_text())
+            schema_v = int(raw.get("_schema_version", 1))
             for regime, vals in raw.items():
-                if regime in self._bands and isinstance(vals, dict):
-                    # Only restore keys that already exist for this regime
-                    for k in self._bands[regime]:
-                        if k in vals:
-                            self._bands[regime][k] = float(vals[k])
+                if regime.startswith("_"):
+                    continue   # skip meta keys like _schema_version
+                if regime not in self._bands or not isinstance(vals, dict):
+                    continue
+                # TRENDING/UNKNOWN bands from schema v1 used short_rsi for SHORT —
+                # incompatible with v2 unified logic; reset them to safe defaults.
+                if regime in ("TRENDING", "UNKNOWN") and schema_v < self._PERSIST_SCHEMA_VER:
+                    logger.info(
+                        f"[FTD-057][RSI_GOV] {regime}: schema v{schema_v}→v{self._PERSIST_SCHEMA_VER} "
+                        f"— resetting to defaults (SHORT logic changed)"
+                    )
+                    continue
+                for k in self._bands[regime]:
+                    if k in vals:
+                        self._bands[regime][k] = float(vals[k])
             logger.info(f"[FTD-057][RSI_GOV] Restored bands from {_BAND_PERSIST_PATH}")
         except Exception as exc:
             logger.warning(f"[FTD-057][RSI_GOV] Band load failed (using defaults): {exc}")
@@ -439,9 +456,9 @@ class AdaptiveRSIGovernor:
     def _save_bands(self) -> None:
         try:
             _BAND_PERSIST_PATH.parent.mkdir(parents=True, exist_ok=True)
-            _BAND_PERSIST_PATH.write_text(
-                json.dumps({k: dict(v) for k, v in self._bands.items()}, indent=2)
-            )
+            data = {k: dict(v) for k, v in self._bands.items()}
+            data["_schema_version"] = self._PERSIST_SCHEMA_VER
+            _BAND_PERSIST_PATH.write_text(json.dumps(data, indent=2))
             self._last_save_ts = time.time()
         except Exception as exc:
             logger.warning(f"[FTD-057][RSI_GOV] Band save failed: {exc}")
