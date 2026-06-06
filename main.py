@@ -257,7 +257,10 @@ _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
 # Setting _paper_speed=False (not sig=None) is critical: sig is already None at this
 # point, so only clearing _paper_speed actually prevents the generation block at line 1318.
 _DISABLED_PAPER_SPEED_STRATEGIES: frozenset[str] = frozenset({
-    "TrendFollowing",   # 117 trades, PF 0.657, -$16.20 noise
+    # TrendFollowing removed (v1.51.4): blocking generation here AND having
+    # TrendFollowing_PAPER_SPEED in _DISABLED_STRATEGY_IDS caused 0 trades with
+    # BYPASS_ALL_GATES=False.  Historical PF 0.657 was bypass-era data (no gates).
+    # Quality gate stack now active — signals will be evaluated on merit.
     "MeanReversion",    # 1287+ visits, WR 16-19%, RL TOXIC — suppress PAPER_SPEED fallback
 })
 
