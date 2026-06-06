@@ -1033,28 +1033,27 @@ async def on_tick(tick: Tick):
         if sym in _SYMBOL_BLACKLIST:
             return
 
-        # ── Hour gate — calendar filter (FTD-SNP-001) ────────────────────────────
-        # In BYPASS_ALL_GATES mode the gate is disabled so RL can accumulate Q-value
-        # data across ALL hours (including the historically bad ones). The RL engine
-        # will converge to avoid bad-hour contexts itself once Q < ENTRY_EV_FLOOR.
-        # Without this, 17/24 hours are permanently dark to RL → context table is
-        # sparse → bandit explores fewer dimensions → slower convergence.
-        # In LIVE mode this gate remains active (historical -ve PnL hours are hard-blocked).
+        # ── Hour gate — LIVE mode only (FTD-SNP-001) ────────────────────────────
+        # The "avoid hours" list was derived from 502 trades with BYPASS_ALL_GATES=True
+        # (no quality filtering).  Those hours appeared bad because the SIGNALS were
+        # bad, not the hours.  Blocking 17/24 hours in PAPER mode suppresses the RL
+        # engine's ability to learn all time-contexts and prevents profitable setups
+        # from executing.  Quality gates (signal filter, RR gate, confidence) handle
+        # hour-agnostic signal quality.  Hour avoidance is only enforced in LIVE mode
+        # as a last-resort safety net.
         _current_utc_hour = _session_utc_hour  # reuse value computed at strategy-build time
         if cfg.RCAF_ENABLED:
             rcaf_engine.log_gate("hour_avoidance", _rcaf_signal_id,
                                  would_block=_current_utc_hour in _AVOID_HOURS_UTC,
                                  reason=f"utc_hour={_current_utc_hour}" if _current_utc_hour in _AVOID_HOURS_UTC else "")
-        if not cfg.BYPASS_ALL_GATES and _current_utc_hour in _AVOID_HOURS_UTC:
-            # Calculate next allowed hour so the user knows when to expect trades.
+        if cfg.TRADE_MODE == "LIVE" and _current_utc_hour in _AVOID_HOURS_UTC:
             _allowed_hours = sorted(set(range(24)) - _AVOID_HOURS_UTC)
             _next_open = next((h for h in _allowed_hours if h > _current_utc_hour),
                               _allowed_hours[0])
             _hg_reason = f"HOUR_GATE({_current_utc_hour:02d}h_UTC_blocked,next={_next_open:02d}h)"
             _thought(
-                f"⏸ HOUR_GATE {sym}: {_current_utc_hour:02d}h UTC BLOCKED — "
-                f"next open: {_next_open:02d}h UTC | "
-                f"golden hours (positive PnL): 07h 10h 14h UTC",
+                f"⏸ HOUR_GATE {sym}: {_current_utc_hour:02d}h UTC BLOCKED (LIVE only) — "
+                f"next open: {_next_open:02d}h UTC",
                 "FILTER",
             )
             _last_skip = {
