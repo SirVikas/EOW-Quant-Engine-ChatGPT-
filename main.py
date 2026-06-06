@@ -1825,9 +1825,9 @@ async def on_tick(tick: Tick):
                 # FTD-054-PHOENIX: RL TOXIC hard-block must be bypassed in paper/learning
                 # mode. After 21 trades at WR=9.5%, Q=-0.3163 crossed the EV floor (-0.3)
                 # → TOXIC → permanent block → zero new updates → Q can never recover.
-                # Same pattern as the LCC fix: gate the hard stop behind BYPASS_ALL_GATES
-                # so the learning engine can accumulate data and escape the toxic context.
-                if not cfg.BYPASS_ALL_GATES:
+                # Same pattern as the LCC fix: gate the hard stop behind LIVE mode only —
+                # in PAPER mode the RL engine must observe outcomes to escape toxic contexts.
+                if cfg.TRADE_MODE == "LIVE":
                     return
                 _thought(
                     f"⚡ RL_OVERRIDE {sym}: TOXIC context {regime.value}|{strategy_type} "
