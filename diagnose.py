@@ -186,6 +186,25 @@ if skip:
 else:
     print("  No skips recorded yet")
 
+# No-Trade Reason Breakdown (session totals)
+sr = get("/api/skip-reasons")
+if "_error" not in sr:
+    reasons = sr.get("top_rejection_reasons") or {}
+    total_s = sr.get("total_skips", 0)
+    mins_idle = sr.get("minutes_since_last_trade", 0)
+    rej_rate  = sr.get("rejection_rate_pct", 0)
+    if reasons:
+        print(f"\n  NO-TRADE REASON BREAKDOWN (session — top gates):")
+        print(f"  {'Gate / Reason':<40} {'Count':>6}  {'Share':>6}")
+        print(f"  {'-'*56}")
+        for gate, cnt in sorted(reasons.items(), key=lambda x: -x[1]):
+            share = (cnt / total_s * 100) if total_s else 0
+            warn  = " ⚠" if cnt == max(reasons.values()) else ""
+            print(f"  {gate:<40} {cnt:>6}  {share:>5.1f}%{warn}")
+        print(f"  Total skips: {total_s}  |  Rejection rate: {rej_rate:.1f}%  |  Mins since trade: {mins_idle:.0f}")
+    else:
+        print(f"  No-Trade log: no skips recorded yet this session")
+
 # ── 8. ERROR REGISTRY ───────────────────────────────────────
 hr("8. ERROR REGISTRY")
 err = get("/api/errors")

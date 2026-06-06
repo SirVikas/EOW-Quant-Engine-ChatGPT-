@@ -4385,6 +4385,19 @@ async def get_last_skip():
     }
 
 
+@app.get("/api/skip-reasons")
+async def get_skip_reasons():
+    """All-session skip reason counts — consolidated No-Trade audit log."""
+    summary = trade_flow_monitor.summary()
+    return {
+        "top_rejection_reasons": summary.get("top_rejection_reasons", {}),
+        "total_skips":           summary.get("total_skips", 0),
+        "rejection_rate_pct":    summary.get("rejection_rate_pct", 0),
+        "minutes_since_last_trade": summary.get("minutes_since_last_trade", 0),
+        "ts": int(time.time() * 1000),
+    }
+
+
 # ── FTD-REF-025: WebSocket Truth + Error Registry ────────────────────────────
 
 @app.get("/api/ws-truth")
