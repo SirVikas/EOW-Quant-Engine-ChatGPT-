@@ -141,6 +141,10 @@ from core.signal_ecology.alpha_context_memory  import alpha_context_memory      
 from core.signal_ecology.adaptive_rsi_governor import adaptive_rsi_governor           # PRP-002
 from core.learning_memory.trade_memory_bridge  import trade_memory_bridge              # LRN-001
 from core.exit_attribution import resolve_exit_method, compute_exit_attribution_report # FTD-PHOENIX-EXIT-ATTR-001
+from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult              # FTD-PHOENIX-ETE-001
+from core.truth.exit_truth_engine   import exit_truth_engine                           # FTD-PHOENIX-XTE-001
+from core.truth.alpha_attribution   import alpha_attribution_platform, AttributionSnapshot  # FTD-PHOENIX-AAP-001
+from core.truth.truth_archive       import truth_archive                               # FTD-PHOENIX-AAP-001
 
 
 def _safe_num(v):
@@ -503,6 +507,10 @@ async def on_tick(tick: Tick):
     if len(sym) < 5 or not sym.endswith("USDT"):
         return
 
+    # FTD-PHOENIX-ETE-001: per-tick ETE result — initialized to None so trade-close
+    # integration can safely reference it even when ETE was not evaluated this tick.
+    _ete_result: "ETEResult | None" = None
+
     # FTD-031: per-cycle latency tracking
     if cfg.PERF_ENABLED:
         perf_monitor.on_cycle_start(sym)
@@ -776,6 +784,34 @@ async def on_tick(tick: Tick):
                 atr_pct     = _atr_close,
                 utc_hour    = _close_utc_hour,
             )
+        # FTD-PHOENIX-AAP-001: Alpha Attribution snapshot
+        if cfg.TRUTH_ENGINE_ENABLED and _ete_result is not None:
+            _snap_aap = AttributionSnapshot(
+                trade_id=str(getattr(last_trade, 'trade_id', id(last_trade))),
+                symbol=sym,
+                session=_origin_sess if '_origin_sess' in dir() else "UNKNOWN",
+                strategy=getattr(last_trade, 'strategy_id', _trade_strategy),
+                regime=_trade_regime,
+                entry_truth_score=_ete_result.score,
+                exit_truth_score=0.0,  # XTE not yet evaluated at close in Phase 1
+                structure_score=_ete_result.structure_score,
+                regime_score=_ete_result.regime_score,
+                momentum_score=_ete_result.momentum_score,
+                volatility_score=_ete_result.volatility_score,
+                liquidity_score=_ete_result.liquidity_score,
+                cost_score=_ete_result.cost_score,
+                net_pnl=last_trade.net_pnl,
+                r_multiple=getattr(last_trade, 'r_multiple', _r_mult),
+                genome_id=None,
+                rl_context=f"{_trade_regime}|{(_origin_sess if '_origin_sess' in dir() else 'UNKNOWN')}",
+                ts_entry=getattr(last_trade, 'entry_ts', int(time.time() * 1000)) / 1000,
+                ts_exit=time.time(),
+                alpha_sources=[],
+                destruction_sources=[],
+            )
+            alpha_attribution_platform.record(_snap_aap)
+            truth_archive.save(_snap_aap)
+
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
@@ -2294,6 +2330,39 @@ async def on_tick(tick: Tick):
                 f"explore={_skip_quality} qty={sizing.qty:.6f}",
                 "SIGNAL",
             )
+
+            # FTD-PHOENIX-ETE-001: Entry Truth Engine — Observation Mode
+            # Scores signal quality 0-100 across 6 dimensions. Does NOT block in Phase 1.
+            if cfg.TRUTH_ENGINE_ENABLED:
+                _gross_tp = abs(sig.take_profit - sig.entry_price) * (sizing.qty if sizing.qty else 1.0)
+                _fee_cost = cost_per_unit * (sizing.qty if sizing.qty else 1.0) * 2  # round-trip estimate
+                _atr_ema_val = reactive_evolution_engine._atr_ema.get(sym, 0.0)
+                _ete_result = entry_truth_engine.evaluate(
+                    closes=list(closes),
+                    highs=list(highs),
+                    lows=list(lows),
+                    volumes=list(vol_buf),
+                    atr_pct=atr_pct,
+                    atr_ema=_atr_ema_val,
+                    regime=regime.value,
+                    fee_cost=_fee_cost,
+                    gross_tp=_gross_tp,
+                    rr=sf_result.rr if 'sf_result' in dir() and sf_result else 0.0,
+                    signal_side=sig.signal.value,
+                    gate_enabled=cfg.ETE_GATE_ENABLED,
+                    min_score=cfg.ETE_MIN_SCORE,
+                )
+                if _ete_result:
+                    _thought(
+                        f"[ETE] {sym} truth={_ete_result.score:.1f} "
+                        f"str={_ete_result.structure_score:.0f} "
+                        f"reg={_ete_result.regime_score:.0f} "
+                        f"mom={_ete_result.momentum_score:.0f} "
+                        f"vol={_ete_result.volatility_score:.0f} "
+                        f"liq={_ete_result.liquidity_score:.0f} "
+                        f"cost={_ete_result.cost_score:.0f}",
+                        "TRUTH",
+                    )
 
             edge_ok, edge = risk_ctrl.get_trade_decision(
                 side=sig.signal.value,
@@ -12826,6 +12895,38 @@ async def unified_intelligence_export():
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Truth Engine API (FTD-PHOENIX-ENTRY-EXIT-TRUTH-ENGINE-001) ───────────────
+
+@app.get("/api/truth/ete-status")
+async def get_ete_status():
+    return {
+        "gate_enabled": cfg.ETE_GATE_ENABLED,
+        "min_score": cfg.ETE_MIN_SCORE,
+        "observation_mode": not cfg.ETE_GATE_ENABLED,
+        **entry_truth_engine.summary(),
+    }
+
+@app.get("/api/truth/xte-status")
+async def get_xte_status():
+    return {
+        "force_close_enabled": cfg.XTE_FORCE_CLOSE_ENABLED,
+        "advisory_mode": True,
+        **exit_truth_engine.summary(),
+    }
+
+@app.get("/api/truth/alpha-matrix")
+async def get_alpha_matrix():
+    return alpha_attribution_platform.alpha_discovery_matrix()
+
+@app.get("/api/truth/calibration")
+async def get_truth_calibration():
+    return alpha_attribution_platform.truth_calibration_report()
+
+@app.get("/api/truth/recent")
+async def get_truth_recent():
+    return truth_archive.recent(50)
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────

@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.51.4"
+APP_VERSION = "1.52.0"
 
 
 class EngineConfig(BaseSettings):
@@ -582,6 +582,13 @@ class EngineConfig(BaseSettings):
         "ev_confidence",
         "drawdown_controller",
     ]
+
+    # ── Truth Engine (FTD-PHOENIX-ENTRY-EXIT-TRUTH-ENGINE-001) ──────────────────
+    ETE_GATE_ENABLED:         bool  = Field(default=False, env="ETE_GATE_ENABLED")
+    ETE_MIN_SCORE:            float = Field(default=45.0,  env="ETE_MIN_SCORE")
+    XTE_FORCE_CLOSE_ENABLED:  bool  = Field(default=False, env="XTE_FORCE_CLOSE_ENABLED")
+    XTE_ADVISORY_TSL_SCORE:   float = Field(default=35.0,  env="XTE_ADVISORY_TSL_SCORE")
+    TRUTH_ENGINE_ENABLED:     bool  = Field(default=True,  env="TRUTH_ENGINE_ENABLED")
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 
