@@ -3357,6 +3357,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [DIAL] Boot failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── FTD-AEOS-001: Autonomous Engineering Operating System ──────────────────
+    try:
+        from core.aeos.aeos_engine import aeos
+        _aeos_summary = aeos.get_boot_summary()
+        _thought(
+            f"⚙ [AEOS] Autonomous Engineering Operating System active | endpoints: /api/aeos/* | {_aeos_summary}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [AEOS] Boot failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -13131,6 +13142,69 @@ async def dial_stats():
     """DIAL — engine stats: query count, IMRAF availability, uptime."""
     from core.developer_intelligence.dial_engine import dial
     return dial.get_stats()
+
+@app.get("/api/dial/plan")
+async def dial_plan(state: str = ""):
+    """DIAL — autonomous planning: what should happen next based on institutional memory."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.plan_next_steps(current_state=state)
+
+@app.get("/api/dial/proposal")
+async def dial_proposal(goal: str, component: str):
+    """DIAL — generate a change proposal: files, risks, verifiers, checklist."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.generate_change_proposal(goal, component)
+
+@app.get("/api/dial/draft-ftd")
+async def dial_draft_ftd(topic: str, context: str = ""):
+    """DIAL — draft a new FTD based on institutional memory for the given topic."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.draft_ftd(topic, context=context)
+
+@app.get("/api/dial/health/{module_name}")
+async def dial_module_health(module_name: str):
+    """DIAL — engineering memory score for a module (0-10 risk score, incident/regression counts)."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.get_module_health_score(module_name)
+
+@app.post("/api/dial/observe")
+async def dial_observe(component: str, observation: str, outcome: str, context: str = ""):
+    """DIAL — record an observation into the autonomous learning loop."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.observe_and_learn(component, observation, outcome, context=context)
+
+
+# ── FTD-AEOS-001: Autonomous Engineering Operating System API ─────────────────
+
+@app.get("/api/aeos/context")
+async def aeos_context(task: str, module: str = ""):
+    """AEOS — assemble full AI-agent briefing: history + FTDs + arch + deps + risks + verifiers."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.assemble_context(task, module=module or None)
+
+@app.get("/api/aeos/roadmap")
+async def aeos_roadmap():
+    """AEOS — prioritised next-step roadmap guidance from current institutional memory state."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.get_roadmap_guidance()
+
+@app.get("/api/aeos/forecast")
+async def aeos_forecast(component: str, change: str):
+    """AEOS — forecast full impact of a proposed change including second-order effects."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.forecast_change_impact(component, change)
+
+@app.get("/api/aeos/verifiers/{component}")
+async def aeos_verifiers(component: str):
+    """AEOS — recommend verifier test files for a component with historical pass-rate data."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.recommend_verifiers(component)
+
+@app.get("/api/aeos/stats")
+async def aeos_stats():
+    """AEOS — engine stats: assembly count, availability, capabilities."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.get_stats()
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────

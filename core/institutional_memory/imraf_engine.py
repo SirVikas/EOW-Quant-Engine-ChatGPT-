@@ -40,6 +40,10 @@ class Category(str, Enum):
     EVOLUTION_TL   = "EVOLUTION_TL"
     OPERATIONAL    = "OPERATIONAL"
     SELF_IMPROVE   = "SELF_IMPROVE"
+    FTD        = "FTD"
+    DELIVERY   = "DELIVERY"
+    VERIFIER   = "VERIFIER"
+    GOVERNANCE = "GOVERNANCE"
 
 
 _SCHEMA = """
@@ -480,4 +484,99 @@ def record_evolution_timeline(milestone: str, description: str,
                        "impact": impact},
         subcategory = "timeline",
         tags        = ["evolution_timeline", milestone],
+    )
+
+
+def record_ftd(
+    ftd_id: str,
+    title: str,
+    status: str,           # PLANNED | IN_PROGRESS | DELIVERED | REJECTED | ROLLBACK
+    delivered_by: str = "claude",
+    completion_date: str = "",
+    dependencies: list = None,
+    verification_result: str = "",
+    rollback_history: list = None,
+    description: str = "",
+) -> int:
+    return imraf.record(
+        category    = Category.FTD,
+        title       = f"FTD {ftd_id}: {title}",
+        data        = {
+            "ftd_id": ftd_id, "title": title, "status": status,
+            "delivered_by": delivered_by, "completion_date": completion_date,
+            "dependencies": dependencies or [], "verification_result": verification_result,
+            "rollback_history": rollback_history or [], "description": description,
+        },
+        subcategory = ftd_id,
+        tags        = ["ftd", status.lower(), ftd_id],
+    )
+
+
+def record_delivery(
+    title: str,
+    developer: str,
+    delivery_type: str,    # DEVELOPER_REPORT | DELIVERY_REPORT | IMPLEMENTATION_REPORT
+    summary: str,
+    files_changed: list = None,
+    tests_status: str = "",
+    version: str = "",
+) -> int:
+    return imraf.record(
+        category    = Category.DELIVERY,
+        title       = f"Delivery: {title}",
+        data        = {
+            "title": title, "developer": developer, "delivery_type": delivery_type,
+            "summary": summary, "files_changed": files_changed or [],
+            "tests_status": tests_status, "version": version,
+        },
+        subcategory = delivery_type,
+        tags        = ["delivery", delivery_type.lower(), developer],
+    )
+
+
+def record_verifier(
+    verifier_name: str,
+    passed_tests: int,
+    failed_tests: int,
+    coverage: float,
+    confidence: str,       # HIGH | MEDIUM | LOW
+    historical_failures: list = None,
+    component: str = "",
+    notes: str = "",
+) -> int:
+    return imraf.record(
+        category    = Category.VERIFIER,
+        title       = f"Verifier: {verifier_name}",
+        data        = {
+            "verifier_name": verifier_name, "passed_tests": passed_tests,
+            "failed_tests": failed_tests, "coverage": coverage,
+            "confidence": confidence, "historical_failures": historical_failures or [],
+            "component": component, "notes": notes,
+            "pass_rate": round(passed_tests / max(passed_tests + failed_tests, 1) * 100, 1),
+        },
+        subcategory = component,
+        tags        = ["verifier", confidence.lower(), component],
+    )
+
+
+def record_governance(
+    decision: str,
+    rationale: str,
+    impact: str,
+    stakeholder: str = "PHOENIX",
+    category_type: str = "ROADMAP",  # ROADMAP | STRATEGIC | FEATURE | DISABLE | DELAY
+    affected_components: list = None,
+    review_date: str = "",
+) -> int:
+    return imraf.record(
+        category    = Category.GOVERNANCE,
+        title       = f"Governance: {decision[:80]}",
+        data        = {
+            "decision": decision, "rationale": rationale, "impact": impact,
+            "stakeholder": stakeholder, "category_type": category_type,
+            "affected_components": affected_components or [],
+            "review_date": review_date,
+        },
+        subcategory = category_type,
+        tags        = ["governance", category_type.lower(), stakeholder.lower()],
     )
