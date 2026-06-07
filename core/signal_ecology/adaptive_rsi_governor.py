@@ -40,7 +40,7 @@ _TR_SHORT_RSI_MIN  = 42.0   # TRENDING short bounce: RSI must be above this (rel
 # ceiling — governor couldn't tighten further, trapping bands at the minimum.
 # At 46 with _TARGET_SURVIVAL_HI raised to 0.35, bands stabilise in the 46–50 range
 # instead of compressing to the old 44 floor.
-_TR_LONG_RSI_TIGHT_MIN  = 46.0   # raised 44→46: old floor was the binding constraint
+_TR_LONG_RSI_TIGHT_MIN  = 42.0   # lowered 46→42: TRENDING survival stuck at 86% >> 35% target_hi; governor loops TIGHTEN but can't go below 46 — no-op every 30s. Floor at 42 lets the adaptive system converge (was 44 originally, floor raised to 46 when target_hi was 25%; now target_hi=35% and 86% survival shows bands need room to tighten further).
 _TR_SHORT_RSI_TIGHT_MAX = 56.0   # TRENDING short_rsi never tightens above this
 
 # Starting bands (same as hardcoded legacy)
