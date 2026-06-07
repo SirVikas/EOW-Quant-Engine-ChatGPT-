@@ -3233,16 +3233,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # ── Phase-H: Institutional Continuity boot registration ───────────────────
     try:
         from core.institutional_continuity.continuity_evolution_orchestrator import get_continuity_health
-        _cont_seen: dict[str, dict] = {}
-        for _t in [asdict(t) for t in pnl_calc.trades]:
-            _tid = _t.get("trade_id", "")
-            if _tid:
-                _cont_seen[_tid] = _t
-        for _t in data_lake.get_trades(limit=1000):
-            _tid = _t.get("trade_id", "")
-            if _tid and _tid not in _cont_seen:
-                _cont_seen[_tid] = _t
-        _cont_trades  = list(_cont_seen.values())
+        # Use a small DataLake sample — pnl_calc.trades merge was O(4818) blocking
+        # the event loop and causing the bat-file startup timeout to kill the process.
+        _cont_trades  = data_lake.get_trades(limit=500)
         _cont_h       = get_continuity_health(_cont_trades)
         _cont_score   = _cont_h.get("continuity_score", 0)
         _cont_tier    = _cont_h.get("continuity_tier", "UNKNOWN")
