@@ -1689,7 +1689,7 @@ async def on_tick(tick: Tick):
                 signal_density_engine.record_pass(regime=regime.value, symbol=sym)
                 exploration_recovery_governor.on_signal_passed()
                 _ctx_amp = alpha_context_memory.get_amplification(
-                    regime=regime.value, utc_hour=_utc_hr_ec, strategy=strategy_type,
+                    regime=regime.value, utc_hour=_utc_hr_ec, strategy=sig.strategy_id,
                 )
                 # Fix B (FTD-BOOST-SUPPRESS): forensic audit showed context-boosted trades
                 # during recovery cycles avg -0.20 PnL vs -0.12 for normal trades.
@@ -2795,11 +2795,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             )
 
             # FTD-ACM-BOOT-001: backfill alpha_context_memory from DataLake history.
-            # Without this, all context knowledge (regime/strategy profitability) is
-            # wiped on every restart.  With 4800+ historical trades, the context memory
-            # was always showing 0 — blocking the toxic-context gate and amplification.
+            # Skipped if context memory was already restored from its persisted JSON file
+            # (populated contexts → file existed) to prevent double-counting on restarts.
+            # On a clean start (no file), backfill ensures no context knowledge is lost.
             _acm_fed = 0
-            for _ht in _hist:
+            _acm_already_loaded = alpha_context_memory.get_telemetry()["total_contexts"] > 0
+            if _acm_already_loaded:
+                _thought(
+                    f"📂 Context memory restored from file "
+                    f"({alpha_context_memory.get_telemetry()['total_contexts']} contexts) "
+                    f"— DataLake backfill skipped to prevent double-counting",
+                    "SYSTEM",
+                )
+            for _ht in (_hist if not _acm_already_loaded else []):
                 _ht_regime   = _ht.get("regime", "UNKNOWN")
                 _ht_strategy = _ht.get("strategy_id", "")
                 _ht_net_pnl  = _ht.get("net_pnl", 0.0)
@@ -2821,12 +2829,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
                         net_pnl=float(_ht_net_pnl),
                     )
                     _acm_fed += 1
-            # Force an immediate save so the populated data survives future restarts
-            alpha_context_memory.save()
-            _thought(
-                f"📂 Context memory backfilled: {_acm_fed} historical trades loaded",
-                "SYSTEM",
-            )
+            if _acm_fed > 0:
+                # Force an immediate save so the populated data survives future restarts
+                alpha_context_memory.save()
+                _thought(
+                    f"📂 Context memory backfilled from DataLake: {_acm_fed} trades loaded",
+                    "SYSTEM",
+                )
         else:
             _thought("📂 DataLake: no trade history found.", "SYSTEM")
     except Exception as _exc:

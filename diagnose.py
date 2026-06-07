@@ -44,8 +44,8 @@ def get(path, timeout=6):
         return {"_error": str(e)}
 
 def get_fast(path):
-    """3-second hard timeout for slow/blocking endpoints."""
-    return get(path, timeout=3)
+    """10-second timeout for reporting endpoints (heavy computation, not latency-sensitive)."""
+    return get(path, timeout=10)
 
 def hr(title):
     print(f"\n{'='*60}")
