@@ -437,30 +437,30 @@ else:
 hr("15. CONTEXT MEMORY — TOXIC / PROFITABLE")
 cm = get("/api/prp/002/context-memory")
 if "_error" not in cm:
-    contexts = (cm if isinstance(cm, list)
-                else cm.get("contexts", cm.get("records", [])))
-    if isinstance(contexts, list):
-        toxic  = [c for c in contexts if str(c.get("context_type","")).upper() == "TOXIC"]
-        profit = [c for c in contexts if str(c.get("context_type","")).upper() == "PROFITABLE"]
-        print(f"  Total contexts tracked: {len(contexts)}")
-        print(f"  TOXIC:      {len(toxic)}")
-        print(f"  PROFITABLE: {len(profit)}")
-        if toxic:
-            print("  Toxic contexts (blocking trades):")
-            for c in toxic[:10]:
-                key = c.get("context_key") or f"{c.get('regime','?')}|{c.get('strategy','?')}"
-                wr_ = c.get("win_rate") or c.get("wr", "?")
-                n_  = c.get("n") or c.get("count", "?")
-                print(f"    ⚠ {key}  WR={wr_}  n={n_}")
-        if profit:
-            print("  Profitable contexts (signal amplifiers):")
-            for c in profit[:5]:
-                key = c.get("context_key") or f"{c.get('regime','?')}|{c.get('strategy','?')}"
-                wr_ = c.get("win_rate") or c.get("wr", "?")
-                n_  = c.get("n") or c.get("count", "?")
-                print(f"    ✓ {key}  WR={wr_}  n={n_}")
-    else:
-        print(f"  {cm}")
+    # API returns a flat telemetry dict — keys are total_contexts, profitable_count,
+    # toxic_count, top_profitable.  Previous code looked for "contexts"/"records" keys
+    # that don't exist, so it always printed 0.
+    total_ctx  = cm.get("total_contexts", 0)
+    n_profit   = cm.get("profitable_count", 0)
+    n_toxic    = cm.get("toxic_count", 0)
+    top_profit = cm.get("top_profitable", [])
+    lookup_ct  = cm.get("lookup_count", 0)
+    boost_ct   = cm.get("boost_count", 0)
+    block_ct   = cm.get("block_count", 0)
+    print(f"  Total contexts tracked: {total_ctx}")
+    print(f"  TOXIC:      {n_toxic}")
+    print(f"  PROFITABLE: {n_profit}  (need ≥5 trades + avg_pnl > 0)")
+    print(f"  Lookups: {lookup_ct}  Boosts applied: {boost_ct}  Blocks applied: {block_ct}")
+    if n_toxic == 0 and n_profit == 0 and total_ctx == 0:
+        print("  ⚠ No context history — verify startup backfill ran and SAVE_INTERVAL is short enough")
+    if top_profit:
+        print("  Top profitable contexts (signal amplifiers):")
+        for c in top_profit[:5]:
+            key    = c.get("context_key", "?")
+            wr_    = c.get("win_rate", "?")
+            n_     = c.get("n_trades", "?")
+            avg_p  = c.get("avg_pnl", "?")
+            print(f"    ✓ {key}  WR={wr_}  n={n_}  avg_pnl={avg_p}")
 else:
     print(f"  {cm.get('_error', 'unavailable')}")
 

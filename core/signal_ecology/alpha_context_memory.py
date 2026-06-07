@@ -35,7 +35,7 @@ TOXIC_THRESH     = -0.30   # avg_pnl < this = toxic (mirrors rl_engine)
 BOOST_MULT       = 1.25    # size multiplier for known-profitable contexts
 MAX_BOOST_MULT   = 1.50    # hard cap on amplification
 PERSIST_PATH     = Path("data/alpha_context_memory.json")
-SAVE_INTERVAL    = 300.0   # seconds between auto-saves
+SAVE_INTERVAL    = 60.0    # reduced 300→60: limit data loss to at most 1 min on crash
 MAX_CONTEXTS     = 500     # maximum stored contexts (LRU eviction)
 
 
