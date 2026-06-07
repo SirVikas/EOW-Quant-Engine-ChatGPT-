@@ -122,7 +122,7 @@ from core.performance import (                                                 #
     perf_monitor, task_queue, perf_guard,
     PRIORITY_LOW, PRIORITY_MEDIUM,
 )
-from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi
+from strategies.strategy_modules import get_strategy, Signal, TradeSignal, _rsi, _ema
 from core.lean_gate import lean_gate
 from core.rl_engine import rl_engine                              # RL Contextual Bandit
 from core.live_process_access import live_process_access          # FTD-LPA: runtime observability
@@ -488,6 +488,53 @@ def _capture_decision_snapshot(
             pass
 
     return snap
+
+
+def _diagnose_strategy_none(strategy, strategy_type: str, closes: list[float]) -> str:
+    """Diagnose why strategy.generate_signal() returned None — for Stage-2 visibility."""
+    try:
+        if strategy_type in ("TrendFollowing", "TF_EMA_RSI_v1"):
+            ema_fast   = int(getattr(strategy, "ema_fast",   5))
+            ema_slow   = int(getattr(strategy, "ema_slow",   12))
+            ema_trend  = int(getattr(strategy, "ema_trend",  20))
+            rsi_period = int(getattr(strategy, "rsi_period", 14))
+            rsi_long_min  = float(getattr(strategy, "RSI_LONG_MIN",  40))
+            rsi_short_max = float(getattr(strategy, "RSI_SHORT_MAX", 60))
+            rsi_ob        = float(getattr(strategy, "rsi_ob", 70))
+            min_len = max(ema_trend + 2, ema_slow + 2, rsi_period + 2)
+            if len(closes) < min_len:
+                return "INSUFFICIENT_DATA"
+            fn  = _ema(closes,      ema_fast)
+            fp  = _ema(closes[:-1], ema_fast)
+            sn  = _ema(closes,      ema_slow)
+            sp  = _ema(closes[:-1], ema_slow)
+            tr  = _ema(closes,      ema_trend)
+            rsi = _rsi(closes,      rsi_period)
+            rp  = _rsi(closes[:-1], rsi_period)
+            bull = fp < sp and fn > sn
+            bear = fp > sp and fn < sn
+            if not (bull or bear):
+                return "EMA_CROSS_MISSING"
+            price = closes[-1]
+            if bull and price <= tr:
+                return "TREND_FILTER_FAIL"
+            if bear and price >= tr:
+                return "TREND_FILTER_FAIL"
+            if bull and not (rsi_long_min <= rsi <= rsi_ob):
+                return "RSI_ZONE_FAIL"
+            if bear and not (rsi <= rsi_short_max):
+                return "RSI_ZONE_FAIL"
+            if bull and rsi <= rp:
+                return "RSI_DIRECTION_FAIL"
+            if bear and rsi >= rp:
+                return "RSI_DIRECTION_FAIL"
+        elif strategy_type in ("MeanReversion", "MR_BB_RSI_v1"):
+            return "BB_ZONE_FAIL"
+        elif strategy_type in ("VolatilityExpansion",):
+            return "VOL_EXPANSION_FAIL"
+    except Exception:
+        pass
+    return "UNKNOWN"
 
 
 def _estimate_atr_pct(closes: list[float]) -> float:
@@ -1472,6 +1519,13 @@ async def on_tick(tick: Tick):
         sig = strategy.generate_signal(sym, closes, highs, lows)
         if not sig or sig.signal == Signal.NONE:
             logger.debug(f"[SIG] {sym} strategy={strategy_type} → NONE (no crossover / conditions unmet)")
+            _s2_reason = _diagnose_strategy_none(strategy, strategy_type, closes)
+            _s2_rsi    = _rsi(closes, 14) if len(closes) >= 15 else 0.0
+            _s2_above  = closes[-1] > _ema(closes, 20) if len(closes) >= 22 else False
+            trade_flow_monitor.record_stage2_none(
+                symbol=sym, strategy=strategy_type, regime=regime.value,
+                reason=_s2_reason, rsi=_s2_rsi, above_sma=_s2_above,
+            )
 
         # Phase 4: Alpha Engine — supplementary high-quality signals
         # Runs when existing strategy produces no signal; all alpha signals
@@ -1509,6 +1563,7 @@ async def on_tick(tick: Tick):
                 )
             else:
                 logger.debug(f"[SIG] {sym} alpha → NONE (RR/score below threshold)")
+                trade_flow_monitor.record_alpha_none(sym, strategy_type, regime.value)
 
         # PAPER_SPEED fallback injector:
         # If both primary + alpha signals are NONE, synthesize a minimal
@@ -1601,6 +1656,9 @@ async def on_tick(tick: Tick):
                 else None
             )
             _prp002_size_mult = _ps_ec_dec.size_multiplier if _ps_side is not None else 1.0
+
+            if _ps_ec_dec.approved:
+                trade_flow_monitor.record_ecology_approved(sym, strategy_type, regime.value)
 
             if _ps_side is not None:
                 _atr_px = max(
@@ -1866,6 +1924,7 @@ async def on_tick(tick: Tick):
             # In PAPER/BYPASS mode, virtual drawdown and streak must not halt
             # the RL engine — it needs to trade through losses to learn.
             # Gates 1-3 (SL distance, RR, fee economy) always apply.
+            trade_flow_monitor.record_reached_leangate(sym, strategy_type)
             _lean = lean_gate.check(
                 entry=sig.entry_price,
                 stop_loss=sig.stop_loss,
@@ -5813,6 +5872,17 @@ async def prp002_summary():
 async def prp002_ecology():
     """PRP-002 — Compact ecology snapshot (signals/hr, survival, drought, recovery)."""
     return opportunity_ecology.ecology_snapshot()
+
+
+@app.get("/api/stage2/visibility")
+async def stage2_visibility():
+    """qFTD-STAGE2-VISIBILITY-001 — Stage-2 signal generation transparency.
+    Exposes the previously invisible drop between ecology approval and LeanGate.
+    """
+    return {
+        **trade_flow_monitor.stage2_summary(),
+        "flow_summary": trade_flow_monitor.summary(),
+    }
 
 
 @app.get("/api/prp/002/density")
