@@ -87,24 +87,46 @@ Only `config.APP_VERSION` is ever updated. Everything downstream inherits automa
 
 ## PHOENIX NEXUS — Institutional Intelligence Layer
 
-**PHOENIX NEXUS** is the institutional intelligence layer of the PHOENIX trading system.
-It is the central knowledge and intelligence nexus where memory, intelligence, context,
-and governance converge. It is architecturally separate from the Execution Layer.
+**PHOENIX NEXUS** is the formally declared Institutional Intelligence Layer of the
+PHOENIX trading system (ADR-NEXUS-001, IMRAF records 111 + 118). It is the central
+connection point where memory, intelligence, context, and governance converge.
+It is architecturally separate from and complementary to the Execution Layer.
+
+NEXUS is not a module — it is the collective name for the entire institutional
+intelligence ecosystem.
 
 ```
 PHOENIX
-├── Execution Layer         Trading Engine / Risk Engine / Reporting Engine
-└── PHOENIX NEXUS           Institutional Intelligence Layer
-     ├── IMRAF              Memory
-     ├── DIAL               Intelligence
-     ├── AEOS               Context Assembly
-     ├── EMA                Enterprise Interface
-     ├── EGI                Governance
-     └── Pending: KGE → HKE → AEG
+│
+├── Execution Layer
+│   ├── Trading Engine
+│   ├── Risk Engine
+│   ├── Portfolio Intelligence
+│   ├── Reporting Layer
+│   └── Truth Engine (ETE / XTE / AAP)
+│
+└── PHOENIX NEXUS                    ← Institutional Intelligence Layer
+     ├── IMRAF   Institutional Memory
+     ├── DIAL    Developer Intelligence
+     ├── AEOS    Engineering Operating System
+     ├── EMA     Enterprise Memory Architecture
+     ├── EGI     Engineering Governance Integrity
+     │
+     └── Future Expansion
+          ├── KGE  Knowledge Graph Expansion     (NEXT)
+          ├── HKE  Historical Knowledge Extraction
+          └── AEG  Autonomous Engineering Governance
 ```
 
-Registered in: `config.py` (`NEXUS_NAME`, `NEXUS_VERSION`), IMRAF record 111,
-`core/ema/ema_engine.py` (`_PROJECT_KNOWLEDGE["nexus"]`).
+**SYSTEM_NAME**: `"PHOENIX NEXUS"`
+**SYSTEM_DESCRIPTION**: PHOENIX Institutional Intelligence Layer responsible for
+memory, intelligence, context assembly, governance, and future autonomous
+engineering guidance.
+
+**Boot log**: `[PHOENIX NEXUS Active] Memory | Intelligence | Context | Governance | Future Guidance`
+
+Registered in: `config.py`, IMRAF records 111 (naming) + 118 (ADR-NEXUS-001),
+`core/ema/ema_engine.py` (`_PROJECT_KNOWLEDGE["SYSTEM_NAME"]`), `GET /api/nexus`.
 
 ---
 

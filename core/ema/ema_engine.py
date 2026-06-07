@@ -38,10 +38,30 @@ from loguru import logger
 # Static institutional knowledge that never changes — the permanent identity
 # of the PHOENIX project.
 _PROJECT_KNOWLEDGE: Dict[str, Any] = {
-    "project":       "EOW Quant Engine — PHOENIX Autonomous Trading Platform",
+    "project":        "EOW Quant Engine — PHOENIX Autonomous Trading Platform",
     "classification": "Proprietary institutional trading system",
     "stack":          "Python / FastAPI / asyncio / SQLite / loguru",
     "trade_modes":    ["PAPER", "LIVE"],
+    # ── PHOENIX NEXUS formal identity ───────────────────────────────────────
+    "SYSTEM_NAME":    "PHOENIX NEXUS",
+    "SYSTEM_DESCRIPTION": (
+        "PHOENIX Institutional Intelligence Layer responsible for memory, intelligence, "
+        "context assembly, governance, and future autonomous engineering guidance. "
+        "NEXUS is not a module — it is the collective name for the entire institutional "
+        "intelligence ecosystem: IMRAF + DIAL + AEOS + EMA + EGI (active) and "
+        "KGE + HKE + AEG (pending)."
+    ),
+    "architecture": {
+        "execution_layer": [
+            "Trading Engine", "Risk Engine", "Portfolio Intelligence",
+            "Reporting Layer", "Truth Engine (ETE / XTE / AAP)",
+        ],
+        "PHOENIX_NEXUS": {
+            "active":  ["IMRAF", "DIAL", "AEOS", "EMA", "EGI"],
+            "pending": ["KGE", "HKE", "AEG"],
+            "adr":     "ADR-NEXUS-001",
+        },
+    },
     "vision":         (
         "A self-evolving, AI-guided autonomous trading engine that compounds "
         "institutional knowledge across every session, trade, and engineering change."
