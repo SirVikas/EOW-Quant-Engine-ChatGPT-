@@ -1092,6 +1092,9 @@ async def on_tick(tick: Tick):
     _session_min_atr    = cfg.SESSION_MIN_ATR_PCT.get(_session_label_now, 0.10)
     _session_size_scale = cfg.SESSION_SIZE_SCALE.get(_session_label_now, 1.00)
 
+    if strategy_type == "MeanReversion":
+        trade_flow_monitor.record_mr_regime_event(sym)
+
     dna      = genome.active_dna.get(strategy_type, {})
     # FTD-REA-001: merge per-symbol reactive overrides (RSI bands, ATR multipliers)
     _re_overrides = reactive_evolution_engine.get_overrides(sym)
@@ -1253,6 +1256,7 @@ async def on_tick(tick: Tick):
                 "reason": f"MR_TREND_LOCK(ADX={raw_adx:.1f}>25)",
                 "regime": regime.value,
             }
+            trade_flow_monitor.record_mr_trend_lock(sym, raw_adx)
             return
 
         # ── Phase 5.2: Dynamic Threshold Provider — master control layer ────────
@@ -1526,6 +1530,10 @@ async def on_tick(tick: Tick):
                 symbol=sym, strategy=strategy_type, regime=regime.value,
                 reason=_s2_reason, rsi=_s2_rsi, above_sma=_s2_above,
             )
+            if strategy_type == "MeanReversion":
+                trade_flow_monitor.record_mr_signal_none(sym)
+        elif strategy_type == "MeanReversion":
+            trade_flow_monitor.record_mr_signal_generated(sym)
 
         # Phase 4: Alpha Engine — supplementary high-quality signals
         # Runs when existing strategy produces no signal; all alpha signals
@@ -1951,7 +1959,11 @@ async def on_tick(tick: Tick):
                     regime=regime.value, utc_hour=_utc_hr_ec, reason=_lean.reason,
                 )
                 trade_flow_monitor.record_skip(sym, _lean.reason)
+                if strategy_type == "MeanReversion":
+                    trade_flow_monitor.record_mr_leangate_result(sym, False, _lean.reason)
                 return
+            if strategy_type == "MeanReversion":
+                trade_flow_monitor.record_mr_leangate_result(sym, True)
 
             # FTD-REF-024: fee-aware gate — reject if TP profit can't cover fees
             _gross_tp = abs(sig.take_profit - sig.entry_price) * sizing.qty
@@ -1965,6 +1977,8 @@ async def on_tick(tick: Tick):
                     "strategy": strategy_type,
                 }
                 trade_flow_monitor.record_skip(sym, f"FEE_REJECT")
+                if strategy_type == "MeanReversion":
+                    trade_flow_monitor.record_mr_fee_reject(sym)
                 return
 
             # ── Phase 6: Loss Cluster Controller — gates ALL trades ──────────
@@ -2124,6 +2138,8 @@ async def on_tick(tick: Tick):
                         "regime": regime.value, "strategy": strategy_type,
                     }
                     trade_flow_monitor.record_skip(sym, _score_result.reason)
+                    if strategy_type == "MeanReversion":
+                        trade_flow_monitor.record_mr_score_reject(sym)
                     return
 
                 # ── Phase 5: Confidence Decay — dynamic threshold from DTP ────
@@ -2216,6 +2232,8 @@ async def on_tick(tick: Tick):
                         "strategy": strategy_type,
                     }
                     trade_flow_monitor.record_skip(sym, _sfg_result.reason)
+                    if strategy_type == "MeanReversion":
+                        trade_flow_monitor.record_mr_fee_reject(sym)
                     return
 
                 # ── Phase 5: EV Engine — expected value gate ──────────────────
@@ -2564,6 +2582,8 @@ async def on_tick(tick: Tick):
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
                     execution_drive_policy.record_trade(sym)   # EDP: reset idle timer
+                    if strategy_type == "MeanReversion":
+                        trade_flow_monitor.record_mr_executed(sym)
                     # Phase 4: register with trade manager for lifecycle tracking
                     # MR regime uses RANGE_SCALP mode: BE triggers at 0.5R (vs 1.0R)
                     # to protect the near-zero-gross-edge setup faster.
@@ -2624,6 +2644,8 @@ async def on_tick(tick: Tick):
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
                     execution_drive_policy.record_trade(sym)   # EDP: reset idle timer
+                    if strategy_type == "MeanReversion":
+                        trade_flow_monitor.record_mr_executed(sym)
                     # PRP-001: record signal context at trade open for truth tracking.
                     # context_quality_engine is separate try/except so its failure never
                     # silently prevents signal_truth_engine from recording the trade.
@@ -5883,6 +5905,14 @@ async def stage2_visibility():
         **trade_flow_monitor.stage2_summary(),
         "flow_summary": trade_flow_monitor.summary(),
     }
+
+
+@app.get("/api/mr/funnel")
+async def mr_funnel():
+    """FTD-MR-FUNNEL-TELEMETRY-001 — MeanReversion stage-by-stage funnel.
+    Shows exactly where MR candidates are suppressed between regime detection and execution.
+    """
+    return trade_flow_monitor.mr_funnel_summary()
 
 
 @app.get("/api/prp/002/density")

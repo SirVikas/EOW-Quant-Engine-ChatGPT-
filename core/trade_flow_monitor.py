@@ -79,6 +79,21 @@ class TradeFlowMonitor:
         self._s2_none_by_regime:Dict[str, int] = defaultdict(int)   # per-regime NONE count
         self._s2_recent_nones:  deque = deque(maxlen=50)            # last 50 Stage-2 NONE events
 
+        # ── MR Funnel Telemetry (FTD-MR-FUNNEL-TELEMETRY-001) ────────────────
+        # Hard counters — replaces estimates with measured stage-by-stage data
+        self._mr_regime_events:      int = 0   # MR symbol entered scan pipeline
+        self._mr_trend_lock_reject:  int = 0   # blocked by ADX > 25 early return
+        self._mr_signal_generated:   int = 0   # MR strategy produced a non-NONE signal
+        self._mr_signal_none:        int = 0   # MR strategy returned NONE
+        self._mr_leangate_reject_rr: int = 0   # LeanGate blocked for RR_LOW
+        self._mr_leangate_reject_sl: int = 0   # LeanGate blocked for SL_TOO_TIGHT
+        self._mr_leangate_reject_fee:int = 0   # LeanGate blocked for FEE_HEAVY
+        self._mr_leangate_reject_other:int = 0 # LeanGate blocked for other reason
+        self._mr_leangate_pass:      int = 0   # signal survived LeanGate
+        self._mr_fee_reject:         int = 0   # smart fee guard / fee-aware gate blocked
+        self._mr_score_reject:       int = 0   # adaptive scorer blocked
+        self._mr_executed:           int = 0   # trade reached execution
+
         logger.info(
             f"[FLOW-MONITOR] Phase 5.1 activated | "
             f"window={cfg.TFM_WINDOW_MIN}min | "
@@ -144,6 +159,104 @@ class TradeFlowMonitor:
     def record_reached_leangate(self, symbol: str, strategy: str):
         """Call when a signal survives Stage-2 and enters LeanGate evaluation."""
         self._s2_reached_leangate += 1
+
+    # ── MR Funnel Telemetry (FTD-MR-FUNNEL-TELEMETRY-001) ────────────────────
+
+    def record_mr_regime_event(self, symbol: str):
+        """Call when a MEAN_REVERTING symbol enters the scan pipeline."""
+        self._mr_regime_events += 1
+
+    def record_mr_trend_lock(self, symbol: str, adx: float):
+        """Call when MR_TREND_LOCK fires (ADX > 25 blocks MR pipeline)."""
+        self._mr_trend_lock_reject += 1
+
+    def record_mr_signal_generated(self, symbol: str):
+        """Call when MeanReversionStrategy returns a non-NONE signal."""
+        self._mr_signal_generated += 1
+
+    def record_mr_signal_none(self, symbol: str):
+        """Call when MeanReversionStrategy returns None/NONE."""
+        self._mr_signal_none += 1
+
+    def record_mr_leangate_result(self, symbol: str, passed: bool, reason: str = ""):
+        """Call with LeanGate result for MR signals."""
+        if passed:
+            self._mr_leangate_pass += 1
+        else:
+            if "RR" in reason or "rr" in reason.lower():
+                self._mr_leangate_reject_rr += 1
+            elif "SL" in reason or "sl_dist" in reason.lower():
+                self._mr_leangate_reject_sl += 1
+            elif "FEE" in reason or "fee" in reason.lower():
+                self._mr_leangate_reject_fee += 1
+            else:
+                self._mr_leangate_reject_other += 1
+
+    def record_mr_fee_reject(self, symbol: str):
+        """Call when fee gate (smart_fee_guard or fee-aware gate) blocks an MR signal."""
+        self._mr_fee_reject += 1
+
+    def record_mr_score_reject(self, symbol: str):
+        """Call when adaptive scorer blocks an MR signal."""
+        self._mr_score_reject += 1
+
+    def record_mr_executed(self, symbol: str):
+        """Call when an MR trade reaches execution."""
+        self._mr_executed += 1
+
+    def mr_funnel_summary(self) -> dict:
+        """FTD-MR-FUNNEL-TELEMETRY-001 — measured MR execution funnel."""
+        ev   = self._mr_regime_events
+        tl   = self._mr_trend_lock_reject
+        sg   = self._mr_signal_generated
+        sn   = self._mr_signal_none
+        lg_p = self._mr_leangate_pass
+        lg_rr= self._mr_leangate_reject_rr
+        lg_sl= self._mr_leangate_reject_sl
+        lg_fe= self._mr_leangate_reject_fee
+        lg_ot= self._mr_leangate_reject_other
+        fr   = self._mr_fee_reject
+        sr   = self._mr_score_reject
+        ex   = self._mr_executed
+
+        lg_total_reject = lg_rr + lg_sl + lg_fe + lg_ot
+
+        def pct(n, d):
+            return round(n / d * 100, 1) if d > 0 else 0.0
+
+        return {
+            "description": "MR execution funnel — FTD-MR-FUNNEL-TELEMETRY-001",
+            "funnel": {
+                "mr_regime_events":         {"count": ev,   "pct_of_events": 100.0},
+                "mr_trend_lock_reject":     {"count": tl,   "pct_of_events": pct(tl, ev),
+                                             "note": "ADX>25 early return — kills pipeline incl. alpha"},
+                "mr_signal_generated":      {"count": sg,   "pct_of_events": pct(sg, ev)},
+                "mr_signal_none":           {"count": sn,   "pct_of_events": pct(sn, ev)},
+                "mr_leangate_reject_rr":    {"count": lg_rr,"pct_of_signals": pct(lg_rr, sg),
+                                             "note": "RR < 2.5 — structural MR geometry issue"},
+                "mr_leangate_reject_sl":    {"count": lg_sl,"pct_of_signals": pct(lg_sl, sg)},
+                "mr_leangate_reject_fee":   {"count": lg_fe,"pct_of_signals": pct(lg_fe, sg)},
+                "mr_leangate_reject_other": {"count": lg_ot,"pct_of_signals": pct(lg_ot, sg)},
+                "mr_leangate_pass":         {"count": lg_p, "pct_of_signals": pct(lg_p, sg)},
+                "mr_fee_reject":            {"count": fr,   "pct_of_leangate_pass": pct(fr, lg_p)},
+                "mr_score_reject":          {"count": sr,   "pct_of_leangate_pass": pct(sr, lg_p)},
+                "mr_executed":              {"count": ex,   "pct_of_events": pct(ex, ev)},
+            },
+            "dominant_suppressor": self._mr_dominant_suppressor(ev, tl, sg, lg_rr, lg_total_reject, fr, sr),
+            "session_conversion_rate_pct": pct(ex, ev),
+            "trend_lock_vs_signal_ratio": round(tl / max(sg + sn, 1), 2),
+        }
+
+    def _mr_dominant_suppressor(self, ev, tl, sg, lg_rr, lg_total, fr, sr) -> str:
+        stages = {
+            "MR_TREND_LOCK (ADX>25)":    tl,
+            "SIGNAL_NONE (no BB touch)": max(0, ev - tl - sg),
+            "LEANGATE_RR (<2.5)":        lg_rr,
+            "LEANGATE_OTHER":            max(0, lg_total - lg_rr),
+            "FEE_REJECT":                fr,
+            "SCORE_REJECT":              sr,
+        }
+        return max(stages, key=stages.get) if any(stages.values()) else "INSUFFICIENT_DATA"
 
     # ── Querying ──────────────────────────────────────────────────────────────
 
