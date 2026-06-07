@@ -3346,6 +3346,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [IMRAF] Boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── FTD-DIAL-001: Developer Intelligence Assist Layer ─────────────────────
+    try:
+        from core.developer_intelligence.dial_engine import dial
+        _dial_summary = dial.get_boot_summary()
+        _thought(
+            f"🧠 [DIAL] Developer Intelligence Assist Layer active | endpoints: /api/dial/* | {_dial_summary}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [DIAL] Boot failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -13087,6 +13098,39 @@ async def get_truth_calibration():
 @app.get("/api/truth/recent")
 async def get_truth_recent():
     return truth_archive.recent(50)
+
+
+# ── FTD-DIAL-001: Developer Intelligence Assist Layer API ─────────────────────
+
+@app.get("/api/dial/context/{module_name}")
+async def dial_context(module_name: str):
+    """DIAL — autonomous context package for a module (history, regression risk, dependencies)."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.get_autonomous_context(module_name)
+
+@app.get("/api/dial/regression/{component}")
+async def dial_regression(component: str):
+    """DIAL — regression risk assessment for a component."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.check_regression_risk(component)
+
+@app.get("/api/dial/similar")
+async def dial_similar(q: str, limit: int = 10):
+    """DIAL — find similar historical incidents/bugs matching query."""
+    from core.developer_intelligence.dial_engine import dial
+    return {"results": dial.find_similar_issues(q, limit=limit)}
+
+@app.get("/api/dial/onboarding")
+async def dial_onboarding():
+    """DIAL — onboarding package: subsystems, critical files, known risks, architecture decisions."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.generate_onboarding_package()
+
+@app.get("/api/dial/stats")
+async def dial_stats():
+    """DIAL — engine stats: query count, IMRAF availability, uptime."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.get_stats()
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
