@@ -139,6 +139,11 @@ from core.signal_ecology.signal_density_engine import signal_density_engine     
 from core.signal_ecology.exploration_recovery  import exploration_recovery_governor   # PRP-002
 from core.signal_ecology.alpha_context_memory  import alpha_context_memory            # PRP-002
 from core.signal_ecology.adaptive_rsi_governor import adaptive_rsi_governor           # PRP-002
+from core.institutional_memory.imraf_engine import (                                  # FTD-IMR-001
+    imraf,
+    record_failure, record_incident, record_decision,
+    record_self_improvement, record_knowledge,
+)
 from core.learning_memory.trade_memory_bridge  import trade_memory_bridge              # LRN-001
 from core.exit_attribution import resolve_exit_method, compute_exit_attribution_report # FTD-PHOENIX-EXIT-ATTR-001
 from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult              # FTD-PHOENIX-ETE-001
@@ -813,6 +818,27 @@ async def on_tick(tick: Tick):
             alpha_attribution_platform.record(_snap_aap)
             truth_archive.save(_snap_aap)
 
+            # FTD-IMR-001: archive decision explainability and self-improvement tracking
+            try:
+                record_decision(
+                    symbol   = sym,
+                    signal   = _trade_direction if "_trade_direction" in dir() else "UNKNOWN",
+                    regime   = _trade_regime,
+                    strategy = _trade_strategy,
+                    confidence = getattr(last_trade, "confidence", 0.0),
+                    decision = "EXECUTED",
+                    reason   = getattr(last_trade, "reason", ""),
+                    filters_applied = [],
+                )
+                record_self_improvement(
+                    change            = f"{_trade_strategy} trade in {_trade_regime}",
+                    observed_impact   = f"net_pnl={last_trade.net_pnl:+.4f}",
+                    performance_delta = {"net_pnl": last_trade.net_pnl, "r": getattr(last_trade, "r_multiple", 0)},
+                    stability_delta   = "stable",
+                    outcome           = "WIN" if last_trade.net_pnl >= 0 else "LOSS",
+                )
+            except Exception:
+                pass
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
@@ -3306,6 +3332,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [AIL] Boot failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── FTD-IMR-001: Institutional Memory & Research Archive Framework ─────────
+    try:
+        _imraf_stats = imraf.get_stats()
+        _thought(
+            f"📚 [IMRAF] Institutional Memory loaded | "
+            f"total={_imraf_stats['total_records']} records | "
+            f"categories={len(_imraf_stats['by_category'])} | "
+            f"db=data/institutional_memory.db | "
+            f"endpoints: /api/imraf/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [IMRAF] Boot check failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5731,6 +5771,47 @@ async def prp002_rsi_decisions(n: int = 50):
 async def prp002_recovery_history(n: int = 20):
     """PRP-002 — Recent exploration recovery cycles."""
     return {"cycles": exploration_recovery_governor.cycle_history(n=n)}
+
+
+# ── FTD-IMR-001: Institutional Memory & Research Archive Framework endpoints ──
+
+@app.get("/api/imraf/stats")
+async def imraf_stats():
+    """FTD-IMR-001 — Institutional Memory stats and category breakdown."""
+    return imraf.get_stats()
+
+@app.get("/api/imraf/search")
+async def imraf_search(q: str, category: str = "", limit: int = 50):
+    """FTD-IMR-001 — Full-text search across institutional memory."""
+    from core.institutional_memory.imraf_engine import Category
+    cat = None
+    if category:
+        try:
+            cat = Category(category.upper())
+        except ValueError:
+            pass
+    return {"results": imraf.search(q, category=cat, limit=limit)}
+
+@app.get("/api/imraf/timeline")
+async def imraf_timeline(category: str = "", limit: int = 100):
+    """FTD-IMR-001 — Chronological timeline of institutional memory records."""
+    from core.institutional_memory.imraf_engine import Category
+    cat = None
+    if category:
+        try:
+            cat = Category(category.upper())
+        except ValueError:
+            pass
+    return {"timeline": imraf.timeline(category=cat, limit=limit)}
+
+@app.get("/api/imraf/record/{record_id}")
+async def imraf_get_record(record_id: int):
+    """FTD-IMR-001 — Retrieve a specific institutional memory record by ID."""
+    rec = imraf.get_record(record_id)
+    if rec is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Record not found")
+    return rec
 
 
 @app.get("/api/forensics/recovery-cycle-audit")
