@@ -144,3 +144,55 @@ Any future session should be able to answer:
 (Historical Extraction) → FTD-AEG-001 (Autonomous Engineering Governance).
 This is stored in IMRAF (records 95–99) and enforced by this directive.
 
+---
+
+## TRUTH ENGINE ROADMAP — Chain-B Institutional Directive
+
+**MANDATORY RULE**: ETE_GATE_ENABLED and XTE_FORCE_CLOSE_ENABLED must NOT be set
+True without completing Phase-2 Truth Calibration first.
+
+### Current State (v1.57.0)
+- **ETE**: Phase-1 Observation Mode — gate DISABLED (`ETE_GATE_ENABLED=False`)
+- **XTE**: Advisory Mode — force-close DISABLED (`XTE_FORCE_CLOSE_ENABLED=False`)
+- **AAP**: Observation Mode — attribution tracking active, not influencing allocation
+
+### Why ETE gate is disabled
+ETE requires a minimum of 500+ trades to calibrate `ETE_MIN_SCORE`. Activating
+without calibration risks blocking valid entries on an uncalibrated threshold.
+
+### Activation Sequence (Phase-1 → Phase-4)
+
+| Phase | Name | Gate Condition | Status |
+|-------|------|---------------|--------|
+| 1 | Observation Mode | None — always active | ✅ ACTIVE |
+| 2 | Truth Calibration | 500+ trades collected | ⏳ PENDING |
+| 3 | ETE Entry Governance | Phase-2 complete + ETE_MIN_SCORE set | ⏳ PENDING |
+| 4 | XTE Autonomous Exit | Phase-3 stable for 200+ live trades | ⏳ PENDING |
+
+### Future AI Session Briefing
+Any future session must be able to answer:
+
+> "Why is ETE not blocking entries yet?"
+
+**Expected answer**: ETE is in Phase-1 Observation Mode. `ETE_GATE_ENABLED=False`
+because Truth Score calibration requires 500+ trades minimum. See IMRAF records
+105–109 for full activation roadmap.
+
+> "What must happen before ETE/XTE activation?"
+
+**Expected answer**: Phase-2 — collect 500+ trades, run calibration analysis,
+determine `ETE_MIN_SCORE`. Then Phase-3 — set `ETE_GATE_ENABLED=True`. Then
+Phase-4 — set `XTE_FORCE_CLOSE_ENABLED=True` after Phase-3 stable.
+
+### Both Chains Are Independent
+
+```
+Chain-A (Institutional Memory):    Chain-B (Truth Engine):
+FTD-KGE-001                        ETE Phase-2 Calibration
+    ↓                                   ↓
+FTD-HKE-001                        ETE Phase-3 Gate Live
+    ↓                                   ↓
+FTD-AEG-001                        XTE Phase-4 Autonomous Exit
+```
+
+Neither chain blocks the other. Both are approved and pending.
