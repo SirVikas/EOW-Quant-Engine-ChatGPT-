@@ -2792,6 +2792,40 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
                 f"equity={_replay_equity:.2f} USDT",
                 "SYSTEM",
             )
+
+            # FTD-ACM-BOOT-001: backfill alpha_context_memory from DataLake history.
+            # Without this, all context knowledge (regime/strategy profitability) is
+            # wiped on every restart.  With 4800+ historical trades, the context memory
+            # was always showing 0 — blocking the toxic-context gate and amplification.
+            _acm_fed = 0
+            for _ht in _hist:
+                _ht_regime   = _ht.get("regime", "UNKNOWN")
+                _ht_strategy = _ht.get("strategy_id", "")
+                _ht_net_pnl  = _ht.get("net_pnl", 0.0)
+                # close_utc_hour stored on TradeRecord; fall back to parsing exit_ts
+                _ht_hour = _ht.get("close_utc_hour", -1)
+                if _ht_hour < 0:
+                    try:
+                        import datetime as _dt
+                        _ht_hour = _dt.datetime.utcfromtimestamp(
+                            _ht.get("exit_ts", 0) / 1000
+                        ).hour
+                    except Exception:
+                        _ht_hour = 0
+                if _ht_regime and _ht_strategy:
+                    alpha_context_memory.record_outcome(
+                        regime=_ht_regime,
+                        utc_hour=_ht_hour,
+                        strategy=_ht_strategy,
+                        net_pnl=float(_ht_net_pnl),
+                    )
+                    _acm_fed += 1
+            # Force an immediate save so the populated data survives future restarts
+            alpha_context_memory.save()
+            _thought(
+                f"📂 Context memory backfilled: {_acm_fed} historical trades loaded",
+                "SYSTEM",
+            )
         else:
             _thought("📂 DataLake: no trade history found.", "SYSTEM")
     except Exception as _exc:
