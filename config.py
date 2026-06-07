@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.52.8"
+APP_VERSION = "1.53.0"
 
 
 class EngineConfig(BaseSettings):
@@ -214,6 +214,11 @@ class EngineConfig(BaseSettings):
     # Raised 2.0→3.0 — with TP at 4.0R, booking 50% at 3.0R preserves upside while locking gains.
     # Previous 2.0R partial TP was dragging down avg win before the full TP move completed.
     PARTIAL_TP_R: float = 1.5            # lowered 3.0→1.5 — with corrected R denominator (actual SL risk), 1.5R is reachable; 3.0R was dead code (TP_R < 3.0 for notional-capped trades)
+    # Trailing Stop — tight enough so TSL candidate > BE price, converting BE losers to TSL wins.
+    # Old value ATR_MULT_SL*0.7=1.75 placed TSL BELOW BE price so BE always fired first;
+    # 67 of 200 exits were classified BE with small net losses from fee drag.
+    # At 0.60: TSL candidate > BE when peak_r > 0.686R — captures profit from medium moves.
+    TRAIL_ATR_MULT: float = 0.60
 
     # ── Phase 5: EV Engine + Adaptive Intelligence ───────────────────────────
     # EV Engine
