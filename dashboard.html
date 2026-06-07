@@ -520,8 +520,15 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
       </svg>
     </div>
     <div>
-      <div style="font-size:15px;font-weight:600;letter-spacing:-.01em;">EOW Quant Engine</div>
-      <div id="app-version-label" style="font-size:10px;color:var(--muted);">Self-Evolving Multi-Asset System — v1.0</div>
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <div id="app-version-label" style="font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--text);">PHOENIX</div>
+        <div id="nexus-topbar-badge" style="display:inline-flex;align-items:center;gap:5px;background:#EDE9FE;border:1px solid #C4B5FD;border-radius:20px;padding:2px 9px;cursor:pointer;" onclick="openNexusDiagnostics()" title="PHOENIX NEXUS — Institutional Intelligence Layer">
+          <span style="font-size:9px;font-weight:700;color:#553C9A;letter-spacing:.04em;">PHOENIX NEXUS</span>
+          <span id="nexus-version-topbar" style="font-size:9px;color:#7C3AED;font-family:var(--fm);">v1.0.0</span>
+          <span id="nexus-health-dot" style="width:6px;height:6px;border-radius:50%;background:#9AE6B4;display:inline-block;" title="All layers active"></span>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);" id="nexus-topbar-sub">Institutional Intelligence Layer Active</div>
     </div>
   </div>
 
@@ -566,6 +573,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
   <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
   <button class="tab-btn"        onclick="switchTab('truth')"        id="tab-btn-truth">🔬 Truth Engine</button>
+  <button class="tab-btn"        onclick="switchTab('nexus')"        id="tab-btn-nexus">🏛 NEXUS</button>
 </nav>
 
 <!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
@@ -3849,6 +3857,367 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </div><!-- /tab-truth -->
 
+<!-- ══ TAB: PHOENIX NEXUS ════════════════════════════════════════════════════ -->
+<div id="tab-nexus" class="tab-panel">
+<div class="main">
+
+  <!-- COMPONENT-1 identity header -->
+  <div class="card" style="background:linear-gradient(135deg,#1A1A2E 0%,#2D1B69 100%);color:#F7FAFC;margin-bottom:0;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:#C4B5FD;text-transform:uppercase;margin-bottom:4px;">PHOENIX NEXUS</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.02em;">Institutional Intelligence Layer</div>
+        <div style="font-size:12px;opacity:.7;margin-top:4px;">Memory · Intelligence · Context · Governance · Future Guidance</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:#C4B5FD;font-family:var(--fm);">ADR-NEXUS-001</div>
+        <div id="nexus-card-version" style="font-size:18px;font-weight:700;font-family:var(--fm);color:#A78BFA;">v1.0.0</div>
+        <div id="nexus-health-summary" style="font-size:11px;color:#9AE6B4;margin-top:2px;">5 / 5 Active · Health 100%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPONENT-4 architecture clarity panel -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+
+    <!-- Execution Layer -->
+    <div class="card" style="border-left:3px solid #48BB78;">
+      <div class="label" style="color:#276749;margin-bottom:10px;">Execution Layer</div>
+      <div id="nexus-exec-layers" style="display:flex;flex-direction:column;gap:6px;">
+        <div class="nexus-exec-item">Trading Engine</div>
+        <div class="nexus-exec-item">Risk Engine</div>
+        <div class="nexus-exec-item">Reporting Engine</div>
+        <div class="nexus-exec-item" style="border-color:#BEE3F8;color:#2B6CB0;">Truth Engine (ETE / XTE / AAP)</div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;">PHOENIX executes.</div>
+    </div>
+
+    <!-- NEXUS Layer -->
+    <div class="card" style="border-left:3px solid #9F7AEA;">
+      <div class="label" style="color:#553C9A;margin-bottom:10px;">NEXUS Layer — Active Layers</div>
+      <div id="nexus-layer-grid" style="display:flex;flex-direction:column;gap:6px;">
+        <!-- Populated dynamically from /api/nexus active_layers -->
+        <div style="font-size:11px;color:var(--muted);">Loading…</div>
+      </div>
+      <div id="nexus-pending-layers" style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
+        <!-- Populated dynamically from /api/nexus pending_layers -->
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:10px;">PHOENIX NEXUS remembers, learns, governs, and guides.</div>
+    </div>
+  </div>
+
+  <!-- COMPONENT-2 + COMPONENT-7 health card -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="label">NEXUS Health Monitor</div>
+      <button onclick="loadNexusData()" style="padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:11px;">⟳ Refresh</button>
+    </div>
+    <div id="nexus-health-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+      <div style="font-size:11px;color:var(--muted);">Loading…</div>
+    </div>
+  </div>
+
+  <!-- COMPONENT-3 roadmap intelligence panel -->
+  <div class="card">
+    <div class="label" style="margin-bottom:12px;">Roadmap Intelligence — Approved Pending Chains</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+
+      <!-- Chain-A -->
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#553C9A;margin-bottom:8px;">Chain-A — Institutional Memory</div>
+        <div id="nexus-chain-a" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="font-size:11px;color:var(--muted);">Loading…</div>
+        </div>
+      </div>
+
+      <!-- Chain-B -->
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#2B6CB0;margin-bottom:8px;">Chain-B — Truth Engine Activation</div>
+        <div id="nexus-chain-b" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="font-size:11px;color:var(--muted);">Loading…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COMPONENT-5 expandable diagnostics -->
+  <div class="card" id="nexus-diagnostics-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="toggleNexusDiagnostics()">
+      <div class="label">Layer Diagnostics</div>
+      <span id="nexus-diag-toggle" style="font-size:12px;color:var(--muted);">▼ Expand</span>
+    </div>
+    <div id="nexus-diagnostics-body" style="display:none;margin-top:12px;">
+      <div id="nexus-diag-content" style="font-size:12px;font-family:var(--fm);color:var(--text);background:#F7FAFC;border-radius:8px;padding:14px;white-space:pre-wrap;line-height:1.7;">Loading…</div>
+      <div style="margin-top:10px;font-size:10px;color:var(--muted);">
+        Registered: ADR-NEXUS-001 · IMRAF Records 111 + 118 · Read-only diagnostic view
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-nexus -->
+
+<style>
+.nexus-exec-item {
+  font-size:12px;font-weight:500;padding:5px 10px;border-radius:6px;
+  border:1px solid #C6F6D5;background:#F0FFF4;color:#276749;
+}
+.nexus-layer-row {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 10px;border-radius:6px;border:1px solid #E9D8FD;background:#FAF5FF;
+}
+.nexus-layer-name { font-size:12px;font-weight:700;color:#553C9A; }
+.nexus-layer-status { font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px; }
+.nexus-layer-status.active { background:#C6F6D5;color:#276749; }
+.nexus-layer-status.pending { background:#FEFCBF;color:#7B6100; }
+.nexus-layer-meta { font-size:10px;color:var(--muted);margin-top:1px; }
+.nexus-chain-step {
+  display:flex;align-items:center;gap:8px;padding:6px 10px;
+  border-radius:6px;border:1px solid var(--border);background:#F7FAFC;
+}
+.nexus-chain-step.current { border-color:#9F7AEA;background:#FAF5FF; }
+.nexus-chain-step.next    { border-color:#68D391;background:#F0FFF4; }
+.nexus-chain-step.blocked { border-color:#FBD38D;background:#FFFFF0; }
+.nexus-chain-label { font-size:11px;font-weight:700; }
+.nexus-chain-desc  { font-size:10px;color:var(--muted);margin-top:1px; }
+.nexus-step-badge  { font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap; }
+.nexus-step-badge.current { background:#E9D8FD;color:#553C9A; }
+.nexus-step-badge.next    { background:#C6F6D5;color:#276749; }
+.nexus-step-badge.blocked { background:#FEFCBF;color:#7B6100; }
+</style>
+
+<script>
+// ── PHOENIX NEXUS Tab ─────────────────────────────────────────────────────────
+
+let _nexusLoaded = false;
+
+function loadNexusData() {
+  fetch(API + '/api/nexus')
+    .then(r => r.json())
+    .then(d => {
+      _nexusLoaded = true;
+      renderNexusCard(d);
+      renderNexusTopbar(d);
+    })
+    .catch(e => {
+      document.getElementById('nexus-layer-grid').innerHTML =
+        '<div style="font-size:11px;color:var(--c-red);">⚠ /api/nexus unreachable</div>';
+    });
+}
+
+function renderNexusTopbar(d) {
+  const ver = document.getElementById('nexus-version-topbar');
+  if (ver && d.nexus_version) ver.textContent = 'v' + d.nexus_version;
+  const sub = document.getElementById('nexus-topbar-sub');
+  if (!sub) return;
+  const total  = Object.keys(d.active_layers || {}).length;
+  const active = Object.values(d.active_layers || {}).filter(l => l.status === 'ACTIVE').length;
+  sub.textContent = active === total
+    ? 'Institutional Intelligence Layer Active'
+    : `Institutional Intelligence Layer — ${active}/${total} Active`;
+  const dot = document.getElementById('nexus-health-dot');
+  if (dot) dot.style.background = active === total ? '#9AE6B4' : '#FBD38D';
+}
+
+function renderNexusCard(d) {
+  // Version
+  const cv = document.getElementById('nexus-card-version');
+  if (cv && d.nexus_version) cv.textContent = 'v' + d.nexus_version;
+
+  // Health summary
+  const activeLayers  = Object.keys(d.active_layers  || {});
+  const pendingLayers = Object.keys(d.pending_layers || {});
+  const activeCount   = Object.values(d.active_layers || {}).filter(l => l.status === 'ACTIVE').length;
+  const total         = activeLayers.length;
+  const healthPct     = total > 0 ? Math.round((activeCount / total) * 100) : 0;
+  const hs = document.getElementById('nexus-health-summary');
+  if (hs) hs.textContent = `${activeCount} / ${total} Active · Health ${healthPct}%`;
+
+  // COMPONENT-6: dynamic active layer grid
+  const grid = document.getElementById('nexus-layer-grid');
+  if (grid) {
+    grid.innerHTML = activeLayers.map(key => {
+      const layer = d.active_layers[key];
+      const meta  = buildLayerMeta(key, layer);
+      return `<div class="nexus-layer-row">
+        <div>
+          <div class="nexus-layer-name">${key}</div>
+          ${meta ? `<div class="nexus-layer-meta">${meta}</div>` : ''}
+        </div>
+        <span class="nexus-layer-status ${layer.status === 'ACTIVE' ? 'active' : 'pending'}">${layer.status}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Pending layers (future — KGE, HKE, AEG)
+  const pl = document.getElementById('nexus-pending-layers');
+  if (pl && pendingLayers.length > 0) {
+    pl.innerHTML = '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Pending Layers</div>' +
+      pendingLayers.map(key => {
+        const desc = d.pending_layers[key] || key;
+        return `<div class="nexus-layer-row" style="border-color:#FEFCBF;background:#FFFFF0;">
+          <div>
+            <div class="nexus-layer-name" style="color:#7B6100;">${key}</div>
+            <div class="nexus-layer-meta">${desc}</div>
+          </div>
+          <span class="nexus-layer-status pending">PENDING</span>
+        </div>`;
+      }).join('');
+  }
+
+  // Health monitor grid
+  renderNexusHealthGrid(d);
+
+  // Roadmap chains
+  renderNexusRoadmap(d);
+
+  // Diagnostics content
+  renderNexusDiagnostics(d);
+}
+
+function buildLayerMeta(key, layer) {
+  if (layer.records  != null) return `${layer.records} Records`;
+  if (layer.modules  != null) return `${layer.modules} Modules`;
+  if (layer.components != null) return `${layer.components} Components`;
+  return '';
+}
+
+function renderNexusHealthGrid(d) {
+  const grid = document.getElementById('nexus-health-grid');
+  if (!grid) return;
+  const activeLayers  = d.active_layers  || {};
+  const pendingLayers = d.pending_layers || {};
+  const allItems = [
+    ...Object.entries(activeLayers).map(([k,v]) => ({key:k, layer:v, isPending:false})),
+    ...Object.keys(pendingLayers).map(k => ({key:k, layer:{status:'PENDING'}, isPending:true}))
+  ];
+  grid.innerHTML = allItems.map(({key, layer, isPending}) => {
+    const meta = isPending ? '' : buildLayerMeta(key, layer);
+    const bg   = isPending ? '#FFFFF0' : '#F0FFF4';
+    const bc   = isPending ? '#FBD38D' : '#9AE6B4';
+    const sc   = isPending ? '#7B6100' : '#276749';
+    const statusBg = isPending ? '#FEFCBF' : '#C6F6D5';
+    return `<div style="padding:10px;border-radius:8px;border:1px solid ${bc};background:${bg};">
+      <div style="font-size:11px;font-weight:700;color:${sc};">${key}</div>
+      ${meta ? `<div style="font-size:10px;color:var(--muted);margin-top:1px;">${meta}</div>` : ''}
+      <div style="margin-top:5px;display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:${statusBg};color:${sc};">${layer.status}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderNexusRoadmap(d) {
+  const chains = d.roadmap_chains || {};
+  const pending = d.pending_layers || {};
+
+  // Chain-A
+  const ca = document.getElementById('nexus-chain-a');
+  if (ca) {
+    const chainAKeys = Object.keys(pending);  // KGE, HKE, AEG in order
+    const activeLayers = Object.keys(d.active_layers || {});
+    const lastActive = activeLayers[activeLayers.length - 1] || 'EGI';
+    const steps = [
+      { label: lastActive + ' Complete', badge: 'current', badgeClass: 'current',
+        desc: 'Current stage — all active NEXUS layers operational' },
+      ...chainAKeys.map((key, i) => ({
+        label: key,
+        badge: i === 0 ? 'NEXT' : 'BLOCKED',
+        badgeClass: i === 0 ? 'next' : 'blocked',
+        desc: i === 0
+          ? pending[key] || key
+          : `Requires ${chainAKeys.slice(0, i).join(' + ')} completion`
+      }))
+    ];
+    ca.innerHTML = steps.map(s =>
+      `<div class="nexus-chain-step ${s.badgeClass}">
+        <div style="flex:1;">
+          <div class="nexus-chain-label">${s.label}</div>
+          <div class="nexus-chain-desc">${s.desc}</div>
+        </div>
+        <span class="nexus-step-badge ${s.badgeClass}">${s.badge}</span>
+      </div>`
+    ).join('');
+  }
+
+  // Chain-B
+  const cb = document.getElementById('nexus-chain-b');
+  if (cb) {
+    const chainBSteps = [
+      { label: 'Phase-1 Observation', badge: 'ACTIVE', badgeClass: 'current',
+        desc: 'ETE in observation mode — gate disabled, collecting trades' },
+      { label: 'Phase-2 Truth Calibration', badge: 'NEXT', badgeClass: 'next',
+        desc: 'Requires 500+ trades — then set ETE_MIN_SCORE' },
+      { label: 'Phase-3 ETE Gate Live', badge: 'BLOCKED', badgeClass: 'blocked',
+        desc: 'Blocked until Phase-2 calibration complete' },
+      { label: 'Phase-4 XTE Autonomous Exit', badge: 'BLOCKED', badgeClass: 'blocked',
+        desc: 'Blocked until Phase-3 stable for 200+ live trades' }
+    ];
+    cb.innerHTML = chainBSteps.map(s =>
+      `<div class="nexus-chain-step ${s.badgeClass}">
+        <div style="flex:1;">
+          <div class="nexus-chain-label">${s.label}</div>
+          <div class="nexus-chain-desc">${s.desc}</div>
+        </div>
+        <span class="nexus-step-badge ${s.badgeClass}">${s.badge}</span>
+      </div>`
+    ).join('');
+  }
+}
+
+function renderNexusDiagnostics(d) {
+  const el = document.getElementById('nexus-diag-content');
+  if (!el) return;
+  const activeLayers  = d.active_layers  || {};
+  const pendingLayers = d.pending_layers || {};
+  const activeCount   = Object.values(activeLayers).filter(l => l.status === 'ACTIVE').length;
+  const lines = [
+    `SYSTEM_NAME     : ${d.nexus_name || '—'}`,
+    `NEXUS_VERSION   : ${d.nexus_version || '—'}`,
+    `APP_VERSION     : ${d.app_version || '—'}`,
+    ``,
+    `ACTIVE LAYERS (${activeCount}/${Object.keys(activeLayers).length}):`,
+    ...Object.entries(activeLayers).map(([k,v]) => {
+      const meta = buildLayerMeta(k, v);
+      return `  ${k.padEnd(8)} ${v.status}${meta ? '  ' + meta : ''}`;
+    }),
+    ``,
+    `PENDING LAYERS (${Object.keys(pendingLayers).length}):`,
+    ...Object.keys(pendingLayers).map(k => `  ${k.padEnd(8)} PENDING`),
+    ``,
+    `ROADMAP:`,
+    `  Chain-A: ${d.roadmap_chains?.chain_a || '—'}`,
+    `  Chain-B: ${d.roadmap_chains?.chain_b || '—'}`,
+    ``,
+    `ARCHITECTURE:`,
+    `  Execution : ${(d.architecture?.execution_layer || []).join(', ')}`,
+    `  NEXUS     : ${(d.architecture?.nexus_layer     || []).join(', ')}`,
+    ``,
+    `IMRAF Record    : ${d.imraf_record || '—'}`,
+    `ADR Reference   : ADR-NEXUS-001`,
+  ];
+  el.textContent = lines.join('\n');
+}
+
+function toggleNexusDiagnostics() {
+  const body   = document.getElementById('nexus-diagnostics-body');
+  const toggle = document.getElementById('nexus-diag-toggle');
+  if (!body) return;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if (toggle) toggle.textContent = open ? '▲ Collapse' : '▼ Expand';
+}
+
+function openNexusDiagnostics() {
+  switchTab('nexus');
+  setTimeout(() => {
+    const body   = document.getElementById('nexus-diagnostics-body');
+    const toggle = document.getElementById('nexus-diag-toggle');
+    if (body)   body.style.display   = 'block';
+    if (toggle) toggle.textContent   = '▲ Collapse';
+  }, 100);
+}
+</script>
+
 <script>
 // ── PRP Chain tab ─────────────────────────────────────────────────────────────
 
@@ -4351,7 +4720,7 @@ function initGrowthChart() {
 // ── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(name) {
   _activeTab = name;
-  ['etcc','overview','dbo','combat','report','perf','lio','institutional','prp','apiexplorer','ailmonitor'].forEach(t => {
+  ['etcc','overview','dbo','combat','report','perf','lio','institutional','prp','apiexplorer','ailmonitor','truth','nexus'].forEach(t => {
     const panel = document.getElementById('tab-'+t);
     const btn   = document.getElementById('tab-btn-'+t);
     if (panel) panel.classList.toggle('active', t === name);
@@ -4398,6 +4767,9 @@ function switchTab(name) {
   }
   if (name === 'institutional' && !_irelLoaded) {
     loadIREL();
+  }
+  if (name === 'nexus') {
+    loadNexusData();
   }
 }
 
@@ -6101,13 +6473,19 @@ window.addEventListener('DOMContentLoaded', () => {
   // MASTER-001: wire execution mode radio buttons
   initExecModeSelector();
 
-  // Fetch application version from API — single source of truth
+  // Fetch application version — single source of truth
   fetch(API + '/api/version')
     .then(r => r.json())
     .then(d => {
       const el = document.getElementById('app-version-label');
-      if (el && d.version) el.textContent = `Self-Evolving Multi-Asset System — v${d.version}`;
+      if (el && d.version) el.textContent = `PHOENIX v${d.version}`;
     })
+    .catch(() => {});
+
+  // Fetch NEXUS identity for topbar badge — boot-time only
+  fetch(API + '/api/nexus')
+    .then(r => r.json())
+    .then(d => renderNexusTopbar(d))
     .catch(() => {});
 });
 
