@@ -3418,6 +3418,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [EGI Truth] Boot warning (non-fatal): {_e}", "SYSTEM")
 
+    # PHOENIX NEXUS — Institutional Intelligence Layer identity declaration
+    try:
+        from config import NEXUS_NAME, NEXUS_VERSION, NEXUS_LAYERS, NEXUS_PENDING
+        _thought(
+            f"[{NEXUS_NAME} Active] "
+            f"Memory | Intelligence | Context | Governance | Future Guidance  "
+            f"layers={NEXUS_LAYERS}  pending={NEXUS_PENDING}  v{NEXUS_VERSION}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [PHOENIX NEXUS] Identity declaration failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
