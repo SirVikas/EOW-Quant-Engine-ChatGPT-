@@ -3385,6 +3385,39 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [EMA] Boot failed (non-fatal): {_e}", "SYSTEM")
 
+    # FTD-EGI-001 — Engineering Governance Integrity Program
+    try:
+        from core.governance.backfill.historical_decision_backfill import run_full_backfill
+        _backfill_result = run_full_backfill(dry_run=True)
+        _thought(
+            f"[Decision Backfill Engine Active] known_decisions={_backfill_result.get('would_import', 0)} "
+            f"coverage={_backfill_result.get('coverage_pct', 0.0):.1f}%",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [EGI Backfill] Boot warning (non-fatal): {_e}", "SYSTEM")
+
+    try:
+        from core.governance.enforcement.gate import gate as _gov_gate
+        _thought(
+            "[Verifier Auto-Recording Active] [Governance Enforcement Gate Active] "
+            f"imraf_connected={_gov_gate._imraf is not None}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [EGI Gate] Boot warning (non-fatal): {_e}", "SYSTEM")
+
+    try:
+        from core.governance.truth.truth_engine import truth_engine as _truth
+        _cov = _truth.get_decision_coverage()
+        _thought(
+            f"[Institutional Truth Engine Active] decisions={_cov['total_decisions']} "
+            f"coverage={_cov['coverage_pct']:.1f}%",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [EGI Truth] Boot warning (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -13309,6 +13342,70 @@ async def ema_stats():
     """EMA — engine stats: query count, audit log size, all 14 module names."""
     from core.ema.ema_engine import ema
     return ema.get_stats()
+
+
+# ── FTD-EGI-001 Governance Integrity Endpoints ────────────────────────────────
+
+@app.get("/api/egi/truth")
+async def egi_truth(q: str = ""):
+    """Truth Engine — answer 'Why was X changed?' with decision provenance."""
+    from core.governance.truth.truth_engine import truth_engine
+    result = truth_engine.why(q)
+    return result.to_dict()
+
+
+@app.get("/api/egi/truth/search")
+async def egi_truth_search(q: str = "", limit: int = 10):
+    """Truth Engine — search for matching decisions."""
+    from core.governance.truth.truth_engine import truth_engine
+    results = truth_engine.search(q, limit=limit)
+    return [r.to_dict() for r in results]
+
+
+@app.get("/api/egi/truth/decisions")
+async def egi_truth_decisions(component: str = "", limit: int = 20):
+    """Truth Engine — list all known decisions."""
+    from core.governance.truth.truth_engine import truth_engine
+    return truth_engine.list_decisions(component=component, limit=limit)
+
+
+@app.get("/api/egi/truth/coverage")
+async def egi_truth_coverage():
+    """Truth Engine — decision coverage metrics."""
+    from core.governance.truth.truth_engine import truth_engine
+    return truth_engine.get_decision_coverage()
+
+
+@app.get("/api/egi/gate/check")
+async def egi_gate_check(component: str = "", bypass: bool = True):
+    """Governance Enforcement Gate — check current staged files (bypass=True for read-only)."""
+    from core.governance.enforcement.gate import run_gate_check
+    result = run_gate_check(component=component, bypass=bypass, record=False)
+    return {
+        "passed": result.passed,
+        "summary": result.summary(),
+        "violations": [{"rule": v.rule, "message": v.message, "blocking": v.blocking} for v in result.violations],
+        "warnings": result.warnings,
+        "checks_run": result.checks_run,
+    }
+
+
+@app.get("/api/egi/backfill/status")
+async def egi_backfill_status():
+    """Decision Backfill Engine — dry-run status report."""
+    from core.governance.backfill.historical_decision_backfill import (
+        DecisionValidator, HistoricalDecisionBackfill, _KNOWN_DECISIONS,
+    )
+    try:
+        from core.institutional_memory.imraf_engine import imraf
+        validator = DecisionValidator(imraf=imraf)
+        report = validator.validate()
+    except Exception:
+        report = {"error": "IMRAF unavailable", "coverage_pct": 0.0}
+    return {
+        "hardcoded_decisions": len(_KNOWN_DECISIONS),
+        "validation": report,
+    }
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
