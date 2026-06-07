@@ -86,7 +86,21 @@ _PROJECT_KNOWLEDGE: Dict[str, Any] = {
         "FTD-DIAL-001: Developer Intelligence Assist Layer",
         "FTD-AEOS-001: Autonomous Engineering Operating System",
         "FTD-EMA-001: Enterprise Memory Architecture",
+        "FTD-EGI-001: Engineering Governance Integrity Program",
+        "FTD-KGE-001: Knowledge Graph Expansion Program (PENDING — NEXT)",
+        "FTD-HKE-001: Historical Knowledge Extraction Program (PENDING)",
+        "FTD-AEG-001: Autonomous Engineering Governance (PENDING — BLOCKED until KGE+HKE)",
+        "FTD-ETE-001: Entry Truth Engine Activation Program (PENDING — Phase-2 after 500+ trades)",
+        "FTD-XTE-001: Exit Truth Engine Activation Program (PENDING — after ETE Phase-3)",
     ],
+    "nexus": {
+        "name":        "PHOENIX NEXUS",
+        "version":     "1.0.0",
+        "definition":  "Central knowledge and intelligence nexus — connects all institutional layers.",
+        "active":      ["IMRAF", "DIAL", "AEOS", "EMA", "EGI"],
+        "pending":     ["KGE", "HKE", "AEG"],
+        "imraf_record": 111,
+    },
 }
 
 # ── Module 6: Architecture Knowledge Graph (entity registry) ─────────────────
