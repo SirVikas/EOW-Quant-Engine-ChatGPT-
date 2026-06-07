@@ -36,8 +36,11 @@ _MR_PREV_MARGIN    = 3.0    # crash-guard: prev RSI must be within this margin o
 _TR_LONG_RSI_MAX   = 58.0   # TRENDING long pullback: RSI must be below this (relax limit)
 _TR_SHORT_RSI_MIN  = 42.0   # TRENDING short bounce: RSI must be above this (relax limit)
 # Tightening floors for TRENDING: prevent bands from squeezing to RSI≈50 territory.
-# Below 44/above 56 would filter >95% of trend signals — a pathological outcome.
-_TR_LONG_RSI_TIGHT_MIN  = 44.0   # TRENDING long_rsi never tightens below this
+# Floor raised 44→46: diagnostic showed band stuck at 44 (floor) with survival 32%>25%
+# ceiling — governor couldn't tighten further, trapping bands at the minimum.
+# At 46 with _TARGET_SURVIVAL_HI raised to 0.35, bands stabilise in the 46–50 range
+# instead of compressing to the old 44 floor.
+_TR_LONG_RSI_TIGHT_MIN  = 46.0   # raised 44→46: old floor was the binding constraint
 _TR_SHORT_RSI_TIGHT_MAX = 56.0   # TRENDING short_rsi never tightens above this
 
 # Starting bands (same as hardcoded legacy)
@@ -61,9 +64,13 @@ _MR_PERSIST_BUFFER    = 5.0   # zone = long_band + buffer (long) / short_band - 
 _MR_PERSIST_MIN_COUNT = 2     # at least this many of the history window must be in zone
 _MR_PERSIST_WINDOW    = 3     # number of candles to check (including current)
 
-# Target survival rate window
+# Target survival rate window.
+# Ceiling raised 0.25→0.35: TRENDING band was stuck at the 44 floor because survival 32%
+# exceeded the old 25% ceiling — governor kept tightening but couldn't go below the floor.
+# At 35%, survival of 32% is within-target so adaptation stops; bands relax back toward
+# start (48) and stabilise in the 46–50 range where more signals reach downstream gates.
 _TARGET_SURVIVAL_LO = 0.10   # 10% floor
-_TARGET_SURVIVAL_HI = 0.25   # 25% ceiling
+_TARGET_SURVIVAL_HI = 0.35   # raised 0.25→0.35 ceiling
 
 # Rolling window for survival rate calculation
 _SURVIVAL_WINDOW = 100        # evaluations

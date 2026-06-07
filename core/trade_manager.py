@@ -104,7 +104,7 @@ class TradeManager:
         self._positions: Dict[str, ManagedPosition] = {}
         self.be_r           = cfg.BREAKEVEN_TRIGGER_R
         self.partial_tp_r   = cfg.PARTIAL_TP_R
-        self.trail_atr_mult = cfg.ATR_MULT_SL * 0.7
+        self.trail_atr_mult = cfg.TRAIL_ATR_MULT
         self.be_epsilon     = cfg.BREAKEVEN_EPSILON_USDT
         logger.info(
             f"[TRADE-MANAGER] Adaptive activated | "
