@@ -3368,6 +3368,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [AEOS] Boot failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── FTD-EMA-001: Enterprise Memory Architecture ────────────────────────────
+    try:
+        from core.ema.ema_engine import ema
+        _ema_summary = ema.get_boot_summary()
+        _thought(
+            f"🏢 [EMA] Enterprise Memory Architecture active | endpoints: /api/ema/* | {_ema_summary}",
+            "SYSTEM",
+        )
+        _thought(
+            "[EMA Loaded] [Context Assembly Engine Active] [Knowledge Graph Active] "
+            "[Roadmap Intelligence Active] [Multi-AI Compatibility Active] "
+            "[Institutional Memory Governance Active]",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [EMA] Boot failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -13205,6 +13222,93 @@ async def aeos_stats():
     """AEOS — engine stats: assembly count, availability, capabilities."""
     from core.aeos.aeos_engine import aeos
     return aeos.get_stats()
+
+
+# ── FTD-EMA-001: Enterprise Memory Architecture API ───────────────────────────
+
+@app.get("/api/ema/abstraction")
+async def ema_abstraction():
+    """EMA Module 1 — AI vendor independence status and supported consumers."""
+    from core.ema.ema_engine import ema
+    return ema.get_ai_abstraction_status()
+
+@app.get("/api/ema/context-package")
+async def ema_context_package(task: str, module: str = "", consumer: str = "Generic"):
+    """EMA Module 2+8 — full AI-ready engineering briefing (vendor-neutral, any consumer)."""
+    from core.ema.ema_engine import ema
+    return ema.generate_ai_context_package(task, module=module or None, ai_consumer=consumer)
+
+@app.get("/api/ema/project-knowledge")
+async def ema_project_knowledge():
+    """EMA Module 3 — permanent project knowledge core (vision, principles, governance, risks)."""
+    from core.ema.ema_engine import ema
+    return ema.get_project_knowledge()
+
+@app.get("/api/ema/ftd-hub")
+async def ema_ftd_hub(ftd_id: str = "", limit: int = 50):
+    """EMA Module 4 — FTD knowledge hub with full lifecycle metadata."""
+    from core.ema.ema_engine import ema
+    return ema.get_ftd_hub(ftd_id=ftd_id, limit=limit)
+
+@app.get("/api/ema/verifier-hub")
+async def ema_verifier_hub(component: str = ""):
+    """EMA Module 5 — verifier intelligence hub with pass rates and failure history."""
+    from core.ema.ema_engine import ema
+    return ema.get_verifier_hub(component=component)
+
+@app.get("/api/ema/knowledge-graph/{module_name}")
+async def ema_knowledge_graph(module_name: str):
+    """EMA Module 6 — architecture knowledge graph for a module (FTDs, incidents, verifiers, governance)."""
+    from core.ema.ema_engine import ema
+    return ema.get_knowledge_graph(module_name)
+
+@app.get("/api/ema/roadmap")
+async def ema_roadmap():
+    """EMA Module 7 — full roadmap state: completed, pending, blocked, next steps."""
+    from core.ema.ema_engine import ema
+    return ema.get_roadmap_state()
+
+@app.get("/api/ema/multi-ai")
+async def ema_multi_ai(task: str, module: str = "", consumer: str = "Generic"):
+    """EMA Module 11 — multi-AI compatibility package with consumer instructions."""
+    from core.ema.ema_engine import ema
+    return ema.get_multi_ai_package(task, module=module or None, consumer=consumer)
+
+@app.get("/api/ema/decisions")
+async def ema_decisions(q: str = "", limit: int = 50):
+    """EMA Module 9 — decision traceability: trade, architecture, and governance decisions."""
+    from core.ema.ema_engine import ema
+    return ema.get_decision_trail(query=q, limit=limit)
+
+@app.get("/api/ema/lessons")
+async def ema_lessons(q: str = "", limit: int = 50):
+    """EMA Module 10 — lessons learned: issues, root causes, resolutions, future recommendations."""
+    from core.ema.ema_engine import ema
+    return ema.get_lessons_learned(query=q, limit=limit)
+
+@app.get("/api/ema/governance/audit")
+async def ema_governance_audit(limit: int = 100):
+    """EMA Module 12 — institutional memory governance audit trail and integrity check."""
+    from core.ema.ema_engine import ema
+    return ema.get_governance_audit(limit=limit)
+
+@app.get("/api/ema/health")
+async def ema_health():
+    """EMA Module 13 — knowledge health monitor: coverage, completeness, freshness, integrity."""
+    from core.ema.ema_engine import ema
+    return ema.get_knowledge_health()
+
+@app.get("/api/ema/dashboard")
+async def ema_dashboard():
+    """EMA Module 14 — engineering intelligence dashboard: incidents, roadmap, verifiers, knowledge."""
+    from core.ema.ema_engine import ema
+    return ema.get_engineering_dashboard()
+
+@app.get("/api/ema/stats")
+async def ema_stats():
+    """EMA — engine stats: query count, audit log size, all 14 module names."""
+    from core.ema.ema_engine import ema
+    return ema.get_stats()
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
