@@ -139,6 +139,11 @@ from core.signal_ecology.signal_density_engine import signal_density_engine     
 from core.signal_ecology.exploration_recovery  import exploration_recovery_governor   # PRP-002
 from core.signal_ecology.alpha_context_memory  import alpha_context_memory            # PRP-002
 from core.signal_ecology.adaptive_rsi_governor import adaptive_rsi_governor           # PRP-002
+from core.institutional_memory.imraf_engine import (                                  # FTD-IMR-001
+    imraf,
+    record_failure, record_incident, record_decision,
+    record_self_improvement, record_knowledge,
+)
 from core.learning_memory.trade_memory_bridge  import trade_memory_bridge              # LRN-001
 from core.exit_attribution import resolve_exit_method, compute_exit_attribution_report # FTD-PHOENIX-EXIT-ATTR-001
 from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult              # FTD-PHOENIX-ETE-001
@@ -813,6 +818,27 @@ async def on_tick(tick: Tick):
             alpha_attribution_platform.record(_snap_aap)
             truth_archive.save(_snap_aap)
 
+            # FTD-IMR-001: archive decision explainability and self-improvement tracking
+            try:
+                record_decision(
+                    symbol   = sym,
+                    signal   = _trade_direction if "_trade_direction" in dir() else "UNKNOWN",
+                    regime   = _trade_regime,
+                    strategy = _trade_strategy,
+                    confidence = getattr(last_trade, "confidence", 0.0),
+                    decision = "EXECUTED",
+                    reason   = getattr(last_trade, "reason", ""),
+                    filters_applied = [],
+                )
+                record_self_improvement(
+                    change            = f"{_trade_strategy} trade in {_trade_regime}",
+                    observed_impact   = f"net_pnl={last_trade.net_pnl:+.4f}",
+                    performance_delta = {"net_pnl": last_trade.net_pnl, "r": getattr(last_trade, "r_multiple", 0)},
+                    stability_delta   = "stable",
+                    outcome           = "WIN" if last_trade.net_pnl >= 0 else "LOSS",
+                )
+            except Exception:
+                pass
         trade_manager.deregister(sym)                       # Phase 4: remove from lifecycle
         _last_trade_ts[sym] = int(time.time() * 1000)  # cooldown starts on close
 
@@ -3306,6 +3332,42 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [AIL] Boot failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── FTD-IMR-001: Institutional Memory & Research Archive Framework ─────────
+    try:
+        _imraf_stats = imraf.get_stats()
+        _thought(
+            f"📚 [IMRAF] Institutional Memory loaded | "
+            f"total={_imraf_stats['total_records']} records | "
+            f"categories={len(_imraf_stats['by_category'])} | "
+            f"db=data/institutional_memory.db | "
+            f"endpoints: /api/imraf/*",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [IMRAF] Boot check failed (non-fatal): {_e}", "SYSTEM")
+
+    # ── FTD-DIAL-001: Developer Intelligence Assist Layer ─────────────────────
+    try:
+        from core.developer_intelligence.dial_engine import dial
+        _dial_summary = dial.get_boot_summary()
+        _thought(
+            f"🧠 [DIAL] Developer Intelligence Assist Layer active | endpoints: /api/dial/* | {_dial_summary}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [DIAL] Boot failed (non-fatal): {_e}", "SYSTEM")
+
+    # ── FTD-AEOS-001: Autonomous Engineering Operating System ──────────────────
+    try:
+        from core.aeos.aeos_engine import aeos
+        _aeos_summary = aeos.get_boot_summary()
+        _thought(
+            f"⚙ [AEOS] Autonomous Engineering Operating System active | endpoints: /api/aeos/* | {_aeos_summary}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [AEOS] Boot failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -5731,6 +5793,47 @@ async def prp002_rsi_decisions(n: int = 50):
 async def prp002_recovery_history(n: int = 20):
     """PRP-002 — Recent exploration recovery cycles."""
     return {"cycles": exploration_recovery_governor.cycle_history(n=n)}
+
+
+# ── FTD-IMR-001: Institutional Memory & Research Archive Framework endpoints ──
+
+@app.get("/api/imraf/stats")
+async def imraf_stats():
+    """FTD-IMR-001 — Institutional Memory stats and category breakdown."""
+    return imraf.get_stats()
+
+@app.get("/api/imraf/search")
+async def imraf_search(q: str, category: str = "", limit: int = 50):
+    """FTD-IMR-001 — Full-text search across institutional memory."""
+    from core.institutional_memory.imraf_engine import Category
+    cat = None
+    if category:
+        try:
+            cat = Category(category.upper())
+        except ValueError:
+            pass
+    return {"results": imraf.search(q, category=cat, limit=limit)}
+
+@app.get("/api/imraf/timeline")
+async def imraf_timeline(category: str = "", limit: int = 100):
+    """FTD-IMR-001 — Chronological timeline of institutional memory records."""
+    from core.institutional_memory.imraf_engine import Category
+    cat = None
+    if category:
+        try:
+            cat = Category(category.upper())
+        except ValueError:
+            pass
+    return {"timeline": imraf.timeline(category=cat, limit=limit)}
+
+@app.get("/api/imraf/record/{record_id}")
+async def imraf_get_record(record_id: int):
+    """FTD-IMR-001 — Retrieve a specific institutional memory record by ID."""
+    rec = imraf.get_record(record_id)
+    if rec is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Record not found")
+    return rec
 
 
 @app.get("/api/forensics/recovery-cycle-audit")
@@ -13006,6 +13109,102 @@ async def get_truth_calibration():
 @app.get("/api/truth/recent")
 async def get_truth_recent():
     return truth_archive.recent(50)
+
+
+# ── FTD-DIAL-001: Developer Intelligence Assist Layer API ─────────────────────
+
+@app.get("/api/dial/context/{module_name}")
+async def dial_context(module_name: str):
+    """DIAL — autonomous context package for a module (history, regression risk, dependencies)."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.get_autonomous_context(module_name)
+
+@app.get("/api/dial/regression/{component}")
+async def dial_regression(component: str):
+    """DIAL — regression risk assessment for a component."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.check_regression_risk(component)
+
+@app.get("/api/dial/similar")
+async def dial_similar(q: str, limit: int = 10):
+    """DIAL — find similar historical incidents/bugs matching query."""
+    from core.developer_intelligence.dial_engine import dial
+    return {"results": dial.find_similar_issues(q, limit=limit)}
+
+@app.get("/api/dial/onboarding")
+async def dial_onboarding():
+    """DIAL — onboarding package: subsystems, critical files, known risks, architecture decisions."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.generate_onboarding_package()
+
+@app.get("/api/dial/stats")
+async def dial_stats():
+    """DIAL — engine stats: query count, IMRAF availability, uptime."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.get_stats()
+
+@app.get("/api/dial/plan")
+async def dial_plan(state: str = ""):
+    """DIAL — autonomous planning: what should happen next based on institutional memory."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.plan_next_steps(current_state=state)
+
+@app.get("/api/dial/proposal")
+async def dial_proposal(goal: str, component: str):
+    """DIAL — generate a change proposal: files, risks, verifiers, checklist."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.generate_change_proposal(goal, component)
+
+@app.get("/api/dial/draft-ftd")
+async def dial_draft_ftd(topic: str, context: str = ""):
+    """DIAL — draft a new FTD based on institutional memory for the given topic."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.draft_ftd(topic, context=context)
+
+@app.get("/api/dial/health/{module_name}")
+async def dial_module_health(module_name: str):
+    """DIAL — engineering memory score for a module (0-10 risk score, incident/regression counts)."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.get_module_health_score(module_name)
+
+@app.post("/api/dial/observe")
+async def dial_observe(component: str, observation: str, outcome: str, context: str = ""):
+    """DIAL — record an observation into the autonomous learning loop."""
+    from core.developer_intelligence.dial_engine import dial
+    return dial.observe_and_learn(component, observation, outcome, context=context)
+
+
+# ── FTD-AEOS-001: Autonomous Engineering Operating System API ─────────────────
+
+@app.get("/api/aeos/context")
+async def aeos_context(task: str, module: str = ""):
+    """AEOS — assemble full AI-agent briefing: history + FTDs + arch + deps + risks + verifiers."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.assemble_context(task, module=module or None)
+
+@app.get("/api/aeos/roadmap")
+async def aeos_roadmap():
+    """AEOS — prioritised next-step roadmap guidance from current institutional memory state."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.get_roadmap_guidance()
+
+@app.get("/api/aeos/forecast")
+async def aeos_forecast(component: str, change: str):
+    """AEOS — forecast full impact of a proposed change including second-order effects."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.forecast_change_impact(component, change)
+
+@app.get("/api/aeos/verifiers/{component}")
+async def aeos_verifiers(component: str):
+    """AEOS — recommend verifier test files for a component with historical pass-rate data."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.recommend_verifiers(component)
+
+@app.get("/api/aeos/stats")
+async def aeos_stats():
+    """AEOS — engine stats: assembly count, availability, capabilities."""
+    from core.aeos.aeos_engine import aeos
+    return aeos.get_stats()
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
