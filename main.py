@@ -242,12 +242,13 @@ _SYMBOL_BLACKLIST: frozenset[str] = frozenset({
 #   MeanReversion_PAPER_SPEED: 1287+ visits across RL contexts, WR 16-19%, -$293.75 total;
 #     RL classified MEAN_REVERTING|LONDON (Q=-0.422) and MEAN_REVERTING|ASIA (Q=-0.344) toxic
 _DISABLED_STRATEGY_IDS: frozenset[str] = frozenset({
-    # TF_EMA_RSI_v1 and MR_BB_RSI_v1 intentionally removed — primary strategies
-    # restored to active status so they trade with full quality-gate stack rather
-    # than bypassing all filters via BYPASS_ALL_GATES.  PAPER_SPEED variants and
-    # inverse/alpha noise generators remain disabled.
+    # TF_EMA_RSI_v1, MR_BB_RSI_v1, ALPHA_PBE_v1 intentionally removed — primary strategies
+    # restored to active status so they trade with full quality-gate stack.
+    # ALPHA_PBE_v1 re-enabled (v1.53.3): context memory shows MEAN_REVERTING|9-11 contexts
+    # avg_pnl=+$0.45–$0.56 (n=42-57 trades, WR=37-54%); context memory will boost/block
+    # per-context — historical all-period PF 0.479 was without context gating.
+    # PAPER_SPEED variants and inverse/noise generators remain disabled.
     "ALPHA_TCB_v1",
-    "ALPHA_PBE_v1",
     "VE_BREAKOUT_ATR_v1",
     "ALPHA_VSE_v1",
     "MR_BB_RSI_v1_INV",
