@@ -82,3 +82,65 @@ Evaluate on every meaningful commit. Use semantic versioning (`MAJOR.MINOR.PATCH
 **Rule**: Claude must evaluate the bump on every commit that modifies `main.py`, `core/`, or `strategies/`. If no bump is needed, that is an explicit decision — not an omission.
 
 Only `config.APP_VERSION` is ever updated. Everything downstream inherits automatically.
+
+---
+
+## PHOENIX Institutional Architecture — Completed Layers
+
+As of v1.57.0, the following institutional layers are complete:
+
+| Layer | FTD | Status |
+|-------|-----|--------|
+| IMRAF — Institutional Memory | FTD-IMR-001 | ✅ COMPLETE |
+| DIAL — Developer Intelligence | FTD-DIAL-001 | ✅ COMPLETE |
+| AEOS — Context Assembly | FTD-AEOS-001 | ✅ COMPLETE |
+| EMA — Enterprise Memory Architecture | FTD-EMA-001 | ✅ COMPLETE |
+| EGI — Engineering Governance Integrity | FTD-EGI-001 | ✅ COMPLETE |
+
+---
+
+## APPROVED PENDING ROADMAP — INSTITUTIONAL DIRECTIVE
+
+**MANDATORY RULE**: This sequence is locked. AEG must NOT begin until KGE and HKE
+are complete or formally waived.
+
+### Phase 1 — NEXT PRIORITY
+**FTD-KGE-001: Knowledge Graph Expansion Program**
+- Expand entity coverage: Decision, Roadmap, Governance, Risk, Research, Strategy,
+  Incident, Verifier, FTD, Developer Report, Implementation Report
+- All entities become first-class graph nodes with relationships
+- Improves institutional relationship intelligence across all layers
+
+### Phase 2 — AFTER KGE
+**FTD-HKE-001: Historical Knowledge Extraction Program**
+- Automated extraction from: FTD archives, AnswerFTDs, developer reports,
+  implementation reports, verifier reports, CLAUDE.md, git history
+- Target: 11 hardcoded decisions → 100+ → 500+ institutional facts
+- Without this, AEG advisory quality will be fragile (small evidence base)
+
+### Phase 3 — AFTER HKE (BLOCKED UNTIL THEN)
+**FTD-AEG-001: Autonomous Engineering Governance**
+- AEG-C1: Evidence Accumulator — pattern detection across IMRAF
+- AEG-C2: Precondition Engine — conditions check before actions
+- AEG-C3: Advisory Generator — confidence-weighted recommendations
+- **BLOCKED**: Do not implement until KGE + HKE formally complete
+
+### Rationale — Architecture Build Order
+```
+Memory → Intelligence → Context → Governance
+→ Knowledge Expansion (KGE)
+→ Historical Extraction (HKE)
+→ Advisory Intelligence (AEG)
+```
+Advisory layer quality is bounded by evidence base size.
+AEG recommendations built on 11 facts will be fragile.
+AEG recommendations built on 500+ facts will be institutional-grade.
+
+### Future AI Session Briefing
+Any future session should be able to answer:
+> "What is the next approved roadmap step?"
+
+**Expected answer**: FTD-KGE-001 (Knowledge Graph Expansion) → FTD-HKE-001
+(Historical Extraction) → FTD-AEG-001 (Autonomous Engineering Governance).
+This is stored in IMRAF (records 95–99) and enforced by this directive.
+
