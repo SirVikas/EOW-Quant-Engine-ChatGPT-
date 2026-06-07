@@ -85,6 +85,29 @@ Only `config.APP_VERSION` is ever updated. Everything downstream inherits automa
 
 ---
 
+## PHOENIX NEXUS — Institutional Intelligence Layer
+
+**PHOENIX NEXUS** is the institutional intelligence layer of the PHOENIX trading system.
+It is the central knowledge and intelligence nexus where memory, intelligence, context,
+and governance converge. It is architecturally separate from the Execution Layer.
+
+```
+PHOENIX
+├── Execution Layer         Trading Engine / Risk Engine / Reporting Engine
+└── PHOENIX NEXUS           Institutional Intelligence Layer
+     ├── IMRAF              Memory
+     ├── DIAL               Intelligence
+     ├── AEOS               Context Assembly
+     ├── EMA                Enterprise Interface
+     ├── EGI                Governance
+     └── Pending: KGE → HKE → AEG
+```
+
+Registered in: `config.py` (`NEXUS_NAME`, `NEXUS_VERSION`), IMRAF record 111,
+`core/ema/ema_engine.py` (`_PROJECT_KNOWLEDGE["nexus"]`).
+
+---
+
 ## PHOENIX Institutional Architecture — Completed Layers
 
 As of v1.57.0, the following institutional layers are complete:

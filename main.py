@@ -13408,6 +13408,60 @@ async def egi_backfill_status():
     }
 
 
+# ── PHOENIX NEXUS Endpoint ────────────────────────────────────────────────────
+
+@app.get("/api/nexus")
+async def nexus_status():
+    """
+    PHOENIX NEXUS — Institutional Intelligence Layer identity and status.
+    Returns architecture map, active layers, pending roadmap, and version.
+    """
+    from config import NEXUS_NAME, NEXUS_VERSION, NEXUS_LAYERS, NEXUS_PENDING, APP_VERSION
+    from core.ema.ema_engine import ema
+
+    layer_health: dict = {}
+    for layer in NEXUS_LAYERS:
+        try:
+            if layer == "IMRAF":
+                from core.institutional_memory.imraf_engine import imraf
+                stats = imraf.get_stats()
+                layer_health[layer] = {"status": "ACTIVE", "records": stats.get("total_records", 0)}
+            elif layer == "DIAL":
+                from core.developer_intelligence.dial_engine import dial
+                layer_health[layer] = {"status": "ACTIVE", "modules": 16}
+            elif layer == "AEOS":
+                from core.aeos.aeos_engine import aeos
+                layer_health[layer] = {"status": "ACTIVE"}
+            elif layer == "EMA":
+                layer_health[layer] = {"status": "ACTIVE", "modules": 14}
+            elif layer == "EGI":
+                layer_health[layer] = {"status": "ACTIVE", "components": 4}
+        except Exception as exc:
+            layer_health[layer] = {"status": "DEGRADED", "error": str(exc)}
+
+    return {
+        "nexus_name":    NEXUS_NAME,
+        "nexus_version": NEXUS_VERSION,
+        "app_version":   APP_VERSION,
+        "description":   "Central knowledge and intelligence nexus — connects all institutional layers.",
+        "architecture": {
+            "execution_layer": ["Trading Engine", "Risk Engine", "Reporting Engine"],
+            "nexus_layer":     NEXUS_LAYERS,
+        },
+        "active_layers": layer_health,
+        "pending_layers": {
+            "KGE": "Knowledge Graph Expansion (NEXT PRIORITY — FTD-KGE-001)",
+            "HKE": "Historical Knowledge Extraction (AFTER KGE — FTD-HKE-001)",
+            "AEG": "Autonomous Engineering Governance (AFTER HKE — FTD-AEG-001)",
+        },
+        "roadmap_chains": {
+            "chain_a": "FTD-KGE-001 → FTD-HKE-001 → FTD-AEG-001",
+            "chain_b": "ETE Phase-2 Calibration → Phase-3 Gate → XTE Phase-4 Autonomous Exit",
+        },
+        "imraf_record": 111,
+    }
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly

@@ -11,6 +11,15 @@ import os
 # Update this when making significant changes — dashboard and all reports read from here.
 APP_VERSION = "1.57.0"
 
+# PHOENIX NEXUS — Institutional Intelligence Layer
+# The central knowledge & intelligence nexus connecting all institutional layers:
+#   IMRAF (Memory) → DIAL (Intelligence) → AEOS (Context) → EMA (Interface) → EGI (Governance)
+# Pending: KGE → HKE → AEG
+NEXUS_NAME    = "PHOENIX NEXUS"
+NEXUS_VERSION = "1.0.0"   # Nexus architecture version, independent of APP_VERSION
+NEXUS_LAYERS  = ["IMRAF", "DIAL", "AEOS", "EMA", "EGI"]
+NEXUS_PENDING = ["KGE", "HKE", "AEG"]
+
 
 class EngineConfig(BaseSettings):
     # ── Binance API ─────────────────────────────────────────────────────────
