@@ -3526,7 +3526,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHOENIX NEXUS] Identity declaration failed (non-fatal): {_e}", "SYSTEM")
 
-    # FTD-NEXUS-100-PERCENT-001 — Backfill + bootstrap at every engine start
+    # FTD-NEXUS-100-PERCENT-001 — Fast backfill before yield (cheap operations only)
+    # KGE bootstrap and HKE extraction run AFTER yield as a background thread
+    # so they never block port 8000 from opening.
     try:
         from core.institutional_memory.imraf_engine import imraf as _imraf_boot
         _prov_updated = _imraf_boot.backfill_provenance()
@@ -3539,30 +3541,37 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [NEXUS-100] Backfill failed (non-fatal): {_e}", "SYSTEM")
 
-    try:
-        from core.nexus.kge.kge_engine import kge as _kge_boot
-        _kge_boot_result = _kge_boot.bootstrap_from_codebase()
-        _kge_intel = _kge_boot.relationship_intelligence_score()
-        _thought(
-            f"🕸 [NEXUS-100] KGE bootstrap: modules={_kge_boot_result.get('modules_added',0)} "
-            f"configs={_kge_boot_result.get('config_added',0)} "
-            f"endpoints={_kge_boot_result.get('endpoints_added',0)} "
-            f"intelligence_score={_kge_intel.get('intelligence_score',0):.1f}",
-            "SYSTEM",
-        )
-    except Exception as _e:
-        _thought(f"⚠ [NEXUS-100] KGE bootstrap failed (non-fatal): {_e}", "SYSTEM")
+    # Schedule heavy NEXUS enrichment for after startup
+    def _nexus_background_enrichment():
+        import time as _time
+        _time.sleep(5)  # Let the server fully start before beginning heavy work
+        try:
+            from core.nexus.kge.kge_engine import kge as _kge_bg
+            _r = _kge_bg.bootstrap_from_codebase()
+            _ki = _kge_bg.relationship_intelligence_score()
+            _thought(
+                f"🕸 [NEXUS-100] KGE bootstrap: modules={_r.get('modules_added',0)} "
+                f"intelligence_score={_ki.get('intelligence_score',0):.1f}"
+                + (" (enrichment_skipped=cached)" if _r.get('enrichment_skipped') else ""),
+                "SYSTEM",
+            )
+        except Exception as _e:
+            _thought(f"⚠ [NEXUS-100] KGE bootstrap failed: {_e}", "SYSTEM")
+        try:
+            from core.nexus.hke.hke_engine import hke as _hke_bg
+            _hr = _hke_bg.run_extraction()
+            _thought(
+                f"📖 [NEXUS-100] HKE extraction: {_hr.get('total_new', 0)} new facts",
+                "SYSTEM",
+            )
+        except Exception as _e:
+            _thought(f"⚠ [NEXUS-100] HKE extraction failed: {_e}", "SYSTEM")
 
-    try:
-        from core.nexus.hke.hke_engine import hke as _hke_boot
-        _hke_boot_result = _hke_boot.run_extraction()
-        _thought(
-            f"📖 [NEXUS-100] HKE extraction: {_hke_boot_result.get('total_new', 0)} new facts "
-            f"(total sources: {len(_hke_boot_result.get('by_source', {}))})",
-            "SYSTEM",
-        )
-    except Exception as _e:
-        _thought(f"⚠ [NEXUS-100] HKE extraction failed (non-fatal): {_e}", "SYSTEM")
+    import threading as _threading
+    _nexus_thread = _threading.Thread(
+        target=_nexus_background_enrichment, daemon=True, name="nexus-enrichment"
+    )
+    _nexus_thread.start()
 
     yield
 
