@@ -13871,6 +13871,46 @@ async def nexus_100_progress():
         return {"error": str(exc)}
 
 
+@app.get("/api/nexus/safety/status")
+async def nexus_safety_status():
+    """NEXUS Safety System status — approval queue + rollback layer + human oversight."""
+    try:
+        from core.nexus.safety.safety_system import safety_system
+        return safety_system.get_safety_status()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/safety/queue")
+async def nexus_safety_queue():
+    """NEXUS Safety System pending approval queue."""
+    try:
+        from core.nexus.safety.safety_system import safety_system
+        return {"queue": safety_system.get_queue(), "applied": safety_system.get_applied()}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/brain")
+async def nexus_brain_score():
+    """NEXUS Brain Score — composite 8-dimension institutional intelligence metric."""
+    try:
+        from core.nexus.confidence.confidence_engine import confidence_engine
+        return confidence_engine.compute_nexus_brain_score()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/self-awareness")
+async def nexus_self_awareness():
+    """NEXUS Self-Awareness Score — 5-dimension meta-cognitive measurement."""
+    try:
+        from core.nexus.confidence.confidence_engine import confidence_engine
+        return confidence_engine.compute_nexus_self_awareness()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly

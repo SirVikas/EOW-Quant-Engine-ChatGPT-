@@ -180,13 +180,25 @@ class AEGReadinessEngine:
         )
 
     def check_safety_system(self) -> dict:
-        """Safety system (approval queue + rollback) not yet implemented."""
-        # Per spec: always FAIL until safety system is built
-        return _check_result(
-            "safety_system", "FAIL", None, "implemented",
-            "Safety system (approval queue + rollback) not yet implemented. "
-            "Implement before AEG activation.",
-        )
+        """Safety system implemented: approval queue + rollback + human oversight."""
+        check = "safety_system"
+        try:
+            from core.nexus.safety.safety_system import safety_system
+            status_info = safety_system.get_safety_status()
+            implemented = status_info.get("implemented", False)
+            has_approval = status_info.get("approval_required", False)
+            has_rollback = status_info.get("rollback_available", False)
+            passes = implemented and has_approval and has_rollback
+            return _check_result(
+                check, "PASS" if passes else "FAIL",
+                {"implemented": implemented, "approval_required": has_approval, "rollback_available": has_rollback},
+                "implemented",
+                "Safety system active: approval queue + rollback layer + human oversight enabled."
+                if passes else "Safety system check failed.",
+            )
+        except Exception as exc:
+            return _check_result(check, "FAIL", None, "implemented",
+                                 f"Safety system unavailable: {exc}")
 
     def check_evidence_quality(self) -> dict:
         """IMRAF verified facts (confidence >= 0.75) >= 100."""

@@ -22,6 +22,40 @@ _DEFAULT_DB = Path(__file__).parent.parent.parent.parent / "data" / "knowledge_g
 
 _BOOTSTRAP_SENTINEL = "kge_bootstrap_v2_done"
 
+_NEXUS_KEYWORDS = [
+    "genome", "rsi", "alpha", "context", "memory", "loss", "risk", "rl",
+    "engine", "adaptive", "scorer", "safe", "mode", "cluster", "signal",
+    "trade", "manager", "data", "lake", "pnl", "calc", "strategy",
+    "imraf", "doae", "kge", "hke", "governance", "confidence", "aeg",
+    "nexus", "dcel", "ema", "dial", "aeos", "egi",
+]
+
+_FTD_TEMPORAL_ORDER = [
+    "FTD-IMR-001", "FTD-DIAL-001", "FTD-AEOS-001", "FTD-EMA-001", "FTD-EGI-001",
+    "FTD-033", "FTD-034", "FTD-035", "FTD-036", "FTD-037", "FTD-038",
+    "FTD-039", "FTD-040", "FTD-057",
+    "FTD-NEXUS-ACCEL-001",
+]
+
+_FTD_METRIC_MAP = {
+    "FTD-033": ["win_rate", "drawdown", "hold_time"],
+    "FTD-034": ["context_amplification", "win_rate"],
+    "FTD-035": ["drawdown", "trade_frequency"],
+    "FTD-036": ["win_rate", "trade_frequency"],
+    "FTD-037": ["drawdown"],
+    "FTD-038": ["win_rate", "context_amplification"],
+    "FTD-039": ["win_rate", "trade_frequency"],
+    "FTD-040": ["context_amplification"],
+    "FTD-057": ["context_amplification", "win_rate"],
+}
+
+_CAUSAL_HYPOTHESES = [
+    ("FTD-033", "win_rate", "TSL fix removed premature BE exits → more trades capture profit"),
+    ("FTD-034", "context_amplification", "Key fix restored 1.25x boost to 34 profitable contexts"),
+    ("FTD-035", "drawdown", "LCC circuit breaker reduced consecutive-loss drawdown clusters"),
+    ("FTD-038", "win_rate", "RL contextual bandit filters low-quality signals by regime"),
+]
+
 
 class KGEEngine:
     def __init__(self, db_path: Optional[Path] = None):
@@ -455,12 +489,18 @@ class KGEEngine:
             total_edges = con.execute("SELECT COUNT(*) FROM kg_edges").fetchone()[0]
             edge_pairs  = con.execute("SELECT from_node, to_node FROM kg_edges").fetchall()
             node_ids    = [r[0] for r in con.execute("SELECT node_id FROM kg_nodes").fetchall()]
+            semantic_edges    = con.execute("SELECT COUNT(*) FROM kg_edges WHERE relationship='RELATED_TO'").fetchone()[0]
+            temporal_edges    = con.execute("SELECT COUNT(*) FROM kg_edges WHERE relationship='PRECEDED_BY'").fetchone()[0]
+            causal_hypotheses = con.execute("SELECT COUNT(*) FROM kg_edges WHERE relationship='CAUSAL_HYPOTHESIS'").fetchone()[0]
+            metric_nodes      = con.execute("SELECT COUNT(*) FROM kg_nodes WHERE node_type='METRIC'").fetchone()[0]
 
         if total_nodes == 0:
             return {
                 "total_nodes": 0, "total_edges": 0, "avg_edges_per_node": 0.0,
                 "isolated_nodes": 0, "well_connected": 0, "relationship_density": 0.0,
                 "intelligence_score": 0.0, "top_hubs": [],
+                "semantic_edges": 0, "temporal_edges": 0,
+                "causal_hypotheses": 0, "metric_nodes": 0,
             }
 
         edge_counts: dict = {}
@@ -468,15 +508,18 @@ class KGEEngine:
             edge_counts[from_n] = edge_counts.get(from_n, 0) + 1
             edge_counts[to_n]   = edge_counts.get(to_n,   0) + 1
 
-        isolated  = sum(1 for nid in node_ids if edge_counts.get(nid, 0) == 0)
-        well_conn = sum(1 for nid in node_ids if edge_counts.get(nid, 0) >= 3)
-        avg_edges = round(sum(edge_counts.values()) / total_nodes, 4) if total_nodes else 0.0
+        isolated     = sum(1 for nid in node_ids if edge_counts.get(nid, 0) == 0)
+        well_conn    = sum(1 for nid in node_ids if edge_counts.get(nid, 0) >= 3)
+        avg_edges    = round(sum(edge_counts.values()) / total_nodes, 4) if total_nodes else 0.0
+        isolated_ratio = isolated / total_nodes
 
         max_possible = total_nodes * (total_nodes - 1) / 2
         density = round(total_edges / max_possible, 6) if max_possible > 0 else 0.0
 
+        # Updated formula: rewards avg connectivity, non-isolation, and semantic richness
+        semantic_bonus = min(20.0, (well_conn / max(total_nodes, 1)) * 40.0)
         intel_score = round(
-            min(100.0, (avg_edges / 5.0) * 50.0 + (1.0 - isolated / total_nodes) * 50.0),
+            min(100.0, (avg_edges / 3.0) * 40.0 + (1.0 - isolated_ratio) * 40.0 + semantic_bonus),
             2,
         )
 
@@ -499,6 +542,10 @@ class KGEEngine:
             "relationship_density": density,
             "intelligence_score":   intel_score,
             "top_hubs":             hub_list,
+            "semantic_edges":       semantic_edges,
+            "temporal_edges":       temporal_edges,
+            "causal_hypotheses":    causal_hypotheses,
+            "metric_nodes":         metric_nodes,
         }
 
     # ------------------------------------------------------------------
@@ -593,7 +640,12 @@ class KGEEngine:
         )
 
         intel = self.build_intelligent_relationships()
-        deep = self.build_deep_relationships()
+        deep  = self.build_deep_relationships()
+        sem   = self.build_semantic_edges()
+        temp  = self.build_temporal_chain()
+        imp   = self.build_impact_propagation_edges()
+        caus  = self.build_causal_hypothesis_edges()
+
         return {
             "modules_added":     modules_added,
             "config_added":      config_added,
@@ -602,6 +654,12 @@ class KGEEngine:
             "edges_added":       edges_added + intel.get("edges_added", 0),
             "intelligent_edges": intel.get("edges_added", 0),
             "deep_edges":        sum(v for k, v in deep.items() if "edges" in k),
+            "semantic_edges":    sem.get("semantic_edges_added", 0),
+            "temporal_edges":    temp.get("temporal_edges_added", 0),
+            "epoch_nodes":       temp.get("epoch_nodes_added", 0),
+            "metric_nodes":      imp.get("metric_nodes_added", 0),
+            "impact_edges":      imp.get("impact_edges_added", 0),
+            "causal_edges":      caus.get("causal_edges_added", 0),
         }
 
     # ------------------------------------------------------------------
@@ -772,6 +830,167 @@ class KGEEngine:
             total_edges, results["roadmap_nodes_added"],
         )
         return results
+
+    # ------------------------------------------------------------------
+    # Phase-5: Semantic, Temporal, Impact, and Causal Intelligence
+    # ------------------------------------------------------------------
+
+    def build_semantic_edges(self) -> dict:
+        """
+        For every MODULE, FTD, and STRATEGY node, tokenize the label into
+        lowercase words and match against _NEXUS_KEYWORDS. Any pair of nodes
+        that share at least 1 keyword gets a RELATED_TO edge weighted by the
+        shared keyword count.
+        """
+        with self._connect() as con:
+            rows = con.execute(
+                "SELECT node_id, label FROM kg_nodes "
+                "WHERE node_type IN ('MODULE','FTD','STRATEGY')"
+            ).fetchall()
+
+        keyword_set = set(_NEXUS_KEYWORDS)
+
+        # Build per-node keyword sets
+        node_keywords: dict = {}
+        for node_id, label in rows:
+            tokens = set(label.lower().replace("-", " ").replace("_", " ").split())
+            matched = tokens & keyword_set
+            if matched:
+                node_keywords[node_id] = matched
+
+        node_list = list(node_keywords.items())
+        edges_added = 0
+        for i in range(len(node_list)):
+            nid_a, kws_a = node_list[i]
+            for j in range(i + 1, len(node_list)):
+                nid_b, kws_b = node_list[j]
+                shared = kws_a & kws_b
+                if shared:
+                    weight = float(len(shared))
+                    if self.add_edge(nid_a, nid_b, "RELATED_TO", weight=weight):
+                        edges_added += 1
+
+        logger.info("KGE build_semantic_edges: %d edges added", edges_added)
+        return {"semantic_edges_added": edges_added}
+
+    def build_temporal_chain(self) -> dict:
+        """
+        Connect FTDs in deployment order with PRECEDED_BY edges.
+        Also create EPOCH cluster nodes and link FTDs to their epoch.
+        """
+        temporal_edges_added = 0
+        epoch_nodes_added = 0
+
+        # Add PRECEDED_BY edges between consecutive FTDs that exist in the graph
+        with self._connect() as con:
+            existing = {r[0] for r in con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_type='FTD'"
+            ).fetchall()}
+
+        ordered = [fid for fid in _FTD_TEMPORAL_ORDER if fid in existing]
+        for i in range(len(ordered) - 1):
+            if self.add_edge(ordered[i], ordered[i + 1], "PRECEDED_BY"):
+                temporal_edges_added += 1
+
+        # EPOCH nodes grouping
+        _epochs = [
+            ("NEXUS_ERA_1", "NEXUS Era 1: Foundation FTDs 033-040", ["FTD-033", "FTD-034", "FTD-035", "FTD-036", "FTD-037", "FTD-038", "FTD-039", "FTD-040"]),
+            ("NEXUS_ERA_2", "NEXUS Era 2: Acceleration", ["FTD-NEXUS-ACCEL-001", "FTD-057"]),
+        ]
+        for epoch_id, epoch_label, member_ftds in _epochs:
+            if self.add_node("EPOCH", epoch_id, epoch_label):
+                epoch_nodes_added += 1
+            for ftd_id in member_ftds:
+                if ftd_id in existing:
+                    if self.add_edge(ftd_id, epoch_id, "BELONGS_TO"):
+                        temporal_edges_added += 1
+
+        logger.info(
+            "KGE build_temporal_chain: %d temporal edges, %d epoch nodes",
+            temporal_edges_added, epoch_nodes_added,
+        )
+        return {"temporal_edges_added": temporal_edges_added, "epoch_nodes_added": epoch_nodes_added}
+
+    def build_impact_propagation_edges(self) -> dict:
+        """
+        Add METRIC nodes and connect FTDs and STRATEGYs to the metrics they influence.
+        Edge type: INFLUENCES.
+        """
+        _metric_labels = {
+            "win_rate":               "Win Rate",
+            "profit_factor":          "Profit Factor",
+            "drawdown":               "Drawdown",
+            "avg_pnl":                "Average PnL",
+            "trade_frequency":        "Trade Frequency",
+            "hold_time":              "Hold Time",
+            "context_amplification":  "Context Amplification",
+        }
+
+        metric_nodes_added = 0
+        for metric_id, metric_label in _metric_labels.items():
+            if self.add_node("METRIC", metric_id, metric_label):
+                metric_nodes_added += 1
+
+        impact_edges_added = 0
+
+        # FTD → METRIC edges
+        with self._connect() as con:
+            existing_ftds = {r[0] for r in con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_type='FTD'"
+            ).fetchall()}
+
+        for ftd_id, metrics in _FTD_METRIC_MAP.items():
+            if ftd_id not in existing_ftds:
+                continue
+            for metric_id in metrics:
+                if self.add_edge(ftd_id, metric_id, "INFLUENCES"):
+                    impact_edges_added += 1
+
+        # STRATEGY → METRIC edges — known connections
+        _strategy_metric_map = {
+            "TrendFollowing":      ["win_rate", "hold_time", "profit_factor"],
+            "MeanReversion":       ["win_rate", "trade_frequency", "avg_pnl"],
+            "VolatilityExpansion": ["drawdown", "trade_frequency"],
+        }
+        with self._connect() as con:
+            existing_strategies = {r[0] for r in con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_type='STRATEGY'"
+            ).fetchall()}
+
+        for strat_id, metrics in _strategy_metric_map.items():
+            if strat_id not in existing_strategies:
+                continue
+            for metric_id in metrics:
+                if self.add_edge(strat_id, metric_id, "INFLUENCES"):
+                    impact_edges_added += 1
+
+        logger.info(
+            "KGE build_impact_propagation_edges: %d metric nodes, %d impact edges",
+            metric_nodes_added, impact_edges_added,
+        )
+        return {"metric_nodes_added": metric_nodes_added, "impact_edges_added": impact_edges_added}
+
+    def build_causal_hypothesis_edges(self) -> dict:
+        """
+        Add CAUSAL_HYPOTHESIS edges for known FTD→METRIC causal beliefs.
+        Weaker than CAUSES but stronger than RELATED_TO — explicitly probabilistic.
+        """
+        with self._connect() as con:
+            existing_nodes = {r[0] for r in con.execute("SELECT node_id FROM kg_nodes").fetchall()}
+
+        causal_edges_added = 0
+        for source_id, target_id, hypothesis in _CAUSAL_HYPOTHESES:
+            if source_id not in existing_nodes or target_id not in existing_nodes:
+                continue
+            if self.add_edge(
+                source_id, target_id, "CAUSAL_HYPOTHESIS",
+                weight=0.65,
+                data={"hypothesis": hypothesis, "confidence": 0.65},
+            ):
+                causal_edges_added += 1
+
+        logger.info("KGE build_causal_hypothesis_edges: %d causal edges added", causal_edges_added)
+        return {"causal_edges_added": causal_edges_added}
 
 
 # Singleton — lazy so tests can override db_path

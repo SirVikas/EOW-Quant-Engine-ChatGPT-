@@ -111,6 +111,13 @@ _RAISE_KEYWORDS = ["raised", "increased", "bumped", "higher", "up to", "from.*to
 _LOWER_KEYWORDS = ["lowered", "decreased", "reduced", "lower", "down to"]
 
 
+def _rec_attr(rec: Any, attr: str, default: Any = "") -> Any:
+    """Uniform attribute access for dict-or-object IMRAF records."""
+    if isinstance(rec, dict):
+        return rec.get(attr, default)
+    return getattr(rec, attr, default)
+
+
 class GovernanceIntelligenceEngine:
 
     def scan_contradictions(self) -> List[ContradictionFinding]:
@@ -130,24 +137,23 @@ class GovernanceIntelligenceEngine:
         # Group by param keywords appearing in title
         param_records: Dict[str, list] = {}
         for rec in decisions:
-            title_lower = (rec.get("title") or rec.get("search_text") or rec.get("data","")).lower()
+            title_lower = (_rec_attr(rec, "title") or "").lower()
             for word in title_lower.split():
                 if len(word) > 4 and word.isalpha():
                     param_records.setdefault(word, []).append(rec)
 
-        import re
         for param, recs in param_records.items():
             if len(recs) < 2:
                 continue
-            raised = [r for r in recs if any(kw in (r.get("title") or r.get("search_text","")).lower() for kw in ["raised", "increased", "bumped", "higher"])]
-            lowered = [r for r in recs if any(kw in (r.get("title") or r.get("search_text","")).lower() for kw in ["lowered", "decreased", "reduced", "lower"])]
+            raised = [r for r in recs if any(kw in (_rec_attr(r, "title") or "").lower() for kw in ["raised", "increased", "bumped", "higher"])]
+            lowered = [r for r in recs if any(kw in (_rec_attr(r, "title") or "").lower() for kw in ["lowered", "decreased", "reduced", "lower"])]
             if raised and lowered:
                 a = raised[0]
                 b = lowered[0]
                 findings.append(ContradictionFinding(
                     param_name=param,
-                    decision_a={"id": a.id, "title": a.title, "ts": a.ts},
-                    decision_b={"id": b.id, "title": b.title, "ts": b.ts},
+                    decision_a={"id": _rec_attr(a, "id"), "title": _rec_attr(a, "title"), "ts": _rec_attr(a, "ts")},
+                    decision_b={"id": _rec_attr(b, "id"), "title": _rec_attr(b, "title"), "ts": _rec_attr(b, "ts")},
                     description=f"Param '{param}' was both raised and lowered across decisions — possible reversal confusion.",
                     severity="MEDIUM",
                 ))
@@ -180,14 +186,14 @@ class GovernanceIntelligenceEngine:
             return []
 
         for rec in decisions:
-            _rec_ts = rec.get("ts", 0) if isinstance(rec, dict) else getattr(rec, "ts", 0)
+            _rec_ts = _rec_attr(rec, "ts", 0)
             if _rec_ts >= cutoff_ms:
                 continue
             age_days = int((now_ms - _rec_ts) / _MS_PER_DAY)
             findings.append(StaleFinding(
-                record_id=rec.get("id",0) if isinstance(rec,dict) else getattr(rec,"id",0),
-                title=rec.get("title","") if isinstance(rec,dict) else getattr(rec,"title",""),
-                category=rec.get("category","") if isinstance(rec,dict) else getattr(rec,"category",""),
+                record_id=_rec_attr(rec, "id", 0),
+                title=_rec_attr(rec, "title", ""),
+                category=_rec_attr(rec, "category", ""),
                 age_days=age_days,
                 last_referenced="unknown",
                 recommendation=f"Review whether this decision is still current — {age_days} days old.",
@@ -218,33 +224,34 @@ class GovernanceIntelligenceEngine:
 
         registry: List[DecisionLifecycle] = []
         for rec in records:
-            # rec may be dict or object depending on IMRAF version in use
-            if isinstance(rec, dict):
-                rec_id = str(rec.get("id", ""))
-                title = (rec.get("title") or "").lower()
-                data = rec.get("data", {})
-                engine_ver = rec.get("engine_ver", "") or ""
-                tags = rec.get("tags", [])
-            else:
-                rec_id = str(getattr(rec, "id", ""))
-                title = (getattr(rec, "title", "") or "").lower()
-                data = getattr(rec, "data", {})
-                engine_ver = getattr(rec, "engine_ver", "") or ""
-                tags = getattr(rec, "tags", [])
+            rec_id = str(_rec_attr(rec, "id", ""))
+            title = (_rec_attr(rec, "title", "") or "").lower()
+            data = _rec_attr(rec, "data", {})
+            engine_ver = _rec_attr(rec, "engine_ver", "") or ""
 
             component = ""
             if isinstance(data, dict):
                 component = data.get("component", "") or ""
-
-            # Infer state from content
-            if "disabled" in title or "deprecated" in title:
-                state = "DEPRECATED"
-            elif "re-enabled" in title or "reverted" in title:
-                state = "ACTIVE"
-            elif "superseded" in title or "replaced by" in title:
-                state = "SUPERSEDED"
+                # Respect explicit lifecycle state set by mark_decision_superseded
+                if data.get("lifecycle_state") == "SUPERSEDED":
+                    state = "SUPERSEDED"
+                elif "disabled" in title or "deprecated" in title:
+                    state = "DEPRECATED"
+                elif "re-enabled" in title or "reverted" in title:
+                    state = "ACTIVE"
+                elif "superseded" in title or "replaced by" in title:
+                    state = "SUPERSEDED"
+                else:
+                    state = "ACTIVE"
             else:
-                state = "ACTIVE"
+                if "disabled" in title or "deprecated" in title:
+                    state = "DEPRECATED"
+                elif "re-enabled" in title or "reverted" in title:
+                    state = "ACTIVE"
+                elif "superseded" in title or "replaced by" in title:
+                    state = "SUPERSEDED"
+                else:
+                    state = "ACTIVE"
 
             registry.append(DecisionLifecycle(
                 decision_id=rec_id,
@@ -263,14 +270,20 @@ class GovernanceIntelligenceEngine:
             "registry": [dl.to_dict() for dl in registry],
         }
 
-    # ── Contradiction Escalation ──────────────────────────────────────────────
+    # ── Contradiction Detection — Subject-Scoped ──────────────────────────────
 
     def detect_real_contradictions(self) -> List[dict]:
         """
-        Detect contradictions in DECISION records pulled live from IMRAF.
+        Detect genuine contradictions in DECISION/GOVERNANCE records from IMRAF.
 
-        Groups records by component metadata field, then looks for pairs
-        with opposite direction keywords or conflicting numeric parameter values.
+        A contradiction exists ONLY when the SAME specific subject (strategy ID or
+        parameter name) is both enabled AND disabled in records from the SAME
+        component, and neither record is a sequential correction of the other.
+
+        Sequential corrections (re-enabled, reversed, reverted) are NOT
+        contradictions — they are temporal state progressions. Different strategies
+        in different states (ALPHA_TCB disabled, ALPHA_PBE enabled) are also NOT
+        contradictions.
         """
         try:
             from core.institutional_memory.imraf_engine import imraf
@@ -278,91 +291,258 @@ class GovernanceIntelligenceEngine:
             return []
 
         try:
-            records = imraf.search(query="decision", limit=500)
+            records = imraf.timeline(category="DECISION", limit=500)
+            records += imraf.timeline(category="GOVERNANCE", limit=200)
         except Exception as exc:
-            logger.warning("detect_real_contradictions: IMRAF search failed: %s", exc)
+            logger.warning("detect_real_contradictions: IMRAF fetch failed: %s", exc)
             return []
 
+        _DISABLE_WORDS = {"disabled", "removed", "deprecated", "deactivated"}
+        _ENABLE_WORDS = {"enabled", "activated"}
+        # Correction markers indicate a sequential fix, not a new independent decision.
+        _CORRECTION_WORDS = {"re-enabled", "reenabled", "reverted", "reversed", "restored"}
+
+        def _extract_subjects(title: str) -> List[str]:
+            """Extract specific strategy IDs or long uppercase param names."""
+            subjects: List[str] = []
+            # Strategy IDs like ALPHA_TCB_v1, ALPHA_PBE_v1
+            subjects += re.findall(r'ALPHA_\w+', title)
+            # Uppercase parameter names >= 5 chars (e.g. BREAKEVEN_TRIGGER_R)
+            subjects += re.findall(r'\b[A-Z][A-Z_]{4,}[A-Z]\b', title)
+            return subjects
+
+        def _is_superseded(rec: Any) -> bool:
+            data = _rec_attr(rec, "data", {})
+            return isinstance(data, dict) and data.get("lifecycle_state") == "SUPERSEDED"
+
+        # Group records by component
         groups: Dict[str, list] = {}
         for rec in records:
-            if isinstance(rec, dict):
-                data = rec.get("data", {})
-                component = data.get("component", "") if isinstance(data, dict) else ""
-                title = rec.get("title", "") or ""
-            else:
-                data = getattr(rec, "data", {})
-                component = data.get("component", "") if isinstance(data, dict) else ""
-                title = getattr(rec, "title", "") or ""
+            data = _rec_attr(rec, "data", {})
+            component = data.get("component", "") if isinstance(data, dict) else ""
+            title = _rec_attr(rec, "title", "") or ""
+            rec_id = _rec_attr(rec, "id", 0)
+            rec_ts = _rec_attr(rec, "ts", 0)
             if not component:
                 component = "unknown"
-            groups.setdefault(component, []).append({"title": title, "raw": rec})
-
-        _OPPOSITE_PAIRS = [
-            ("enabled", "disabled"),
-            ("raised", "lowered"),
-            ("increased", "decreased"),
-            ("activated", "deactivated"),
-            ("added", "removed"),
-        ]
+            groups.setdefault(component, []).append({
+                "id": rec_id, "title": title, "ts": rec_ts,
+                "superseded": _is_superseded(rec), "raw": rec,
+            })
 
         findings: list = []
         for component, recs in groups.items():
             if len(recs) < 2:
                 continue
-            for i in range(len(recs)):
-                for j in range(i + 1, len(recs)):
-                    title_a = recs[i]["title"].lower()
-                    title_b = recs[j]["title"].lower()
-                    for kw_pos, kw_neg in _OPPOSITE_PAIRS:
-                        if kw_pos in title_a and kw_neg in title_b:
-                            severity = "HIGH" if kw_pos in ("enabled", "activated") else "MEDIUM"
-                            findings.append({
-                                "component": component,
-                                "contradiction_type": f"{kw_pos}/{kw_neg} conflict",
-                                "fact_a": recs[i]["title"],
-                                "fact_b": recs[j]["title"],
-                                "severity": severity,
-                            })
-                            break
-                        if kw_neg in title_a and kw_pos in title_b:
-                            severity = "HIGH" if kw_pos in ("enabled", "activated") else "MEDIUM"
-                            findings.append({
-                                "component": component,
-                                "contradiction_type": f"{kw_neg}/{kw_pos} conflict",
-                                "fact_a": recs[i]["title"],
-                                "fact_b": recs[j]["title"],
-                                "severity": severity,
-                            })
-                            break
 
-                    param_vals_a = {m.group(1).lower(): m.group(2)
-                                    for m in re.finditer(r"(\w+)=(\d+\.?\d*)", title_a)}
-                    param_vals_b = {m.group(1).lower(): m.group(2)
-                                    for m in re.finditer(r"(\w+)=(\d+\.?\d*)", title_b)}
-                    for param, val_a in param_vals_a.items():
-                        if param in param_vals_b and param_vals_b[param] != val_a:
-                            findings.append({
-                                "component": component,
-                                "contradiction_type": f"parameter value conflict: {param}",
-                                "fact_a": recs[i]["title"],
-                                "fact_b": recs[j]["title"],
-                                "severity": "MEDIUM",
-                            })
+            # Build per-subject state map — only ACTIVE (non-superseded) records
+            subject_states: Dict[str, list] = {}
+            for r in recs:
+                if r["superseded"]:
+                    continue
+                title_lower = r["title"].lower()
+                subjects = _extract_subjects(r["title"])
+                if not subjects:
+                    continue
+                is_disable = any(w in title_lower for w in _DISABLE_WORDS)
+                is_enable = any(w in title_lower for w in _ENABLE_WORDS)
+                is_correction = any(w in title_lower for w in _CORRECTION_WORDS)
+                for subj in subjects:
+                    subject_states.setdefault(subj, []).append({
+                        "state": "disabled" if is_disable and not is_enable else
+                                 "enabled" if is_enable else "other",
+                        "is_correction": is_correction,
+                        "record": r,
+                    })
+
+            # Flag only when the SAME subject has conflicting ACTIVE states and
+            # no correction sequence explains the transition.
+            for subj, states in subject_states.items():
+                disabled_recs = [s for s in states if s["state"] == "disabled"]
+                enabled_recs  = [s for s in states if s["state"] == "enabled"]
+                if not disabled_recs or not enabled_recs:
+                    continue
+                # Sequential correction present → not a contradiction
+                if any(s["is_correction"] for s in enabled_recs):
+                    continue
+                ra = disabled_recs[0]["record"]
+                rb = enabled_recs[0]["record"]
+                findings.append({
+                    "component": component,
+                    "subject": subj,
+                    "contradiction_type": "enable/disable conflict",
+                    "fact_a": ra["title"],
+                    "fact_a_id": ra["id"],
+                    "fact_b": rb["title"],
+                    "fact_b_id": rb["id"],
+                    "severity": "HIGH",
+                })
 
         seen: set = set()
         deduped: list = []
         for f in findings:
-            key = (f["component"], f["fact_a"][:60], f["contradiction_type"])
+            key = (f["component"], f["subject"])
             if key not in seen:
                 seen.add(key)
                 deduped.append(f)
 
         return deduped[:30]
 
+    def mark_decision_superseded(self, record_id: int, superseded_by: str, reason: str) -> bool:
+        """
+        Mark an IMRAF record as SUPERSEDED by patching its data JSON in SQLite and
+        archiving a GOVERNANCE record documenting the supersession.
+        """
+        try:
+            from core.institutional_memory.imraf_engine import imraf, Category
+        except ImportError:
+            return False
+
+        try:
+            records = imraf.timeline(limit=2000)
+            target = None
+            for r in records:
+                if _rec_attr(r, "id", 0) == record_id:
+                    target = r
+                    break
+            if target is None:
+                logger.warning("mark_decision_superseded: record %s not found", record_id)
+                return False
+
+            data = _rec_attr(target, "data", {})
+            if not isinstance(data, dict):
+                data = {}
+            data["lifecycle_state"] = "SUPERSEDED"
+            data["superseded_by"] = superseded_by
+            data["superseded_reason"] = reason
+
+            import sqlite3 as _sqlite3
+            import json as _json
+            from pathlib import Path
+            db_path = Path("data/institutional_memory.db")
+            with _sqlite3.connect(str(db_path)) as conn:
+                conn.execute(
+                    "UPDATE imraf_records SET data=? WHERE id=?",
+                    (_json.dumps(data), record_id),
+                )
+                conn.commit()
+
+            imraf.record(
+                category=Category.GOVERNANCE,
+                title=f"SUPERSEDED: record {record_id} → {superseded_by[:60]}",
+                data={"content": reason, "superseded_record_id": record_id,
+                      "superseded_by": superseded_by, "lifecycle_state": "GOVERNANCE_RESOLUTION"},
+                tags=["governance", "superseded", "lifecycle"],
+            )
+            return True
+        except Exception as exc:
+            logger.warning("mark_decision_superseded: %s", exc)
+            return False
+
+    def resolve_contradiction(self, fact_a_id: int, fact_b_id: int, resolution: str) -> bool:
+        """
+        Resolve a contradiction between two IMRAF records.
+        The older record is marked SUPERSEDED by the newer one, and a GOVERNANCE
+        record documents the resolution.
+        """
+        try:
+            from core.institutional_memory.imraf_engine import imraf, Category
+        except ImportError:
+            return False
+
+        try:
+            records = imraf.timeline(limit=2000)
+            rec_map: Dict[int, Any] = {_rec_attr(r, "id", 0): r for r in records}
+
+            rec_a = rec_map.get(fact_a_id)
+            rec_b = rec_map.get(fact_b_id)
+            if rec_a is None or rec_b is None:
+                return False
+
+            ts_a = _rec_attr(rec_a, "ts", 0)
+            ts_b = _rec_attr(rec_b, "ts", 0)
+            older_id = fact_a_id if ts_a <= ts_b else fact_b_id
+            newer_title = (_rec_attr(rec_b, "title", "") if ts_a <= ts_b else _rec_attr(rec_a, "title", "")) or ""
+
+            ok = self.mark_decision_superseded(older_id, newer_title[:80], resolution)
+            if ok:
+                try:
+                    imraf.record(
+                        category=Category.GOVERNANCE,
+                        title=f"CONTRADICTION_RESOLVED: records {fact_a_id}/{fact_b_id}",
+                        data={"content": resolution, "fact_a_id": fact_a_id,
+                              "fact_b_id": fact_b_id, "older_superseded": older_id},
+                        tags=["governance", "contradiction_resolved"],
+                    )
+                except Exception:
+                    pass
+            return ok
+        except Exception as exc:
+            logger.warning("resolve_contradiction: %s", exc)
+            return False
+
+    def auto_resolve_sequential_contradictions(self) -> int:
+        """
+        Find sequential correction pairs (re-enabled/reversed records) and mark
+        the earlier record as SUPERSEDED so detect_real_contradictions() won't flag
+        them. Returns count of auto-resolved pairs.
+        """
+        try:
+            from core.institutional_memory.imraf_engine import imraf
+        except ImportError:
+            return 0
+
+        _CORRECTION_WORDS = ["re-enabled", "reenabled", "reverted", "reversed", "restored"]
+        _ALPHA_RE = re.compile(r'ALPHA_\w+')
+
+        try:
+            records = imraf.timeline(category="DECISION", limit=500)
+        except Exception:
+            return 0
+
+        resolved = 0
+        # Group by component
+        groups: Dict[str, list] = {}
+        for rec in records:
+            data = _rec_attr(rec, "data", {})
+            component = data.get("component", "") if isinstance(data, dict) else ""
+            if not component:
+                component = "unknown"
+            if isinstance(data, dict) and data.get("lifecycle_state") == "SUPERSEDED":
+                continue
+            groups.setdefault(component, []).append({
+                "id": _rec_attr(rec, "id", 0),
+                "title": _rec_attr(rec, "title", "") or "",
+                "ts": _rec_attr(rec, "ts", 0),
+            })
+
+        for _component, recs in groups.items():
+            for rec in recs:
+                title_lower = rec["title"].lower()
+                if not any(cw in title_lower for cw in _CORRECTION_WORDS):
+                    continue
+                subjects = _ALPHA_RE.findall(rec["title"])
+                if not subjects:
+                    continue
+                for subj in subjects:
+                    for older in recs:
+                        if older["id"] == rec["id"] or subj not in older["title"]:
+                            continue
+                        if older["ts"] >= rec["ts"]:
+                            continue
+                        ok = self.mark_decision_superseded(
+                            older["id"],
+                            rec["title"][:80],
+                            f"Sequential correction: '{rec['title'][:80]}' supersedes this record",
+                        )
+                        if ok:
+                            resolved += 1
+
+        return resolved
+
     def detect_stale_assumptions(self) -> List[dict]:
         """
-        Return DECISION records whose version is 5+ minor versions old vs current APP_VERSION.
-        These may represent stale assumptions that need review.
+        Return DECISION records whose version is 5+ minor versions old vs APP_VERSION.
         """
         stale: List[dict] = []
         try:
@@ -377,12 +557,11 @@ class GovernanceIntelligenceEngine:
         except Exception:
             current_minor = 59
 
-        import re
         for rec in records:
             content = ""
-            if isinstance(rec, dict):
-                data = rec.get("data", {})
-                content = data.get("content", "") if isinstance(data, dict) else ""
+            data = _rec_attr(rec, "data", {})
+            if isinstance(data, dict):
+                content = data.get("content", "") or ""
             ver_matches = re.findall(r"v?(\d+)\.(\d+)\.\d+", content)
             for _major, minor_s in ver_matches:
                 try:
@@ -392,7 +571,7 @@ class GovernanceIntelligenceEngine:
                             "content": content[:120],
                             "version": f"v{_major}.{minor_s}",
                             "age_versions": current_minor - minor,
-                            "component": rec.get("data", {}).get("component", "") if isinstance(rec.get("data"), dict) else "",
+                            "component": data.get("component", "") if isinstance(data, dict) else "",
                         })
                         break
                 except Exception:
@@ -401,8 +580,8 @@ class GovernanceIntelligenceEngine:
 
     def escalate_contradictions_to_imraf(self) -> int:
         """
-        For each HIGH/MEDIUM contradiction found, archive as INCIDENT if not
-        already present in IMRAF. Returns count of new incidents created.
+        For each HIGH/MEDIUM contradiction, archive as INCIDENT if not already
+        present in IMRAF. Returns count of new incidents created.
         """
         contradictions = self.detect_real_contradictions()
         if not contradictions:
@@ -419,7 +598,6 @@ class GovernanceIntelligenceEngine:
                 continue
             component = c["component"]
             contradiction_type = c["contradiction_type"]
-            # Idempotency check — skip if already archived
             search_key = f"GOVERNANCE_ALERT: Contradiction detected in {component}"
             existing = imraf.search(query=search_key, limit=1)
             if existing:
@@ -445,8 +623,7 @@ class GovernanceIntelligenceEngine:
     def governance_coverage_report(self) -> dict:
         """
         Groups DECISION + GOVERNANCE records by component and computes coverage
-        against the known component list (from KGE MODULE nodes if available,
-        else the hardcoded 14-component list).
+        against the known component list.
         """
         try:
             from core.institutional_memory.imraf_engine import imraf
@@ -466,17 +643,11 @@ class GovernanceIntelligenceEngine:
 
         covered_set: set = set()
         for rec in records:
-            if isinstance(rec, dict):
-                data = rec.get("data", {})
-            else:
-                data = getattr(rec, "data", {})
-            component = ""
-            if isinstance(data, dict):
-                component = data.get("component", "") or ""
+            data = _rec_attr(rec, "data", {})
+            component = data.get("component", "") if isinstance(data, dict) else ""
             if component and component != "unknown":
                 covered_set.add(component)
 
-        # Try KGE MODULE nodes first
         all_components = list(_KNOWN_COMPONENTS)
         try:
             from core.nexus.kge.kge_engine import kge
@@ -507,8 +678,8 @@ class GovernanceIntelligenceEngine:
 
     def generate_report(self) -> dict:
         """
-        Full governance report: base cleanup report extended with lifecycle,
-        real contradictions, stale assumptions, coverage, and AEG-readiness fields.
+        Full governance report: cleanup + lifecycle + real contradictions +
+        stale assumptions + coverage + AEG-readiness fields.
         """
         base = self.generate_cleanup_report()
         coverage = self.governance_coverage_report()
@@ -532,7 +703,6 @@ class GovernanceIntelligenceEngine:
         stale = self.scan_stale_decisions()
         assumptions = self.scan_assumptions()
 
-        # Count by severity
         all_severities: List[str] = []
         for c in contradictions:
             all_severities.append(c.severity)
