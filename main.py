@@ -15665,6 +15665,269 @@ async def trust_validation_records(pillar: str, limit: int = 50):
     return {"records": _tvr.records_for_pillar(pillar.upper(), limit=limit)}
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# TRUST ACCURACY LEDGER  [PTP-GAP-02]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/accuracy-ledger/windows")
+async def trust_accuracy_all_windows():
+    from core.trust.trust_accuracy_ledger import trust_accuracy_ledger as _tal
+    return {"pillars": _tal.all_pillars_windows()}
+
+
+@app.get("/api/trust/accuracy-ledger/{pillar}/windows")
+async def trust_accuracy_pillar_windows(pillar: str):
+    from core.trust.trust_accuracy_ledger import trust_accuracy_ledger as _tal
+    return {"windows": _tal.all_windows(pillar.upper())}
+
+
+@app.get("/api/trust/accuracy-ledger/{pillar}/recent")
+async def trust_accuracy_recent_claims(pillar: str, limit: int = 50):
+    from core.trust.trust_accuracy_ledger import trust_accuracy_ledger as _tal
+    return {"claims": _tal.recent_claims(pillar.upper(), limit=limit)}
+
+
+@app.get("/api/trust/accuracy-ledger/entity/{entity_id}")
+async def trust_accuracy_entity_history(entity_id: str):
+    from core.trust.trust_accuracy_ledger import trust_accuracy_ledger as _tal
+    return {"history": _tal.entity_history(entity_id)}
+
+
+@app.post("/api/trust/accuracy-ledger/record")
+async def trust_accuracy_record(body: dict):
+    from core.trust.trust_accuracy_ledger import trust_accuracy_ledger as _tal
+    c = _tal.record(
+        pillar=body.get("pillar", "").upper(),
+        entity_id=body.get("entity_id", "SYSTEM"),
+        claimed_outcome=body.get("claimed_outcome", ""),
+        actual_outcome=body.get("actual_outcome", ""),
+        correct=bool(body.get("correct", False)),
+        evidence_detail=body.get("evidence_detail", ""),
+    )
+    return {"recorded": True, "claim_id": c.claim_id}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TRUST DECAY ENGINE  [PTP-GAP-03 / PTP-GAP-04]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/decay/status")
+async def trust_decay_all_status():
+    from core.trust.trust_decay_engine import trust_decay_engine as _tde
+    return {"decay_statuses": _tde.all_decay_statuses(), "summary": _tde.summary()}
+
+
+@app.get("/api/trust/decay/{pillar}")
+async def trust_decay_pillar(pillar: str):
+    from core.trust.trust_decay_engine import trust_decay_engine as _tde
+    from core.trust.trust_validation_registry import trust_validation_registry as _tvr
+    status = _tvr.pillar_status(pillar.upper())
+    raw_score = status.get("trust_score", 0.0)
+    ds = _tde.decay_status(pillar.upper(), raw_score)
+    return {
+        "pillar":         ds.pillar,
+        "raw_score":      ds.raw_score,
+        "adjusted_score": ds.adjusted_score,
+        "decay_applied":  ds.decay_applied,
+        "is_stale":       ds.is_stale,
+        "decay_note":     ds.decay_note,
+        "days_since_evidence": round(ds.days_since_evidence, 1),
+    }
+
+
+@app.get("/api/trust/revocations")
+async def trust_revocations():
+    from core.trust.trust_decay_engine import trust_decay_engine as _tde
+    return {"revocations": _tde.revocation_log(), "summary": _tde.summary()}
+
+
+@app.post("/api/trust/revocations/{event_id}/reinstate")
+async def trust_reinstate_revocation(event_id: str):
+    from core.trust.trust_decay_engine import trust_decay_engine as _tde
+    return _tde.reinstate(event_id)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG SANDBOX STATS / LEADERBOARD / EVIDENCE / AUTO-DEMOTION  [AEG-GAP-01..04]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/sandbox-stats")
+async def aeg_sandbox_stats_all():
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    return {"stats": _ass.all_stats(), "oversight": _ass.oversight_summary()}
+
+
+@app.get("/api/nexus/aeg/sandbox-stats/{rec_type}")
+async def aeg_sandbox_stats_for_type(rec_type: str):
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    return _ass.stats_for(rec_type)
+
+
+@app.get("/api/nexus/aeg/leaderboard")
+async def aeg_leaderboard(min_samples: int = 5, limit: int = 20):
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    return {"leaderboard": _ass.leaderboard(min_samples=min_samples, limit=limit)}
+
+
+@app.get("/api/nexus/aeg/evidence/{rec_type}")
+async def aeg_evidence_package(rec_type: str):
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    return _ass.evidence_package(rec_type)
+
+
+@app.get("/api/nexus/aeg/demotions")
+async def aeg_demotion_log():
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    return {"demotions": _ass.demotion_log()}
+
+
+@app.post("/api/nexus/aeg/demotions/{rec_type}/rollback")
+async def aeg_rollback_demotion(rec_type: str, body: dict):
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    return _ass.rollback_demotion(rec_type, approved_by=body.get("approved_by", "HUMAN"))
+
+
+@app.post("/api/nexus/aeg/sandbox-stats/record-outcome")
+async def aeg_record_sandbox_outcome(body: dict):
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    _ass.record_sandbox_outcome(
+        rec_type=body.get("rec_type", ""),
+        correct=bool(body.get("correct", False)),
+    )
+    return {"recorded": True}
+
+
+@app.get("/api/nexus/aeg/oversight")
+async def aeg_human_oversight():
+    from core.nexus.aeg_pipeline.aeg_sandbox_stats import aeg_sandbox_stats as _ass
+    from core.nexus.aeg_pipeline.aeg_promotion_engine import aeg_promotion_engine as _ape
+    return {
+        "oversight_summary":    _ass.oversight_summary(),
+        "pipeline_summary":     _ape.summary(),
+        "candidates_ready":     _ape.candidates_ready(),
+        "live_recommendations": _ape.live_recommendations(),
+        "demotion_log":         _ass.demotion_log(),
+        "leaderboard_top10":    _ass.leaderboard(limit=10),
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CORTEX CONSTITUTIONAL HISTORY  [CORTEX-CHANGE-HISTORY-01]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/cortex/constitution/history")
+async def constitutional_history_timeline(limit: int = 100):
+    from core.cortex.constitutional_history import constitutional_history as _ch
+    return {"timeline": _ch.full_timeline(limit=limit), "summary": _ch.summary()}
+
+
+@app.get("/api/cortex/constitution/history/subject/{subject_id}")
+async def constitutional_history_for_subject(subject_id: str):
+    from core.cortex.constitutional_history import constitutional_history as _ch
+    return {"history": _ch.for_subject(subject_id)}
+
+
+@app.get("/api/cortex/constitution/history/type/{change_type}")
+async def constitutional_history_by_type(change_type: str, limit: int = 50):
+    from core.cortex.constitutional_history import constitutional_history as _ch
+    return {"events": _ch.by_type(change_type.upper(), limit=limit)}
+
+
+@app.get("/api/cortex/constitution/history/recent/{days}")
+async def constitutional_history_since(days: int):
+    from core.cortex.constitutional_history import constitutional_history as _ch
+    return {"events": _ch.since(days)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# OBSERVATORY-X LONG-TERM ARCHIVE  [OBX-ARCHIVE-01]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/observatory/archive/summary")
+async def obx_archive_summary():
+    from core.observatory.long_term_archive import long_term_archive as _lta
+    return {
+        "summary":               _lta.summary(),
+        "aggregate_by_rec_type": _lta.aggregate_by_rec_type(),
+        "aggregate_by_pillar":   _lta.aggregate_by_pillar(),
+    }
+
+
+@app.get("/api/observatory/archive/rec-type/{rec_type}")
+async def obx_archive_by_rec_type(rec_type: str, limit: int = 100):
+    from core.observatory.long_term_archive import long_term_archive as _lta
+    return {"records": _lta.by_rec_type(rec_type, limit=limit)}
+
+
+@app.get("/api/observatory/archive/pillar/{pillar}")
+async def obx_archive_by_pillar(pillar: str, limit: int = 100):
+    from core.observatory.long_term_archive import long_term_archive as _lta
+    return {"records": _lta.by_pillar(pillar.upper(), limit=limit)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS TRUST EVIDENCE BRIDGE  [NEXUS-TRUST-EVIDENCE-01]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/trust-evidence")
+async def nexus_trust_evidence_snapshot():
+    from core.nexus.trust_evidence_bridge import trust_evidence_bridge as _teb
+    return _teb.trust_evidence_snapshot()
+
+
+@app.get("/api/nexus/trust-evidence/mirrors")
+async def nexus_trust_evidence_mirrors(limit: int = 50):
+    from core.nexus.trust_evidence_bridge import trust_evidence_bridge as _teb
+    return {"mirrors": _teb.recent_mirrors(limit=limit)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Planning, Control, Autonomy, and Oversight  [FTD-PCAO-001]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/summary")
+async def pcao_summary():
+    from core.pcao.pcao_engine import pcao_engine as _pe
+    return _pe.board_summary()
+
+
+@app.get("/api/pcao/objectives")
+async def pcao_objectives():
+    from core.pcao.pcao_engine import pcao_engine as _pe
+    return {"priority_queue": _pe.priority_queue()}
+
+
+@app.post("/api/pcao/objectives")
+async def pcao_add_objective(body: dict):
+    from core.pcao.pcao_engine import pcao_engine as _pe
+    obj = _pe.add_objective(
+        title=body.get("title", ""),
+        description=body.get("description", ""),
+        priority=body.get("priority", "MEDIUM"),
+        owner=body.get("owner", "HUMAN"),
+        target_subsystem=body.get("target_subsystem", ""),
+    )
+    return {"added": True, "obj_id": obj.obj_id, "title": obj.title}
+
+
+@app.patch("/api/pcao/objectives/{obj_id}/status")
+async def pcao_update_objective(obj_id: str, body: dict):
+    from core.pcao.pcao_engine import pcao_engine as _pe
+    return _pe.update_objective_status(obj_id, status=body.get("status", ""), outcome=body.get("outcome", ""))
+
+
+@app.get("/api/pcao/resources")
+async def pcao_resource_allocation():
+    from core.pcao.pcao_engine import pcao_engine as _pe
+    return {"allocation": _pe.resource_allocation_status()}
+
+
+@app.get("/api/pcao/audit")
+async def pcao_executive_audit(limit: int = 20):
+    from core.pcao.pcao_engine import pcao_engine as _pe
+    return {"audit": _pe.executive_audit(limit=limit)}
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
