@@ -5,11 +5,13 @@ CORTEX governs the PHOENIX module ecosystem.  It does not replace any
 module — it acts as Governor, Arbitrator, Coordinator, and Supervisor.
 
 Architecture:
-  CX-1  module_registry.py    Canonical catalog of every PHOENIX module
-  CX-2  dependency_mapper.py  Full dependency graph + boot order
-  CX-3  conflict_engine.py    Conflict detection + Constitutional Rules
-  CX-4  influence_matrix.py   Dynamic influence weights (advisory)
-  CX-5  blame_engine.py       Loss blame attribution — "who caused it?"
+  CX-1  module_registry.py       Canonical catalog of every PHOENIX module
+  CX-2  dependency_mapper.py     Full dependency graph + boot order
+  CX-3  conflict_engine.py       Conflict detection + Constitutional Rules
+  CX-4  influence_matrix.py      Dynamic influence weights (advisory)
+  CX-5  blame_engine.py          Loss blame attribution — "who caused it?"
+  CX-5  counterfactual_engine.py Counterfactual analysis (DECISIVE/PERMISSIVE/AMPLIFYING/REDUNDANT)
+  CX-G  constitution.py          Constitutional Governance Registry (8 founding articles)
 
 PHOENIX Institutional Stack:
   Layer 2  NEXUS          (Connectivity + Intelligence)
@@ -19,11 +21,13 @@ PHOENIX Institutional Stack:
 
 Boot log: [PHOENIX CORTEX Active] Registry | Dependencies | Conflict | Influence | Blame
 """
-from core.cortex.module_registry  import cortex_module_registry
-from core.cortex.dependency_mapper import cortex_dependency_mapper
-from core.cortex.conflict_engine  import conflict_engine
-from core.cortex.influence_matrix import influence_matrix
-from core.cortex.blame_engine     import blame_engine
+from core.cortex.module_registry       import cortex_module_registry
+from core.cortex.dependency_mapper    import cortex_dependency_mapper
+from core.cortex.conflict_engine      import conflict_engine
+from core.cortex.influence_matrix     import influence_matrix
+from core.cortex.blame_engine         import blame_engine
+from core.cortex.constitution         import constitution_registry
+from core.cortex.counterfactual_engine import counterfactual_engine
 
 __all__ = [
     "cortex_module_registry",
@@ -31,4 +35,6 @@ __all__ = [
     "conflict_engine",
     "influence_matrix",
     "blame_engine",
+    "constitution_registry",
+    "counterfactual_engine",
 ]

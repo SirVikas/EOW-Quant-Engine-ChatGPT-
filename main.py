@@ -150,14 +150,16 @@ from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult        
 from core.truth.exit_truth_engine   import exit_truth_engine                           # FTD-PHOENIX-XTE-001
 from core.truth.alpha_attribution   import alpha_attribution_platform, AttributionSnapshot  # FTD-PHOENIX-AAP-001
 from core.truth.truth_archive       import truth_archive                               # FTD-PHOENIX-AAP-001
-from core.observatory import (                                                         # OBSERVATORY-X OX-1/2/3
+from core.observatory import (                                                         # OBSERVATORY-X OX-1/2/3/4
     report_registry, report_scheduler, report_health_monitor,
     report_relationship_engine, event_lineage_tracker,
     defect_engine, phoenix_inspector, recommendation_engine,
+    report_ownership_registry, observatory_truth_layer, recommendation_trust_engine,
 )
-from core.cortex import (                                                              # CORTEX CX-1/2/3/4/5
+from core.cortex import (                                                              # CORTEX CX-1/2/3/4/5+
     cortex_module_registry, cortex_dependency_mapper,
     conflict_engine, influence_matrix, blame_engine,
+    constitution_registry, counterfactual_engine,
 )
 
 
@@ -3609,27 +3611,31 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         influence_matrix.build()
         _reg_sum  = cortex_module_registry.summary()
         _dep_sum  = cortex_dependency_mapper.graph_summary()
+        _const_sum = constitution_registry.summary()
         _thought(
             f"🧠 [PHOENIX CORTEX Active] "
             f"Registry: {_reg_sum['total_modules']} modules "
             f"(critical={_reg_sum['critical_modules']}) | "
             f"Dependencies: {_dep_sum['total_nodes']} nodes {_dep_sum['total_edges']} edges | "
             f"Conflict engine ready | Influence matrix ready | Blame engine ready | "
-            f"endpoints: /api/cortex/*",
+            f"Constitution: {_const_sum['total_articles']} articles | "
+            f"Counterfactual engine ready | endpoints: /api/cortex/*",
             "SYSTEM",
         )
     except Exception as _cx_e:
         _thought(f"⚠ [CORTEX] Startup failed (non-fatal): {_cx_e}", "SYSTEM")
 
-    # ── OBSERVATORY-X OX-1: Report Scheduler startup ──────────────────────────
+    # ── OBSERVATORY-X OX-1/4: Report Scheduler + Ownership/Truth/Trust startup ─
     try:
         await report_scheduler.start()
         _reg_summary = report_registry.summary()
+        _own_sum     = report_ownership_registry.sla_dashboard()
         _thought(
-            f"🔭 [OBSERVATORY-X OX-1] Active | "
+            f"🔭 [OBSERVATORY-X OX-1/4] Active | "
             f"reports_registered={_reg_summary['total_registered']} | "
             f"categories={list(_reg_summary['by_category'].keys())} | "
-            f"endpoints: /api/observatory/*",
+            f"ownership_records={_own_sum['total_with_sla']} | "
+            f"truth_layer ready | trust_engine ready | endpoints: /api/observatory/*",
             "SYSTEM",
         )
     except Exception as _obs_e:
@@ -14462,6 +14468,257 @@ async def observatory_status():
             },
             "inspector": inspector_sum,
         }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OBSERVATORY-X OX-4: Ownership / SLA / Version Lineage ────────────────────
+
+@app.get("/api/observatory/ownership")
+async def observatory_ownership_dashboard():
+    """SLA dashboard for all owned reports."""
+    try:
+        return report_ownership_registry.sla_dashboard()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/ownership/{report_key}")
+async def observatory_ownership_detail(report_key: str):
+    """Ownership and SLA record for a specific report."""
+    try:
+        from core.observatory.ownership import report_ownership_registry as _r
+        own = _r.get(report_key)
+        if not own:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail=f"No ownership record for '{report_key}'")
+        sla = _r.sla_status(report_key)
+        return {**own.__dict__ if hasattr(own, "__dict__") else {}, "sla_status": sla}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/ownership/audit/version")
+async def observatory_version_audit():
+    """Version history audit across all owned reports."""
+    try:
+        with report_ownership_registry._lock:
+            keys = list(report_ownership_registry._records.keys())
+        return {"version_audit": [report_ownership_registry.version_audit(k) for k in keys]}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/ownership/{report_key}/sla-breach")
+async def observatory_record_sla_breach(report_key: str):
+    """Manually record an SLA breach and push to IMRAF."""
+    try:
+        from core.observatory.nexus_bridge import record_sla_breach
+        sla = report_ownership_registry.sla_status(report_key)
+        record_sla_breach(report_key, sla)
+        return {"recorded": True, "sla_status": sla}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OBSERVATORY-X OX-4: Truth Layer ──────────────────────────────────────────
+
+@app.get("/api/observatory/truth")
+async def observatory_truth_summary():
+    """Truth layer summary — all truth records and state distribution."""
+    try:
+        return observatory_truth_layer.summary()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/truth/{truth_id}")
+async def observatory_truth_record(truth_id: str):
+    """Get a specific truth record by ID."""
+    try:
+        rec = observatory_truth_layer.get(truth_id)
+        if not rec:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail=f"Truth record '{truth_id}' not found")
+        return rec
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/truth/observe")
+async def observatory_truth_observe(body: dict):
+    """Observe a new finding — creates a truth record in OBSERVED state."""
+    try:
+        from core.observatory.nexus_bridge import record_truth_transition
+        rec = observatory_truth_layer.observe(
+            subject=body.get("subject", "unknown"),
+            subject_type=body.get("subject_type", "module"),
+            description=body.get("description", ""),
+            evidence=body.get("evidence", {}),
+            source=body.get("source", "api"),
+        )
+        record_truth_transition({"truth_id": rec.truth_id, "subject": rec.subject,
+                                  "subject_type": rec.subject_type, "description": rec.description,
+                                  "state": "observed"}, "OBSERVED")
+        return {"truth_id": rec.truth_id, "state": rec.state}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/truth/{truth_id}/explain")
+async def observatory_truth_explain(truth_id: str, body: dict):
+    """Advance a truth record from OBSERVED → EXPLAINED."""
+    try:
+        from core.observatory.nexus_bridge import record_truth_transition
+        ok = observatory_truth_layer.explain(
+            truth_id=truth_id,
+            explanation=body.get("explanation", ""),
+            investigation_id=body.get("investigation_id", ""),
+            confidence=float(body.get("confidence", 0.5)),
+        )
+        if not ok:
+            return {"error": "Could not advance — check confidence threshold or state"}
+        rec = observatory_truth_layer.get(truth_id)
+        record_truth_transition(rec or {}, "EXPLAINED")
+        return {"truth_id": truth_id, "state": "explained"}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OBSERVATORY-X OX-4: Recommendation Trust Engine ──────────────────────────
+
+@app.get("/api/observatory/trust")
+async def observatory_trust_summary():
+    """Trust engine summary — scores for all recommendation types."""
+    try:
+        return recommendation_trust_engine.summary()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/trust/{rec_type}")
+async def observatory_trust_for_type(rec_type: str):
+    """Trust score and tier for a specific recommendation type."""
+    try:
+        return recommendation_trust_engine.trust_for_type(rec_type)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/trust/outcome")
+async def observatory_trust_record_outcome(body: dict):
+    """Record whether a recommendation type outcome was positive or negative."""
+    try:
+        recommendation_trust_engine.record_outcome(
+            rec_type=body.get("rec_type", ""),
+            applied=bool(body.get("applied", True)),
+            improved=bool(body.get("improved", False)),
+            damage=float(body.get("damage", 0.0)),
+        )
+        return {"recorded": True}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── CORTEX CX-G: Constitutional Governance ───────────────────────────────────
+
+@app.get("/api/cortex/constitution")
+async def cortex_constitution_summary():
+    """All constitutional articles and violation statistics."""
+    try:
+        return constitution_registry.summary()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/constitution/{article_id}")
+async def cortex_constitution_article(article_id: str):
+    """Get a specific constitutional article."""
+    try:
+        art = constitution_registry.get_article(article_id)
+        if not art:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail=f"Article '{article_id}' not found")
+        return constitution_registry._serialise_article(art)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/cortex/constitution/check")
+async def cortex_constitution_check(body: dict):
+    """Check whether a proposed action is constitutionally compliant."""
+    try:
+        return constitution_registry.check_action(
+            module_key=body.get("module_key", ""),
+            action=body.get("action", ""),
+            action_type=body.get("action_type", "parameter_change"),
+        )
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/constitution/violations")
+async def cortex_constitution_violations(limit: int = 50):
+    """Constitutional violation log."""
+    try:
+        return {"violations": constitution_registry.violation_log(limit=limit)}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── CORTEX CX-5: Counterfactual Engine ───────────────────────────────────────
+
+@app.get("/api/cortex/counterfactual")
+async def cortex_counterfactual_summary():
+    """Counterfactual engine summary — top decisive modules."""
+    try:
+        return counterfactual_engine.summary()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/counterfactual/{trade_id}")
+async def cortex_counterfactual_report(trade_id: str):
+    """Get counterfactual analysis report for a specific trade."""
+    try:
+        rep = counterfactual_engine.get_report(trade_id)
+        if not rep:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail=f"No counterfactual report for trade '{trade_id}'")
+        return rep
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/cortex/counterfactual/analyse")
+async def cortex_counterfactual_analyse(body: dict):
+    """Run counterfactual analysis on a blame record payload."""
+    try:
+        from core.observatory.nexus_bridge import record_blame
+        report = counterfactual_engine.analyse(body)
+        if body.get("record_to_imraf"):
+            record_blame(body)
+        return counterfactual_engine._serialise(report)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── CORTEX: Influence matrix risk-adjusted attribution ───────────────────────
+
+@app.post("/api/cortex/influence/risk-adjusted")
+async def cortex_influence_risk_adjusted(body: dict):
+    """Record a risk-adjusted attribution event for a module."""
+    try:
+        influence_matrix.record_risk_adjusted(
+            module_key=body.get("module_key", ""),
+            sharpe_contribution=float(body.get("sharpe_contribution", 0.0)),
+            expectancy=float(body.get("expectancy", 0.0)),
+            drawdown=float(body.get("drawdown", 0.0)),
+            stability=float(body.get("stability", 0.5)),
+            regime_fitness=float(body.get("regime_fitness", 0.5)),
+            reason=body.get("reason", ""),
+        )
+        return {"recorded": True, "module_key": body.get("module_key")}
     except Exception as exc:
         return {"error": str(exc)}
 

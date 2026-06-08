@@ -1,31 +1,28 @@
 """
-PHOENIX OBSERVATORY-X — Defect Discovery Engine (DDE)  [OX-3A]
+PHOENIX OBSERVATORY-X — Defect Discovery Engine (DDE)  [OX-3A — v2]
 
 Continuously scans all report health records and recent event lineage to
 surface systemic defects — patterns that indicate something is structurally
 wrong in the PHOENIX ecosystem.
 
-A defect is different from a single report failure:
-  • A single failure = transient error
-  • A systemic defect = same failure type recurring across multiple reports,
-    time windows, or modules, indicating a root-cause worth investigating
+Severity Framework (P0–P3 — Institutional Standard)
+────────────────────────────────────────────────────
+  P0  PRODUCTION_EMERGENCY  Trading halted or imminent PnL catastrophe
+  P1  CRITICAL              Significant PnL risk, immediate action required
+  P2  WARNING               Degraded capability, action within 24 hours
+  P3  INFORMATIONAL         Minor issue, action within 7 days
 
-Defect types
-────────────
-  RECURRING_FAILURE   Same report fails repeatedly
-  STALENESS_CLUSTER   Multiple related reports are all stale simultaneously
-  DATA_QUALITY        Completeness scores falling across a report family
-  PATTERN_DIVERGENCE  Signals or patterns are contradicting each other
-  GOVERNANCE_GAP      Governance-tier reports are absent or perpetually failing
-  LOSS_CONCENTRATION  Lineage shows losses clustering in a specific actor/regime
+Defect Aging States
+───────────────────
+  OPEN          Detected, no action taken
+  ACKNOWLEDGED  Someone has seen it
+  IN_PROGRESS   Fix being applied
+  RESOLVED      Verified improvement recorded
+  WONT_FIX      Accepted risk — documented reason required
+  EXPIRED       Auto-closed after 90 days without action (P3 only)
 
-Each defect produces a DefectRecord with:
-  - severity (INFO / WARN / CRITICAL)
-  - affected reports list
-  - probable root cause description
-  - recommended investigator action
-
-The engine runs on-demand (called from the scheduler or /api/observatory/inspect).
+Each DefectRecord also carries:
+  - opened_at, age_days, aging_state, aging_history
 """
 from __future__ import annotations
 
@@ -35,8 +32,14 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 
-# ── Severity ──────────────────────────────────────────────────────────────────
+# ── Priority / Severity ───────────────────────────────────────────────────────
 
+P0 = "P0"   # Production emergency
+P1 = "P1"   # Critical
+P2 = "P2"   # Warning
+P3 = "P3"   # Informational
+
+# Legacy aliases for backward compat
 INFO     = "INFO"
 WARN     = "WARN"
 CRITICAL = "CRITICAL"
@@ -56,6 +59,28 @@ class DefectRecord:
     recommended_action: str
     detected_at: float = field(default_factory=time.time)
     evidence: Dict = field(default_factory=dict)
+    # ── Aging (v2) ────────────────────────────────────────────────────────────
+    priority: str = P2          # P0 | P1 | P2 | P3
+    aging_state: str = "OPEN"   # OPEN | ACKNOWLEDGED | IN_PROGRESS | RESOLVED | WONT_FIX | EXPIRED
+    opened_at: float = field(default_factory=time.time)
+    aging_history: List[dict] = field(default_factory=list)
+
+    @property
+    def age_days(self) -> float:
+        return (time.time() - self.opened_at) / 86400
+
+    def transition_aging(self, new_state: str, reason: str = "") -> None:
+        self.aging_history.append({
+            "from": self.aging_state,
+            "to":   new_state,
+            "reason": reason,
+            "timestamp": time.time(),
+        })
+        self.aging_state = new_state
+
+
+# ── Aging Expiry ──────────────────────────────────────────────────────────────
+_EXPIRY_DAYS: Dict[str, int] = {P0: 0, P1: 0, P2: 30, P3: 90}
 
 
 # ── Engine ────────────────────────────────────────────────────────────────────
@@ -63,18 +88,55 @@ class DefectRecord:
 class DefectDiscoveryEngine:
     """
     Scans health + lineage data and returns a list of DefectRecords.
-    Stateless per scan — every call to scan() produces a fresh result.
+    Maintains a persistent defect registry with aging lifecycle management.
     """
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
         self._last_scan: Optional[dict] = None
         self._last_scan_ts: float = 0.0
+        self._known_defects: Dict[str, DefectRecord] = {}  # persisted across scans
+
+    def acknowledge(self, defect_id: str, reason: str = "") -> bool:
+        with self._lock:
+            d = self._known_defects.get(defect_id)
+            if not d:
+                return False
+            d.transition_aging("ACKNOWLEDGED", reason)
+        return True
+
+    def resolve(self, defect_id: str, reason: str = "") -> bool:
+        with self._lock:
+            d = self._known_defects.get(defect_id)
+            if not d:
+                return False
+            d.transition_aging("RESOLVED", reason)
+        return True
+
+    def wont_fix(self, defect_id: str, reason: str = "") -> bool:
+        with self._lock:
+            d = self._known_defects.get(defect_id)
+            if not d:
+                return False
+            d.transition_aging("WONT_FIX", reason)
+        return True
+
+    def get_defect(self, defect_id: str) -> Optional[dict]:
+        with self._lock:
+            d = self._known_defects.get(defect_id)
+        return self._full_serialise(d) if d else None
+
+    def open_defects(self) -> List[dict]:
+        with self._lock:
+            items = [d for d in self._known_defects.values()
+                     if d.aging_state in ("OPEN", "ACKNOWLEDGED", "IN_PROGRESS")]
+        return [self._full_serialise(d) for d in items]
 
     def scan(self) -> dict:
         """
         Run a full defect scan.  Returns a scan report dict.
         Results are cached for 60 s so rapid API calls don't re-scan.
+        New defects are persisted in _known_defects for aging lifecycle.
         """
         now = time.time()
         with self._lock:
@@ -88,18 +150,32 @@ class DefectDiscoveryEngine:
         defects.extend(self._scan_data_quality())
         defects.extend(self._scan_loss_concentration())
 
-        # Sort by severity priority
-        _pri = {CRITICAL: 0, WARN: 1, INFO: 2}
-        defects.sort(key=lambda d: _pri.get(d.severity, 9))
+        # Assign P0-P3 priorities and persist new defects
+        for d in defects:
+            d.priority = self._severity_to_priority(d.severity)
+            with self._lock:
+                if d.defect_id not in self._known_defects:
+                    self._known_defects[d.defect_id] = d
+
+        # Auto-expire old P2/P3 defects
+        self._age_defects()
+
+        # Sort by priority
+        _pri = {P0: 0, P1: 1, P2: 2, P3: 3, CRITICAL: 0, WARN: 1, INFO: 2}
+        defects.sort(key=lambda d: _pri.get(d.priority, 9))
 
         result = {
             "scan_timestamp": now,
             "total_defects":  len(defects),
+            "by_priority": {P0: 0, P1: 0, P2: 0, P3: 0,
+                            **{d.priority: sum(1 for x in defects if x.priority == d.priority)
+                               for d in defects}},
             "by_severity": {
                 "CRITICAL": sum(1 for d in defects if d.severity == CRITICAL),
                 "WARN":      sum(1 for d in defects if d.severity == WARN),
                 "INFO":      sum(1 for d in defects if d.severity == INFO),
             },
+            "open_defects_total": len(self.open_defects()),
             "defects": [self._serialise(d) for d in defects],
         }
 
@@ -108,6 +184,31 @@ class DefectDiscoveryEngine:
             self._last_scan_ts = now
 
         return result
+
+    @staticmethod
+    def _severity_to_priority(severity: str) -> str:
+        return {CRITICAL: P0, WARN: P1, INFO: P2}.get(severity, P3)
+
+    def _age_defects(self) -> None:
+        """Auto-expire P2/P3 defects past their expiry threshold."""
+        now = time.time()
+        with self._lock:
+            for d in list(self._known_defects.values()):
+                if d.aging_state not in ("OPEN", "ACKNOWLEDGED"):
+                    continue
+                expiry = _EXPIRY_DAYS.get(d.priority, 90)
+                if expiry > 0 and d.age_days > expiry:
+                    d.transition_aging("EXPIRED", f"Auto-expired after {expiry} days")
+
+    def _full_serialise(self, d: DefectRecord) -> dict:
+        return {
+            **self._serialise(d),
+            "priority":       d.priority,
+            "aging_state":    d.aging_state,
+            "age_days":       round(d.age_days, 1),
+            "opened_at":      d.opened_at,
+            "aging_history":  d.aging_history,
+        }
 
     # ── Scan Routines ─────────────────────────────────────────────────────────
 
