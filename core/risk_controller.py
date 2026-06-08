@@ -59,6 +59,7 @@ class OpenPosition:
     breakeven_armed: bool = False
     peak_r:       float = 0.0
     ticks_since_peak: int = 0
+    atr_pct:      float = 0.0   # FTD-LONDON-001: ATR at entry for forensic lineage
 
 
 @dataclass
@@ -395,6 +396,7 @@ class RiskController:
             stop_loss=pos.initial_stop_loss,   # FTD-REF-055: preserve initial SL
             take_profit=pos.take_profit,        # FTD-REF-055: preserve TP
             peak_r=round(pos.peak_r, 4),        # FTD-PEAK-R: forensic — highest R seen during trade
+            atr_pct=round(pos.atr_pct, 6),      # FTD-LONDON-001: ATR at entry for ATR-bucket forensics
         )
         result = self.pnl_calc.calculate(record, initial_risk_usdt=pos.initial_risk)
         self.scaler.record_trade(result.net_pnl)
