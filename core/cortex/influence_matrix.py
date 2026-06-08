@@ -22,6 +22,10 @@ Weight update rules
   Floor:  critical modules min weight = 10
   Ceiling: max weight = 50
 
+Risk-adjusted attribution (5-factor):
+  Sharpe contribution, Expectancy, Max Drawdown, Stability Score, Regime Fitness
+  Combined into a composite attribution score that replaces simple win/loss counting.
+
 Tier-based maximum influence weights:
   Tier A max: 40   (direct execution impact)
   Tier B max: 25   (indirect impact)
@@ -49,6 +53,36 @@ TIER_MAX: Dict[str, float] = {"A": 40.0, "B": 25.0, "C": 10.0, "D": 5.0}
 # ── Data Model ────────────────────────────────────────────────────────────────
 
 @dataclass
+class RiskAdjustedStats:
+    """Rolling risk-adjusted performance metrics for a module."""
+    sharpe_sum: float = 0.0       # sum of per-trade Sharpe contributions
+    expectancy_sum: float = 0.0   # sum of (win_prob × avg_win - loss_prob × avg_loss)
+    max_drawdown: float = 0.0     # worst peak-to-trough seen
+    stability_sum: float = 0.0    # sum of consistency scores (0–1)
+    regime_fitness_sum: float = 0.0  # sum of regime-fit scores (0–1)
+    sample_count: int = 0
+
+    def composite_score(self) -> float:
+        """0–1 composite: higher = better risk-adjusted contribution."""
+        if self.sample_count == 0:
+            return 0.5  # neutral prior
+        n = self.sample_count
+        sharpe_norm    = min(1.0, max(0.0, (self.sharpe_sum / n + 2) / 4))  # normalise Sharpe [-2,2]→[0,1]
+        expectancy_norm= min(1.0, max(0.0, (self.expectancy_sum / n + 1) / 2))
+        dd_score       = max(0.0, 1.0 - abs(self.max_drawdown))             # drawdown penalty
+        stability      = min(1.0, max(0.0, self.stability_sum / n))
+        regime_fit     = min(1.0, max(0.0, self.regime_fitness_sum / n))
+        return round(
+            sharpe_norm * 0.30 +
+            expectancy_norm * 0.25 +
+            dd_score * 0.20 +
+            stability * 0.15 +
+            regime_fit * 0.10,
+            4,
+        )
+
+
+@dataclass
 class ModuleInfluence:
     module_key: str
     tier: str
@@ -62,6 +96,7 @@ class ModuleInfluence:
     negative_events: int    # loss attributions
     last_adjusted: float = field(default_factory=time.time)
     locked: bool = False    # if True, weight is immutable (constitutional lock)
+    risk_stats: RiskAdjustedStats = field(default_factory=RiskAdjustedStats)
 
 
 # ── Matrix ────────────────────────────────────────────────────────────────────
@@ -127,17 +162,19 @@ class InfluenceMatrix:
         with self._lock:
             return [
                 {
-                    "module_key":     inf.module_key,
-                    "tier":           inf.tier,
-                    "current_weight": round(inf.current_weight, 2),
-                    "initial_weight": round(inf.initial_weight, 2),
-                    "delta":          round(inf.current_weight - inf.initial_weight, 2),
-                    "health_factor":  round(inf.health_factor, 3),
-                    "conflict_count": inf.conflict_count,
-                    "positive_events": inf.positive_events,
-                    "negative_events": inf.negative_events,
-                    "locked":         inf.locked,
-                    "last_adjusted":  inf.last_adjusted,
+                    "module_key":       inf.module_key,
+                    "tier":             inf.tier,
+                    "current_weight":   round(inf.current_weight, 2),
+                    "initial_weight":   round(inf.initial_weight, 2),
+                    "delta":            round(inf.current_weight - inf.initial_weight, 2),
+                    "health_factor":    round(inf.health_factor, 3),
+                    "conflict_count":   inf.conflict_count,
+                    "positive_events":  inf.positive_events,
+                    "negative_events":  inf.negative_events,
+                    "locked":           inf.locked,
+                    "last_adjusted":    inf.last_adjusted,
+                    "risk_composite":   inf.risk_stats.composite_score(),
+                    "risk_sample_count": inf.risk_stats.sample_count,
                 }
                 for inf in sorted(
                     self._matrix.values(),
@@ -157,6 +194,59 @@ class InfluenceMatrix:
         """Record a negative attribution event (loss attributed to this module)."""
         self._ensure_built()
         self._adjust(module_key, -DECAY_FACTOR, "negative", reason)
+
+    def record_risk_adjusted(
+        self,
+        module_key: str,
+        sharpe_contribution: float = 0.0,
+        expectancy: float = 0.0,
+        drawdown: float = 0.0,
+        stability: float = 0.5,
+        regime_fitness: float = 0.5,
+        reason: str = "",
+    ) -> None:
+        """
+        Record a risk-adjusted attribution event.
+        This replaces simple win/loss counting with a 5-factor composite.
+        """
+        self._ensure_built()
+        with self._lock:
+            inf = self._matrix.get(module_key)
+            if not inf:
+                return
+            rs = inf.risk_stats
+            rs.sharpe_sum += sharpe_contribution
+            rs.expectancy_sum += expectancy
+            rs.max_drawdown = min(rs.max_drawdown, drawdown)  # track worst dd
+            rs.stability_sum += stability
+            rs.regime_fitness_sum += regime_fitness
+            rs.sample_count += 1
+
+            composite = rs.composite_score()
+            # composite > 0.5 → boost; < 0.5 → decay; magnitude scales with distance from 0.5
+            deviation = composite - 0.5
+            factor = deviation * 2 * (BOOST_FACTOR if deviation > 0 else DECAY_FACTOR)
+
+            if not inf.locked and rs.sample_count >= 3:
+                old_w = inf.current_weight
+                new_w = max(inf.min_weight, min(inf.max_weight, old_w * (1 + factor)))
+                inf.current_weight = new_w
+                inf.last_adjusted  = time.time()
+                self._history.append({
+                    "module_key":  module_key,
+                    "event_type":  "risk_adjusted",
+                    "old_weight":  round(old_w, 3),
+                    "new_weight":  round(new_w, 3),
+                    "delta":       round(new_w - old_w, 3),
+                    "composite":   composite,
+                    "sharpe":      sharpe_contribution,
+                    "expectancy":  expectancy,
+                    "drawdown":    drawdown,
+                    "reason":      reason,
+                    "timestamp":   time.time(),
+                })
+                if len(self._history) > 500:
+                    self._history = self._history[-500:]
 
     def record_conflict(self, module_key: str) -> None:
         """Penalise a module for being involved in a conflict."""

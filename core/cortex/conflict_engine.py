@@ -13,6 +13,8 @@ Conflict types
   SIZE_CONFLICT          Capital allocator says increase size, risk engine says reduce
   GOVERNANCE_CONFLICT    Gate approves, safe mode wants to block
   REGIME_CONFLICT        Two regime detectors disagree on the current regime
+  ECONOMIC_CONFLICT      Module A increases win rate but destroys profit factor
+  STRATEGIC_CONFLICT     Trend-following signal conflicts with mean-reversion signal
 
 Each ConflictEvent records:
   - The conflicting modules and their signals
@@ -172,6 +174,8 @@ class ConflictDetectionEngine:
         conflicts.extend(self._check_risk_conflicts(signals))
         conflicts.extend(self._check_size_conflicts(signals))
         conflicts.extend(self._check_governance_conflicts(signals))
+        conflicts.extend(self._check_economic_conflicts(signals))
+        conflicts.extend(self._check_strategic_conflicts(signals))
 
         # Record new conflicts
         score = 0.0
@@ -341,6 +345,96 @@ class ConflictDetectionEngine:
                     resolution="Defer to Safe Mode Engine (RULE-002 + RULE-003)",
                     block_trading=True,
                     constitutional_rule="RULE-003",
+                ))
+        return conflicts
+
+    def _check_economic_conflicts(
+        self, signals: Dict[str, ModuleSignal]
+    ) -> List[ConflictEvent]:
+        """Module improves win rate but degrades profit factor — pyrrhic win."""
+        econ_signals = [
+            s for s in signals.values()
+            if s.signal_type == "economic"
+        ]
+        conflicts = []
+        for i, s1 in enumerate(econ_signals):
+            for s2 in econ_signals[i + 1:]:
+                wr1 = s1.metadata.get("win_rate_delta", 0)
+                pf1 = s1.metadata.get("profit_factor_delta", 0)
+                wr2 = s2.metadata.get("win_rate_delta", 0)
+                pf2 = s2.metadata.get("profit_factor_delta", 0)
+                # Conflict: one module improves WR while other degrades PF significantly
+                if (wr1 > 0.05 and pf1 < -0.2) or (wr2 > 0.05 and pf2 < -0.2):
+                    conflicts.append(ConflictEvent(
+                        conflict_id=f"ECON_{s1.module_key}_{s2.module_key}_{int(time.time())}",
+                        conflict_type="ECONOMIC_CONFLICT",
+                        severity=SEVERITY_MEDIUM,
+                        module_a=s1.module_key, signal_a=f"WR+{wr1:.1%} PF{pf1:+.2f}",
+                        module_b=s2.module_key, signal_b=f"WR+{wr2:.1%} PF{pf2:+.2f}",
+                        description=(
+                            "Economic trade-off conflict: win rate improvement destroys "
+                            "profit factor — net outcome may be negative expectancy."
+                        ),
+                        resolution="Evaluate net expectancy before applying parameter change",
+                        block_trading=False,
+                    ))
+        # Also detect: single module reporting wr+ but pf-
+        for s in econ_signals:
+            wr = s.metadata.get("win_rate_delta", 0)
+            pf = s.metadata.get("profit_factor_delta", 0)
+            if wr > 0.05 and pf < -0.3:
+                conflicts.append(ConflictEvent(
+                    conflict_id=f"ECON_PYRRHIC_{s.module_key}_{int(time.time())}",
+                    conflict_type="ECONOMIC_CONFLICT",
+                    severity=SEVERITY_HIGH,
+                    module_a=s.module_key, signal_a=f"WR+{wr:.1%}",
+                    module_b=s.module_key, signal_b=f"PF{pf:+.2f}",
+                    description=(
+                        f"'{s.module_key}' reports win rate improvement of {wr:.1%} "
+                        f"but profit factor degradation of {pf:.2f} — pyrrhic win."
+                    ),
+                    resolution="Block parameter change; net expectancy is negative",
+                    block_trading=False,
+                ))
+        return conflicts
+
+    def _check_strategic_conflicts(
+        self, signals: Dict[str, ModuleSignal]
+    ) -> List[ConflictEvent]:
+        """Trend-following and mean-reversion modules signaling simultaneously."""
+        strat_signals = {
+            k: s for k, s in signals.items()
+            if s.signal_type == "strategy"
+        }
+        trend_modules = [
+            s for s in strat_signals.values()
+            if s.signal_value in ("TREND_FOLLOW", "MOMENTUM", "BREAKOUT")
+        ]
+        reversion_modules = [
+            s for s in strat_signals.values()
+            if s.signal_value in ("MEAN_REVERT", "COUNTER_TREND", "RANGE_BOUND")
+        ]
+        conflicts = []
+        for t in trend_modules:
+            for r in reversion_modules:
+                avg_conf = (t.confidence + r.confidence) / 2
+                sev = SEVERITY_HIGH if avg_conf > 0.7 else SEVERITY_MEDIUM
+                conflicts.append(ConflictEvent(
+                    conflict_id=f"STRAT_{t.module_key}_{r.module_key}_{int(time.time())}",
+                    conflict_type="STRATEGIC_CONFLICT",
+                    severity=sev,
+                    module_a=t.module_key, signal_a=t.signal_value,
+                    module_b=r.module_key, signal_b=r.signal_value,
+                    description=(
+                        f"Strategic regime conflict: '{t.module_key}' ({t.signal_value}) "
+                        f"conflicts with '{r.module_key}' ({r.signal_value}). "
+                        "Regime is ambiguous — applying both degrades expectancy."
+                    ),
+                    resolution=(
+                        "Use regime detector consensus to select one strategy. "
+                        "If regime is ambiguous, reduce position size or wait."
+                    ),
+                    block_trading=sev == SEVERITY_HIGH,
                 ))
         return conflicts
 

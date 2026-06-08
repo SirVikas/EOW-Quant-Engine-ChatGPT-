@@ -57,6 +57,9 @@ class InvestigationReport:
     primary_suspect: str = ""         # top finding label
     evidence_sample_size: int = 0
     recommendations: List[str] = field(default_factory=list)  # filled by RecommendationEngine
+    # ── v2: confidence + multi-cause ─────────────────────────────────────────
+    investigation_confidence: float = 0.0  # 0–1: how confident in the findings overall
+    cause_attribution: List[dict] = field(default_factory=list)  # multi-cause with % split
 
 
 # ── Inspector ─────────────────────────────────────────────────────────────────
@@ -112,12 +115,40 @@ class PhoenixInspector:
             findings.sort(key=lambda f: f.frequency, reverse=True)
             report.findings = findings
 
+            # ── Multi-cause attribution with % split ─────────────────────────
+            significant = [f for f in findings if f.frequency >= 0.25]
+            total_freq  = sum(f.frequency for f in significant) or 1.0
+            report.cause_attribution = [
+                {
+                    "cause":           f.label,
+                    "dimension":       f.dimension,
+                    "value":           f.value,
+                    "attribution_pct": round(f.frequency / total_freq * 100, 1),
+                    "raw_frequency":   f.frequency,
+                    "significance":    f.significance,
+                }
+                for f in significant
+            ]
+
+            # ── Investigation confidence ─────────────────────────────────────
+            # Confidence scales with: sample size, top-finding frequency, finding count
+            n = len(loss_events)
+            top_freq = findings[0].frequency if findings else 0.0
+            sample_factor  = min(1.0, n / 30)          # full confidence at 30+ events
+            signal_factor  = top_freq                   # how strong is the top signal
+            finding_factor = min(1.0, len(significant) * 0.25)  # more corroborating = better
+            report.investigation_confidence = round(
+                (sample_factor * 0.5 + signal_factor * 0.35 + finding_factor * 0.15), 3
+            )
+
             if findings:
                 top = findings[0]
                 report.primary_suspect = f"{top.dimension}: {top.value} ({top.frequency:.0%} of losses)"
                 report.summary = (
                     f"Investigated {len(loss_events)} loss events. "
-                    f"Highest concentration: {report.primary_suspect}."
+                    f"Confidence: {report.investigation_confidence:.0%}. "
+                    f"Primary suspect: {report.primary_suspect}. "
+                    f"Multi-cause: {len(report.cause_attribution)} contributing factors."
                 )
             else:
                 report.summary = "No strong concentration found across investigated dimensions."
@@ -331,6 +362,8 @@ class PhoenixInspector:
                 for f in r.findings
             ],
             "recommendations": r.recommendations,
+            "investigation_confidence": r.investigation_confidence,
+            "cause_attribution": r.cause_attribution,
         }
 
 
