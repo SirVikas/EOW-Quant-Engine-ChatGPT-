@@ -3440,9 +3440,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             trades_count=_pnl_stats.get("total_trades", 0),
         )
         kge.enrich_from_imraf()
+        kge.bootstrap_from_codebase()
+        from core.nexus.hke.hke_engine import hke
+        _hke_result = hke.run_extraction()
         _thought(
             f"🧠 [NEXUS-ACCEL] DOAE snapshot recorded | "
-            f"KGE enriched | trades={_pnl_stats.get('total_trades', 0)} | "
+            f"KGE enriched | HKE extracted {_hke_result.get('total_new', 0)} new facts | "
+            f"trades={_pnl_stats.get('total_trades', 0)} | "
             f"pf={_pnl_stats.get('profit_factor', 0):.3f}",
             "SYSTEM",
         )
