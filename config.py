@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.59.1"
+APP_VERSION = "1.59.2"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 # The central knowledge & intelligence nexus connecting all institutional layers:
