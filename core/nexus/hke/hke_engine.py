@@ -414,6 +414,10 @@ class HKEEngine:
         # Lazy import to avoid circular deps at module load time
         self._imraf = None
         self._Category = None
+        # Lifecycle tracking counters updated by run_extraction()
+        self._total_extracted: int = 0
+        self._last_run_new: int = 0
+        self._last_run_ts: int = 0
         logger.info("[HKE] Historical Knowledge Extraction Engine initialised")
 
     # ── IMRAF access ─────────────────────────────────────────────────────────
@@ -749,6 +753,7 @@ class HKEEngine:
                 }
             }
         """
+        import time as _time
         logger.info("[HKE] Starting historical knowledge extraction …")
 
         by_source: Dict[str, int] = {}
@@ -762,12 +767,161 @@ class HKEEngine:
 
         total_new = sum(by_source.values())
 
+        # Update lifecycle tracking counters
+        self._total_extracted += total_new
+        self._last_run_new = total_new
+        self._last_run_ts = int(_time.time() * 1000)
+
         logger.info(
             f"[HKE] Extraction complete — {total_new} new facts archived | "
             + " | ".join(f"{k}={v}" for k, v in by_source.items())
         )
 
         return {"total_new": total_new, "by_source": by_source}
+
+    # ── Stats ─────────────────────────────────────────────────────────────────
+
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Return lightweight stats about the HKE engine's extraction history.
+
+        Keys:
+          total_extracted_lifetime  — cumulative new facts archived since process start
+          last_run_new              — new facts in the most recent run_extraction() call
+          last_run_ts               — unix-ms timestamp of last run_extraction() call (0 = never)
+          sources                   — list of source names this engine extracts from
+        """
+        return {
+            "total_extracted_lifetime": self._total_extracted,
+            "last_run_new": self._last_run_new,
+            "last_run_ts": self._last_run_ts,
+            "sources": [
+                "known_decisions",
+                "config_params",
+                "claude_md_rules",
+                "ftd_registry",
+                "module_profiles",
+                "known_incidents",
+            ],
+        }
+
+    # ── Audit ─────────────────────────────────────────────────────────────────
+
+    def audit_extracted_facts(self) -> Dict[str, Any]:
+        """
+        Audit the HKE-extracted facts currently stored in IMRAF.
+
+        Fetches all records tagged "hke_extracted", then checks for:
+          - duplicates     : records sharing an identical first-100-char content prefix
+          - outdated facts : content mentions a version older than current APP_VERSION
+          - low quality    : content shorter than 20 chars, or missing/empty metadata dict
+
+        Returns:
+          total_hke_facts      — count of records found
+          by_category          — breakdown by IMRAF category string
+          duplicates_found     — extra records beyond the first in each duplicate group
+          duplicate_groups     — list of {"content_prefix": str, "count": int}
+          potentially_outdated — count of records referencing a version older than APP_VERSION
+          low_quality          — count of records failing the quality bar
+          quality_score        — float 0–100
+          audit_passed         — bool (quality_score >= 70)
+        """
+        import re as _re
+
+        imraf, _ = self._get_imraf()
+
+        try:
+            records = imraf.search(query="hke_extracted", limit=2000)
+        except Exception as exc:
+            logger.warning(f"[HKE] audit_extracted_facts: IMRAF search failed: {exc}")
+            records = []
+
+        total = len(records)
+
+        # ── by_category ──────────────────────────────────────────────────────
+        by_category: Dict[str, int] = {}
+        for rec in records:
+            cat = rec.get("category", "UNKNOWN")
+            by_category[cat] = by_category.get(cat, 0) + 1
+
+        # ── duplicates ───────────────────────────────────────────────────────
+        prefix_counts: Dict[str, int] = {}
+        for rec in records:
+            data = rec.get("data", {})
+            if isinstance(data, dict):
+                content = data.get("content", rec.get("title", ""))
+            else:
+                content = rec.get("title", "")
+            prefix = content[:100].strip()
+            prefix_counts[prefix] = prefix_counts.get(prefix, 0) + 1
+
+        duplicate_groups = [
+            {"content_prefix": prefix, "count": count}
+            for prefix, count in prefix_counts.items()
+            if count > 1
+        ]
+        # Count extra copies — one original is fine, each additional copy is a duplicate
+        duplicates_found = sum(g["count"] - 1 for g in duplicate_groups)
+
+        # ── version comparison helper ─────────────────────────────────────────
+        try:
+            from config import APP_VERSION as _APP_VER
+        except Exception:
+            _APP_VER = "0.0.0"
+
+        def _parse_ver(vstr: str):
+            """Parse 'vX.Y.Z' or 'X.Y.Z' → (major, minor, patch) tuple, or None."""
+            m = _re.search(r"(\d+)\.(\d+)(?:\.(\d+))?", vstr)
+            if not m:
+                return None
+            return (int(m.group(1)), int(m.group(2)), int(m.group(3) or 0))
+
+        current_ver = _parse_ver(_APP_VER)
+
+        # ── outdated & low-quality ────────────────────────────────────────────
+        potentially_outdated = 0
+        low_quality = 0
+
+        for rec in records:
+            data = rec.get("data", {})
+            if isinstance(data, dict):
+                content = data.get("content", rec.get("title", ""))
+            else:
+                content = rec.get("title", "")
+
+            # Low quality: too short or missing metadata
+            if len(content) < 20 or not isinstance(data, dict) or not data:
+                low_quality += 1
+
+            # Outdated: any version mention older than current APP_VERSION
+            if current_ver:
+                for ver_match in _re.findall(r"v(\d+\.\d+(?:\.\d+)?)", content):
+                    rec_ver = _parse_ver(ver_match)
+                    if rec_ver and rec_ver < current_ver:
+                        potentially_outdated += 1
+                        break  # count this record once even if multiple old versions appear
+
+        # ── quality score ────────────────────────────────────────────────────
+        raw_score = 100.0 - (duplicates_found * 5) - (low_quality * 2) - (potentially_outdated * 1)
+        quality_score = max(0.0, min(100.0, raw_score))
+        audit_passed = quality_score >= 70.0
+
+        logger.info(
+            f"[HKE] Audit complete — total={total} dups={duplicates_found} "
+            f"outdated={potentially_outdated} low_quality={low_quality} "
+            f"score={quality_score:.1f} passed={audit_passed}"
+        )
+
+        return {
+            "total_hke_facts": total,
+            "by_category": by_category,
+            "duplicates_found": duplicates_found,
+            "duplicate_groups": duplicate_groups,
+            "potentially_outdated": potentially_outdated,
+            "low_quality": low_quality,
+            "quality_score": quality_score,
+            "audit_passed": audit_passed,
+        }
 
 
 # ── Singleton ─────────────────────────────────────────────────────────────────
