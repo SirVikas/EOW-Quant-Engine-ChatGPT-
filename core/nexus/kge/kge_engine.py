@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 _DEFAULT_DB = Path(__file__).parent.parent.parent.parent / "data" / "knowledge_graph.db"
 
 _BOOTSTRAP_SENTINEL = "kge_bootstrap_v2_done"
+_ENRICHMENT_SENTINEL = "kge_enrichment_v3_done"
 
 _NEXUS_KEYWORDS = [
     "genome", "rsi", "alpha", "context", "memory", "loss", "risk", "rl",
@@ -120,6 +121,22 @@ class KGEEngine:
                 con.execute(
                     "INSERT OR REPLACE INTO kg_meta (key, value) VALUES (?,?)",
                     (_BOOTSTRAP_SENTINEL, "1"),
+                )
+                con.commit()
+
+    def _is_enriched(self) -> bool:
+        with self._connect() as con:
+            row = con.execute(
+                "SELECT value FROM kg_meta WHERE key=?", (_ENRICHMENT_SENTINEL,)
+            ).fetchone()
+        return row is not None
+
+    def _mark_enriched(self):
+        with self._lock:
+            with self._connect() as con:
+                con.execute(
+                    "INSERT OR REPLACE INTO kg_meta (key, value) VALUES (?,?)",
+                    (_ENRICHMENT_SENTINEL, "1"),
                 )
                 con.commit()
 
@@ -640,11 +657,19 @@ class KGEEngine:
         )
 
         intel = self.build_intelligent_relationships()
-        deep  = self.build_deep_relationships()
-        sem   = self.build_semantic_edges()
-        temp  = self.build_temporal_chain()
-        imp   = self.build_impact_propagation_edges()
-        caus  = self.build_causal_hypothesis_edges()
+
+        # Heavy enrichment (O(n²) semantic pass + deep/temporal/impact/causal) only runs
+        # once per DB — sentinel prevents re-running on every engine restart.
+        already_enriched = self._is_enriched()
+        if not already_enriched:
+            deep  = self.build_deep_relationships()
+            sem   = self.build_semantic_edges()
+            temp  = self.build_temporal_chain()
+            imp   = self.build_impact_propagation_edges()
+            caus  = self.build_causal_hypothesis_edges()
+            self._mark_enriched()
+        else:
+            deep = sem = temp = imp = caus = {}
 
         return {
             "modules_added":     modules_added,
@@ -653,13 +678,14 @@ class KGEEngine:
             "endpoints_added":   endpoints_added,
             "edges_added":       edges_added + intel.get("edges_added", 0),
             "intelligent_edges": intel.get("edges_added", 0),
-            "deep_edges":        sum(v for k, v in deep.items() if "edges" in k),
+            "deep_edges":        sum(v for k, v in deep.items() if isinstance(v, int) and "edge" in k),
             "semantic_edges":    sem.get("semantic_edges_added", 0),
             "temporal_edges":    temp.get("temporal_edges_added", 0),
             "epoch_nodes":       temp.get("epoch_nodes_added", 0),
             "metric_nodes":      imp.get("metric_nodes_added", 0),
             "impact_edges":      imp.get("impact_edges_added", 0),
             "causal_edges":      caus.get("causal_edges_added", 0),
+            "enrichment_skipped": already_enriched,
         }
 
     # ------------------------------------------------------------------
@@ -859,16 +885,28 @@ class KGEEngine:
                 node_keywords[node_id] = matched
 
         node_list = list(node_keywords.items())
+        ts = int(time.time() * 1000)
         edges_added = 0
-        for i in range(len(node_list)):
-            nid_a, kws_a = node_list[i]
-            for j in range(i + 1, len(node_list)):
-                nid_b, kws_b = node_list[j]
-                shared = kws_a & kws_b
-                if shared:
-                    weight = float(len(shared))
-                    if self.add_edge(nid_a, nid_b, "RELATED_TO", weight=weight):
-                        edges_added += 1
+
+        # Batch all inserts in a single connection to avoid per-edge connection overhead
+        with self._lock:
+            with self._connect() as con:
+                for i in range(len(node_list)):
+                    nid_a, kws_a = node_list[i]
+                    for j in range(i + 1, len(node_list)):
+                        nid_b, kws_b = node_list[j]
+                        shared = kws_a & kws_b
+                        if shared:
+                            weight = float(len(shared))
+                            cur = con.execute(
+                                "INSERT OR IGNORE INTO kg_edges "
+                                "(from_node, to_node, relationship, weight, data, ts) "
+                                "VALUES (?,?,?,?,?,?)",
+                                (nid_a, nid_b, "RELATED_TO", weight, "{}", ts),
+                            )
+                            if cur.rowcount > 0:
+                                edges_added += 1
+                con.commit()
 
         logger.info("KGE build_semantic_edges: %d edges added", edges_added)
         return {"semantic_edges_added": edges_added}
