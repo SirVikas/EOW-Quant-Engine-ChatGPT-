@@ -218,6 +218,35 @@ class IMRAFEngine:
             ).fetchone()
         return self._row_to_dict(row) if row else None
 
+    def register_translation(self, original_id: int, english_title: str,
+                              english_data: dict, tags: "List[str] | None" = None) -> int:
+        """
+        Create an official English translation record linked to a non-English original.
+        Per NEXUS-LANGUAGE-POLICY-001-AMENDMENT-A (IMRAF #782):
+          - Original is never modified.
+          - Translation is a new record with references=[original_id].
+          - KGE/AEG use translation as canonical; original is audit reference.
+        Returns the new translation record id.
+        """
+        original = self.get_record(original_id)
+        if not original:
+            raise ValueError(f"Original record {original_id} not found")
+
+        translation_data = dict(english_data)
+        translation_data["translation_of"] = original_id
+        translation_data["original_language"] = original.get("data", {}).get("language", "HI")
+        translation_data["canonical_for_kge_aeg"] = True
+
+        trans_id = self.record(
+            category=original.get("category", "GOVERNANCE"),
+            title=english_title,
+            data=translation_data,
+            subcategory=original.get("subcategory", ""),
+            tags=(tags or []) + ["official-translation", f"translates-imraf-{original_id}",
+                                  "language-policy-001"],
+        )
+        return trans_id
+
     def get_stats(self) -> "Dict[str, Any]":
         with self._lock:
             total = self._conn.execute(
