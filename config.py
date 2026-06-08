@@ -168,7 +168,7 @@ class EngineConfig(BaseSettings):
         # Root cause: low-ATR moves are smaller than round-trip fee cost. Raising ATR floors
         # blocks setups where the potential move cannot overcome the fee burden.
         "ASIA":   0.20,   # raised 0.06→0.20: FDR=143.5 — ASIA setups are fee-annihilated at low ATR
-        "LONDON": 0.20,   # raised 0.15→0.20: diagnostic 2026-06-08 WR=12.1% in LONDON — require higher volatility floor
+        "LONDON": 0.15,   # REVERTED 0.20→0.15: Board held ATR increase pending ATR bucket analysis (no per-ATR-bucket WR data yet)
         "NY":     0.10,   # unchanged — NY is TRUE_NEGATIVE but not fee-collapsed; FDR=1.23
         "LATE":   0.07,   # unchanged — LATE is TRUE_NEGATIVE; lower vol but not fee-collapsed
     }
