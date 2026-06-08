@@ -14493,7 +14493,7 @@ async def observatory_ownership_detail(report_key: str):
             from fastapi import HTTPException
             raise HTTPException(status_code=404, detail=f"No ownership record for '{report_key}'")
         sla = _r.sla_status(report_key)
-        return {**own.__dict__ if hasattr(own, "__dict__") else {}, "sla_status": sla}
+        return {**(own.__dict__ if hasattr(own, "__dict__") else {}), "sla_status": sla}
     except Exception as exc:
         return {"error": str(exc)}
 
