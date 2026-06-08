@@ -13746,6 +13746,93 @@ async def nexus_governance_assumptions():
         return {"error": str(exc)}
 
 
+@app.get("/api/nexus/provenance")
+async def nexus_provenance_report():
+    """Provenance coverage statistics across all IMRAF facts."""
+    try:
+        from core.institutional_memory.imraf_engine import imraf
+        return imraf.get_provenance_stats()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/hke/audit")
+async def nexus_hke_audit():
+    """HKE extracted-fact audit — quality score, duplicates, outdated facts."""
+    try:
+        from core.nexus.hke.hke_engine import hke
+        return hke.audit_extracted_facts()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/kge/intelligence")
+async def nexus_kge_intelligence():
+    """KGE relationship intelligence metrics — score, density, hubs, isolated nodes."""
+    try:
+        from core.nexus.kge.kge_engine import kge
+        return kge.relationship_intelligence_score()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/confidence")
+async def nexus_confidence_report():
+    """Unified NEXUS confidence report across all layers."""
+    try:
+        from core.nexus.confidence.confidence_engine import confidence_engine
+        return confidence_engine.compute_nexus_confidence()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/aeg/readiness")
+async def nexus_aeg_readiness():
+    """AEG readiness audit — all 8 prerequisites checked, GO/PARTIAL/NO_GO verdict."""
+    try:
+        from core.nexus.aeg_readiness.aeg_readiness_engine import aeg_readiness
+        return aeg_readiness.run_readiness_audit()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/100")
+async def nexus_100_progress():
+    """NEXUS 100% program progress tracker — all 7 phases + composite score."""
+    try:
+        from core.nexus.aeg_readiness.aeg_readiness_engine import aeg_readiness
+        from core.nexus.confidence.confidence_engine import confidence_engine
+        from core.nexus.kge.kge_engine import kge
+        from core.institutional_memory.imraf_engine import imraf
+        audit = aeg_readiness.run_readiness_audit()
+        conf = confidence_engine.compute_nexus_confidence()
+        kge_intel = kge.relationship_intelligence_score()
+        prov = imraf.get_provenance_stats()
+        return {
+            "program": "FTD-NEXUS-100-PERCENT-001",
+            "nexus_version": "2.0.0",
+            "target_version": "3.0.0",
+            "phases": {
+                "phase_1_evidence_foundation": {"status": "IN_PROGRESS", "metric": f"provenance_coverage={prov.get('coverage_pct', 0):.1f}%"},
+                "phase_2_historical_reconstruction": {"status": "IN_PROGRESS", "metric": f"imraf_facts={prov.get('total', 0)}"},
+                "phase_3_attribution_truth": {"status": "IN_PROGRESS", "metric": "snapshot_accumulation_active"},
+                "phase_4_kge_intelligence": {"status": "IN_PROGRESS", "metric": f"intelligence_score={kge_intel.get('intelligence_score', 0):.1f}"},
+                "phase_5_confidence_engine": {"status": "COMPLETE", "metric": f"composite={conf.get('nexus_composite_confidence', 0):.3f}"},
+                "phase_6_governance_completeness": {"status": "IN_PROGRESS", "metric": "lifecycle+contradictions+coverage"},
+                "phase_7_aeg_readiness": {"status": "IN_PROGRESS", "metric": f"prerequisites={audit.get('pass_count', 0)}/8"},
+            },
+            "aeg_verdict": audit.get("verdict"),
+            "aeg_readiness_pct": audit.get("readiness_pct"),
+            "nexus_confidence": conf.get("nexus_composite_confidence"),
+            "recommendation_ready": conf.get("recommendation_ready"),
+            "kge_intelligence_score": kge_intel.get("intelligence_score"),
+            "provenance_coverage_pct": prov.get("coverage_pct"),
+            "ts": __import__("time").time_ns() // 1_000_000,
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
