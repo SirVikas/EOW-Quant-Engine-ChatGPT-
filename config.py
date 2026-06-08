@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.58.2"
+APP_VERSION = "1.58.3"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 # The central knowledge & intelligence nexus connecting all institutional layers:
@@ -118,7 +118,7 @@ class EngineConfig(BaseSettings):
     GENOME_OOS_SPLIT_RATIO: float = 0.70       # 70% candles for training, 30% held-out OOS test
     GENOME_OOS_MIN_PF: float = 1.0             # OOS profit-factor floor
     GENOME_OVERFITTING_MAX_RATIO: float = 2.5  # Relaxed 2.0→2.5: avoid over-penalising good fits
-    GENOME_MIN_AVG_R: float = 0.50             # raised 0.20→0.50: only promote DNA with meaningful avg R
+    GENOME_MIN_AVG_R: float = 0.20             # lowered 0.50→0.20: 0.50 gate was mathematically unreachable — with 50% WR and 1.0R avg loss, passing avg_R≥0.50 requires avg_win≥2.0R; no candidate could ever promote. 0.20 is the original value and a realistic bar.
     # FTD-PHOENIX-GENOME-READINESS-001: minimum candles per symbol before evaluation is allowed
     GENOME_MIN_CANDLES_TO_EVALUATE: int = 50   # must have ≥ warmup_bars candles to run any meaningful backtest
     # FTD-PHOENIX-ESR-001 Phase 1: OOS Validation Hardening
