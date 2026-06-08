@@ -132,12 +132,33 @@ class AdaptiveScorer:
         # Store breakdown so record_outcome() can update weights on close
         self._pending[symbol] = breakdown
 
+        near_miss = abs(composite - self.min_score) <= 0.10
         if composite < self.min_score:
+            try:
+                from core.nexus.dcel.dcel_engine import archive_scorer_decision
+                archive_scorer_decision(
+                    symbol=symbol, regime=regime, score=composite,
+                    threshold=self.min_score, passed=False,
+                    factors=breakdown, strategy="",
+                )
+            except Exception:
+                pass
             return AdaptiveScoreResult(
                 ok=False, score=composite, breakdown=breakdown,
                 weights=dict(self._weights),
                 reason=f"ADAPTIVE_LOW_SCORE({composite:.3f}<{self.min_score})",
             )
+
+        if near_miss:
+            try:
+                from core.nexus.dcel.dcel_engine import archive_scorer_decision
+                archive_scorer_decision(
+                    symbol=symbol, regime=regime, score=composite,
+                    threshold=self.min_score, passed=True,
+                    factors=breakdown, strategy="",
+                )
+            except Exception:
+                pass
 
         return AdaptiveScoreResult(
             ok=True, score=composite, breakdown=breakdown,

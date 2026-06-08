@@ -343,6 +343,117 @@ class KGEEngine:
         if enriched:
             logger.info("KGE enriched %d nodes from IMRAF", enriched)
 
+    # ------------------------------------------------------------------
+    # Codebase Bootstrap
+    # ------------------------------------------------------------------
+
+    def bootstrap_from_codebase(self, root_path: str = ".") -> dict:
+        """
+        Scan the codebase and add MODULE, CONFIG, VERIFIER, and ENDPOINT nodes.
+        Deduplicates via INSERT OR IGNORE (add_node returns False on duplicate).
+        Edges are added between MODULE nodes and any matching FTD or STRATEGY node.
+        """
+        import re
+        from pathlib import Path as _Path
+
+        root = _Path(root_path).resolve()
+        modules_added = 0
+        config_added = 0
+        verifiers_added = 0
+        endpoints_added = 0
+        edges_added = 0
+
+        # --- MODULE nodes: every .py file under core/ (skip __pycache__)
+        try:
+            core_dir = root / "core"
+            for py_file in core_dir.rglob("*.py"):
+                if "__pycache__" in py_file.parts:
+                    continue
+                node_id = "module:" + str(py_file.relative_to(root)).replace("/", ".").removesuffix(".py")
+                label = py_file.stem.replace("_", " ").title()
+                added = self.add_node("MODULE", node_id, label, {"path": str(py_file.relative_to(root))})
+                if added:
+                    modules_added += 1
+                    # Connect to a matching FTD or STRATEGY if stem appears in label
+                    stem_upper = py_file.stem.upper()
+                    with self._connect() as con:
+                        ftd_row = con.execute(
+                            "SELECT node_id FROM kg_nodes WHERE node_type='FTD' AND UPPER(label) LIKE ?",
+                            (f"%{stem_upper}%",),
+                        ).fetchone()
+                        if ftd_row:
+                            if self.add_edge(node_id, ftd_row[0], "IMPLEMENTS"):
+                                edges_added += 1
+                        strat_row = con.execute(
+                            "SELECT node_id FROM kg_nodes WHERE node_type='STRATEGY' AND UPPER(node_id) LIKE ?",
+                            (f"%{stem_upper}%",),
+                        ).fetchone()
+                        if strat_row:
+                            if self.add_edge(node_id, strat_row[0], "PART_OF"):
+                                edges_added += 1
+        except Exception as exc:
+            logger.warning("KGE bootstrap_from_codebase modules scan error: %s", exc)
+
+        # --- CONFIG nodes: parameter names in config.py
+        # Matches both bare assignments (FOO = ...) and pydantic field
+        # declarations (FOO: type = Field(...)) at any indentation level,
+        # so we capture EngineConfig class members as well as module-level vars.
+        try:
+            config_file = root / "config.py"
+            config_pattern = re.compile(r'^\s*([A-Z][A-Z0-9_]{2,})\s*(?::\s*\S+\s*)?=\s*')
+            for line in config_file.read_text(errors="replace").splitlines():
+                m = config_pattern.match(line)
+                if m:
+                    param = m.group(1)
+                    added = self.add_node("CONFIG", param, param)
+                    if added:
+                        config_added += 1
+        except Exception as exc:
+            logger.warning("KGE bootstrap_from_codebase config scan error: %s", exc)
+
+        # --- VERIFIER nodes: every .py test file under tests/
+        try:
+            tests_dir = root / "tests"
+            for py_file in tests_dir.rglob("*.py"):
+                if "__pycache__" in py_file.parts:
+                    continue
+                node_id = "verifier:" + py_file.stem
+                label = py_file.stem.replace("_", " ").title()
+                added = self.add_node("VERIFIER", node_id, label, {"path": str(py_file.relative_to(root))})
+                if added:
+                    verifiers_added += 1
+        except Exception as exc:
+            logger.warning("KGE bootstrap_from_codebase verifiers scan error: %s", exc)
+
+        # --- ENDPOINT nodes: @app.get / @app.post decorators in main.py
+        try:
+            main_file = root / "main.py"
+            endpoint_pattern = re.compile(r'@app\.(get|post)\(["\']([^"\']+)["\']')
+            for line in main_file.read_text(errors="replace").splitlines():
+                m = endpoint_pattern.search(line)
+                if m:
+                    method = m.group(1).upper()
+                    path = m.group(2)
+                    node_id = f"endpoint:{method}:{path}"
+                    label = f"{method} {path}"
+                    added = self.add_node("ENDPOINT", node_id, label, {"method": method, "path": path})
+                    if added:
+                        endpoints_added += 1
+        except Exception as exc:
+            logger.warning("KGE bootstrap_from_codebase endpoints scan error: %s", exc)
+
+        logger.info(
+            "KGE bootstrap_from_codebase: modules=%d config=%d verifiers=%d endpoints=%d edges=%d",
+            modules_added, config_added, verifiers_added, endpoints_added, edges_added,
+        )
+        return {
+            "modules_added":   modules_added,
+            "config_added":    config_added,
+            "verifiers_added": verifiers_added,
+            "endpoints_added": endpoints_added,
+            "edges_added":     edges_added,
+        }
+
 
 # Singleton — lazy so tests can override db_path
 kge = KGEEngine()

@@ -104,6 +104,7 @@ class AlphaContextMemory:
                 if len(self._contexts) > MAX_CONTEXTS:
                     self._evict_lru()
 
+            prev_trades = rec.n_trades
             rec.n_trades    += 1
             rec.total_pnl   += net_pnl
             rec.last_seen_ts = int(time.time() * 1000)
@@ -111,6 +112,25 @@ class AlphaContextMemory:
                 rec.wins += 1
             else:
                 rec.losses += 1
+
+            # Archive context classification transitions to IMRAF (first time only)
+            if rec.n_trades >= MIN_VISITS and prev_trades < MIN_VISITS:
+                try:
+                    from core.nexus.dcel.dcel_engine import archive_regime_transition
+                    ctx_type = (
+                        "PROFITABLE" if rec.avg_pnl > PROFIT_THRESH
+                        else "TOXIC" if rec.avg_pnl < TOXIC_THRESH
+                        else "NEUTRAL"
+                    )
+                    archive_regime_transition(
+                        symbol=key,
+                        old_regime="UNKNOWN",
+                        new_regime=ctx_type,
+                        trigger=f"n_trades={rec.n_trades} avg_pnl={rec.avg_pnl:+.4f}",
+                        session="context_memory",
+                    )
+                except Exception:
+                    pass
 
             self._maybe_save()
 

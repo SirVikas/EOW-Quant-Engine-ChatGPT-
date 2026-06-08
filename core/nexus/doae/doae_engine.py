@@ -320,6 +320,142 @@ class DOAEEngine:
             "is_operational": len(attributions) > 0,
         }
 
+    def compute_attribution_from_raw(
+        self,
+        ftd_id: str,
+        pre_snapshot: dict,
+        post_snapshot: dict,
+    ) -> Dict[str, Any]:
+        """
+        Compute attribution from caller-supplied pre/post snapshots instead of
+        querying trade_snapshots by date.  Useful when the caller already has
+        partitioned data or for unit-testing without DB fixtures.
+
+        Expected keys in each snapshot: win_rate, profit_factor, avg_pnl,
+        total_pnl, trades_count.
+        """
+        from datetime import datetime
+
+        computed_at = datetime.utcnow().isoformat()
+
+        pre_wr  = float(pre_snapshot.get("win_rate", 0.0))
+        post_wr = float(post_snapshot.get("win_rate", 0.0))
+        pre_pf  = float(pre_snapshot.get("profit_factor", 0.0))
+        post_pf = float(post_snapshot.get("profit_factor", 0.0))
+        pre_avg  = float(pre_snapshot.get("avg_pnl", 0.0))
+        post_avg = float(post_snapshot.get("avg_pnl", 0.0))
+        pre_trades  = int(pre_snapshot.get("trades_count", 0))
+        post_trades = int(post_snapshot.get("trades_count", 0))
+
+        wr_delta  = round(post_wr - pre_wr, 4)
+        pf_delta  = round(post_pf - pre_pf, 4)
+        pnl_delta = round(post_avg - pre_avg, 4)
+
+        impact_score = round(
+            (pf_delta * 30) + (wr_delta * 100 * 0.5) + (pnl_delta * 0.2), 4
+        )
+
+        # Confidence driven by post-deployment sample size (post_trades)
+        if post_trades < 20:
+            confidence = "LOW"
+        elif post_trades < 100:
+            confidence = "MEDIUM"
+        else:
+            confidence = "HIGH"
+
+        with self._lock:
+            self._conn.execute(
+                "INSERT INTO ftd_attribution "
+                "(ftd_id, computed_at, pre_win_rate, post_win_rate, pre_pf, post_pf, "
+                "pre_avg_pnl, post_avg_pnl, pre_trades, post_trades, "
+                "wr_delta, pf_delta, pnl_delta, impact_score, confidence, notes) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (ftd_id, computed_at, pre_wr, post_wr, pre_pf, post_pf,
+                 pre_avg, post_avg, pre_trades, post_trades,
+                 wr_delta, pf_delta, pnl_delta, impact_score, confidence, "raw_input"),
+            )
+            self._conn.commit()
+
+        return {
+            "ftd_id":       ftd_id,
+            "computed_at":  computed_at,
+            "wr_delta":     wr_delta,
+            "pf_delta":     pf_delta,
+            "pnl_delta":    pnl_delta,
+            "impact_score": impact_score,
+            "confidence":   confidence,
+            "pre_trades":   pre_trades,
+            "post_trades":  post_trades,
+        }
+
+    def run_all_attributions(self, ftd_list: list = None) -> list:
+        """
+        Iterate all FTDs in ftd_registry (or the supplied list) and compute
+        attribution if both a pre and post trade_snapshot exist for that FTD's
+        deploy_date.  Returns a list of result dicts.
+        """
+        with self._lock:
+            if ftd_list:
+                placeholders = ",".join("?" * len(ftd_list))
+                rows = self._conn.execute(
+                    f"SELECT ftd_id, deploy_date FROM ftd_registry "
+                    f"WHERE ftd_id IN ({placeholders}) "
+                    f"AND deploy_date != '' AND deploy_date IS NOT NULL",
+                    ftd_list,
+                ).fetchall()
+            else:
+                rows = self._conn.execute(
+                    "SELECT ftd_id, deploy_date FROM ftd_registry "
+                    "WHERE deploy_date != '' AND deploy_date IS NOT NULL"
+                ).fetchall()
+
+        results = []
+        for row in rows:
+            ftd_id = row["ftd_id"]
+            deploy_date = row["deploy_date"]
+            try:
+                with self._lock:
+                    pre_row = self._conn.execute(
+                        "SELECT * FROM trade_snapshots WHERE snapshot_date < ? "
+                        "ORDER BY snapshot_date DESC LIMIT 1",
+                        (deploy_date,),
+                    ).fetchone()
+                    post_row = self._conn.execute(
+                        "SELECT * FROM trade_snapshots WHERE snapshot_date >= ? "
+                        "ORDER BY snapshot_date ASC LIMIT 1",
+                        (deploy_date,),
+                    ).fetchone()
+
+                if pre_row is None or post_row is None:
+                    results.append({
+                        "ftd_id": ftd_id,
+                        "skipped": True,
+                        "reason": "insufficient snapshots",
+                    })
+                    continue
+
+                pre_snap = {
+                    "win_rate":      pre_row["win_rate"],
+                    "profit_factor": pre_row["profit_factor"],
+                    "avg_pnl":       pre_row["avg_pnl"],
+                    "total_pnl":     pre_row["total_pnl"],
+                    "trades_count":  pre_row["trades_count"],
+                }
+                post_snap = {
+                    "win_rate":      post_row["win_rate"],
+                    "profit_factor": post_row["profit_factor"],
+                    "avg_pnl":       post_row["avg_pnl"],
+                    "total_pnl":     post_row["total_pnl"],
+                    "trades_count":  post_row["trades_count"],
+                }
+                result = self.compute_attribution_from_raw(ftd_id, pre_snap, post_snap)
+                results.append(result)
+            except Exception as exc:
+                logger.warning(f"[DOAE] run_all_attributions failed for {ftd_id}: {exc}")
+                results.append({"ftd_id": ftd_id, "skipped": True, "reason": str(exc)})
+
+        return results
+
     def compute_all_attributions(self) -> None:
         """Run compute_attribution for all FTDs with a deploy_date set."""
         with self._lock:

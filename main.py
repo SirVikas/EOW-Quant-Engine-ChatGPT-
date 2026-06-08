@@ -3427,6 +3427,32 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [IMRAF] Boot check failed (non-fatal): {_e}", "SYSTEM")
 
+    # ── FTD-NEXUS-ACCELERATION-001: DOAE live snapshot on boot ───────────────
+    try:
+        from core.nexus.doae.doae_engine import doae
+        from core.nexus.kge.kge_engine import kge
+        _pnl_stats = pnl_calc.get_stats()
+        doae.record_snapshot(
+            win_rate=_pnl_stats.get("win_rate", 0.0),
+            profit_factor=_pnl_stats.get("profit_factor", 0.0),
+            avg_pnl=_pnl_stats.get("avg_win_usdt", 0.0),
+            total_pnl=_pnl_stats.get("total_net_pnl", 0.0),
+            trades_count=_pnl_stats.get("total_trades", 0),
+        )
+        kge.enrich_from_imraf()
+        kge.bootstrap_from_codebase()
+        from core.nexus.hke.hke_engine import hke
+        _hke_result = hke.run_extraction()
+        _thought(
+            f"🧠 [NEXUS-ACCEL] DOAE snapshot recorded | "
+            f"KGE enriched | HKE extracted {_hke_result.get('total_new', 0)} new facts | "
+            f"trades={_pnl_stats.get('total_trades', 0)} | "
+            f"pf={_pnl_stats.get('profit_factor', 0):.3f}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [NEXUS-ACCEL] Boot snapshot failed (non-fatal): {_e}", "SYSTEM")
+
     # ── FTD-DIAL-001: Developer Intelligence Assist Layer ─────────────────────
     try:
         from core.developer_intelligence.dial_engine import dial

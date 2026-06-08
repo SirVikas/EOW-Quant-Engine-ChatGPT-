@@ -614,6 +614,21 @@ class RLContextualBandit:
         # Persist updated knowledge so restarts don't wipe learning
         self.save_state()
 
+        try:
+            from core.nexus.dcel.dcel_engine import archive_rl_summary
+            telem = self.get_telemetry()
+            archive_rl_summary(
+                total_contexts=telem.get("total_contexts", 0),
+                total_pulls=self._total_pulls,
+                avg_q=round(sum(s.q_value for s in self._q_table.values()) / max(len(self._q_table), 1), 4),
+                toxic_count=len(self._toxic_contexts),
+                eco_toxic_count=len(self._eco_toxic_contexts),
+                convergence_state=telem.get("convergence_state", "UNKNOWN"),
+                intelligence_score=telem.get("intelligence_score", 0.0),
+            )
+        except Exception:
+            pass
+
         logger.debug(
             f"[RL-ENGINE] update ctx={ctx_key} "
             f"raw={net_pnl:+.4f} shaped={reward:+.4f} "

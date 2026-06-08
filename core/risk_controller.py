@@ -429,10 +429,32 @@ class RiskController:
             self._emit("HALT", "PORTFOLIO",
                        f"MDD {dd*100:.1f}% breached — engine halted. No new trades.")
             logger.critical("[RISK] 🛑 ENGINE HALTED — max drawdown reached.")
+            try:
+                from core.nexus.dcel.dcel_engine import archive_risk_state_change
+                archive_risk_state_change(
+                    event="ENGINE_HALT",
+                    daily_used_pct=0.0, daily_cap_pct=0.0,
+                    drawdown_pct=round(dd * 100, 2),
+                    safe_mode=False,
+                    reason=f"MDD {dd*100:.1f}% >= {cfg.MAX_DRAWDOWN_HALT*100:.1f}%",
+                )
+            except Exception:
+                pass
         elif dd < cfg.MAX_DRAWDOWN_HALT * 0.8 and self.halted:
             self.halted = False
             self._emit("INFO", "PORTFOLIO", "Engine resumed — drawdown recovered.")
             logger.info("[RISK] ✅ Engine resumed.")
+            try:
+                from core.nexus.dcel.dcel_engine import archive_risk_state_change
+                archive_risk_state_change(
+                    event="ENGINE_RESUME",
+                    daily_used_pct=0.0, daily_cap_pct=0.0,
+                    drawdown_pct=round(dd * 100, 2),
+                    safe_mode=False,
+                    reason="Drawdown recovered below 80% of halt threshold",
+                )
+            except Exception:
+                pass
 
     # ── Force Close All ─────────────────────────────────────────────────────
 

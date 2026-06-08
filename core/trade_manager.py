@@ -183,6 +183,16 @@ class TradeManager:
                 f"[TRADE-MANAGER] {symbol} FAST_FAIL at {elapsed/60:.1f}min "
                 f"(r={r_mult:.3f})"
             )
+            try:
+                from core.nexus.dcel.dcel_engine import archive_risk_state_change
+                archive_risk_state_change(
+                    event="TRADE_FAST_FAIL",
+                    daily_used_pct=0.0, daily_cap_pct=0.0,
+                    drawdown_pct=0.0, safe_mode=False,
+                    reason=f"{symbol} FF at {elapsed/60:.1f}min r={r_mult:.3f}",
+                )
+            except Exception:
+                pass
             return ManagementAction(
                 action="FAST_FAIL",
                 reason=f"Fast-fail: {elapsed/60:.1f}min r={r_mult:.3f}<{_FAST_FAIL_R}",
