@@ -321,17 +321,20 @@ class DOAEEngine:
                 "a.wr_delta, a.pf_delta, a.pnl_delta, r.title "
                 "FROM ftd_attribution a "
                 "LEFT JOIN ftd_registry r ON a.ftd_id = r.ftd_id "
-                "ORDER BY a.impact_score DESC LIMIT 5"
+                "WHERE a.ftd_id NOT LIKE 'FTD-TEST%' AND a.ftd_id NOT LIKE 'FTD-CONF%' "
+                "ORDER BY a.impact_score DESC LIMIT 10"
             ).fetchall()
             neg_rows = self._conn.execute(
                 "SELECT a.ftd_id, a.impact_score, a.confidence, "
                 "a.wr_delta, a.pf_delta, a.pnl_delta, r.title "
                 "FROM ftd_attribution a "
                 "LEFT JOIN ftd_registry r ON a.ftd_id = r.ftd_id "
-                "ORDER BY a.impact_score ASC LIMIT 5"
+                "WHERE a.ftd_id NOT LIKE 'FTD-TEST%' AND a.ftd_id NOT LIKE 'FTD-CONF%' "
+                "ORDER BY a.impact_score ASC LIMIT 10"
             ).fetchall()
             all_scores = self._conn.execute(
-                "SELECT impact_score, confidence FROM ftd_attribution"
+                "SELECT impact_score, confidence FROM ftd_attribution "
+                "WHERE ftd_id NOT LIKE 'FTD-TEST%' AND ftd_id NOT LIKE 'FTD-CONF%'"
             ).fetchall()
 
         def _enrich(row: sqlite3.Row) -> Dict[str, Any]:

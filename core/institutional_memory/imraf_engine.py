@@ -306,6 +306,125 @@ class IMRAFEngine:
 
         return records_with_prov[:limit]
 
+    def backfill_provenance(self) -> Dict[str, int]:
+        """
+        Backfill provenance metadata for existing records that lack it.
+        Uses category + tags + content patterns to infer source.
+        Returns counts of records updated per extraction_method.
+        """
+        updated: Dict[str, int] = {}
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT id, category, tags, data FROM imraf_records"
+            ).fetchall()
+
+        for row in rows:
+            rec_id, category, tags_str, data_str = row
+            try:
+                data = json.loads(data_str) if data_str else {}
+            except Exception:
+                continue
+            if isinstance(data, dict) and "provenance" in data:
+                continue  # already has provenance
+
+            # Infer provenance from patterns
+            tags = tags_str.split(",") if tags_str else []
+            content = data.get("content", "") or data.get("title", "")
+
+            prov = None
+            if "hke_extracted" in tags or any(
+                content.startswith(p) for p in ("CONFIG:", "MODULE:", "FTD:", "PARAM_RATIONALE:", "GIT:", "INCIDENT:", "BACKFILL_DECISION:")
+            ):
+                if content.startswith("CONFIG:") or content.startswith("PARAM_RATIONALE:"):
+                    prov = {"source_file": "config.py", "extraction_method": "hke_config", "confidence": 0.70, "source_line": 0, "git_sha": ""}
+                elif content.startswith("MODULE:"):
+                    prov = {"source_file": "core/nexus/hke/hke_engine.py", "extraction_method": "hke_module", "confidence": 0.75, "source_line": 0, "git_sha": ""}
+                elif content.startswith("FTD:"):
+                    prov = {"source_file": "core/nexus/hke/hke_engine.py", "extraction_method": "hke_ftd", "confidence": 0.90, "source_line": 0, "git_sha": ""}
+                elif content.startswith("GIT:"):
+                    prov = {"source_file": ".git/logs/HEAD", "extraction_method": "hke_git", "confidence": 0.60, "source_line": 0, "git_sha": ""}
+                elif content.startswith("INCIDENT:") or content.startswith("BACKFILL_DECISION:"):
+                    prov = {"source_file": "core/governance/backfill/historical_decision_backfill.py", "extraction_method": "hke_decision", "confidence": 0.80, "source_line": 0, "git_sha": ""}
+                else:
+                    prov = {"source_file": "core/nexus/hke/hke_engine.py", "extraction_method": "hke_extracted", "confidence": 0.65, "source_line": 0, "git_sha": ""}
+            elif category in ("DEPLOYMENT",):
+                prov = {"source_file": "main.py", "extraction_method": "dcel_hook", "confidence": 0.85, "source_line": 0, "git_sha": ""}
+            elif category in ("VERIFIER",):
+                prov = {"source_file": "tests/", "extraction_method": "auto_verifier", "confidence": 0.90, "source_line": 0, "git_sha": ""}
+            elif "dcel" in tags or "dcel_hook" in tags:
+                prov = {"source_file": "core/nexus/dcel/dcel_engine.py", "extraction_method": "dcel_hook", "confidence": 0.90, "source_line": 0, "git_sha": ""}
+
+            if prov is None:
+                continue
+
+            data["provenance"] = prov
+            method = prov["extraction_method"]
+            updated[method] = updated.get(method, 0) + 1
+            try:
+                with self._lock:
+                    self._conn.execute(
+                        "UPDATE imraf_records SET data=? WHERE id=?",
+                        (json.dumps(data, default=str), rec_id),
+                    )
+            except Exception:
+                pass
+
+        try:
+            with self._lock:
+                self._conn.commit()
+        except Exception:
+            pass
+
+        total_updated = sum(updated.values())
+        logger.info(f"[IMRAF] Provenance backfill complete — {total_updated} records updated | {updated}")
+        return updated
+
+    def backfill_hke_tags(self) -> int:
+        """
+        Add 'hke_extracted' tag to records that are clearly HKE-sourced
+        but were written before the tag was standardised.
+        Returns count of records updated.
+        """
+        updated = 0
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT id, tags, data FROM imraf_records"
+            ).fetchall()
+
+        hke_prefixes = ("CONFIG:", "MODULE:", "FTD:", "PARAM_RATIONALE:", "GIT:",
+                        "INCIDENT:", "BACKFILL_DECISION:", "GOVERNANCE:", "STRATEGY:")
+        for row in rows:
+            rec_id, tags_str, data_str = row
+            tags = tags_str.split(",") if tags_str else []
+            if "hke_extracted" in tags:
+                continue
+            try:
+                data = json.loads(data_str) if data_str else {}
+                content = data.get("content", "")
+            except Exception:
+                continue
+            if any(content.startswith(p) for p in hke_prefixes):
+                tags.append("hke_extracted")
+                new_tags = ",".join(t for t in tags if t)
+                try:
+                    with self._lock:
+                        self._conn.execute(
+                            "UPDATE imraf_records SET tags=? WHERE id=?",
+                            (new_tags, rec_id),
+                        )
+                    updated += 1
+                except Exception:
+                    pass
+
+        try:
+            with self._lock:
+                self._conn.commit()
+        except Exception:
+            pass
+
+        logger.info(f"[IMRAF] HKE tag backfill complete — {updated} records tagged")
+        return updated
+
     def boot_summary(self) -> str:
         stats = self.get_stats()
         lines = [
