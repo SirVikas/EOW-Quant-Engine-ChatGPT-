@@ -251,8 +251,15 @@ class KGEEngine:
             ("FTD-AEOS-001", "AEOS Context Assembly"),
             ("FTD-EMA-001", "EMA Enterprise Memory Architecture"),
             ("FTD-EGI-001", "EGI Engineering Governance Integrity"),
-            ("FTD-057", "Adaptive RSI Governor"),
-            ("FTD-037", "Breakeven and Time Exit Tuning"),
+            ("FTD-033", "Alpha Engine Cost-Adjusted"),
+            ("FTD-034", "Genome Engine Evolutionary Optimizer"),
+            ("FTD-035", "Loss Cluster Controller"),
+            ("FTD-036", "Adaptive RSI Governor"),
+            ("FTD-037", "Risk Controller MDD Drawdown Gate"),
+            ("FTD-038", "RL Engine Contextual Bandit"),
+            ("FTD-039", "Adaptive Scorer"),
+            ("FTD-040", "Alpha Context Memory"),
+            ("FTD-057", "Adaptive RSI Governor Phase-2"),
             ("FTD-LOSS", "Loss Cluster Fast Fail Configuration"),
             ("FTD-PHOENIX-ESR-001", "PHOENIX ESR Emergency Strategy Review"),
             ("FTD-KGE-001", "Knowledge Graph Expansion Program"),
@@ -266,6 +273,8 @@ class KGEEngine:
         configs = [
             "BREAKEVEN_TRIGGER_R", "GENOME_MIN_AVG_R", "GENOME_PROMOTE_WIN_RATE",
             "LCC_PAUSE_MINUTES", "_TR_LONG_RSI_TIGHT_MIN", "TRAIL_ATR_MULT", "PARTIAL_TP_R",
+            "LCC_MAX_CONSECUTIVE", "RSI_FLOOR", "MAX_DRAWDOWN_HALT",
+            "RL_EXPLORATION_RATE", "MIN_SCORE", "ALPHA_BOOST_MULT",
         ]
         for c in configs:
             self.add_node("CONFIG", c, c)
@@ -347,7 +356,6 @@ class KGEEngine:
     # Intelligent Relationship Builder
     # ------------------------------------------------------------------
 
-    # FTDs that map to specific implementation modules
     _FTD_MODULE_MAP = {
         "FTD-033":                    ["trade_manager"],
         "FTD-034":                    ["alpha_context_memory"],
@@ -362,7 +370,6 @@ class KGEEngine:
         "FTD-NEXUS-ACCELERATION-001": ["doae_engine", "kge_engine", "governance_intelligence", "iq_dashboard"],
     }
 
-    # Known architectural module→module dependencies
     _MODULE_DEPS = [
         ("alpha_engine",    "net_edge_engine"),
         ("rl_engine",       "alpha_context_memory"),
@@ -372,16 +379,6 @@ class KGEEngine:
     ]
 
     def build_intelligent_relationships(self) -> dict:
-        """
-        Creates semantically meaningful edges between existing graph nodes:
-
-        1. MODULE→CONFIG  (CONFIGURES): module label keywords match config param names
-        2. FTD→MODULE     (IMPLEMENTS): _FTD_MODULE_MAP hardcoded mapping
-        3. STRATEGY→MODULE (USES): strategies connect to their implementing modules
-        4. MODULE→MODULE  (DEPENDS_ON): known architectural dependencies
-
-        Returns a summary dict with edges_added count.
-        """
         edges_added = 0
 
         with self._connect() as con:
@@ -390,7 +387,6 @@ class KGEEngine:
             ftd_rows      = con.execute("SELECT node_id FROM kg_nodes WHERE node_type='FTD'").fetchall()
             strategy_rows = con.execute("SELECT node_id, label FROM kg_nodes WHERE node_type='STRATEGY'").fetchall()
 
-        # 1. MODULE→CONFIG (CONFIGURES)
         for mod_id, mod_label in module_rows:
             stem = mod_id.split(":")[-1].replace("_", " ").upper()
             keywords = [w for w in stem.split() if len(w) >= 3]
@@ -400,7 +396,6 @@ class KGEEngine:
                     if self.add_edge(mod_id, cfg_id, "CONFIGURES"):
                         edges_added += 1
 
-        # 2. FTD→MODULE (IMPLEMENTS)
         existing_ftd_ids = {r[0] for r in ftd_rows}
         for ftd_id, modules in self._FTD_MODULE_MAP.items():
             if ftd_id not in existing_ftd_ids:
@@ -416,7 +411,6 @@ class KGEEngine:
                     if self.add_edge(ftd_id, row[0], "IMPLEMENTS"):
                         edges_added += 1
 
-        # 3. STRATEGY→MODULE (USES)
         strategy_module_map = {
             "TrendFollowing":      ["adaptive_rsi_governor", "signal_ecology"],
             "MeanReversion":       ["signal_ecology"],
@@ -435,7 +429,6 @@ class KGEEngine:
                     if self.add_edge(strat_id, row[0], "USES"):
                         edges_added += 1
 
-        # 4. MODULE→MODULE (DEPENDS_ON)
         for from_mod, to_mod in self._MODULE_DEPS:
             with self._connect() as con:
                 from_rows = con.execute(
@@ -457,12 +450,6 @@ class KGEEngine:
         return {"edges_added": edges_added}
 
     def relationship_intelligence_score(self) -> dict:
-        """
-        Returns metrics quantifying how well-connected the knowledge graph is.
-
-        intelligence_score = min(100,
-            (avg_edges_per_node / 5) * 50 + (1 - isolated_nodes/total_nodes) * 50)
-        """
         with self._connect() as con:
             total_nodes = con.execute("SELECT COUNT(*) FROM kg_nodes").fetchone()[0]
             total_edges = con.execute("SELECT COUNT(*) FROM kg_edges").fetchone()[0]
@@ -519,11 +506,6 @@ class KGEEngine:
     # ------------------------------------------------------------------
 
     def bootstrap_from_codebase(self, root_path: str = ".") -> dict:
-        """
-        Scan the codebase and add MODULE, CONFIG, VERIFIER, and ENDPOINT nodes.
-        Deduplicates via INSERT OR IGNORE (add_node returns False on duplicate).
-        Then calls build_intelligent_relationships() to add semantic edges.
-        """
         import re
         from pathlib import Path as _Path
 
@@ -534,7 +516,6 @@ class KGEEngine:
         endpoints_added = 0
         edges_added     = 0
 
-        # MODULE nodes: every .py file under core/ (skip __pycache__)
         try:
             core_dir = root / "core"
             for py_file in core_dir.rglob("*.py"):
@@ -564,7 +545,6 @@ class KGEEngine:
         except Exception as exc:
             logger.warning("KGE bootstrap_from_codebase modules scan error: %s", exc)
 
-        # CONFIG nodes: parameter names in config.py
         try:
             config_file     = root / "config.py"
             config_pattern  = re.compile(r'^\s*([A-Z][A-Z0-9_]{2,})\s*(?::\s*\S+\s*)?=\s*')
@@ -578,7 +558,6 @@ class KGEEngine:
         except Exception as exc:
             logger.warning("KGE bootstrap_from_codebase config scan error: %s", exc)
 
-        # VERIFIER nodes: every .py test file under tests/
         try:
             tests_dir = root / "tests"
             for py_file in tests_dir.rglob("*.py"):
@@ -592,7 +571,6 @@ class KGEEngine:
         except Exception as exc:
             logger.warning("KGE bootstrap_from_codebase verifiers scan error: %s", exc)
 
-        # ENDPOINT nodes: @app.get / @app.post decorators in main.py
         try:
             main_file        = root / "main.py"
             endpoint_pattern = re.compile(r'@app\.(get|post)\(["\']([^"\']+)["\']')
@@ -615,6 +593,7 @@ class KGEEngine:
         )
 
         intel = self.build_intelligent_relationships()
+        deep = self.build_deep_relationships()
         return {
             "modules_added":     modules_added,
             "config_added":      config_added,
@@ -622,7 +601,177 @@ class KGEEngine:
             "endpoints_added":   endpoints_added,
             "edges_added":       edges_added + intel.get("edges_added", 0),
             "intelligent_edges": intel.get("edges_added", 0),
+            "deep_edges":        sum(v for k, v in deep.items() if "edges" in k),
         }
+
+    # ------------------------------------------------------------------
+    # Deep Relationship Builder (Phase-4 KGE Intelligence Expansion)
+    # ------------------------------------------------------------------
+
+    _CONFIG_FTD_MAP = {
+        "TRAIL_ATR_MULT":          "FTD-033",
+        "BREAKEVEN_TRIGGER_R":     "FTD-033",
+        "GENOME_MIN_AVG_R":        "FTD-034",
+        "GENOME_PROMOTE_WIN_RATE": "FTD-034",
+        "LCC_MAX_CONSECUTIVE":     "FTD-035",
+        "RSI_FLOOR":               "FTD-036",
+        "MAX_DRAWDOWN_HALT":       "FTD-037",
+        "RL_EXPLORATION_RATE":     "FTD-038",
+        "MIN_SCORE":               "FTD-039",
+        "ALPHA_BOOST_MULT":        "FTD-040",
+    }
+
+    _VERIFIER_MODULE_MAP = {
+        "hke":        "hke_engine",
+        "doae":       "doae_engine",
+        "kge":        "kge_engine",
+        "governance": "governance_intelligence",
+        "rl_engine":  "rl_engine",
+        "genome":     "genome_engine",
+    }
+
+    def build_deep_relationships(self) -> dict:
+        """
+        Phase-4 KGE Intelligence Expansion.
+
+        Adds 5 categories of new edges beyond build_intelligent_relationships():
+          1. ENDPOINT→MODULE (CALLS): route path keywords → module nodes
+          2. CONFIG→FTD (INTRODUCED_BY): hardcoded param→FTD mapping
+          3. VERIFIER→MODULE (TESTS): verifier filename → module it covers
+          4. DECISION→DECISION (SUPERSEDES): known supersession pairs
+          5. ROADMAP nodes with PRECEDES and BLOCKS edges
+
+        Idempotent — INSERT OR IGNORE on all nodes and edges.
+        Returns dict with per-category edge counts.
+        """
+        results: dict = {
+            "endpoint_module_edges": 0,
+            "config_ftd_edges": 0,
+            "verifier_module_edges": 0,
+            "decision_supersedes_edges": 0,
+            "roadmap_nodes_added": 0,
+            "roadmap_edges_added": 0,
+        }
+
+        # 1. ENDPOINT→MODULE (CALLS)
+        with self._connect() as con:
+            endpoint_rows = con.execute(
+                "SELECT node_id, label, data FROM kg_nodes WHERE node_type='ENDPOINT'"
+            ).fetchall()
+            module_ids = [r[0] for r in con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_type='MODULE'"
+            ).fetchall()]
+
+        _route_module_hints = [
+            ("doae",       "doae"),
+            ("kge",        "kge"),
+            ("nexus/rl",   "rl_engine"),
+            ("hke",        "hke"),
+            ("genome",     "genome"),
+            ("imraf",      "imraf"),
+            ("governance", "governance"),
+            ("ema",        "ema"),
+            ("aeos",       "aeos"),
+            ("dial",       "dial"),
+            ("dcel",       "dcel"),
+            ("iq",         "iq"),
+        ]
+        for ep_id, ep_label, _data in endpoint_rows:
+            route = ep_label.lower()
+            for keyword, stem in _route_module_hints:
+                if keyword in route:
+                    for mod_id in module_ids:
+                        if stem in mod_id.lower():
+                            if self.add_edge(ep_id, mod_id, "CALLS"):
+                                results["endpoint_module_edges"] += 1
+
+        # 2. CONFIG→FTD (INTRODUCED_BY)
+        with self._connect() as con:
+            config_rows = con.execute(
+                "SELECT node_id, label FROM kg_nodes WHERE node_type='CONFIG'"
+            ).fetchall()
+            ftd_ids = {r[0] for r in con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_type='FTD'"
+            ).fetchall()}
+
+        for param_name, ftd_id in self._CONFIG_FTD_MAP.items():
+            if ftd_id not in ftd_ids:
+                continue
+            for cfg_id, cfg_label in config_rows:
+                if param_name.upper() in cfg_label.upper() or cfg_id.upper() == param_name.upper():
+                    if self.add_edge(cfg_id, ftd_id, "INTRODUCED_BY"):
+                        results["config_ftd_edges"] += 1
+
+        # 3. VERIFIER→MODULE (TESTS)
+        with self._connect() as con:
+            verifier_rows = con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_type='VERIFIER'"
+            ).fetchall()
+            module_ids_now = [r[0] for r in con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_type='MODULE'"
+            ).fetchall()]
+
+        for (ver_id,) in verifier_rows:
+            ver_stem = ver_id.lower()
+            for pattern, mod_name in self._VERIFIER_MODULE_MAP.items():
+                if pattern in ver_stem:
+                    for mod_id in module_ids_now:
+                        if mod_name in mod_id.lower():
+                            if self.add_edge(ver_id, mod_id, "TESTS"):
+                                results["verifier_module_edges"] += 1
+                            break
+
+        # 4. DECISION→DECISION (SUPERSEDES) — only when both nodes exist
+        with self._connect() as con:
+            decision_ids = {
+                r[0] for r in con.execute(
+                    "SELECT node_id FROM kg_nodes WHERE node_type='DECISION'"
+                ).fetchall()
+            }
+        _supersedes_pairs = [
+            ("DECISION:PBE_REENABLE", "DECISION:PBE_DISABLE"),
+        ]
+        for newer, older in _supersedes_pairs:
+            if newer in decision_ids and older in decision_ids:
+                if self.add_edge(newer, older, "SUPERSEDES"):
+                    results["decision_supersedes_edges"] += 1
+
+        # 5. ROADMAP nodes + PRECEDES chain + BLOCKS edges
+        _roadmap_phases = [
+            ("PHASE-1", "PHASE-1: Evidence Foundation",       "IN_PROGRESS"),
+            ("PHASE-2", "PHASE-2: Historical Reconstruction",  "IN_PROGRESS"),
+            ("PHASE-3", "PHASE-3: Attribution Truth",          "PENDING"),
+            ("PHASE-4", "PHASE-4: KGE Intelligence",           "IN_PROGRESS"),
+            ("PHASE-5", "PHASE-5: Confidence Engine",          "PENDING"),
+            ("PHASE-6", "PHASE-6: Governance Completeness",    "PENDING"),
+            ("PHASE-7", "PHASE-7: AEG Readiness",              "PENDING"),
+        ]
+        phase_ids = []
+        for phase_id, label, status in _roadmap_phases:
+            if self.add_node("ROADMAP", phase_id, label, {"status": status, "program": "FTD-NEXUS-100-PERCENT-001"}):
+                results["roadmap_nodes_added"] += 1
+            phase_ids.append(phase_id)
+
+        for i in range(len(phase_ids) - 1):
+            if self.add_edge(phase_ids[i], phase_ids[i + 1], "PRECEDES"):
+                results["roadmap_edges_added"] += 1
+
+        with self._connect() as con:
+            aeg_row = con.execute(
+                "SELECT node_id FROM kg_nodes WHERE node_id LIKE '%AEG%' LIMIT 1"
+            ).fetchone()
+        if aeg_row:
+            aeg_id = aeg_row[0]
+            for blocker in ("PHASE-3", "PHASE-7"):
+                if self.add_edge(blocker, aeg_id, "BLOCKS"):
+                    results["roadmap_edges_added"] += 1
+
+        total_edges = sum(v for k, v in results.items() if "edges" in k)
+        logger.info(
+            "KGE build_deep_relationships: %d total new edges, %d roadmap nodes",
+            total_edges, results["roadmap_nodes_added"],
+        )
+        return results
 
 
 # Singleton — lazy so tests can override db_path

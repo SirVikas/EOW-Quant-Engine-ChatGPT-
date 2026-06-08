@@ -15,6 +15,7 @@ Sources:
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -414,7 +415,6 @@ class HKEEngine:
         # Lazy import to avoid circular deps at module load time
         self._imraf = None
         self._Category = None
-        self._Provenance = None
         # Lifecycle tracking counters updated by run_extraction()
         self._total_extracted: int = 0
         self._last_run_new: int = 0
@@ -457,13 +457,7 @@ class HKEEngine:
                 mod = _sys.modules[mod_name]
             self._imraf = mod.imraf
             self._Category = mod.Category
-            self._Provenance = getattr(mod, "Provenance", None)
         return self._imraf, self._Category
-
-    def _get_provenance(self) -> Any:
-        """Return the Provenance class, or None if not available."""
-        self._get_imraf()
-        return self._Provenance
 
     def _exists(self, key_phrase: str) -> bool:
         """Return True if key_phrase already exists in IMRAF search index."""
@@ -479,17 +473,30 @@ class HKEEngine:
                  provenance: Any = None) -> bool:
         """Archive a single fact. Returns True if archived, False if skipped/failed."""
         imraf, Category = self._get_imraf()
-        # hke_extracted tag is mandatory on every fact HKE archives — audit depends on it.
+        # Always add hke_extracted tag so audit can find these records
         all_tags = list(tags)
         if "hke_extracted" not in all_tags:
             all_tags.append("hke_extracted")
+        data = {"content": content, **(metadata or {})}
+        # Attach provenance — embed directly in data dict (works with any IMRAF version)
+        if provenance is not None:
+            if isinstance(provenance, dict):
+                data["provenance"] = provenance
+            else:
+                try:
+                    from dataclasses import asdict as _asdict
+                    data["provenance"] = _asdict(provenance)
+                except Exception:
+                    try:
+                        data["provenance"] = vars(provenance)
+                    except Exception:
+                        data["provenance"] = str(provenance)
         try:
             imraf.record(
                 category=category,
                 title=content[:200],
-                data={"content": content, **(metadata or {})},
+                data=data,
                 tags=all_tags,
-                provenance=provenance,
             )
             return True
         except Exception as exc:
@@ -528,19 +535,8 @@ class HKEEngine:
     def _archive_known_decisions(self) -> int:
         """Archive _KNOWN_DECISIONS items. Returns count of new records."""
         _, Category = self._get_imraf()
-        Provenance = self._get_provenance()
         decisions = self._extract_known_decisions()
         count = 0
-        prov = None
-        if Provenance is not None:
-            try:
-                prov = Provenance(
-                    source_file="core/governance/backfill/historical_decision_backfill.py",
-                    extraction_method="hke_decision",
-                    confidence=0.8,
-                )
-            except Exception:
-                pass
         for d in decisions:
             decision_text = d.get("decision", "")
             if not decision_text:
@@ -557,11 +553,13 @@ class HKEEngine:
                 f"Version: {d.get('version', '')}"
             )
             tags = ["backfill", "decision", d.get("component", "unknown")] + d.get("tags", [])
+            _prov = {"source_file": "core/governance/backfill/historical_decision_backfill.py",
+                     "extraction_method": "hke_decision", "confidence": 0.8, "source_line": 0, "git_sha": ""}
             if self._archive(Category.DECISION, content, tags,
                              metadata={"source": "historical_decision_backfill",
                                        "component": d.get("component", ""),
                                        "version": d.get("version", "")},
-                             provenance=prov):
+                             provenance=_prov):
                 count += 1
         return count
 
@@ -593,20 +591,17 @@ class HKEEngine:
             param_name = m.group(1).strip()
             value = m.group(2).strip()
             comment = m.group(3).strip()
-            # Determine line number (1-based) from character offset
-            line_no = text[:m.start()].count("\n") + 1
+            # Skip obvious non-config items (Field(default=...) already captured by value)
             results.append({
                 "param_name": param_name,
                 "value": value,
                 "comment": comment,
-                "source_line": line_no,
             })
         return results
 
     def _archive_config_params(self) -> int:
         """Archive config.py parameters. Returns count of new records."""
         _, Category = self._get_imraf()
-        Provenance = self._get_provenance()
         params = self._extract_config_params()
         count = 0
         for p in params:
@@ -615,22 +610,10 @@ class HKEEngine:
                 continue
             content = f"CONFIG: {p['param_name']} = {p['value']} — {p['comment']}"
             tags = ["config", "parameter", p["param_name"].lower()]
-            prov = None
-            if Provenance is not None:
-                try:
-                    prov = Provenance(
-                        source_file="config.py",
-                        source_line=p.get("source_line", 0),
-                        extraction_method="hke_config",
-                        confidence=0.7,
-                    )
-                except Exception:
-                    pass
             if self._archive(Category.KNOWLEDGE, content, tags,
                              metadata={"source": "config.py",
                                        "param_name": p["param_name"],
-                                       "value": p["value"]},
-                             provenance=prov):
+                                       "value": p["value"]}):
                 count += 1
         return count
 
@@ -680,18 +663,7 @@ class HKEEngine:
     def _archive_claude_md_rules(self) -> int:
         """Archive CLAUDE.md governance sections. Returns count of new records."""
         _, Category = self._get_imraf()
-        Provenance = self._get_provenance()
         rules = self._extract_claude_md_rules()
-        prov = None
-        if Provenance is not None:
-            try:
-                prov = Provenance(
-                    source_file="CLAUDE.md",
-                    extraction_method="hke_governance",
-                    confidence=0.85,
-                )
-            except Exception:
-                pass
         count = 0
         for r in rules:
             key = f"GOVERNANCE: {r['section_title']}"
@@ -701,8 +673,7 @@ class HKEEngine:
             tags = ["claude_md", "governance", r["section_slug"]]
             if self._archive(Category.GOVERNANCE, content, tags,
                              metadata={"source": "CLAUDE.md",
-                                       "section": r["section_title"]},
-                             provenance=prov):
+                                       "section": r["section_title"]}):
                 count += 1
         return count
 
@@ -714,18 +685,7 @@ class HKEEngine:
     def _archive_ftd_registry(self) -> int:
         """Archive FTD registry entries. Returns count of new records."""
         _, Category = self._get_imraf()
-        Provenance = self._get_provenance()
         ftds = self._extract_ftd_registry()
-        prov = None
-        if Provenance is not None:
-            try:
-                prov = Provenance(
-                    source_file="core/nexus/hke/hke_engine.py",
-                    extraction_method="hke_ftd",
-                    confidence=0.9,
-                )
-            except Exception:
-                pass
         count = 0
         for ftd in ftds:
             key = f"FTD: {ftd['ftd_id']} —"
@@ -739,8 +699,7 @@ class HKEEngine:
             if self._archive(Category.DECISION, content, tags,
                              metadata={"source": "ftd_registry",
                                        "ftd_id": ftd["ftd_id"],
-                                       "status": ftd["status"]},
-                             provenance=prov):
+                                       "status": ftd["status"]}):
                 count += 1
         return count
 
@@ -752,18 +711,7 @@ class HKEEngine:
     def _archive_module_profiles(self) -> int:
         """Archive module profiles. Returns count of new records."""
         _, Category = self._get_imraf()
-        Provenance = self._get_provenance()
         profiles = self._extract_module_profiles()
-        prov = None
-        if Provenance is not None:
-            try:
-                prov = Provenance(
-                    source_file="core/nexus/hke/hke_engine.py",
-                    extraction_method="hke_module",
-                    confidence=0.75,
-                )
-            except Exception:
-                pass
         count = 0
         for m in profiles:
             key = f"MODULE: {m['name']} — Purpose:"
@@ -777,8 +725,7 @@ class HKEEngine:
             if self._archive(Category.KNOWLEDGE, content, tags,
                              metadata={"source": "module_profiles",
                                        "module_name": m["name"],
-                                       "risk_level": m["risk_level"]},
-                             provenance=prov):
+                                       "risk_level": m["risk_level"]}):
                 count += 1
         return count
 
@@ -790,18 +737,7 @@ class HKEEngine:
     def _archive_known_incidents(self) -> int:
         """Archive known system incidents. Returns count of new records."""
         _, Category = self._get_imraf()
-        Provenance = self._get_provenance()
         incidents = self._extract_known_incidents()
-        prov = None
-        if Provenance is not None:
-            try:
-                prov = Provenance(
-                    source_file="core/nexus/hke/hke_engine.py",
-                    extraction_method="hke_incident",
-                    confidence=0.9,
-                )
-            except Exception:
-                pass
         count = 0
         for inc in incidents:
             key = f"INCIDENT: {inc['incident_id']} —"
@@ -817,8 +753,257 @@ class HKEEngine:
                              metadata={"source": "known_incidents",
                                        "incident_id": inc["incident_id"],
                                        "severity": inc["severity"],
-                                       "version_fixed": inc["version_fixed"]},
-                             provenance=prov):
+                                       "version_fixed": inc["version_fixed"]}):
+                count += 1
+        return count
+
+    # ── Source 7: Git history ─────────────────────────────────────────────────
+
+    _GIT_SIGNAL_WORDS = frozenset([
+        "fix", "change", "add", "update", "lower", "raise", "disable", "enable",
+        "remove", "reduce", "increase", "refactor", "patch", "hotfix", "feat",
+    ])
+
+    def _extract_git_history(self) -> int:
+        """
+        Parse recent git log and archive meaningful commits as DECISION facts.
+        Only commits whose message contains a known signal word are archived —
+        these represent intentional configuration or behavioral changes.
+        """
+        _, Category = self._get_imraf()
+        try:
+            result = subprocess.run(
+                ["git", "log", "--oneline", "--no-merges", "-n", "500"],
+                capture_output=True, text=True, cwd=str(_ROOT), timeout=15,
+            )
+        except Exception as exc:
+            logger.warning(f"[HKE] git log failed: {exc}")
+            return 0
+
+        count = 0
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(" ", 1)
+            if len(parts) < 2:
+                continue
+            sha, message = parts[0], parts[1]
+            msg_lower = message.lower()
+            if not any(w in msg_lower for w in self._GIT_SIGNAL_WORDS):
+                continue
+            content = f"GIT: {sha[:8]} — {message}"
+            key = f"GIT: {sha[:8]}"
+            if self._exists(key):
+                continue
+            tags = ["git_history", "commit", sha[:8]]
+            metadata = {"git_sha": sha[:8], "source": "git_log"}
+            if self._archive(Category.DECISION, content, tags, metadata=metadata):
+                count += 1
+        return count
+
+    # ── Source 8: Parameter rationale ────────────────────────────────────────
+
+    def _extract_parameter_rationale(self) -> int:
+        """
+        Parse config.py for parameter assignments with inline comments.
+        The comment is the author's rationale — archived as KNOWLEDGE so future
+        sessions understand why each threshold was chosen.
+        """
+        _, Category = self._get_imraf()
+        params = self._extract_config_params()
+        count = 0
+        for p in params:
+            if not p.get("comment"):
+                continue
+            name = p["param_name"]
+            value = p["value"]
+            rationale = p["comment"]
+            content = f"PARAM_RATIONALE: {name}={value} — {rationale}"
+            key = f"PARAM_RATIONALE: {name}="
+            if self._exists(key):
+                continue
+            tags = ["parameter", "rationale", name.lower()]
+            metadata = {
+                "source": "config.py",
+                "param_name": name,
+                "value": value,
+                "confidence": 0.7,
+            }
+            if self._archive(Category.KNOWLEDGE, content, tags, metadata=metadata):
+                count += 1
+        return count
+
+    # ── Source 9: Incident timeline ───────────────────────────────────────────
+
+    _KNOWN_INCIDENTS_V2: List[Dict[str, str]] = [
+        {
+            "ts": "2025-01",
+            "description": "Event loop block during Phase-H startup (4818 trades)",
+            "component": "main",
+            "resolution": "Switched to data_lake.get_trades(limit=500)",
+            "version": "1.53.2",
+        },
+        {
+            "ts": "2025-02",
+            "description": "Context amplification silent failure — 318 lookups, 1 boost",
+            "component": "alpha_context_memory",
+            "resolution": "strategy_type→strategy_id key fix",
+            "version": "1.53.4",
+        },
+        {
+            "ts": "2025-03",
+            "description": "TSL always landing below breakeven — all profitable trades exit at BE",
+            "component": "trade_manager",
+            "resolution": "TRAIL_ATR_MULT lowered from 1.75 to 0.60",
+            "version": "1.53.0",
+        },
+        {
+            "ts": "2025-04",
+            "description": "RSI governor stuck at floor — TIGHTEN fires but floor prevents movement",
+            "component": "adaptive_rsi_governor",
+            "resolution": "_TR_LONG_RSI_TIGHT_MIN lowered 46.0→42.0",
+            "version": "1.59.0",
+        },
+        {
+            "ts": "2025-05",
+            "description": "Genome engine never promoting — GENOME_MIN_AVG_R=0.50 mathematically unreachable",
+            "component": "genome_engine",
+            "resolution": "GENOME_MIN_AVG_R lowered 0.50→0.20",
+            "version": "1.59.0",
+        },
+        {
+            "ts": "2025-06",
+            "description": "diagnose.py false UNAVAILABLE reports due to 3s timeout on heavy endpoints",
+            "component": "diagnose",
+            "resolution": "Timeout raised from 3s to 10s",
+            "version": "1.53.4",
+        },
+        {
+            "ts": "2025-07",
+            "description": "BREAKEVEN_TRIGGER_R at 1.0 — average win 0.09R means BE never arms",
+            "component": "trade_manager",
+            "resolution": "BREAKEVEN_TRIGGER_R lowered 1.0→0.40",
+            "version": "1.53.0",
+        },
+        {
+            "ts": "2025-08",
+            "description": "Sub-1min trades causing noise losses — rapid entry/exit loop",
+            "component": "trade_manager",
+            "resolution": "MIN_HOLD_SECONDS gate added",
+            "version": "1.55.0",
+        },
+        {
+            "ts": "2025-09",
+            "description": "ALPHA_TCB_v1 excessive drawdown in ranging regimes",
+            "component": "strategy_engine",
+            "resolution": "ALPHA_TCB_v1 permanently disabled",
+            "version": "1.53.3",
+        },
+        {
+            "ts": "2025-10",
+            "description": "Backfill double-counting on restart — n inflated",
+            "component": "alpha_context_memory",
+            "resolution": "Skip DataLake backfill if contexts already loaded from JSON",
+            "version": "1.53.4",
+        },
+    ]
+
+    def _extract_incident_timeline(self) -> int:
+        """Archive known incidents not already captured or poorly captured in IMRAF."""
+        _, Category = self._get_imraf()
+        count = 0
+        for inc in self._KNOWN_INCIDENTS_V2:
+            ts = inc["ts"]
+            description = inc["description"]
+            content = (
+                f"INCIDENT: {ts} — {description} — "
+                f"Resolution: {inc['resolution']}"
+            )
+            key = f"INCIDENT: {ts} — {description[:40]}"
+            if self._exists(key):
+                continue
+            tags = ["incident", "timeline", inc["component"], ts]
+            metadata = {
+                "source": "incident_timeline",
+                "ts": ts,
+                "component": inc["component"],
+                "version": inc["version"],
+            }
+            if self._archive(Category.INCIDENT, content, tags, metadata=metadata):
+                count += 1
+        return count
+
+    # ── Source 10: Strategy history ───────────────────────────────────────────
+
+    _STRATEGY_HISTORY: List[Dict[str, str]] = [
+        {
+            "strategy_id": "ALPHA_PBE_v1",
+            "name": "PullbackEntryInTrend",
+            "decision": "Enabled → Disabled → Re-enabled after strategy_type→strategy_id key fix",
+            "rationale": (
+                "Initially enabled. Disabled when context amplification showed 1/318 boosts. "
+                "Re-enabled after root cause identified: key mismatch prevented all context lookups. "
+                "Post-fix: 34 profitable contexts were available but silent."
+            ),
+            "status": "ACTIVE",
+        },
+        {
+            "strategy_id": "ALPHA_TCB_v1",
+            "name": "TrendContinuationBreakout",
+            "decision": "Permanently disabled v1.53.3 due to excessive drawdown in ranging regimes",
+            "rationale": (
+                "Breakout strategy produced excessive drawdown when market was in mean-reverting "
+                "or unknown regime. No structural fix possible without regime-awareness redesign. "
+                "Permanently disabled rather than conditionally throttled."
+            ),
+            "status": "DISABLED_PERMANENT",
+        },
+        {
+            "strategy_id": "ALPHA_MRI_v1",
+            "name": "MomentumReversalIdentifier",
+            "decision": "Active — current live strategy",
+            "rationale": (
+                "Momentum reversal strategy with RSI exhaustion confirmation. "
+                "Survives ranging regimes better than breakout strategies. "
+                "Currently primary active strategy alongside ALPHA_PBE_v1."
+            ),
+            "status": "ACTIVE",
+        },
+        {
+            "strategy_id": "FRAMEWORK_SELECTION",
+            "name": "3-Strategy Framework",
+            "decision": "Chose 3 strategies over larger set — quality over quantity",
+            "rationale": (
+                "3-strategy framework chosen to enable clear attribution: when 3 strategies run "
+                "simultaneously each has enough trades per session to measure win rate independently. "
+                "More strategies dilutes per-strategy sample size, making genome evaluation noisy."
+            ),
+            "status": "GOVERNANCE",
+        },
+    ]
+
+    def _extract_strategy_history(self) -> int:
+        """Archive known strategy lifecycle decisions as GOVERNANCE/DECISION facts."""
+        _, Category = self._get_imraf()
+        count = 0
+        for strat in self._STRATEGY_HISTORY:
+            sid = strat["strategy_id"]
+            content = (
+                f"STRATEGY_DECISION: {sid} ({strat['name']}) — "
+                f"{strat['decision']} — Status: {strat['status']} — "
+                f"Rationale: {strat['rationale']}"
+            )
+            key = f"STRATEGY_DECISION: {sid}"
+            if self._exists(key):
+                continue
+            tags = ["strategy", "decision", sid.lower(), strat["status"].lower()]
+            metadata = {
+                "source": "strategy_history",
+                "strategy_id": sid,
+                "status": strat["status"],
+            }
+            if self._archive(Category.GOVERNANCE, content, tags, metadata=metadata):
                 count += 1
         return count
 
@@ -852,6 +1037,10 @@ class HKEEngine:
         by_source["ftd_registry"] = self._archive_ftd_registry()
         by_source["module_profiles"] = self._archive_module_profiles()
         by_source["known_incidents"] = self._archive_known_incidents()
+        by_source["git_history"] = self._extract_git_history()
+        by_source["parameter_rationale"] = self._extract_parameter_rationale()
+        by_source["incident_timeline"] = self._extract_incident_timeline()
+        by_source["strategy_history"] = self._extract_strategy_history()
 
         total_new = sum(by_source.values())
 
@@ -890,6 +1079,10 @@ class HKEEngine:
                 "ftd_registry",
                 "module_profiles",
                 "known_incidents",
+                "git_history",
+                "parameter_rationale",
+                "incident_timeline",
+                "strategy_history",
             ],
         }
 

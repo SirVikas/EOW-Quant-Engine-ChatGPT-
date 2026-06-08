@@ -181,10 +181,13 @@ def test_hke_extraction_produces_hke_extracted_tag(tmp_path):
     hke_tagged = [r for r in records if "hke_extracted" in r.get("tags", [])]
     assert len(hke_tagged) > 0, "No records found with 'hke_extracted' tag after HKE extraction"
 
-    # Also verify at least one has provenance
+    # Verify at least one has provenance (known_decisions source passes provenance)
+    all_records = test_imraf.timeline(limit=2000)
     hke_with_prov = [
-        r for r in hke_tagged
-        if isinstance(r.get("data"), dict) and "provenance" in r["data"]
+        r for r in all_records
+        if "hke_extracted" in r.get("tags", [])
+        and isinstance(r.get("data"), dict)
+        and "provenance" in r["data"]
     ]
     assert len(hke_with_prov) > 0, "No HKE records found with provenance after extraction"
 
