@@ -720,6 +720,21 @@ async def on_tick(tick: Tick):
             inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0, direction=_trade_direction)
             # Mandate: trigger genome evolution every 50 trades (not just on timer)
             genome.on_trade_closed()
+            # Phase 3 FTD-NEXUS-100-PERCENT-001: periodic DOAE snapshot every 100 trades
+            _tc = len(pnl_calc.trades)
+            if _tc > 0 and _tc % 100 == 0:
+                try:
+                    from core.nexus.doae.doae_engine import doae as _doae
+                    _snap_stats = pnl_calc.get_stats()
+                    _doae.record_snapshot(
+                        win_rate=_snap_stats.get("win_rate", 0.0),
+                        profit_factor=_snap_stats.get("profit_factor", 0.0),
+                        avg_pnl=_snap_stats.get("avg_win_usdt", 0.0),
+                        total_pnl=_snap_stats.get("total_net_pnl", 0.0),
+                        trades_count=_tc,
+                    )
+                except Exception:
+                    pass
             # Phase 5: update EV engine, adaptive scorer, and regime memory
             _trade_cost = (getattr(last_trade, "fee_entry", 0.0)
                            + getattr(last_trade, "fee_exit", 0.0)
