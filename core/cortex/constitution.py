@@ -216,6 +216,71 @@ class ConstitutionRegistry:
             for v in items
         ]
 
+    # ── Constitutional Risk Scoring  [CX-GAP-04] ─────────────────────────────
+
+    def constitutional_risk_score(
+        self,
+        module_key: str,
+        action: str,
+        action_type: str = "parameter_change",
+    ) -> dict:
+        """
+        Compute a 0–100 Constitutional Risk Score for a proposed action.
+        Combines the enforcement levels of ALL violated articles, not just the
+        hardest one.  Higher score = higher governance risk.
+
+        Risk formula per article:
+          HARD_BLOCK  → 40 pts
+          SOFT_BLOCK  → 20 pts
+          ADVISORY    → 8 pts
+          AUDIT_ONLY  → 2 pts
+        Capped at 100.
+        """
+        with self._lock:
+            all_articles = list(self._articles.values())
+
+        applicable = [
+            a for a in all_articles
+            if a.protected_modules and module_key in a.protected_modules
+        ]
+
+        _weights = {"HARD_BLOCK": 40, "SOFT_BLOCK": 20, "ADVISORY": 8, "AUDIT_ONLY": 2}
+        raw_score = sum(_weights.get(a.enforcement, 0) for a in applicable)
+        score = min(100, raw_score)
+
+        violated_articles = [
+            {
+                "article_id":        a.article_id,
+                "title":             a.title,
+                "enforcement":       a.enforcement,
+                "risk_contribution": _weights.get(a.enforcement, 0),
+            }
+            for a in applicable
+        ]
+
+        risk_label = (
+            "CRITICAL" if score >= 80 else
+            "HIGH"     if score >= 50 else
+            "MODERATE" if score >= 20 else
+            "LOW"      if score > 0   else
+            "NONE"
+        )
+
+        return {
+            "module_key":        module_key,
+            "action":            action,
+            "constitutional_risk_score": score,
+            "risk_label":        risk_label,
+            "violated_articles": violated_articles,
+            "article_count":     len(applicable),
+            "recommendation":    (
+                "DO NOT PROCEED — Constitutional HARD_BLOCK in effect." if any(a.enforcement == "HARD_BLOCK" for a in applicable)
+                else "Requires human approval before proceeding." if any(a.enforcement == "SOFT_BLOCK" for a in applicable)
+                else "Proceed with caution and audit trail." if applicable
+                else "No constitutional constraints detected."
+            ),
+        }
+
     def summary(self) -> dict:
         with self._lock:
             total_arts = len(self._articles)
