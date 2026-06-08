@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.60.3"
+APP_VERSION = "1.60.4"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 # The central knowledge & intelligence nexus connecting all institutional layers:
@@ -168,13 +168,13 @@ class EngineConfig(BaseSettings):
         # Root cause: low-ATR moves are smaller than round-trip fee cost. Raising ATR floors
         # blocks setups where the potential move cannot overcome the fee burden.
         "ASIA":   0.20,   # raised 0.06→0.20: FDR=143.5 — ASIA setups are fee-annihilated at low ATR
-        "LONDON": 0.15,   # raised 0.10→0.15: FDR=28.1 — LONDON fee-collapsed; require meaningful volatility
+        "LONDON": 0.20,   # raised 0.15→0.20: diagnostic 2026-06-08 WR=12.1% in LONDON — require higher volatility floor
         "NY":     0.10,   # unchanged — NY is TRUE_NEGATIVE but not fee-collapsed; FDR=1.23
         "LATE":   0.07,   # unchanged — LATE is TRUE_NEGATIVE; lower vol but not fee-collapsed
     }
     SESSION_SIZE_SCALE: dict = {
         "ASIA":   0.30,   # reduced 0.50→0.30: further cut ASIA exposure; FDR=143.5 demands minimal size on surviving setups
-        "LONDON": 0.75,   # reduced 1.00→0.75: LONDON FDR=28.1; reduce size until fee-adjusted edge is proven
+        "LONDON": 0.50,   # reduced 0.75→0.50: diagnostic 2026-06-08 WR=12.1% — halve LONDON exposure until edge proven
         "NY":     1.00,   # unchanged
         "LATE":   0.70,   # unchanged — 70%: post-NY liquidity drop
     }

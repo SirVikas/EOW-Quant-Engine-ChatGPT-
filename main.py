@@ -1798,6 +1798,20 @@ async def on_tick(tick: Tick):
                 _ctx_amp = alpha_context_memory.get_amplification(
                     regime=regime.value, utc_hour=_utc_hr_ec, strategy=sig.strategy_id,
                 )
+                # TOXIC context: skip trade immediately rather than silently treating as neutral.
+                # The previous `else 1.0` converted boost_mult=0 (TOXIC) to neutral, which is
+                # why "Blocks applied" always showed 0 despite 26 known-toxic contexts.
+                # Context memory TOXIC (avg_pnl < -0.30 over n≥5 trades) is evidence-based,
+                # unlike the RL TOXIC bypass (FTD-054) which protects Q-value recovery.
+                if _ctx_amp.get("context_type") == "TOXIC":
+                    _last_skip = {
+                        "ts": int(time.time() * 1000), "symbol": sym,
+                        "reason": f"TOXIC_CONTEXT: {_ctx_amp.get('context_key','')} avg_pnl={_ctx_amp.get('avg_pnl',0):.4f}",
+                        "regime": regime.value, "strategy": strategy_type,
+                    }
+                    trade_flow_monitor.record_skip(sym, "TOXIC_CONTEXT")
+                    return
+
                 # Fix B (FTD-BOOST-SUPPRESS): forensic audit showed context-boosted trades
                 # during recovery cycles avg -0.20 PnL vs -0.12 for normal trades.
                 # Suppress upward boost (>1.0) when a recovery cycle is active; reductions
