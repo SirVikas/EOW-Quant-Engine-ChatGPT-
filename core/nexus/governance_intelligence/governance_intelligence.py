@@ -359,6 +359,46 @@ class GovernanceIntelligenceEngine:
 
         return deduped[:30]
 
+    def detect_stale_assumptions(self) -> List[dict]:
+        """
+        Return DECISION records whose version is 5+ minor versions old vs current APP_VERSION.
+        These may represent stale assumptions that need review.
+        """
+        stale: List[dict] = []
+        try:
+            from core.institutional_memory.imraf_engine import imraf
+            from config import APP_VERSION
+            records = imraf.timeline(category=None, limit=1000)
+        except Exception:
+            return stale
+
+        try:
+            current_minor = int(APP_VERSION.split(".")[1]) if "." in APP_VERSION else 59
+        except Exception:
+            current_minor = 59
+
+        import re
+        for rec in records:
+            content = ""
+            if isinstance(rec, dict):
+                data = rec.get("data", {})
+                content = data.get("content", "") if isinstance(data, dict) else ""
+            ver_matches = re.findall(r"v?(\d+)\.(\d+)\.\d+", content)
+            for _major, minor_s in ver_matches:
+                try:
+                    minor = int(minor_s)
+                    if current_minor - minor >= 5:
+                        stale.append({
+                            "content": content[:120],
+                            "version": f"v{_major}.{minor_s}",
+                            "age_versions": current_minor - minor,
+                            "component": rec.get("data", {}).get("component", "") if isinstance(rec.get("data"), dict) else "",
+                        })
+                        break
+                except Exception:
+                    pass
+        return stale[:20]
+
     def escalate_contradictions_to_imraf(self) -> int:
         """
         For each HIGH/MEDIUM contradiction found, archive as INCIDENT if not
@@ -468,17 +508,23 @@ class GovernanceIntelligenceEngine:
     def generate_report(self) -> dict:
         """
         Full governance report: base cleanup report extended with lifecycle,
-        coverage, and escalated contradiction metrics.
+        real contradictions, stale assumptions, coverage, and AEG-readiness fields.
         """
         base = self.generate_cleanup_report()
         coverage = self.governance_coverage_report()
         escalated = self.escalate_contradictions_to_imraf()
+        real_contradictions = self.detect_real_contradictions()
+        stale_assumptions = self.detect_stale_assumptions()
 
         return {
             **base,
-            "lifecycle_summary": coverage["lifecycle_summary"],
-            "coverage_pct": coverage["coverage_pct"],
+            "lifecycle_summary": coverage.get("lifecycle_summary", {}),
+            "coverage_pct": coverage.get("coverage_pct", 0.0),
             "escalated_contradictions": escalated,
+            "real_contradictions": real_contradictions,
+            "real_contradiction_count": len(real_contradictions),
+            "stale_assumptions": stale_assumptions,
+            "stale_count": len(stale_assumptions),
         }
 
     def generate_cleanup_report(self) -> dict:

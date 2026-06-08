@@ -3526,6 +3526,44 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     except Exception as _e:
         _thought(f"⚠ [PHOENIX NEXUS] Identity declaration failed (non-fatal): {_e}", "SYSTEM")
 
+    # FTD-NEXUS-100-PERCENT-001 — Backfill + bootstrap at every engine start
+    try:
+        from core.institutional_memory.imraf_engine import imraf as _imraf_boot
+        _prov_updated = _imraf_boot.backfill_provenance()
+        _tag_updated  = _imraf_boot.backfill_hke_tags()
+        _thought(
+            f"🔍 [NEXUS-100] Provenance backfill: {sum(_prov_updated.values())} records | "
+            f"HKE tag backfill: {_tag_updated} records",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [NEXUS-100] Backfill failed (non-fatal): {_e}", "SYSTEM")
+
+    try:
+        from core.nexus.kge.kge_engine import kge as _kge_boot
+        _kge_boot_result = _kge_boot.bootstrap_from_codebase()
+        _kge_intel = _kge_boot.relationship_intelligence_score()
+        _thought(
+            f"🕸 [NEXUS-100] KGE bootstrap: modules={_kge_boot_result.get('modules_added',0)} "
+            f"configs={_kge_boot_result.get('config_added',0)} "
+            f"endpoints={_kge_boot_result.get('endpoints_added',0)} "
+            f"intelligence_score={_kge_intel.get('intelligence_score',0):.1f}",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [NEXUS-100] KGE bootstrap failed (non-fatal): {_e}", "SYSTEM")
+
+    try:
+        from core.nexus.hke.hke_engine import hke as _hke_boot
+        _hke_boot_result = _hke_boot.run_extraction()
+        _thought(
+            f"📖 [NEXUS-100] HKE extraction: {_hke_boot_result.get('total_new', 0)} new facts "
+            f"(total sources: {len(_hke_boot_result.get('by_source', {}))})",
+            "SYSTEM",
+        )
+    except Exception as _e:
+        _thought(f"⚠ [NEXUS-100] HKE extraction failed (non-fatal): {_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
