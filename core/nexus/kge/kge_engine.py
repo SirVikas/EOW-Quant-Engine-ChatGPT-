@@ -344,6 +344,177 @@ class KGEEngine:
             logger.info("KGE enriched %d nodes from IMRAF", enriched)
 
     # ------------------------------------------------------------------
+    # Intelligent Relationship Builder
+    # ------------------------------------------------------------------
+
+    # FTDs that map to specific implementation modules
+    _FTD_MODULE_MAP = {
+        "FTD-033":                    ["trade_manager"],
+        "FTD-034":                    ["alpha_context_memory"],
+        "FTD-035":                    ["loss_cluster"],
+        "FTD-036":                    ["adaptive_rsi_governor"],
+        "FTD-037":                    ["trade_manager"],
+        "FTD-057":                    ["adaptive_rsi_governor"],
+        "FTD-038":                    ["rl_engine"],
+        "FTD-039":                    ["adaptive_scorer"],
+        "FTD-040":                    ["alpha_context_memory"],
+        "FTD-IMR-001":                ["imraf_engine"],
+        "FTD-NEXUS-ACCELERATION-001": ["doae_engine", "kge_engine", "governance_intelligence", "iq_dashboard"],
+    }
+
+    # Known architectural module→module dependencies
+    _MODULE_DEPS = [
+        ("alpha_engine",    "net_edge_engine"),
+        ("rl_engine",       "alpha_context_memory"),
+        ("adaptive_scorer", "rl_engine"),
+        ("trade_manager",   "risk_controller"),
+        ("genome_engine",   "adaptive_scorer"),
+    ]
+
+    def build_intelligent_relationships(self) -> dict:
+        """
+        Creates semantically meaningful edges between existing graph nodes:
+
+        1. MODULE→CONFIG  (CONFIGURES): module label keywords match config param names
+        2. FTD→MODULE     (IMPLEMENTS): _FTD_MODULE_MAP hardcoded mapping
+        3. STRATEGY→MODULE (USES): strategies connect to their implementing modules
+        4. MODULE→MODULE  (DEPENDS_ON): known architectural dependencies
+
+        Returns a summary dict with edges_added count.
+        """
+        edges_added = 0
+
+        with self._connect() as con:
+            module_rows   = con.execute("SELECT node_id, label FROM kg_nodes WHERE node_type='MODULE'").fetchall()
+            config_rows   = con.execute("SELECT node_id, label FROM kg_nodes WHERE node_type='CONFIG'").fetchall()
+            ftd_rows      = con.execute("SELECT node_id FROM kg_nodes WHERE node_type='FTD'").fetchall()
+            strategy_rows = con.execute("SELECT node_id, label FROM kg_nodes WHERE node_type='STRATEGY'").fetchall()
+
+        # 1. MODULE→CONFIG (CONFIGURES)
+        for mod_id, mod_label in module_rows:
+            stem = mod_id.split(":")[-1].replace("_", " ").upper()
+            keywords = [w for w in stem.split() if len(w) >= 3]
+            for cfg_id, cfg_label in config_rows:
+                cfg_upper = cfg_label.upper()
+                if any(kw in cfg_upper for kw in keywords):
+                    if self.add_edge(mod_id, cfg_id, "CONFIGURES"):
+                        edges_added += 1
+
+        # 2. FTD→MODULE (IMPLEMENTS)
+        existing_ftd_ids = {r[0] for r in ftd_rows}
+        for ftd_id, modules in self._FTD_MODULE_MAP.items():
+            if ftd_id not in existing_ftd_ids:
+                continue
+            for mod_name in modules:
+                with self._connect() as con:
+                    candidates = con.execute(
+                        "SELECT node_id FROM kg_nodes WHERE node_type='MODULE' "
+                        "AND (node_id=? OR node_id LIKE ?)",
+                        (mod_name, f"%{mod_name}%"),
+                    ).fetchall()
+                for row in candidates:
+                    if self.add_edge(ftd_id, row[0], "IMPLEMENTS"):
+                        edges_added += 1
+
+        # 3. STRATEGY→MODULE (USES)
+        strategy_module_map = {
+            "TrendFollowing":      ["adaptive_rsi_governor", "signal_ecology"],
+            "MeanReversion":       ["signal_ecology"],
+            "VolatilityExpansion": ["regime_cartography"],
+        }
+        for strat_id, _label in strategy_rows:
+            targets = strategy_module_map.get(strat_id, [])
+            for mod_name in targets:
+                with self._connect() as con:
+                    candidates = con.execute(
+                        "SELECT node_id FROM kg_nodes WHERE node_type='MODULE' "
+                        "AND (node_id=? OR node_id LIKE ?)",
+                        (mod_name, f"%{mod_name}%"),
+                    ).fetchall()
+                for row in candidates:
+                    if self.add_edge(strat_id, row[0], "USES"):
+                        edges_added += 1
+
+        # 4. MODULE→MODULE (DEPENDS_ON)
+        for from_mod, to_mod in self._MODULE_DEPS:
+            with self._connect() as con:
+                from_rows = con.execute(
+                    "SELECT node_id FROM kg_nodes WHERE node_type='MODULE' "
+                    "AND (node_id=? OR node_id LIKE ?)",
+                    (from_mod, f"%{from_mod}%"),
+                ).fetchall()
+                to_rows = con.execute(
+                    "SELECT node_id FROM kg_nodes WHERE node_type='MODULE' "
+                    "AND (node_id=? OR node_id LIKE ?)",
+                    (to_mod, f"%{to_mod}%"),
+                ).fetchall()
+            for f_row in from_rows:
+                for t_row in to_rows:
+                    if self.add_edge(f_row[0], t_row[0], "DEPENDS_ON"):
+                        edges_added += 1
+
+        logger.info("KGE build_intelligent_relationships: %d edges added", edges_added)
+        return {"edges_added": edges_added}
+
+    def relationship_intelligence_score(self) -> dict:
+        """
+        Returns metrics quantifying how well-connected the knowledge graph is.
+
+        intelligence_score = min(100,
+            (avg_edges_per_node / 5) * 50 + (1 - isolated_nodes/total_nodes) * 50)
+        """
+        with self._connect() as con:
+            total_nodes = con.execute("SELECT COUNT(*) FROM kg_nodes").fetchone()[0]
+            total_edges = con.execute("SELECT COUNT(*) FROM kg_edges").fetchone()[0]
+            edge_pairs  = con.execute("SELECT from_node, to_node FROM kg_edges").fetchall()
+            node_ids    = [r[0] for r in con.execute("SELECT node_id FROM kg_nodes").fetchall()]
+
+        if total_nodes == 0:
+            return {
+                "total_nodes": 0, "total_edges": 0, "avg_edges_per_node": 0.0,
+                "isolated_nodes": 0, "well_connected": 0, "relationship_density": 0.0,
+                "intelligence_score": 0.0, "top_hubs": [],
+            }
+
+        edge_counts: dict = {}
+        for from_n, to_n in edge_pairs:
+            edge_counts[from_n] = edge_counts.get(from_n, 0) + 1
+            edge_counts[to_n]   = edge_counts.get(to_n,   0) + 1
+
+        isolated  = sum(1 for nid in node_ids if edge_counts.get(nid, 0) == 0)
+        well_conn = sum(1 for nid in node_ids if edge_counts.get(nid, 0) >= 3)
+        avg_edges = round(sum(edge_counts.values()) / total_nodes, 4) if total_nodes else 0.0
+
+        max_possible = total_nodes * (total_nodes - 1) / 2
+        density = round(total_edges / max_possible, 6) if max_possible > 0 else 0.0
+
+        intel_score = round(
+            min(100.0, (avg_edges / 5.0) * 50.0 + (1.0 - isolated / total_nodes) * 50.0),
+            2,
+        )
+
+        hub_list = sorted(
+            [{"node_id": nid, "edge_count": edge_counts.get(nid, 0)} for nid in node_ids],
+            key=lambda x: x["edge_count"],
+            reverse=True,
+        )[:5]
+        with self._connect() as con:
+            for hub in hub_list:
+                row = con.execute("SELECT label FROM kg_nodes WHERE node_id=?", (hub["node_id"],)).fetchone()
+                hub["label"] = row[0] if row else hub["node_id"]
+
+        return {
+            "total_nodes":          total_nodes,
+            "total_edges":          total_edges,
+            "avg_edges_per_node":   avg_edges,
+            "isolated_nodes":       isolated,
+            "well_connected":       well_conn,
+            "relationship_density": density,
+            "intelligence_score":   intel_score,
+            "top_hubs":             hub_list,
+        }
+
+    # ------------------------------------------------------------------
     # Codebase Bootstrap
     # ------------------------------------------------------------------
 
@@ -351,30 +522,29 @@ class KGEEngine:
         """
         Scan the codebase and add MODULE, CONFIG, VERIFIER, and ENDPOINT nodes.
         Deduplicates via INSERT OR IGNORE (add_node returns False on duplicate).
-        Edges are added between MODULE nodes and any matching FTD or STRATEGY node.
+        Then calls build_intelligent_relationships() to add semantic edges.
         """
         import re
         from pathlib import Path as _Path
 
         root = _Path(root_path).resolve()
-        modules_added = 0
-        config_added = 0
+        modules_added   = 0
+        config_added    = 0
         verifiers_added = 0
         endpoints_added = 0
-        edges_added = 0
+        edges_added     = 0
 
-        # --- MODULE nodes: every .py file under core/ (skip __pycache__)
+        # MODULE nodes: every .py file under core/ (skip __pycache__)
         try:
             core_dir = root / "core"
             for py_file in core_dir.rglob("*.py"):
                 if "__pycache__" in py_file.parts:
                     continue
                 node_id = "module:" + str(py_file.relative_to(root)).replace("/", ".").removesuffix(".py")
-                label = py_file.stem.replace("_", " ").title()
-                added = self.add_node("MODULE", node_id, label, {"path": str(py_file.relative_to(root))})
+                label   = py_file.stem.replace("_", " ").title()
+                added   = self.add_node("MODULE", node_id, label, {"path": str(py_file.relative_to(root))})
                 if added:
                     modules_added += 1
-                    # Connect to a matching FTD or STRATEGY if stem appears in label
                     stem_upper = py_file.stem.upper()
                     with self._connect() as con:
                         ftd_row = con.execute(
@@ -394,13 +564,10 @@ class KGEEngine:
         except Exception as exc:
             logger.warning("KGE bootstrap_from_codebase modules scan error: %s", exc)
 
-        # --- CONFIG nodes: parameter names in config.py
-        # Matches both bare assignments (FOO = ...) and pydantic field
-        # declarations (FOO: type = Field(...)) at any indentation level,
-        # so we capture EngineConfig class members as well as module-level vars.
+        # CONFIG nodes: parameter names in config.py
         try:
-            config_file = root / "config.py"
-            config_pattern = re.compile(r'^\s*([A-Z][A-Z0-9_]{2,})\s*(?::\s*\S+\s*)?=\s*')
+            config_file     = root / "config.py"
+            config_pattern  = re.compile(r'^\s*([A-Z][A-Z0-9_]{2,})\s*(?::\s*\S+\s*)?=\s*')
             for line in config_file.read_text(errors="replace").splitlines():
                 m = config_pattern.match(line)
                 if m:
@@ -411,32 +578,32 @@ class KGEEngine:
         except Exception as exc:
             logger.warning("KGE bootstrap_from_codebase config scan error: %s", exc)
 
-        # --- VERIFIER nodes: every .py test file under tests/
+        # VERIFIER nodes: every .py test file under tests/
         try:
             tests_dir = root / "tests"
             for py_file in tests_dir.rglob("*.py"):
                 if "__pycache__" in py_file.parts:
                     continue
                 node_id = "verifier:" + py_file.stem
-                label = py_file.stem.replace("_", " ").title()
-                added = self.add_node("VERIFIER", node_id, label, {"path": str(py_file.relative_to(root))})
+                label   = py_file.stem.replace("_", " ").title()
+                added   = self.add_node("VERIFIER", node_id, label, {"path": str(py_file.relative_to(root))})
                 if added:
                     verifiers_added += 1
         except Exception as exc:
             logger.warning("KGE bootstrap_from_codebase verifiers scan error: %s", exc)
 
-        # --- ENDPOINT nodes: @app.get / @app.post decorators in main.py
+        # ENDPOINT nodes: @app.get / @app.post decorators in main.py
         try:
-            main_file = root / "main.py"
+            main_file        = root / "main.py"
             endpoint_pattern = re.compile(r'@app\.(get|post)\(["\']([^"\']+)["\']')
             for line in main_file.read_text(errors="replace").splitlines():
                 m = endpoint_pattern.search(line)
                 if m:
-                    method = m.group(1).upper()
-                    path = m.group(2)
+                    method  = m.group(1).upper()
+                    path    = m.group(2)
                     node_id = f"endpoint:{method}:{path}"
-                    label = f"{method} {path}"
-                    added = self.add_node("ENDPOINT", node_id, label, {"method": method, "path": path})
+                    label   = f"{method} {path}"
+                    added   = self.add_node("ENDPOINT", node_id, label, {"method": method, "path": path})
                     if added:
                         endpoints_added += 1
         except Exception as exc:
@@ -446,12 +613,15 @@ class KGEEngine:
             "KGE bootstrap_from_codebase: modules=%d config=%d verifiers=%d endpoints=%d edges=%d",
             modules_added, config_added, verifiers_added, endpoints_added, edges_added,
         )
+
+        intel = self.build_intelligent_relationships()
         return {
-            "modules_added":   modules_added,
-            "config_added":    config_added,
-            "verifiers_added": verifiers_added,
-            "endpoints_added": endpoints_added,
-            "edges_added":     edges_added,
+            "modules_added":     modules_added,
+            "config_added":      config_added,
+            "verifiers_added":   verifiers_added,
+            "endpoints_added":   endpoints_added,
+            "edges_added":       edges_added + intel.get("edges_added", 0),
+            "intelligent_edges": intel.get("edges_added", 0),
         }
 
 
