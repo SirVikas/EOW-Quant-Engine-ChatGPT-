@@ -3551,7 +3551,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         from config import (
             NEXUS_NAME, NEXUS_VERSION, NEXUS_LAYERS, NEXUS_PENDING,
             OBSX_NAME, OBSX_VERSION, CORTEX_NAME, CORTEX_VERSION,
-            PTP_NAME, PTP_VERSION, APP_VERSION,
+            PTP_NAME, PTP_VERSION, AEG_PIPELINE_VERSION, APP_VERSION,
         )
         _thought(
             f"[{NEXUS_NAME} Active] "
@@ -3568,7 +3568,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             f"  OBSX_VERSION   : v{OBSX_VERSION}  — OPERATIONAL\n"
             f"  CORTEX_VERSION : v{CORTEX_VERSION}  — OPERATIONAL\n"
             f"  PTP_VERSION    : v{PTP_VERSION}  — ACCUMULATING\n"
-            f"  AEG_STATUS     : PARTIAL\n"
+            f"  AEG_VERSION    : v{AEG_PIPELINE_VERSION}  — PARTIAL\n"
+            f"  PCAO           : FUTURE\n"
             f"════════════════════════════════════════════════════════",
             "SYSTEM",
         )
@@ -14738,6 +14739,337 @@ async def cortex_influence_risk_adjusted(body: dict):
         return {"recorded": True, "module_key": body.get("module_key")}
     except Exception as exc:
         return {"error": str(exc)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# MATURITY GAP COVERAGE — OX-MATURITY, CX-MATURITY, PTP, AEG Pipeline
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── OX-MATURITY-01: Institutional Disease Registry ────────────────────────────
+
+@app.get("/api/observatory/diseases")
+async def observatory_diseases_summary():
+    """Institutional Disease Registry — summary of systemic patterns."""
+    from core.observatory.disease_registry import institutional_disease_registry as _dr
+    return _dr.summary()
+
+
+@app.get("/api/observatory/diseases/all")
+async def observatory_diseases_all(status: str = ""):
+    from core.observatory.disease_registry import institutional_disease_registry as _dr
+    return {"diseases": _dr.all_diseases(status_filter=status or None)}
+
+
+@app.get("/api/observatory/diseases/active")
+async def observatory_diseases_active():
+    from core.observatory.disease_registry import institutional_disease_registry as _dr
+    return {"active_diseases": _dr.active_diseases()}
+
+
+@app.get("/api/observatory/diseases/{disease_id}")
+async def observatory_disease_get(disease_id: str):
+    from core.observatory.disease_registry import institutional_disease_registry as _dr
+    d = _dr.get(disease_id)
+    if not d:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"Disease '{disease_id}' not found")
+    return d
+
+
+@app.post("/api/observatory/diseases/declare")
+async def observatory_disease_declare(body: dict):
+    """Declare a new institutional disease."""
+    from core.observatory.disease_registry import institutional_disease_registry as _dr
+    try:
+        d = _dr.declare_disease(
+            disease_id=body["disease_id"],
+            name=body["name"],
+            description=body.get("description", ""),
+            root_cause=body.get("root_cause", ""),
+            dimension=body.get("dimension", "actor"),
+            dimension_value=body.get("dimension_value", ""),
+            severity=body.get("severity", "MEDIUM"),
+            investigation_ids=body.get("investigation_ids", []),
+            tags=body.get("tags", []),
+        )
+        return {"declared": True, "disease_id": d.disease_id}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/diseases/{disease_id}/status")
+async def observatory_disease_update_status(disease_id: str, body: dict):
+    from core.observatory.disease_registry import institutional_disease_registry as _dr
+    ok = _dr.update_status(disease_id, body.get("status", "MONITORED"), body.get("resolution_note", ""))
+    return {"updated": ok}
+
+
+# ── OX-MATURITY-02: Economic Outcome Ledger ───────────────────────────────────
+
+@app.get("/api/observatory/economic-ledger")
+async def observatory_economic_ledger_summary():
+    """Economic Outcome Ledger — which recommendations improved profitability."""
+    from core.observatory.economic_outcome_ledger import economic_outcome_ledger as _eol
+    return _eol.summary()
+
+
+@app.get("/api/observatory/economic-ledger/all")
+async def observatory_economic_ledger_all(status: str = ""):
+    from core.observatory.economic_outcome_ledger import economic_outcome_ledger as _eol
+    return {"entries": _eol.all_entries(status_filter=status or None)}
+
+
+@app.get("/api/observatory/economic-ledger/top-performers")
+async def observatory_economic_top_performers(n: int = 5):
+    from core.observatory.economic_outcome_ledger import economic_outcome_ledger as _eol
+    return {"top_performers": _eol.top_performers(n=n)}
+
+
+@app.get("/api/observatory/economic-ledger/worst-performers")
+async def observatory_economic_worst_performers(n: int = 5):
+    from core.observatory.economic_outcome_ledger import economic_outcome_ledger as _eol
+    return {"worst_performers": _eol.worst_performers(n=n)}
+
+
+@app.post("/api/observatory/economic-ledger/open")
+async def observatory_economic_ledger_open(body: dict):
+    """Open a new economic tracking entry when a recommendation is applied."""
+    from core.observatory.economic_outcome_ledger import economic_outcome_ledger as _eol
+    try:
+        entry = _eol.open_entry(
+            rec_id=body["rec_id"],
+            rec_type=body["rec_type"],
+            rec_title=body.get("rec_title", ""),
+            investigation_id=body.get("investigation_id", ""),
+            current_trade_count=int(body.get("current_trade_count", 0)),
+            current_pnl_usdt=float(body.get("current_pnl_usdt", 0.0)),
+            current_wr=float(body.get("current_wr", 0.5)),
+            current_pf=float(body.get("current_pf", 1.0)),
+            current_avg_fee_usdt=float(body.get("current_avg_fee_usdt", 0.0)),
+            current_equity_usdt=float(body.get("current_equity_usdt", 0.0)),
+        )
+        return {"opened": True, "entry_id": entry.entry_id}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OX-MATURITY-03: Observatory Board Reports ─────────────────────────────────
+
+@app.get("/api/observatory/board-reports")
+async def observatory_board_reports_summary():
+    """Observatory Board Reports — summary of all cadences."""
+    from core.observatory.board_reports import observatory_board_reports as _obr
+    return _obr.summary()
+
+
+@app.post("/api/observatory/board-reports/generate")
+async def observatory_board_reports_generate(body: dict):
+    """Generate an Observatory Board Report for the given cadence (WEEKLY/MONTHLY/QUARTERLY)."""
+    from core.observatory.board_reports import observatory_board_reports as _obr
+    try:
+        r = _obr.generate(body.get("cadence", "WEEKLY").upper())
+        return _obr._serialise(r)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/board-reports/{cadence}/latest")
+async def observatory_board_reports_latest(cadence: str):
+    from core.observatory.board_reports import observatory_board_reports as _obr
+    r = _obr.latest(cadence.upper())
+    if not r:
+        return {"note": f"No {cadence.upper()} report generated yet. POST /api/observatory/board-reports/generate"}
+    return r
+
+
+@app.get("/api/observatory/board-reports/{cadence}/all")
+async def observatory_board_reports_all(cadence: str):
+    from core.observatory.board_reports import observatory_board_reports as _obr
+    return {"reports": _obr.all_reports(cadence.upper())}
+
+
+# ── CX-MATURITY-01: Constitutional Court ─────────────────────────────────────
+
+@app.get("/api/cortex/court")
+async def cortex_court_summary():
+    """Constitutional Court — case summary."""
+    from core.cortex.constitutional_court import constitutional_court as _cc
+    return _cc.summary()
+
+
+@app.get("/api/cortex/court/cases")
+async def cortex_court_cases(status: str = ""):
+    from core.cortex.constitutional_court import constitutional_court as _cc
+    return {"cases": _cc.all_cases(status_filter=status or None)}
+
+
+@app.get("/api/cortex/court/open")
+async def cortex_court_open_cases():
+    from core.cortex.constitutional_court import constitutional_court as _cc
+    return {"open_cases": _cc.open_cases()}
+
+
+@app.post("/api/cortex/court/file")
+async def cortex_court_file(body: dict):
+    """File a constitutional court case."""
+    from core.cortex.constitutional_court import constitutional_court as _cc
+    try:
+        case = _cc.file_case(
+            case_type=body.get("case_type", "CONFLICT"),
+            articles_involved=body.get("articles_involved", []),
+            case_description=body["case_description"],
+            action_context=body.get("action_context", ""),
+            module_key=body.get("module_key", ""),
+            filed_by=body.get("filed_by", "operator"),
+        )
+        return {"filed": True, "case_id": case.case_id, "status": case.status, "preliminary_analysis": case.ruling_rationale}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/cortex/court/{case_id}/rule")
+async def cortex_court_rule(case_id: str, body: dict):
+    """Issue a ruling on a court case."""
+    from core.cortex.constitutional_court import constitutional_court as _cc
+    return _cc.issue_ruling(
+        case_id=case_id,
+        ruling=body["ruling"],
+        ruling_type=body.get("ruling_type", "INTERPRETATION"),
+        ruling_authority=body.get("ruling_authority", "operator"),
+        ruling_rationale=body.get("ruling_rationale", ""),
+        binding_verdict=body.get("binding_verdict", ""),
+        dissenting_notes=body.get("dissenting_notes", ""),
+    )
+
+
+# ── CX-MATURITY-02: Governance Case Law ──────────────────────────────────────
+
+@app.get("/api/cortex/case-law")
+async def cortex_case_law_summary():
+    """Governance Case Law — classification summary."""
+    from core.cortex.governance_case_law import governance_case_law as _gcl
+    return _gcl.summary()
+
+
+@app.get("/api/cortex/case-law/all")
+async def cortex_case_law_all(classification: str = ""):
+    from core.cortex.governance_case_law import governance_case_law as _gcl
+    return {"case_law": _gcl.all_records(classification_filter=classification or None)}
+
+
+@app.get("/api/cortex/case-law/most-cited")
+async def cortex_case_law_most_cited(n: int = 10):
+    from core.cortex.governance_case_law import governance_case_law as _gcl
+    return {"most_cited": _gcl.most_cited(n=n)}
+
+
+@app.post("/api/cortex/case-law/find-governing")
+async def cortex_case_law_find_governing(body: dict):
+    from core.cortex.governance_case_law import governance_case_law as _gcl
+    return {"governing": _gcl.find_governing(articles=body.get("articles", []), context=body.get("context", ""))}
+
+
+@app.post("/api/cortex/case-law/{record_id}/reclassify")
+async def cortex_case_law_reclassify(record_id: str, body: dict):
+    from core.cortex.governance_case_law import governance_case_law as _gcl
+    ok = _gcl.reclassify(record_id, body.get("classification", "ARCHIVED"))
+    return {"reclassified": ok}
+
+
+# ── CX-MATURITY-03: Governance Simulator ─────────────────────────────────────
+
+@app.post("/api/cortex/simulate")
+async def cortex_governance_simulate(body: dict):
+    """
+    Governance Simulator — what-if analysis for constitutional changes.
+    POST body: {target_article_id, proposed_enforcement, proposed_override_authority, description}
+    """
+    from core.cortex.governance_simulator import governance_simulator as _gs
+    try:
+        return _gs.simulate_from_dict(body)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── PTP-03: Trust Promotion Ladder ───────────────────────────────────────────
+
+@app.get("/api/trust/ladder")
+async def trust_promotion_ladder_overview():
+    """Trust Promotion Ladder — current rung positions for all pillars."""
+    from core.trust.trust_promotion_ladder import trust_promotion_ladder as _tpl
+    return _tpl.program_overview()
+
+
+@app.get("/api/trust/ladder/{pillar}")
+async def trust_promotion_ladder_pillar(pillar: str):
+    from core.trust.trust_promotion_ladder import trust_promotion_ladder as _tpl
+    pos = _tpl.get_position(pillar.upper())
+    if not pos:
+        return {"note": f"No position data for pillar '{pillar}'"}
+    return pos
+
+
+# ── AEG Promotion Pipeline ────────────────────────────────────────────────────
+
+@app.get("/api/nexus/aeg/pipeline")
+async def nexus_aeg_pipeline_summary():
+    """AEG Promotion Pipeline — Observatory→Trust→Sandbox→Live summary."""
+    from core.nexus.aeg_pipeline.aeg_promotion_engine import aeg_promotion_engine as _ape
+    return _ape.summary()
+
+
+@app.get("/api/nexus/aeg/pipeline/candidates")
+async def nexus_aeg_pipeline_candidates():
+    """Recommendations ready for human approval and promotion to live."""
+    from core.nexus.aeg_pipeline.aeg_promotion_engine import aeg_promotion_engine as _ape
+    return {"candidates": _ape.candidates_ready()}
+
+
+@app.get("/api/nexus/aeg/pipeline/live")
+async def nexus_aeg_pipeline_live():
+    """Live promoted AEG recommendations."""
+    from core.nexus.aeg_pipeline.aeg_promotion_engine import aeg_promotion_engine as _ape
+    return {"live": _ape.live_recommendations()}
+
+
+@app.post("/api/nexus/aeg/pipeline/ingest")
+async def nexus_aeg_pipeline_ingest(body: dict):
+    """Ingest a recommendation into the AEG promotion pipeline."""
+    from core.nexus.aeg_pipeline.aeg_promotion_engine import aeg_promotion_engine as _ape
+    try:
+        entry = _ape.ingest_recommendation(
+            rec_id=body["rec_id"],
+            rec_type=body["rec_type"],
+            investigation_id=body.get("investigation_id", ""),
+        )
+        return {"ingested": True, "entry_id": entry.entry_id, "stage": entry.stage, "blocked_reason": entry.blocked_reason}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/nexus/aeg/pipeline/{rec_id}/approve")
+async def nexus_aeg_pipeline_approve(rec_id: str, body: dict):
+    """Human approves a PROMOTION_CANDIDATE to PROMOTED_TO_LIVE."""
+    from core.nexus.aeg_pipeline.aeg_promotion_engine import aeg_promotion_engine as _ape
+    return _ape.approve_promotion(rec_id, approved_by=body.get("approved_by", "operator"))
+
+
+# ── Institutional Timeline ────────────────────────────────────────────────────
+
+@app.get("/api/institutional/timeline")
+async def institutional_timeline():
+    """PHOENIX Institutional Evolution Timeline — version history of all layers."""
+    from config import INSTITUTIONAL_TIMELINE, APP_VERSION, NEXUS_VERSION, OBSX_VERSION, CORTEX_VERSION, PTP_VERSION
+    return {
+        "current_versions": {
+            "app":    APP_VERSION,
+            "nexus":  NEXUS_VERSION,
+            "obsx":   OBSX_VERSION,
+            "cortex": CORTEX_VERSION,
+            "ptp":    PTP_VERSION,
+        },
+        "timeline": INSTITUTIONAL_TIMELINE,
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -4064,6 +4064,28 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 
+  <!-- Maturity Gaps v1.2 -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Maturity Implementations (v1.2)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;">
+      <div style="padding:8px;border-radius:8px;border:1px solid #81E6D9;background:#E6FFFA;">
+        <div style="font-size:11px;font-weight:700;color:#276749;">OX-MATURITY-01</div>
+        <div style="font-size:10px;color:var(--muted);">Institutional Disease Registry</div>
+        <div id="obsx-disease-count" style="font-size:13px;font-weight:700;color:#C05621;margin-top:2px;">— diseases</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #81E6D9;background:#E6FFFA;">
+        <div style="font-size:11px;font-weight:700;color:#276749;">OX-MATURITY-02</div>
+        <div style="font-size:10px;color:var(--muted);">Economic Outcome Ledger</div>
+        <div id="obsx-ledger-impact" style="font-size:13px;font-weight:700;color:#276749;margin-top:2px;">— impact</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #81E6D9;background:#E6FFFA;">
+        <div style="font-size:11px;font-weight:700;color:#276749;">OX-MATURITY-03</div>
+        <div style="font-size:10px;color:var(--muted);">Board Reports</div>
+        <div id="obsx-board-score" style="font-size:13px;font-weight:700;color:#276749;margin-top:2px;">— score</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Maturity progression -->
   <div class="card" style="margin-top:10px;">
     <div class="label" style="margin-bottom:8px;">OBSERVATORY-X Maturity</div>
@@ -4171,6 +4193,28 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 
+  <!-- CORTEX Maturity Gaps v1.2 -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Maturity Implementations (v1.2)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;">
+      <div style="padding:8px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;">
+        <div style="font-size:11px;font-weight:700;color:#C2410C;">CX-MATURITY-01</div>
+        <div style="font-size:10px;color:var(--muted);">Constitutional Court</div>
+        <div id="cortex-court-count" style="font-size:13px;font-weight:700;color:#C2410C;margin-top:2px;">— cases</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;">
+        <div style="font-size:11px;font-weight:700;color:#C2410C;">CX-MATURITY-02</div>
+        <div style="font-size:10px;color:var(--muted);">Governance Case Law</div>
+        <div id="cortex-caselaw-count" style="font-size:13px;font-weight:700;color:#C2410C;margin-top:2px;">— records</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;">
+        <div style="font-size:11px;font-weight:700;color:#C2410C;">CX-MATURITY-03</div>
+        <div style="font-size:10px;color:var(--muted);">Governance Simulator</div>
+        <div style="font-size:13px;font-weight:700;color:#276749;margin-top:2px;">ACTIVE</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Maturity progression -->
   <div class="card" style="margin-top:10px;">
     <div class="label" style="margin-bottom:8px;">CORTEX Maturity</div>
@@ -4272,6 +4316,24 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="card" style="margin-top:10px;">
     <div class="label" style="margin-bottom:8px;">PHOENIX Trust Program — Pillar Status</div>
     <div id="istack-ptp-pillars" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Trust Promotion Ladder -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Trust Promotion Ladder</div>
+    <div id="istack-trust-ladder" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- AEG Pipeline -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">AEG Promotion Pipeline</div>
+    <div id="istack-aeg-pipeline" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Institutional Timeline -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Institutional Evolution Timeline</div>
+    <div id="istack-timeline" style="font-size:12px;color:var(--muted);">Loading…</div>
   </div>
 
   <!-- Approved roadmap -->
@@ -4628,6 +4690,27 @@ function loadObsxTab() {
     const el = document.getElementById('obsx-gap04-cases');
     if (el) el.textContent = (d.total_cases ?? 0) + ' cases';
   }).catch(() => {});
+
+  // Maturity v1.2 data
+  fetch(API + '/api/observatory/diseases').then(r => r.json()).then(d => {
+    const el = document.getElementById('obsx-disease-count');
+    if (el) el.textContent = (d.active ?? 0) + ' active / ' + (d.total_diseases ?? 0) + ' total';
+  }).catch(() => {});
+
+  fetch(API + '/api/observatory/economic-ledger').then(r => r.json()).then(d => {
+    const el = document.getElementById('obsx-ledger-impact');
+    if (el) {
+      const impact = d.total_pnl_impact_usdt ?? 0;
+      el.textContent = (impact >= 0 ? '+' : '') + impact.toFixed(2) + ' USDT';
+      el.style.color = impact >= 0 ? '#276749' : '#C05621';
+    }
+  }).catch(() => {});
+
+  fetch(API + '/api/observatory/board-reports').then(r => r.json()).then(d => {
+    const el = document.getElementById('obsx-board-score');
+    const latest_score = d.weekly?.latest_score ?? d.monthly?.latest_score ?? null;
+    if (el) el.textContent = latest_score !== null ? latest_score + '/100' : '— (not generated)';
+  }).catch(() => {});
 }
 
 function loadCortexTab() {
@@ -4686,6 +4769,17 @@ function loadCortexTab() {
     const el = document.getElementById('cortex-gap03-count');
     if (el) el.textContent = (d.summary?.total_events ?? 0) + ' events';
   }).catch(() => {});
+
+  // Maturity v1.2 data
+  fetch(API + '/api/cortex/court').then(r => r.json()).then(d => {
+    const el = document.getElementById('cortex-court-count');
+    if (el) el.textContent = (d.total_cases ?? 0) + ' cases (' + (d.open_cases ?? 0) + ' open)';
+  }).catch(() => {});
+
+  fetch(API + '/api/cortex/case-law').then(r => r.json()).then(d => {
+    const el = document.getElementById('cortex-caselaw-count');
+    if (el) el.textContent = (d.binding ?? 0) + ' binding / ' + (d.total_records ?? 0) + ' total';
+  }).catch(() => {});
 }
 
 function loadInstitutionalStackTab() {
@@ -4741,6 +4835,64 @@ function loadInstitutionalStackTab() {
       const sd = document.getElementById('istack-detail');
       if (sd) sd.innerHTML = '<span style="color:var(--muted);">Engine not reachable</span>';
     });
+
+  // Trust Promotion Ladder
+  fetch(API + '/api/trust/ladder').then(r => r.json()).then(d => {
+    const el = document.getElementById('istack-trust-ladder');
+    if (el && d.positions) {
+      const _rungColor = {
+        UNVERIFIED: '#A0AEC0', PROVISIONAL: '#D69E2E', TRUSTED: '#2B6CB0',
+        INSTITUTIONAL: '#276749', CONSTITUTIONAL: '#553C9A'
+      };
+      const rows = d.positions.map(p =>
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #EDF2F7;">
+          <span style="font-size:11px;font-weight:600;">${p.pillar.replace(/_/g,' ')}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:#EDF2F7;color:${_rungColor[p.current_rung]||'#718096'};">${p.current_rung}</span>
+            <span style="font-family:var(--fm);font-size:11px;color:var(--muted);">${p.trust_score?.toFixed(1) ?? '—'}</span>
+          </div>
+        </div>`
+      ).join('');
+      el.innerHTML = rows + (d.by_rung ? `<div style="margin-top:6px;font-size:10px;color:var(--muted);">Program: ${d.highest_rung}</div>` : '');
+    }
+  }).catch(() => {});
+
+  // AEG Pipeline
+  fetch(API + '/api/nexus/aeg/pipeline').then(r => r.json()).then(d => {
+    const el = document.getElementById('istack-aeg-pipeline');
+    if (el) {
+      const rows = Object.entries(d.by_stage || {}).map(([stage, count]) =>
+        `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #EDF2F7;">
+          <span style="font-size:11px;">${stage}</span>
+          <span style="font-family:var(--fm);font-weight:700;font-size:12px;">${count}</span>
+        </div>`
+      ).join('') || '<span style="color:var(--muted);">No entries yet</span>';
+      el.innerHTML = rows + `<div style="margin-top:6px;font-size:10px;color:var(--muted);">Health: ${d.pipeline_health ?? '—'} | Live: ${d.live_recommendations ?? 0}</div>`;
+    }
+  }).catch(() => {});
+
+  // Institutional Timeline
+  fetch(API + '/api/institutional/timeline').then(r => r.json()).then(d => {
+    const el = document.getElementById('istack-timeline');
+    if (el && d.timeline) {
+      const _layerColor = {
+        NEXUS: '#7C3AED', OBSX: '#00897B', CORTEX: '#C2410C', STACK: '#2B6CB0'
+      };
+      const rows = [...d.timeline].reverse().map((t, i) => {
+        const isLatest = i === 0;
+        return `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #EDF2F7;${isLatest?'background:#F7FAFC;border-radius:6px;padding:8px;margin-bottom:4px;':''}">
+          <div style="flex-shrink:0;">
+            <span style="font-family:var(--fm);font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:#EDF2F7;color:${_layerColor[t.layer]||'#718096'};">${t.layer}</span>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--text);font-family:var(--fm);">v${t.version}${isLatest?' ← CURRENT':''}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px;">${t.event}</div>
+          </div>
+        </div>`;
+      }).join('');
+      el.innerHTML = rows;
+    }
+  }).catch(() => {});
 
   // PTP pillars
   fetch(API + '/api/trust/validation').then(r => r.json()).then(d => {

@@ -9,42 +9,40 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.65.0"
+APP_VERSION = "1.66.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
-# The central knowledge & intelligence nexus connecting all institutional layers:
-#   IMRAF (Memory) → DIAL (Intelligence) → AEOS (Context) → EMA (Interface) → EGI (Governance)
-# Pending: KGE → HKE → AEG
 NEXUS_NAME    = "PHOENIX NEXUS"
-NEXUS_VERSION = "3.2.0"   # v3.2: Trust Validation Platform — Evidence Accumulation + AEG Sandbox + Confidence Trajectory + Damage Score
+NEXUS_VERSION = "3.2.0"
 NEXUS_LAYERS  = ["IMRAF", "DIAL", "AEOS", "EMA", "EGI"]
 NEXUS_PENDING = ["KGE", "HKE", "AEG"]
 
 # OBSERVATORY-X — Institutional Observability Layer  (FTD-OBSX-CORTEX-DASHBOARD-001)
-# Independently versioned per institutional governance directive.
-# Bump MINOR on new observatory capabilities, PATCH on bug/observation fixes.
 OBSX_NAME    = "OBSERVATORY-X"
-OBSX_VERSION = "1.1.0"   # v1.1: Outcome Registry + Cemetery + Correlator + Precedent Library
+OBSX_VERSION = "1.2.0"   # v1.2: Disease Registry + Economic Outcome Ledger + Board Reports
 OBSX_COMPONENTS = ["registry", "scheduler", "health_monitor", "lineage_tracker",
                    "inspector", "defect_engine", "recommendation_engine",
                    "truth_layer", "trust_engine", "ownership", "nexus_bridge",
-                   "outcome_registry", "cemetery", "cross_correlator", "precedent_library"]
+                   "outcome_registry", "cemetery", "cross_correlator", "precedent_library",
+                   "disease_registry", "economic_outcome_ledger", "board_reports"]
 
 # CORTEX — Institutional Governance Layer  (FTD-OBSX-CORTEX-DASHBOARD-001)
-# Independently versioned per institutional governance directive.
-# Bump MINOR on new governance capabilities, PATCH on rule/article fixes.
 CORTEX_NAME    = "CORTEX"
-CORTEX_VERSION = "1.1.0"   # v1.1: Amendment Framework + Precedents + Governance Replay + Risk Scoring
+CORTEX_VERSION = "1.2.0"   # v1.2: Constitutional Court + Governance Case Law + Governance Simulator
 CORTEX_COMPONENTS = ["module_registry", "dependency_mapper", "conflict_engine",
                      "influence_matrix", "blame_engine", "constitution",
                      "counterfactual_engine", "constitutional_amendment",
-                     "constitutional_precedents", "governance_replay"]
+                     "constitutional_precedents", "governance_replay",
+                     "constitutional_court", "governance_case_law", "governance_simulator"]
 
 # PHOENIX TRUST PROGRAM (PTP) — Trust Validation Layer
 PTP_NAME    = "PHOENIX TRUST PROGRAM"
-PTP_VERSION = "1.0.0"   # v1.0: Five-pillar trust validation registry
+PTP_VERSION = "1.1.0"   # v1.1: Trust Promotion Ladder (UNVERIFIED→CONSTITUTIONAL)
 PTP_PILLARS = ["RECOMMENDATION_ACCURACY", "INVESTIGATION_ACCURACY",
                "BLAME_ACCURACY", "COUNTERFACTUAL_ACCURACY", "CONFLICT_ACCURACY"]
+
+# AEG Pipeline
+AEG_PIPELINE_VERSION = "1.0.0"  # v1.0: OBX→Trust→Sandbox→Promotion pipeline
 
 # PHOENIX Institutional Stack — ordered maturity progression
 INSTITUTIONAL_STACK = [
@@ -53,8 +51,19 @@ INSTITUTIONAL_STACK = [
     {"name": "OBSERVATORY-X",        "status": "OPERATIONAL",  "version": OBSX_VERSION},
     {"name": "CORTEX",               "status": "OPERATIONAL",  "version": CORTEX_VERSION},
     {"name": "PHOENIX TRUST PROGRAM","status": "ACCUMULATING", "version": PTP_VERSION},
-    {"name": "AEG",                  "status": "PARTIAL",      "version": None},
+    {"name": "AEG",                  "status": "PARTIAL",      "version": AEG_PIPELINE_VERSION},
     {"name": "PCAO",                 "status": "FUTURE",       "version": None},
+]
+
+# Institutional Evolution Timeline — for dashboard display
+INSTITUTIONAL_TIMELINE = [
+    {"version": "1.57.0", "event": "NEXUS v3.0 — IMRAF+DIAL+AEOS+EMA+EGI complete",    "layer": "NEXUS"},
+    {"version": "1.60.0", "event": "OBSERVATORY-X v1.0 — Foundation complete",           "layer": "OBSX"},
+    {"version": "1.62.0", "event": "CORTEX v1.0 — Governance foundation complete",       "layer": "CORTEX"},
+    {"version": "1.63.0", "event": "NEXUS v3.2 — Trust Validation Platform",             "layer": "NEXUS"},
+    {"version": "1.64.0", "event": "OBSX v1.0 + CORTEX v1.0 — Institutional layers declared", "layer": "STACK"},
+    {"version": "1.65.0", "event": "OBSX v1.1 + CORTEX v1.1 — Gap coverage: Outcome Registry, Cemetery, Correlator, Precedent Library, Amendment Framework, Precedents, Replay, Risk Scoring + PTP v1.0", "layer": "STACK"},
+    {"version": "1.66.0", "event": "OBSX v1.2 + CORTEX v1.2 — Maturity: Disease Registry, Economic Ledger, Board Reports, Constitutional Court, Case Law, Governance Simulator + PTP v1.1 Promotion Ladder + AEG Pipeline v1.0", "layer": "STACK"},
 ]
 
 
