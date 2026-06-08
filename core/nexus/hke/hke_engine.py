@@ -414,6 +414,7 @@ class HKEEngine:
         # Lazy import to avoid circular deps at module load time
         self._imraf = None
         self._Category = None
+        self._Provenance = None
         # Lifecycle tracking counters updated by run_extraction()
         self._total_extracted: int = 0
         self._last_run_new: int = 0
@@ -456,7 +457,13 @@ class HKEEngine:
                 mod = _sys.modules[mod_name]
             self._imraf = mod.imraf
             self._Category = mod.Category
+            self._Provenance = getattr(mod, "Provenance", None)
         return self._imraf, self._Category
+
+    def _get_provenance(self) -> Any:
+        """Return the Provenance class, or None if not available."""
+        self._get_imraf()
+        return self._Provenance
 
     def _exists(self, key_phrase: str) -> bool:
         """Return True if key_phrase already exists in IMRAF search index."""
@@ -468,15 +475,21 @@ class HKEEngine:
             return False
 
     def _archive(self, category, content: str, tags: List[str],
-                 metadata: Dict[str, Any] = None) -> bool:
+                 metadata: Dict[str, Any] = None,
+                 provenance: Any = None) -> bool:
         """Archive a single fact. Returns True if archived, False if skipped/failed."""
         imraf, Category = self._get_imraf()
+        # hke_extracted tag is mandatory on every fact HKE archives — audit depends on it.
+        all_tags = list(tags)
+        if "hke_extracted" not in all_tags:
+            all_tags.append("hke_extracted")
         try:
             imraf.record(
                 category=category,
                 title=content[:200],
                 data={"content": content, **(metadata or {})},
-                tags=tags,
+                tags=all_tags,
+                provenance=provenance,
             )
             return True
         except Exception as exc:
@@ -515,8 +528,19 @@ class HKEEngine:
     def _archive_known_decisions(self) -> int:
         """Archive _KNOWN_DECISIONS items. Returns count of new records."""
         _, Category = self._get_imraf()
+        Provenance = self._get_provenance()
         decisions = self._extract_known_decisions()
         count = 0
+        prov = None
+        if Provenance is not None:
+            try:
+                prov = Provenance(
+                    source_file="core/governance/backfill/historical_decision_backfill.py",
+                    extraction_method="hke_decision",
+                    confidence=0.8,
+                )
+            except Exception:
+                pass
         for d in decisions:
             decision_text = d.get("decision", "")
             if not decision_text:
@@ -536,7 +560,8 @@ class HKEEngine:
             if self._archive(Category.DECISION, content, tags,
                              metadata={"source": "historical_decision_backfill",
                                        "component": d.get("component", ""),
-                                       "version": d.get("version", "")}):
+                                       "version": d.get("version", "")},
+                             provenance=prov):
                 count += 1
         return count
 
@@ -568,17 +593,20 @@ class HKEEngine:
             param_name = m.group(1).strip()
             value = m.group(2).strip()
             comment = m.group(3).strip()
-            # Skip obvious non-config items (Field(default=...) already captured by value)
+            # Determine line number (1-based) from character offset
+            line_no = text[:m.start()].count("\n") + 1
             results.append({
                 "param_name": param_name,
                 "value": value,
                 "comment": comment,
+                "source_line": line_no,
             })
         return results
 
     def _archive_config_params(self) -> int:
         """Archive config.py parameters. Returns count of new records."""
         _, Category = self._get_imraf()
+        Provenance = self._get_provenance()
         params = self._extract_config_params()
         count = 0
         for p in params:
@@ -587,10 +615,22 @@ class HKEEngine:
                 continue
             content = f"CONFIG: {p['param_name']} = {p['value']} — {p['comment']}"
             tags = ["config", "parameter", p["param_name"].lower()]
+            prov = None
+            if Provenance is not None:
+                try:
+                    prov = Provenance(
+                        source_file="config.py",
+                        source_line=p.get("source_line", 0),
+                        extraction_method="hke_config",
+                        confidence=0.7,
+                    )
+                except Exception:
+                    pass
             if self._archive(Category.KNOWLEDGE, content, tags,
                              metadata={"source": "config.py",
                                        "param_name": p["param_name"],
-                                       "value": p["value"]}):
+                                       "value": p["value"]},
+                             provenance=prov):
                 count += 1
         return count
 
@@ -640,7 +680,18 @@ class HKEEngine:
     def _archive_claude_md_rules(self) -> int:
         """Archive CLAUDE.md governance sections. Returns count of new records."""
         _, Category = self._get_imraf()
+        Provenance = self._get_provenance()
         rules = self._extract_claude_md_rules()
+        prov = None
+        if Provenance is not None:
+            try:
+                prov = Provenance(
+                    source_file="CLAUDE.md",
+                    extraction_method="hke_governance",
+                    confidence=0.85,
+                )
+            except Exception:
+                pass
         count = 0
         for r in rules:
             key = f"GOVERNANCE: {r['section_title']}"
@@ -650,7 +701,8 @@ class HKEEngine:
             tags = ["claude_md", "governance", r["section_slug"]]
             if self._archive(Category.GOVERNANCE, content, tags,
                              metadata={"source": "CLAUDE.md",
-                                       "section": r["section_title"]}):
+                                       "section": r["section_title"]},
+                             provenance=prov):
                 count += 1
         return count
 
@@ -662,7 +714,18 @@ class HKEEngine:
     def _archive_ftd_registry(self) -> int:
         """Archive FTD registry entries. Returns count of new records."""
         _, Category = self._get_imraf()
+        Provenance = self._get_provenance()
         ftds = self._extract_ftd_registry()
+        prov = None
+        if Provenance is not None:
+            try:
+                prov = Provenance(
+                    source_file="core/nexus/hke/hke_engine.py",
+                    extraction_method="hke_ftd",
+                    confidence=0.9,
+                )
+            except Exception:
+                pass
         count = 0
         for ftd in ftds:
             key = f"FTD: {ftd['ftd_id']} —"
@@ -676,7 +739,8 @@ class HKEEngine:
             if self._archive(Category.DECISION, content, tags,
                              metadata={"source": "ftd_registry",
                                        "ftd_id": ftd["ftd_id"],
-                                       "status": ftd["status"]}):
+                                       "status": ftd["status"]},
+                             provenance=prov):
                 count += 1
         return count
 
@@ -688,7 +752,18 @@ class HKEEngine:
     def _archive_module_profiles(self) -> int:
         """Archive module profiles. Returns count of new records."""
         _, Category = self._get_imraf()
+        Provenance = self._get_provenance()
         profiles = self._extract_module_profiles()
+        prov = None
+        if Provenance is not None:
+            try:
+                prov = Provenance(
+                    source_file="core/nexus/hke/hke_engine.py",
+                    extraction_method="hke_module",
+                    confidence=0.75,
+                )
+            except Exception:
+                pass
         count = 0
         for m in profiles:
             key = f"MODULE: {m['name']} — Purpose:"
@@ -702,7 +777,8 @@ class HKEEngine:
             if self._archive(Category.KNOWLEDGE, content, tags,
                              metadata={"source": "module_profiles",
                                        "module_name": m["name"],
-                                       "risk_level": m["risk_level"]}):
+                                       "risk_level": m["risk_level"]},
+                             provenance=prov):
                 count += 1
         return count
 
@@ -714,7 +790,18 @@ class HKEEngine:
     def _archive_known_incidents(self) -> int:
         """Archive known system incidents. Returns count of new records."""
         _, Category = self._get_imraf()
+        Provenance = self._get_provenance()
         incidents = self._extract_known_incidents()
+        prov = None
+        if Provenance is not None:
+            try:
+                prov = Provenance(
+                    source_file="core/nexus/hke/hke_engine.py",
+                    extraction_method="hke_incident",
+                    confidence=0.9,
+                )
+            except Exception:
+                pass
         count = 0
         for inc in incidents:
             key = f"INCIDENT: {inc['incident_id']} —"
@@ -730,7 +817,8 @@ class HKEEngine:
                              metadata={"source": "known_incidents",
                                        "incident_id": inc["incident_id"],
                                        "severity": inc["severity"],
-                                       "version_fixed": inc["version_fixed"]}):
+                                       "version_fixed": inc["version_fixed"]},
+                             provenance=prov):
                 count += 1
         return count
 
