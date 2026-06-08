@@ -9,14 +9,14 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.59.2"
+APP_VERSION = "1.59.4"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 # The central knowledge & intelligence nexus connecting all institutional layers:
 #   IMRAF (Memory) → DIAL (Intelligence) → AEOS (Context) → EMA (Interface) → EGI (Governance)
 # Pending: KGE → HKE → AEG
 NEXUS_NAME    = "PHOENIX NEXUS"
-NEXUS_VERSION = "1.0.0"   # Nexus architecture version, independent of APP_VERSION
+NEXUS_VERSION = "2.0.0"   # v2: Validation Era — DCEL+DOAE+KGE+HKE+GOV+IQ+Evidence+Quality
 NEXUS_LAYERS  = ["IMRAF", "DIAL", "AEOS", "EMA", "EGI"]
 NEXUS_PENDING = ["KGE", "HKE", "AEG"]
 

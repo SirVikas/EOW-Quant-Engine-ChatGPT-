@@ -7,6 +7,7 @@ and assumption drift. No persistent DB — computes fresh each call.
 
 from __future__ import annotations
 
+import re
 import time
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Any
@@ -107,24 +108,23 @@ class GovernanceIntelligenceEngine:
         # Group by param keywords appearing in title
         param_records: Dict[str, list] = {}
         for rec in decisions:
-            title_lower = rec.title.lower()
+            title_lower = (rec.get("title") or "").lower()
             for word in title_lower.split():
                 if len(word) > 4 and word.isalpha():
                     param_records.setdefault(word, []).append(rec)
 
-        import re
         for param, recs in param_records.items():
             if len(recs) < 2:
                 continue
-            raised = [r for r in recs if any(kw in r.title.lower() for kw in ["raised", "increased", "bumped", "higher"])]
-            lowered = [r for r in recs if any(kw in r.title.lower() for kw in ["lowered", "decreased", "reduced", "lower"])]
+            raised = [r for r in recs if any(kw in (r.get("title") or "").lower() for kw in ["raised", "increased", "bumped", "higher"])]
+            lowered = [r for r in recs if any(kw in (r.get("title") or "").lower() for kw in ["lowered", "decreased", "reduced", "lower"])]
             if raised and lowered:
                 a = raised[0]
                 b = lowered[0]
                 findings.append(ContradictionFinding(
                     param_name=param,
-                    decision_a={"id": a.id, "title": a.title, "ts": a.ts},
-                    decision_b={"id": b.id, "title": b.title, "ts": b.ts},
+                    decision_a={"id": a.get("id"), "title": a.get("title"), "ts": a.get("ts")},
+                    decision_b={"id": b.get("id"), "title": b.get("title"), "ts": b.get("ts")},
                     description=f"Param '{param}' was both raised and lowered across decisions — possible reversal confusion.",
                     severity="MEDIUM",
                 ))
@@ -150,29 +150,230 @@ class GovernanceIntelligenceEngine:
         cutoff_ms = now_ms - (max_age_days * _MS_PER_DAY)
 
         try:
-            decisions = imraf.get_all(category="DECISION")
-            decisions += imraf.get_all(category="GOVERNANCE")
+            decisions = imraf.timeline(category="DECISION", limit=500)
+            decisions += imraf.timeline(category="GOVERNANCE", limit=200)
         except Exception as exc:
             logger.warning("GovernanceIntelligenceEngine.scan_stale_decisions error: %s", exc)
             return []
 
         for rec in decisions:
-            if rec.ts >= cutoff_ms:
+            rec_ts = rec.get("ts", 0) or 0
+            if rec_ts >= cutoff_ms:
                 continue
-            age_days = int((now_ms - rec.ts) / _MS_PER_DAY)
+            age_days = int((now_ms - rec_ts) / _MS_PER_DAY)
+            title = rec.get("title", "")
             findings.append(StaleFinding(
-                record_id=rec.id,
-                title=rec.title,
-                category=rec.category,
+                record_id=rec.get("id", 0),
+                title=title,
+                category=rec.get("category", ""),
                 age_days=age_days,
                 last_referenced="unknown",
-                recommendation=f"Review whether this decision ({rec.title}) is still current — {age_days} days old.",
+                recommendation=f"Review whether this decision ({title}) is still current — {age_days} days old.",
             ))
 
         return findings[:20]
 
     def scan_assumptions(self) -> List[AssumptionFinding]:
         return list(_TRACKED_ASSUMPTIONS)
+
+    # ── Real contradiction detection (live IMRAF data) ────────────────────────
+
+    def detect_real_contradictions(self) -> List[dict]:
+        """
+        Detect contradictions in DECISION records pulled live from IMRAF.
+
+        Groups records by component metadata field, then within each component
+        looks for pairs with opposite direction keywords or conflicting numeric
+        parameter values.
+
+        Returns list of dicts:
+          {"component": str, "contradiction_type": str, "fact_a": str,
+           "fact_b": str, "severity": "HIGH"|"MEDIUM"|"LOW"}
+        """
+        try:
+            from core.institutional_memory.imraf_engine import imraf
+        except ImportError:
+            return []
+
+        try:
+            records = imraf.search(query="decision", limit=500)
+        except Exception as exc:
+            logger.warning("detect_real_contradictions: IMRAF search failed: %s", exc)
+            return []
+
+        # Group by component extracted from the data dict
+        groups: Dict[str, list] = {}
+        for rec in records:
+            data = rec.get("data", {})
+            component = ""
+            if isinstance(data, dict):
+                component = data.get("component", "") or ""
+            if not component:
+                component = "unknown"
+            groups.setdefault(component, []).append(rec)
+
+        findings: list = []
+
+        # Opposite keyword pairs that signal conflicting decisions
+        _OPPOSITE_PAIRS = [
+            ("enabled", "disabled"),
+            ("raised", "lowered"),
+            ("increased", "decreased"),
+            ("activated", "deactivated"),
+            ("added", "removed"),
+        ]
+
+        for component, recs in groups.items():
+            if len(recs) < 2:
+                continue
+
+            for i in range(len(recs)):
+                for j in range(i + 1, len(recs)):
+                    a = recs[i]
+                    b = recs[j]
+                    title_a = (a.get("title") or "").lower()
+                    title_b = (b.get("title") or "").lower()
+
+                    # Check for opposite keyword pairs
+                    for kw_pos, kw_neg in _OPPOSITE_PAIRS:
+                        if kw_pos in title_a and kw_neg in title_b:
+                            severity = "HIGH" if kw_pos in ("enabled", "activated") else "MEDIUM"
+                            findings.append({
+                                "component": component,
+                                "contradiction_type": f"{kw_pos}/{kw_neg} conflict",
+                                "fact_a": a.get("title", ""),
+                                "fact_b": b.get("title", ""),
+                                "severity": severity,
+                            })
+                            break
+                        if kw_neg in title_a and kw_pos in title_b:
+                            severity = "HIGH" if kw_pos in ("enabled", "activated") else "MEDIUM"
+                            findings.append({
+                                "component": component,
+                                "contradiction_type": f"{kw_neg}/{kw_pos} conflict",
+                                "fact_a": a.get("title", ""),
+                                "fact_b": b.get("title", ""),
+                                "severity": severity,
+                            })
+                            break
+
+                    # Numeric parameter value conflicts: param=X in one vs param=Y in other
+                    param_vals_a = {m.group(1).lower(): m.group(2)
+                                    for m in re.finditer(r"(\w+)=(\d+\.?\d*)", title_a)}
+                    param_vals_b = {m.group(1).lower(): m.group(2)
+                                    for m in re.finditer(r"(\w+)=(\d+\.?\d*)", title_b)}
+                    for param, val_a in param_vals_a.items():
+                        if param in param_vals_b and param_vals_b[param] != val_a:
+                            findings.append({
+                                "component": component,
+                                "contradiction_type": f"parameter value conflict: {param}",
+                                "fact_a": a.get("title", ""),
+                                "fact_b": b.get("title", ""),
+                                "severity": "MEDIUM",
+                            })
+
+        # Deduplicate by (component, fact_a prefix, contradiction_type)
+        seen: set = set()
+        deduped: list = []
+        for f in findings:
+            key = (f["component"], f["fact_a"][:60], f["contradiction_type"])
+            if key not in seen:
+                seen.add(key)
+                deduped.append(f)
+
+        return deduped[:30]
+
+    def detect_stale_assumptions(self) -> List[dict]:
+        """
+        Detect DECISION records whose engine_ver is more than 5 minor versions
+        behind the current APP_VERSION.
+
+        Returns list of dicts:
+          {"content": str, "version": str, "age_versions": int, "component": str}
+        """
+        try:
+            from core.institutional_memory.imraf_engine import imraf
+        except ImportError:
+            return []
+
+        try:
+            from config import APP_VERSION as _APP_VER
+        except Exception:
+            _APP_VER = "0.0.0"
+
+        def _parse_minor(vstr: str):
+            m = re.search(r"\d+\.(\d+)", vstr)
+            return int(m.group(1)) if m else None
+
+        current_minor = _parse_minor(_APP_VER)
+        if current_minor is None:
+            return []
+
+        try:
+            records = imraf.search(query="decision", limit=500)
+        except Exception as exc:
+            logger.warning("detect_stale_assumptions: IMRAF search failed: %s", exc)
+            return []
+
+        stale: list = []
+        for rec in records:
+            if rec.get("category") != "DECISION":
+                continue
+            engine_ver = rec.get("engine_ver", "")
+            if not engine_ver:
+                continue
+            rec_minor = _parse_minor(engine_ver)
+            if rec_minor is None:
+                continue
+            age = current_minor - rec_minor
+            if age > 5:
+                data = rec.get("data", {})
+                component = ""
+                if isinstance(data, dict):
+                    component = data.get("component", "") or ""
+                stale.append({
+                    "content": rec.get("title", ""),
+                    "version": engine_ver,
+                    "age_versions": age,
+                    "component": component or "unknown",
+                })
+
+        stale.sort(key=lambda x: x["age_versions"], reverse=True)
+        return stale[:30]
+
+    # ── Reports ───────────────────────────────────────────────────────────────
+
+    def generate_report(self) -> dict:
+        """
+        Extended governance report that includes live contradiction detection.
+
+        Extends generate_cleanup_report() with:
+          real_contradictions      — output of detect_real_contradictions()
+          stale_assumptions        — output of detect_stale_assumptions()
+          real_contradiction_count — int
+          stale_count              — int
+
+        governance_health_score is adjusted downward for real contradictions
+        and stale assumptions beyond those already counted in the base report.
+        """
+        base = self.generate_cleanup_report()
+        real_contradictions = self.detect_real_contradictions()
+        stale_assumptions = self.detect_stale_assumptions()
+
+        real_count = len(real_contradictions)
+        stale_count = len(stale_assumptions)
+
+        # Each real contradiction costs 5 points; each stale assumption costs 1 point
+        adjusted_score = max(0, base["governance_health_score"] - real_count * 5 - stale_count * 1)
+
+        return {
+            **base,
+            "real_contradictions": real_contradictions,
+            "stale_assumptions": stale_assumptions,
+            "real_contradiction_count": real_count,
+            "stale_count": stale_count,
+            "governance_health_score": adjusted_score,
+        }
 
     def generate_cleanup_report(self) -> dict:
         contradictions = self.scan_contradictions()
