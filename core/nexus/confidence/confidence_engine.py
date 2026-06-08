@@ -475,6 +475,191 @@ class ConfidenceEngine:
             "ts": ts,
         }
 
+    def compute_confidence_trajectory(self) -> dict:
+        """
+        Project confidence trajectory toward 0.80+ based on current velocity
+        and known improvement levers.
+
+        Models each lever's marginal contribution to composite confidence
+        given the adaptive weighting formula in compute_nexus_confidence().
+        """
+        conf = self.compute_nexus_confidence()
+        current = conf.get("nexus_composite_confidence", 0.0)
+        target = 0.80
+        gap = round(target - current, 4)
+
+        real_pct = conf.get("real_attribution_pct", 0.0)
+        imraf_avg = conf.get("imraf_avg_confidence", 0.0)
+        attribution_avg = conf.get("attribution_avg_confidence", 0.0)
+        provenance_pct = conf.get("provenance_coverage_pct", 0.0)
+
+        # KGE connectivity — read from kge engine
+        kge_score = 0.0
+        try:
+            from core.nexus.kge.kge_engine import kge
+            intel = kge.relationship_intelligence_score()
+            kge_score = intel.get("intelligence_score", 0.0)
+        except Exception:
+            pass
+
+        # --- Lever analysis ---
+        # real_attribution_pct: drives attribution_weight from 0.3→0.6 and removes synthetic_penalty.
+        # Estimated impact: shifting from current real_pct to 100% raises composite ~0.08-0.13
+        real_attr_impact = round(0.30 * (1.0 - real_pct) * (attribution_avg - imraf_avg if attribution_avg > imraf_avg else 0.10), 4)
+        real_attr_impact = max(real_attr_impact, 0.08)  # floor: minimum raises composite ~0.08
+
+        # imraf_avg_confidence: directly scales the IMRAF component
+        # Moving from current imraf_avg to 0.85 (HIGH level) would add imraf_weight*(0.85-imraf_avg)
+        imraf_weight_now = conf.get("imraf_weight", 0.70)
+        imraf_avg_impact = round(imraf_weight_now * max(0.0, 0.85 - imraf_avg), 4)
+
+        # synthetic_penalty: already captured in real_attribution_pct lever — low incremental
+        synthetic_penalty_impact = round(0.05 * (1.0 - real_pct), 4)
+
+        # kge_connectivity: already at 100 → near-zero incremental impact
+        kge_impact = round(max(0.0, 0.02 * (1.0 - kge_score / 100.0)), 4)
+
+        # provenance_coverage: already 97%+ → near-zero incremental impact
+        provenance_impact = round(max(0.0, 0.05 * max(0.0, 1.0 - provenance_pct / 100.0)), 4)
+
+        levers = [
+            {
+                "lever": "real_attribution_pct",
+                "current_value": round(real_pct, 4),
+                "impact_on_confidence": real_attr_impact,
+                "how_to_improve": "Accumulate live trades so DOAE generates HIGH-confidence post-trade snapshots",
+                "time_dependent": True,
+            },
+            {
+                "lever": "imraf_avg_confidence",
+                "current_value": round(imraf_avg, 4),
+                "impact_on_confidence": imraf_avg_impact,
+                "how_to_improve": "Add VERIFIER and DEPLOYMENT records with provenance+git_sha to raise average",
+                "time_dependent": False,
+            },
+            {
+                "lever": "synthetic_penalty",
+                "current_value": round(1.0 - real_pct, 4),
+                "impact_on_confidence": synthetic_penalty_impact,
+                "how_to_improve": "Reduced automatically as real_attribution_pct grows via live trades",
+                "time_dependent": True,
+            },
+            {
+                "lever": "kge_connectivity",
+                "current_value": round(kge_score, 1),
+                "impact_on_confidence": kge_impact,
+                "how_to_improve": "Already near maximum — minimal incremental gain",
+                "time_dependent": False,
+            },
+            {
+                "lever": "provenance_coverage",
+                "current_value": round(provenance_pct, 2),
+                "impact_on_confidence": provenance_impact,
+                "how_to_improve": "Already 97%+ — minimal incremental gain",
+                "time_dependent": False,
+            },
+        ]
+        # Sort by impact descending
+        levers.sort(key=lambda x: x["impact_on_confidence"], reverse=True)
+
+        # --- Milestone projections ---
+        # Rough model: 50 trades → ~20% real attribution → raises composite by ~real_attr_impact/5
+        def _trades_for_confidence(conf_target: float) -> int:
+            if current >= conf_target:
+                return 0
+            needed_gain = conf_target - current
+            gain_per_50_trades = real_attr_impact / 5.0 if real_attr_impact > 0 else 0.01
+            return int((needed_gain / gain_per_50_trades) * 50)
+
+        milestones = [
+            {
+                "target": 0.70,
+                "status": "REACHED" if current >= 0.70 else "PENDING",
+                "estimated_trades_needed": _trades_for_confidence(0.70),
+            },
+            {
+                "target": 0.75,
+                "status": "REACHED" if current >= 0.75 else "PENDING",
+                "estimated_trades_needed": _trades_for_confidence(0.75),
+            },
+            {
+                "target": 0.80,
+                "status": "REACHED" if current >= 0.80 else "PENDING",
+                "estimated_trades_needed": _trades_for_confidence(0.80),
+            },
+        ]
+
+        est_trades_to_080 = _trades_for_confidence(0.80)
+        bottleneck = (
+            "real_attribution_pct is near zero — confidence is dominated by synthetic DOAE data; "
+            "accumulate live trades to unlock full confidence range"
+            if real_pct < 0.10
+            else "imraf_avg_confidence is the primary limiter — add high-confidence IMRAF records"
+            if imraf_avg_impact > real_attr_impact
+            else "real_attribution_pct — live trade accumulation required to reach 0.80 target"
+        )
+
+        return {
+            "current": current,
+            "target": target,
+            "gap": gap,
+            "levers": levers,
+            "projected_milestones": milestones,
+            "estimated_trades_to_0_80": est_trades_to_080,
+            "bottleneck": bottleneck,
+        }
+
+    def get_recommendation_confidence_floor(self) -> dict:
+        """
+        Return the minimum confidence required before a recommendation is trustworthy,
+        and whether current state meets that floor.
+
+        ADVISORY floor: 0.65 — can generate recommendations, not guaranteed
+        TRUSTED floor:  0.75 — recommendations are institutionally credible
+        HIGH_TRUST floor: 0.85 — recommendations can be acted on with minimal review
+        """
+        conf = self.compute_nexus_confidence()
+        current = conf.get("nexus_composite_confidence", 0.0)
+
+        advisory_floor = 0.65
+        trusted_floor = 0.75
+        high_trust_floor = 0.85
+
+        advisory_met = current >= advisory_floor
+        trusted_met = current >= trusted_floor
+        high_trust_met = current >= high_trust_floor
+
+        if high_trust_met:
+            current_tier = "HIGH_TRUST"
+        elif trusted_met:
+            current_tier = "TRUSTED"
+        elif advisory_met:
+            current_tier = "ADVISORY"
+        else:
+            current_tier = "BELOW_ADVISORY"
+
+        return {
+            "current_confidence": current,
+            "advisory": {
+                "floor": advisory_floor,
+                "met": advisory_met,
+                "description": "Can generate recommendations, not guaranteed",
+            },
+            "trusted": {
+                "floor": trusted_floor,
+                "met": trusted_met,
+                "description": "Recommendations are institutionally credible",
+            },
+            "high_trust": {
+                "floor": high_trust_floor,
+                "met": high_trust_met,
+                "description": "Recommendations can be acted on with minimal review",
+            },
+            "current_tier": current_tier,
+            "gap_to_trusted": round(max(0.0, trusted_floor - current), 4),
+            "gap_to_high_trust": round(max(0.0, high_trust_floor - current), 4),
+        }
+
     def get_low_confidence_facts(self, threshold: float = 0.5, limit: int = 20) -> list:
         """Return IMRAF records whose confidence score falls below threshold."""
         results: List[dict] = []

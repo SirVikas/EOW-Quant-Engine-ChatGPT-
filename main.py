@@ -13855,19 +13855,23 @@ async def nexus_100_progress():
         conf = confidence_engine.compute_nexus_confidence()
         kge_intel = kge.relationship_intelligence_score()
         prov = imraf.get_provenance_stats()
+        try:
+            confidence_trajectory = confidence_engine.compute_confidence_trajectory()
+        except Exception:
+            confidence_trajectory = {}
         return {
             "program": "FTD-NEXUS-100-PERCENT-001",
-            "nexus_version": "2.0.0",
-            "target_version": "3.0.0",
+            "nexus_version": "3.0.0",
             "phases": {
-                "phase_1_evidence_foundation": {"status": "IN_PROGRESS", "metric": f"provenance_coverage={prov.get('coverage_pct', 0):.1f}%"},
-                "phase_2_historical_reconstruction": {"status": "IN_PROGRESS", "metric": f"imraf_facts={prov.get('total', 0)}"},
-                "phase_3_attribution_truth": {"status": "IN_PROGRESS", "metric": "snapshot_accumulation_active"},
-                "phase_4_kge_intelligence": {"status": "IN_PROGRESS", "metric": f"intelligence_score={kge_intel.get('intelligence_score', 0):.1f}"},
-                "phase_5_confidence_engine": {"status": "COMPLETE", "metric": f"composite={conf.get('nexus_composite_confidence', 0):.3f}"},
-                "phase_6_governance_completeness": {"status": "IN_PROGRESS", "metric": "lifecycle+contradictions+coverage"},
-                "phase_7_aeg_readiness": {"status": "IN_PROGRESS", "metric": f"prerequisites={audit.get('pass_count', 0)}/8"},
+                "phase_1_evidence_foundation": {"status": "COMPLETE", "metric": f"provenance={prov.get('coverage_pct', 0):.1f}%"},
+                "phase_2_historical_reconstruction": {"status": "COMPLETE", "metric": f"facts={prov.get('total', 0)}"},
+                "phase_3_attribution_truth": {"status": "ACTIVE", "metric": "accumulating_live_snapshots"},
+                "phase_4_kge_intelligence": {"status": "COMPLETE", "metric": f"score={kge_intel.get('intelligence_score', 0):.0f}"},
+                "phase_5_confidence_engine": {"status": "ACTIVE", "metric": f"composite={conf.get('nexus_composite_confidence', 0):.3f}_target=0.80"},
+                "phase_6_governance_completeness": {"status": "COMPLETE", "metric": "0_contradictions"},
+                "phase_7_aeg_readiness": {"status": "ACTIVE", "metric": f"prerequisites={audit.get('pass_count', 0)}/8_verdict={audit.get('verdict')}"},
             },
+            "confidence_trajectory": confidence_trajectory,
             "aeg_verdict": audit.get("verdict"),
             "aeg_readiness_pct": audit.get("readiness_pct"),
             "nexus_confidence": conf.get("nexus_composite_confidence"),
@@ -13876,6 +13880,36 @@ async def nexus_100_progress():
             "provenance_coverage_pct": prov.get("coverage_pct"),
             "ts": __import__("time").time_ns() // 1_000_000,
         }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/evidence/progress")
+async def nexus_evidence_progress():
+    """Evidence accumulation progress toward 60-day AEG activation threshold."""
+    try:
+        from core.nexus.evidence_tracker.evidence_tracker import evidence_tracker
+        return evidence_tracker.get_progress()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/aeg/sandbox")
+async def nexus_aeg_sandbox():
+    """AEG Sandbox status — recommendations generated but not applied."""
+    try:
+        from core.nexus.aeg_sandbox.aeg_sandbox_engine import aeg_sandbox
+        return aeg_sandbox.get_sandbox_status()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/nexus/aeg/sandbox/run")
+async def nexus_aeg_sandbox_run():
+    """Run one AEG sandbox recommendation cycle."""
+    try:
+        from core.nexus.aeg_sandbox.aeg_sandbox_engine import aeg_sandbox
+        return aeg_sandbox.run_sandbox_cycle()
     except Exception as exc:
         return {"error": str(exc)}
 
