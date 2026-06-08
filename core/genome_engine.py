@@ -682,6 +682,23 @@ class GenomeEngine:
             )
         )
         self.promotion_log = self.promotion_log[-500:]
+        try:
+            from core.nexus.dcel.dcel_engine import archive_genome_decision
+            archive_genome_decision(
+                strategy_type=candidate.strategy_type,
+                decision=decision,
+                genome_id=candidate.genome_id,
+                train_pf=candidate.profit_factor,
+                oos_pf=candidate.oos_pf,
+                avg_r=candidate.avg_r_multiple,
+                win_rate=candidate.win_rate,
+                cost_drag=candidate.cost_drag_pct,
+                trades=candidate.trades,
+                reason=reason,
+                dna_keys=list(candidate.dna.keys()),
+            )
+        except Exception:
+            pass
         # Auto-save winning DNA to disk immediately (Fix A — survives Redis loss)
         if decision == "PROMOTED":
             self._persist_dna()

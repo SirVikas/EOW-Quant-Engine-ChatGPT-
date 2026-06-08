@@ -78,6 +78,15 @@ class LossClusterController:
                 f" → pause {cfg.LCC_PAUSE_MINUTES}min)"
             )
             logger.warning(f"[LOSS-CLUSTER] {reason}")
+            try:
+                from core.nexus.dcel.dcel_engine import archive_lcc_event
+                archive_lcc_event(
+                    event_type="PAUSE_START",
+                    consecutive_losses=consecutive_losses,
+                    pause_minutes=cfg.LCC_PAUSE_MINUTES,
+                )
+            except Exception:
+                pass
             return LossClusterResult(
                 ok=False, size_mult=0.0, state="PAUSED",
                 consecutive_losses=consecutive_losses, reason=reason,
@@ -90,6 +99,14 @@ class LossClusterController:
                 f" → {cfg.LCC_REDUCE_SIZE_MULT:.0%}× size)"
             )
             logger.debug(f"[LOSS-CLUSTER] {reason}")
+            try:
+                from core.nexus.dcel.dcel_engine import archive_lcc_event
+                archive_lcc_event(
+                    event_type="REDUCING",
+                    consecutive_losses=consecutive_losses,
+                )
+            except Exception:
+                pass
             return LossClusterResult(
                 ok=True, size_mult=cfg.LCC_REDUCE_SIZE_MULT, state="REDUCING",
                 consecutive_losses=consecutive_losses, reason=reason,
@@ -104,6 +121,11 @@ class LossClusterController:
         """Force-clear any active pause (call after manual review / win trade)."""
         self._pause_until = 0.0
         logger.info("[LOSS-CLUSTER] Pause manually cleared")
+        try:
+            from core.nexus.dcel.dcel_engine import archive_lcc_event
+            archive_lcc_event(event_type="RESUME", consecutive_losses=0)
+        except Exception:
+            pass
 
     def is_paused(self) -> bool:
         return self._pause_until > time.time()
