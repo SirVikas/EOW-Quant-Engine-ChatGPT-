@@ -37,6 +37,10 @@ MAX_BOOST_MULT   = 1.50    # hard cap on amplification
 PERSIST_PATH     = Path("data/alpha_context_memory.json")
 SAVE_INTERVAL    = 60.0    # reduced 300→60: limit data loss to at most 1 min on crash
 MAX_CONTEXTS     = 500     # maximum stored contexts (LRU eviction)
+# FTD-LONDON-001 Phase-C.2: context store rebuilt with correct entry-hour keys.
+# On first boot after this version, existing store is backed up and cleared.
+_SCHEMA_VERSION  = "entry_hour_v2"
+_VERSION_MARKER  = Path("data/alpha_context_memory_version.txt")
 
 
 @dataclass
@@ -226,7 +230,28 @@ class AlphaContextMemory:
         except Exception as exc:
             logger.warning(f"[FTD-057][ACM] Save failed: {exc}")
 
+    def _migrate_if_needed(self) -> None:
+        """
+        FTD-LONDON-001 Phase-C.2: on first boot after entry-hour fix,
+        back up the old close-hour-keyed store and start fresh.
+        Old data had wrong keys (close-hour) — keeping it would poison the new store.
+        """
+        if _VERSION_MARKER.exists() and _VERSION_MARKER.read_text().strip() == _SCHEMA_VERSION:
+            return  # already migrated
+        if PERSIST_PATH.exists():
+            backup = PERSIST_PATH.parent / "alpha_context_memory_PRE_FIX_backup.json"
+            import shutil
+            shutil.copy2(PERSIST_PATH, backup)
+            PERSIST_PATH.unlink()
+            logger.info(
+                f"[FTD-LONDON-001][ACM] Context store backed up to {backup.name} "
+                "and cleared — rebuilding with correct entry-hour keys."
+            )
+        _VERSION_MARKER.parent.mkdir(parents=True, exist_ok=True)
+        _VERSION_MARKER.write_text(_SCHEMA_VERSION)
+
     def _load(self) -> None:
+        self._migrate_if_needed()
         if not PERSIST_PATH.exists():
             return
         try:
