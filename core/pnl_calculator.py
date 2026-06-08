@@ -89,6 +89,10 @@ class TradeRecord:
     # Avoids unpacking decision_snapshot for confidence analysis.
     entry_confidence:         float = -1.0
 
+    # FTD-LONDON-001 Phase-A: ATR at entry — required for per-ATR-bucket forensic analysis.
+    # 0.0 means not captured (pre-fix trades). Populated from OpenPosition.atr_pct at close.
+    atr_pct:                  float = 0.0
+
 
 # ── PnL Calculator ────────────────────────────────────────────────────────────
 

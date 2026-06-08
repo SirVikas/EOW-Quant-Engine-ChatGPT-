@@ -2648,6 +2648,7 @@ async def on_tick(tick: Tick):
                     strategy_id=sig.strategy_id,
                     initial_risk=sizing.usdt_risk,
                     regime=regime.value,
+                    atr_pct=round(atr_pct, 6),  # FTD-LONDON-001: preserve ATR at entry for forensic lineage
                 )
                 if not risk_ctrl.open_position(pos, order_type="MARKET"):
                     _thought(
