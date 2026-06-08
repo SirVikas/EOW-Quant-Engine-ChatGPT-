@@ -13,3 +13,6 @@ data/
 
 # Learning memory runtime artifacts (modified every session)
 reports/learning_memory/pattern_index.json
+
+# Claude Code agent worktrees
+.claude/worktrees/
