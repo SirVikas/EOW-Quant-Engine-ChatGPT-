@@ -155,6 +155,10 @@ from core.observatory import (                                                  
     report_relationship_engine, event_lineage_tracker,
     defect_engine, phoenix_inspector, recommendation_engine,
 )
+from core.cortex import (                                                              # CORTEX CX-1/2/3/4/5
+    cortex_module_registry, cortex_dependency_mapper,
+    conflict_engine, influence_matrix, blame_engine,
+)
 
 
 def _safe_num(v):
@@ -3598,6 +3602,24 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         target=_nexus_background_enrichment, daemon=True, name="nexus-enrichment"
     )
     _nexus_thread.start()
+
+    # ── CORTEX: Dependency graph + Influence matrix ───────────────────────────
+    try:
+        cortex_dependency_mapper.build()
+        influence_matrix.build()
+        _reg_sum  = cortex_module_registry.summary()
+        _dep_sum  = cortex_dependency_mapper.graph_summary()
+        _thought(
+            f"🧠 [PHOENIX CORTEX Active] "
+            f"Registry: {_reg_sum['total_modules']} modules "
+            f"(critical={_reg_sum['critical_modules']}) | "
+            f"Dependencies: {_dep_sum['total_nodes']} nodes {_dep_sum['total_edges']} edges | "
+            f"Conflict engine ready | Influence matrix ready | Blame engine ready | "
+            f"endpoints: /api/cortex/*",
+            "SYSTEM",
+        )
+    except Exception as _cx_e:
+        _thought(f"⚠ [CORTEX] Startup failed (non-fatal): {_cx_e}", "SYSTEM")
 
     # ── OBSERVATORY-X OX-1: Report Scheduler startup ──────────────────────────
     try:
@@ -14182,6 +14204,212 @@ async def observatory_recommend(investigation_id: str):
     try:
         bundle = recommendation_engine.generate(investigation_id)
         return recommendation_engine.serialise_bundle(bundle)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── CORTEX CX-1/2/3/4/5 Endpoints ───────────────────────────────────────────
+
+@app.get("/api/cortex/registry")
+async def cortex_registry():
+    """CORTEX Module Registry — full catalog of all PHOENIX modules."""
+    try:
+        summary = cortex_module_registry.summary()
+        modules = [
+            {
+                "key":              m.key,
+                "name":             m.name,
+                "file_path":        m.file_path,
+                "tier":             m.tier,
+                "role":             m.role,
+                "state":            m.state,
+                "consumes":         m.consumes,
+                "produces":         m.produces,
+                "influence_weight": m.influence_weight,
+                "critical":         m.critical,
+                "description":      m.description,
+                "dependencies":     m.dependencies,
+                "fdt_ref":          m.fdt_ref,
+                "auto_discovered":  m.auto_discovered,
+            }
+            for m in cortex_module_registry.all()
+        ]
+        return {"summary": summary, "modules": modules}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/dependencies")
+async def cortex_dependencies():
+    """CORTEX Dependency Graph — full adjacency list and summary."""
+    try:
+        return {
+            "summary":   cortex_dependency_mapper.graph_summary(),
+            "graph":     cortex_dependency_mapper.full_graph(),
+            "boot_order": cortex_dependency_mapper.boot_order(),
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/dependencies/{module_key}")
+async def cortex_module_dependencies(module_key: str):
+    """Dependency chain, dependents, and impact radius for one module."""
+    try:
+        return {
+            "module_key":         module_key,
+            "depends_on":         cortex_dependency_mapper.dependency_chain(module_key),
+            "depended_on_by":     cortex_dependency_mapper.dependents(module_key),
+            "impact_radius":      cortex_dependency_mapper.impact_radius(module_key),
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/dependencies/shared-inputs")
+async def cortex_shared_inputs():
+    """Modules sharing the same input streams — conflict risk map."""
+    try:
+        return {"shared_inputs": cortex_dependency_mapper.shared_inputs()}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/conflicts")
+async def cortex_conflicts():
+    """CORTEX Conflict Detection Engine — current conflict scan."""
+    try:
+        return conflict_engine.scan()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/conflicts/history")
+async def cortex_conflict_history(limit: int = 50):
+    """Recent conflict events."""
+    try:
+        return {
+            "conflict_score": conflict_engine.current_score(),
+            "trading_blocked": conflict_engine.is_trading_blocked(),
+            "history": conflict_engine.history(limit=min(limit, 100)),
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/conflicts/rules")
+async def cortex_constitutional_rules():
+    """CORTEX Constitutional Rules — immutable governance precedence."""
+    try:
+        return {"rules": conflict_engine.constitutional_rules()}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/influence")
+async def cortex_influence():
+    """CORTEX Influence Matrix — current weights for all modules."""
+    try:
+        return {
+            "summary": influence_matrix.summary(),
+            "weights": influence_matrix.all_weights(),
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/influence/history")
+async def cortex_influence_history(limit: int = 50):
+    """Influence matrix adjustment history."""
+    try:
+        return {"history": influence_matrix.adjustment_history(limit=min(limit, 200))}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/blame")
+async def cortex_blame_summary():
+    """CORTEX Blame Attribution Engine — top blamed modules and summary."""
+    try:
+        return blame_engine.summary()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/blame/recent")
+async def cortex_blame_recent(limit: int = 20):
+    """Recent loss blame records."""
+    try:
+        return {"records": blame_engine.recent_losses(limit=min(limit, 50))}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/blame/module/{module_key}")
+async def cortex_blame_module(module_key: str):
+    """Blame profile for a specific module."""
+    try:
+        return blame_engine.module_blame_profile(module_key)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/blame/trade/{trade_id}")
+async def cortex_blame_trade(trade_id: str):
+    """Blame record for a specific trade ID."""
+    try:
+        record = blame_engine.get_record(trade_id)
+        if record is None:
+            raise HTTPException(status_code=404,
+                                detail=f"No blame record for trade '{trade_id}'")
+        return record
+    except HTTPException:
+        raise
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/cortex/status")
+async def cortex_status():
+    """
+    CORTEX Master Status — consolidated view across all CX layers.
+    Single endpoint for the dashboard CORTEX panel.
+    """
+    try:
+        reg_sum  = cortex_module_registry.summary()
+        dep_sum  = cortex_dependency_mapper.graph_summary()
+        conflict = conflict_engine.scan()
+        inf_sum  = influence_matrix.summary()
+        blame_sum= blame_engine.summary()
+        return {
+            "cortex_version": "CX-5",
+            "registry": {
+                "total_modules":    reg_sum["total_modules"],
+                "critical_modules": reg_sum["critical_modules"],
+                "by_tier":          reg_sum["by_tier"],
+                "by_role":          reg_sum["by_role"],
+            },
+            "dependencies": {
+                "nodes": dep_sum["total_nodes"],
+                "edges": dep_sum["total_edges"],
+            },
+            "conflicts": {
+                "active":          conflict["active_conflicts"],
+                "score":           conflict["conflict_score"],
+                "trading_blocked": conflict["trading_blocked"],
+            },
+            "influence": {
+                "total_modules":  inf_sum["total_modules"],
+                "locked":         inf_sum["locked_modules"],
+                "decayed":        inf_sum["decayed_modules"],
+                "boosted":        inf_sum["boosted_modules"],
+            },
+            "blame": {
+                "loss_trades_attributed": blame_sum["total_loss_trades_attributed"],
+                "modules_with_data":      blame_sum["modules_with_blame_data"],
+                "top_blamed":             blame_sum["top_blamed_modules"][:3],
+            },
+        }
     except Exception as exc:
         return {"error": str(exc)}
 
