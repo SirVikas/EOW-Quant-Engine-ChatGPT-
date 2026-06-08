@@ -180,6 +180,23 @@ class AlphaEngine:
             rejection_reason=decision.rejection_reason,
         )
         self._recent_evals.append(result)
+
+        if not approved and not exploration:
+            try:
+                from core.nexus.dcel.dcel_engine import archive_scorer_decision
+                archive_scorer_decision(
+                    symbol=symbol, regime=str(regime_weight),
+                    score=round(alpha_score, 4),
+                    threshold=0.0,
+                    passed=False,
+                    factors={"alpha_score": alpha_score, "signal_type": signal_type,
+                             "rr_factor": rr_factor, "dd_penalty": dd_penalty,
+                             "rejection": decision.rejection_reason},
+                    strategy=signal_type,
+                )
+            except Exception:
+                pass
+
         return result
 
     def rank_signals(self, evals: list[AlphaSignalEval]) -> list[AlphaSignalEval]:
