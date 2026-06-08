@@ -3548,11 +3548,28 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
     # PHOENIX NEXUS — Institutional Intelligence Layer identity declaration
     try:
-        from config import NEXUS_NAME, NEXUS_VERSION, NEXUS_LAYERS, NEXUS_PENDING
+        from config import (
+            NEXUS_NAME, NEXUS_VERSION, NEXUS_LAYERS, NEXUS_PENDING,
+            OBSX_NAME, OBSX_VERSION, CORTEX_NAME, CORTEX_VERSION,
+            PTP_NAME, PTP_VERSION, APP_VERSION,
+        )
         _thought(
             f"[{NEXUS_NAME} Active] "
             f"Memory | Intelligence | Context | Governance | Future Guidance  "
             f"layers={NEXUS_LAYERS}  pending={NEXUS_PENDING}  v{NEXUS_VERSION}",
+            "SYSTEM",
+        )
+        # FTD-OBSX-CORTEX-DASHBOARD-001 — Institutional Stack boot declaration
+        _thought(
+            f"════════════════════════════════════════════════════════\n"
+            f"  PHOENIX INSTITUTIONAL STACK\n"
+            f"  APP_VERSION    : v{APP_VERSION}\n"
+            f"  NEXUS_VERSION  : v{NEXUS_VERSION}  — ACTIVE\n"
+            f"  OBSX_VERSION   : v{OBSX_VERSION}  — OPERATIONAL\n"
+            f"  CORTEX_VERSION : v{CORTEX_VERSION}  — OPERATIONAL\n"
+            f"  PTP_VERSION    : v{PTP_VERSION}  — ACCUMULATING\n"
+            f"  AEG_STATUS     : PARTIAL\n"
+            f"════════════════════════════════════════════════════════",
             "SYSTEM",
         )
     except Exception as _e:
@@ -14721,6 +14738,599 @@ async def cortex_influence_risk_adjusted(body: dict):
         return {"recorded": True, "module_key": body.get("module_key")}
     except Exception as exc:
         return {"error": str(exc)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FTD-OBSX-CORTEX-DASHBOARD-001 — Institutional Layer Endpoints
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Institutional Stack ───────────────────────────────────────────────────────
+
+@app.get("/api/institutional/stack")
+async def institutional_stack():
+    """Full PHOENIX Institutional Stack — versions, status, maturity for all layers."""
+    from config import (
+        APP_VERSION, NEXUS_VERSION, OBSX_VERSION, CORTEX_VERSION,
+        PTP_VERSION, INSTITUTIONAL_STACK,
+        OBSX_NAME, CORTEX_NAME, NEXUS_NAME, PTP_NAME,
+    )
+    obsx_health = _compute_obsx_health()
+    cortex_health = _compute_cortex_health()
+    return {
+        "app_version":    APP_VERSION,
+        "nexus_version":  NEXUS_VERSION,
+        "obsx_version":   OBSX_VERSION,
+        "cortex_version": CORTEX_VERSION,
+        "ptp_version":    PTP_VERSION,
+        "stack":          INSTITUTIONAL_STACK,
+        "obsx_health_score":   obsx_health["score"],
+        "cortex_health_score": cortex_health["score"],
+        "generated_at": __import__("time").time(),
+    }
+
+
+def _compute_obsx_health() -> dict:
+    score = 0
+    components = {}
+    try:
+        from core.observatory.registry import report_registry
+        s = report_registry.summary()
+        components["registry"] = {"ok": True, "reports": s.get("total_registered", 0)}
+        score += 25
+    except Exception as e:
+        components["registry"] = {"ok": False, "error": str(e)}
+    try:
+        from core.observatory.scheduler import report_scheduler
+        components["scheduler"] = {"ok": True}
+        score += 25
+    except Exception as e:
+        components["scheduler"] = {"ok": False, "error": str(e)}
+    try:
+        from core.observatory.defect_engine import defect_engine
+        components["defect_engine"] = {"ok": True}
+        score += 25
+    except Exception as e:
+        components["defect_engine"] = {"ok": False, "error": str(e)}
+    try:
+        from core.observatory.trust_engine import recommendation_trust_engine
+        components["trust_engine"] = {"ok": True}
+        score += 25
+    except Exception as e:
+        components["trust_engine"] = {"ok": False, "error": str(e)}
+    return {"score": score, "components": components}
+
+
+def _compute_cortex_health() -> dict:
+    score = 0
+    components = {}
+    try:
+        from core.cortex.conflict_engine import conflict_engine
+        components["conflict_engine"] = {"ok": True}
+        score += 25
+    except Exception as e:
+        components["conflict_engine"] = {"ok": False, "error": str(e)}
+    try:
+        from core.cortex.constitution import constitution_registry
+        s = constitution_registry.summary()
+        components["constitution"] = {"ok": True, "articles": s.get("total_articles", 0)}
+        score += 25
+    except Exception as e:
+        components["constitution"] = {"ok": False, "error": str(e)}
+    try:
+        from core.cortex.influence_matrix import influence_matrix
+        components["influence_matrix"] = {"ok": True}
+        score += 25
+    except Exception as e:
+        components["influence_matrix"] = {"ok": False, "error": str(e)}
+    try:
+        from core.cortex.counterfactual_engine import counterfactual_engine
+        components["counterfactual_engine"] = {"ok": True}
+        score += 25
+    except Exception as e:
+        components["counterfactual_engine"] = {"ok": False, "error": str(e)}
+    return {"score": score, "components": components}
+
+
+# ── OBSERVATORY-X Institutional Endpoints ─────────────────────────────────────
+
+@app.get("/api/observatory/institutional/version")
+async def observatory_institutional_version():
+    """OBSERVATORY-X version, maturity, and component status."""
+    from config import OBSX_VERSION, OBSX_NAME, OBSX_COMPONENTS, APP_VERSION
+    health = _compute_obsx_health()
+    maturity = (
+        "TRUSTED"      if health["score"] >= 95 else
+        "INSTITUTIONAL" if health["score"] >= 80 else
+        "OPERATIONAL"  if health["score"] >= 50 else
+        "FOUNDATION"
+    )
+    return {
+        "name":          OBSX_NAME,
+        "version":       OBSX_VERSION,
+        "app_version":   APP_VERSION,
+        "status":        "OPERATIONAL",
+        "maturity":      maturity,
+        "health_score":  health["score"],
+        "components":    OBSX_COMPONENTS,
+        "component_health": health["components"],
+        "gap_implementations": [
+            "OX-GAP-01: Recommendation Outcome Registry",
+            "OX-GAP-02: Recommendation Cemetery",
+            "OX-GAP-03: Cross-Investigation Correlator",
+            "OX-GAP-04: Precedent Library",
+        ],
+    }
+
+
+@app.get("/api/observatory/institutional/status")
+async def observatory_institutional_status():
+    """Full OBSERVATORY-X institutional status panel."""
+    from config import OBSX_VERSION
+    result: dict = {"obsx_version": OBSX_VERSION}
+    try:
+        from core.observatory.registry import report_registry
+        result["registry"] = report_registry.summary()
+    except Exception as e:
+        result["registry"] = {"error": str(e)}
+    try:
+        from core.observatory.health_monitor import observatory_health_monitor
+        result["health"] = observatory_health_monitor.scan()
+    except Exception as e:
+        result["health"] = {"error": str(e)}
+    try:
+        from core.observatory.truth_layer import observatory_truth_layer
+        result["truth_layer"] = {"status": "ACTIVE", "observations": len(observatory_truth_layer._observations)}
+    except Exception as e:
+        result["truth_layer"] = {"error": str(e)}
+    try:
+        from core.observatory.trust_engine import recommendation_trust_engine
+        result["trust_engine"] = recommendation_trust_engine.summary()
+    except Exception as e:
+        result["trust_engine"] = {"error": str(e)}
+    try:
+        from core.observatory.inspector import phoenix_inspector
+        open_count = sum(1 for inv in phoenix_inspector._investigations.values() if inv.status == "pending")
+        result["investigations"] = {"open": open_count, "total": len(phoenix_inspector._investigations)}
+    except Exception as e:
+        result["investigations"] = {"error": str(e)}
+    try:
+        from core.observatory.defect_engine import defect_engine
+        result["defects"] = defect_engine.summary()
+    except Exception as e:
+        result["defects"] = {"error": str(e)}
+    return result
+
+
+# ── OX-GAP-01: Recommendation Outcome Registry ────────────────────────────────
+
+@app.get("/api/observatory/outcomes")
+async def observatory_outcomes_summary():
+    """Recommendation Outcome Registry — summary of all tracked recommendations."""
+    from core.observatory.recommendation_outcome_registry import recommendation_outcome_registry as _ror
+    return _ror.summary()
+
+
+@app.get("/api/observatory/outcomes/all")
+async def observatory_outcomes_all(status: str = ""):
+    from core.observatory.recommendation_outcome_registry import recommendation_outcome_registry as _ror
+    return {"outcomes": _ror.all_tracked(status_filter=status or None)}
+
+
+@app.get("/api/observatory/outcomes/{rec_id}")
+async def observatory_outcomes_get(rec_id: str):
+    from core.observatory.recommendation_outcome_registry import recommendation_outcome_registry as _ror
+    r = _ror.get(rec_id)
+    if not r:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"No outcome tracking for rec_id '{rec_id}'")
+    return r
+
+
+@app.post("/api/observatory/outcomes/register")
+async def observatory_outcomes_register(body: dict):
+    """Register a recommendation as applied and begin outcome monitoring."""
+    from core.observatory.recommendation_outcome_registry import recommendation_outcome_registry as _ror
+    try:
+        rec = _ror.register_applied(
+            rec_id=body["rec_id"],
+            rec_type=body["rec_type"],
+            title=body.get("title", ""),
+            action=body.get("action", ""),
+            investigation_id=body.get("investigation_id", ""),
+            current_trade_count=int(body.get("current_trade_count", 0)),
+            current_wr=float(body.get("current_wr", 0.5)),
+            current_pf=float(body.get("current_pf", 1.0)),
+        )
+        return {"registered": True, "rec_id": rec.rec_id, "status": rec.status}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OX-GAP-02: Recommendation Cemetery ───────────────────────────────────────
+
+@app.get("/api/observatory/cemetery")
+async def observatory_cemetery_summary():
+    """Recommendation Cemetery — summary of rejected/failed/harmful recommendations."""
+    from core.observatory.recommendation_cemetery import recommendation_cemetery as _rc
+    return _rc.summary()
+
+
+@app.get("/api/observatory/cemetery/all")
+async def observatory_cemetery_all(reason: str = "", include_revived: bool = False):
+    from core.observatory.recommendation_cemetery import recommendation_cemetery as _rc
+    return {"buried": _rc.all_buried(reason_filter=reason or None, include_revived=include_revived)}
+
+
+@app.post("/api/observatory/cemetery/bury")
+async def observatory_cemetery_bury(body: dict):
+    """Bury a recommendation (mark as rejected/failed/harmful/expired)."""
+    from core.observatory.recommendation_cemetery import recommendation_cemetery as _rc
+    try:
+        burial = _rc.bury(
+            rec_id=body["rec_id"],
+            rec_type=body["rec_type"],
+            title=body.get("title", ""),
+            action=body.get("action", ""),
+            investigation_id=body.get("investigation_id", ""),
+            reason=body["reason"],
+            note=body.get("note", ""),
+            harm_score=float(body.get("harm_score", 0.0)),
+        )
+        return {"buried": True, "rec_id": burial.rec_id, "reason": burial.burial_reason}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/cemetery/revive")
+async def observatory_cemetery_revive(body: dict):
+    from core.observatory.recommendation_cemetery import recommendation_cemetery as _rc
+    ok = _rc.revive(body["rec_id"], body.get("justification", ""))
+    return {"revived": ok}
+
+
+# ── OX-GAP-03: Cross-Investigation Correlator ────────────────────────────────
+
+@app.post("/api/observatory/correlate")
+async def observatory_correlate():
+    """Run cross-investigation correlation to detect systemic patterns (diseases)."""
+    from core.observatory.cross_investigation_correlator import cross_investigation_correlator as _cic
+    report = _cic.correlate()
+    return _cic._serialise(report)
+
+
+@app.get("/api/observatory/correlate/last")
+async def observatory_correlate_last():
+    """Return the most recent correlation report."""
+    from core.observatory.cross_investigation_correlator import cross_investigation_correlator as _cic
+    r = _cic.last_report()
+    if not r:
+        return {"note": "No correlation report generated yet. POST /api/observatory/correlate to run."}
+    return r
+
+
+# ── OX-GAP-04: Precedent Library ─────────────────────────────────────────────
+
+@app.get("/api/observatory/precedents")
+async def observatory_precedents_summary():
+    """Observatory Precedent Library — case registry summary."""
+    from core.observatory.precedent_library import precedent_library as _pl
+    return _pl.summary()
+
+
+@app.get("/api/observatory/precedents/all")
+async def observatory_precedents_all():
+    from core.observatory.precedent_library import precedent_library as _pl
+    return {"cases": _pl.all_cases()}
+
+
+@app.get("/api/observatory/precedents/binding")
+async def observatory_precedents_binding():
+    from core.observatory.precedent_library import precedent_library as _pl
+    return {"binding_cases": _pl.binding_precedents()}
+
+
+@app.post("/api/observatory/precedents/search")
+async def observatory_precedents_search(body: dict):
+    """Search precedents by dimension/value, trigger type, or tags."""
+    from core.observatory.precedent_library import precedent_library as _pl
+    return {
+        "matches": _pl.seen_before(
+            dimension=body.get("dimension"),
+            value=body.get("value"),
+            trigger_type=body.get("trigger_type"),
+            tags=body.get("tags"),
+        )
+    }
+
+
+@app.post("/api/observatory/precedents/record")
+async def observatory_precedents_record(body: dict):
+    """Record a new precedent case."""
+    from core.observatory.precedent_library import precedent_library as _pl
+    try:
+        p = _pl.record(
+            case_id=body["case_id"],
+            title=body["title"],
+            investigation_id=body.get("investigation_id", ""),
+            trigger_type=body.get("trigger_type", "CUSTOM"),
+            primary_dimension=body.get("primary_dimension", "actor"),
+            primary_value=body.get("primary_value", ""),
+            finding_summary=body.get("finding_summary", ""),
+            recommendation_applied=body.get("recommendation_applied", ""),
+            outcome=body.get("outcome", "unknown"),
+            outcome_detail=body.get("outcome_detail", ""),
+            is_binding=bool(body.get("is_binding", False)),
+            binding_verdict=body.get("binding_verdict", ""),
+            tags=body.get("tags", []),
+        )
+        return {"recorded": True, "case_id": p.case_id}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── CORTEX Institutional Endpoints ────────────────────────────────────────────
+
+@app.get("/api/cortex/institutional/version")
+async def cortex_institutional_version():
+    """CORTEX version, maturity, and component status."""
+    from config import CORTEX_VERSION, CORTEX_NAME, CORTEX_COMPONENTS, APP_VERSION
+    health = _compute_cortex_health()
+    maturity = (
+        "CONSTITUTIONAL" if health["score"] >= 95 else
+        "INSTITUTIONAL"  if health["score"] >= 80 else
+        "OPERATIONAL"    if health["score"] >= 50 else
+        "FOUNDATION"
+    )
+    return {
+        "name":         CORTEX_NAME,
+        "version":      CORTEX_VERSION,
+        "app_version":  APP_VERSION,
+        "status":       "OPERATIONAL",
+        "maturity":     maturity,
+        "health_score": health["score"],
+        "components":   CORTEX_COMPONENTS,
+        "component_health": health["components"],
+        "gap_implementations": [
+            "CX-GAP-01: Constitutional Amendment Framework",
+            "CX-GAP-02: Constitutional Precedents Registry",
+            "CX-GAP-03: Governance Replay Engine",
+            "CX-GAP-04: Constitutional Risk Scoring",
+        ],
+    }
+
+
+@app.get("/api/cortex/institutional/status")
+async def cortex_institutional_status():
+    """Full CORTEX institutional status panel."""
+    from config import CORTEX_VERSION
+    result: dict = {"cortex_version": CORTEX_VERSION}
+    try:
+        from core.cortex.constitution import constitution_registry
+        result["constitution"] = constitution_registry.summary()
+    except Exception as e:
+        result["constitution"] = {"error": str(e)}
+    try:
+        from core.cortex.conflict_engine import conflict_engine
+        result["conflict_engine"] = conflict_engine.summary() if hasattr(conflict_engine, "summary") else {"status": "ACTIVE"}
+    except Exception as e:
+        result["conflict_engine"] = {"error": str(e)}
+    try:
+        from core.cortex.influence_matrix import influence_matrix
+        result["influence_matrix"] = influence_matrix.summary() if hasattr(influence_matrix, "summary") else {"status": "ACTIVE"}
+    except Exception as e:
+        result["influence_matrix"] = {"error": str(e)}
+    try:
+        from core.cortex.counterfactual_engine import counterfactual_engine
+        result["counterfactual_engine"] = {"status": "ACTIVE"}
+    except Exception as e:
+        result["counterfactual_engine"] = {"error": str(e)}
+    return result
+
+
+# ── CX-GAP-01: Constitutional Amendment Framework ─────────────────────────────
+
+@app.get("/api/cortex/constitution/amendments")
+async def cortex_amendments_summary():
+    """Constitutional Amendment Framework — summary."""
+    from core.cortex.constitutional_amendment import constitutional_amendment_framework as _caf
+    return _caf.summary()
+
+
+@app.get("/api/cortex/constitution/amendments/all")
+async def cortex_amendments_all(status: str = ""):
+    from core.cortex.constitutional_amendment import constitutional_amendment_framework as _caf
+    return {"amendments": _caf.all_amendments(status_filter=status or None)}
+
+
+@app.post("/api/cortex/constitution/amendments/propose")
+async def cortex_amendment_propose(body: dict):
+    """Propose a constitutional amendment (Stage 1: PROPOSE)."""
+    from core.cortex.constitutional_amendment import constitutional_amendment_framework as _caf
+    try:
+        a = _caf.propose(
+            target_article_id=body["target_article_id"],
+            proposed_change=body["proposed_change"],
+            rationale=body["rationale"],
+            proposed_by=body.get("proposed_by", "operator"),
+        )
+        return {"proposed": True, "amendment_id": a.amendment_id, "status": a.status, "review_notes": a.review_notes}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/cortex/constitution/amendments/vote")
+async def cortex_amendment_vote(body: dict):
+    """Cast a vote on a constitutional amendment (Stage 3: VOTE)."""
+    from core.cortex.constitutional_amendment import constitutional_amendment_framework as _caf
+    return _caf.cast_vote(
+        amendment_id=body["amendment_id"],
+        voter=body.get("voter", "operator"),
+        approve=bool(body.get("approve", True)),
+        reason=body.get("reason", ""),
+    )
+
+
+@app.post("/api/cortex/constitution/amendments/enact")
+async def cortex_amendment_enact(body: dict):
+    """Enact a ratified amendment after cooling-off period (Stage 5: ENACTED)."""
+    from core.cortex.constitutional_amendment import constitutional_amendment_framework as _caf
+    return _caf.enact(body["amendment_id"], enacted_by=body.get("enacted_by", "operator"))
+
+
+# ── CX-GAP-02: Constitutional Precedents ─────────────────────────────────────
+
+@app.get("/api/cortex/constitution/precedents")
+async def cortex_precedents_summary():
+    """Constitutional Precedents Registry — summary."""
+    from core.cortex.constitutional_precedents import constitutional_precedents_registry as _cpr
+    return _cpr.summary()
+
+
+@app.get("/api/cortex/constitution/precedents/all")
+async def cortex_precedents_all(include_superseded: bool = False):
+    from core.cortex.constitutional_precedents import constitutional_precedents_registry as _cpr
+    return {"precedents": _cpr.all_precedents(include_superseded=include_superseded)}
+
+
+@app.post("/api/cortex/constitution/precedents/search")
+async def cortex_precedents_search(body: dict):
+    from core.cortex.constitutional_precedents import constitutional_precedents_registry as _cpr
+    return {
+        "matches": _cpr.find_by_context(
+            tags=body.get("tags", []),
+            article_id=body.get("article_id"),
+        )
+    }
+
+
+@app.post("/api/cortex/constitution/precedents/record")
+async def cortex_precedents_record(body: dict):
+    from core.cortex.constitutional_precedents import constitutional_precedents_registry as _cpr
+    try:
+        p = _cpr.record(
+            precedent_id=body["precedent_id"],
+            title=body["title"],
+            article_ids=body.get("article_ids", []),
+            case_description=body.get("case_description", ""),
+            verdict=body["verdict"],
+            precedent_type=body.get("precedent_type", "ADVISORY"),
+            decided_by=body.get("decided_by", "operator"),
+            context_tags=body.get("context_tags", []),
+        )
+        return {"recorded": True, "precedent_id": p.precedent_id}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── CX-GAP-03: Governance Replay Engine ──────────────────────────────────────
+
+@app.get("/api/cortex/governance/replay")
+async def cortex_governance_replay(event_type: str = "", actor: str = "", limit: int = 50):
+    """Governance Replay Engine — timeline of governance decisions."""
+    from core.cortex.governance_replay import governance_replay_engine as _gre
+    return {
+        "events": _gre.replay_timeline(
+            event_type=event_type or None,
+            actor=actor or None,
+            limit=limit,
+        ),
+        "summary": _gre.summary(),
+    }
+
+
+@app.get("/api/cortex/governance/replay/trade/{trade_id}")
+async def cortex_governance_replay_trade(trade_id: str):
+    """Replay all governance events related to a specific trade."""
+    from core.cortex.governance_replay import governance_replay_engine as _gre
+    return {"trade_id": trade_id, "events": _gre.replay_for_trade(trade_id)}
+
+
+@app.get("/api/cortex/governance/replay/recommendation/{rec_id}")
+async def cortex_governance_replay_rec(rec_id: str):
+    """Replay all governance events related to a specific recommendation."""
+    from core.cortex.governance_replay import governance_replay_engine as _gre
+    return {"rec_id": rec_id, "events": _gre.replay_for_recommendation(rec_id)}
+
+
+@app.post("/api/cortex/governance/replay/record")
+async def cortex_governance_replay_record(body: dict):
+    """Record a governance event into the replay engine."""
+    from core.cortex.governance_replay import governance_replay_engine as _gre
+    try:
+        evt = _gre.record(
+            event_type=body["event_type"],
+            actor=body.get("actor", "system"),
+            action_attempted=body.get("action_attempted", ""),
+            decision=body.get("decision", "BLOCKED"),
+            reason=body.get("reason", ""),
+            decision_authority=body.get("decision_authority", "system"),
+            articles_cited=body.get("articles_cited", []),
+            trust_score_at_time=float(body.get("trust_score_at_time", 0.0)),
+            context=body.get("context", {}),
+            resolution=body.get("resolution", ""),
+        )
+        return {"recorded": True, "event_id": evt.event_id}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── CX-GAP-04: Constitutional Risk Scoring ───────────────────────────────────
+
+@app.post("/api/cortex/constitution/risk-score")
+async def cortex_constitutional_risk_score(body: dict):
+    """
+    Compute Constitutional Risk Score (0–100) for a proposed action.
+    Combines all violated articles, not just the hardest enforcement level.
+    """
+    from core.cortex.constitution import constitution_registry
+    try:
+        return constitution_registry.constitutional_risk_score(
+            module_key=body.get("module_key", ""),
+            action=body.get("action", ""),
+            action_type=body.get("action_type", "parameter_change"),
+        )
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── PHOENIX TRUST PROGRAM (PTP) Endpoints ─────────────────────────────────────
+
+@app.get("/api/trust/validation")
+async def trust_validation_overall():
+    """PHOENIX Trust Program — overall trust health across all five pillars."""
+    from core.trust.trust_validation_registry import trust_validation_registry as _tvr
+    return _tvr.overall_trust_health()
+
+
+@app.get("/api/trust/validation/{pillar}")
+async def trust_validation_pillar(pillar: str):
+    """Trust status for a specific pillar."""
+    from core.trust.trust_validation_registry import trust_validation_registry as _tvr
+    return _tvr.pillar_status(pillar.upper())
+
+
+@app.post("/api/trust/validation/record")
+async def trust_validation_record(body: dict):
+    """Record a validation event for a trust pillar."""
+    from core.trust.trust_validation_registry import trust_validation_registry as _tvr
+    try:
+        rec = _tvr.record_validation(
+            pillar=body["pillar"].upper(),
+            entity_id=body["entity_id"],
+            claimed_outcome=body.get("claimed_outcome", ""),
+            actual_outcome=body.get("actual_outcome", ""),
+            correct=bool(body.get("correct", False)),
+            evidence_detail=body.get("evidence_detail", ""),
+        )
+        return {"recorded": True, "record_id": rec.record_id, "pillar": rec.pillar}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/trust/validation/{pillar}/records")
+async def trust_validation_records(pillar: str, limit: int = 50):
+    from core.trust.trust_validation_registry import trust_validation_registry as _tvr
+    return {"records": _tvr.records_for_pillar(pillar.upper(), limit=limit)}
 
 
 # ── Entry Point ───────────────────────────────────────────────────────────────

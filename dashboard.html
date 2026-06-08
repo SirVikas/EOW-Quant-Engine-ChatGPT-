@@ -524,11 +524,21 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
         <div id="app-version-label" style="font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--text);">PHOENIX</div>
         <div id="nexus-topbar-badge" style="display:inline-flex;align-items:center;gap:5px;background:#EDE9FE;border:1px solid #C4B5FD;border-radius:20px;padding:2px 9px;cursor:pointer;" onclick="openNexusDiagnostics()" title="PHOENIX NEXUS — Institutional Intelligence Layer">
           <span style="font-size:9px;font-weight:700;color:#553C9A;letter-spacing:.04em;">PHOENIX NEXUS</span>
-          <span id="nexus-version-topbar" style="font-size:9px;color:#7C3AED;font-family:var(--fm);">v1.0.0</span>
+          <span id="nexus-version-topbar" style="font-size:9px;color:#7C3AED;font-family:var(--fm);">v3.2.0</span>
           <span id="nexus-health-dot" style="width:6px;height:6px;border-radius:50%;background:#9AE6B4;display:inline-block;" title="All layers active"></span>
         </div>
+        <div id="obsx-topbar-badge" style="display:inline-flex;align-items:center;gap:5px;background:#E0F7FA;border:1px solid #4DD0E1;border-radius:20px;padding:2px 9px;cursor:pointer;" onclick="switchTab('obsx')" title="OBSERVATORY-X — Institutional Observability Layer">
+          <span style="font-size:9px;font-weight:700;color:#006064;letter-spacing:.04em;">OBSX</span>
+          <span id="obsx-version-topbar" style="font-size:9px;color:#00838F;font-family:var(--fm);">v1.1.0</span>
+          <span id="obsx-health-dot" style="width:6px;height:6px;border-radius:50%;background:#9AE6B4;display:inline-block;"></span>
+        </div>
+        <div id="cortex-topbar-badge" style="display:inline-flex;align-items:center;gap:5px;background:#FFF3E0;border:1px solid #FFB74D;border-radius:20px;padding:2px 9px;cursor:pointer;" onclick="switchTab('cortex')" title="CORTEX — Institutional Governance Layer">
+          <span style="font-size:9px;font-weight:700;color:#E65100;letter-spacing:.04em;">CORTEX</span>
+          <span id="cortex-version-topbar" style="font-size:9px;color:#BF360C;font-family:var(--fm);">v1.1.0</span>
+          <span id="cortex-health-dot" style="width:6px;height:6px;border-radius:50%;background:#9AE6B4;display:inline-block;"></span>
+        </div>
       </div>
-      <div style="font-size:10px;color:var(--muted);" id="nexus-topbar-sub">Institutional Intelligence Layer Active</div>
+      <div style="font-size:10px;color:var(--muted);" id="nexus-topbar-sub">Institutional Stack Active — NEXUS · OBSX · CORTEX</div>
     </div>
   </div>
 
@@ -574,6 +584,9 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
   <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
   <button class="tab-btn"        onclick="switchTab('truth')"        id="tab-btn-truth">🔬 Truth Engine</button>
   <button class="tab-btn"        onclick="switchTab('nexus')"        id="tab-btn-nexus">🏛 NEXUS</button>
+  <button class="tab-btn"        onclick="switchTab('obsx')"         id="tab-btn-obsx">🔭 OBSERVATORY-X</button>
+  <button class="tab-btn"        onclick="switchTab('cortex')"       id="tab-btn-cortex">⚖ CORTEX</button>
+  <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional-stack">🏗 Inst. Stack</button>
 </nav>
 
 <!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
@@ -3958,6 +3971,335 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </div><!-- /tab-nexus -->
 
+<!-- ══ TAB: OBSERVATORY-X ══════════════════════════════════════════════════════ -->
+<div id="tab-obsx" class="tab-panel">
+<div class="main">
+
+  <!-- Header card -->
+  <div class="card" style="background:linear-gradient(135deg,#004D40 0%,#00695C 100%);color:#E0F7FA;margin-bottom:0;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:#80CBC4;text-transform:uppercase;margin-bottom:4px;">OBSERVATORY-X</div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:2px;">Institutional Observability Layer</div>
+        <div style="font-size:11px;color:#B2DFDB;">Observe · Explain · Verify · Trust · Preserve</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;font-weight:700;color:#80CBC4;">Version</div>
+        <div id="obsx-version-display" style="font-size:20px;font-weight:800;color:#E0F7FA;font-family:var(--fm);">v1.1.0</div>
+        <div id="obsx-maturity-badge" style="margin-top:4px;display:inline-block;font-size:10px;font-weight:700;padding:2px 10px;border-radius:12px;background:#00897B;color:#E0F7FA;">OPERATIONAL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Score + Status Row -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:10px;">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">OBSX Health Score</div>
+      <div id="obsx-health-score" style="font-size:28px;font-weight:800;color:#00897B;">—/100</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Reports Registered</div>
+      <div id="obsx-reports-count" style="font-size:28px;font-weight:800;color:var(--text);">—</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Open Investigations</div>
+      <div id="obsx-investigations-open" style="font-size:28px;font-weight:800;color:var(--text);">—</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Active Defects</div>
+      <div id="obsx-defects-active" style="font-size:28px;font-weight:800;color:#C05621;">—</div>
+    </div>
+  </div>
+
+  <!-- Layer status row -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px;">
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Registry</div>
+      <div id="obsx-registry-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Truth Layer</div>
+      <div id="obsx-truth-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Trust Engine</div>
+      <div id="obsx-trust-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Defect Engine</div>
+      <div id="obsx-defect-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+  </div>
+
+  <!-- Trust Engine breakdown -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Trust Engine — Recommendation Type Scores</div>
+    <div id="obsx-trust-scores" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Gap Implementations -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Gap Implementations (v1.1)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;">
+      <div style="padding:8px;border-radius:8px;border:1px solid #81E6D9;background:#E6FFFA;">
+        <div style="font-size:11px;font-weight:700;color:#276749;">OX-GAP-01</div>
+        <div style="font-size:10px;color:var(--muted);">Recommendation Outcome Registry</div>
+        <div id="obsx-gap01-count" style="font-size:13px;font-weight:700;color:#276749;margin-top:2px;">—</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #81E6D9;background:#E6FFFA;">
+        <div style="font-size:11px;font-weight:700;color:#276749;">OX-GAP-02</div>
+        <div style="font-size:10px;color:var(--muted);">Recommendation Cemetery</div>
+        <div id="obsx-gap02-count" style="font-size:13px;font-weight:700;color:#C05621;margin-top:2px;">—</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #81E6D9;background:#E6FFFA;">
+        <div style="font-size:11px;font-weight:700;color:#276749;">OX-GAP-03</div>
+        <div style="font-size:10px;color:var(--muted);">Cross-Investigation Correlator</div>
+        <div id="obsx-gap03-diseases" style="font-size:13px;font-weight:700;color:#276749;margin-top:2px;">— patterns</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #81E6D9;background:#E6FFFA;">
+        <div style="font-size:11px;font-weight:700;color:#276749;">OX-GAP-04</div>
+        <div style="font-size:10px;color:var(--muted);">Precedent Library</div>
+        <div id="obsx-gap04-cases" style="font-size:13px;font-weight:700;color:#276749;margin-top:2px;">— cases</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Maturity progression -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">OBSERVATORY-X Maturity</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#E2E8F0;color:#718096;">FOUNDATION ✓</div>
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#C6F6D5;color:#276749;">OPERATIONAL ← CURRENT</div>
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#EDF2F7;color:#A0AEC0;">INSTITUTIONAL</div>
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#EDF2F7;color:#A0AEC0;">TRUSTED</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-obsx -->
+
+<!-- ══ TAB: CORTEX ════════════════════════════════════════════════════════════ -->
+<div id="tab-cortex" class="tab-panel">
+<div class="main">
+
+  <!-- Header card -->
+  <div class="card" style="background:linear-gradient(135deg,#7C2D12 0%,#C2410C 100%);color:#FFF7ED;margin-bottom:0;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:#FED7AA;text-transform:uppercase;margin-bottom:4px;">CORTEX</div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:2px;">Institutional Governance Layer</div>
+        <div style="font-size:11px;color:#FDBA74;">Module Intelligence · Conflict Resolution · Constitutional Governance</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;font-weight:700;color:#FED7AA;">Version</div>
+        <div id="cortex-version-display" style="font-size:20px;font-weight:800;color:#FFF7ED;font-family:var(--fm);">v1.1.0</div>
+        <div id="cortex-maturity-badge" style="margin-top:4px;display:inline-block;font-size:10px;font-weight:700;padding:2px 10px;border-radius:12px;background:#EA580C;color:#FFF7ED;">OPERATIONAL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Score + Metrics -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:10px;">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">CORTEX Health Score</div>
+      <div id="cortex-health-score" style="font-size:28px;font-weight:800;color:#C2410C;">—/100</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Constitution Articles</div>
+      <div id="cortex-articles-count" style="font-size:28px;font-weight:800;color:var(--text);">—</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Violations Recorded</div>
+      <div id="cortex-violations-count" style="font-size:28px;font-weight:800;color:#C05621;">—</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Precedents</div>
+      <div id="cortex-precedents-count" style="font-size:28px;font-weight:800;color:var(--text);">—</div>
+    </div>
+  </div>
+
+  <!-- Engine status row -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px;">
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Conflict Engine</div>
+      <div id="cortex-conflict-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Constitution Engine</div>
+      <div id="cortex-constitution-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Influence Matrix</div>
+      <div id="cortex-influence-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;">Counterfactual Engine</div>
+      <div id="cortex-counterfactual-status" style="font-size:13px;font-weight:700;color:#276749;">● ACTIVE</div>
+    </div>
+  </div>
+
+  <!-- Constitution Articles -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Constitutional Articles</div>
+    <div id="cortex-articles-list" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Gap Implementations -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Gap Implementations (v1.1)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;">
+      <div style="padding:8px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;">
+        <div style="font-size:11px;font-weight:700;color:#C2410C;">CX-GAP-01</div>
+        <div style="font-size:10px;color:var(--muted);">Constitutional Amendment Framework</div>
+        <div id="cortex-gap01-count" style="font-size:13px;font-weight:700;color:#C2410C;margin-top:2px;">— amendments</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;">
+        <div style="font-size:11px;font-weight:700;color:#C2410C;">CX-GAP-02</div>
+        <div style="font-size:10px;color:var(--muted);">Constitutional Precedents Registry</div>
+        <div id="cortex-gap02-count" style="font-size:13px;font-weight:700;color:#C2410C;margin-top:2px;">— precedents</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;">
+        <div style="font-size:11px;font-weight:700;color:#C2410C;">CX-GAP-03</div>
+        <div style="font-size:10px;color:var(--muted);">Governance Replay Engine</div>
+        <div id="cortex-gap03-count" style="font-size:13px;font-weight:700;color:#C2410C;margin-top:2px;">— events</div>
+      </div>
+      <div style="padding:8px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;">
+        <div style="font-size:11px;font-weight:700;color:#C2410C;">CX-GAP-04</div>
+        <div style="font-size:10px;color:var(--muted);">Constitutional Risk Scoring</div>
+        <div style="font-size:13px;font-weight:700;color:#276749;margin-top:2px;">ACTIVE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Maturity progression -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">CORTEX Maturity</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#E2E8F0;color:#718096;">FOUNDATION ✓</div>
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#FED7AA;color:#7C2D12;">OPERATIONAL ← CURRENT</div>
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#EDF2F7;color:#A0AEC0;">INSTITUTIONAL</div>
+      <div style="padding:5px 12px;border-radius:12px;font-size:11px;font-weight:700;background:#EDF2F7;color:#A0AEC0;">CONSTITUTIONAL</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-cortex -->
+
+<!-- ══ TAB: INSTITUTIONAL STACK ═══════════════════════════════════════════════ -->
+<div id="tab-institutional-stack" class="tab-panel">
+<div class="main">
+
+  <!-- Header -->
+  <div class="card" style="background:linear-gradient(135deg,#1A202C 0%,#2D3748 100%);color:#F7FAFC;margin-bottom:0;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:#A0AEC0;text-transform:uppercase;margin-bottom:4px;">PHOENIX</div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:2px;">Institutional Stack</div>
+        <div style="font-size:11px;color:#CBD5E0;">Complete view of all institutional layers and their maturity</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:#A0AEC0;margin-bottom:2px;">App Version</div>
+        <div id="istack-app-version" style="font-size:18px;font-weight:800;color:#F7FAFC;font-family:var(--fm);">v1.65.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version banner row -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px;">
+    <div class="card" style="text-align:center;border-top:3px solid #7C3AED;">
+      <div style="font-size:9px;font-weight:700;color:#7C3AED;letter-spacing:.08em;">NEXUS</div>
+      <div id="istack-nexus-version" style="font-size:16px;font-weight:800;font-family:var(--fm);margin:4px 0;">v3.2.0</div>
+      <div style="font-size:10px;font-weight:700;color:#276749;">ACTIVE</div>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid #00897B;">
+      <div style="font-size:9px;font-weight:700;color:#00897B;letter-spacing:.08em;">OBSERVATORY-X</div>
+      <div id="istack-obsx-version" style="font-size:16px;font-weight:800;font-family:var(--fm);margin:4px 0;">v1.1.0</div>
+      <div style="font-size:10px;font-weight:700;color:#276749;">OPERATIONAL</div>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid #C2410C;">
+      <div style="font-size:9px;font-weight:700;color:#C2410C;letter-spacing:.08em;">CORTEX</div>
+      <div id="istack-cortex-version" style="font-size:16px;font-weight:800;font-family:var(--fm);margin:4px 0;">v1.1.0</div>
+      <div style="font-size:10px;font-weight:700;color:#276749;">OPERATIONAL</div>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid #D69E2E;">
+      <div style="font-size:9px;font-weight:700;color:#D69E2E;letter-spacing:.08em;">TRUST PROGRAM</div>
+      <div id="istack-ptp-version" style="font-size:16px;font-weight:800;font-family:var(--fm);margin:4px 0;">v1.0.0</div>
+      <div style="font-size:10px;font-weight:700;color:#D69E2E;">ACCUMULATING</div>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid #A0AEC0;">
+      <div style="font-size:9px;font-weight:700;color:#A0AEC0;letter-spacing:.08em;">AEG</div>
+      <div style="font-size:16px;font-weight:800;font-family:var(--fm);margin:4px 0;color:#A0AEC0;">—</div>
+      <div style="font-size:10px;font-weight:700;color:#D69E2E;">PARTIAL</div>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid #CBD5E0;">
+      <div style="font-size:9px;font-weight:700;color:#CBD5E0;letter-spacing:.08em;">PCAO</div>
+      <div style="font-size:16px;font-weight:800;font-family:var(--fm);margin:4px 0;color:#CBD5E0;">—</div>
+      <div style="font-size:10px;font-weight:700;color:#A0AEC0;">FUTURE</div>
+    </div>
+  </div>
+
+  <!-- Health Score panels -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+    <div class="card">
+      <div class="label" style="margin-bottom:10px;">OBSERVATORY-X Health</div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div id="istack-obsx-score" style="font-size:36px;font-weight:800;color:#00897B;">—</div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);">out of 100</div>
+          <div id="istack-obsx-components" style="font-size:11px;color:var(--text);margin-top:4px;">Loading…</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="margin-bottom:10px;">CORTEX Health</div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div id="istack-cortex-score" style="font-size:36px;font-weight:800;color:#C2410C;">—</div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);">out of 100</div>
+          <div id="istack-cortex-components" style="font-size:11px;color:var(--text);margin-top:4px;">Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full stack table -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Stack Detail</div>
+    <div id="istack-detail" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Trust Program Pillar scores -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">PHOENIX Trust Program — Pillar Status</div>
+    <div id="istack-ptp-pillars" style="font-size:12px;color:var(--muted);">Loading…</div>
+  </div>
+
+  <!-- Approved roadmap -->
+  <div class="card" style="margin-top:10px;">
+    <div class="label" style="margin-bottom:8px;">Approved Roadmap</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#C6F6D5;border:1px solid #68D391;">
+        <div style="font-size:14px;">✅</div>
+        <div><div style="font-size:11px;font-weight:700;color:#276749;">NEXUS · OBSX · CORTEX</div><div style="font-size:10px;color:var(--muted);">Institutional layers complete</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#FEFCBF;border:1px solid #F6E05E;">
+        <div style="font-size:14px;">⏳</div>
+        <div><div style="font-size:11px;font-weight:700;color:#7B6100;">PHOENIX TRUST PROGRAM (PTP)</div><div style="font-size:10px;color:var(--muted);">Accumulating evidence — 60–90 day programme</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#EDF2F7;border:1px solid #CBD5E0;">
+        <div style="font-size:14px;">🔒</div>
+        <div><div style="font-size:11px;font-weight:700;color:#718096;">AEG Promotion Program</div><div style="font-size:10px;color:var(--muted);">Blocked until Trust Earned milestone</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#EDF2F7;border:1px solid #CBD5E0;">
+        <div style="font-size:14px;">🔒</div>
+        <div><div style="font-size:11px;font-weight:700;color:#718096;">PCAO</div><div style="font-size:10px;color:var(--muted);">Final layer — future</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-institutional-stack -->
+
 <style>
 .nexus-exec-item {
   font-size:12px;font-weight:500;padding:5px 10px;border-radius:6px;
@@ -4215,6 +4557,218 @@ function openNexusDiagnostics() {
     if (body)   body.style.display   = 'block';
     if (toggle) toggle.textContent   = '▲ Collapse';
   }, 100);
+}
+</script>
+
+<script>
+// ── FTD-OBSX-CORTEX-DASHBOARD-001 — OBSERVATORY-X, CORTEX, Institutional Stack ─
+
+function loadObsxTab() {
+  const API = window._API || '';
+  // Version + health
+  fetch(API + '/api/observatory/institutional/version')
+    .then(r => r.json()).then(d => {
+      const v = d.version ? 'v' + d.version : '—';
+      const el = document.getElementById('obsx-version-display');
+      if (el) el.textContent = v;
+      const topbar = document.getElementById('obsx-version-topbar');
+      if (topbar) topbar.textContent = v;
+      const mat = document.getElementById('obsx-maturity-badge');
+      if (mat) mat.textContent = d.maturity || 'OPERATIONAL';
+      const hs = document.getElementById('obsx-health-score');
+      if (hs) hs.textContent = (d.health_score ?? '—') + '/100';
+      // Topbar health dot
+      const dot = document.getElementById('obsx-health-dot');
+      if (dot) dot.style.background = (d.health_score >= 75) ? '#9AE6B4' : '#FBD38D';
+    }).catch(() => {});
+
+  // Institutional status
+  fetch(API + '/api/observatory/institutional/status')
+    .then(r => r.json()).then(d => {
+      const rc = document.getElementById('obsx-reports-count');
+      if (rc) rc.textContent = d.registry?.total_registered ?? '—';
+      const io = document.getElementById('obsx-investigations-open');
+      if (io) io.textContent = d.investigations?.open ?? '—';
+      const da = document.getElementById('obsx-defects-active');
+      if (da) da.textContent = d.defects?.active_defects ?? '—';
+
+      // Trust scores
+      const ts = document.getElementById('obsx-trust-scores');
+      if (ts && d.trust_engine?.type_scores) {
+        const rows = d.trust_engine.type_scores.slice(0,6).map(t =>
+          `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #EDF2F7;">
+            <span style="font-weight:600;">${t.rec_type}</span>
+            <span>
+              <span style="font-family:var(--fm);font-weight:700;color:${t.trust_score>=70?'#276749':t.trust_score>=50?'#2B6CB0':'#C05621'};">${t.trust_score}</span>
+              <span style="font-size:10px;color:var(--muted);margin-left:4px;">${t.trust_tier}</span>
+            </span>
+          </div>`
+        ).join('');
+        ts.innerHTML = rows || '<span style="color:var(--muted);">No data yet</span>';
+      }
+    }).catch(() => {});
+
+  // Gap summaries
+  fetch(API + '/api/observatory/outcomes').then(r => r.json()).then(d => {
+    const el = document.getElementById('obsx-gap01-count');
+    if (el) el.textContent = (d.total_tracked ?? 0) + ' tracked';
+  }).catch(() => {});
+
+  fetch(API + '/api/observatory/cemetery').then(r => r.json()).then(d => {
+    const el = document.getElementById('obsx-gap02-count');
+    if (el) el.textContent = (d.active_burials ?? 0) + ' buried';
+  }).catch(() => {});
+
+  fetch(API + '/api/observatory/correlate/last').then(r => r.json()).then(d => {
+    const el = document.getElementById('obsx-gap03-diseases');
+    if (el) el.textContent = (d.pattern_count ?? 0) + ' patterns';
+  }).catch(() => {});
+
+  fetch(API + '/api/observatory/precedents').then(r => r.json()).then(d => {
+    const el = document.getElementById('obsx-gap04-cases');
+    if (el) el.textContent = (d.total_cases ?? 0) + ' cases';
+  }).catch(() => {});
+}
+
+function loadCortexTab() {
+  const API = window._API || '';
+  fetch(API + '/api/cortex/institutional/version')
+    .then(r => r.json()).then(d => {
+      const v = d.version ? 'v' + d.version : '—';
+      const el = document.getElementById('cortex-version-display');
+      if (el) el.textContent = v;
+      const topbar = document.getElementById('cortex-version-topbar');
+      if (topbar) topbar.textContent = v;
+      const mat = document.getElementById('cortex-maturity-badge');
+      if (mat) mat.textContent = d.maturity || 'OPERATIONAL';
+      const hs = document.getElementById('cortex-health-score');
+      if (hs) hs.textContent = (d.health_score ?? '—') + '/100';
+      const dot = document.getElementById('cortex-health-dot');
+      if (dot) dot.style.background = (d.health_score >= 75) ? '#9AE6B4' : '#FBD38D';
+    }).catch(() => {});
+
+  fetch(API + '/api/cortex/institutional/status')
+    .then(r => r.json()).then(d => {
+      const ac = document.getElementById('cortex-articles-count');
+      if (ac) ac.textContent = d.constitution?.total_articles ?? '—';
+      const vc = document.getElementById('cortex-violations-count');
+      if (vc) vc.textContent = d.constitution?.total_violations ?? '—';
+
+      // Articles list
+      const al = document.getElementById('cortex-articles-list');
+      if (al && d.constitution?.articles) {
+        const rows = d.constitution.articles.map(a =>
+          `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #EDF2F7;">
+            <div>
+              <span style="font-weight:700;font-size:11px;">${a.article_id}</span>
+              <span style="margin-left:6px;font-size:11px;color:var(--text);">${a.title}</span>
+            </div>
+            <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;background:${a.enforcement==='HARD_BLOCK'?'#FED7D7':a.enforcement==='SOFT_BLOCK'?'#FEFCBF':'#C6F6D5'};color:${a.enforcement==='HARD_BLOCK'?'#9B2C2C':a.enforcement==='SOFT_BLOCK'?'#7B6100':'#276749'};">${a.enforcement}</span>
+          </div>`
+        ).join('');
+        al.innerHTML = rows || '<span style="color:var(--muted);">No articles</span>';
+      }
+    }).catch(() => {});
+
+  fetch(API + '/api/cortex/constitution/amendments').then(r => r.json()).then(d => {
+    const el = document.getElementById('cortex-gap01-count');
+    if (el) el.textContent = (d.total_amendments ?? 0) + ' amendments';
+  }).catch(() => {});
+
+  fetch(API + '/api/cortex/constitution/precedents').then(r => r.json()).then(d => {
+    const pc = document.getElementById('cortex-precedents-count');
+    if (pc) pc.textContent = d.total_precedents ?? '—';
+    const el = document.getElementById('cortex-gap02-count');
+    if (el) el.textContent = (d.total_precedents ?? 0) + ' precedents';
+  }).catch(() => {});
+
+  fetch(API + '/api/cortex/governance/replay?limit=1').then(r => r.json()).then(d => {
+    const el = document.getElementById('cortex-gap03-count');
+    if (el) el.textContent = (d.summary?.total_events ?? 0) + ' events';
+  }).catch(() => {});
+}
+
+function loadInstitutionalStackTab() {
+  const API = window._API || '';
+  fetch(API + '/api/institutional/stack')
+    .then(r => r.json()).then(d => {
+      const av = document.getElementById('istack-app-version');
+      if (av) av.textContent = 'v' + (d.app_version || '—');
+      const nv = document.getElementById('istack-nexus-version');
+      if (nv) nv.textContent = 'v' + (d.nexus_version || '—');
+      const ov = document.getElementById('istack-obsx-version');
+      if (ov) ov.textContent = 'v' + (d.obsx_version || '—');
+      const cv = document.getElementById('istack-cortex-version');
+      if (cv) cv.textContent = 'v' + (d.cortex_version || '—');
+      const pv = document.getElementById('istack-ptp-version');
+      if (pv) pv.textContent = 'v' + (d.ptp_version || '—');
+
+      // Health scores
+      const os = document.getElementById('istack-obsx-score');
+      if (os) os.textContent = d.obsx_health_score ?? '—';
+      const cs = document.getElementById('istack-cortex-score');
+      if (cs) cs.textContent = d.cortex_health_score ?? '—';
+
+      // Component detail
+      const oc = document.getElementById('istack-obsx-components');
+      if (oc && d.obsx_health_score !== undefined) {
+        oc.textContent = d.obsx_health_score >= 75 ? '✅ All components healthy' : '⚠ Some components degraded';
+      }
+      const cc = document.getElementById('istack-cortex-components');
+      if (cc && d.cortex_health_score !== undefined) {
+        cc.textContent = d.cortex_health_score >= 75 ? '✅ All components healthy' : '⚠ Some components degraded';
+      }
+
+      // Stack detail table
+      const sd = document.getElementById('istack-detail');
+      if (sd && d.stack) {
+        const rows = d.stack.map(s =>
+          `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EDF2F7;">
+            <span style="font-weight:600;">${s.name}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              ${s.version ? `<span style="font-family:var(--fm);font-size:11px;color:var(--muted);">v${s.version}</span>` : ''}
+              <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;
+                background:${s.status==='ACTIVE'?'#C6F6D5':s.status==='OPERATIONAL'?'#BEE3F8':s.status==='ACCUMULATING'?'#FEFCBF':s.status==='PARTIAL'?'#FEFCBF':'#EDF2F7'};
+                color:${s.status==='ACTIVE'?'#276749':s.status==='OPERATIONAL'?'#2B6CB0':s.status==='ACCUMULATING'?'#7B6100':s.status==='PARTIAL'?'#92400E':'#718096'};">
+                ${s.status}
+              </span>
+            </div>
+          </div>`
+        ).join('');
+        sd.innerHTML = rows;
+      }
+    }).catch(() => {
+      const sd = document.getElementById('istack-detail');
+      if (sd) sd.innerHTML = '<span style="color:var(--muted);">Engine not reachable</span>';
+    });
+
+  // PTP pillars
+  fetch(API + '/api/trust/validation').then(r => r.json()).then(d => {
+    const el = document.getElementById('istack-ptp-pillars');
+    if (el && d.pillar_detail) {
+      const rows = d.pillar_detail.map(p =>
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #EDF2F7;">
+          <span style="font-size:11px;font-weight:600;">${p.pillar.replace(/_/g,' ')}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-family:var(--fm);font-weight:700;font-size:13px;color:${p.trust_score>=70?'#276749':p.trust_score>=50?'#2B6CB0':'#C05621'};">${p.trust_score}</span>
+            <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;background:${p.trust_earned?'#C6F6D5':'#EDF2F7'};color:${p.trust_earned?'#276749':'#718096'};">${p.trust_tier}</span>
+            <span style="font-size:10px;color:var(--muted);">${p.total_evidence} records</span>
+          </div>
+        </div>`
+      ).join('');
+      el.innerHTML = rows + `<div style="margin-top:8px;font-size:10px;color:var(--muted);">Overall: ${d.overall_tier} (${d.overall_trust_score}/100) · ${d.program_maturity}</div>`;
+    }
+  }).catch(() => {});
+}
+
+// Hook into switchTab to lazy-load new tabs
+const _origSwitchTabInst = typeof switchTab === 'function' ? switchTab : null;
+function switchTab(name) {
+  if (_origSwitchTabInst) _origSwitchTabInst(name);
+  if (name === 'obsx')                loadObsxTab();
+  if (name === 'cortex')              loadCortexTab();
+  if (name === 'institutional-stack') loadInstitutionalStackTab();
+  if (name === 'institutional')       loadInstitutionalStackTab(); // alias
 }
 </script>
 
@@ -6487,6 +7041,27 @@ window.addEventListener('DOMContentLoaded', () => {
     .then(r => r.json())
     .then(d => renderNexusTopbar(d))
     .catch(() => {});
+
+  // FTD-OBSX-CORTEX-DASHBOARD-001 — Fetch OBSX/CORTEX versions for topbar badges
+  fetch(API + '/api/observatory/institutional/version')
+    .then(r => r.json())
+    .then(d => {
+      const v = d.version ? 'v' + d.version : '—';
+      const el = document.getElementById('obsx-version-topbar');
+      if (el) el.textContent = v;
+      const dot = document.getElementById('obsx-health-dot');
+      if (dot) dot.style.background = (d.health_score >= 75) ? '#9AE6B4' : '#FBD38D';
+    }).catch(() => {});
+
+  fetch(API + '/api/cortex/institutional/version')
+    .then(r => r.json())
+    .then(d => {
+      const v = d.version ? 'v' + d.version : '—';
+      const el = document.getElementById('cortex-version-topbar');
+      if (el) el.textContent = v;
+      const dot = document.getElementById('cortex-health-dot');
+      if (dot) dot.style.background = (d.health_score >= 75) ? '#9AE6B4' : '#FBD38D';
+    }).catch(() => {});
 });
 
 // ── MASTER-001: Execution Mode Selector ──────────────────────────────────────
