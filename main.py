@@ -150,6 +150,9 @@ from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult        
 from core.truth.exit_truth_engine   import exit_truth_engine                           # FTD-PHOENIX-XTE-001
 from core.truth.alpha_attribution   import alpha_attribution_platform, AttributionSnapshot  # FTD-PHOENIX-AAP-001
 from core.truth.truth_archive       import truth_archive                               # FTD-PHOENIX-AAP-001
+from core.observatory import (                                                         # OX-1: Observatory-X Foundation
+    report_registry, report_scheduler, report_health_monitor,
+)
 
 
 def _safe_num(v):
@@ -3594,6 +3597,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     )
     _nexus_thread.start()
 
+    # ── OBSERVATORY-X OX-1: Report Scheduler startup ──────────────────────────
+    try:
+        await report_scheduler.start()
+        _reg_summary = report_registry.summary()
+        _thought(
+            f"🔭 [OBSERVATORY-X OX-1] Active | "
+            f"reports_registered={_reg_summary['total_registered']} | "
+            f"categories={list(_reg_summary['by_category'].keys())} | "
+            f"endpoints: /api/observatory/*",
+            "SYSTEM",
+        )
+    except Exception as _obs_e:
+        _thought(f"⚠ [OBSERVATORY-X] Startup failed (non-fatal): {_obs_e}", "SYSTEM")
+
     yield
 
     _thought("⏹ Engine shutting down…", "SYSTEM")
@@ -3611,6 +3628,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     try:
         from core.autonomous_intelligence.ail_engine import ail_engine as _ail
         await _ail.shutdown()
+    except Exception:
+        pass
+    try:
+        await report_scheduler.stop()
     except Exception:
         pass
 
@@ -13971,6 +13992,68 @@ async def nexus_self_awareness():
     try:
         from core.nexus.confidence.confidence_engine import confidence_engine
         return confidence_engine.compute_nexus_self_awareness()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OBSERVATORY-X OX-1 Endpoints ─────────────────────────────────────────────
+
+@app.get("/api/observatory/registry")
+async def observatory_registry():
+    """Universal Report Registry — full catalog of all known PHOENIX reports."""
+    try:
+        summary = report_registry.summary()
+        reports = [
+            {
+                "key":           r.key,
+                "name":          r.name,
+                "category":      r.category,
+                "tier":          r.tier,
+                "source_module": r.source_module,
+                "output_format": r.output_format,
+                "frequency":     r.frequency,
+                "storage_path":  r.storage_path,
+                "dependencies":  r.dependencies,
+                "description":   r.description,
+                "tags":          r.tags,
+            }
+            for r in report_registry.all()
+        ]
+        return {"summary": summary, "reports": reports}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/scheduler")
+async def observatory_scheduler_status():
+    """Report Scheduler status — which reports are scheduled and when they last ran."""
+    try:
+        return report_scheduler.status()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/scheduler/trigger/{report_key}")
+async def observatory_trigger_report(report_key: str):
+    """Manually trigger a report by its registry key."""
+    try:
+        fired = await report_scheduler.trigger(report_key)
+        if not fired:
+            return {
+                "triggered": False,
+                "reason": "No handler registered for this report key — "
+                          "auto-trigger requires a handler attached via register_handler()",
+            }
+        return {"triggered": True, "report_key": report_key}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/health")
+async def observatory_health():
+    """Report Health Monitor — staleness, error counts, and health scores for all reports."""
+    try:
+        return report_health_monitor.summary()
     except Exception as exc:
         return {"error": str(exc)}
 
