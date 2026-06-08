@@ -9,13 +9,35 @@ from __future__ import annotations
 
 import re
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Any
 
 import logging
 logger = logging.getLogger(__name__)
 
 _MS_PER_DAY = 86_400_000
+
+# Known components — fallback when KGE MODULE nodes are unavailable
+_KNOWN_COMPONENTS = [
+    "trade_manager", "risk_engine", "alpha_context_memory", "data_lake",
+    "pnl_calc", "genome_engine", "rl_engine", "signal_ecology",
+    "loss_cluster", "safe_mode", "adaptive_scorer", "adaptive_rsi_governor",
+    "regime_cartography", "trade_flow_monitor",
+]
+
+
+@dataclass
+class DecisionLifecycle:
+    decision_id: str
+    state: str        # PROPOSED | APPROVED | ACTIVE | DEPRECATED | SUPERSEDED
+    component: str
+    version_introduced: str
+    version_deprecated: str = ""
+    superseded_by: str = ""
+    notes: str = ""
+
+    def to_dict(self) -> dict:
+        return asdict(self)
 
 
 @dataclass
@@ -108,23 +130,24 @@ class GovernanceIntelligenceEngine:
         # Group by param keywords appearing in title
         param_records: Dict[str, list] = {}
         for rec in decisions:
-            title_lower = (rec.get("title") or "").lower()
+            title_lower = (rec.get("title") or rec.get("search_text") or rec.get("data","")).lower()
             for word in title_lower.split():
                 if len(word) > 4 and word.isalpha():
                     param_records.setdefault(word, []).append(rec)
 
+        import re
         for param, recs in param_records.items():
             if len(recs) < 2:
                 continue
-            raised = [r for r in recs if any(kw in (r.get("title") or "").lower() for kw in ["raised", "increased", "bumped", "higher"])]
-            lowered = [r for r in recs if any(kw in (r.get("title") or "").lower() for kw in ["lowered", "decreased", "reduced", "lower"])]
+            raised = [r for r in recs if any(kw in (r.get("title") or r.get("search_text","")).lower() for kw in ["raised", "increased", "bumped", "higher"])]
+            lowered = [r for r in recs if any(kw in (r.get("title") or r.get("search_text","")).lower() for kw in ["lowered", "decreased", "reduced", "lower"])]
             if raised and lowered:
                 a = raised[0]
                 b = lowered[0]
                 findings.append(ContradictionFinding(
                     param_name=param,
-                    decision_a={"id": a.get("id"), "title": a.get("title"), "ts": a.get("ts")},
-                    decision_b={"id": b.get("id"), "title": b.get("title"), "ts": b.get("ts")},
+                    decision_a={"id": a.id, "title": a.title, "ts": a.ts},
+                    decision_b={"id": b.id, "title": b.title, "ts": b.ts},
                     description=f"Param '{param}' was both raised and lowered across decisions — possible reversal confusion.",
                     severity="MEDIUM",
                 ))
@@ -151,24 +174,23 @@ class GovernanceIntelligenceEngine:
 
         try:
             decisions = imraf.timeline(category="DECISION", limit=500)
-            decisions += imraf.timeline(category="GOVERNANCE", limit=200)
+            decisions += imraf.timeline(category="GOVERNANCE", limit=100)
         except Exception as exc:
             logger.warning("GovernanceIntelligenceEngine.scan_stale_decisions error: %s", exc)
             return []
 
         for rec in decisions:
-            rec_ts = rec.get("ts", 0) or 0
-            if rec_ts >= cutoff_ms:
+            _rec_ts = rec.get("ts", 0) if isinstance(rec, dict) else getattr(rec, "ts", 0)
+            if _rec_ts >= cutoff_ms:
                 continue
-            age_days = int((now_ms - rec_ts) / _MS_PER_DAY)
-            title = rec.get("title", "")
+            age_days = int((now_ms - _rec_ts) / _MS_PER_DAY)
             findings.append(StaleFinding(
-                record_id=rec.get("id", 0),
-                title=title,
-                category=rec.get("category", ""),
+                record_id=rec.get("id",0) if isinstance(rec,dict) else getattr(rec,"id",0),
+                title=rec.get("title","") if isinstance(rec,dict) else getattr(rec,"title",""),
+                category=rec.get("category","") if isinstance(rec,dict) else getattr(rec,"category",""),
                 age_days=age_days,
                 last_referenced="unknown",
-                recommendation=f"Review whether this decision ({title}) is still current — {age_days} days old.",
+                recommendation=f"Review whether this decision is still current — {age_days} days old.",
             ))
 
         return findings[:20]
@@ -176,19 +198,79 @@ class GovernanceIntelligenceEngine:
     def scan_assumptions(self) -> List[AssumptionFinding]:
         return list(_TRACKED_ASSUMPTIONS)
 
-    # ── Real contradiction detection (live IMRAF data) ────────────────────────
+    # ── Decision Lifecycle State Machine ─────────────────────────────────────
+
+    def build_lifecycle_registry(self) -> dict:
+        """
+        Fetch DECISION records from IMRAF and infer lifecycle state for each.
+        Returns summary with total, by_state, and registry list.
+        """
+        try:
+            from core.institutional_memory.imraf_engine import imraf
+        except ImportError:
+            return {"total": 0, "by_state": {}, "registry": []}
+
+        try:
+            records = imraf.timeline(category="DECISION", limit=500)
+        except Exception as exc:
+            logger.warning("build_lifecycle_registry: IMRAF error: %s", exc)
+            return {"total": 0, "by_state": {}, "registry": []}
+
+        registry: List[DecisionLifecycle] = []
+        for rec in records:
+            # rec may be dict or object depending on IMRAF version in use
+            if isinstance(rec, dict):
+                rec_id = str(rec.get("id", ""))
+                title = (rec.get("title") or "").lower()
+                data = rec.get("data", {})
+                engine_ver = rec.get("engine_ver", "") or ""
+                tags = rec.get("tags", [])
+            else:
+                rec_id = str(getattr(rec, "id", ""))
+                title = (getattr(rec, "title", "") or "").lower()
+                data = getattr(rec, "data", {})
+                engine_ver = getattr(rec, "engine_ver", "") or ""
+                tags = getattr(rec, "tags", [])
+
+            component = ""
+            if isinstance(data, dict):
+                component = data.get("component", "") or ""
+
+            # Infer state from content
+            if "disabled" in title or "deprecated" in title:
+                state = "DEPRECATED"
+            elif "re-enabled" in title or "reverted" in title:
+                state = "ACTIVE"
+            elif "superseded" in title or "replaced by" in title:
+                state = "SUPERSEDED"
+            else:
+                state = "ACTIVE"
+
+            registry.append(DecisionLifecycle(
+                decision_id=rec_id,
+                state=state,
+                component=component or "unknown",
+                version_introduced=engine_ver,
+            ))
+
+        by_state: Dict[str, int] = {}
+        for dl in registry:
+            by_state[dl.state] = by_state.get(dl.state, 0) + 1
+
+        return {
+            "total": len(registry),
+            "by_state": by_state,
+            "registry": [dl.to_dict() for dl in registry],
+        }
+
+    # ── Contradiction Escalation ──────────────────────────────────────────────
 
     def detect_real_contradictions(self) -> List[dict]:
         """
         Detect contradictions in DECISION records pulled live from IMRAF.
 
-        Groups records by component metadata field, then within each component
-        looks for pairs with opposite direction keywords or conflicting numeric
-        parameter values.
-
-        Returns list of dicts:
-          {"component": str, "contradiction_type": str, "fact_a": str,
-           "fact_b": str, "severity": "HIGH"|"MEDIUM"|"LOW"}
+        Groups records by component metadata field, then looks for pairs
+        with opposite direction keywords or conflicting numeric parameter values.
         """
         try:
             from core.institutional_memory.imraf_engine import imraf
@@ -201,20 +283,20 @@ class GovernanceIntelligenceEngine:
             logger.warning("detect_real_contradictions: IMRAF search failed: %s", exc)
             return []
 
-        # Group by component extracted from the data dict
         groups: Dict[str, list] = {}
         for rec in records:
-            data = rec.get("data", {})
-            component = ""
-            if isinstance(data, dict):
-                component = data.get("component", "") or ""
+            if isinstance(rec, dict):
+                data = rec.get("data", {})
+                component = data.get("component", "") if isinstance(data, dict) else ""
+                title = rec.get("title", "") or ""
+            else:
+                data = getattr(rec, "data", {})
+                component = data.get("component", "") if isinstance(data, dict) else ""
+                title = getattr(rec, "title", "") or ""
             if not component:
                 component = "unknown"
-            groups.setdefault(component, []).append(rec)
+            groups.setdefault(component, []).append({"title": title, "raw": rec})
 
-        findings: list = []
-
-        # Opposite keyword pairs that signal conflicting decisions
         _OPPOSITE_PAIRS = [
             ("enabled", "disabled"),
             ("raised", "lowered"),
@@ -223,26 +305,22 @@ class GovernanceIntelligenceEngine:
             ("added", "removed"),
         ]
 
+        findings: list = []
         for component, recs in groups.items():
             if len(recs) < 2:
                 continue
-
             for i in range(len(recs)):
                 for j in range(i + 1, len(recs)):
-                    a = recs[i]
-                    b = recs[j]
-                    title_a = (a.get("title") or "").lower()
-                    title_b = (b.get("title") or "").lower()
-
-                    # Check for opposite keyword pairs
+                    title_a = recs[i]["title"].lower()
+                    title_b = recs[j]["title"].lower()
                     for kw_pos, kw_neg in _OPPOSITE_PAIRS:
                         if kw_pos in title_a and kw_neg in title_b:
                             severity = "HIGH" if kw_pos in ("enabled", "activated") else "MEDIUM"
                             findings.append({
                                 "component": component,
                                 "contradiction_type": f"{kw_pos}/{kw_neg} conflict",
-                                "fact_a": a.get("title", ""),
-                                "fact_b": b.get("title", ""),
+                                "fact_a": recs[i]["title"],
+                                "fact_b": recs[j]["title"],
                                 "severity": severity,
                             })
                             break
@@ -251,13 +329,12 @@ class GovernanceIntelligenceEngine:
                             findings.append({
                                 "component": component,
                                 "contradiction_type": f"{kw_neg}/{kw_pos} conflict",
-                                "fact_a": a.get("title", ""),
-                                "fact_b": b.get("title", ""),
+                                "fact_a": recs[i]["title"],
+                                "fact_b": recs[j]["title"],
                                 "severity": severity,
                             })
                             break
 
-                    # Numeric parameter value conflicts: param=X in one vs param=Y in other
                     param_vals_a = {m.group(1).lower(): m.group(2)
                                     for m in re.finditer(r"(\w+)=(\d+\.?\d*)", title_a)}
                     param_vals_b = {m.group(1).lower(): m.group(2)
@@ -267,12 +344,11 @@ class GovernanceIntelligenceEngine:
                             findings.append({
                                 "component": component,
                                 "contradiction_type": f"parameter value conflict: {param}",
-                                "fact_a": a.get("title", ""),
-                                "fact_b": b.get("title", ""),
+                                "fact_a": recs[i]["title"],
+                                "fact_b": recs[j]["title"],
                                 "severity": "MEDIUM",
                             })
 
-        # Deduplicate by (component, fact_a prefix, contradiction_type)
         seen: set = set()
         deduped: list = []
         for f in findings:
@@ -283,96 +359,126 @@ class GovernanceIntelligenceEngine:
 
         return deduped[:30]
 
-    def detect_stale_assumptions(self) -> List[dict]:
+    def escalate_contradictions_to_imraf(self) -> int:
         """
-        Detect DECISION records whose engine_ver is more than 5 minor versions
-        behind the current APP_VERSION.
+        For each HIGH/MEDIUM contradiction found, archive as INCIDENT if not
+        already present in IMRAF. Returns count of new incidents created.
+        """
+        contradictions = self.detect_real_contradictions()
+        if not contradictions:
+            return 0
 
-        Returns list of dicts:
-          {"content": str, "version": str, "age_versions": int, "component": str}
+        try:
+            from core.institutional_memory.imraf_engine import imraf, Category
+        except ImportError:
+            return 0
+
+        created = 0
+        for c in contradictions:
+            if c["severity"] not in ("HIGH", "MEDIUM"):
+                continue
+            component = c["component"]
+            contradiction_type = c["contradiction_type"]
+            # Idempotency check — skip if already archived
+            search_key = f"GOVERNANCE_ALERT: Contradiction detected in {component}"
+            existing = imraf.search(query=search_key, limit=1)
+            if existing:
+                continue
+            content = f"GOVERNANCE_ALERT: Contradiction detected in {component} — {contradiction_type}"
+            try:
+                imraf.record(
+                    category=Category.INCIDENT,
+                    title=content[:200],
+                    data={"content": content, "component": component,
+                          "contradiction_type": contradiction_type,
+                          "severity": c["severity"]},
+                    tags=["governance", "contradiction", "alert", component],
+                )
+                created += 1
+            except Exception as exc:
+                logger.warning("escalate_contradictions_to_imraf: record failed: %s", exc)
+
+        return created
+
+    # ── Governance Coverage Report ────────────────────────────────────────────
+
+    def governance_coverage_report(self) -> dict:
+        """
+        Groups DECISION + GOVERNANCE records by component and computes coverage
+        against the known component list (from KGE MODULE nodes if available,
+        else the hardcoded 14-component list).
         """
         try:
             from core.institutional_memory.imraf_engine import imraf
         except ImportError:
-            return []
+            return {
+                "covered_components": 0, "uncovered_components": len(_KNOWN_COMPONENTS),
+                "coverage_pct": 0.0, "covered": [], "uncovered": list(_KNOWN_COMPONENTS),
+                "lifecycle_summary": {},
+            }
 
         try:
-            from config import APP_VERSION as _APP_VER
-        except Exception:
-            _APP_VER = "0.0.0"
-
-        def _parse_minor(vstr: str):
-            m = re.search(r"\d+\.(\d+)", vstr)
-            return int(m.group(1)) if m else None
-
-        current_minor = _parse_minor(_APP_VER)
-        if current_minor is None:
-            return []
-
-        try:
-            records = imraf.search(query="decision", limit=500)
+            records = imraf.timeline(category="DECISION", limit=500)
+            records += imraf.timeline(category="GOVERNANCE", limit=200)
         except Exception as exc:
-            logger.warning("detect_stale_assumptions: IMRAF search failed: %s", exc)
-            return []
+            logger.warning("governance_coverage_report: IMRAF error: %s", exc)
+            records = []
 
-        stale: list = []
+        covered_set: set = set()
         for rec in records:
-            if rec.get("category") != "DECISION":
-                continue
-            engine_ver = rec.get("engine_ver", "")
-            if not engine_ver:
-                continue
-            rec_minor = _parse_minor(engine_ver)
-            if rec_minor is None:
-                continue
-            age = current_minor - rec_minor
-            if age > 5:
+            if isinstance(rec, dict):
                 data = rec.get("data", {})
-                component = ""
-                if isinstance(data, dict):
-                    component = data.get("component", "") or ""
-                stale.append({
-                    "content": rec.get("title", ""),
-                    "version": engine_ver,
-                    "age_versions": age,
-                    "component": component or "unknown",
-                })
+            else:
+                data = getattr(rec, "data", {})
+            component = ""
+            if isinstance(data, dict):
+                component = data.get("component", "") or ""
+            if component and component != "unknown":
+                covered_set.add(component)
 
-        stale.sort(key=lambda x: x["age_versions"], reverse=True)
-        return stale[:30]
+        # Try KGE MODULE nodes first
+        all_components = list(_KNOWN_COMPONENTS)
+        try:
+            from core.nexus.kge.kge_engine import kge
+            with kge._connect() as con:
+                rows = con.execute(
+                    "SELECT node_id FROM kg_nodes WHERE node_type='MODULE'"
+                ).fetchall()
+            if rows:
+                all_components = [r[0].split(":")[-1] for r in rows]
+        except Exception:
+            pass
 
-    # ── Reports ───────────────────────────────────────────────────────────────
+        uncovered = [c for c in all_components if c not in covered_set]
+        covered_list = [c for c in all_components if c in covered_set]
+        coverage_pct = round(len(covered_list) / len(all_components) * 100, 2) if all_components else 0.0
+
+        lifecycle = self.build_lifecycle_registry()
+        lifecycle_summary = lifecycle.get("by_state", {})
+
+        return {
+            "covered_components": len(covered_list),
+            "uncovered_components": len(uncovered),
+            "coverage_pct": coverage_pct,
+            "covered": covered_list,
+            "uncovered": uncovered,
+            "lifecycle_summary": lifecycle_summary,
+        }
 
     def generate_report(self) -> dict:
         """
-        Extended governance report that includes live contradiction detection.
-
-        Extends generate_cleanup_report() with:
-          real_contradictions      — output of detect_real_contradictions()
-          stale_assumptions        — output of detect_stale_assumptions()
-          real_contradiction_count — int
-          stale_count              — int
-
-        governance_health_score is adjusted downward for real contradictions
-        and stale assumptions beyond those already counted in the base report.
+        Full governance report: base cleanup report extended with lifecycle,
+        coverage, and escalated contradiction metrics.
         """
         base = self.generate_cleanup_report()
-        real_contradictions = self.detect_real_contradictions()
-        stale_assumptions = self.detect_stale_assumptions()
-
-        real_count = len(real_contradictions)
-        stale_count = len(stale_assumptions)
-
-        # Each real contradiction costs 5 points; each stale assumption costs 1 point
-        adjusted_score = max(0, base["governance_health_score"] - real_count * 5 - stale_count * 1)
+        coverage = self.governance_coverage_report()
+        escalated = self.escalate_contradictions_to_imraf()
 
         return {
             **base,
-            "real_contradictions": real_contradictions,
-            "stale_assumptions": stale_assumptions,
-            "real_contradiction_count": real_count,
-            "stale_count": stale_count,
-            "governance_health_score": adjusted_score,
+            "lifecycle_summary": coverage["lifecycle_summary"],
+            "coverage_pct": coverage["coverage_pct"],
+            "escalated_contradictions": escalated,
         }
 
     def generate_cleanup_report(self) -> dict:

@@ -12,12 +12,22 @@ import os
 import sqlite3
 import threading
 import time
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from loguru import logger
 from config import APP_VERSION, cfg
+
+
+@dataclass
+class Provenance:
+    source_file: str = ""        # e.g. "config.py", "core/rl_engine.py"
+    source_line: int = 0         # line number, 0 if unknown
+    git_sha: str = ""            # first 8 chars of commit SHA, "" if unknown
+    extraction_method: str = ""  # "hke_config", "hke_decision", "dcel_hook", "manual", etc.
+    confidence: float = 0.5      # 0.0-1.0: 1.0 = verified, 0.5 = inferred, 0.1 = synthetic
 
 
 class Category(str, Enum):
@@ -116,12 +126,20 @@ class IMRAFEngine:
         data:        dict,
         subcategory: str = "",
         tags:        "List[str] | None" = None,
+        provenance:  "Optional[Provenance]" = None,
     ) -> int:
         cat_str  = category.value if isinstance(category, Category) else str(category)
         tags_str = ",".join(tags or [])
-        data_str = json.dumps(data, default=str)
+        # Merge provenance into data under a dedicated key — no schema change needed.
+        stored_data = dict(data)
+        if provenance is not None:
+            try:
+                stored_data["provenance"] = asdict(provenance)
+            except Exception:
+                pass  # provenance failure must never crash archive()
+        data_str = json.dumps(stored_data, default=str)
         ts       = int(time.time() * 1000)
-        search   = self._build_search_text(cat_str, subcategory, title, tags_str, data)
+        search   = self._build_search_text(cat_str, subcategory, title, tags_str, stored_data)
         with self._lock:
             cur = self._conn.execute(
                 """INSERT INTO imraf_records
@@ -131,6 +149,26 @@ class IMRAFEngine:
             )
             self._conn.commit()
             return cur.lastrowid  # type: ignore[return-value]
+
+    # archive() is an alias for record() — same signature, kept for callers that use
+    # the archive name after reading the FTD spec.
+    def archive(
+        self,
+        category:    "Category | str",
+        title:       str,
+        data:        dict,
+        subcategory: str = "",
+        tags:        "List[str] | None" = None,
+        provenance:  "Optional[Provenance]" = None,
+    ) -> int:
+        return self.record(
+            category=category,
+            title=title,
+            data=data,
+            subcategory=subcategory,
+            tags=tags,
+            provenance=provenance,
+        )
 
     def search(
         self,
@@ -195,6 +233,78 @@ class IMRAFEngine:
             "db_path":       str(self._db_path),
             "boot_ts":       self._boot_ts,
         }
+
+    def get_provenance_stats(self) -> "Dict[str, Any]":
+        """
+        Scan all records and return provenance coverage statistics.
+
+        Returns:
+            total           — total record count
+            with_provenance — records that have a "provenance" key in their data JSON
+            coverage_pct    — percentage of records with provenance
+            by_method       — breakdown by extraction_method string
+            avg_confidence  — mean confidence across records that have provenance
+        """
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT data FROM imraf_records"
+            ).fetchall()
+
+        total = len(rows)
+        with_provenance = 0
+        by_method: Dict[str, int] = {}
+        confidence_sum = 0.0
+
+        for row in rows:
+            try:
+                data = json.loads(row[0])
+                prov = data.get("provenance") if isinstance(data, dict) else None
+                if prov and isinstance(prov, dict):
+                    with_provenance += 1
+                    method = prov.get("extraction_method", "unknown") or "unknown"
+                    by_method[method] = by_method.get(method, 0) + 1
+                    confidence_sum += float(prov.get("confidence", 0.5))
+            except Exception:
+                pass
+
+        coverage_pct = round(with_provenance / total * 100, 2) if total > 0 else 0.0
+        avg_confidence = round(confidence_sum / with_provenance, 4) if with_provenance > 0 else 0.0
+
+        return {
+            "total": total,
+            "with_provenance": with_provenance,
+            "coverage_pct": coverage_pct,
+            "by_method": by_method,
+            "avg_confidence": avg_confidence,
+        }
+
+    def get_provenance_report(self, limit: int = 100) -> "List[Dict[str, Any]]":
+        """
+        Return records that have provenance, sorted by confidence ascending
+        (lowest confidence first — these need the most review).
+        """
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM imraf_records ORDER BY ts DESC"
+            ).fetchall()
+
+        records_with_prov = []
+        for row in rows:
+            d = self._row_to_dict(row)
+            data = d.get("data", {})
+            if not isinstance(data, dict):
+                continue
+            prov = data.get("provenance")
+            if prov and isinstance(prov, dict):
+                d["_confidence"] = float(prov.get("confidence", 0.5))
+                records_with_prov.append(d)
+
+        # Sort by confidence ascending so lowest-confidence records appear first
+        records_with_prov.sort(key=lambda r: r["_confidence"])
+        for r in records_with_prov:
+            del r["_confidence"]
+
+        return records_with_prov[:limit]
 
     def boot_summary(self) -> str:
         stats = self.get_stats()

@@ -13,11 +13,23 @@ from typing import Any, Dict, List, Optional
 # Throttle state — only DCEL module uses this; no external write access needed.
 _last_rl_archive_ts: float = 0.0
 
+# DCEL hooks capture live runtime events — all records originate here.
+_DCEL_SOURCE = "core/nexus/dcel/dcel_engine.py"
+
 
 def _imraf():
     """Lazy import to prevent circular imports at module load time."""
-    from core.institutional_memory.imraf_engine import imraf, Category
-    return imraf, Category
+    from core.institutional_memory.imraf_engine import imraf, Category, Provenance
+    return imraf, Category, Provenance
+
+
+def _dcel_prov(Provenance):
+    """Build a standard DCEL provenance object."""
+    return Provenance(
+        source_file=_DCEL_SOURCE,
+        extraction_method="dcel_hook",
+        confidence=0.9,  # live runtime capture is high confidence
+    )
 
 
 # ── Archive functions ─────────────────────────────────────────────────────────
@@ -35,7 +47,7 @@ def archive_genome_decision(
     reason: str,
     dna_keys: List[str],
 ) -> None:
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     im.record(
         category=Category.EVOLUTION,
         subcategory=decision,
@@ -54,6 +66,7 @@ def archive_genome_decision(
             "dna_keys": dna_keys,
         },
         tags=["genome", "evolution", decision.lower(), strategy_type.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -64,7 +77,7 @@ def archive_rsi_adaptation(
     new_bands: Dict[str, Any],
     survival_rate: float,
 ) -> None:
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     im.record(
         category=Category.EVOLUTION,
         subcategory=f"RSI_{regime}_{action}",
@@ -77,6 +90,7 @@ def archive_rsi_adaptation(
             "survival_rate": round(survival_rate, 4),
         },
         tags=["rsi", "adaptation", regime.lower(), action.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -86,7 +100,7 @@ def archive_lcc_event(
     pause_minutes: float = 0,
     symbol: str = "",
 ) -> None:
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     im.record(
         category=Category.OPERATIONAL,
         subcategory=f"LCC_{event_type}",
@@ -98,6 +112,7 @@ def archive_lcc_event(
             "symbol": symbol,
         },
         tags=["lcc", "loss_cluster", event_type.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -107,7 +122,7 @@ def archive_safe_mode_event(
     duration_min: float = 0.0,
     score: float = 0.0,
 ) -> None:
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     im.record(
         category=Category.OPERATIONAL,
         subcategory=f"SAFE_MODE_{action}",
@@ -119,6 +134,7 @@ def archive_safe_mode_event(
             "score": score,
         },
         tags=["safe_mode", action.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -136,7 +152,7 @@ def archive_scorer_decision(
     if passed and not near_miss:
         return
 
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     subcategory = "SCORE_PASS" if passed else "SCORE_FAIL"
     label = "NEAR_MISS" if (passed and near_miss) else subcategory
     im.record(
@@ -154,6 +170,7 @@ def archive_scorer_decision(
             "factors": factors,
         },
         tags=["scorer", label.lower(), symbol, strategy.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -173,7 +190,7 @@ def archive_rl_summary(
         return
     _last_rl_archive_ts = now
 
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     im.record(
         category=Category.EVOLUTION,
         subcategory="RL_SUMMARY",
@@ -188,6 +205,7 @@ def archive_rl_summary(
             "intelligence_score": round(intelligence_score, 4),
         },
         tags=["rl", "summary", convergence_state.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -198,7 +216,7 @@ def archive_regime_transition(
     trigger: str,
     session: str,
 ) -> None:
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     im.record(
         category=Category.REGIME,
         subcategory=f"{old_regime}→{new_regime}",
@@ -211,6 +229,7 @@ def archive_regime_transition(
             "session": session,
         },
         tags=["regime", "transition", symbol, old_regime.lower(), new_regime.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -222,7 +241,7 @@ def archive_risk_state_change(
     safe_mode: bool,
     reason: str = "",
 ) -> None:
-    im, Category = _imraf()
+    im, Category, Provenance = _imraf()
     im.record(
         category=Category.OPERATIONAL,
         subcategory=event,
@@ -236,6 +255,7 @@ def archive_risk_state_change(
             "reason": reason,
         },
         tags=["risk", "state_change", event.lower()],
+        provenance=_dcel_prov(Provenance),
     )
 
 
@@ -249,7 +269,7 @@ def get_coverage_stats() -> Dict[str, Any]:
     Returns per-category DCEL record counts and an estimated coverage percentage
     against the 800-record target (500 OPERATIONAL + 200 EVOLUTION + 100 REGIME).
     """
-    im, Category = _imraf()
+    im, Category, _ = _imraf()
     stats = im.get_stats()
     by_cat = stats.get("by_category", {})
 

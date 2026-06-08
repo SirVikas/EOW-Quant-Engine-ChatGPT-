@@ -22,10 +22,10 @@ def _make_fresh_imraf(tmp_path: Path):
 
 def _patch_imraf(imraf_instance):
     """Patch the _imraf() helper in dcel_engine to use our test instance."""
-    from core.institutional_memory.imraf_engine import Category
+    from core.institutional_memory.imraf_engine import Category, Provenance
 
     def _fake_imraf():
-        return imraf_instance, Category
+        return imraf_instance, Category, Provenance
 
     return patch("core.nexus.dcel.dcel_engine._imraf", side_effect=_fake_imraf)
 
