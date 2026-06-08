@@ -828,10 +828,15 @@ async def on_tick(tick: Tick):
                 net_pnl     = last_trade.net_pnl,
             )
             # PRP-002: update alpha context memory with trade outcome
-            _close_utc_hour = __import__("datetime").datetime.utcnow().hour
+            # FTD-LONDON-001 Phase-C.2: use ENTRY hour (origin_utc_hour), not close hour.
+            # Context key is regime|utc_hour|strategy — must match the hour used at get_amplification()
+            # time. Recording at close hour creates key mismatch: entry-hour keys stay empty forever.
+            _ctx_utc_hour = getattr(last_trade, "origin_utc_hour", -1)
+            if _ctx_utc_hour < 0:
+                _ctx_utc_hour = __import__("datetime").datetime.utcnow().hour
             opportunity_ecology.record_trade_outcome(
                 regime      = _trade_regime,
-                utc_hour    = _close_utc_hour,
+                utc_hour    = _ctx_utc_hour,
                 strategy_id = _trade_strategy,
                 net_pnl     = last_trade.net_pnl,
             )
@@ -850,7 +855,7 @@ async def on_tick(tick: Tick):
                 net_pnl     = last_trade.net_pnl,
                 confidence  = getattr(last_trade, "confidence", 0.51),
                 atr_pct     = _atr_close,
-                utc_hour    = _close_utc_hour,
+                utc_hour    = _ctx_utc_hour,
             )
         # FTD-PHOENIX-AAP-001: Alpha Attribution snapshot
         if cfg.TRUTH_ENGINE_ENABLED and _ete_result is not None:
@@ -2948,13 +2953,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
                 _ht_regime   = _ht.get("regime", "UNKNOWN")
                 _ht_strategy = _ht.get("strategy_id", "")
                 _ht_net_pnl  = _ht.get("net_pnl", 0.0)
-                # close_utc_hour stored on TradeRecord; fall back to parsing exit_ts
-                _ht_hour = _ht.get("close_utc_hour", -1)
+                # FTD-LONDON-001 Phase-C.2: use ENTRY hour (origin_utc_hour) for context key.
+                # Historical replay must match the same key that was read at entry time.
+                _ht_hour = _ht.get("origin_utc_hour", -1)
                 if _ht_hour < 0:
                     try:
                         import datetime as _dt
                         _ht_hour = _dt.datetime.utcfromtimestamp(
-                            _ht.get("exit_ts", 0) / 1000
+                            _ht.get("entry_ts", 0) / 1000
                         ).hour
                     except Exception:
                         _ht_hour = 0
