@@ -350,6 +350,17 @@ class AdaptiveRSIGovernor:
                 "new_bands": new_bands,
             }
             self._adapt_log.append(entry)
+            try:
+                from core.nexus.dcel.dcel_engine import archive_rsi_adaptation
+                archive_rsi_adaptation(
+                    regime=regime_key,
+                    action=entry["action"],
+                    old_bands=old_bands,
+                    new_bands=new_bands,
+                    survival_rate=sr,
+                )
+            except Exception:
+                pass
             logger.info(
                 f"[FTD-057][RSI_GOV] {regime_key} adapt: sr={sr:.3f} "
                 f"action={entry['action']} bands={new_bands}"

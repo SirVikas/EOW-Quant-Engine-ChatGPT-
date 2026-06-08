@@ -206,6 +206,11 @@ class SafeModeController:
         self._history.append(SafeModeEvent(ts=time.time(), action=action, reason=reason))
         if len(self._history) > 200:
             self._history = self._history[-200:]
+        try:
+            from core.nexus.dcel.dcel_engine import archive_safe_mode_event
+            archive_safe_mode_event(action=action, reason=reason)
+        except Exception:
+            pass
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

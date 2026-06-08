@@ -13574,6 +13574,155 @@ async def nexus_status():
     }
 
 
+# ── NEXUS Acceleration Endpoints (FTD-NEXUS-ACCELERATION-001) ─────────────────
+
+@app.get("/api/nexus/iq")
+async def nexus_iq():
+    """Institutional IQ Dashboard — 5-dimension intelligence score (0-100)."""
+    try:
+        from core.nexus.iq.iq_dashboard import IQDashboard
+        return IQDashboard().compute()
+    except Exception as exc:
+        return {"error": str(exc), "institutional_iq": 0, "grade": "F"}
+
+
+@app.get("/api/nexus/iq/quick")
+async def nexus_iq_quick():
+    """Quick IQ score — lightweight single-number readout."""
+    try:
+        from core.nexus.iq.iq_dashboard import IQDashboard
+        return IQDashboard().get_quick_score()
+    except Exception as exc:
+        return {"error": str(exc), "institutional_iq": 0}
+
+
+@app.get("/api/nexus/dcel/stats")
+async def nexus_dcel_stats():
+    """DCEL coverage stats — how many decisions are now archived to IMRAF."""
+    try:
+        from core.nexus.dcel.dcel_engine import get_coverage_stats
+        return get_coverage_stats()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/doae/report")
+async def nexus_doae_report():
+    """Full Decision Outcome Attribution report — FTDs, config changes, attributions."""
+    try:
+        from core.nexus.doae.doae_engine import doae
+        return doae.get_attribution_report()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/doae/top-positive")
+async def nexus_doae_top_positive(n: int = 10):
+    """Top N decisions that created the most profit (by impact_score)."""
+    try:
+        from core.nexus.doae.doae_engine import doae
+        return {"top_positive": doae.get_top_positive(n)}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/doae/top-negative")
+async def nexus_doae_top_negative(n: int = 10):
+    """Top N decisions that destroyed the most profit (by impact_score)."""
+    try:
+        from core.nexus.doae.doae_engine import doae
+        return {"top_negative": doae.get_top_negative(n)}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/nexus/doae/snapshot")
+async def nexus_doae_snapshot(
+    win_rate: float = 0.0,
+    profit_factor: float = 0.0,
+    avg_pnl: float = 0.0,
+    total_pnl: float = 0.0,
+    trades_count: int = 0,
+):
+    """Record a performance snapshot for attribution tracking."""
+    try:
+        from core.nexus.doae.doae_engine import doae
+        snap_id = doae.record_snapshot(
+            win_rate=win_rate, profit_factor=profit_factor,
+            avg_pnl=avg_pnl, total_pnl=total_pnl, trades_count=trades_count,
+        )
+        return {"status": "recorded", "snapshot_id": snap_id}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/kge/stats")
+async def nexus_kge_stats():
+    """Knowledge graph stats — node count, edge count, coverage score."""
+    try:
+        from core.nexus.kge.kge_engine import kge
+        return kge.get_stats()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/kge/graph")
+async def nexus_kge_graph(limit: int = 200):
+    """Full knowledge graph — all nodes and edges (up to limit)."""
+    try:
+        from core.nexus.kge.kge_engine import kge
+        kge.enrich_from_imraf()
+        return kge.get_full_graph(limit=limit)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/kge/chain")
+async def nexus_kge_signal_chain():
+    """Signal→Gate→Trade→Outcome execution chain documentation."""
+    try:
+        from core.nexus.kge.kge_engine import kge
+        return kge.get_signal_chain()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/kge/neighbors/{node_id}")
+async def nexus_kge_neighbors(node_id: str, depth: int = 2):
+    """Neighborhood of a knowledge graph node up to given depth."""
+    try:
+        from core.nexus.kge.kge_engine import kge
+        return kge.get_neighbors(node_id=node_id, max_depth=depth)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/governance/report")
+async def nexus_governance_report():
+    """Governance Intelligence report — stale, contradictory, expired decisions."""
+    try:
+        from core.nexus.governance_intelligence.governance_intelligence import (
+            GovernanceIntelligenceEngine,
+        )
+        return GovernanceIntelligenceEngine().generate_cleanup_report()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/nexus/governance/assumptions")
+async def nexus_governance_assumptions():
+    """Tracked assumptions that may be stale or violated."""
+    try:
+        from core.nexus.governance_intelligence.governance_intelligence import (
+            GovernanceIntelligenceEngine,
+        )
+        from dataclasses import asdict
+        findings = GovernanceIntelligenceEngine().scan_assumptions()
+        return {"assumptions": [asdict(f) for f in findings]}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
