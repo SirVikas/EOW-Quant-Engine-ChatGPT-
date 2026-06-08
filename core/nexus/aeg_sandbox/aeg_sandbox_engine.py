@@ -198,8 +198,13 @@ class AEGSandboxEngine:
 
         return new_recs
 
-    def record_outcome(self, rec_id: str, outcome: str, accurate: bool) -> bool:
-        """Mark a sandbox recommendation as validated with actual outcome."""
+    def record_outcome(self, rec_id: str, outcome: str, accurate: bool,
+                       damage_score: float = 0.0) -> bool:
+        """
+        Mark a sandbox recommendation as validated with actual outcome.
+        damage_score: 0.0 (no harm) → 1.0 (catastrophic harm) for wrong recommendations.
+        Only meaningful when accurate=False; ignored otherwise.
+        """
         with self._lock:
             state = self._load()
             for rec in state["recommendations"]:
@@ -207,12 +212,62 @@ class AEGSandboxEngine:
                     rec["outcome"] = outcome
                     rec["accurate"] = accurate
                     rec["status"] = "VALIDATED"
+                    # Damage only applies to wrong recommendations
+                    rec["damage_score"] = round(damage_score, 4) if not accurate else 0.0
                     self._save(state)
                     return True
         return False
 
+    def compute_damage_score(self, validated: list) -> dict:
+        """
+        Recommendation Damage Score — measures harm from wrong recommendations.
+
+        A system with 80% accuracy but catastrophic 20% failures is unsafe.
+        This metric surfaces that risk by tracking wrong-recommendation severity.
+
+        Damage grade:
+          SAFE     (avg_damage < 0.20) — wrong recs caused minimal harm
+          MODERATE (avg_damage < 0.50) — some harmful wrong recs, monitor
+          HIGH     (avg_damage < 0.80) — wrong recs causing significant harm
+          CRITICAL (avg_damage >= 0.80) — system unsafe despite accuracy
+        """
+        wrong = [r for r in validated if r.get("accurate") is False]
+        if not wrong:
+            return {
+                "wrong_count": 0,
+                "avg_damage_score": 0.0,
+                "max_damage_score": 0.0,
+                "damage_grade": "SAFE",
+                "safe_to_promote": True,
+            }
+
+        scores = [r.get("damage_score", 0.0) for r in wrong]
+        avg_damage = sum(scores) / len(scores)
+        max_damage = max(scores)
+
+        if avg_damage < 0.20:
+            grade = "SAFE"
+        elif avg_damage < 0.50:
+            grade = "MODERATE"
+        elif avg_damage < 0.80:
+            grade = "HIGH"
+        else:
+            grade = "CRITICAL"
+
+        # Promotion blocked if any single recommendation caused catastrophic harm (>=0.9)
+        # or average damage is HIGH/CRITICAL
+        safe_to_promote = avg_damage < 0.50 and max_damage < 0.90
+
+        return {
+            "wrong_count": len(wrong),
+            "avg_damage_score": round(avg_damage, 4),
+            "max_damage_score": round(max_damage, 4),
+            "damage_grade": grade,
+            "safe_to_promote": safe_to_promote,
+        }
+
     def get_accuracy_stats(self) -> dict:
-        """Return accuracy statistics and promotion eligibility."""
+        """Return accuracy + damage statistics and promotion eligibility."""
         with self._lock:
             state = self._load()
             recs = state.get("recommendations", [])
@@ -223,13 +278,19 @@ class AEGSandboxEngine:
         validated_count = len(validated)
         accuracy_rate = accurate_count / validated_count if validated_count > 0 else 0.0
 
+        damage = self.compute_damage_score(validated)
+
+        # Promotion requires accuracy threshold AND damage safety gate
         promotion_eligible = (
             accuracy_rate >= self.ACCURACY_THRESHOLD
             and validated_count >= self.MIN_SANDBOX_RECOMMENDATIONS
+            and damage["safe_to_promote"]
         )
 
         if validated_count < self.MIN_SANDBOX_RECOMMENDATIONS:
             promotion_status = "INSUFFICIENT_DATA"
+        elif not damage["safe_to_promote"]:
+            promotion_status = "BLOCKED_HIGH_DAMAGE"
         elif accuracy_rate >= self.ACCURACY_THRESHOLD:
             promotion_status = "ELIGIBLE"
         else:
@@ -245,6 +306,7 @@ class AEGSandboxEngine:
             "promotion_eligible": promotion_eligible,
             "promotion_status": promotion_status,
             "recommendations_needed": recommendations_needed,
+            "damage": damage,
         }
 
     def get_sandbox_status(self) -> dict:
