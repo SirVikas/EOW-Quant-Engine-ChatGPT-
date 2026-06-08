@@ -150,8 +150,10 @@ from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult        
 from core.truth.exit_truth_engine   import exit_truth_engine                           # FTD-PHOENIX-XTE-001
 from core.truth.alpha_attribution   import alpha_attribution_platform, AttributionSnapshot  # FTD-PHOENIX-AAP-001
 from core.truth.truth_archive       import truth_archive                               # FTD-PHOENIX-AAP-001
-from core.observatory import (                                                         # OX-1: Observatory-X Foundation
+from core.observatory import (                                                         # OBSERVATORY-X OX-1/2/3
     report_registry, report_scheduler, report_health_monitor,
+    report_relationship_engine, event_lineage_tracker,
+    defect_engine, phoenix_inspector, recommendation_engine,
 )
 
 
@@ -14054,6 +14056,184 @@ async def observatory_health():
     """Report Health Monitor — staleness, error counts, and health scores for all reports."""
     try:
         return report_health_monitor.summary()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OBSERVATORY-X OX-2 Endpoints ─────────────────────────────────────────────
+
+@app.get("/api/observatory/relationships")
+async def observatory_relationships():
+    """Report Relationship Graph — full edge list and graph summary."""
+    try:
+        return {
+            "graph":    report_relationship_engine.graph_summary(),
+            "edges":    report_relationship_engine.all_relationships(),
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/relationships/{report_key}")
+async def observatory_report_context(report_key: str):
+    """Context for a specific report — all inbound and outbound relationships."""
+    try:
+        return report_relationship_engine.context_for(report_key)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/dependency-order")
+async def observatory_dependency_order():
+    """Topological execution order for all reports respecting DEPENDS edges."""
+    try:
+        return {"order": report_relationship_engine.dependency_order()}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/lineage")
+async def observatory_lineage_summary():
+    """Event lineage tracker summary — all events in memory."""
+    try:
+        return event_lineage_tracker.summary()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/lineage/recent")
+async def observatory_lineage_recent(limit: int = 20):
+    """Most recent lineage events."""
+    try:
+        return {"events": event_lineage_tracker.recent(limit=min(limit, 100))}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/lineage/losses")
+async def observatory_lineage_losses(limit: int = 50):
+    """Lineage chains for recent loss events — forensic view."""
+    try:
+        return {"losses": event_lineage_tracker.losses(limit=min(limit, 100))}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/lineage/{event_id}")
+async def observatory_lineage_event(event_id: str):
+    """Full lineage chain for a specific event ID."""
+    try:
+        result = event_lineage_tracker.get_lineage(event_id)
+        if result is None:
+            raise HTTPException(status_code=404, detail=f"Event '{event_id}' not found")
+        return result
+    except HTTPException:
+        raise
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── OBSERVATORY-X OX-3 Endpoints ─────────────────────────────────────────────
+
+@app.get("/api/observatory/inspect/defects")
+async def observatory_defects():
+    """Defect Discovery Engine scan — systemic defects across the report ecosystem."""
+    try:
+        return defect_engine.scan()
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/inspect/losses")
+async def observatory_inspect_losses():
+    """Run a loss investigation against recent lineage events."""
+    try:
+        report = phoenix_inspector.investigate_losses(trigger="api")
+        return phoenix_inspector._serialise(report)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/inspect/defect/{defect_id}")
+async def observatory_inspect_defect(defect_id: str):
+    """Run an investigation for a specific defect ID."""
+    try:
+        report = phoenix_inspector.investigate_defect(defect_id, trigger="api")
+        return phoenix_inspector._serialise(report)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/inspect/history")
+async def observatory_inspect_history(limit: int = 10):
+    """Recent investigation reports."""
+    try:
+        return {
+            "summary":         phoenix_inspector.summary(),
+            "investigations":  phoenix_inspector.recent_investigations(limit=min(limit, 50)),
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.post("/api/observatory/recommend/{investigation_id}")
+async def observatory_recommend(investigation_id: str):
+    """Generate recommendations for a completed investigation."""
+    try:
+        bundle = recommendation_engine.generate(investigation_id)
+        return recommendation_engine.serialise_bundle(bundle)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@app.get("/api/observatory/status")
+async def observatory_status():
+    """
+    OBSERVATORY-X Master Status — consolidated view across all OX layers.
+    Single endpoint for the dashboard Observatory panel.
+    """
+    try:
+        reg_summary   = report_registry.summary()
+        health        = report_health_monitor.summary()
+        sched         = report_scheduler.status()
+        graph         = report_relationship_engine.graph_summary()
+        lineage       = event_lineage_tracker.summary()
+        defects       = defect_engine.scan()
+        inspector_sum = phoenix_inspector.summary()
+        return {
+            "observatory_version": "OX-3",
+            "registry": {
+                "total_reports":   reg_summary["total_registered"],
+                "by_category":     reg_summary["by_category"],
+                "by_tier":         reg_summary["by_tier"],
+            },
+            "health": {
+                "health_score":    health["health_score"],
+                "verdict_counts":  health["verdict_counts"],
+                "critical_count":  len(health["critical_reports"]),
+                "failed_count":    len(health["failed_reports"]),
+            },
+            "scheduler": {
+                "running":         sched["running"],
+                "total_jobs":      sched["total_jobs"],
+                "jobs_with_handlers": sched["jobs_with_handlers"],
+            },
+            "relationships": {
+                "total_nodes":  graph["total_nodes"],
+                "total_edges":  graph["total_edges"],
+                "edges_by_type": graph["edges_by_type"],
+            },
+            "lineage": {
+                "total_events":  lineage["total_events"],
+                "open_events":   lineage["open_events"],
+                "by_type":       lineage["by_type"],
+            },
+            "defects": {
+                "total":          defects["total_defects"],
+                "by_severity":    defects["by_severity"],
+            },
+            "inspector": inspector_sum,
+        }
     except Exception as exc:
         return {"error": str(exc)}
 
