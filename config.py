@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.77.0"
+APP_VERSION = "1.78.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -82,6 +82,18 @@ NEXUS_MATURITY_VERSION  = "1.0.0"  # v1.0: 20 Institutional Maturity Reports (GA
 
 # NEXUS — Evidence Supremacy Engine
 NEXUS_ESE_VERSION = "1.0.0"   # v1.0: Evidence Supremacy Automation
+
+# v1.78.0 — POST-v1.77.0 Independent Architectural Gap Review
+OBSERVABILITY_PLATFORM_VERSION = "1.0.0"   # v1.0: Institutional Observability Platform
+PORTFOLIO_INTELLIGENCE_VERSION = "1.0.0"   # v1.0: Portfolio Intelligence Layer
+CAUSAL_INTELLIGENCE_VERSION = "1.0.0"      # v1.0: Causal Inference Engine
+RESEARCH_LAB_VERSION = "1.0.0"             # v1.0: Institutional Research Lab
+AGENT_FABRIC_VERSION = "1.0.0"             # v1.0: Multi-Agent Coordination Fabric
+FORECASTING_ENGINE_VERSION = "1.0.0"       # v1.0: Strategic Forecasting Engine
+SELF_DIAGNOSTICS_VERSION = "1.0.0"         # v1.0: Self-Diagnostic Reconstruction Engine
+POLICY_GOVERNANCE_VERSION = "1.0.0"        # v1.0: Global Policy Governance System
+INSTITUTIONAL_SCORECARD_VERSION = "1.0.0"  # v1.0: Continuous Institutional Scorecard
+COMMAND_CENTER_VERSION = "1.0.0"           # v1.0: PHOENIX Command Center
 
 # PHOENIX Institutional Stack — ordered maturity progression
 INSTITUTIONAL_STACK = [

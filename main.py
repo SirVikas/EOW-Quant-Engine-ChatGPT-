@@ -19183,6 +19183,442 @@ def maturity_readiness():
     return institutional_dashboard.readiness_summary()
 
 
+# ── GAP-01: Observability Platform ──────────────────────────────────────────
+@app.get("/api/obs/mission-control")
+def obs_mission_control():
+    from core.observability_platform.observability_engine import observability_engine
+    return observability_engine.mission_control()
+
+@app.get("/api/obs/dashboard")
+def obs_dashboard():
+    from core.observability_platform.institutional_observability_dashboard import institutional_observability_dashboard
+    return institutional_observability_dashboard.full_dashboard()
+
+@app.get("/api/obs/status")
+def obs_status():
+    from core.observability_platform.observability_engine import observability_engine
+    return observability_engine.observability_health()
+
+@app.get("/api/obs/metrics")
+def obs_metrics():
+    from core.observability_platform.real_time_metrics_bus import real_time_metrics_bus
+    return real_time_metrics_bus.all_latest()
+
+@app.post("/api/obs/telemetry/collect")
+def obs_telemetry_collect():
+    from core.observability_platform.cross_layer_telemetry import cross_layer_telemetry
+    return cross_layer_telemetry.collect_all()
+
+@app.get("/api/obs/anomalies")
+def obs_anomalies():
+    from core.observability_platform.anomaly_center import anomaly_center
+    return {"anomalies": anomaly_center.all_anomalies(resolved=False), "stats": anomaly_center.anomaly_stats()}
+
+@app.post("/api/obs/anomalies/scan")
+def obs_anomalies_scan():
+    from core.observability_platform.anomaly_center import anomaly_center
+    return anomaly_center.scan()
+
+
+# ── GAP-02: Portfolio Intelligence ───────────────────────────────────────────
+@app.get("/api/portfolio/snapshot")
+def portfolio_snapshot():
+    from core.portfolio_intelligence.portfolio_engine import portfolio_engine
+    return portfolio_engine.portfolio_snapshot()
+
+@app.get("/api/portfolio/exposure")
+def portfolio_exposure():
+    from core.portfolio_intelligence.exposure_analyzer import exposure_analyzer
+    return exposure_analyzer.concentration_report()
+
+@app.post("/api/portfolio/exposure/record")
+def portfolio_exposure_record(body: dict):
+    from core.portfolio_intelligence.exposure_analyzer import exposure_analyzer
+    return exposure_analyzer.record_exposure(
+        body["exposure_type"], body["name"], body["exposure_pct"], body["risk_contribution_pct"])
+
+@app.get("/api/portfolio/risk")
+def portfolio_risk():
+    from core.portfolio_intelligence.portfolio_risk_mapper import portfolio_risk_mapper
+    return portfolio_risk_mapper.risk_summary()
+
+@app.post("/api/portfolio/risk/map")
+def portfolio_risk_map(body: dict):
+    from core.portfolio_intelligence.portfolio_risk_mapper import portfolio_risk_mapper
+    return portfolio_risk_mapper.create_risk_map(body["total_var_pct"], body["max_drawdown_pct"], body["sharpe_estimate"])
+
+@app.get("/api/portfolio/allocations")
+def portfolio_allocations():
+    from core.portfolio_intelligence.capital_allocator import capital_allocator
+    return capital_allocator.allocation_report()
+
+@app.post("/api/portfolio/allocate")
+def portfolio_allocate(body: dict):
+    from core.portfolio_intelligence.capital_allocator import capital_allocator
+    return capital_allocator.allocate(
+        body["strategy_name"], body["allocated_pct"], body["max_drawdown_limit_pct"],
+        body["expected_return_pct"], body["rationale"])
+
+@app.get("/api/portfolio/rebalance")
+def portfolio_rebalance():
+    from core.portfolio_intelligence.portfolio_engine import portfolio_engine
+    return {"recommendations": portfolio_engine.rebalance_recommendation()}
+
+
+# ── GAP-03: Causal Intelligence ──────────────────────────────────────────────
+@app.get("/api/causal/report")
+def causal_report():
+    from core.causal_intelligence.causal_engine import causal_engine
+    return causal_engine.causal_report()
+
+@app.post("/api/causal/claim/validate")
+def causal_validate(body: dict):
+    from core.causal_intelligence.causal_engine import causal_engine
+    return causal_engine.did_x_cause_y(body["cause"], body["effect"])
+
+@app.get("/api/causal/claims")
+def causal_claims():
+    from core.causal_intelligence.causal_validator import causal_validator
+    return {"claims": causal_validator.all_claims()}
+
+@app.get("/api/causal/map")
+def causal_map():
+    from core.causal_intelligence.causal_validator import causal_validator
+    return causal_validator.causal_map()
+
+@app.post("/api/causal/counterfactual")
+def causal_counterfactual(body: dict):
+    from core.causal_intelligence.counterfactual_engine import counterfactual_engine
+    return counterfactual_engine.ask(body["question"], body["actual_outcome"],
+                                     body["counterfactual_scenario"], body.get("confidence", 0.5))
+
+@app.get("/api/causal/counterfactuals")
+def causal_counterfactuals():
+    from core.causal_intelligence.counterfactual_engine import counterfactual_engine
+    return {"counterfactuals": counterfactual_engine.all_counterfactuals()}
+
+@app.post("/api/causal/intervention")
+def causal_intervention(body: dict):
+    from core.causal_intelligence.intervention_tracker import intervention_tracker
+    return intervention_tracker.record_intervention(
+        body["cause_candidate"], body["effect_candidate"], body["intervention_type"],
+        body["before_state"], body["after_state"], body["effect_observed"])
+
+
+# ── GAP-04: Research Lab ─────────────────────────────────────────────────────
+@app.get("/api/research/report")
+def research_report():
+    from core.research_lab.research_report_builder import research_report_builder
+    return research_report_builder.build_report()
+
+@app.post("/api/research/experiment/register")
+def research_experiment_register(body: dict):
+    from core.research_lab.experiment_registry import experiment_registry
+    exp_id = experiment_registry.register(body["title"], body["hypothesis"], body["methodology"],
+                                           body["researcher"], body["expected_outcome"])
+    return {"exp_id": exp_id}
+
+@app.get("/api/research/experiments")
+def research_experiments():
+    from core.research_lab.experiment_registry import experiment_registry
+    return {"experiments": experiment_registry.all_experiments(), "stats": experiment_registry.experiment_stats()}
+
+@app.post("/api/research/experiment/complete")
+def research_experiment_complete(body: dict):
+    from core.research_lab.experiment_registry import experiment_registry
+    ok = experiment_registry.complete(body["exp_id"], body["actual_outcome"], body["conclusion"])
+    return {"ok": ok}
+
+@app.post("/api/research/hypothesis/propose")
+def research_hypothesis_propose(body: dict):
+    from core.research_lab.hypothesis_engine import hypothesis_engine
+    hyp_id = hypothesis_engine.propose(body["statement"], body["domain"], body.get("testability", "TESTABLE"))
+    return {"hyp_id": hyp_id}
+
+@app.get("/api/research/hypotheses")
+def research_hypotheses():
+    from core.research_lab.hypothesis_engine import hypothesis_engine
+    return {"hypotheses": hypothesis_engine.all_hypotheses(), "stats": hypothesis_engine.hypothesis_stats()}
+
+@app.post("/api/research/hypothesis/evidence")
+def research_hypothesis_evidence(body: dict):
+    from core.research_lab.hypothesis_engine import hypothesis_engine
+    ok = hypothesis_engine.add_evidence(body["hyp_id"], body["evidence"], body.get("supports", True))
+    return {"ok": ok}
+
+@app.get("/api/research/items")
+def research_items():
+    from core.research_lab.research_tracker import research_tracker
+    return {"items": research_tracker.top_relevant(20), "stats": research_tracker.research_stats()}
+
+@app.post("/api/research/items/add")
+def research_items_add(body: dict):
+    from core.research_lab.research_tracker import research_tracker
+    return research_tracker.add(body["title"], body["item_type"], body["source"], body["summary"],
+                                 body.get("tags"), body.get("relevance_score", 0.5))
+
+
+# ── GAP-05: Agent Fabric ─────────────────────────────────────────────────────
+@app.get("/api/agents/all")
+def agents_all():
+    from core.agent_fabric.agent_registry import agent_registry
+    return {"agents": agent_registry.all_agents(), "stats": agent_registry.agent_stats()}
+
+@app.get("/api/agents/active")
+def agents_active():
+    from core.agent_fabric.agent_registry import agent_registry
+    return {"agents": agent_registry.active_agents()}
+
+@app.post("/api/agents/register")
+def agents_register(body: dict):
+    from core.agent_fabric.agent_registry import agent_registry
+    agent_id = agent_registry.register(body["name"], body["agent_type"], body["capabilities"])
+    return {"agent_id": agent_id}
+
+@app.post("/api/agents/consensus")
+def agents_consensus(body: dict):
+    from core.agent_fabric.agent_consensus_engine import agent_consensus_engine
+    return agent_consensus_engine.run_consensus(body["topic"], body["participating_agents"], body["vote_options"])
+
+@app.get("/api/agents/consensus/history")
+def agents_consensus_history():
+    from core.agent_fabric.agent_consensus_engine import agent_consensus_engine
+    return {"rounds": agent_consensus_engine.recent_rounds(), "stats": agent_consensus_engine.consensus_stats()}
+
+@app.get("/api/agents/coordinator/status")
+def agents_coordinator_status():
+    from core.agent_fabric.agent_coordinator import agent_coordinator
+    return agent_coordinator.coordinator_status()
+
+@app.post("/api/agents/task/assign")
+def agents_task_assign(body: dict):
+    from core.agent_fabric.agent_coordinator import agent_coordinator
+    return agent_coordinator.assign_task(body["description"], body.get("agent_type_preferred"),
+                                          body.get("priority", 5))
+
+
+# ── GAP-06: Forecasting ──────────────────────────────────────────────────────
+@app.get("/api/forecast/status")
+def forecast_status():
+    from core.forecasting.forecast_engine import forecast_engine
+    return forecast_engine.forecast_status()
+
+@app.get("/api/forecast/outlook")
+def forecast_outlook():
+    from core.forecasting.forecast_engine import forecast_engine
+    return forecast_engine.forecast()
+
+@app.get("/api/forecast/multi-horizon")
+def forecast_multi_horizon():
+    from core.forecasting.forecast_engine import forecast_engine
+    return forecast_engine.multi_horizon_forecast()
+
+@app.get("/api/forecast/risks/critical")
+def forecast_risks_critical():
+    from core.forecasting.future_risk_mapper import future_risk_mapper
+    return {"critical_risks": future_risk_mapper.critical_future_risks(), "report": future_risk_mapper.risk_map_report()}
+
+@app.post("/api/forecast/risk/project")
+def forecast_risk_project(body: dict):
+    from core.forecasting.future_risk_mapper import future_risk_mapper
+    return future_risk_mapper.project_risk(body["risk_type"], body["horizon_days"],
+                                            body["probability"], body["severity"],
+                                            body.get("mitigation", ""))
+
+@app.post("/api/forecast/scenario")
+def forecast_scenario(body: dict):
+    from core.forecasting.scenario_projection import scenario_projection
+    return scenario_projection.project(body["scenario_name"], body["horizon_days"],
+                                        body["base_case"], body.get("bull_case"),
+                                        body.get("bear_case"))
+
+@app.get("/api/forecast/scenarios")
+def forecast_scenarios():
+    from core.forecasting.scenario_projection import scenario_projection
+    return {"projections": scenario_projection.all_projections()}
+
+
+# ── GAP-07: Self Diagnostics ─────────────────────────────────────────────────
+@app.get("/api/diag/summary")
+def diag_summary():
+    from core.self_diagnostics.failure_reconstruction_engine import failure_reconstruction_engine
+    return failure_reconstruction_engine.diagnostic_summary()
+
+@app.post("/api/diag/incident/report")
+def diag_incident_report(body: dict):
+    from core.self_diagnostics.incident_analyzer import incident_analyzer
+    incident_id = incident_analyzer.report_incident(body["title"], body["description"],
+                                                     body["severity"], body["affected_layers"])
+    return {"incident_id": incident_id}
+
+@app.get("/api/diag/incidents")
+def diag_incidents():
+    from core.self_diagnostics.incident_analyzer import incident_analyzer
+    return {"incidents": incident_analyzer.all_incidents(), "stats": incident_analyzer.incident_stats()}
+
+@app.post("/api/diag/incident/investigate")
+def diag_incident_investigate(body: dict):
+    from core.self_diagnostics.incident_analyzer import incident_analyzer
+    return incident_analyzer.investigate(body["incident_id"])
+
+@app.post("/api/diag/incident/resolve")
+def diag_incident_resolve(body: dict):
+    from core.self_diagnostics.incident_analyzer import incident_analyzer
+    ok = incident_analyzer.resolve(body["incident_id"])
+    return {"ok": ok}
+
+@app.post("/api/diag/postmortem")
+def diag_postmortem(body: dict):
+    from core.self_diagnostics.auto_postmortem_generator import auto_postmortem_generator
+    return auto_postmortem_generator.generate(body["incident_id"])
+
+@app.get("/api/diag/postmortems")
+def diag_postmortems():
+    from core.self_diagnostics.auto_postmortem_generator import auto_postmortem_generator
+    return {"postmortems": auto_postmortem_generator.all_postmortems()}
+
+@app.get("/api/diag/remediation/open")
+def diag_remediation_open():
+    from core.self_diagnostics.remediation_tracker import remediation_tracker
+    return {"actions": remediation_tracker.open_actions(), "stats": remediation_tracker.action_stats()}
+
+@app.post("/api/diag/remediation/add")
+def diag_remediation_add(body: dict):
+    from core.self_diagnostics.remediation_tracker import remediation_tracker
+    return remediation_tracker.add_action(body["incident_id"], body["action_description"],
+                                           body["owner"], body.get("due_days", 7))
+
+@app.post("/api/diag/remediation/complete")
+def diag_remediation_complete(body: dict):
+    from core.self_diagnostics.remediation_tracker import remediation_tracker
+    ok = remediation_tracker.complete(body["action_id"])
+    return {"ok": ok}
+
+
+# ── GAP-08: Policy Governance ────────────────────────────────────────────────
+@app.get("/api/policy/all")
+def policy_all():
+    from core.policy_governance.policy_registry import policy_registry
+    return {"policies": policy_registry.active_policies(), "stats": policy_registry.policy_stats()}
+
+@app.get("/api/policy/active")
+def policy_active():
+    from core.policy_governance.policy_registry import policy_registry
+    return {"policies": policy_registry.active_policies()}
+
+@app.post("/api/policy/create")
+def policy_create(body: dict):
+    from core.policy_governance.policy_registry import policy_registry
+    policy_id = policy_registry.create(body["title"], body["category"], body["rules"])
+    return {"policy_id": policy_id}
+
+@app.post("/api/policy/activate")
+def policy_activate(body: dict):
+    from core.policy_governance.policy_registry import policy_registry
+    ok = policy_registry.activate(body["policy_id"])
+    return {"ok": ok}
+
+@app.post("/api/policy/check")
+def policy_check(body: dict):
+    from core.policy_governance.policy_enforcement_engine import policy_enforcement_engine
+    return policy_enforcement_engine.check_compliance(body["policy_id"], body["action_description"])
+
+@app.get("/api/policy/violations")
+def policy_violations():
+    from core.policy_governance.policy_enforcement_engine import policy_enforcement_engine
+    return {"violations": policy_enforcement_engine.violation_report()}
+
+@app.get("/api/policy/stats")
+def policy_stats():
+    from core.policy_governance.policy_registry import policy_registry
+    from core.policy_governance.policy_enforcement_engine import policy_enforcement_engine
+    return {"policy_stats": policy_registry.policy_stats(), "enforcement_stats": policy_enforcement_engine.enforcement_stats()}
+
+
+# ── GAP-09: Continuous Scorecard ─────────────────────────────────────────────
+@app.get("/api/scorecard/score")
+def scorecard_score():
+    from core.institutional_scorecard.continuous_score_engine import continuous_score_engine
+    return continuous_score_engine.score()
+
+@app.get("/api/scorecard/kpis")
+def scorecard_kpis():
+    from core.institutional_scorecard.institutional_kpi_tracker import institutional_kpi_tracker
+    return {"kpis": institutional_kpi_tracker.all_kpis(), "dashboard": institutional_kpi_tracker.kpi_dashboard()}
+
+@app.post("/api/scorecard/kpi/update")
+def scorecard_kpi_update(body: dict):
+    from core.institutional_scorecard.institutional_kpi_tracker import institutional_kpi_tracker
+    ok = institutional_kpi_tracker.update_kpi(body["name"], body["current_value"])
+    return {"ok": ok}
+
+@app.get("/api/scorecard/kpis/below-target")
+def scorecard_kpis_below_target():
+    from core.institutional_scorecard.institutional_kpi_tracker import institutional_kpi_tracker
+    return {"kpis": institutional_kpi_tracker.kpis_below_target()}
+
+@app.get("/api/scorecard/trends")
+def scorecard_trends():
+    from core.institutional_scorecard.trend_analyzer import trend_analyzer
+    return {"trends": trend_analyzer.all_trends(), "declining": trend_analyzer.declining_metrics()}
+
+@app.get("/api/scorecard/degradation/scan")
+def scorecard_degradation_scan():
+    from core.institutional_scorecard.degradation_detector import degradation_detector
+    return degradation_detector.scan()
+
+@app.get("/api/scorecard/degradation/alerts")
+def scorecard_degradation_alerts():
+    from core.institutional_scorecard.degradation_detector import degradation_detector
+    return {"alerts": degradation_detector.active_alerts()}
+
+
+# ── GAP-10: Command Center ───────────────────────────────────────────────────
+@app.get("/api/cc/dashboard")
+def cc_dashboard():
+    from core.command_center.command_center_engine import command_center_engine
+    return command_center_engine.dashboard()
+
+@app.get("/api/cc/status")
+def cc_status():
+    from core.command_center.command_center_engine import command_center_engine
+    return command_center_engine.command_center_status()
+
+@app.get("/api/cc/console")
+def cc_console():
+    from core.command_center.executive_console import executive_console
+    return executive_console.console_view()
+
+@app.get("/api/cc/one-liner")
+def cc_one_liner():
+    from core.command_center.executive_console import executive_console
+    return {"one_liner": executive_console.one_liner()}
+
+@app.post("/api/cc/alert")
+def cc_alert(body: dict):
+    from core.command_center.command_center_engine import command_center_engine
+    alert_id = command_center_engine.raise_alert(body["title"], body["source_system"],
+                                                  body["severity"], body["message"],
+                                                  body.get("action_required", False))
+    return {"alert_id": alert_id}
+
+@app.get("/api/cc/alerts/active")
+def cc_alerts_active():
+    from core.command_center.alert_center import alert_center
+    return {"alerts": alert_center.active_alerts(), "stats": alert_center.alert_stats()}
+
+@app.post("/api/cc/alert/acknowledge")
+def cc_alert_acknowledge(body: dict):
+    from core.command_center.alert_center import alert_center
+    ok = alert_center.acknowledge(body["alert_id"], body["acknowledged_by"])
+    return {"ok": ok}
+
+@app.get("/api/cc/mission-control")
+def cc_mission_control():
+    from core.command_center.mission_control import mission_control
+    return mission_control.full_status()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
