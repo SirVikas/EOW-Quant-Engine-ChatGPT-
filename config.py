@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.68.0"
+APP_VERSION = "1.69.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 NEXUS_NAME    = "PHOENIX NEXUS"
@@ -19,7 +19,7 @@ NEXUS_PENDING = ["KGE", "HKE", "AEG"]
 
 # OBSERVATORY-X — Institutional Observability Layer  (FTD-OBSX-CORTEX-DASHBOARD-001)
 OBSX_NAME    = "OBSERVATORY-X"
-OBSX_VERSION = "1.4.0"   # v1.4: Recommendation Reality Engine
+OBSX_VERSION = "1.5.0"   # v1.5: Economic Survivability Engine
 OBSX_COMPONENTS = ["registry", "scheduler", "health_monitor", "lineage_tracker",
                    "inspector", "defect_engine", "recommendation_engine",
                    "truth_layer", "trust_engine", "ownership", "nexus_bridge",
@@ -29,7 +29,7 @@ OBSX_COMPONENTS = ["registry", "scheduler", "health_monitor", "lineage_tracker",
 
 # CORTEX — Institutional Governance Layer  (FTD-OBSX-CORTEX-DASHBOARD-001)
 CORTEX_NAME    = "CORTEX"
-CORTEX_VERSION = "1.4.0"   # v1.4: Constitutional Commentary + Governance Stress Test
+CORTEX_VERSION = "1.5.0"   # v1.5: Governance Consistency Audit + Amendment Impact Tracker
 CORTEX_COMPONENTS = ["module_registry", "dependency_mapper", "conflict_engine",
                      "influence_matrix", "blame_engine", "constitution",
                      "counterfactual_engine", "constitutional_amendment",
@@ -39,15 +39,15 @@ CORTEX_COMPONENTS = ["module_registry", "dependency_mapper", "conflict_engine",
 
 # PHOENIX TRUST PROGRAM (PTP) — Trust Validation Layer
 PTP_NAME    = "PHOENIX TRUST PROGRAM"
-PTP_VERSION = "1.3.0"   # v1.3: Live Accuracy Validator + Trust Evidence Warehouse
+PTP_VERSION = "1.4.0"   # v1.4: Multi-Regime Validator + Warehouse Integrity Engine
 PTP_PILLARS = ["RECOMMENDATION_ACCURACY", "INVESTIGATION_ACCURACY",
                "BLAME_ACCURACY", "COUNTERFACTUAL_ACCURACY", "CONFLICT_ACCURACY"]
 
 # AEG Pipeline
-AEG_PIPELINE_VERSION = "1.2.0"  # v1.2: Replay, Promotion Court, Damage Accounting, Rollback Framework
+AEG_PIPELINE_VERSION = "1.3.0"  # v1.3: Shadow Mode, Longitudinal Tracker
 
 # PCAO — Planning, Control, Autonomy, and Oversight
-PCAO_VERSION = "0.2.0"   # v0.2: Program Manager, Resource Governor, Executive Board, Memory Commander
+PCAO_VERSION = "0.3.0"   # v0.3: Strategic Planner, Risk Office, Decision Support, Human Governance Layer
 
 # NEXUS — Evidence Supremacy Engine
 NEXUS_ESE_VERSION = "1.0.0"   # v1.0: Evidence Supremacy Automation
