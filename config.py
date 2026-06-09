@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.75.0"
+APP_VERSION = "1.76.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -26,6 +26,15 @@ CONSTITUTION_VERSION = "1.0.0"        # v1.0: Constitution Engine
 EPISTEMIC_VERSION = "1.0.0"           # v1.0: Epistemic Intelligence Layer
 TRUST_FABRIC_VERSION = "1.0.0"        # v1.0: Unified Trust Fabric
 AUTO_IMPROVEMENT_VERSION = "1.0.0"    # v1.0: Autonomous Improvement Loop
+
+REAL_MARKET_VALIDATION_VERSION = "1.0.0"   # v1.0: Real Market Validation Layer
+EVIDENCE_WAREHOUSE_VERSION = "1.0.0"       # v1.0: Institutional Evidence Warehouse
+PERF_ATTRIBUTION_VERSION = "1.0.0"         # v1.0: Multi-Horizon Performance Attribution
+REGIME_INTELLIGENCE_VERSION = "1.0.0"      # v1.0: Regime Intelligence Layer
+BOARD_GOVERNANCE_VERSION = "1.0.0"         # v1.0: Executive Board Governance
+REPORTING_HUB_VERSION = "1.0.0"            # v1.0: Unified Reporting Hub
+LINEAGE_VERSION = "1.0.0"                  # v1.0: Snapshot & Lineage System
+HUMAN_GOVERNANCE_VERSION = "1.0.0"         # v1.0: Human Governance Framework
 
 NEXUS_NAME    = "PHOENIX NEXUS"
 NEXUS_VERSION = "3.2.0"

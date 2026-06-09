@@ -18768,6 +18768,380 @@ def improvement_feedback_loops():
     return feedback_loop_engine.all_cycles()
 
 
+# ── Real Market Validation (/api/rmv) ──────────────────────────────────────
+
+@app.post("/api/rmv/validate")
+def rmv_validate(body: dict):
+    from core.real_market_validation.validation_engine import real_market_validation_engine
+    return real_market_validation_engine.validate(
+        body.get("subject_id", ""), body.get("subject_type", "STRATEGY"),
+        body.get("expected_outcome", {}), body.get("actual_outcome", {}),
+        body.get("market_regime", "UNKNOWN"),
+    )
+
+@app.get("/api/rmv/summary")
+def rmv_summary():
+    from core.real_market_validation.validation_engine import real_market_validation_engine
+    return real_market_validation_engine.validation_summary()
+
+@app.get("/api/rmv/pending")
+def rmv_pending():
+    from core.real_market_validation.validation_engine import real_market_validation_engine
+    return real_market_validation_engine.pending_validations()
+
+@app.get("/api/rmv/outcomes")
+def rmv_outcomes():
+    from core.real_market_validation.outcome_tracker import outcome_tracker
+    return outcome_tracker.all_outcomes()
+
+@app.get("/api/rmv/evidence/stats")
+def rmv_evidence_stats():
+    from core.real_market_validation.market_evidence_registry import market_evidence_registry
+    return market_evidence_registry.evidence_stats()
+
+
+# ── Evidence Warehouse (/api/ew) ────────────────────────────────────────────
+
+@app.get("/api/ew/report")
+def ew_report():
+    from core.evidence_warehouse.evidence_warehouse import evidence_warehouse
+    return evidence_warehouse.warehouse_report()
+
+@app.post("/api/ew/deposit")
+def ew_deposit(body: dict):
+    from core.evidence_warehouse.evidence_warehouse import evidence_warehouse
+    item_id = evidence_warehouse.deposit(
+        body.get("evidence_type", "VALIDATION"), body.get("subject_id", ""),
+        body.get("source_layer", "api"), body.get("content", {}),
+        body.get("quality", 0.5), body.get("tags"),
+    )
+    return {"item_id": item_id}
+
+@app.get("/api/ew/retrieve/{subject_id}")
+def ew_retrieve(subject_id: str):
+    from core.evidence_warehouse.evidence_warehouse import evidence_warehouse
+    return evidence_warehouse.retrieve(subject_id)
+
+@app.post("/api/ew/harvest")
+def ew_harvest():
+    from core.evidence_warehouse.evidence_warehouse import evidence_warehouse
+    return evidence_warehouse.auto_harvest()
+
+@app.get("/api/ew/search")
+def ew_search(q: str = "", evidence_type: str = None):
+    from core.evidence_warehouse.evidence_query_engine import evidence_query_engine
+    return evidence_query_engine.search(q, evidence_type)
+
+@app.get("/api/ew/gaps")
+def ew_gaps():
+    from core.evidence_warehouse.evidence_query_engine import evidence_query_engine
+    return evidence_query_engine.evidence_gap_report()
+
+
+# ── Performance Attribution (/api/pa) ───────────────────────────────────────
+
+@app.get("/api/pa/report")
+def pa_report():
+    from core.performance_attribution.performance_attribution_engine import performance_attribution_engine
+    return performance_attribution_engine.attribution_report()
+
+@app.post("/api/pa/attribute")
+def pa_attribute(body: dict):
+    from core.performance_attribution.performance_attribution_engine import performance_attribution_engine
+    return performance_attribution_engine.attribute(
+        body.get("period", ""), body.get("total_pnl_pct", 0.0), body.get("drawdown_pct", 0.0),
+    )
+
+@app.get("/api/pa/signals/top")
+def pa_signals_top():
+    from core.performance_attribution.signal_contribution_analyzer import signal_contribution_analyzer
+    return signal_contribution_analyzer.top_signals()
+
+@app.post("/api/pa/signals/record")
+def pa_signals_record(body: dict):
+    from core.performance_attribution.signal_contribution_analyzer import signal_contribution_analyzer
+    aid = signal_contribution_analyzer.record_signal_performance(
+        body.get("signal_name", ""), body.get("period", ""),
+        body.get("profit_contribution_pct", 0.0), body.get("trade_count", 0),
+        body.get("win_rate", 0.0), body.get("avg_pnl", 0.0),
+    )
+    return {"analysis_id": aid}
+
+@app.get("/api/pa/risks/top")
+def pa_risks_top():
+    from core.performance_attribution.risk_contribution_analyzer import risk_contribution_analyzer
+    return risk_contribution_analyzer.top_risk_contributors()
+
+@app.post("/api/pa/risks/record")
+def pa_risks_record(body: dict):
+    from core.performance_attribution.risk_contribution_analyzer import risk_contribution_analyzer
+    aid = risk_contribution_analyzer.record_risk_contribution(
+        body.get("risk_factor", ""), body.get("period", ""),
+        body.get("drawdown_pct", 0.0), body.get("volatility_pct", 0.0),
+        body.get("var_pct", 0.0),
+    )
+    return {"analysis_id": aid}
+
+@app.get("/api/pa/regimes/breakdown")
+def pa_regimes_breakdown():
+    from core.performance_attribution.regime_contribution_analyzer import regime_contribution_analyzer
+    return regime_contribution_analyzer.regime_breakdown()
+
+
+# ── Regime Intelligence (/api/regime) ───────────────────────────────────────
+
+@app.get("/api/regime/current")
+def regime_current():
+    from core.regime_intelligence.regime_engine import regime_engine
+    return regime_engine.current_regime()
+
+@app.get("/api/regime/context")
+def regime_context():
+    from core.regime_intelligence.regime_engine import regime_engine
+    return regime_engine.regime_context()
+
+@app.post("/api/regime/update")
+def regime_update(body: dict):
+    from core.regime_intelligence.regime_engine import regime_engine
+    return regime_engine.update_regime(
+        body.get("regime", ""), body.get("trigger", ""), body.get("characteristics"),
+    )
+
+@app.get("/api/regime/history")
+def regime_history_endpoint():
+    from core.regime_intelligence.regime_history import regime_history
+    return regime_history.all_regimes()
+
+@app.get("/api/regime/transitions")
+def regime_transitions():
+    from core.regime_intelligence.regime_transition_tracker import regime_transition_tracker
+    return regime_transition_tracker.recent_transitions()
+
+@app.get("/api/regime/transitions/matrix")
+def regime_transitions_matrix():
+    from core.regime_intelligence.regime_transition_tracker import regime_transition_tracker
+    return regime_transition_tracker.transition_matrix()
+
+@app.post("/api/regime/classify")
+def regime_classify(body: dict):
+    from core.regime_intelligence.regime_classifier import regime_classifier
+    if "description" in body:
+        return {"regime": regime_classifier.classify_from_description(body["description"])}
+    return {"regime": regime_classifier.classify_from_metrics(
+        body.get("volatility"), body.get("trend_strength"), body.get("drawdown"),
+    )}
+
+
+# ── Board Governance (/api/board) ────────────────────────────────────────────
+
+@app.get("/api/board/dashboard")
+def board_dashboard():
+    from core.board_governance.board_engine import board_engine
+    return board_engine.full_board_dashboard()
+
+@app.get("/api/board/status")
+def board_status():
+    from core.board_governance.board_engine import board_engine
+    return board_engine.board_status()
+
+@app.get("/api/board/decisions")
+def board_decisions():
+    from core.board_governance.board_decision_registry import board_decision_registry
+    return board_decision_registry.all_decisions()
+
+@app.get("/api/board/decisions/pending")
+def board_decisions_pending():
+    from core.board_governance.board_decision_registry import board_decision_registry
+    return board_decision_registry.pending_review()
+
+@app.post("/api/board/decisions/submit")
+def board_decisions_submit(body: dict):
+    from core.board_governance.board_decision_registry import board_decision_registry
+    did = board_decision_registry.submit(
+        body.get("title", ""), body.get("decision_type", "STRATEGIC"),
+        body.get("submitted_by", ""), body.get("rationale", ""),
+    )
+    return {"decision_id": did}
+
+@app.post("/api/board/decisions/decide")
+def board_decisions_decide(body: dict):
+    from core.board_governance.board_decision_registry import board_decision_registry
+    ok = board_decision_registry.decide(
+        body.get("decision_id", ""), body.get("status", ""),
+        body.get("board_notes", ""),
+    )
+    return {"success": ok}
+
+@app.post("/api/board/review")
+def board_review(body: dict):
+    from core.board_governance.board_review_engine import board_review_engine
+    rid = board_review_engine.submit_review(
+        body.get("decision_id", ""), body.get("reviewer", ""),
+        body.get("score", 0.5), body.get("recommendation", "DEFER"),
+        body.get("concerns"),
+    )
+    return {"review_id": rid}
+
+@app.get("/api/board/oversight")
+def board_oversight():
+    from core.board_governance.executive_oversight_engine import executive_oversight_engine
+    return executive_oversight_engine.oversight_report()
+
+
+# ── Reporting Hub (/api/reports) ─────────────────────────────────────────────
+
+@app.get("/api/reports/executive")
+def reports_executive():
+    from core.reporting_hub.executive_report_builder import executive_report_builder
+    return executive_report_builder.build()
+
+@app.get("/api/reports/governance")
+def reports_governance():
+    from core.reporting_hub.governance_report_builder import governance_report_builder
+    return governance_report_builder.build()
+
+@app.get("/api/reports/trust")
+def reports_trust():
+    from core.reporting_hub.trust_report_builder import trust_report_builder
+    return trust_report_builder.build()
+
+@app.get("/api/reports/evolution")
+def reports_evolution():
+    from core.reporting_hub.evolution_report_builder import evolution_report_builder
+    return evolution_report_builder.build()
+
+@app.get("/api/reports/capital")
+def reports_capital():
+    from core.reporting_hub.capital_report_builder import capital_report_builder
+    return capital_report_builder.build()
+
+@app.get("/api/reports/all")
+def reports_all():
+    from core.reporting_hub.reporting_engine import reporting_engine
+    return reporting_engine.generate_all_reports()
+
+@app.get("/api/reports/board-pack")
+def reports_board_pack():
+    from core.reporting_hub.reporting_engine import reporting_engine
+    return reporting_engine.board_pack()
+
+
+# ── Lineage (/api/lineage) ───────────────────────────────────────────────────
+
+@app.post("/api/lineage/snapshot")
+def lineage_snapshot(body: dict):
+    from core.lineage.snapshot_engine import snapshot_engine
+    return snapshot_engine.capture(body.get("label", ""), body.get("snapshot_type", "MANUAL"))
+
+@app.get("/api/lineage/snapshots")
+def lineage_snapshots():
+    from core.lineage.snapshot_engine import snapshot_engine
+    return snapshot_engine.all_snapshots()
+
+@app.get("/api/lineage/state-at/{timestamp}")
+def lineage_state_at(timestamp: float):
+    from core.lineage.historical_state_engine import historical_state_engine
+    return historical_state_engine.state_at(timestamp)
+
+@app.get("/api/lineage/history/{subject_id}")
+def lineage_history(subject_id: str):
+    from core.lineage.lineage_registry import lineage_registry
+    return lineage_registry.history_of(subject_id)
+
+@app.get("/api/lineage/timeline")
+def lineage_timeline():
+    from core.lineage.timeline_reconstruction_engine import timeline_reconstruction_engine
+    return timeline_reconstruction_engine.full_timeline()
+
+@app.get("/api/lineage/audit/{subject_id}")
+def lineage_audit(subject_id: str):
+    from core.lineage.timeline_reconstruction_engine import timeline_reconstruction_engine
+    return {"audit_trail": timeline_reconstruction_engine.audit_trail(subject_id)}
+
+@app.get("/api/lineage/diff/{snapshot_id_a}/{snapshot_id_b}")
+def lineage_diff(snapshot_id_a: str, snapshot_id_b: str):
+    from core.lineage.historical_state_engine import historical_state_engine
+    return historical_state_engine.state_diff(snapshot_id_a, snapshot_id_b)
+
+
+# ── Human Governance (/api/hgov) ─────────────────────────────────────────────
+
+@app.get("/api/hgov/dashboard")
+def hgov_dashboard():
+    from core.human_governance.human_governance_engine import human_governance_engine
+    return human_governance_engine.governance_dashboard()
+
+@app.get("/api/hgov/status")
+def hgov_status():
+    from core.human_governance.human_governance_engine import human_governance_engine
+    return human_governance_engine.human_governance_status()
+
+@app.post("/api/hgov/approve/request")
+def hgov_approve_request(body: dict):
+    from core.human_governance.approval_registry import approval_registry
+    aid = approval_registry.request_approval(
+        body.get("subject_id", ""), body.get("subject_type", ""),
+        body.get("action_requested", ""), body.get("requested_by", ""),
+    )
+    return {"approval_id": aid}
+
+@app.post("/api/hgov/approve/decide")
+def hgov_approve_decide(body: dict):
+    from core.human_governance.approval_registry import approval_registry
+    aid = body.get("approval_id", "")
+    approved_by = body.get("approved_by", "")
+    if body.get("approved", False):
+        ok = approval_registry.approve(aid, approved_by)
+    else:
+        ok = approval_registry.reject(aid, approved_by, body.get("reason", ""))
+    return {"success": ok}
+
+@app.get("/api/hgov/approvals/pending")
+def hgov_approvals_pending():
+    from core.human_governance.approval_registry import approval_registry
+    return approval_registry.pending_approvals()
+
+@app.post("/api/hgov/override/pause")
+def hgov_override_pause(body: dict):
+    from core.human_governance.human_governance_engine import human_governance_engine
+    oid = human_governance_engine.pause(
+        body.get("target", ""), body.get("issued_by", ""), body.get("reason", ""),
+    )
+    return {"override_id": oid}
+
+@app.post("/api/hgov/override/stop")
+def hgov_override_stop(body: dict):
+    from core.human_governance.human_governance_engine import human_governance_engine
+    return human_governance_engine.emergency_stop(
+        body.get("target", ""), body.get("issued_by", ""), body.get("reason", ""),
+    )
+
+@app.post("/api/hgov/override/revoke")
+def hgov_override_revoke(body: dict):
+    from core.human_governance.emergency_override_engine import emergency_override_engine
+    ok = emergency_override_engine.revoke(body.get("override_id", ""), body.get("revoked_by", ""))
+    return {"success": ok}
+
+@app.get("/api/hgov/overrides/active")
+def hgov_overrides_active():
+    from core.human_governance.emergency_override_engine import emergency_override_engine
+    return emergency_override_engine.active_overrides()
+
+@app.post("/api/hgov/rollback")
+def hgov_rollback(body: dict):
+    from core.human_governance.rollback_authority import rollback_authority
+    oid = rollback_authority.issue_rollback(
+        body.get("issued_by", ""), body.get("target", ""), body.get("target_type", ""),
+        body.get("reason", ""), body.get("urgency", "ROUTINE"),
+    )
+    return {"order_id": oid}
+
+@app.get("/api/hgov/rollbacks")
+def hgov_rollbacks():
+    from core.human_governance.rollback_authority import rollback_authority
+    return rollback_authority.all_orders()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
