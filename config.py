@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.81.0"
+APP_VERSION = "1.82.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -71,6 +71,15 @@ RESOURCE_PLANNING_VERSION = "1.0.0"
 ECOSYSTEM_GOVERNANCE_VERSION = "1.0.0"
 INSTITUTIONAL_ECONOMICS_VERSION = "1.0.0"
 META_CIVILIZATION_VERSION = "1.0.0"
+
+STRATEGY_TRUTH_VERSION = "1.0.0"
+LIVE_MARKET_LAB_VERSION = "1.0.0"
+ALPHA_ATTRIBUTION_VERSION = "1.0.0"
+LONG_HORIZON_VALIDATION_VERSION = "1.0.0"
+REGIME_SURVIVABILITY_VERSION = "1.0.0"
+OPERATIONS_CENTER_VERSION = "1.0.0"
+BENCHMARKING_VERSION = "1.0.0"
+ECONOMIC_PROOF_VERSION = "1.0.0"
 
 NEXUS_NAME    = "PHOENIX NEXUS"
 NEXUS_VERSION = "3.2.0"

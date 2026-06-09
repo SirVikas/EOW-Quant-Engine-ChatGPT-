@@ -20363,6 +20363,230 @@ def metaciv_principles():
             "enforced": universal_governance_framework.enforced_principles()}
 
 
+# ── GAP-01: Strategy Truth ────────────────────────────────────────────────────
+
+@app.get("/api/st/status")
+def st_status():
+    from core.strategy_truth.strategy_truth_engine import strategy_truth_engine
+    return strategy_truth_engine.truth_report()
+
+@app.get("/api/st/one-liner")
+def st_one_liner():
+    from core.strategy_truth.strategy_truth_engine import strategy_truth_engine
+    return {"one_liner": strategy_truth_engine.one_liner()}
+
+@app.get("/api/st/alpha-sources")
+def st_alpha_sources():
+    from core.strategy_truth.alpha_source_tracker import alpha_source_tracker
+    return {"summary": alpha_source_tracker.alpha_source_summary(), "top_sources": alpha_source_tracker.top_sources()}
+
+@app.get("/api/st/signal-validation")
+def st_signal_validation():
+    from core.strategy_truth.signal_truth_validator import signal_truth_validator
+    return signal_truth_validator.validation_report()
+
+@app.get("/api/st/edge-health")
+def st_edge_health():
+    from core.strategy_truth.edge_decay_monitor import edge_decay_monitor
+    return {"health": edge_decay_monitor.edge_health_report(), "decaying": edge_decay_monitor.decaying_edges()}
+
+
+# ── GAP-02: Live Market Lab ───────────────────────────────────────────────────
+
+@app.get("/api/lml/status")
+def lml_status():
+    from core.live_market_lab.live_behavior_engine import live_behavior_engine
+    return live_behavior_engine.lab_report()
+
+@app.get("/api/lml/one-liner")
+def lml_one_liner():
+    from core.live_market_lab.live_behavior_engine import live_behavior_engine
+    return {"one_liner": live_behavior_engine.one_liner()}
+
+@app.get("/api/lml/gaps")
+def lml_gaps():
+    from core.live_market_lab.expectation_gap_tracker import expectation_gap_tracker
+    return {"summary": expectation_gap_tracker.gap_summary(), "significant": expectation_gap_tracker.significant_gaps()}
+
+@app.get("/api/lml/reactions")
+def lml_reactions():
+    from core.live_market_lab.market_reaction_analyzer import market_reaction_analyzer
+    return market_reaction_analyzer.reaction_report()
+
+@app.get("/api/lml/hypotheses")
+def lml_hypotheses():
+    from core.live_market_lab.behavior_validation_engine import behavior_validation_engine
+    return behavior_validation_engine.hypothesis_summary()
+
+
+# ── GAP-03: Alpha Attribution ─────────────────────────────────────────────────
+
+@app.get("/api/aa/status")
+def aa_status():
+    from core.alpha_attribution.alpha_attribution_engine import alpha_attribution_engine
+    return alpha_attribution_engine.attribution_report()
+
+@app.get("/api/aa/one-liner")
+def aa_one_liner():
+    from core.alpha_attribution.alpha_attribution_engine import alpha_attribution_engine
+    return {"one_liner": alpha_attribution_engine.one_liner()}
+
+@app.get("/api/aa/profit-sources")
+def aa_profit_sources():
+    from core.alpha_attribution.profit_source_mapper import profit_source_mapper
+    return {"avg_attribution": profit_source_mapper.avg_attribution(), "history": profit_source_mapper.attribution_history()}
+
+@app.get("/api/aa/edge-contributions")
+def aa_edge_contributions():
+    from core.alpha_attribution.edge_contribution_tracker import edge_contribution_tracker
+    return {"top_edges": edge_contribution_tracker.top_contributing_edges()}
+
+@app.get("/api/aa/decomposition")
+def aa_decomposition():
+    from core.alpha_attribution.performance_decomposition import performance_decomposition
+    return performance_decomposition.decompose("latest")
+
+
+# ── GAP-04: Long-Horizon Validation ──────────────────────────────────────────
+
+@app.get("/api/lhv/status")
+def lhv_status():
+    from core.long_horizon_validation.validation_engine import validation_engine
+    return validation_engine.validation_report()
+
+@app.get("/api/lhv/one-liner")
+def lhv_one_liner():
+    from core.long_horizon_validation.validation_engine import validation_engine
+    return {"one_liner": validation_engine.one_liner()}
+
+@app.get("/api/lhv/survivability")
+def lhv_survivability():
+    from core.long_horizon_validation.survivability_tracker import survivability_tracker
+    return {h: survivability_tracker.survivability_rate(h) for h in ["30D", "90D", "180D", "365D"]}
+
+@app.get("/api/lhv/stability")
+def lhv_stability():
+    from core.long_horizon_validation.stability_monitor import stability_monitor
+    return stability_monitor.stability_report()
+
+@app.get("/api/lhv/persistence")
+def lhv_persistence():
+    from core.long_horizon_validation.performance_persistence_engine import performance_persistence_engine
+    return performance_persistence_engine.persistence_summary()
+
+
+# ── GAP-05: Regime Survivability ──────────────────────────────────────────────
+
+@app.get("/api/rs/status")
+def rs_status():
+    from core.regime_survivability.regime_survival_engine import regime_survival_engine
+    return regime_survival_engine.survival_report()
+
+@app.get("/api/rs/one-liner")
+def rs_one_liner():
+    from core.regime_survivability.regime_survival_engine import regime_survival_engine
+    return {"one_liner": regime_survival_engine.one_liner()}
+
+@app.get("/api/rs/scorecard")
+def rs_scorecard():
+    from core.regime_survivability.regime_scorecard import regime_scorecard
+    return regime_scorecard.scorecard_summary()
+
+@app.get("/api/rs/transitions")
+def rs_transitions():
+    from core.regime_survivability.transition_resilience_tracker import transition_resilience_tracker
+    return transition_resilience_tracker.resilience_report()
+
+@app.get("/api/rs/crises")
+def rs_crises():
+    from core.regime_survivability.crisis_response_validator import crisis_response_validator
+    return crisis_response_validator.crisis_summary()
+
+
+# ── GAP-06: Operations Center ─────────────────────────────────────────────────
+
+@app.get("/api/oc/status")
+def oc_status():
+    from core.operations_center.operations_engine import operations_engine
+    return operations_engine.ops_status()
+
+@app.get("/api/oc/one-liner")
+def oc_one_liner():
+    from core.operations_center.operations_engine import operations_engine
+    return {"one_liner": operations_engine.one_liner()}
+
+@app.get("/api/oc/runtime")
+def oc_runtime():
+    from core.operations_center.runtime_monitor import runtime_monitor
+    return runtime_monitor.runtime_health_summary()
+
+@app.get("/api/oc/incidents")
+def oc_incidents():
+    from core.operations_center.incident_center import incident_center
+    return {"open": incident_center.open_incidents(), "stats": incident_center.incident_stats()}
+
+@app.get("/api/oc/scoreboard")
+def oc_scoreboard():
+    from core.operations_center.operations_scoreboard import operations_scoreboard
+    return operations_scoreboard.scoreboard()
+
+
+# ── GAP-07: Benchmarking ──────────────────────────────────────────────────────
+
+@app.get("/api/bm/status")
+def bm_status():
+    from core.benchmarking.benchmark_engine import benchmark_engine
+    return benchmark_engine.benchmark_report()
+
+@app.get("/api/bm/one-liner")
+def bm_one_liner():
+    from core.benchmarking.benchmark_engine import benchmark_engine
+    return {"one_liner": benchmark_engine.one_liner()}
+
+@app.get("/api/bm/comparisons")
+def bm_comparisons():
+    from core.benchmarking.peer_comparison_tracker import peer_comparison_tracker
+    return {"outperforming": peer_comparison_tracker.outperforming_benchmarks(), "underperforming": peer_comparison_tracker.underperforming_benchmarks()}
+
+@app.get("/api/bm/rank")
+def bm_rank():
+    from core.benchmarking.performance_ranker import performance_ranker
+    return {"ranked": performance_ranker.rank(), "percentile": performance_ranker.percentile_rank()}
+
+@app.get("/api/bm/gaps")
+def bm_gaps():
+    from core.benchmarking.improvement_gap_detector import improvement_gap_detector
+    return improvement_gap_detector.gap_report()
+
+
+# ── GAP-08: Economic Proof ────────────────────────────────────────────────────
+
+@app.get("/api/ep/status")
+def ep_status():
+    from core.economic_proof.economic_proof_engine import economic_proof_engine
+    return economic_proof_engine.proof_report()
+
+@app.get("/api/ep/one-liner")
+def ep_one_liner():
+    from core.economic_proof.economic_proof_engine import economic_proof_engine
+    return {"one_liner": economic_proof_engine.one_liner()}
+
+@app.get("/api/ep/roi-validation")
+def ep_roi_validation():
+    from core.economic_proof.roi_validation_engine import roi_validation_engine
+    return roi_validation_engine.validation_summary()
+
+@app.get("/api/ep/capital-efficiency")
+def ep_capital_efficiency():
+    from core.economic_proof.capital_efficiency_validator import capital_efficiency_validator
+    return capital_efficiency_validator.efficiency_report()
+
+@app.get("/api/ep/claim-audit")
+def ep_claim_audit():
+    from core.economic_proof.economic_claim_auditor import economic_claim_auditor
+    return economic_claim_auditor.audit_summary()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
