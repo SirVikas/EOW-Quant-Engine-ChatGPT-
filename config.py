@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.67.0"
+APP_VERSION = "1.68.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 NEXUS_NAME    = "PHOENIX NEXUS"
@@ -19,35 +19,38 @@ NEXUS_PENDING = ["KGE", "HKE", "AEG"]
 
 # OBSERVATORY-X — Institutional Observability Layer  (FTD-OBSX-CORTEX-DASHBOARD-001)
 OBSX_NAME    = "OBSERVATORY-X"
-OBSX_VERSION = "1.3.0"   # v1.3: Long-Term Recommendation Archive
+OBSX_VERSION = "1.4.0"   # v1.4: Recommendation Reality Engine
 OBSX_COMPONENTS = ["registry", "scheduler", "health_monitor", "lineage_tracker",
                    "inspector", "defect_engine", "recommendation_engine",
                    "truth_layer", "trust_engine", "ownership", "nexus_bridge",
                    "outcome_registry", "cemetery", "cross_correlator", "precedent_library",
                    "disease_registry", "economic_outcome_ledger", "board_reports",
-                   "long_term_archive"]
+                   "long_term_archive", "recommendation_reality_engine"]
 
 # CORTEX — Institutional Governance Layer  (FTD-OBSX-CORTEX-DASHBOARD-001)
 CORTEX_NAME    = "CORTEX"
-CORTEX_VERSION = "1.3.0"   # v1.3: Constitutional Change History
+CORTEX_VERSION = "1.4.0"   # v1.4: Constitutional Commentary + Governance Stress Test
 CORTEX_COMPONENTS = ["module_registry", "dependency_mapper", "conflict_engine",
                      "influence_matrix", "blame_engine", "constitution",
                      "counterfactual_engine", "constitutional_amendment",
                      "constitutional_precedents", "governance_replay",
                      "constitutional_court", "governance_case_law", "governance_simulator",
-                     "constitutional_history"]
+                     "constitutional_history", "constitutional_commentary", "governance_stress_test"]
 
 # PHOENIX TRUST PROGRAM (PTP) — Trust Validation Layer
 PTP_NAME    = "PHOENIX TRUST PROGRAM"
-PTP_VERSION = "1.2.0"   # v1.2: Accuracy Ledger + Trust Decay + Trust Revocation
+PTP_VERSION = "1.3.0"   # v1.3: Live Accuracy Validator + Trust Evidence Warehouse
 PTP_PILLARS = ["RECOMMENDATION_ACCURACY", "INVESTIGATION_ACCURACY",
                "BLAME_ACCURACY", "COUNTERFACTUAL_ACCURACY", "CONFLICT_ACCURACY"]
 
 # AEG Pipeline
-AEG_PIPELINE_VERSION = "1.1.0"  # v1.1: Sandbox Stats, Leaderboard, Evidence Packages, Auto-Demotion
+AEG_PIPELINE_VERSION = "1.2.0"  # v1.2: Replay, Promotion Court, Damage Accounting, Rollback Framework
 
-# PCAO — Planning, Control, Autonomy, and Oversight (Foundation)
-PCAO_VERSION = "0.1.0"   # v0.1: Foundation layer — advisory only
+# PCAO — Planning, Control, Autonomy, and Oversight
+PCAO_VERSION = "0.2.0"   # v0.2: Program Manager, Resource Governor, Executive Board, Memory Commander
+
+# NEXUS — Evidence Supremacy Engine
+NEXUS_ESE_VERSION = "1.0.0"   # v1.0: Evidence Supremacy Automation
 
 # PHOENIX Institutional Stack — ordered maturity progression
 INSTITUTIONAL_STACK = [
@@ -57,7 +60,8 @@ INSTITUTIONAL_STACK = [
     {"name": "CORTEX",               "status": "OPERATIONAL",  "version": CORTEX_VERSION},
     {"name": "PHOENIX TRUST PROGRAM","status": "ACCUMULATING", "version": PTP_VERSION},
     {"name": "AEG",                  "status": "OPERATIONAL",  "version": AEG_PIPELINE_VERSION},
-    {"name": "PCAO",                 "status": "FOUNDATION",   "version": PCAO_VERSION},
+    {"name": "PCAO",                 "status": "ACTIVE",       "version": PCAO_VERSION},
+    {"name": "EVIDENCE SUPREMACY",   "status": "OPERATIONAL",  "version": NEXUS_ESE_VERSION},
 ]
 
 # Institutional Evolution Timeline — for dashboard display
@@ -70,6 +74,7 @@ INSTITUTIONAL_TIMELINE = [
     {"version": "1.65.0", "event": "OBSX v1.1 + CORTEX v1.1 — Gap coverage: Outcome Registry, Cemetery, Correlator, Precedent Library, Amendment Framework, Precedents, Replay, Risk Scoring + PTP v1.0", "layer": "STACK"},
     {"version": "1.66.0", "event": "OBSX v1.2 + CORTEX v1.2 — Maturity: Disease Registry, Economic Ledger, Board Reports, Constitutional Court, Case Law, Governance Simulator + PTP v1.1 Promotion Ladder + AEG Pipeline v1.0", "layer": "STACK"},
     {"version": "1.67.0", "event": "OBSX v1.3 + CORTEX v1.3 + PTP v1.2 + AEG v1.1 + PCAO v0.1 — Accuracy Ledger, Trust Decay/Revocation, Sandbox Stats, Leaderboard, Evidence Packages, Auto-Demotion, Constitutional History, Long-Term Archive, Trust Evidence Bridge, PCAO Foundation", "layer": "STACK"},
+    {"version": "1.68.0", "event": "17 institutional gaps filled — Live Accuracy Validator, Reality Engine, Evidence Warehouse, AEG Sandbox Replay/Court/Damage/Rollback, Constitutional Commentary/Stress Test, Evidence Supremacy Engine, PCAO Program Manager/Resource Governor/Executive Board/Memory Commander", "layer": "STACK"},
 ]
 
 
