@@ -17631,6 +17631,134 @@ async def learning_insights(unapplied_only: bool = False):
     return {"insights": _ile.all_insights(unapplied_only=unapplied_only)}
 
 
+# ── Institutional Maturity Reports (v1.72.0 — GAP-EM/VM/EI/IL-01..05) ────────
+
+@app.get("/api/nexus/maturity/evidence/multi-regime")
+async def maturity_em01():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_em01_multi_regime()
+
+
+@app.get("/api/nexus/maturity/evidence/long-term")
+async def maturity_em02():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_em02_long_term_survival()
+
+
+@app.get("/api/nexus/maturity/evidence/aeg-history")
+async def maturity_em03():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_em03_aeg_history()
+
+
+@app.get("/api/nexus/maturity/evidence/board-accuracy")
+async def maturity_em04():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_em04_board_accuracy()
+
+
+@app.get("/api/nexus/maturity/evidence/memory-density")
+async def maturity_em05():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_em05_memory_density()
+
+
+@app.get("/api/nexus/maturity/validation/trust-calibration")
+async def maturity_vm01():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_vm01_trust_calibration()
+
+
+@app.get("/api/nexus/maturity/validation/digital-twin")
+async def maturity_vm02():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_vm02_digital_twin_accuracy()
+
+
+@app.get("/api/nexus/maturity/validation/cascade-accuracy")
+async def maturity_vm03():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_vm03_cascade_accuracy()
+
+
+@app.get("/api/nexus/maturity/validation/health-correlation")
+async def maturity_vm04():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_vm04_health_correlation()
+
+
+@app.get("/api/nexus/maturity/validation/governance")
+async def maturity_vm05():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_vm05_governance_effectiveness()
+
+
+@app.get("/api/nexus/maturity/executive/recommendation-accuracy")
+async def maturity_ei01():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_ei01_recommendation_accuracy()
+
+
+@app.get("/api/nexus/maturity/executive/forecast-accuracy")
+async def maturity_ei02():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_ei02_forecast_accuracy()
+
+
+@app.get("/api/nexus/maturity/executive/resource-optimization")
+async def maturity_ei03():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_ei03_resource_optimization()
+
+
+@app.get("/api/nexus/maturity/executive/roadmap-performance")
+async def maturity_ei04():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_ei04_roadmap_performance()
+
+
+@app.get("/api/nexus/maturity/executive/command-center-value")
+async def maturity_ei05():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_ei05_command_center_value()
+
+
+@app.get("/api/nexus/maturity/learning/cycle-audit")
+async def maturity_il01():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_il01_learning_cycle_audit()
+
+
+@app.get("/api/nexus/maturity/learning/trust-evolution")
+async def maturity_il02():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_il02_trust_evolution()
+
+
+@app.get("/api/nexus/maturity/learning/governance-evolution")
+async def maturity_il03():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_il03_governance_evolution()
+
+
+@app.get("/api/nexus/maturity/learning/roadmap-evolution")
+async def maturity_il04():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_il04_roadmap_evolution()
+
+
+@app.get("/api/nexus/maturity/learning/institutional-evolution")
+async def maturity_il05():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.gap_il05_institutional_evolution()
+
+
+@app.get("/api/nexus/maturity/full-report")
+async def maturity_full_report():
+    from core.nexus.institutional_maturity_reports import institutional_maturity_reports as _imr
+    return _imr.full_maturity_report()
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
