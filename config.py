@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.71.0"
+APP_VERSION = "1.72.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 NEXUS_NAME    = "PHOENIX NEXUS"
@@ -51,6 +51,7 @@ PCAO_VERSION = "0.5.0"   # v0.5: Board Accuracy Ledger, Executive Scorecard, Str
 AEG_VALIDATION_VERSION = "1.0.0"  # v1.0: AEG Validation Program (shadow evidence, promotion accuracy, readiness index)
 NEXUS_IHI_VERSION      = "1.1.0"  # v1.1: Validation Suite + Institutional Learning Engine
 CORTEX_GMETRICS_VERSION = "1.0.0" # v1.0: Governance Metrics (Constitutional KPIs, Amendment Outcomes)
+NEXUS_MATURITY_VERSION  = "1.0.0"  # v1.0: 20 Institutional Maturity Reports (GAP-EM/VM/EI/IL-01..05)
 
 # NEXUS — Evidence Supremacy Engine
 NEXUS_ESE_VERSION = "1.0.0"   # v1.0: Evidence Supremacy Automation
