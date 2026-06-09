@@ -20069,6 +20069,300 @@ def fed_protocol():
     return inter_phoenix_protocol.protocol_stats()
 
 
+# ── GAP-01: Knowledge Operations ─────────────────────────────────────────────
+
+@app.get("/api/kos/status")
+def kos_status():
+    from core.knowledge_operations.knowledge_value_monitor import knowledge_value_monitor
+    return knowledge_value_monitor.kos_report()
+
+@app.get("/api/kos/one-liner")
+def kos_one_liner():
+    from core.knowledge_operations.knowledge_value_monitor import knowledge_value_monitor
+    return {"one_liner": knowledge_value_monitor.one_liner()}
+
+@app.get("/api/kos/lifecycle")
+def kos_lifecycle():
+    from core.knowledge_operations.knowledge_lifecycle_engine import knowledge_lifecycle_engine
+    return knowledge_lifecycle_engine.lifecycle_summary()
+
+@app.get("/api/kos/curation")
+def kos_curation():
+    from core.knowledge_operations.knowledge_curator import knowledge_curator
+    return knowledge_curator.curation_stats()
+
+@app.get("/api/kos/promotions")
+def kos_promotions():
+    from core.knowledge_operations.knowledge_promotion_engine import knowledge_promotion_engine
+    return {"history": knowledge_promotion_engine.promotion_history()}
+
+
+# ── GAP-02: Workforce Management ─────────────────────────────────────────────
+
+@app.get("/api/wfm/status")
+def wfm_status():
+    from core.workforce_management.agent_hr_engine import agent_hr_engine
+    return agent_hr_engine.workforce_summary()
+
+@app.get("/api/wfm/one-liner")
+def wfm_one_liner():
+    from core.workforce_management.agent_hr_engine import agent_hr_engine
+    summary = agent_hr_engine.workforce_summary()
+    return {"one_liner": f"WFM: {summary['total_agents']} agents | by_status={summary['by_status']}"}
+
+@app.get("/api/wfm/agents")
+def wfm_agents():
+    from core.workforce_management.agent_hr_engine import agent_hr_engine
+    return {"active_agents": agent_hr_engine.active_agents()}
+
+@app.get("/api/wfm/performance")
+def wfm_performance():
+    from core.workforce_management.agent_performance_tracker import agent_performance_tracker
+    return {"top_performers": agent_performance_tracker.top_performers()}
+
+@app.get("/api/wfm/assignments")
+def wfm_assignments():
+    from core.workforce_management.agent_assignment_director import agent_assignment_director
+    return {"active_assignments": agent_assignment_director.active_assignments(),
+            "report": agent_assignment_director.assignment_report()}
+
+
+# ── GAP-03: Capital Command ───────────────────────────────────────────────────
+
+@app.get("/api/capcmd/status")
+def capcmd_status():
+    from core.capital_command.capital_command_engine import capital_command_engine
+    return capital_command_engine.command_status()
+
+@app.get("/api/capcmd/one-liner")
+def capcmd_one_liner():
+    from core.capital_command.capital_command_engine import capital_command_engine
+    return {"one_liner": capital_command_engine.one_liner()}
+
+@app.get("/api/capcmd/strategy")
+def capcmd_strategy():
+    from core.capital_command.capital_strategy_director import capital_strategy_director
+    return {"current": capital_strategy_director.current_strategy(),
+            "history": capital_strategy_director.strategy_history()}
+
+@app.get("/api/capcmd/reserves")
+def capcmd_reserves():
+    from core.capital_command.capital_reserve_manager import capital_reserve_manager
+    return {"reserves": capital_reserve_manager.check_reserves(),
+            "health": capital_reserve_manager.reserve_health()}
+
+@app.get("/api/capcmd/deployments")
+def capcmd_deployments():
+    from core.capital_command.capital_deployment_engine import capital_deployment_engine
+    return {"recent": capital_deployment_engine.recent_deployments(),
+            "summary": capital_deployment_engine.deployment_summary()}
+
+
+# ── GAP-04: Risk Command ──────────────────────────────────────────────────────
+
+@app.get("/api/rcmd/status")
+def rcmd_status():
+    from core.risk_command.risk_command_engine import risk_command_engine
+    return risk_command_engine.command_center()
+
+@app.get("/api/rcmd/one-liner")
+def rcmd_one_liner():
+    from core.risk_command.risk_command_engine import risk_command_engine
+    return {"one_liner": risk_command_engine.one_liner()}
+
+@app.get("/api/rcmd/radar")
+def rcmd_radar():
+    from core.risk_command.risk_radar import risk_radar
+    return {"active_risks": risk_radar.active_risks(), "summary": risk_radar.radar_summary()}
+
+@app.get("/api/rcmd/escalations")
+def rcmd_escalations():
+    from core.risk_command.risk_escalation_center import risk_escalation_center
+    return {"open_escalations": risk_escalation_center.open_escalations()}
+
+@app.get("/api/rcmd/responses")
+def rcmd_responses():
+    from core.risk_command.risk_response_director import risk_response_director
+    return risk_response_director.response_effectiveness()
+
+
+# ── GAP-05: Organization Design ──────────────────────────────────────────────
+
+@app.get("/api/org/status")
+def org_status():
+    from core.organization_design.organizational_evolution_engine import organizational_evolution_engine
+    return organizational_evolution_engine.org_health_report()
+
+@app.get("/api/org/one-liner")
+def org_one_liner():
+    from core.organization_design.organizational_evolution_engine import organizational_evolution_engine
+    report = organizational_evolution_engine.org_health_report()
+    return {"one_liner": f"Org: {report['total_units']} units | {report['total_roles']} roles | health={report['health_score']}"}
+
+@app.get("/api/org/units")
+def org_units():
+    from core.organization_design.organization_registry import organization_registry
+    return {"org_tree": organization_registry.org_tree(), "summary": organization_registry.unit_summary()}
+
+@app.get("/api/org/roles")
+def org_roles():
+    from core.organization_design.role_definition_engine import role_definition_engine
+    return {"role_catalog": role_definition_engine.role_catalog()}
+
+@app.get("/api/org/optimization")
+def org_optimization():
+    from core.organization_design.structure_optimizer import structure_optimizer
+    return structure_optimizer.optimization_report()
+
+
+# ── GAP-06: Strategy Office ───────────────────────────────────────────────────
+
+@app.get("/api/strat/status")
+def strat_status():
+    from core.strategy_office.strategy_engine import strategy_engine
+    return strategy_engine.strategy_report()
+
+@app.get("/api/strat/one-liner")
+def strat_one_liner():
+    from core.strategy_office.strategy_engine import strategy_engine
+    return {"one_liner": strategy_engine.one_liner()}
+
+@app.get("/api/strat/initiatives")
+def strat_initiatives():
+    from core.strategy_office.initiative_registry import initiative_registry
+    return {"active": initiative_registry.active_initiatives(),
+            "summary": initiative_registry.initiative_summary()}
+
+@app.get("/api/strat/milestones-at-risk")
+def strat_milestones_at_risk():
+    from core.strategy_office.strategy_execution_monitor import strategy_execution_monitor
+    return {"at_risk": strategy_execution_monitor.at_risk_milestones()}
+
+@app.get("/api/strat/alignment")
+def strat_alignment():
+    from core.strategy_office.strategy_alignment_tracker import strategy_alignment_tracker
+    return strategy_alignment_tracker.alignment_report()
+
+
+# ── GAP-07: Resource Planning ─────────────────────────────────────────────────
+
+@app.get("/api/rplan/status")
+def rplan_status():
+    from core.resource_planning.resource_forecaster import resource_forecaster
+    return resource_forecaster.forecast_report()
+
+@app.get("/api/rplan/one-liner")
+def rplan_one_liner():
+    from core.resource_planning.resource_forecaster import resource_forecaster
+    return {"one_liner": resource_forecaster.one_liner()}
+
+@app.get("/api/rplan/demand")
+def rplan_demand():
+    from core.resource_planning.resource_demand_predictor import resource_demand_predictor
+    return {"upcoming_demand": resource_demand_predictor.upcoming_demand()}
+
+@app.get("/api/rplan/capacity")
+def rplan_capacity():
+    from core.resource_planning.capacity_planner import capacity_planner
+    return {"gaps": capacity_planner.capacity_gaps(), "summary": capacity_planner.capacity_summary()}
+
+@app.get("/api/rplan/procurement")
+def rplan_procurement():
+    from core.resource_planning.resource_procurement_engine import resource_procurement_engine
+    return {"pending": resource_procurement_engine.pending_procurements()}
+
+
+# ── GAP-08: Ecosystem Governance ─────────────────────────────────────────────
+
+@app.get("/api/ecogov/status")
+def ecogov_status():
+    from core.ecosystem_governance.ecosystem_alignment_engine import ecosystem_alignment_engine
+    return ecosystem_alignment_engine.ecosystem_governance_report()
+
+@app.get("/api/ecogov/one-liner")
+def ecogov_one_liner():
+    from core.ecosystem_governance.ecosystem_alignment_engine import ecosystem_alignment_engine
+    return {"one_liner": ecosystem_alignment_engine.one_liner()}
+
+@app.get("/api/ecogov/policies")
+def ecogov_policies():
+    from core.ecosystem_governance.federation_policy_manager import federation_policy_manager
+    return {"active_policies": federation_policy_manager.active_policies()}
+
+@app.get("/api/ecogov/audit")
+def ecogov_audit():
+    from core.ecosystem_governance.cross_instance_audit import cross_instance_audit
+    return {"non_compliant": cross_instance_audit.non_compliant_nodes(),
+            "summary": cross_instance_audit.audit_summary()}
+
+@app.get("/api/ecogov/council")
+def ecogov_council():
+    from core.ecosystem_governance.council_engine import council_engine
+    return {"pending_decisions": council_engine.pending_decisions(),
+            "summary": council_engine.council_summary()}
+
+
+# ── GAP-09: Institutional Economics ──────────────────────────────────────────
+
+@app.get("/api/iecon/status")
+def iecon_status():
+    from core.institutional_economics.economic_sustainability_engine import economic_sustainability_engine
+    return economic_sustainability_engine.sustainability_report()
+
+@app.get("/api/iecon/one-liner")
+def iecon_one_liner():
+    from core.institutional_economics.economic_sustainability_engine import economic_sustainability_engine
+    return {"one_liner": economic_sustainability_engine.one_liner()}
+
+@app.get("/api/iecon/costs")
+def iecon_costs():
+    from core.institutional_economics.institutional_cost_engine import institutional_cost_engine
+    return {"by_category": institutional_cost_engine.cost_by_category(),
+            "total": institutional_cost_engine.total_cost()}
+
+@app.get("/api/iecon/value")
+def iecon_value():
+    from core.institutional_economics.value_creation_tracker import value_creation_tracker
+    return {"by_type": value_creation_tracker.value_by_type(),
+            "total": value_creation_tracker.total_value()}
+
+@app.get("/api/iecon/efficiency")
+def iecon_efficiency():
+    from core.institutional_economics.efficiency_governor import efficiency_governor
+    return efficiency_governor.compute_efficiency()
+
+
+# ── GAP-10: Meta Civilization ─────────────────────────────────────────────────
+
+@app.get("/api/metaciv/status")
+def metaciv_status():
+    from core.meta_civilization.meta_civilization_engine import meta_civilization_engine
+    return meta_civilization_engine.meta_status()
+
+@app.get("/api/metaciv/one-liner")
+def metaciv_one_liner():
+    from core.meta_civilization.meta_civilization_engine import meta_civilization_engine
+    return {"one_liner": meta_civilization_engine.one_liner()}
+
+@app.get("/api/metaciv/council")
+def metaciv_council():
+    from core.meta_civilization.supervisory_council import supervisory_council
+    return {"members": supervisory_council.council_members(),
+            "quorum": supervisory_council.council_quorum()}
+
+@app.get("/api/metaciv/alignment")
+def metaciv_alignment():
+    from core.meta_civilization.cross_civilization_alignment import cross_civilization_alignment
+    return {"matrix": cross_civilization_alignment.alignment_matrix(),
+            "misaligned": cross_civilization_alignment.misaligned_pairs()}
+
+@app.get("/api/metaciv/principles")
+def metaciv_principles():
+    from core.meta_civilization.universal_governance_framework import universal_governance_framework
+    return {"all_principles": universal_governance_framework.all_principles(),
+            "enforced": universal_governance_framework.enforced_principles()}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
