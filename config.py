@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.82.0"
+APP_VERSION = "1.83.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -136,6 +136,12 @@ SELF_DIAGNOSTICS_VERSION = "1.0.0"         # v1.0: Self-Diagnostic Reconstructio
 POLICY_GOVERNANCE_VERSION = "1.0.0"        # v1.0: Global Policy Governance System
 INSTITUTIONAL_SCORECARD_VERSION = "1.0.0"  # v1.0: Continuous Institutional Scorecard
 COMMAND_CENTER_VERSION = "1.0.0"           # v1.0: PHOENIX Command Center
+
+DATA_ASSURANCE_VERSION = "1.0.0"           # v1.0: Data Assurance Layer
+SIGNAL_CERTIFICATION_VERSION = "1.0.0"    # v1.0: Signal Certification Layer
+DRIFT_DETECTION_VERSION = "1.0.0"         # v1.0: Drift Detection Layer
+POSTMORTEM_VERSION = "1.0.0"              # v1.0: Postmortem System
+READINESS_V2_VERSION = "1.0.0"            # v1.0: Continuous Readiness Engine v2
 
 # PHOENIX Institutional Stack — ordered maturity progression
 INSTITUTIONAL_STACK = [

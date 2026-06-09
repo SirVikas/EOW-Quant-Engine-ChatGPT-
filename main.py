@@ -20587,6 +20587,146 @@ def ep_claim_audit():
     return economic_claim_auditor.audit_summary()
 
 
+# ── v1.83.0 GAP-02: Data Assurance ───────────────────────────────────────────
+
+@app.get("/api/da/status")
+def da_status():
+    from core.data_assurance.market_data_auditor import market_data_auditor
+    return market_data_auditor.audit_report()
+
+@app.get("/api/da/one-liner")
+def da_one_liner():
+    from core.data_assurance.market_data_auditor import market_data_auditor
+    return {"one_liner": market_data_auditor.one_liner()}
+
+@app.get("/api/da/gaps")
+def da_gaps():
+    from core.data_assurance.data_gap_detector import data_gap_detector
+    return {"summary": data_gap_detector.gap_summary(), "active": [vars(g) for g in data_gap_detector.active_gaps()]}
+
+@app.get("/api/da/integrity")
+def da_integrity():
+    from core.data_assurance.data_integrity_validator import data_integrity_validator
+    return {"failing": [vars(c) for c in data_integrity_validator.failing_checks()]}
+
+@app.get("/api/da/feed-health")
+def da_feed_health():
+    from core.data_assurance.feed_health_monitor import feed_health_monitor
+    return feed_health_monitor.feed_health_report()
+
+
+# ── v1.83.0 GAP-03: Signal Certification ─────────────────────────────────────
+
+@app.get("/api/sc/status")
+def sc_status():
+    from core.signal_certification.signal_certifier import signal_certifier
+    return signal_certifier.certification_report()
+
+@app.get("/api/sc/one-liner")
+def sc_one_liner():
+    from core.signal_certification.signal_certifier import signal_certifier
+    return {"one_liner": f"Signal Certification | {signal_certifier.certification_report()['certified']} certified"}
+
+@app.get("/api/sc/decay")
+def sc_decay():
+    from core.signal_certification.signal_decay_tracker import signal_decay_tracker
+    return signal_decay_tracker.decay_report()
+
+@app.get("/api/sc/precision")
+def sc_precision():
+    from core.signal_certification.false_positive_tracker import false_positive_tracker
+    return false_positive_tracker.precision_report()
+
+@app.get("/api/sc/recall")
+def sc_recall():
+    from core.signal_certification.false_negative_tracker import false_negative_tracker
+    return false_negative_tracker.recall_report()
+
+
+# ── v1.83.0 GAP-04: Drift Detection ──────────────────────────────────────────
+
+@app.get("/api/dd/status")
+def dd_status():
+    from core.drift_detection.drift_engine import drift_engine
+    return drift_engine.drift_report()
+
+@app.get("/api/dd/one-liner")
+def dd_one_liner():
+    from core.drift_detection.drift_engine import drift_engine
+    return {"one_liner": drift_engine.one_liner()}
+
+@app.get("/api/dd/behavior")
+def dd_behavior():
+    from core.drift_detection.behavior_drift_tracker import behavior_drift_tracker
+    return behavior_drift_tracker.drift_summary()
+
+@app.get("/api/dd/performance")
+def dd_performance():
+    from core.drift_detection.performance_drift_detector import performance_drift_detector
+    return performance_drift_detector.performance_drift_report()
+
+@app.get("/api/dd/alerts")
+def dd_alerts():
+    from core.drift_detection.alert_generator import alert_generator
+    return alert_generator.alert_stats()
+
+
+# ── v1.83.0 GAP-05: Postmortem ───────────────────────────────────────────────
+
+@app.get("/api/pm/status")
+def pm_status():
+    from core.postmortem.postmortem_engine import postmortem_engine
+    return postmortem_engine.postmortem_report()
+
+@app.get("/api/pm/one-liner")
+def pm_one_liner():
+    from core.postmortem.postmortem_engine import postmortem_engine
+    return {"one_liner": postmortem_engine.one_liner()}
+
+@app.get("/api/pm/reconstructions")
+def pm_reconstructions():
+    from core.postmortem.incident_reconstructor import incident_reconstructor
+    return {"reconstructions": [vars(r) for r in incident_reconstructor.all_reconstructions()]}
+
+@app.get("/api/pm/actions")
+def pm_actions():
+    from core.postmortem.corrective_action_tracker import corrective_action_tracker
+    return corrective_action_tracker.action_summary()
+
+@app.get("/api/pm/lessons")
+def pm_lessons():
+    from core.postmortem.lesson_extractor import lesson_extractor
+    return {"total": len(lesson_extractor._lessons), "lessons": [vars(l) for l in lesson_extractor._lessons]}
+
+
+# ── v1.83.0 GAP-07: Readiness v2 ─────────────────────────────────────────────
+
+@app.get("/api/rv2/status")
+def rv2_status():
+    from core.readiness_v2.continuous_readiness_engine import continuous_readiness_engine
+    return continuous_readiness_engine.readiness_report()
+
+@app.get("/api/rv2/one-liner")
+def rv2_one_liner():
+    from core.readiness_v2.continuous_readiness_engine import continuous_readiness_engine
+    return {"one_liner": continuous_readiness_engine.one_liner()}
+
+@app.get("/api/rv2/certifications")
+def rv2_certifications():
+    from core.readiness_v2.certification_monitor import certification_monitor
+    return certification_monitor.certification_summary()
+
+@app.get("/api/rv2/compliance")
+def rv2_compliance():
+    from core.readiness_v2.compliance_dashboard import compliance_dashboard
+    return compliance_dashboard.dashboard()
+
+@app.get("/api/rv2/trends")
+def rv2_trends():
+    from core.readiness_v2.readiness_trend_tracker import readiness_trend_tracker
+    return {"latest_scores": readiness_trend_tracker.latest_scores()}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
