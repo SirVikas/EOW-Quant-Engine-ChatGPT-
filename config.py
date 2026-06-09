@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.78.0"
+APP_VERSION = "1.79.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -38,6 +38,17 @@ HUMAN_GOVERNANCE_VERSION = "1.0.0"         # v1.0: Human Governance Framework
 DISASTER_RECOVERY_VERSION = "1.0.0"       # v1.0: Disaster Recovery & Continuity
 MATURITY_SCORECARD_VERSION = "1.0.0"      # v1.0: Institutional Maturity Scorecard
 VERIFICATION_SUITE_VERSION = "1.0.0"      # v1.0: Institutional Verification Suite
+
+INSTITUTIONAL_MEMORY_VERSION = "1.0.0"       # v1.0: Institutional Memory Layer
+META_KNOWLEDGE_VERSION = "1.0.0"             # v1.0: Meta Knowledge Layer
+EVOLUTION_PLANNING_VERSION = "1.0.0"         # v1.0: Evolution Planning Layer
+COLLECTIVE_INTELLIGENCE_VERSION = "1.0.0"    # v1.0: Collective Intelligence Layer
+CAPABILITY_GOVERNANCE_VERSION = "1.0.0"      # v1.0: Capability Governance Layer
+DIGITAL_DNA_VERSION = "1.0.0"                # v1.0: Digital DNA Layer
+KNOWLEDGE_SYNTHESIS_VERSION = "1.0.0"        # v1.0: Knowledge Synthesis Layer
+WAR_GAMING_VERSION = "1.0.0"                 # v1.0: War Gaming Layer
+ECOSYSTEM_INTELLIGENCE_VERSION = "1.0.0"     # v1.0: Ecosystem Intelligence Layer
+CIVILIZATION_ORCHESTRATOR_VERSION = "1.0.0"  # v1.0: Civilization Orchestrator Layer
 
 NEXUS_NAME    = "PHOENIX NEXUS"
 NEXUS_VERSION = "3.2.0"

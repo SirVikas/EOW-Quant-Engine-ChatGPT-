@@ -19619,6 +19619,189 @@ def cc_mission_control():
     return mission_control.full_status()
 
 
+# ── v1.79.0 Civilization-Scale Intelligence Endpoints ──────────────────────────
+
+@app.get("/api/imem/status")
+def imem_status():
+    from core.institutional_memory.institutional_memory_engine import institutional_memory_engine
+    return institutional_memory_engine.memory_report()
+
+@app.get("/api/imem/lessons")
+def imem_lessons():
+    from core.institutional_memory.long_term_lesson_archive import long_term_lesson_archive
+    return {"lessons": long_term_lesson_archive.recent_lessons(limit=20)}
+
+@app.get("/api/imem/wisdom")
+def imem_wisdom():
+    from core.institutional_memory.institutional_wisdom_registry import institutional_wisdom_registry
+    return institutional_wisdom_registry.wisdom_summary()
+
+@app.get("/api/mk/status")
+def mk_status():
+    from core.meta_knowledge.meta_knowledge_engine import meta_knowledge_engine
+    return meta_knowledge_engine.meta_knowledge_report()
+
+@app.get("/api/mk/patterns")
+def mk_patterns():
+    from core.meta_knowledge.pattern_library import pattern_library
+    return pattern_library.pattern_stats()
+
+@app.get("/api/mk/one-liner")
+def mk_one_liner():
+    from core.meta_knowledge.meta_knowledge_engine import meta_knowledge_engine
+    return {"one_liner": meta_knowledge_engine.one_liner()}
+
+@app.get("/api/evplan/status")
+def evplan_status():
+    from core.evolution_planning.evolution_planner import evolution_planner
+    return evolution_planner.planning_report()
+
+@app.get("/api/evplan/roadmap")
+def evplan_roadmap():
+    from core.evolution_planning.evolution_planner import evolution_planner
+    return {"roadmap": evolution_planner.active_roadmap()}
+
+@app.get("/api/evplan/one-liner")
+def evplan_one_liner():
+    from core.evolution_planning.evolution_planner import evolution_planner
+    return {"one_liner": evolution_planner.one_liner()}
+
+@app.get("/api/ci/status")
+def ci_status():
+    from core.collective_intelligence.collective_intelligence_engine import collective_intelligence_engine
+    return collective_intelligence_engine.intelligence_report()
+
+@app.get("/api/ci/signals")
+def ci_signals():
+    from core.collective_intelligence.collective_intelligence_engine import collective_intelligence_engine
+    return {"signals": collective_intelligence_engine.active_signals()}
+
+@app.get("/api/ci/one-liner")
+def ci_one_liner():
+    from core.collective_intelligence.collective_intelligence_engine import collective_intelligence_engine
+    return {"one_liner": collective_intelligence_engine.one_liner()}
+
+@app.get("/api/capgov/status")
+def capgov_status():
+    from core.capability_governance.capability_lifecycle_engine import capability_lifecycle_engine
+    return capability_lifecycle_engine.governance_report()
+
+@app.get("/api/capgov/capabilities")
+def capgov_capabilities():
+    from core.capability_governance.capability_lifecycle_engine import capability_lifecycle_engine
+    return {"capabilities": capability_lifecycle_engine.all_capabilities()}
+
+@app.get("/api/capgov/one-liner")
+def capgov_one_liner():
+    from core.capability_governance.capability_lifecycle_engine import capability_lifecycle_engine
+    return {"one_liner": capability_lifecycle_engine.one_liner()}
+
+@app.get("/api/dna/status")
+def dna_status():
+    from core.digital_dna.digital_dna_engine import digital_dna_engine
+    return digital_dna_engine.dna_profile()
+
+@app.get("/api/dna/identity")
+def dna_identity():
+    from core.digital_dna.identity_registry import identity_registry
+    return identity_registry.identity_card()
+
+@app.get("/api/dna/genome")
+def dna_genome():
+    from core.digital_dna.architectural_genome import architectural_genome
+    return architectural_genome.genome_profile()
+
+@app.get("/api/ks/status")
+def ks_status():
+    from core.knowledge_synthesis.knowledge_synthesis_engine import knowledge_synthesis_engine
+    return knowledge_synthesis_engine.synthesize_report()
+
+@app.get("/api/ks/one-liner")
+def ks_one_liner():
+    from core.knowledge_synthesis.knowledge_synthesis_engine import knowledge_synthesis_engine
+    return {"one_liner": knowledge_synthesis_engine.one_liner()}
+
+@app.get("/api/ks/cross-domain")
+def ks_cross_domain():
+    from core.knowledge_synthesis.cross_domain_reasoner import cross_domain_reasoner
+    return cross_domain_reasoner.reasoning_stats()
+
+@app.get("/api/wg/status")
+def wg_status():
+    from core.war_gaming.war_game_engine import war_game_engine
+    return war_game_engine.war_game_summary()
+
+@app.get("/api/wg/one-liner")
+def wg_one_liner():
+    from core.war_gaming.war_game_engine import war_game_engine
+    return {"one_liner": war_game_engine.one_liner()}
+
+@app.get("/api/wg/scenarios")
+def wg_scenarios():
+    from core.war_gaming.stress_outcome_predictor import stress_outcome_predictor
+    return {"scenarios": stress_outcome_predictor.all_scenarios()}
+
+@app.get("/api/wg/worst-case")
+def wg_worst_case():
+    from core.war_gaming.stress_outcome_predictor import stress_outcome_predictor
+    return {"worst_case": stress_outcome_predictor.worst_case_scenarios()}
+
+@app.post("/api/wg/run")
+def wg_run(body: dict):
+    from core.war_gaming.war_game_engine import war_game_engine
+    return war_game_engine.run_full_war_game(body.get("scenario_name", "BLACK_SWAN_CRASH"))
+
+@app.get("/api/eco/status")
+def eco_status():
+    from core.ecosystem_intelligence.ecosystem_mapper import ecosystem_mapper
+    return ecosystem_mapper.ecosystem_map()
+
+@app.get("/api/eco/awareness")
+def eco_awareness():
+    from core.ecosystem_intelligence.ecosystem_mapper import ecosystem_mapper
+    return ecosystem_mapper.situational_awareness_report()
+
+@app.get("/api/eco/dependencies")
+def eco_dependencies():
+    from core.ecosystem_intelligence.external_dependency_tracker import external_dependency_tracker
+    return external_dependency_tracker.dependency_health_summary()
+
+@app.get("/api/eco/risks")
+def eco_risks():
+    from core.ecosystem_intelligence.environmental_risk_engine import environmental_risk_engine
+    return environmental_risk_engine.risk_summary()
+
+@app.get("/api/civ/status")
+def civ_status():
+    from core.civilization_orchestrator.civilization_engine import civilization_engine
+    return civilization_engine.civilization_status()
+
+@app.get("/api/civ/summary")
+def civ_summary():
+    from core.civilization_orchestrator.civilization_engine import civilization_engine
+    return civilization_engine.summary()
+
+@app.get("/api/civ/one-liner")
+def civ_one_liner():
+    from core.civilization_orchestrator.civilization_engine import civilization_engine
+    return {"one_liner": civilization_engine.one_liner()}
+
+@app.get("/api/civ/alignment")
+def civ_alignment():
+    from core.civilization_orchestrator.institutional_alignment_engine import institutional_alignment_engine
+    return institutional_alignment_engine.alignment_summary()
+
+@app.get("/api/civ/horizon")
+def civ_horizon():
+    from core.civilization_orchestrator.long_horizon_director import long_horizon_director
+    return long_horizon_director.horizon_outlook()
+
+@app.get("/api/civ/readiness")
+def civ_readiness():
+    from core.civilization_orchestrator.master_orchestrator import master_orchestrator
+    return master_orchestrator.system_readiness()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
