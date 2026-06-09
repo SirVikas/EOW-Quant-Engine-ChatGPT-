@@ -17772,6 +17772,269 @@ async def serve_dashboard():
     return HTMLResponse("<h2>dashboard.html not found in project root</h2>", status_code=404)
 
 
+# ── PCCP — PHOENIX Central Control Plane ──────────────────────────────────────
+
+@app.get("/api/pccp/status")
+async def pccp_status():
+    from core.pccp.pccp_orchestrator import pccp_orchestrator as _po
+    return _po.system_status()
+
+
+@app.post("/api/pccp/coordination-cycle")
+async def pccp_coordination_cycle():
+    from core.pccp.pccp_orchestrator import pccp_orchestrator as _po
+    return _po.run_coordination_cycle()
+
+
+@app.get("/api/pccp/dashboard")
+async def pccp_dashboard():
+    from core.pccp.pccp_orchestrator import pccp_orchestrator as _po
+    return _po.pccp_dashboard()
+
+
+@app.get("/api/pccp/layers")
+async def pccp_layers():
+    from core.pccp.layer_registry import layer_registry as _lr
+    return _lr.all_layers()
+
+
+@app.post("/api/pccp/layers/health")
+async def pccp_layers_health(body: dict):
+    from core.pccp.layer_registry import layer_registry as _lr
+    return _lr.update_health(body.get("layer_id"), body.get("status"), body.get("detail", ""))
+
+
+@app.get("/api/pccp/bus/events")
+async def pccp_bus_events():
+    from core.pccp.intelligence_bus import intelligence_bus as _ib
+    return _ib.recent_events()
+
+
+@app.post("/api/pccp/bus/publish")
+async def pccp_bus_publish(body: dict):
+    from core.pccp.intelligence_bus import intelligence_bus as _ib
+    event_id = _ib.publish(body.get("source_layer"), body.get("event_type"), body.get("payload", {}))
+    return {"event_id": event_id}
+
+
+@app.get("/api/pccp/bus/stats")
+async def pccp_bus_stats():
+    from core.pccp.intelligence_bus import intelligence_bus as _ib
+    return _ib.bus_stats()
+
+
+@app.post("/api/pccp/conflict/resolve")
+async def pccp_conflict_resolve(body: dict):
+    from core.pccp.conflict_resolver import conflict_resolver as _cr
+    return _cr.resolve(
+        body.get("layer_a"), body.get("signal_a"),
+        body.get("layer_b"), body.get("signal_b"),
+        body.get("context", ""),
+    )
+
+
+@app.get("/api/pccp/conflict/history")
+async def pccp_conflict_history():
+    from core.pccp.conflict_resolver import conflict_resolver as _cr
+    return _cr.all_conflicts()
+
+
+@app.get("/api/pccp/priorities")
+async def pccp_priorities():
+    from core.pccp.global_priority_manager import global_priority_manager as _gpm
+    return _gpm.get_ranked_list()
+
+
+@app.post("/api/pccp/priorities/add")
+async def pccp_priorities_add(body: dict):
+    from core.pccp.global_priority_manager import global_priority_manager as _gpm
+    return _gpm.add_item(
+        body.get("title"), body.get("source_layer"),
+        float(body.get("impact", 5)), float(body.get("confidence", 0.5)),
+        float(body.get("urgency", 5)), float(body.get("implementation_cost", 3)),
+    )
+
+
+@app.get("/api/pccp/priorities/top")
+async def pccp_priorities_top():
+    from core.pccp.global_priority_manager import global_priority_manager as _gpm
+    return _gpm.top_priority()
+
+
+@app.post("/api/pccp/priorities/update-status")
+async def pccp_priorities_update_status(body: dict):
+    from core.pccp.global_priority_manager import global_priority_manager as _gpm
+    return _gpm.update_status(body.get("item_id"), body.get("status"))
+
+
+@app.get("/api/pccp/decisions")
+async def pccp_decisions():
+    from core.pccp.decision_ledger import decision_ledger as _dl
+    return _dl.all_decisions()
+
+
+@app.post("/api/pccp/decisions/record")
+async def pccp_decisions_record(body: dict):
+    from core.pccp.decision_ledger import decision_ledger as _dl
+    decision_id = _dl.record(
+        body.get("title"), body.get("reason"),
+        body.get("source_layers", []), float(body.get("confidence", 0.5)),
+    )
+    return {"decision_id": decision_id}
+
+
+@app.post("/api/pccp/decisions/outcome")
+async def pccp_decisions_outcome(body: dict):
+    from core.pccp.decision_ledger import decision_ledger as _dl
+    return _dl.record_outcome(body.get("decision_id"), body.get("outcome"))
+
+
+@app.get("/api/pccp/decisions/pending")
+async def pccp_decisions_pending():
+    from core.pccp.decision_ledger import decision_ledger as _dl
+    return _dl.pending_decisions()
+
+
+# ── CTAO — CT Scan Autonomous Orchestrator ────────────────────────────────────
+
+@app.post("/api/ctao/scan/run")
+async def ctao_scan_run(body: dict = None):
+    from core.ctao.ctao_orchestrator import ctao_orchestrator as _co
+    scan_results = (body or {}).get("scan_results")
+    return _co.run_scan_cycle(scan_results)
+
+
+@app.get("/api/ctao/dashboard")
+async def ctao_dashboard():
+    from core.ctao.ctao_orchestrator import ctao_orchestrator as _co
+    return _co.ctao_dashboard()
+
+
+@app.get("/api/ctao/findings")
+async def ctao_findings(status: str = None, severity: str = None):
+    from core.ctao.finding_registry import finding_registry as _fr
+    return _fr.all_findings(status_filter=status, severity_filter=severity)
+
+
+@app.post("/api/ctao/findings/record")
+async def ctao_findings_record(body: dict):
+    from core.ctao.finding_registry import finding_registry as _fr
+    fid = _fr.record_finding(
+        body.get("category"), body.get("severity"), float(body.get("confidence", 0.5)),
+        body.get("detected_by"), body.get("description"), body.get("raw_data"),
+    )
+    return {"finding_id": fid}
+
+
+@app.post("/api/ctao/findings/resolve/{finding_id}")
+async def ctao_findings_resolve(finding_id: str):
+    from core.ctao.finding_registry import finding_registry as _fr
+    return _fr.resolve(finding_id)
+
+
+@app.get("/api/ctao/findings/stats")
+async def ctao_findings_stats():
+    from core.ctao.finding_registry import finding_registry as _fr
+    return _fr.finding_stats()
+
+
+@app.get("/api/ctao/root-cause/analyses")
+async def ctao_root_cause_analyses():
+    from core.ctao.root_cause_engine import root_cause_engine as _rce
+    return _rce.all_analyses()
+
+
+@app.post("/api/ctao/root-cause/analyze")
+async def ctao_root_cause_analyze(body: dict):
+    from core.ctao.root_cause_engine import root_cause_engine as _rce
+    return _rce.analyze(body.get("finding_id"), body.get("symptom"), body.get("context_data"))
+
+
+@app.get("/api/ctao/root-cause/frequency")
+async def ctao_root_cause_frequency():
+    from core.ctao.root_cause_engine import root_cause_engine as _rce
+    return _rce.cause_frequency()
+
+
+@app.get("/api/ctao/recommendations")
+async def ctao_recommendations():
+    from core.ctao.recommendation_engine import ctao_recommendation_engine as _re
+    return _re.pending_recommendations()
+
+
+@app.post("/api/ctao/recommendations/generate")
+async def ctao_recommendations_generate(body: dict):
+    from core.ctao.recommendation_engine import ctao_recommendation_engine as _re
+    return _re.generate(
+        body.get("finding_id"), body.get("finding_description"),
+        body.get("root_cause", ""), body.get("severity", "MEDIUM"),
+    )
+
+
+@app.post("/api/ctao/recommendations/implement/{rec_id}")
+async def ctao_recommendations_implement(rec_id: str):
+    from core.ctao.recommendation_engine import ctao_recommendation_engine as _re
+    return _re.implement(rec_id)
+
+
+@app.post("/api/ctao/recommendations/bury/{rec_id}")
+async def ctao_recommendations_bury(rec_id: str, body: dict):
+    from core.ctao.recommendation_engine import ctao_recommendation_engine as _re
+    from core.ctao.recommendation_cemetery import recommendation_cemetery as _rc
+    _re.bury(rec_id)
+    return _rc.bury(
+        rec_id, body.get("original_description", ""),
+        body.get("reason_buried", "REJECTED"), body.get("failure_evidence", ""),
+        body.get("lesson_learned", ""), True,
+    )
+
+
+@app.get("/api/ctao/cemetery")
+async def ctao_cemetery():
+    from core.ctao.recommendation_cemetery import recommendation_cemetery as _rc
+    return _rc.all_buried()
+
+
+@app.get("/api/ctao/cemetery/stats")
+async def ctao_cemetery_stats():
+    from core.ctao.recommendation_cemetery import recommendation_cemetery as _rc
+    return _rc.cemetery_stats()
+
+
+@app.post("/api/ctao/impact/verify")
+async def ctao_impact_verify(body: dict):
+    from core.ctao.impact_verification_engine import impact_verification_engine as _ive
+    return _ive.verify_impact(body.get("rec_id"), float(body.get("actual_benefit", 0)))
+
+
+@app.get("/api/ctao/impact/stats")
+async def ctao_impact_stats():
+    from core.ctao.impact_verification_engine import impact_verification_engine as _ive
+    return _ive.verification_stats()
+
+
+@app.get("/api/ctao/vault/entries")
+async def ctao_vault_entries():
+    from core.ctao.ct_knowledge_vault import ct_knowledge_vault as _ckv
+    return {"stats": _ckv.vault_stats(), "top_lessons": _ckv.top_lessons()}
+
+
+@app.post("/api/ctao/vault/store")
+async def ctao_vault_store(body: dict):
+    from core.ctao.ct_knowledge_vault import ct_knowledge_vault as _ckv
+    entry_id = _ckv.store(
+        body.get("entry_type"), body.get("title"), body.get("content"),
+        body.get("tags"), float(body.get("importance", 5)),
+    )
+    return {"entry_id": entry_id}
+
+
+@app.get("/api/ctao/vault/search")
+async def ctao_vault_search(q: str = ""):
+    from core.ctao.ct_knowledge_vault import ct_knowledge_vault as _ckv
+    return _ckv.search(q)
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
