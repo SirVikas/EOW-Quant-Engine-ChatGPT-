@@ -1,10 +1,31 @@
 """Verifier — confirms all 40 v1.79.0 civilization-scale modules are importable."""
-import importlib
+import importlib.util
 import sys
 import os
 
-# Ensure project root is on the path regardless of invocation directory
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+
+# Modules inside core.institutional_memory must be loaded from file directly
+# because the package __init__.py imports imraf_engine which requires pydantic_settings
+# (a runtime dep not available in bare Python). All other packages have empty __init__.py.
+DIRECT_FILE_MODULES = {
+    "core.institutional_memory.institutional_memory_engine",
+    "core.institutional_memory.long_term_lesson_archive",
+    "core.institutional_memory.memory_consolidation_engine",
+    "core.institutional_memory.institutional_wisdom_registry",
+}
+
+
+def _load_module(dotted: str):
+    if dotted in DIRECT_FILE_MODULES:
+        path = os.path.join(ROOT, dotted.replace(".", os.sep) + ".py")
+        spec = importlib.util.spec_from_file_location(dotted, path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+    else:
+        importlib.import_module(dotted)
+
 
 MODULES = [
     # Institutional Memory (4)
@@ -62,7 +83,7 @@ MODULES = [
 passed = failed = 0
 for m in MODULES:
     try:
-        importlib.import_module(m)
+        _load_module(m)
         print(f"  OK  {m}")
         passed += 1
     except Exception as e:
