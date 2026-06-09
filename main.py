@@ -17315,6 +17315,322 @@ async def chairman_ack_alert(alert_id: str):
     return _ccc.acknowledge_alert(alert_id)
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PTP — Evidence Accumulation Report  [GAP-EAP-01, GAP-EAP-02]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/evidence-accumulation/multi-regime")
+async def evidence_multi_regime(pillar: str = None):
+    from core.trust.evidence_accumulation_report import evidence_accumulation_report as _ear
+    return _ear.multi_regime_report(pillar=pillar)
+
+
+@app.get("/api/trust/evidence-accumulation/survival")
+async def evidence_survival(pillar: str = None):
+    from core.trust.evidence_accumulation_report import evidence_accumulation_report as _ear
+    return _ear.trust_survival_report(pillar=pillar)
+
+
+@app.get("/api/trust/evidence-accumulation/full")
+async def evidence_accumulation_full():
+    from core.trust.evidence_accumulation_report import evidence_accumulation_report as _ear
+    return _ear.full_accumulation_report()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG — Promotion History Ledger  [GAP-EAP-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/promotion-ledger/summary")
+async def aeg_ledger_summary():
+    from core.nexus.aeg_pipeline.aeg_promotion_ledger import aeg_promotion_ledger as _apl
+    return _apl.summary()
+
+
+@app.get("/api/nexus/aeg/promotion-ledger/rec-type/{rec_type}")
+async def aeg_ledger_for_rec(rec_type: str):
+    from core.nexus.aeg_pipeline.aeg_promotion_ledger import aeg_promotion_ledger as _apl
+    return {"rec_type": rec_type, "history": _apl.for_rec_type(rec_type)}
+
+
+@app.get("/api/nexus/aeg/promotion-ledger/by-event/{event_type}")
+async def aeg_ledger_by_event(event_type: str):
+    from core.nexus.aeg_pipeline.aeg_promotion_ledger import aeg_promotion_ledger as _apl
+    return {"event_type": event_type, "entries": _apl.by_event_type(event_type)}
+
+
+@app.get("/api/nexus/aeg/promotion-ledger/success-rate")
+async def aeg_ledger_success_rate():
+    from core.nexus.aeg_pipeline.aeg_promotion_ledger import aeg_promotion_ledger as _apl
+    return _apl.promotion_success_rate()
+
+
+@app.post("/api/nexus/aeg/promotion-ledger/record-promotion")
+async def aeg_ledger_record_promotion(body: dict):
+    from core.nexus.aeg_pipeline.aeg_promotion_ledger import aeg_promotion_ledger as _apl
+    entry = _apl.record_promotion(
+        rec_type=body.get("rec_type", ""),
+        actor=body.get("actor", "SYSTEM"),
+        sandbox_accuracy=body.get("sandbox_accuracy"),
+        trust_score=body.get("trust_score"),
+        notes=body.get("notes", ""),
+    )
+    return {"entry_id": entry.entry_id, "rec_type": entry.rec_type}
+
+
+@app.post("/api/nexus/aeg/promotion-ledger/record-rollback")
+async def aeg_ledger_record_rollback(body: dict):
+    from core.nexus.aeg_pipeline.aeg_promotion_ledger import aeg_promotion_ledger as _apl
+    entry = _apl.record_rollback(
+        rec_type=body.get("rec_type", ""),
+        reason=body.get("reason", ""),
+        actor=body.get("actor", "SYSTEM"),
+        sandbox_accuracy=body.get("sandbox_accuracy"),
+    )
+    return {"entry_id": entry.entry_id}
+
+
+@app.post("/api/nexus/aeg/promotion-ledger/resolve/{entry_id}")
+async def aeg_ledger_resolve(entry_id: str, body: dict):
+    from core.nexus.aeg_pipeline.aeg_promotion_ledger import aeg_promotion_ledger as _apl
+    return _apl.resolve_entry(entry_id, outcome=body.get("outcome", "SUCCESS"))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Board Accuracy Ledger  [GAP-EAP-04]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/board-accuracy/report")
+async def board_accuracy_report():
+    from core.pcao.board_accuracy_ledger import board_accuracy_ledger as _bal
+    return _bal.accuracy_report()
+
+
+@app.get("/api/pcao/board-accuracy/outcomes")
+async def board_accuracy_outcomes(limit: int = 50):
+    from core.pcao.board_accuracy_ledger import board_accuracy_ledger as _bal
+    return {"outcomes": _bal.recent_outcomes(limit=limit)}
+
+
+@app.post("/api/pcao/board-accuracy/evaluate")
+async def board_accuracy_evaluate():
+    from core.pcao.board_accuracy_ledger import board_accuracy_ledger as _bal
+    evaluated = _bal.auto_evaluate()
+    return {"newly_evaluated": len(evaluated), "outcomes": evaluated}
+
+
+@app.post("/api/pcao/board-accuracy/record")
+async def board_accuracy_record(body: dict):
+    from core.pcao.board_accuracy_ledger import board_accuracy_ledger as _bal
+    outcome = _bal.record_outcome(
+        action_id=body.get("action_id", ""),
+        action_type=body.get("action_type", ""),
+        actor=body.get("actor", "UNKNOWN"),
+        subject_id=body.get("subject_id", ""),
+        decision_at=float(body.get("decision_at", 0)),
+        verdict=body.get("verdict", "PENDING"),
+        evidence=body.get("evidence", ""),
+        notes=body.get("notes", ""),
+    )
+    return {"outcome_id": outcome.outcome_id, "verdict": outcome.verdict}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Validation Suite  [GAP-VCP-01 … VCP-06]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/validation/full")
+async def validation_full():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.full_validation_report()
+
+
+@app.get("/api/nexus/validation/calibration")
+async def validation_calibration():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.calibration.validate()
+
+
+@app.get("/api/nexus/validation/cascade")
+async def validation_cascade():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.cascade.validate()
+
+
+@app.get("/api/nexus/validation/digital-twin")
+async def validation_digital_twin():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.digital_twin.accuracy_report()
+
+
+@app.post("/api/nexus/validation/digital-twin/record-actual")
+async def validation_dt_record_actual(body: dict):
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.digital_twin.record_actual(
+        scenario_id=body.get("scenario_id", ""),
+        actual_outcome=body.get("actual_outcome", {}),
+    )
+
+
+@app.post("/api/nexus/validation/health-index/snapshot")
+async def validation_health_snapshot():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.health_index.record_snapshot()
+
+
+@app.get("/api/nexus/validation/health-index/correlation")
+async def validation_health_correlation():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.health_index.correlation_report()
+
+
+@app.get("/api/nexus/validation/doctrine")
+async def validation_doctrine():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.doctrine.audit()
+
+
+@app.get("/api/nexus/validation/governance-effectiveness")
+async def validation_governance_effectiveness():
+    from core.nexus.validation_suite import validation_suite as _vs
+    return _vs.governance_eff.generate()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Executive Scorecard  [GAP-EIP-01, EIP-02, EIP-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/executive-scorecard/full")
+async def executive_scorecard_full():
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    return _es.full_scorecard()
+
+
+@app.get("/api/pcao/executive-scorecard/recommendations")
+async def executive_scorecard_recs():
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    return _es.recommendation_scorecard()
+
+
+@app.post("/api/pcao/executive-scorecard/recommendations/capture")
+async def executive_scorecard_capture():
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    count = _es.auto_capture_recommendations()
+    return {"captured": count}
+
+
+@app.post("/api/pcao/executive-scorecard/recommendations/{rec_id}/outcome")
+async def executive_scorecard_rec_outcome(rec_id: str, body: dict):
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    return _es.record_recommendation_outcome(
+        rec_id=rec_id,
+        outcome=body.get("outcome", ""),
+        evidence=body.get("evidence", ""),
+    )
+
+
+@app.get("/api/pcao/executive-scorecard/optimizer")
+async def executive_scorecard_optimizer():
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    return _es.optimizer_validation_report()
+
+
+@app.post("/api/pcao/executive-scorecard/optimizer/record")
+async def executive_scorecard_opt_record(body: dict):
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    opt_id = _es.record_optimization(
+        subsystem=body.get("subsystem", ""),
+        recommended_delta=float(body.get("recommended_delta", 0)),
+        applied=bool(body.get("applied", False)),
+        baseline_metric=body.get("baseline_metric"),
+    )
+    return {"opt_id": opt_id}
+
+
+@app.post("/api/pcao/executive-scorecard/optimizer/{opt_id}/result")
+async def executive_scorecard_opt_result(opt_id: str, body: dict):
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    return _es.record_optimization_result(opt_id, post_metric=float(body.get("post_metric", 0)))
+
+
+@app.get("/api/pcao/executive-scorecard/roadmap")
+async def executive_scorecard_roadmap():
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    return _es.roadmap_performance_report()
+
+
+@app.post("/api/pcao/executive-scorecard/roadmap/milestone")
+async def executive_scorecard_milestone(body: dict):
+    from core.pcao.executive_scorecard import executive_scorecard as _es
+    m = _es.record_milestone_completion(
+        milestone_id=body.get("milestone_id", ""),
+        title=body.get("title", ""),
+        subsystem=body.get("subsystem", ""),
+        gate_conditions_met=bool(body.get("gate_conditions_met", False)),
+        outcome_notes=body.get("outcome_notes", ""),
+    )
+    return {"milestone_id": m.milestone_id, "verdict": m.verdict}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Strategic Forecast Engine  [GAP-PEP-01, PEP-02, PEP-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/strategic-forecast/forecast")
+async def strategic_forecast(horizon_days: int = 365):
+    from core.pcao.strategic_forecast_engine import strategic_forecast_engine as _sfe
+    return _sfe.strategic_forecast(horizon_days=horizon_days)
+
+
+@app.get("/api/pcao/strategic-forecast/multi-horizon")
+async def strategic_forecast_multi():
+    from core.pcao.strategic_forecast_engine import strategic_forecast_engine as _sfe
+    return _sfe.multi_horizon_forecast()
+
+
+@app.post("/api/pcao/strategic-forecast/scenario")
+async def strategic_forecast_scenario(body: dict):
+    from core.pcao.strategic_forecast_engine import strategic_forecast_engine as _sfe
+    return _sfe.scenario_plan(
+        scenario_name=body.get("name", "CUSTOM"),
+        assumptions=body.get("assumptions", {}),
+    )
+
+
+@app.get("/api/pcao/strategic-forecast/institutional")
+async def strategic_forecast_institutional():
+    from core.pcao.strategic_forecast_engine import strategic_forecast_engine as _sfe
+    return _sfe.institutional_forecast()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Institutional Learning Engine  [GAP-LLP-01]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.post("/api/nexus/learning/run-cycle")
+async def learning_run_cycle():
+    from core.nexus.institutional_learning_engine import institutional_learning_engine as _ile
+    return _ile.run_cycle()
+
+
+@app.get("/api/nexus/learning/summary")
+async def learning_summary():
+    from core.nexus.institutional_learning_engine import institutional_learning_engine as _ile
+    return _ile.learning_summary()
+
+
+@app.get("/api/nexus/learning/cycles")
+async def learning_cycles(limit: int = 10):
+    from core.nexus.institutional_learning_engine import institutional_learning_engine as _ile
+    return {"cycles": _ile.recent_cycles(limit=limit)}
+
+
+@app.get("/api/nexus/learning/insights")
+async def learning_insights(unapplied_only: bool = False):
+    from core.nexus.institutional_learning_engine import institutional_learning_engine as _ile
+    return {"insights": _ile.all_insights(unapplied_only=unapplied_only)}
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
