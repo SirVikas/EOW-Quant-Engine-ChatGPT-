@@ -15928,6 +15928,541 @@ async def pcao_executive_audit(limit: int = 20):
     return {"audit": _pe.executive_audit(limit=limit)}
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# LIVE ACCURACY VALIDATOR  [GAP-001]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/accuracy/report")
+async def live_accuracy_full_report():
+    from core.trust.live_accuracy_validator import live_accuracy_validator as _lav
+    return _lav.all_pillars_report()
+
+
+@app.get("/api/trust/accuracy/report/{pillar}")
+async def live_accuracy_pillar_report(pillar: str):
+    from core.trust.live_accuracy_validator import live_accuracy_validator as _lav
+    return _lav.pillar_report(pillar.upper())
+
+
+@app.get("/api/trust/accuracy/window/{days}")
+async def live_accuracy_window_comparison(days: int):
+    from core.trust.live_accuracy_validator import live_accuracy_validator as _lav
+    return {"comparison": _lav.window_comparison(days)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RECOMMENDATION REALITY ENGINE  [GAP-002]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/observatory/reality/summary")
+async def reality_engine_summary():
+    from core.observatory.recommendation_reality_engine import recommendation_reality_engine as _rre
+    return _rre.summary()
+
+
+@app.get("/api/observatory/reality/{rec_id}")
+async def reality_engine_get(rec_id: str):
+    from core.observatory.recommendation_reality_engine import recommendation_reality_engine as _rre
+    result = _rre.get(rec_id)
+    return result if result else {"error": f"Recommendation '{rec_id}' not found"}
+
+
+@app.post("/api/observatory/reality/register")
+async def reality_engine_register(body: dict):
+    from core.observatory.recommendation_reality_engine import recommendation_reality_engine as _rre
+    rl = _rre.register(
+        rec_id=body.get("rec_id", f"REC-{int(__import__('time').time()*1000)}"),
+        rec_type=body.get("rec_type", ""),
+        entity_id=body.get("entity_id", "SYSTEM"),
+        pillar=body.get("pillar", "").upper(),
+        claimed_outcome=body.get("claimed_outcome", ""),
+    )
+    return {"registered": True, "rec_id": rl.rec_id, "stage": rl.stage}
+
+
+@app.post("/api/observatory/reality/{rec_id}/apply")
+async def reality_engine_mark_applied(rec_id: str):
+    from core.observatory.recommendation_reality_engine import recommendation_reality_engine as _rre
+    return _rre.mark_applied(rec_id)
+
+
+@app.post("/api/observatory/reality/{rec_id}/outcome")
+async def reality_engine_record_outcome(rec_id: str, body: dict):
+    from core.observatory.recommendation_reality_engine import recommendation_reality_engine as _rre
+    return _rre.record_outcome(
+        rec_id=rec_id,
+        actual_outcome=body.get("actual_outcome", ""),
+        correct=bool(body.get("correct", False)),
+        pnl_delta=float(body.get("pnl_delta", 0.0)),
+        win_rate_delta=float(body.get("win_rate_delta", 0.0)),
+        trade_count=int(body.get("trade_count", 0)),
+        evidence_detail=body.get("evidence_detail", ""),
+    )
+
+
+@app.get("/api/observatory/reality/pending/verification")
+async def reality_engine_pending():
+    from core.observatory.recommendation_reality_engine import recommendation_reality_engine as _rre
+    return {"pending": _rre.pending_verification()}
+
+
+@app.get("/api/observatory/reality/pillar/{pillar}")
+async def reality_engine_by_pillar(pillar: str, limit: int = 50):
+    from core.observatory.recommendation_reality_engine import recommendation_reality_engine as _rre
+    return {"records": _rre.by_pillar(pillar.upper(), limit=limit)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TRUST EVIDENCE WAREHOUSE  [GAP-003]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/warehouse/audit")
+async def trust_warehouse_full_audit():
+    from core.trust.trust_evidence_warehouse import trust_evidence_warehouse as _tew
+    return _tew.full_audit()
+
+
+@app.get("/api/trust/warehouse/pillar/{pillar}")
+async def trust_warehouse_pillar(pillar: str, days: int = 0, limit: int = 100):
+    from core.trust.trust_evidence_warehouse import trust_evidence_warehouse as _tew
+    return {"records": _tew.for_pillar(pillar.upper(), days=days or None, limit=limit)}
+
+
+@app.get("/api/trust/warehouse/entity/{entity_id}")
+async def trust_warehouse_entity(entity_id: str, days: int = 0):
+    from core.trust.trust_evidence_warehouse import trust_evidence_warehouse as _tew
+    return {"records": _tew.for_entity(entity_id, days=days or None)}
+
+
+@app.get("/api/trust/warehouse/density/{pillar}")
+async def trust_warehouse_density(pillar: str, bucket_days: int = 7, lookback_days: int = 180):
+    from core.trust.trust_evidence_warehouse import trust_evidence_warehouse as _tew
+    return {"density": _tew.density_over_time(pillar.upper(), bucket_days=bucket_days, lookback_days=lookback_days)}
+
+
+@app.post("/api/trust/warehouse/ingest")
+async def trust_warehouse_ingest(body: dict):
+    from core.trust.trust_evidence_warehouse import trust_evidence_warehouse as _tew
+    ev = _tew.ingest(
+        pillar=body.get("pillar", "").upper(),
+        evidence_type=body.get("evidence_type", "RECOMMENDATION"),
+        entity_id=body.get("entity_id", "SYSTEM"),
+        source_id=body.get("source_id", ""),
+        claimed=body.get("claimed", ""),
+        actual=body.get("actual", ""),
+        correct=bool(body.get("correct", False)),
+        economic_impact=float(body.get("economic_impact", 0.0)),
+        confidence=float(body.get("confidence", 1.0)),
+        tags=body.get("tags", []),
+    )
+    return {"ingested": True, "evidence_id": ev.evidence_id}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG SANDBOX REPLAY  [GAP-005]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/replay/{rec_id}")
+async def aeg_replay_for_rec(rec_id: str):
+    from core.nexus.aeg_pipeline.aeg_sandbox_replay import aeg_sandbox_replay as _asr
+    return {"events": _asr.replay_for_rec(rec_id), "consistency": _asr.decision_consistency_check(rec_id)}
+
+
+@app.get("/api/nexus/aeg/replay/type/{rec_type}")
+async def aeg_replay_for_type(rec_type: str, limit: int = 50):
+    from core.nexus.aeg_pipeline.aeg_sandbox_replay import aeg_sandbox_replay as _asr
+    return {"events": _asr.replay_for_rec_type(rec_type, limit=limit)}
+
+
+@app.get("/api/nexus/aeg/replay/decisions/promotions")
+async def aeg_replay_promotions():
+    from core.nexus.aeg_pipeline.aeg_sandbox_replay import aeg_sandbox_replay as _asr
+    return {"promotions": _asr.promotion_decisions(), "summary": _asr.summary()}
+
+
+@app.get("/api/nexus/aeg/replay/decisions/demotions")
+async def aeg_replay_demotions():
+    from core.nexus.aeg_pipeline.aeg_sandbox_replay import aeg_sandbox_replay as _asr
+    return {"demotions": _asr.demotion_decisions()}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG PROMOTION COURT  [GAP-006]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/court/cases")
+async def aeg_court_all_cases(limit: int = 50):
+    from core.nexus.aeg_pipeline.aeg_promotion_court import aeg_promotion_court as _apc
+    return {"cases": _apc.all_cases(limit=limit), "summary": _apc.summary()}
+
+
+@app.get("/api/nexus/aeg/court/cases/open")
+async def aeg_court_open_cases():
+    from core.nexus.aeg_pipeline.aeg_promotion_court import aeg_promotion_court as _apc
+    return {"open_cases": _apc.open_cases()}
+
+
+@app.post("/api/nexus/aeg/court/file")
+async def aeg_court_file_case(body: dict):
+    from core.nexus.aeg_pipeline.aeg_promotion_court import aeg_promotion_court as _apc
+    case = _apc.file_case(
+        rec_id=body.get("rec_id", ""),
+        rec_type=body.get("rec_type", ""),
+        filed_by=body.get("filed_by", "SYSTEM"),
+    )
+    return {"filed": True, "case_id": case.case_id, "status": case.status}
+
+
+@app.post("/api/nexus/aeg/court/{case_id}/deliberate")
+async def aeg_court_deliberate(case_id: str):
+    from core.nexus.aeg_pipeline.aeg_promotion_court import aeg_promotion_court as _apc
+    return _apc.deliberate(case_id)
+
+
+@app.post("/api/nexus/aeg/court/{case_id}/verdict")
+async def aeg_court_verdict(case_id: str, body: dict):
+    from core.nexus.aeg_pipeline.aeg_promotion_court import aeg_promotion_court as _apc
+    return _apc.issue_verdict(
+        case_id,
+        verdict=body.get("verdict", ""),
+        reasoning=body.get("reasoning", ""),
+        decided_by=body.get("decided_by", "SYSTEM"),
+    )
+
+
+@app.post("/api/nexus/aeg/court/{case_id}/approve")
+async def aeg_court_human_approve(case_id: str, body: dict):
+    from core.nexus.aeg_pipeline.aeg_promotion_court import aeg_promotion_court as _apc
+    return _apc.human_approve(case_id, approver=body.get("approver", "HUMAN"))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG DAMAGE ACCOUNTING  [GAP-007]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/damage/portfolio")
+async def aeg_damage_portfolio(days: int = 0):
+    from core.nexus.aeg_pipeline.aeg_damage_accounting import aeg_damage_accounting as _ada
+    return _ada.portfolio_summary(days=days or None)
+
+
+@app.get("/api/nexus/aeg/damage/leaderboard")
+async def aeg_damage_leaderboard(days: int = 0):
+    from core.nexus.aeg_pipeline.aeg_damage_accounting import aeg_damage_accounting as _ada
+    return {
+        "top_performers":   _ada.top_performers(days=days or None),
+        "worst_performers": _ada.worst_performers(days=days or None),
+    }
+
+
+@app.get("/api/nexus/aeg/damage/{rec_type}")
+async def aeg_damage_for_type(rec_type: str, days: int = 0):
+    from core.nexus.aeg_pipeline.aeg_damage_accounting import aeg_damage_accounting as _ada
+    return _ada.account_for(rec_type, days=days or None)
+
+
+@app.post("/api/nexus/aeg/damage/record")
+async def aeg_damage_record(body: dict):
+    from core.nexus.aeg_pipeline.aeg_damage_accounting import aeg_damage_accounting as _ada
+    _ada.record(
+        rec_id=body.get("rec_id", ""),
+        rec_type=body.get("rec_type", ""),
+        entity_id=body.get("entity_id", "SYSTEM"),
+        pnl_delta=float(body.get("pnl_delta", 0.0)),
+        win_rate_delta=float(body.get("win_rate_delta", 0.0)),
+        correct=bool(body.get("correct", False)),
+    )
+    return {"recorded": True}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG ROLLBACK FRAMEWORK  [GAP-008]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/rollbacks")
+async def aeg_rollback_log(rec_type: str = ""):
+    from core.nexus.aeg_pipeline.aeg_rollback_framework import aeg_rollback_framework as _arf
+    return {
+        "rollbacks":   _arf.rollback_log(rec_type=rec_type or None),
+        "suspended":   _arf.suspended_rec_types(),
+        "summary":     _arf.summary(),
+    }
+
+
+@app.post("/api/nexus/aeg/rollbacks/execute")
+async def aeg_rollback_execute(body: dict):
+    from core.nexus.aeg_pipeline.aeg_rollback_framework import aeg_rollback_framework as _arf
+    ev = _arf.execute_rollback(
+        rec_id=body.get("rec_id", ""),
+        rec_type=body.get("rec_type", ""),
+        trigger=body.get("trigger", "HUMAN_OVERRIDE"),
+        live_accuracy=float(body.get("live_accuracy", 0.0)),
+        live_samples=int(body.get("live_samples", 0)),
+        evidence_snapshot=body.get("evidence_snapshot"),
+    )
+    return {"executed": True, "rollback_id": ev.rollback_id}
+
+
+@app.post("/api/nexus/aeg/rollbacks/{rec_type}/reinstate")
+async def aeg_rollback_reinstate(rec_type: str, body: dict):
+    from core.nexus.aeg_pipeline.aeg_rollback_framework import aeg_rollback_framework as _arf
+    return _arf.reinstate(rec_type, approved_by=body.get("approved_by", "HUMAN"))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONSTITUTIONAL COMMENTARY  [GAP-010]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/cortex/constitution/commentary")
+async def constitutional_commentary_all():
+    from core.cortex.constitutional_commentary import constitutional_commentary as _cc
+    return {"commentaries": _cc.all_commentaries()}
+
+
+@app.get("/api/cortex/constitution/commentary/{article_id}")
+async def constitutional_commentary_for_article(article_id: str):
+    from core.cortex.constitutional_commentary import constitutional_commentary as _cc
+    result = _cc.get_commentary(article_id.upper())
+    return result if result else {"error": f"No commentary for '{article_id}'"}
+
+
+@app.post("/api/cortex/constitution/commentary/{article_id}/annotate")
+async def constitutional_commentary_annotate(article_id: str, body: dict):
+    from core.cortex.constitutional_commentary import constitutional_commentary as _cc
+    ann = _cc.add_annotation(
+        article_id=article_id.upper(),
+        annotation_type=body.get("annotation_type", "INTERPRETATION"),
+        content=body.get("content", ""),
+        source=body.get("source", "HUMAN"),
+    )
+    return {"added": True, "annotation_id": ann.annotation_id}
+
+
+@app.post("/api/cortex/constitution/commentary/search")
+async def constitutional_commentary_search(body: dict):
+    from core.cortex.constitutional_commentary import constitutional_commentary as _cc
+    return {"results": _cc.search(body.get("query", ""))}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GOVERNANCE STRESS TEST  [GAP-011]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.post("/api/cortex/governance/stress-test/run")
+async def governance_stress_test_run():
+    from core.cortex.governance_stress_test import governance_stress_test as _gst
+    run = _gst.run()
+    return {
+        "run_id":            run.run_id,
+        "total":             run.total,
+        "passed":            run.passed,
+        "failed":            run.failed,
+        "consistency_score": run.consistency_score,
+        "ran_at":            run.ran_at,
+        "failing_scenarios": _gst.failing_scenarios(),
+    }
+
+
+@app.get("/api/cortex/governance/stress-test/latest")
+async def governance_stress_test_latest():
+    from core.cortex.governance_stress_test import governance_stress_test as _gst
+    result = _gst.latest_run()
+    return result if result else {"note": "No stress test runs yet — POST to /run first"}
+
+
+@app.get("/api/cortex/governance/stress-test/history")
+async def governance_stress_test_history():
+    from core.cortex.governance_stress_test import governance_stress_test as _gst
+    return {"runs": _gst.all_runs_summary()}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# EVIDENCE SUPREMACY ENGINE  [GAP-017]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/evidence-supremacy/summary")
+async def evidence_supremacy_summary():
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return _ese.summary()
+
+
+@app.get("/api/nexus/evidence-supremacy/verdicts")
+async def evidence_supremacy_verdicts(limit: int = 50):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return {"verdicts": _ese.recent_verdicts(limit=limit)}
+
+
+@app.get("/api/nexus/evidence-supremacy/blocked")
+async def evidence_supremacy_blocked():
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return {"blocked_actions": _ese.blocked_actions()}
+
+
+@app.post("/api/nexus/evidence-supremacy/check/trust-promotion")
+async def evidence_supremacy_check_trust(body: dict):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    v = _ese.check_trust_promotion(pillar=body.get("pillar", "").upper(), to_rung=body.get("to_rung", ""))
+    return {"check_id": v.check_id, "verdict": v.verdict, "reasons": v.reasons, "evidence_count": v.evidence_count, "evidence_required": v.evidence_required}
+
+
+@app.post("/api/nexus/evidence-supremacy/check/aeg-promotion")
+async def evidence_supremacy_check_aeg(body: dict):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    v = _ese.check_aeg_promotion(rec_type=body.get("rec_type", ""))
+    return {"check_id": v.check_id, "verdict": v.verdict, "reasons": v.reasons}
+
+
+@app.post("/api/nexus/evidence-supremacy/check/amendment")
+async def evidence_supremacy_check_amendment(body: dict):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    v = _ese.check_amendment(article_id=body.get("article_id", "").upper(), amendment_type=body.get("amendment_type", ""))
+    return {"check_id": v.check_id, "verdict": v.verdict, "reasons": v.reasons}
+
+
+@app.post("/api/nexus/evidence-supremacy/{check_id}/override")
+async def evidence_supremacy_override(check_id: str, body: dict):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return _ese.override_verdict(check_id, overridden_by=body.get("overridden_by", "HUMAN"))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Program Manager  [GAP-013]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/programs")
+async def pcao_all_programs():
+    from core.pcao.program_manager import program_manager as _pm
+    return {"programs": _pm.all_programs()}
+
+
+@app.get("/api/pcao/programs/{program_id}")
+async def pcao_program_status(program_id: str):
+    from core.pcao.program_manager import program_manager as _pm
+    return _pm.program_status(program_id)
+
+
+@app.post("/api/pcao/programs")
+async def pcao_create_program(body: dict):
+    from core.pcao.program_manager import program_manager as _pm
+    p = _pm.create_program(
+        obj_id=body.get("obj_id", ""),
+        title=body.get("title", ""),
+        description=body.get("description", ""),
+    )
+    return {"created": True, "program_id": p.program_id}
+
+
+@app.post("/api/pcao/programs/{program_id}/tasks")
+async def pcao_add_task(program_id: str, body: dict):
+    from core.pcao.program_manager import program_manager as _pm
+    t = _pm.add_task(
+        program_id=program_id,
+        title=body.get("title", ""),
+        description=body.get("description", ""),
+        depends_on=body.get("depends_on", []),
+        assigned_to=body.get("assigned_to", "UNASSIGNED"),
+    )
+    return {"added": True, "task_id": t.task_id}
+
+
+@app.post("/api/pcao/tasks/{task_id}/start")
+async def pcao_start_task(task_id: str):
+    from core.pcao.program_manager import program_manager as _pm
+    return _pm.start_task(task_id)
+
+
+@app.post("/api/pcao/tasks/{task_id}/complete")
+async def pcao_complete_task(task_id: str, body: dict):
+    from core.pcao.program_manager import program_manager as _pm
+    return _pm.complete_task(task_id, notes=body.get("notes", ""))
+
+
+@app.get("/api/pcao/tasks/blocked")
+async def pcao_blocked_tasks():
+    from core.pcao.program_manager import program_manager as _pm
+    return {"blocked_tasks": _pm.blocked_tasks()}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Resource Governor  [GAP-014]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/resources/allocations")
+async def pcao_all_allocations():
+    from core.pcao.resource_governor import resource_governor as _rg
+    return {"allocations": _rg.all_allocations()}
+
+
+@app.get("/api/pcao/resources/bottlenecks")
+async def pcao_bottlenecks():
+    from core.pcao.resource_governor import resource_governor as _rg
+    return {"bottlenecks": _rg.bottlenecks()}
+
+
+@app.get("/api/pcao/resources/priority")
+async def pcao_resource_priority():
+    from core.pcao.resource_governor import resource_governor as _rg
+    return _rg.priority_recommendation()
+
+
+@app.get("/api/pcao/resources/research-health")
+async def pcao_research_health():
+    from core.pcao.resource_governor import resource_governor as _rg
+    return _rg.research_pipeline_health()
+
+
+@app.post("/api/pcao/resources/allocations")
+async def pcao_set_allocation(body: dict):
+    from core.pcao.resource_governor import resource_governor as _rg
+    _rg.set_allocation(
+        subsystem=body.get("subsystem", ""),
+        capacity_type=body.get("capacity_type", "DEVELOPER"),
+        allocated=float(body.get("allocated", 0.0)),
+        consumed=float(body.get("consumed", 0.0)),
+        queued_work=int(body.get("queued_work", 0)),
+        note=body.get("note", ""),
+    )
+    return {"updated": True}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Executive Board  [GAP-015]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/board/snapshot")
+async def pcao_board_snapshot():
+    from core.pcao.executive_board import executive_board as _eb
+    return _eb.board_snapshot()
+
+
+@app.get("/api/pcao/board/executive-summary")
+async def pcao_executive_summary():
+    from core.pcao.executive_board import executive_board as _eb
+    return _eb.executive_summary()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Institutional Memory Commander  [GAP-016]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/commander/snapshot")
+async def imc_full_snapshot():
+    from core.pcao.institutional_memory_commander import institutional_memory_commander as _imc
+    return _imc.full_snapshot()
+
+
+@app.get("/api/pcao/commander/health")
+async def imc_health_matrix():
+    from core.pcao.institutional_memory_commander import institutional_memory_commander as _imc
+    return _imc.health_matrix()
+
+
+@app.get("/api/pcao/commander/alerts")
+async def imc_cross_layer_alerts():
+    from core.pcao.institutional_memory_commander import institutional_memory_commander as _imc
+    return _imc.cross_layer_alert()
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
