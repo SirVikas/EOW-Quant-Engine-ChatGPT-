@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.69.0"
+APP_VERSION = "1.70.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 NEXUS_NAME    = "PHOENIX NEXUS"
@@ -39,7 +39,7 @@ CORTEX_COMPONENTS = ["module_registry", "dependency_mapper", "conflict_engine",
 
 # PHOENIX TRUST PROGRAM (PTP) — Trust Validation Layer
 PTP_NAME    = "PHOENIX TRUST PROGRAM"
-PTP_VERSION = "1.4.0"   # v1.4: Multi-Regime Validator + Warehouse Integrity Engine
+PTP_VERSION = "1.5.0"   # v1.5: Trust Calibration Engine + Trust Error Classifier
 PTP_PILLARS = ["RECOMMENDATION_ACCURACY", "INVESTIGATION_ACCURACY",
                "BLAME_ACCURACY", "COUNTERFACTUAL_ACCURACY", "CONFLICT_ACCURACY"]
 
@@ -47,7 +47,10 @@ PTP_PILLARS = ["RECOMMENDATION_ACCURACY", "INVESTIGATION_ACCURACY",
 AEG_PIPELINE_VERSION = "1.3.0"  # v1.3: Shadow Mode, Longitudinal Tracker
 
 # PCAO — Planning, Control, Autonomy, and Oversight
-PCAO_VERSION = "0.3.0"   # v0.3: Strategic Planner, Risk Office, Decision Support, Human Governance Layer
+PCAO_VERSION = "0.4.0"   # v0.4: Risk Forecaster, Resource Optimizer, Roadmap Engine, Chairman Command Center
+AEG_VALIDATION_VERSION = "1.0.0"  # v1.0: AEG Validation Program (shadow evidence, promotion accuracy, readiness index)
+NEXUS_IHI_VERSION      = "1.0.0"  # v1.0: Institutional Health Index + Unified Causal Graph + Digital Twin Extended
+CORTEX_GMETRICS_VERSION = "1.0.0" # v1.0: Governance Metrics (Constitutional KPIs, Amendment Outcomes)
 
 # NEXUS — Evidence Supremacy Engine
 NEXUS_ESE_VERSION = "1.0.0"   # v1.0: Evidence Supremacy Automation
