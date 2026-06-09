@@ -19802,6 +19802,273 @@ def civ_readiness():
     return master_orchestrator.system_readiness()
 
 
+# ── GAP-01: Data Governance ──────────────────────────────────────────────────
+
+@app.get("/api/dg/status")
+def dg_status():
+    from core.data_governance.data_classification_registry import data_classification_registry
+    return data_classification_registry.governance_report()
+
+@app.get("/api/dg/catalog")
+def dg_catalog():
+    from core.data_governance.data_catalog import data_catalog
+    return {"datasets": data_catalog.all_datasets(), "summary": data_catalog.catalog_summary()}
+
+@app.get("/api/dg/quality")
+def dg_quality():
+    from core.data_governance.data_quality_monitor import data_quality_monitor
+    return {"failing_datasets": data_quality_monitor.failing_datasets()}
+
+@app.get("/api/dg/lineage")
+def dg_lineage():
+    from core.data_governance.data_lineage_engine import data_lineage_engine
+    return {"lineage": data_lineage_engine.lineage_graph()}
+
+@app.get("/api/dg/retention")
+def dg_retention():
+    from core.data_governance.data_retention_engine import data_retention_engine
+    return data_retention_engine.retention_summary()
+
+
+# ── GAP-02: Model Governance ──────────────────────────────────────────────────
+
+@app.get("/api/mg/status")
+def mg_status():
+    from core.model_governance.model_registry import model_registry
+    return model_registry.registry_summary()
+
+@app.get("/api/mg/models")
+def mg_models():
+    from core.model_governance.model_registry import model_registry
+    return {"models": model_registry.by_stage("PRODUCTION")}
+
+@app.get("/api/mg/promotions")
+def mg_promotions():
+    from core.model_governance.model_promotion_workflow import model_promotion_workflow
+    return {"history": model_promotion_workflow.promotion_history()}
+
+@app.get("/api/mg/retired")
+def mg_retired():
+    from core.model_governance.model_retirement_engine import model_retirement_engine
+    return model_retirement_engine.retirement_summary()
+
+@app.get("/api/mg/versions")
+def mg_versions():
+    from core.model_governance.model_version_control import model_version_control
+    from core.model_governance.model_registry import model_registry
+    summary = model_registry.registry_summary()
+    return {"total_models": summary["total_models"], "version_records": len(model_version_control._records)}
+
+
+# ── GAP-03: Decision Intelligence ────────────────────────────────────────────
+
+@app.get("/api/di/status")
+def di_status():
+    from core.decision_intelligence.decision_accuracy_tracker import decision_accuracy_tracker
+    return decision_accuracy_tracker.accuracy_report()
+
+@app.get("/api/di/summary")
+def di_summary():
+    from core.decision_intelligence.decision_accuracy_tracker import decision_accuracy_tracker
+    return decision_accuracy_tracker.intelligence_summary()
+
+@app.get("/api/di/decisions")
+def di_decisions():
+    from core.decision_intelligence.decision_registry import decision_registry
+    return {"decisions": decision_registry.all_decisions()}
+
+@app.get("/api/di/regrets")
+def di_regrets():
+    from core.decision_intelligence.decision_regret_tracker import decision_regret_tracker
+    return decision_regret_tracker.regret_summary()
+
+
+# ── GAP-04: Workflow Orchestration ───────────────────────────────────────────
+
+@app.get("/api/wf/status")
+def wf_status():
+    from core.workflow_orchestration.workflow_engine import workflow_engine
+    return workflow_engine.execution_report()
+
+@app.get("/api/wf/one-liner")
+def wf_one_liner():
+    from core.workflow_orchestration.workflow_engine import workflow_engine
+    return {"one_liner": workflow_engine.one_liner()}
+
+@app.get("/api/wf/workflows")
+def wf_workflows():
+    from core.workflow_orchestration.workflow_registry import workflow_registry
+    return {"workflows": workflow_registry.active_workflows(), "summary": workflow_registry.workflow_summary()}
+
+@app.get("/api/wf/runs")
+def wf_runs():
+    from core.workflow_orchestration.workflow_monitor import workflow_monitor
+    return {"active_runs": workflow_monitor.active_runs()}
+
+
+# ── GAP-05: Resource Economics ───────────────────────────────────────────────
+
+@app.get("/api/re/status")
+def re_status():
+    from core.resource_economics.optimization_recommender import optimization_recommender
+    return optimization_recommender.economics_report()
+
+@app.get("/api/re/costs")
+def re_costs():
+    from core.resource_economics.resource_cost_engine import resource_cost_engine
+    return {"by_type": resource_cost_engine.cost_by_type(), "total_spend": resource_cost_engine.total_spend()}
+
+@app.get("/api/re/roi")
+def re_roi():
+    from core.resource_economics.resource_roi_tracker import resource_roi_tracker
+    return {"roi_by_type": resource_roi_tracker.roi_by_type(), "best": resource_roi_tracker.best_roi_resources()}
+
+@app.get("/api/re/efficiency")
+def re_efficiency():
+    from core.resource_economics.resource_efficiency_analyzer import resource_efficiency_analyzer
+    return {"scores": resource_efficiency_analyzer.all_efficiency_scores()}
+
+@app.get("/api/re/recommendations")
+def re_recommendations():
+    from core.resource_economics.optimization_recommender import optimization_recommender
+    return {"recommendations": optimization_recommender.recommend()}
+
+
+# ── GAP-06: Change Management ────────────────────────────────────────────────
+
+@app.get("/api/cm/status")
+def cm_status():
+    from core.change_management.change_impact_assessor import change_impact_assessor
+    return change_impact_assessor.change_management_summary()
+
+@app.get("/api/cm/pending")
+def cm_pending():
+    from core.change_management.change_registry import change_registry
+    return {"pending": change_registry.pending_changes()}
+
+@app.get("/api/cm/high-risk")
+def cm_high_risk():
+    from core.change_management.change_risk_engine import change_risk_engine
+    return {"high_risk": change_risk_engine.high_risk_changes()}
+
+@app.get("/api/cm/summary")
+def cm_summary():
+    from core.change_management.change_registry import change_registry
+    return change_registry.change_summary()
+
+
+# ── GAP-07: Service Governance ───────────────────────────────────────────────
+
+@app.get("/api/sg/status")
+def sg_status():
+    from core.service_governance.service_quality_engine import service_quality_engine
+    return service_quality_engine.quality_report()
+
+@app.get("/api/sg/one-liner")
+def sg_one_liner():
+    from core.service_governance.service_quality_engine import service_quality_engine
+    return {"one_liner": service_quality_engine.one_liner()}
+
+@app.get("/api/sg/slas")
+def sg_slas():
+    from core.service_governance.sla_registry import sla_registry
+    return {"active": sla_registry.active_slas(), "breached": sla_registry.breached_slas()}
+
+@app.get("/api/sg/slo-compliance")
+def sg_slo_compliance():
+    from core.service_governance.slo_tracker import slo_tracker
+    return {"compliance_rate_pct": slo_tracker.compliance_rate_pct(), "non_compliant": slo_tracker.non_compliant_slos()}
+
+@app.get("/api/sg/availability")
+def sg_availability():
+    from core.service_governance.availability_monitor import availability_monitor
+    return {"degraded_services": availability_monitor.degraded_services()}
+
+
+# ── GAP-08: Dependency Governance ────────────────────────────────────────────
+
+@app.get("/api/depgov/status")
+def depgov_status():
+    from core.dependency_governance.dependency_audit_engine import dependency_audit_engine
+    return dependency_audit_engine.audit_report()
+
+@app.get("/api/depgov/one-liner")
+def depgov_one_liner():
+    from core.dependency_governance.dependency_audit_engine import dependency_audit_engine
+    return {"one_liner": dependency_audit_engine.one_liner()}
+
+@app.get("/api/depgov/vendors")
+def depgov_vendors():
+    from core.dependency_governance.vendor_registry import vendor_registry
+    return {"critical": vendor_registry.critical_vendors(), "summary": vendor_registry.vendor_summary()}
+
+@app.get("/api/depgov/risks")
+def depgov_risks():
+    from core.dependency_governance.dependency_risk_engine import dependency_risk_engine
+    return {"high_severity": dependency_risk_engine.high_severity_risks()}
+
+@app.get("/api/depgov/health")
+def depgov_health():
+    from core.dependency_governance.external_service_monitor import external_service_monitor
+    return external_service_monitor.health_summary()
+
+
+# ── GAP-09: Executive Management ─────────────────────────────────────────────
+
+@app.get("/api/em/status")
+def em_status():
+    from core.executive_management.executive_performance_dashboard import executive_performance_dashboard
+    return executive_performance_dashboard.executive_report()
+
+@app.get("/api/em/one-liner")
+def em_one_liner():
+    from core.executive_management.executive_performance_dashboard import executive_performance_dashboard
+    return {"one_liner": executive_performance_dashboard.one_liner()}
+
+@app.get("/api/em/okrs")
+def em_okrs():
+    from core.executive_management.okr_registry import okr_registry
+    return {"active_okrs": okr_registry.active_okrs()}
+
+@app.get("/api/em/kpis")
+def em_kpis():
+    from core.executive_management.strategic_kpi_engine import strategic_kpi_engine
+    return {"kpis": strategic_kpi_engine.kpi_dashboard(), "off_target": strategic_kpi_engine.off_target_kpis()}
+
+@app.get("/api/em/goals")
+def em_goals():
+    from core.executive_management.goal_tracker import goal_tracker
+    return goal_tracker.goal_summary()
+
+
+# ── GAP-10: Federation ────────────────────────────────────────────────────────
+
+@app.get("/api/fed/status")
+def fed_status():
+    from core.federation.federated_governance import federated_governance
+    return federated_governance.federation_status()
+
+@app.get("/api/fed/one-liner")
+def fed_one_liner():
+    from core.federation.federated_governance import federated_governance
+    return {"one_liner": federated_governance.one_liner()}
+
+@app.get("/api/fed/nodes")
+def fed_nodes():
+    from core.federation.federation_registry import federation_registry
+    return {"active_nodes": federation_registry.active_nodes(), "summary": federation_registry.federation_summary()}
+
+@app.get("/api/fed/exchanges")
+def fed_exchanges():
+    from core.federation.knowledge_exchange_engine import knowledge_exchange_engine
+    return knowledge_exchange_engine.exchange_stats()
+
+@app.get("/api/fed/protocol")
+def fed_protocol():
+    from core.federation.inter_phoenix_protocol import inter_phoenix_protocol
+    return inter_phoenix_protocol.protocol_stats()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
