@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from dataclasses import asdict
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -18033,6 +18033,387 @@ async def ctao_vault_store(body: dict):
 async def ctao_vault_search(q: str = ""):
     from core.ctao.ct_knowledge_vault import ct_knowledge_vault as _ckv
     return _ckv.search(q)
+
+
+# ── Knowledge Graph endpoints (/api/kg) ──────────────────────────────────────
+
+@app.get("/api/kg/status")
+async def kg_status():
+    from core.knowledge_graph.knowledge_graph_engine import knowledge_graph_engine
+    return knowledge_graph_engine.kg_status()
+
+
+@app.post("/api/kg/chain/add")
+async def kg_chain_add(body: dict = Body(...)):
+    from core.knowledge_graph.knowledge_graph_engine import knowledge_graph_engine
+    return knowledge_graph_engine.add_finding_chain(
+        finding_id=body["finding_id"],
+        finding_label=body["finding_label"],
+        root_cause_label=body["root_cause_label"],
+        recommendation_label=body["recommendation_label"],
+        outcome_label=body.get("outcome_label"),
+        trust_delta=body.get("trust_delta"),
+    )
+
+
+@app.get("/api/kg/chain/{entity_id}")
+async def kg_chain_query(entity_id: str):
+    from core.knowledge_graph.knowledge_graph_engine import knowledge_graph_engine
+    return knowledge_graph_engine.query_chain(entity_id)
+
+
+@app.get("/api/kg/export")
+async def kg_export():
+    from core.knowledge_graph.knowledge_graph_engine import knowledge_graph_engine
+    return knowledge_graph_engine.full_graph_export()
+
+
+@app.get("/api/kg/metrics")
+async def kg_metrics():
+    from core.knowledge_graph.graph_metrics import graph_metrics
+    return graph_metrics.coverage_report()
+
+
+@app.post("/api/kg/entity")
+async def kg_entity_register(body: dict = Body(...)):
+    from core.knowledge_graph.entity_registry import entity_registry
+    entity_id = entity_registry.register(
+        entity_type=body["entity_type"],
+        label=body["label"],
+        properties=body.get("properties"),
+    )
+    return {"entity_id": entity_id}
+
+
+@app.post("/api/kg/relationship")
+async def kg_relationship_create(body: dict = Body(...)):
+    from core.knowledge_graph.relationship_registry import relationship_registry
+    rel_id = relationship_registry.create(
+        source_id=body["source_id"],
+        target_id=body["target_id"],
+        rel_type=body["rel_type"],
+        label=body.get("label", ""),
+        weight=float(body.get("weight", 1.0)),
+    )
+    return {"rel_id": rel_id}
+
+
+@app.get("/api/kg/path/{source_id}/{target_id}")
+async def kg_path(source_id: str, target_id: str):
+    from core.knowledge_graph.graph_query_engine import graph_query_engine
+    return {"path": graph_query_engine.find_path(source_id, target_id)}
+
+
+@app.get("/api/kg/impact/{entity_id}")
+async def kg_impact(entity_id: str):
+    from core.knowledge_graph.graph_query_engine import graph_query_engine
+    return graph_query_engine.downstream_impact(entity_id)
+
+
+# ── Strategic Memory endpoints (/api/memory) ─────────────────────────────────
+
+@app.post("/api/memory/consolidate")
+async def memory_consolidate():
+    from core.strategic_memory.strategic_memory_engine import strategic_memory_engine
+    return strategic_memory_engine.consolidate()
+
+
+@app.get("/api/memory/report")
+async def memory_report():
+    from core.strategic_memory.strategic_memory_engine import strategic_memory_engine
+    return strategic_memory_engine.institutional_memory_report()
+
+
+@app.get("/api/memory/lessons")
+async def memory_lessons():
+    from core.strategic_memory.lesson_registry import lesson_registry
+    return lesson_registry.all_lessons()
+
+
+@app.get("/api/memory/lessons/top")
+async def memory_lessons_top():
+    from core.strategic_memory.lesson_registry import lesson_registry
+    return lesson_registry.top_lessons()
+
+
+@app.post("/api/memory/lessons/record")
+async def memory_lessons_record(body: dict = Body(...)):
+    from core.strategic_memory.lesson_registry import lesson_registry
+    lesson_id = lesson_registry.record_lesson(
+        title=body["title"],
+        content=body["content"],
+        evidence_count=int(body.get("evidence_count", 1)),
+        confidence=float(body.get("confidence", 0.5)),
+        source_type=body.get("source_type", "MANUAL"),
+    )
+    return {"lesson_id": lesson_id}
+
+
+@app.get("/api/memory/failures")
+async def memory_failures():
+    from core.strategic_memory.repeat_failure_tracker import repeat_failure_tracker
+    return repeat_failure_tracker.most_repeated()
+
+
+@app.post("/api/memory/failures/record")
+async def memory_failures_record(body: dict = Body(...)):
+    from core.strategic_memory.repeat_failure_tracker import repeat_failure_tracker
+    failure_id = repeat_failure_tracker.record_failure(
+        failure_type=body["failure_type"],
+        description=body["description"],
+        root_cause=body.get("root_cause", ""),
+    )
+    return {"failure_id": failure_id}
+
+
+@app.get("/api/memory/failures/chronic")
+async def memory_failures_chronic():
+    from core.strategic_memory.repeat_failure_tracker import repeat_failure_tracker
+    return repeat_failure_tracker.chronic_failures()
+
+
+@app.get("/api/memory/patterns/extract")
+async def memory_patterns_extract():
+    from core.strategic_memory.pattern_extractor import pattern_extractor
+    total = pattern_extractor.run_full_extraction()
+    return {"total_extracted": total}
+
+
+# ── Economic Intelligence endpoints (/api/econ) ──────────────────────────────
+
+@app.get("/api/econ/report")
+async def econ_report():
+    from core.economic_intelligence.economic_intelligence_engine import economic_intelligence_engine
+    return economic_intelligence_engine.economic_report()
+
+
+@app.post("/api/econ/evaluate")
+async def econ_evaluate(body: dict = Body(...)):
+    from core.economic_intelligence.economic_intelligence_engine import economic_intelligence_engine
+    evaluation_id = economic_intelligence_engine.evaluate_recommendation(
+        rec_id=body["rec_id"],
+        expected_profit_pct=float(body["expected_profit_pct"]),
+        expected_drawdown_reduction=float(body["expected_drawdown_reduction"]),
+        expected_sharpe_delta=float(body["expected_sharpe_delta"]),
+    )
+    return {"evaluation_id": evaluation_id}
+
+
+@app.post("/api/econ/outcome")
+async def econ_outcome(body: dict = Body(...)):
+    from core.economic_intelligence.economic_intelligence_engine import economic_intelligence_engine
+    verdict = economic_intelligence_engine.record_outcome(
+        rec_id=body["rec_id"],
+        actual_profit_pct=float(body["actual_profit_pct"]),
+        actual_drawdown_reduction=float(body["actual_drawdown_reduction"]),
+        actual_sharpe_before=float(body["actual_sharpe_before"]),
+        actual_sharpe_after=float(body["actual_sharpe_after"]),
+        period_days=int(body.get("period_days", 30)),
+    )
+    return {"verdict": verdict}
+
+
+@app.get("/api/econ/profit/stats")
+async def econ_profit_stats():
+    from core.economic_intelligence.profit_impact_analyzer import profit_impact_analyzer
+    return profit_impact_analyzer.impact_stats()
+
+
+@app.get("/api/econ/capital/stats")
+async def econ_capital_stats():
+    from core.economic_intelligence.capital_efficiency_tracker import capital_efficiency_tracker
+    return capital_efficiency_tracker.efficiency_stats()
+
+
+@app.get("/api/econ/sharpe/stats")
+async def econ_sharpe_stats():
+    from core.economic_intelligence.sharpe_impact_tracker import sharpe_impact_tracker
+    return sharpe_impact_tracker.sharpe_stats()
+
+
+# ── CTAO additions (/api/ctao) ────────────────────────────────────────────────
+
+@app.get("/api/ctao/outcomes")
+async def ctao_outcomes():
+    from core.ctao.recommendation_outcome_registry import recommendation_outcome_registry
+    return recommendation_outcome_registry.all_outcomes()
+
+
+@app.post("/api/ctao/outcomes/propose")
+async def ctao_outcomes_propose(body: dict = Body(...)):
+    from core.ctao.recommendation_outcome_registry import recommendation_outcome_registry
+    recommendation_outcome_registry.propose(body["rec_id"])
+    return {"status": "proposed", "rec_id": body["rec_id"]}
+
+
+@app.post("/api/ctao/outcomes/review")
+async def ctao_outcomes_review(body: dict = Body(...)):
+    from core.ctao.recommendation_outcome_registry import recommendation_outcome_registry
+    recommendation_outcome_registry.record_review(body["rec_id"], body["window"], body["result_dict"])
+    return {"status": "ok"}
+
+
+@app.get("/api/ctao/outcomes/stats")
+async def ctao_outcomes_stats():
+    from core.ctao.recommendation_outcome_registry import recommendation_outcome_registry
+    return recommendation_outcome_registry.outcome_stats()
+
+
+@app.get("/api/ctao/accuracy")
+async def ctao_accuracy():
+    from core.ctao.recommendation_accuracy_engine import recommendation_accuracy_engine
+    return recommendation_accuracy_engine.accuracy_stats()
+
+
+@app.post("/api/ctao/accuracy/suggest")
+async def ctao_accuracy_suggest(body: dict = Body(...)):
+    from core.ctao.recommendation_accuracy_engine import recommendation_accuracy_engine
+    recommendation_accuracy_engine.record_suggestion(body["rec_id"])
+    return {"status": "ok"}
+
+
+@app.post("/api/ctao/accuracy/result")
+async def ctao_accuracy_result(body: dict = Body(...)):
+    from core.ctao.recommendation_accuracy_engine import recommendation_accuracy_engine
+    if body.get("success", False):
+        recommendation_accuracy_engine.record_success(body["rec_id"])
+    else:
+        recommendation_accuracy_engine.record_failure(body["rec_id"])
+    return {"status": "ok"}
+
+
+@app.get("/api/ctao/root-cause/validate/all")
+async def ctao_rcv_all():
+    from core.ctao.root_cause_validation_engine import root_cause_validation_engine
+    return root_cause_validation_engine.all_validations()
+
+
+@app.post("/api/ctao/root-cause/validate/submit")
+async def ctao_rcv_submit(body: dict = Body(...)):
+    from core.ctao.root_cause_validation_engine import root_cause_validation_engine
+    validation_id = root_cause_validation_engine.submit_for_validation(
+        root_cause_id=body["root_cause_id"],
+        root_cause_description=body["root_cause_description"],
+        implemented_fix=body["implemented_fix"],
+    )
+    return {"validation_id": validation_id}
+
+
+@app.post("/api/ctao/root-cause/validate/outcome")
+async def ctao_rcv_outcome(body: dict = Body(...)):
+    from core.ctao.root_cause_validation_engine import root_cause_validation_engine
+    ok = root_cause_validation_engine.record_outcome(
+        validation_id=body["validation_id"],
+        observed_outcome=body["observed_outcome"],
+        validation_result=body["validation_result"],
+        accuracy_score=float(body["accuracy_score"]),
+    )
+    return {"status": "ok" if ok else "not_found"}
+
+
+@app.get("/api/ctao/root-cause/validate/stats")
+async def ctao_rcv_stats():
+    from core.ctao.root_cause_validation_engine import root_cause_validation_engine
+    return root_cause_validation_engine.validation_stats()
+
+
+@app.get("/api/ctao/root-cause/validate/reliability")
+async def ctao_rcv_reliability():
+    from core.ctao.root_cause_validation_engine import root_cause_validation_engine
+    return root_cause_validation_engine.diagnostic_reliability_report()
+
+
+# ── PCCP additions (/api/pccp) ────────────────────────────────────────────────
+
+@app.get("/api/pccp/resources")
+async def pccp_resources():
+    from core.pccp.resource_governor import resource_governor
+    return resource_governor.all_budgets()
+
+
+@app.get("/api/pccp/resources/health")
+async def pccp_resources_health():
+    from core.pccp.resource_governor import resource_governor
+    return resource_governor.resource_health()
+
+
+@app.post("/api/pccp/resources/usage")
+async def pccp_resources_usage(body: dict = Body(...)):
+    from core.pccp.resource_governor import resource_governor
+    resource_governor.update_usage(
+        layer_id=body["layer_id"],
+        cpu_usage=float(body["cpu_usage"]),
+        ram_usage=float(body["ram_usage"]),
+    )
+    return {"status": "ok"}
+
+
+@app.get("/api/pccp/goals")
+async def pccp_goals():
+    from core.pccp.strategic_goal_engine import strategic_goal_engine
+    return strategic_goal_engine.goal_hierarchy_report()
+
+
+@app.post("/api/pccp/goals/evaluate")
+async def pccp_goals_evaluate(body: dict = Body(...)):
+    from core.pccp.strategic_goal_engine import strategic_goal_engine
+    return strategic_goal_engine.evaluate_against_goals(
+        action_description=body["action_description"],
+        affected_goals=body["affected_goals"],
+    )
+
+
+@app.post("/api/pccp/goals/constitutional-check")
+async def pccp_goals_constitutional_check(body: dict = Body(...)):
+    from core.pccp.strategic_goal_engine import strategic_goal_engine
+    return strategic_goal_engine.constitutional_check(body["action_description"])
+
+
+@app.post("/api/pccp/goals/resolve-conflict")
+async def pccp_goals_resolve_conflict(body: dict = Body(...)):
+    from core.pccp.strategic_goal_engine import strategic_goal_engine
+    return strategic_goal_engine.resolve_conflict_by_goals(
+        option_a=body["option_a"],
+        goals_a=body["goals_a"],
+        option_b=body["option_b"],
+        goals_b=body["goals_b"],
+    )
+
+
+@app.get("/api/pccp/dependencies")
+async def pccp_dependencies():
+    from core.pccp.layer_dependency_engine import layer_dependency_engine
+    return layer_dependency_engine.dependency_report()
+
+
+@app.get("/api/pccp/dependencies/impact/{layer_id}")
+async def pccp_dependencies_impact(layer_id: str):
+    from core.pccp.layer_dependency_engine import layer_dependency_engine
+    return layer_dependency_engine.impact_of_failure(layer_id)
+
+
+@app.get("/api/pccp/dependencies/critical")
+async def pccp_dependencies_critical():
+    from core.pccp.layer_dependency_engine import layer_dependency_engine
+    return {"most_critical_layer": layer_dependency_engine.most_critical_layer()}
+
+
+@app.get("/api/pccp/health-forecast")
+async def pccp_health_forecast():
+    from core.pccp.health_intelligence_engine import health_intelligence_engine
+    return health_intelligence_engine.health_forecast_report()
+
+
+@app.get("/api/pccp/health-forecast/at-risk")
+async def pccp_health_forecast_at_risk():
+    from core.pccp.health_intelligence_engine import health_intelligence_engine
+    return health_intelligence_engine.at_risk_layers()
+
+
+@app.get("/api/pccp/health-forecast/{layer_id}")
+async def pccp_health_forecast_layer(layer_id: str):
+    from core.pccp.health_intelligence_engine import health_intelligence_engine
+    return health_intelligence_engine.predict_health(layer_id)
 
 
 if __name__ == "__main__":
