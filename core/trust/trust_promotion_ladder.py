@@ -176,6 +176,26 @@ class TrustPromotionLadder:
             "ladder":         LADDER_RUNGS,
         }
 
+    def current_rung(self, pillar: str) -> dict:
+        self.sync_from_registry()
+        with self._lock:
+            pos = self._positions.get(pillar)
+        if not pos:
+            return {"rung": "UNVERIFIED", "pillar": pillar}
+        return {"rung": pos.current_rung, "pillar": pillar, "trust_score": pos.trust_score}
+
+    def force_demote(self, pillar: str, to_rung: str, reason: str = "") -> None:
+        with self._lock:
+            pos = self._positions.get(pillar)
+            if not pos:
+                return
+            old_rung = pos.current_rung
+            pos.previous_rung = old_rung
+            pos.current_rung = to_rung
+            pos.demoted_at = time.time()
+            pos.rung_history.append({"rung": to_rung, "timestamp": time.time(), "score": pos.trust_score, "forced": True, "reason": reason})
+        self._record_milestone(pillar, "FORCED_DEMOTION", old_rung, to_rung, pos.trust_score)
+
     def _record_milestone(self, pillar: str, event: str, from_rung: str, to_rung: str, score: float) -> None:
         try:
             from core.observatory.nexus_bridge import _imraf
