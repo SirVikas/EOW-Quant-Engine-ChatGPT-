@@ -16463,6 +16463,547 @@ async def imc_cross_layer_alerts():
     return _imc.cross_layer_alert()
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PTP — Multi-Regime Validator  [GAP-R1/A]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/multi-regime/pillar/{pillar}")
+async def multi_regime_pillar(pillar: str):
+    from core.trust.multi_regime_validator import multi_regime_validator as _mrv
+    return _mrv.extended_windows_for_pillar(pillar)
+
+
+@app.get("/api/trust/multi-regime/all")
+async def multi_regime_all():
+    from core.trust.multi_regime_validator import multi_regime_validator as _mrv
+    return {"pillars": _mrv.all_pillars_extended()}
+
+
+@app.get("/api/trust/multi-regime/regime-accuracy/{pillar}")
+async def multi_regime_accuracy(pillar: str):
+    from core.trust.multi_regime_validator import multi_regime_validator as _mrv
+    return {"pillar": pillar, "by_regime": _mrv.regime_accuracy(pillar)}
+
+
+@app.get("/api/trust/multi-regime/regime-accuracy")
+async def multi_regime_all_accuracy():
+    from core.trust.multi_regime_validator import multi_regime_validator as _mrv
+    return {"all_pillars": _mrv.all_pillars_regime_accuracy()}
+
+
+@app.post("/api/trust/multi-regime/tag")
+async def multi_regime_tag(body: dict):
+    from core.trust.multi_regime_validator import multi_regime_validator as _mrv
+    _mrv.tag_evidence_with_regime(
+        evidence_id=body.get("evidence_id", ""),
+        regime=body.get("regime", "UNKNOWN"),
+    )
+    return {"tagged": True}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# OBSERVATORY — Economic Survivability Engine  [GAP-R2]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.post("/api/observatory/survivability/compute")
+async def survivability_compute(body: dict):
+    from core.observatory.economic_survivability_engine import economic_survivability_engine as _ese
+    result = _ese.compute(
+        rec_id=body.get("rec_id", ""),
+        rec_type=body.get("rec_type", ""),
+        gross_return=float(body.get("gross_return", 0.0)),
+        position_size=float(body.get("position_size", 1.0)),
+        holding_days=int(body.get("holding_days", 1)),
+        fee_rate=body.get("fee_rate"),
+        spread_pct=body.get("spread_pct"),
+        slippage_coeff=body.get("slippage_coeff"),
+    )
+    return result.__dict__ if hasattr(result, "__dict__") else result
+
+
+@app.get("/api/observatory/survivability/type/{rec_type}")
+async def survivability_for_type(rec_type: str):
+    from core.observatory.economic_survivability_engine import economic_survivability_engine as _ese
+    return _ese.aggregate_for_type(rec_type)
+
+
+@app.get("/api/observatory/survivability/all")
+async def survivability_all():
+    from core.observatory.economic_survivability_engine import economic_survivability_engine as _ese
+    return {"types": _ese.all_types_summary()}
+
+
+@app.get("/api/observatory/survivability/viable")
+async def survivability_viable():
+    from core.observatory.economic_survivability_engine import economic_survivability_engine as _ese
+    return {"viable_types": _ese.viable_rec_types()}
+
+
+@app.get("/api/observatory/survivability/cost-breakdown")
+async def survivability_cost_breakdown():
+    from core.observatory.economic_survivability_engine import economic_survivability_engine as _ese
+    return _ese.cost_breakdown_analysis()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PTP — Warehouse Integrity Engine  [GAP-R3]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/warehouse/integrity/report")
+async def warehouse_integrity_report():
+    from core.trust.warehouse_integrity import warehouse_integrity as _wi
+    return _wi.integrity_report()
+
+
+@app.get("/api/trust/warehouse/integrity/verify")
+async def warehouse_integrity_verify():
+    from core.trust.warehouse_integrity import warehouse_integrity as _wi
+    return _wi.verify_chain()
+
+
+@app.post("/api/trust/warehouse/integrity/seal")
+async def warehouse_integrity_seal():
+    from core.trust.warehouse_integrity import warehouse_integrity as _wi
+    cp = _wi.seal_checkpoint()
+    return cp.__dict__ if hasattr(cp, "__dict__") else cp
+
+
+@app.get("/api/trust/warehouse/integrity/checkpoints")
+async def warehouse_integrity_checkpoints():
+    from core.trust.warehouse_integrity import warehouse_integrity as _wi
+    report = _wi.integrity_report()
+    return {"checkpoints": report.get("checkpoints", [])}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG — Shadow Mode  [GAP-R4/C]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/shadow/summary")
+async def aeg_shadow_summary():
+    from core.nexus.aeg_pipeline.aeg_shadow_mode import aeg_shadow_mode as _asm
+    return _asm.summary()
+
+
+@app.post("/api/nexus/aeg/shadow/start")
+async def aeg_shadow_start(body: dict):
+    from core.nexus.aeg_pipeline.aeg_shadow_mode import aeg_shadow_mode as _asm
+    session = _asm.start_shadow(
+        rec_type=body.get("rec_type", ""),
+        initiated_by=body.get("initiated_by", "SYSTEM"),
+    )
+    return session.__dict__ if hasattr(session, "__dict__") else session
+
+
+@app.post("/api/nexus/aeg/shadow/record")
+async def aeg_shadow_record(body: dict):
+    from core.nexus.aeg_pipeline.aeg_shadow_mode import aeg_shadow_mode as _asm
+    _asm.record_shadow_rec(
+        session_id=body.get("session_id", ""),
+        rec_id=body.get("rec_id", ""),
+        shadow_signal=body.get("shadow_signal", ""),
+        human_signal=body.get("human_signal", ""),
+        outcome=body.get("outcome"),
+    )
+    return {"recorded": True}
+
+
+@app.post("/api/nexus/aeg/shadow/resolve")
+async def aeg_shadow_resolve(body: dict):
+    from core.nexus.aeg_pipeline.aeg_shadow_mode import aeg_shadow_mode as _asm
+    _asm.resolve_shadow(
+        session_id=body.get("session_id", ""),
+        rec_id=body.get("rec_id", ""),
+        correct=bool(body.get("correct", False)),
+    )
+    return {"resolved": True}
+
+
+@app.get("/api/nexus/aeg/shadow/comparison/{session_id}")
+async def aeg_shadow_comparison(session_id: str):
+    from core.nexus.aeg_pipeline.aeg_shadow_mode import aeg_shadow_mode as _asm
+    return _asm.performance_comparison(session_id)
+
+
+@app.post("/api/nexus/aeg/shadow/evaluate/{session_id}")
+async def aeg_shadow_evaluate(session_id: str):
+    from core.nexus.aeg_pipeline.aeg_shadow_mode import aeg_shadow_mode as _asm
+    return _asm.evaluate_for_graduation(session_id)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG — Longitudinal Tracker  [GAP-R5]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/longitudinal/{rec_type}")
+async def aeg_longitudinal_type(rec_type: str):
+    from core.nexus.aeg_pipeline.aeg_longitudinal_tracker import aeg_longitudinal_tracker as _alt
+    return _alt.all_windows_for_type(rec_type)
+
+
+@app.get("/api/nexus/aeg/longitudinal/{rec_type}/decay")
+async def aeg_longitudinal_decay(rec_type: str):
+    from core.nexus.aeg_pipeline.aeg_longitudinal_tracker import aeg_longitudinal_tracker as _alt
+    return {"rec_type": rec_type, "decay_curve": _alt.decay_curve(rec_type)}
+
+
+@app.get("/api/nexus/aeg/longitudinal/{rec_type}/survival")
+async def aeg_longitudinal_survival(rec_type: str):
+    from core.nexus.aeg_pipeline.aeg_longitudinal_tracker import aeg_longitudinal_tracker as _alt
+    return _alt.survival_analysis(rec_type)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CORTEX — Governance Consistency Audit  [GAP-R6/I]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/cortex/governance/consistency-audit/latest")
+async def governance_audit_latest():
+    from core.cortex.governance_consistency_audit import governance_consistency_audit as _gca
+    return _gca.latest_report()
+
+
+@app.get("/api/cortex/governance/consistency-audit/trend")
+async def governance_audit_trend():
+    from core.cortex.governance_consistency_audit import governance_consistency_audit as _gca
+    return {"trend": _gca.trend()}
+
+
+@app.get("/api/cortex/governance/consistency-audit/all")
+async def governance_audit_all():
+    from core.cortex.governance_consistency_audit import governance_consistency_audit as _gca
+    return {"reports": _gca.all_reports()}
+
+
+@app.post("/api/cortex/governance/consistency-audit/generate")
+async def governance_audit_generate(body: dict):
+    from core.cortex.governance_consistency_audit import governance_consistency_audit as _gca
+    report = _gca.generate_report(
+        period_label=body.get("period_label", "MANUAL"),
+        lookback_days=int(body.get("lookback_days", 30)),
+    )
+    return report.__dict__ if hasattr(report, "__dict__") else report
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CORTEX — Amendment Impact Tracker  [GAP-R7]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/cortex/constitution/amendment-impact/all")
+async def amendment_impact_all():
+    from core.cortex.amendment_impact_tracker import amendment_impact_tracker as _ait
+    return {"impacts": _ait.all_impacts()}
+
+
+@app.get("/api/cortex/constitution/amendment-impact/{amendment_id}")
+async def amendment_impact_get(amendment_id: str):
+    from core.cortex.amendment_impact_tracker import amendment_impact_tracker as _ait
+    return _ait.get_impact(amendment_id)
+
+
+@app.post("/api/cortex/constitution/amendment-impact/register")
+async def amendment_impact_register(body: dict):
+    from core.cortex.amendment_impact_tracker import amendment_impact_tracker as _ait
+    record = _ait.register_amendment(
+        amendment_id=body.get("amendment_id", ""),
+        title=body.get("title", ""),
+        article_affected=body.get("article_affected", ""),
+        proposed_by=body.get("proposed_by", "SYSTEM"),
+    )
+    return record.__dict__ if hasattr(record, "__dict__") else record
+
+
+@app.post("/api/cortex/constitution/amendment-impact/evaluate/{amendment_id}")
+async def amendment_impact_evaluate(amendment_id: str):
+    from core.cortex.amendment_impact_tracker import amendment_impact_tracker as _ait
+    return _ait.evaluate_impact(amendment_id)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Cross-Layer Intelligence  [GAP-R11/F]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/cross-layer/history")
+async def cross_layer_history():
+    from core.nexus.cross_layer_intelligence import cross_layer_intelligence as _cli
+    return {"cascades": _cli.recent_cascades()}
+
+
+@app.get("/api/nexus/cross-layer/summary")
+async def cross_layer_summary():
+    from core.nexus.cross_layer_intelligence import cross_layer_intelligence as _cli
+    return _cli.summary()
+
+
+@app.post("/api/nexus/cross-layer/trigger/disease")
+async def cross_layer_disease(body: dict):
+    from core.nexus.cross_layer_intelligence import cross_layer_intelligence as _cli
+    result = _cli.trigger_disease_detected(
+        disease_id=body.get("disease_id", ""),
+        rec_type=body.get("rec_type", ""),
+        severity=body.get("severity", "MEDIUM"),
+    )
+    return result.__dict__ if hasattr(result, "__dict__") else result
+
+
+@app.post("/api/nexus/cross-layer/trigger/trust-revoked")
+async def cross_layer_trust_revoked(body: dict):
+    from core.nexus.cross_layer_intelligence import cross_layer_intelligence as _cli
+    result = _cli.trigger_trust_revoked(
+        pillar=body.get("pillar", ""),
+        reason=body.get("reason", ""),
+    )
+    return result.__dict__ if hasattr(result, "__dict__") else result
+
+
+@app.post("/api/nexus/cross-layer/trigger/aeg-promotion")
+async def cross_layer_aeg_promotion(body: dict):
+    from core.nexus.cross_layer_intelligence import cross_layer_intelligence as _cli
+    result = _cli.trigger_aeg_promotion(
+        rec_type=body.get("rec_type", ""),
+        approved_by=body.get("approved_by", "SYSTEM"),
+    )
+    return result.__dict__ if hasattr(result, "__dict__") else result
+
+
+@app.post("/api/nexus/cross-layer/trigger/evidence-block")
+async def cross_layer_evidence_block(body: dict):
+    from core.nexus.cross_layer_intelligence import cross_layer_intelligence as _cli
+    result = _cli.trigger_evidence_block(
+        action_id=body.get("action_id", ""),
+        blocked_action=body.get("blocked_action", ""),
+        reason=body.get("reason", ""),
+    )
+    return result.__dict__ if hasattr(result, "__dict__") else result
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Strategic Planner  [GAP-R8/G]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/strategic-planner/roadmap")
+async def strategic_planner_roadmap():
+    from core.pcao.strategic_planner import strategic_planner as _sp
+    roadmap = _sp.build_roadmap()
+    return {
+        "roadmap_id": roadmap.roadmap_id,
+        "top_recommendation": roadmap.top_recommendation,
+        "rationale": roadmap.rationale,
+        "item_count": len(roadmap.items),
+        "items": [
+            {"seq": i.sequence_position, "title": i.title, "score": round(i.score, 2),
+             "subsystem": i.subsystem, "priority": i.priority, "readiness": round(i.readiness_score, 2)}
+            for i in roadmap.items
+        ],
+        "generated_at": roadmap.generated_at,
+    }
+
+
+@app.get("/api/pcao/strategic-planner/sequence")
+async def strategic_planner_sequence():
+    from core.pcao.strategic_planner import strategic_planner as _sp
+    return _sp.sequence_programs()
+
+
+@app.get("/api/pcao/strategic-planner/optimize")
+async def strategic_planner_optimize():
+    from core.pcao.strategic_planner import strategic_planner as _sp
+    return {"optimized": _sp.optimize_priorities()}
+
+
+@app.get("/api/pcao/strategic-planner/latest")
+async def strategic_planner_latest():
+    from core.pcao.strategic_planner import strategic_planner as _sp
+    return _sp.latest_roadmap() or {"note": "No roadmap generated yet"}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Risk Office  [GAP-R9]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/risk-office/dashboard")
+async def risk_office_dashboard():
+    from core.pcao.risk_office import risk_office as _ro
+    return _ro.risk_dashboard()
+
+
+@app.get("/api/pcao/risk-office/open")
+async def risk_office_open(severity: str = None):
+    from core.pcao.risk_office import risk_office as _ro
+    return {"open_risks": _ro.open_risks(severity=severity)}
+
+
+@app.post("/api/pcao/risk-office/register")
+async def risk_office_register(body: dict):
+    from core.pcao.risk_office import risk_office as _ro
+    r = _ro.register_risk(
+        title=body.get("title", ""),
+        description=body.get("description", ""),
+        severity=body.get("severity", "MEDIUM"),
+        source_layer=body.get("source_layer", "MANUAL"),
+        owner=body.get("owner", "UNASSIGNED"),
+        mitigation=body.get("mitigation", ""),
+        tags=body.get("tags", []),
+    )
+    return {"risk_id": r.risk_id, "title": r.title, "severity": r.severity}
+
+
+@app.patch("/api/pcao/risk-office/{risk_id}")
+async def risk_office_update(risk_id: str, body: dict):
+    from core.pcao.risk_office import risk_office as _ro
+    return _ro.update_risk(risk_id, **body)
+
+
+@app.post("/api/pcao/risk-office/{risk_id}/close")
+async def risk_office_close(risk_id: str, body: dict):
+    from core.pcao.risk_office import risk_office as _ro
+    return _ro.close_risk(risk_id, reason=body.get("reason", ""))
+
+
+@app.post("/api/pcao/risk-office/scan")
+async def risk_office_scan():
+    from core.pcao.risk_office import risk_office as _ro
+    new_ids = _ro.scan_and_auto_register()
+    return {"new_risks_registered": len(new_ids), "risk_ids": new_ids}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Decision Support  [GAP-R10]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/decision-support")
+async def decision_support_recommendations():
+    from core.pcao.decision_support import decision_support as _ds
+    return _ds.generate_recommendations()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Human Governance Layer  [GAP-R14]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/human-governance/summary")
+async def human_governance_summary():
+    from core.pcao.human_governance_layer import human_governance_layer as _hgl
+    return _hgl.summary()
+
+
+@app.get("/api/pcao/human-governance/recent")
+async def human_governance_recent(limit: int = 50):
+    from core.pcao.human_governance_layer import human_governance_layer as _hgl
+    return {"actions": _hgl.recent_actions(limit=limit)}
+
+
+@app.get("/api/pcao/human-governance/by-actor/{actor}")
+async def human_governance_by_actor(actor: str):
+    from core.pcao.human_governance_layer import human_governance_layer as _hgl
+    return {"actions": _hgl.by_actor(actor)}
+
+
+@app.get("/api/pcao/human-governance/by-type/{action_type}")
+async def human_governance_by_type(action_type: str):
+    from core.pcao.human_governance_layer import human_governance_layer as _hgl
+    return {"actions": _hgl.by_type(action_type)}
+
+
+@app.post("/api/pcao/human-governance/act")
+async def human_governance_act(body: dict):
+    from core.pcao.human_governance_layer import human_governance_layer as _hgl
+    action = _hgl.act(
+        action_type=body.get("action_type", ""),
+        actor=body.get("actor", "UNKNOWN"),
+        subject_id=body.get("subject_id", ""),
+        rationale=body.get("rationale", ""),
+        detail=body.get("detail"),
+    )
+    return {
+        "action_id": action.action_id,
+        "action_type": action.action_type,
+        "outcome": action.outcome,
+        "propagated": action.propagated,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Institutional Digital Twin  [GAP-R12/H]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/digital-twin/change-types")
+async def digital_twin_change_types():
+    from core.nexus.institutional_digital_twin import institutional_digital_twin as _idt
+    return {"change_types": _idt.available_change_types()}
+
+
+@app.get("/api/nexus/digital-twin/scenarios")
+async def digital_twin_scenarios(limit: int = 20):
+    from core.nexus.institutional_digital_twin import institutional_digital_twin as _idt
+    return {"scenarios": _idt.recent_scenarios(limit=limit)}
+
+
+@app.post("/api/nexus/digital-twin/simulate")
+async def digital_twin_simulate(body: dict):
+    from core.nexus.institutional_digital_twin import institutional_digital_twin as _idt
+    scenario = _idt.simulate(
+        hypothesis=body.get("hypothesis", ""),
+        change_type=body.get("change_type", ""),
+        change_params=body.get("change_params", {}),
+    )
+    return {
+        "scenario_id":        scenario.scenario_id,
+        "hypothesis":         scenario.hypothesis,
+        "change_type":        scenario.change_type,
+        "change_params":      scenario.change_params,
+        "projected_outcomes": scenario.projected_outcomes,
+        "confidence":         scenario.confidence,
+        "verdict":            scenario.verdict,
+        "warnings":           scenario.warnings,
+        "simulated_at":       scenario.simulated_at,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Evidence Supremacy Automation Validation  [GAP-R13/E]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/evidence-supremacy/summary")
+async def ese_summary():
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return _ese.summary()
+
+
+@app.get("/api/nexus/evidence-supremacy/blocked")
+async def ese_blocked():
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return {"blocked_actions": _ese.blocked_actions()}
+
+
+@app.post("/api/nexus/evidence-supremacy/check/trust-promotion")
+async def ese_check_trust_promotion(body: dict):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return _ese.check_trust_promotion(
+        pillar=body.get("pillar", ""),
+        target_rung=body.get("target_rung", ""),
+        evidence_count=int(body.get("evidence_count", 0)),
+        accuracy=float(body.get("accuracy", 0.0)),
+    )
+
+
+@app.post("/api/nexus/evidence-supremacy/check/aeg-promotion")
+async def ese_check_aeg_promotion(body: dict):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return _ese.check_aeg_promotion(
+        rec_type=body.get("rec_type", ""),
+        sandbox_accuracy=float(body.get("sandbox_accuracy", 0.0)),
+        sandbox_samples=int(body.get("sandbox_samples", 0)),
+        trust_score=float(body.get("trust_score", 0.0)),
+    )
+
+
+@app.post("/api/nexus/evidence-supremacy/override/{action_id}")
+async def ese_override(action_id: str, body: dict):
+    from core.nexus.evidence_supremacy_engine import evidence_supremacy_engine as _ese
+    return _ese.override_verdict(action_id, overridden_by=body.get("overridden_by", "UNKNOWN"))
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
