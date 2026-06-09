@@ -3241,6 +3241,33 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         f"interval={OBS_TICK_INTERVAL_SECS}s"
     )
 
+    # ── v1.84.0 GAP-01/02: Evidence Orchestration + Certification loop ───────
+    async def _evidence_orchestration_loop():
+        """Hourly tick — executes due evidence/certification schedules (advisory)."""
+        while True:
+            await asyncio.sleep(3600)
+            try:
+                from core.evidence_orchestration.evidence_orchestrator import evidence_orchestrator
+                result = await asyncio.to_thread(evidence_orchestrator.run_due)
+                if result.get("runs"):
+                    logger.info(
+                        f"[EVD-ORCH] {len(result['runs'])} scheduled evidence task(s) executed"
+                    )
+            except Exception as exc:
+                logger.warning(f"[EVD-ORCH] Evidence orchestration loop error: {exc}")
+            try:
+                from core.certification_pipeline.certification_scheduler import certification_scheduler
+                ran = await asyncio.to_thread(certification_scheduler.run_due)
+                if ran.get("runs"):
+                    logger.info(
+                        f"[CERT-PIPE] {len(ran['runs'])} certification task(s) executed"
+                    )
+            except Exception as exc:
+                logger.warning(f"[CERT-PIPE] Certification scheduler loop error: {exc}")
+
+    tasks.append(asyncio.create_task(_evidence_orchestration_loop()))
+    logger.info("[v1.84.0] Evidence orchestration loop started | interval=3600s")
+
     # ── FTD-031: Performance Optimization Layer ───────────────────────────────
     if cfg.PERF_ENABLED:
         await task_queue.start()
@@ -20725,6 +20752,193 @@ def rv2_compliance():
 def rv2_trends():
     from core.readiness_v2.readiness_trend_tracker import readiness_trend_tracker
     return {"latest_scores": readiness_trend_tracker.latest_scores()}
+
+
+# ── v1.84.0 GAP-01: Evidence Orchestration (/api/eo) ─────────────────────────
+
+@app.get("/api/eo/status")
+def eo_status():
+    from core.evidence_orchestration.evidence_orchestrator import evidence_orchestrator
+    return evidence_orchestrator.orchestration_report()
+
+@app.get("/api/eo/one-liner")
+def eo_one_liner():
+    from core.evidence_orchestration.evidence_orchestrator import evidence_orchestrator
+    return {"one_liner": evidence_orchestrator.one_liner()}
+
+@app.post("/api/eo/run")
+def eo_run(force: bool = False):
+    from core.evidence_orchestration.evidence_orchestrator import evidence_orchestrator
+    return evidence_orchestrator.run_due(force=force)
+
+@app.get("/api/eo/schedules")
+def eo_schedules():
+    from core.evidence_orchestration.evidence_scheduler import evidence_scheduler
+    return evidence_scheduler.schedule_status()
+
+@app.get("/api/eo/campaigns")
+def eo_campaigns():
+    from core.evidence_orchestration.evidence_campaign_manager import evidence_campaign_manager
+    return evidence_campaign_manager.campaign_summary()
+
+@app.post("/api/eo/campaigns")
+def eo_open_campaign(body: dict):
+    from core.evidence_orchestration.evidence_campaign_manager import evidence_campaign_manager
+    campaign = evidence_campaign_manager.open_campaign(
+        body.get("name", "UNNAMED_CAMPAIGN"),
+        body.get("evidence_type", "VALIDATION"),
+        body.get("target_count", 100),
+    )
+    return vars(campaign)
+
+@app.get("/api/eo/retention")
+def eo_retention():
+    from core.evidence_orchestration.evidence_retention_controller import evidence_retention_controller
+    return evidence_retention_controller.retention_report()
+
+@app.post("/api/eo/retention/apply")
+def eo_retention_apply():
+    from core.evidence_orchestration.evidence_retention_controller import evidence_retention_controller
+    return evidence_retention_controller.apply_retention()
+
+
+# ── v1.84.0 GAP-02: Certification Pipeline (/api/cp) ─────────────────────────
+
+@app.get("/api/cp/status")
+def cp_status():
+    from core.certification_pipeline.certification_engine import certification_engine
+    return certification_engine.pipeline_report()
+
+@app.get("/api/cp/one-liner")
+def cp_one_liner():
+    from core.certification_pipeline.certification_engine import certification_engine
+    return {"one_liner": certification_engine.one_liner()}
+
+@app.post("/api/cp/run")
+def cp_run(body: dict = None):
+    from core.certification_pipeline.certification_engine import certification_engine
+    period = (body or {}).get("period", "DAILY")
+    return certification_engine.run_certification(period)
+
+@app.get("/api/cp/readiness")
+def cp_readiness():
+    from core.certification_pipeline.certification_engine import certification_engine
+    return certification_engine.daily_readiness_score()
+
+@app.get("/api/cp/gates")
+def cp_gates():
+    from core.certification_pipeline.readiness_gate_manager import readiness_gate_manager
+    return readiness_gate_manager.gate_summary()
+
+@app.get("/api/cp/archive")
+def cp_archive():
+    from core.certification_pipeline.certification_archive import certification_archive
+    return certification_archive.archive_summary()
+
+
+# ── v1.84.0 GAP-03: Anomaly Response (/api/ar) ───────────────────────────────
+
+@app.get("/api/ar/status")
+def ar_status():
+    from core.anomaly_response.response_engine import response_engine
+    return response_engine.response_report()
+
+@app.get("/api/ar/one-liner")
+def ar_one_liner():
+    from core.anomaly_response.response_engine import response_engine
+    return {"one_liner": response_engine.one_liner()}
+
+@app.post("/api/ar/handle")
+def ar_handle(body: dict):
+    from core.anomaly_response.response_engine import response_engine
+    return response_engine.handle_anomaly(
+        body.get("anomaly_type", "UNKNOWN"),
+        body.get("severity", "MEDIUM"),
+        body.get("source", "api"),
+        body.get("detail", ""),
+    )
+
+@app.post("/api/ar/resolve")
+def ar_resolve(body: dict):
+    from core.anomaly_response.response_engine import response_engine
+    return response_engine.resolve(body.get("response_id", ""), body.get("resolution", ""))
+
+@app.get("/api/ar/escalations")
+def ar_escalations():
+    from core.anomaly_response.escalation_manager import escalation_manager
+    return escalation_manager.escalation_summary()
+
+@app.get("/api/ar/containments")
+def ar_containments():
+    from core.anomaly_response.containment_manager import containment_manager
+    return containment_manager.containment_summary()
+
+@app.get("/api/ar/recommendations")
+def ar_recommendations():
+    from core.anomaly_response.recovery_recommender import recovery_recommender
+    return recovery_recommender.recommendation_summary()
+
+
+# ── v1.84.0 GAP-04: Proof Maturity Index (/api/pmx) ──────────────────────────
+
+@app.get("/api/pmx/status")
+def pmx_status():
+    from core.proof_maturity.proof_maturity_engine import proof_maturity_engine
+    return proof_maturity_engine.proof_maturity_report()
+
+@app.get("/api/pmx/one-liner")
+def pmx_one_liner():
+    from core.proof_maturity.proof_maturity_engine import proof_maturity_engine
+    return {"one_liner": proof_maturity_engine.one_liner()}
+
+@app.get("/api/pmx/dimensions")
+def pmx_dimensions():
+    from core.proof_maturity.evidence_scoring_engine import evidence_scoring_engine
+    return evidence_scoring_engine.dimension_scores()
+
+@app.get("/api/pmx/weights")
+def pmx_weights():
+    from core.proof_maturity.confidence_weighting import confidence_weighting
+    return confidence_weighting.weights()
+
+@app.get("/api/pmx/dashboard")
+def pmx_dashboard():
+    from core.proof_maturity.maturity_dashboard import maturity_dashboard
+    return maturity_dashboard.dashboard()
+
+
+# ── v1.84.0 GAP-05: Self-Healing Playbooks (/api/shp) ────────────────────────
+
+@app.get("/api/shp/status")
+def shp_status():
+    from core.self_healing_playbooks.recovery_playbook_manager import recovery_playbook_manager
+    return recovery_playbook_manager.recovery_report()
+
+@app.get("/api/shp/one-liner")
+def shp_one_liner():
+    from core.self_healing_playbooks.recovery_playbook_manager import recovery_playbook_manager
+    return {"one_liner": recovery_playbook_manager.one_liner()}
+
+@app.get("/api/shp/playbooks")
+def shp_playbooks():
+    from core.self_healing_playbooks.playbook_registry import playbook_registry
+    return playbook_registry.all_playbooks()
+
+@app.post("/api/shp/handle")
+def shp_handle(body: dict):
+    from core.self_healing_playbooks.recovery_playbook_manager import recovery_playbook_manager
+    return recovery_playbook_manager.handle_failure(
+        body.get("failure_type", "UNKNOWN"), body.get("context", ""))
+
+@app.get("/api/shp/executions")
+def shp_executions():
+    from core.self_healing_playbooks.playbook_executor import playbook_executor
+    return playbook_executor.execution_summary()
+
+@app.get("/api/shp/verifications")
+def shp_verifications():
+    from core.self_healing_playbooks.verification_engine import verification_engine
+    return verification_engine.verification_summary()
 
 
 if __name__ == "__main__":

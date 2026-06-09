@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.83.0"
+APP_VERSION = "1.84.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -142,6 +142,13 @@ SIGNAL_CERTIFICATION_VERSION = "1.0.0"    # v1.0: Signal Certification Layer
 DRIFT_DETECTION_VERSION = "1.0.0"         # v1.0: Drift Detection Layer
 POSTMORTEM_VERSION = "1.0.0"              # v1.0: Postmortem System
 READINESS_V2_VERSION = "1.0.0"            # v1.0: Continuous Readiness Engine v2
+
+# v1.84.0 — POST-v1.83.0 Remaining Developer Gaps (evidence automation)
+EVIDENCE_ORCHESTRATION_VERSION = "1.0.0"   # v1.0: Evidence Orchestration Engine
+CERTIFICATION_PIPELINE_VERSION = "1.0.0"   # v1.0: Automated Certification Pipeline
+ANOMALY_RESPONSE_VERSION = "1.0.0"         # v1.0: Automated Anomaly Response System
+PROOF_MATURITY_VERSION = "1.0.0"           # v1.0: Proof Maturity Index
+SELF_HEALING_PLAYBOOKS_VERSION = "1.0.0"   # v1.0: Self-Healing Playbook Framework
 
 # PHOENIX Institutional Stack — ordered maturity progression
 INSTITUTIONAL_STACK = [
