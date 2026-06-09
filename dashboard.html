@@ -55,8 +55,23 @@ body {
 .topbar > div:first-child {
   min-width: 0;
   flex-shrink: 1;
-  overflow: hidden;
+  overflow: visible;
 }
+.tab-nav-wrapper {
+  position: sticky; top: 57px; z-index: 90;
+  display: flex; align-items: stretch;
+  background: #fff; border-bottom: 2px solid var(--border);
+}
+.tab-nav-scroll-btn {
+  flex-shrink: 0; width: 28px; border: none; background: #fff;
+  cursor: pointer; color: var(--muted); font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: color .15s, background .15s;
+  z-index: 1;
+}
+.tab-nav-scroll-btn:hover { color: var(--text); background: #f7f7f7; }
+.tab-nav-scroll-btn.hidden { visibility: hidden; pointer-events: none; }
 .topbar > div:last-child {
   flex-shrink: 0;
   display: flex;
@@ -216,11 +231,12 @@ body {
 
 /* ── Tab Navigation ── */
 .tab-nav {
-  display: flex; gap: 0; border-bottom: 2px solid var(--border);
-  background: #fff; padding: 0 24px; position: sticky; top: 57px; z-index: 90;
+  display: flex; gap: 0;
+  background: #fff; padding: 0 8px;
   overflow-x: auto; overflow-y: visible;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  flex: 1; min-width: 0;
 }
 .tab-nav::-webkit-scrollbar { display: none; }
 .tab-btn {
@@ -533,7 +549,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 
 <!-- ══ TOP BAR ══════════════════════════════════════════════════════════════ -->
 <div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;">
+  <div style="display:flex;align-items:center;gap:10px;min-width:0;overflow:visible;">
     <div style="width:34px;height:34px;border-radius:10px;background:#B2F5EA;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
@@ -590,26 +606,30 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 </div>
 
 <!-- ══ TAB NAVIGATION ════════════════════════════════════════════════════════ -->
-<nav class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('etcc')"     id="tab-btn-etcc">💹 Economic Truth</button>
-  <button class="tab-btn"        onclick="switchTab('overview')" id="tab-btn-overview">⚔ Battle Overview</button>
-  <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">🧠 Strategic Truth</button>
-  <button class="tab-btn"        onclick="switchTab('combat')"   id="tab-btn-combat">🎮 Combat Controls</button>
-  <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
-  <button class="tab-btn"        onclick="switchTab('perf')"     id="tab-btn-perf">📊 Performance</button>
-  <button class="tab-btn"        onclick="switchTab('lio')"      id="tab-btn-lio">🧬 LIO</button>
-  <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
-  <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
-  <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
-  <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
-  <button class="tab-btn"        onclick="switchTab('truth')"        id="tab-btn-truth">🔬 Truth Engine</button>
-  <button class="tab-btn"        onclick="switchTab('nexus')"        id="tab-btn-nexus">🏛 NEXUS</button>
-  <button class="tab-btn"        onclick="switchTab('obsx')"         id="tab-btn-obsx">🔭 OBSERVATORY-X</button>
-  <button class="tab-btn"        onclick="switchTab('cortex')"       id="tab-btn-cortex">⚖ CORTEX</button>
-  <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional-stack">🏗 Inst. Stack</button>
-  <button class="tab-btn"        onclick="switchTab('trust-accuracy')" id="tab-btn-trust-accuracy">🎯 Trust Accuracy</button>
-  <button class="tab-btn"        onclick="switchTab('pcao-board')"     id="tab-btn-pcao-board">🗂 PCAO Board</button>
-</nav>
+<div class="tab-nav-wrapper">
+  <button class="tab-nav-scroll-btn hidden" id="tab-nav-left" onclick="scrollTabNav(-1)" title="Scroll left">&#9664;</button>
+  <nav class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('etcc')"     id="tab-btn-etcc">💹 Economic Truth</button>
+    <button class="tab-btn"        onclick="switchTab('overview')" id="tab-btn-overview">⚔ Battle Overview</button>
+    <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">🧠 Strategic Truth</button>
+    <button class="tab-btn"        onclick="switchTab('combat')"   id="tab-btn-combat">🎮 Combat Controls</button>
+    <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
+    <button class="tab-btn"        onclick="switchTab('perf')"     id="tab-btn-perf">📊 Performance</button>
+    <button class="tab-btn"        onclick="switchTab('lio')"      id="tab-btn-lio">🧬 LIO</button>
+    <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
+    <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
+    <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
+    <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
+    <button class="tab-btn"        onclick="switchTab('truth')"        id="tab-btn-truth">🔬 Truth Engine</button>
+    <button class="tab-btn"        onclick="switchTab('nexus')"        id="tab-btn-nexus">🏛 NEXUS</button>
+    <button class="tab-btn"        onclick="switchTab('obsx')"         id="tab-btn-obsx">🔭 OBSERVATORY-X</button>
+    <button class="tab-btn"        onclick="switchTab('cortex')"       id="tab-btn-cortex">⚖ CORTEX</button>
+    <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional-stack">🏗 Inst. Stack</button>
+    <button class="tab-btn"        onclick="switchTab('trust-accuracy')" id="tab-btn-trust-accuracy">🎯 Trust Accuracy</button>
+    <button class="tab-btn"        onclick="switchTab('pcao-board')"     id="tab-btn-pcao-board">🗂 PCAO Board</button>
+  </nav>
+  <button class="tab-nav-scroll-btn" id="tab-nav-right" onclick="scrollTabNav(1)" title="Scroll right">&#9654;</button>
+</div>
 
 <!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
 <div id="tab-etcc" class="tab-panel active">
@@ -4998,6 +5018,26 @@ function switchTab(name) {
   if (name === 'institutional-stack') loadInstitutionalStackTab();
   if (name === 'institutional')       loadInstitutionalStackTab(); // alias
 }
+
+// Tab nav scroll arrows
+function scrollTabNav(dir) {
+  const nav = document.getElementById('tab-nav');
+  if (nav) nav.scrollBy({ left: dir * 200, behavior: 'smooth' });
+}
+(function initTabNavArrows() {
+  const nav = document.getElementById('tab-nav');
+  if (!nav) return;
+  function updateArrows() {
+    const left  = document.getElementById('tab-nav-left');
+    const right = document.getElementById('tab-nav-right');
+    if (!left || !right) return;
+    left.classList.toggle('hidden',  nav.scrollLeft <= 0);
+    right.classList.toggle('hidden', nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 1);
+  }
+  nav.addEventListener('scroll', updateArrows);
+  window.addEventListener('resize', updateArrows);
+  setTimeout(updateArrows, 200);
+})();
 </script>
 
 <script>
