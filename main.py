@@ -17004,6 +17004,317 @@ async def ese_override(action_id: str, body: dict):
     return _ese.override_verdict(action_id, overridden_by=body.get("overridden_by", "UNKNOWN"))
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PTP — Trust Calibration Engine  [TP-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/calibration/{pillar}")
+async def trust_calibration_pillar(pillar: str):
+    from core.trust.trust_calibration_engine import trust_calibration_engine as _tce
+    return _tce.calibration_report(pillar)
+
+
+@app.get("/api/trust/calibration")
+async def trust_calibration_all():
+    from core.trust.trust_calibration_engine import trust_calibration_engine as _tce
+    return _tce.all_pillars_calibration()
+
+
+@app.get("/api/trust/calibration/{pillar}/curve")
+async def trust_calibration_curve(pillar: str):
+    from core.trust.trust_calibration_engine import trust_calibration_engine as _tce
+    return {"pillar": pillar, "curve": _tce.calibration_curve_data(pillar)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PTP — Trust Error Classifier  [TP-04]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/trust/errors/{pillar}")
+async def trust_errors_pillar(pillar: str):
+    from core.trust.trust_error_classifier import trust_error_classifier as _tec
+    return _tec.classify_pillar(pillar)
+
+
+@app.get("/api/trust/errors")
+async def trust_errors_all():
+    from core.trust.trust_error_classifier import trust_error_classifier as _tec
+    return _tec.all_pillars_audit()
+
+
+@app.get("/api/trust/errors/{pillar}/summary")
+async def trust_errors_summary(pillar: str):
+    from core.trust.trust_error_classifier import trust_error_classifier as _tec
+    return _tec.error_summary(pillar)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AEG — Validation Program  [AEG-01 … AEG-05]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/aeg/validation/report")
+async def aeg_validation_full():
+    from core.nexus.aeg_pipeline.aeg_validation_program import aeg_validation_program as _avp
+    return _avp.full_validation_report()
+
+
+@app.get("/api/nexus/aeg/validation/shadow")
+async def aeg_validation_shadow():
+    from core.nexus.aeg_pipeline.aeg_validation_program import aeg_validation_program as _avp
+    return _avp.shadow_validation_report()
+
+
+@app.get("/api/nexus/aeg/validation/promotion-accuracy")
+async def aeg_validation_promotion():
+    from core.nexus.aeg_pipeline.aeg_validation_program import aeg_validation_program as _avp
+    return _avp.promotion_accuracy_report()
+
+
+@app.get("/api/nexus/aeg/validation/rollback-accuracy")
+async def aeg_validation_rollback():
+    from core.nexus.aeg_pipeline.aeg_validation_program import aeg_validation_program as _avp
+    return _avp.rollback_accuracy_report()
+
+
+@app.get("/api/nexus/aeg/validation/sandbox-drift")
+async def aeg_validation_drift():
+    from core.nexus.aeg_pipeline.aeg_validation_program import aeg_validation_program as _avp
+    return _avp.sandbox_drift_report()
+
+
+@app.get("/api/nexus/aeg/validation/readiness")
+async def aeg_validation_readiness():
+    from core.nexus.aeg_pipeline.aeg_validation_program import aeg_validation_program as _avp
+    return _avp.autonomy_readiness_index()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Unified Causal Graph  [CLI-01]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/causal-graph/map")
+async def causal_graph_map():
+    from core.nexus.causal_graph import causal_graph as _cg
+    return _cg.global_causal_map()
+
+
+@app.get("/api/nexus/causal-graph/node/{node_id}")
+async def causal_graph_node(node_id: str):
+    from core.nexus.causal_graph import causal_graph as _cg
+    result = _cg.get_node(node_id)
+    if result is None:
+        return {"error": f"Node '{node_id}' not found"}
+    return result
+
+
+@app.get("/api/nexus/causal-graph/neighbors/{node_id}")
+async def causal_graph_neighbors(node_id: str):
+    from core.nexus.causal_graph import causal_graph as _cg
+    return {"node_id": node_id, "neighbors": _cg.neighbors(node_id)}
+
+
+@app.get("/api/nexus/causal-graph/impact/{node_id}")
+async def causal_graph_impact(node_id: str):
+    from core.nexus.causal_graph import causal_graph as _cg
+    return _cg.impact_analysis(node_id)
+
+
+@app.get("/api/nexus/causal-graph/path")
+async def causal_graph_path(source: str, target: str):
+    from core.nexus.causal_graph import causal_graph as _cg
+    path = _cg.causal_path(source, target)
+    return {"source": source, "target": target, "path": path, "path_length": len(path)}
+
+
+@app.post("/api/nexus/causal-graph/node")
+async def causal_graph_add_node(body: dict):
+    from core.nexus.causal_graph import causal_graph as _cg
+    node = _cg.add_node(
+        node_id=body.get("node_id", f"NODE-{int(__import__('time').time()*1000)}"),
+        node_type=body.get("node_type", "SYSTEM_EVENT"),
+        label=body.get("label", ""),
+        layer=body.get("layer", "NEXUS"),
+        metadata=body.get("metadata"),
+    )
+    return {"node_id": node.node_id, "label": node.label}
+
+
+@app.post("/api/nexus/causal-graph/edge")
+async def causal_graph_add_edge(body: dict):
+    from core.nexus.causal_graph import causal_graph as _cg
+    edge = _cg.add_edge(
+        source_id=body.get("source_id", ""),
+        target_id=body.get("target_id", ""),
+        edge_type=body.get("edge_type", "LED_TO"),
+        weight=float(body.get("weight", 1.0)),
+        label=body.get("label", ""),
+    )
+    if edge is None:
+        return {"error": "One or both nodes not found"}
+    return {"edge_id": edge.edge_id}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Institutional Health Index  [CLI-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/nexus/health-index")
+async def institutional_health():
+    from core.nexus.institutional_health_index import institutional_health_index as _ihi
+    return _ihi.health_report()
+
+
+@app.get("/api/nexus/health-index/critical")
+async def institutional_health_critical():
+    from core.nexus.institutional_health_index import institutional_health_index as _ihi
+    return {"critical_components": _ihi.critical_components()}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Risk Forecaster  [PCAO-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/risk-forecaster/forecast")
+async def risk_forecast(horizon_days: int = 90):
+    from core.pcao.risk_forecaster import risk_forecaster as _rf
+    return _rf.forecast(horizon_days=horizon_days)
+
+
+@app.get("/api/pcao/risk-forecaster/trend")
+async def risk_forecast_trend():
+    from core.pcao.risk_forecaster import risk_forecaster as _rf
+    return _rf.risk_trend_analysis()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Resource Optimizer  [PCAO-04]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/resource-optimizer/optimize")
+async def resource_optimize():
+    from core.pcao.resource_optimizer import resource_optimizer as _ro
+    return _ro.optimize()
+
+
+@app.post("/api/pcao/resource-optimizer/simulate")
+async def resource_simulate(body: dict):
+    from core.pcao.resource_optimizer import resource_optimizer as _ro
+    return _ro.simulate(reallocation_plan=body.get("plan", []))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Roadmap Engine  [PCAO-05]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/roadmap-engine/roadmap")
+async def roadmap_generate():
+    from core.pcao.roadmap_engine import roadmap_engine as _re
+    return _re.generate_roadmap()
+
+
+@app.get("/api/pcao/roadmap-engine/next-step")
+async def roadmap_next_step():
+    from core.pcao.roadmap_engine import roadmap_engine as _re
+    return _re.autonomous_next_step()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEXUS — Digital Twin Extended  [DT-02, DT-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.post("/api/nexus/digital-twin/simulate-recommendation")
+async def dt_simulate_rec(body: dict):
+    from core.nexus.digital_twin_extended import digital_twin_extended as _dte
+    return _dte.simulate_recommendation(
+        rec_type=body.get("rec_type", ""),
+        rec_params=body.get("rec_params", {}),
+    )
+
+
+@app.get("/api/nexus/digital-twin/rec-simulations")
+async def dt_rec_simulations(limit: int = 20):
+    from core.nexus.digital_twin_extended import digital_twin_extended as _dte
+    return {"simulations": _dte.recent_rec_simulations(limit=limit)}
+
+
+@app.post("/api/nexus/digital-twin/simulate-constitution")
+async def dt_simulate_const(body: dict):
+    from core.nexus.digital_twin_extended import digital_twin_extended as _dte
+    return _dte.simulate_constitutional_change(
+        article_id=body.get("article_id", "ARTICLE-001"),
+        change_description=body.get("change_description", ""),
+        change_direction=body.get("change_direction", "strengthen"),
+    )
+
+
+@app.get("/api/nexus/digital-twin/const-simulations")
+async def dt_const_simulations(limit: int = 20):
+    from core.nexus.digital_twin_extended import digital_twin_extended as _dte
+    return {"simulations": _dte.recent_const_simulations(limit=limit)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CORTEX — Governance Metrics  [GOV-01, GOV-02, GOV-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/cortex/governance/metrics/dashboard")
+async def governance_metrics_dashboard():
+    from core.cortex.governance_metrics import governance_metrics as _gm
+    return _gm.governance_dashboard()
+
+
+@app.get("/api/cortex/governance/metrics/constitutional")
+async def governance_constitutional_metrics():
+    from core.cortex.governance_metrics import governance_metrics as _gm
+    return _gm.constitutional_metrics()
+
+
+@app.get("/api/cortex/governance/metrics/kpi")
+async def governance_kpi():
+    from core.cortex.governance_metrics import governance_metrics as _gm
+    return _gm.governance_kpi()
+
+
+@app.get("/api/cortex/governance/metrics/amendment-outcomes")
+async def governance_amendment_outcomes():
+    from core.cortex.governance_metrics import governance_metrics as _gm
+    return _gm.amendment_outcome_registry()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PCAO — Chairman Command Center  [BRD-01, BRD-02, BRD-03]
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/pcao/chairman/command-center")
+async def chairman_command_center():
+    from core.pcao.chairman_command_center import chairman_command_center as _ccc
+    return _ccc.command_center()
+
+
+@app.get("/api/pcao/chairman/dashboard")
+async def chairman_dashboard():
+    from core.pcao.chairman_command_center import chairman_command_center as _ccc
+    return _ccc.chairman_dashboard()
+
+
+@app.get("/api/pcao/chairman/alerts")
+async def chairman_alerts():
+    from core.pcao.chairman_command_center import chairman_command_center as _ccc
+    return {"alerts": _ccc.detect_alerts()}
+
+
+@app.get("/api/pcao/chairman/alerts/active")
+async def chairman_active_alerts():
+    from core.pcao.chairman_command_center import chairman_command_center as _ccc
+    return {"alerts": _ccc.active_alerts()}
+
+
+@app.post("/api/pcao/chairman/alerts/{alert_id}/acknowledge")
+async def chairman_ack_alert(alert_id: str):
+    from core.pcao.chairman_command_center import chairman_command_center as _ccc
+    return _ccc.acknowledge_alert(alert_id)
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 # Serve dashboard.html at "/" so http://localhost:8000 opens the dashboard directly
