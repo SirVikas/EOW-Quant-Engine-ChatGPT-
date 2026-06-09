@@ -19141,6 +19141,47 @@ def hgov_rollbacks():
     from core.human_governance.rollback_authority import rollback_authority
     return rollback_authority.all_orders()
 
+# --- Disaster Recovery ---
+
+@app.post("/api/dr/backup")
+def dr_backup(body: dict):
+    from core.disaster_recovery.backup_engine import backup_engine
+    backup_id = backup_engine.create_backup(body.get("label", "manual"), body.get("backup_type", "FULL"))
+    return {"backup_id": backup_id}
+
+@app.get("/api/dr/backups")
+def dr_backups():
+    from core.disaster_recovery.backup_engine import backup_engine
+    return backup_engine.all_backups()
+
+@app.post("/api/dr/restore")
+def dr_restore(body: dict):
+    from core.disaster_recovery.restore_engine import restore_engine
+    restore_id = restore_engine.initiate_restore(body["backup_id"], body.get("restored_by", "SYSTEM"))
+    return {"restore_id": restore_id}
+
+@app.get("/api/dr/status")
+def dr_status():
+    from core.disaster_recovery.failover_manager import failover_manager
+    return failover_manager.disaster_recovery_status()
+
+# --- Maturity Scorecard ---
+
+@app.get("/api/maturity/assess")
+def maturity_assess():
+    from core.maturity_scorecard.maturity_engine import maturity_engine
+    return maturity_engine.assess()
+
+@app.get("/api/maturity/dashboard")
+def maturity_dashboard():
+    from core.maturity_scorecard.institutional_dashboard import institutional_dashboard
+    return institutional_dashboard.full_dashboard()
+
+@app.get("/api/maturity/readiness")
+def maturity_readiness():
+    from core.maturity_scorecard.institutional_dashboard import institutional_dashboard
+    return institutional_dashboard.readiness_summary()
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.76.0"
+APP_VERSION = "1.77.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -35,6 +35,9 @@ BOARD_GOVERNANCE_VERSION = "1.0.0"         # v1.0: Executive Board Governance
 REPORTING_HUB_VERSION = "1.0.0"            # v1.0: Unified Reporting Hub
 LINEAGE_VERSION = "1.0.0"                  # v1.0: Snapshot & Lineage System
 HUMAN_GOVERNANCE_VERSION = "1.0.0"         # v1.0: Human Governance Framework
+DISASTER_RECOVERY_VERSION = "1.0.0"       # v1.0: Disaster Recovery & Continuity
+MATURITY_SCORECARD_VERSION = "1.0.0"      # v1.0: Institutional Maturity Scorecard
+VERIFICATION_SUITE_VERSION = "1.0.0"      # v1.0: Institutional Verification Suite
 
 NEXUS_NAME    = "PHOENIX NEXUS"
 NEXUS_VERSION = "3.2.0"
