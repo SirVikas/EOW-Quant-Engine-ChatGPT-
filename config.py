@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.74.0"
+APP_VERSION = "1.75.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -17,6 +17,15 @@ CTAO_VERSION = "1.0.0"   # v1.0: CT Scan Autonomous Orchestrator
 KG_VERSION = "1.0.0"            # v1.0: Knowledge Graph Engine
 STRATEGIC_MEMORY_VERSION = "1.0.0"   # v1.0: Strategic Memory Engine
 ECON_INTELLIGENCE_VERSION = "1.0.0"  # v1.0: Economic Intelligence Engine
+
+DIGITAL_TWIN_V2_VERSION = "1.0.0"     # v1.0: Digital Twin Engine v2
+EVOLUTION_GOV_VERSION = "1.0.0"       # v1.0: Evolution Governance System
+PCAO_EXECUTIVE_VERSION = "1.0.0"      # v1.0: PCAO Executive Layer
+META_GOV_VERSION = "1.0.0"            # v1.0: Meta Governance Layer
+CONSTITUTION_VERSION = "1.0.0"        # v1.0: Constitution Engine
+EPISTEMIC_VERSION = "1.0.0"           # v1.0: Epistemic Intelligence Layer
+TRUST_FABRIC_VERSION = "1.0.0"        # v1.0: Unified Trust Fabric
+AUTO_IMPROVEMENT_VERSION = "1.0.0"    # v1.0: Autonomous Improvement Loop
 
 NEXUS_NAME    = "PHOENIX NEXUS"
 NEXUS_VERSION = "3.2.0"

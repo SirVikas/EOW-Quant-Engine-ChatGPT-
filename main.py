@@ -18416,6 +18416,358 @@ async def pccp_health_forecast_layer(layer_id: str):
     return health_intelligence_engine.predict_health(layer_id)
 
 
+# ── PROGRAM 1: Digital Twin (/api/dt) ────────────────────────────────────────
+
+@app.get("/api/dt/status")
+def dt_status():
+    from core.digital_twin.digital_twin_engine import digital_twin_engine
+    return digital_twin_engine.twin_status()
+
+@app.post("/api/dt/pre-deployment-check")
+def dt_pre_deployment_check(body: dict):
+    from core.digital_twin.digital_twin_engine import digital_twin_engine
+    return digital_twin_engine.pre_deployment_check(
+        body.get("rec_id", ""), body.get("rec_description", ""), body.get("parameters")
+    )
+
+@app.post("/api/dt/simulate")
+def dt_simulate(body: dict):
+    from core.digital_twin.scenario_simulator import scenario_simulator
+    return scenario_simulator.simulate(body.get("name", ""), body.get("parameters", {}))
+
+@app.get("/api/dt/scenarios")
+def dt_scenarios():
+    from core.digital_twin.scenario_simulator import scenario_simulator
+    return scenario_simulator.all_scenarios()
+
+@app.get("/api/dt/sandbox/stats")
+def dt_sandbox_stats():
+    from core.digital_twin.recommendation_sandbox import recommendation_sandbox
+    return recommendation_sandbox.sandbox_stats()
+
+@app.post("/api/dt/sandbox/test")
+def dt_sandbox_test(body: dict):
+    from core.digital_twin.recommendation_sandbox import recommendation_sandbox
+    return recommendation_sandbox.test_recommendation(
+        body.get("rec_id", ""), body.get("rec_description", ""), body.get("parameters")
+    )
+
+@app.get("/api/dt/validations")
+def dt_validations():
+    from core.digital_twin.deployment_validator import deployment_validator
+    return deployment_validator.all_validations()
+
+@app.get("/api/dt/validations/stats")
+def dt_validations_stats():
+    from core.digital_twin.deployment_validator import deployment_validator
+    return deployment_validator.validation_stats()
+
+
+# ── PROGRAM 2: Evolution Governance (/api/evolution) ─────────────────────────
+
+@app.post("/api/evolution/propose")
+def evolution_propose(body: dict):
+    from core.evolution_governance.evolution_proposal_engine import evolution_proposal_engine
+    return evolution_proposal_engine.create_proposal(
+        title=body.get("title", ""),
+        description=body.get("description", ""),
+        proposed_by=body.get("proposed_by", "SYSTEM"),
+        evo_type=body.get("evo_type", "POLICY"),
+        rationale=body.get("rationale", ""),
+        risk_level=body.get("risk_level", "MEDIUM"),
+    )
+
+@app.get("/api/evolution/all")
+def evolution_all():
+    from core.evolution_governance.evolution_registry import evolution_registry
+    return evolution_registry.all_evolutions()
+
+@app.get("/api/evolution/pending")
+def evolution_pending():
+    from core.evolution_governance.evolution_proposal_engine import evolution_proposal_engine
+    return evolution_proposal_engine.pending_proposals()
+
+@app.post("/api/evolution/review")
+def evolution_review(body: dict):
+    from core.evolution_governance.evolution_review_engine import evolution_review_engine
+    return evolution_review_engine.submit_review(
+        evo_id=body.get("evo_id", ""),
+        reviewer=body.get("reviewer", "SYSTEM"),
+        review_type=body.get("review_type", "RISK"),
+        findings=body.get("findings", []),
+        score=body.get("score", 0.5),
+        recommendation=body.get("recommendation", "DEFER"),
+    )
+
+@app.get("/api/evolution/review/{evo_id}")
+def evolution_review_get(evo_id: str):
+    from core.evolution_governance.evolution_review_engine import evolution_review_engine
+    return evolution_review_engine.review_summary(evo_id)
+
+@app.post("/api/evolution/approve")
+def evolution_approve(body: dict):
+    from core.evolution_governance.evolution_approval_engine import evolution_approval_engine
+    return evolution_approval_engine.approve(
+        evo_id=body.get("evo_id", ""),
+        approver=body.get("approver", "SYSTEM"),
+        conditions=body.get("conditions"),
+    )
+
+@app.post("/api/evolution/reject")
+def evolution_reject(body: dict):
+    from core.evolution_governance.evolution_approval_engine import evolution_approval_engine
+    return evolution_approval_engine.reject(
+        evo_id=body.get("evo_id", ""),
+        rejector=body.get("rejector", "SYSTEM"),
+        reason=body.get("reason", ""),
+    )
+
+@app.post("/api/evolution/deploy")
+def evolution_deploy(body: dict):
+    from core.evolution_governance.evolution_approval_engine import evolution_approval_engine
+    return evolution_approval_engine.deploy(evo_id=body.get("evo_id", ""))
+
+@app.post("/api/evolution/rollback")
+def evolution_rollback(body: dict):
+    from core.evolution_governance.evolution_rollback_engine import evolution_rollback_engine
+    return evolution_rollback_engine.rollback(
+        evo_id=body.get("evo_id", ""),
+        reason=body.get("reason", ""),
+        rolled_back_by=body.get("rolled_back_by", "SYSTEM"),
+    )
+
+@app.get("/api/evolution/stats")
+def evolution_stats():
+    from core.evolution_governance.evolution_registry import evolution_registry
+    return evolution_registry.evolution_stats()
+
+
+# ── PROGRAM 3: PCAO Executive (/api/pcao/executive) ──────────────────────────
+
+@app.get("/api/pcao/executive/briefing")
+def pcao_executive_briefing():
+    from core.pcao.pcao_executive_engine import pcao_executive_engine
+    return pcao_executive_engine.executive_briefing()
+
+@app.get("/api/pcao/executive/posture")
+def pcao_executive_posture():
+    from core.pcao.pcao_executive_engine import pcao_executive_engine
+    return {"posture": pcao_executive_engine.strategic_posture()}
+
+@app.get("/api/pcao/executive/dashboard")
+def pcao_executive_dashboard():
+    from core.pcao.executive_dashboard import executive_dashboard
+    return executive_dashboard.full_dashboard()
+
+@app.get("/api/pcao/executive/priorities")
+def pcao_executive_priorities():
+    from core.pcao.priority_director import priority_director
+    return priority_director.active_priorities()
+
+@app.post("/api/pcao/executive/direct")
+def pcao_executive_direct(body: dict):
+    from core.pcao.priority_director import priority_director
+    return priority_director.direct(
+        objective=body.get("objective", ""),
+        source=body.get("source", "STRATEGIC"),
+        target_layer=body.get("target_layer", ""),
+        deadline_days=body.get("deadline_days", 30),
+        weight=body.get("weight", 0.5),
+    )
+
+@app.post("/api/pcao/executive/allocate")
+def pcao_executive_allocate(body: dict):
+    from core.pcao.resource_allocator import resource_allocator
+    return resource_allocator.allocate(
+        layer_id=body.get("layer_id", ""),
+        focus_area=body.get("focus_area", ""),
+        allocated_priority=body.get("allocated_priority", 50),
+        rationale=body.get("rationale", ""),
+    )
+
+@app.get("/api/pcao/executive/allocations")
+def pcao_executive_allocations():
+    from core.pcao.resource_allocator import resource_allocator
+    return resource_allocator.current_allocations()
+
+
+# ── PROGRAM 4: Meta Governance (/api/meta-gov) ───────────────────────────────
+
+@app.get("/api/meta-gov/audit/pccp")
+def meta_gov_audit_pccp():
+    from core.meta_governance.pccp_audit_engine import pccp_audit_engine
+    return pccp_audit_engine.full_pccp_audit()
+
+@app.get("/api/meta-gov/compliance")
+def meta_gov_compliance():
+    from core.meta_governance.compliance_engine import compliance_engine
+    return compliance_engine.compliance_report()
+
+@app.get("/api/meta-gov/governance/health")
+def meta_gov_governance_health():
+    from core.meta_governance.governance_validator import governance_validator
+    return governance_validator.governance_health()
+
+@app.get("/api/meta-gov/control-plane/pulse")
+def meta_gov_control_plane_pulse():
+    from core.meta_governance.control_plane_monitor import control_plane_monitor
+    return control_plane_monitor.monitor_pulse()
+
+@app.get("/api/meta-gov/control-plane/report")
+def meta_gov_control_plane_report():
+    from core.meta_governance.control_plane_monitor import control_plane_monitor
+    return control_plane_monitor.continuous_health_report()
+
+
+# ── PROGRAM 5: Constitution (/api/constitution) ───────────────────────────────
+
+@app.get("/api/constitution/articles")
+def constitution_articles():
+    from core.constitution.article_registry import article_registry
+    return article_registry.all_articles()
+
+@app.post("/api/constitution/check")
+def constitution_check(body: dict):
+    from core.constitution.constitution_engine import constitution_engine
+    return constitution_engine.check(
+        action_description=body.get("action_description", ""),
+        actor=body.get("actor", "SYSTEM"),
+    )
+
+@app.get("/api/constitution/violations")
+def constitution_violations():
+    from core.constitution.change_history import change_history
+    return change_history.violations()
+
+@app.get("/api/constitution/report")
+def constitution_report():
+    from core.constitution.constitution_engine import constitution_engine
+    return constitution_engine.constitution_report()
+
+@app.post("/api/constitution/amend")
+def constitution_amend(body: dict):
+    from core.constitution.article_registry import article_registry
+    return article_registry.propose_amendment(
+        article_id=body.get("article_id", ""),
+        proposed_change=body.get("proposed_change", ""),
+        justification=body.get("justification", ""),
+    )
+
+
+# ── PROGRAM 6: Epistemic Intelligence (/api/epistemic) ───────────────────────
+
+@app.get("/api/epistemic/audit")
+def epistemic_audit():
+    from core.epistemic.epistemic_engine import epistemic_engine
+    return epistemic_engine.epistemic_audit()
+
+@app.get("/api/epistemic/know")
+def epistemic_know():
+    from core.epistemic.epistemic_engine import epistemic_engine
+    return epistemic_engine.what_do_we_know()
+
+@app.get("/api/epistemic/assume")
+def epistemic_assume():
+    from core.epistemic.epistemic_engine import epistemic_engine
+    return epistemic_engine.what_do_we_assume()
+
+@app.get("/api/epistemic/unknown")
+def epistemic_unknown():
+    from core.epistemic.epistemic_engine import epistemic_engine
+    return epistemic_engine.what_dont_we_know()
+
+@app.post("/api/epistemic/evidence")
+def epistemic_evidence(body: dict):
+    from core.epistemic.evidence_tracker import evidence_tracker
+    return evidence_tracker.record_evidence(
+        domain=body.get("domain", ""),
+        claim=body.get("claim", ""),
+        quality=body.get("quality", 0.5),
+    )
+
+@app.post("/api/epistemic/uncertainty")
+def epistemic_uncertainty(body: dict):
+    from core.epistemic.uncertainty_registry import uncertainty_registry
+    uid = uncertainty_registry.register(
+        domain=body.get("domain", ""),
+        description=body.get("description", ""),
+        uncertainty_type=body.get("uncertainty_type", "KNOWN_UNKNOWN"),
+        severity=body.get("severity", "MEDIUM"),
+    )
+    return {"uncertainty_id": uid}
+
+@app.get("/api/epistemic/confidence-map")
+def epistemic_confidence_map():
+    from core.epistemic.confidence_boundary_engine import confidence_boundary_engine
+    return confidence_boundary_engine.confidence_map()
+
+
+# ── PROGRAM 7: Trust Fabric (/api/trust-fabric) ───────────────────────────────
+
+@app.get("/api/trust-fabric/report")
+def trust_fabric_report():
+    from core.trust_fabric.trust_fabric_engine import trust_fabric_engine
+    return trust_fabric_engine.unified_trust_report()
+
+@app.get("/api/trust-fabric/leaderboard")
+def trust_fabric_leaderboard():
+    from core.trust_fabric.trust_fabric_engine import trust_fabric_engine
+    return trust_fabric_engine.trust_leaderboard()
+
+@app.post("/api/trust-fabric/update")
+def trust_fabric_update(body: dict):
+    from core.trust_fabric.trust_fabric_engine import trust_fabric_engine
+    return trust_fabric_engine.update_trust(
+        subject_id=body.get("subject_id", ""),
+        subject_type=body.get("subject_type", "RECOMMENDATION"),
+        trust_score=body.get("trust_score", 0.5),
+        evidence_count=body.get("evidence_count", 0),
+    )
+
+@app.get("/api/trust-fabric/decay/status")
+def trust_fabric_decay_status():
+    from core.trust_fabric.trust_decay_engine import trust_fabric_decay_engine
+    return trust_fabric_decay_engine.all_decay_records()
+
+@app.post("/api/trust-fabric/decay/apply")
+def trust_fabric_decay_apply():
+    from core.trust_fabric.trust_decay_engine import trust_fabric_decay_engine
+    return trust_fabric_decay_engine.apply_decay()
+
+
+# ── PROGRAM 8: Autonomous Improvement (/api/improvement) ─────────────────────
+
+@app.post("/api/improvement/run-cycle")
+def improvement_run_cycle():
+    from core.autonomous_improvement.improvement_engine import improvement_engine
+    return improvement_engine.run_improvement_cycle()
+
+@app.get("/api/improvement/status")
+def improvement_status():
+    from core.autonomous_improvement.improvement_engine import improvement_engine
+    return improvement_engine.improvement_status()
+
+@app.get("/api/improvement/policies/pending")
+def improvement_policies_pending():
+    from core.autonomous_improvement.policy_update_engine import policy_update_engine
+    return policy_update_engine.pending_updates()
+
+@app.post("/api/improvement/policies/apply")
+def improvement_policies_apply(body: dict):
+    from core.autonomous_improvement.policy_update_engine import policy_update_engine
+    return policy_update_engine.apply(update_id=body.get("update_id", ""))
+
+@app.get("/api/improvement/behaviors/active")
+def improvement_behaviors_active():
+    from core.autonomous_improvement.behavior_update_engine import behavior_update_engine
+    return behavior_update_engine.active_changes()
+
+@app.get("/api/improvement/feedback/loops")
+def improvement_feedback_loops():
+    from core.autonomous_improvement.feedback_loop_engine import feedback_loop_engine
+    return feedback_loop_engine.all_cycles()
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
