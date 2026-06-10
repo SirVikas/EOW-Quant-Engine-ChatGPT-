@@ -30,6 +30,17 @@ Sections:
 import json, urllib.request, urllib.error, datetime, sys, socket
 from collections import Counter
 
+# Windows: when stdout is redirected to a file (python diagnose.py > report.txt)
+# Python falls back to the ANSI codepage (cp1252), which cannot encode the
+# emoji used in the report (🟢/✓/⚠) and crashes with UnicodeEncodeError.
+# Force UTF-8 with replacement so the report always completes.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        if (_stream.encoding or "").lower() not in ("utf-8", "utf8", "cp65001"):
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 BASE = "http://localhost:8000"
 
 # ── HTTP helpers ─────────────────────────────────────────────────────────────
