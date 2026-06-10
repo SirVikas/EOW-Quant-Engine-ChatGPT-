@@ -8,15 +8,18 @@ def _rc() -> RiskController:
 
 
 def test_dry_spell_relaxes_required_r_but_not_below_floor():
+    # TRENDING (base_r=1.20) is used because MEAN_REVERTING's base (1.05) now
+    # sits at the hard floor, where relaxation has no observable effect.
+    # rr_after_cost lands ≈1.10: blocked at 1.20, allowed once relaxed to 1.05.
     rc = _rc()
     kwargs = dict(
         side="LONG",
         entry=100.0,
-        take_profit=101.27,
+        take_profit=101.04,
         stop_loss=99.2,
         qty=25.0,
         current_volatility=0.20,
-        regime="MEAN_REVERTING",
+        regime="TRENDING",
     )
 
     ok_normal, d0 = rc.get_trade_decision(minutes_no_trade=0.0, **kwargs)

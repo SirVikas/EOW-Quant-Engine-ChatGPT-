@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.85.0"
+APP_VERSION = "1.86.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -250,7 +250,7 @@ class EngineConfig(BaseSettings):
     LIMIT_ENTRY_OFFSET_BPS: float = 3.0  # Place limit 3 bps (0.03%) better than signal price
     PRICE_CHASE_TICKS: int = 5           # After N ticks without fill, move limit to market
     BREAKEVEN_TRIGGER_R: float = 0.40     # lowered 1.0→0.40: avg winning trade = 0.09R; BE at 1.0R never armed (99.8% of wins below 1.0R). 0.40R arms BE on trades that develop past the noise floor, protecting gains via trailing stop.
-    SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
+    SPEED_EXIT_TRIGGER_R: float = 2.00    # lowered 2.50→2.00 — with TP at 2.4R (ATR_MULT_TP=6.0), a 2.5R speed-exit trigger was unreachable dead code; 2.0R makes the stall exit meaningful near TP
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
     # BE stop locks cost + 0.1R so armed-BE exits book a small real win instead of a
@@ -265,7 +265,7 @@ class EngineConfig(BaseSettings):
     RS_CVD_IMBAL_MIN: float = 0.60        # CVD imbalance floor (60% buy/sell concentration)
     RS_MIN_BB_WIDTH: float  = 0.10        # Skip BB scalp when band width < 0.10% (flat market)
     # VTP — Volatile Take-Profit (TREND_FOLLOW / SHORT_HUNT modes only)
-    VTP_EXIT_MIN_R: float   = 1.50        # VTP stall exit only fires after 1.5R profit captured
+    VTP_EXIT_MIN_R: float   = 1.00        # lowered 1.50→1.00 — exit-analysis (1831 trades): zero exits ever reached 1.5R; 1.0R stall exit banks medium winners after the partial books at 0.8R
 
     # ── Genome Engine ────────────────────────────────────────────────────────
     GENOME_CYCLE_MINUTES: int = 3          # Reduced 5→3: faster evolution cycles
@@ -306,10 +306,12 @@ class EngineConfig(BaseSettings):
     EMA_TREND: int = 34                   # qFTD-011: 100→34 — Fibonacci macro filter; min_len 102→36 candles
     ATR_PERIOD: int = 14
     ATR_MULT_SL: float = 2.5              # Widened 1.5→2.5: survives 1-min noise, fewer premature SL hits
-    # Raw RR = ATR_MULT_TP / ATR_MULT_SL = 10.0/2.5 = 4.0× — raised to fix avg_win/avg_loss imbalance.
-    # Historical realized RR was 0.83/1.84=0.45 (avg_win<<avg_loss). Wider TP target fixes this.
-    # With RR=4.0 and WIN_RATE≥30%, PF > 1.0 (positive expectancy).
-    ATR_MULT_TP: float = 10.0             # raised 7.5→10.0: RR=4.0× — wider TP lets winners run
+    # Raw RR = ATR_MULT_TP / ATR_MULT_SL = 6.0/2.5 = 2.4×.
+    # Exit-analysis evidence (1831 trades): TP at 10×ATR (4.0R) produced ZERO take-profit
+    # exits — every winner was cut by BE/trail long before 4R. A TP that never fills is
+    # not a target, it's decoration. 6×ATR (2.4R) is reachable within typical hold windows
+    # while still clearing MIN_RR_RATIO=2.0 and the lean gate.
+    ATR_MULT_TP: float = 6.0              # lowered 10.0→6.0: RR=2.4× — reachable TP beats a fantasy 4R target that filled 0 times
     BB_PERIOD: int = 20
     BB_STD: float = 2.0                   # Tightened 2.5→2.0: more frequent BB touches, better RR
 
@@ -381,12 +383,13 @@ class EngineConfig(BaseSettings):
     # Trade Manager
     # Raised 2.0→3.0 — with TP at 4.0R, booking 50% at 3.0R preserves upside while locking gains.
     # Previous 2.0R partial TP was dragging down avg win before the full TP move completed.
-    PARTIAL_TP_R: float = 1.5            # lowered 3.0→1.5 — with corrected R denominator (actual SL risk), 1.5R is reachable; 3.0R was dead code (TP_R < 3.0 for notional-capped trades)
-    # Trailing Stop — tight enough so TSL candidate > BE price, converting BE losers to TSL wins.
-    # Old value ATR_MULT_SL*0.7=1.75 placed TSL BELOW BE price so BE always fired first;
-    # 67 of 200 exits were classified BE with small net losses from fee drag.
-    # At 0.60: TSL candidate > BE when peak_r > 0.686R — captures profit from medium moves.
-    TRAIL_ATR_MULT: float = 0.60
+    PARTIAL_TP_R: float = 0.8            # lowered 1.5→0.8 — exit-analysis (1831 trades): max R ever reached was ~0.43 under the old tight trail; 1.5R partial never fired once. 0.8R is reachable with the wider trail and banks 50% as a real win.
+    # Trailing Stop — 0.60×ATR (0.24R at SL=2.5×ATR) was the binding winner-cap: it choked
+    # every trade at ~0.2-0.4R while losers ran to -1.0R (avg_win/avg_loss=0.65 → PF<1
+    # at any achievable win rate). At 1.20×ATR the giveback is 0.48R: trades peaking
+    # 0.40-0.61R fall back to the BE lock (+0.1R), above ~0.61R the trail takes over and
+    # winners can develop toward partial (0.8R), VTP stall exit (1.0R+) and TP (2.4R).
+    TRAIL_ATR_MULT: float = 1.20
 
     # ── Phase 5: EV Engine + Adaptive Intelligence ───────────────────────────
     # EV Engine
@@ -482,7 +485,7 @@ class EngineConfig(BaseSettings):
     # Loss Cluster Controller — consecutive-loss circuit breaker
     LCC_REDUCE_AFTER: int = 3           # Consecutive losses → reduce to 50%
     LCC_PAUSE_AFTER: int = 5            # Consecutive losses → pause trading
-    LCC_PAUSE_MINUTES: int = 30         # Pause duration in minutes
+    LCC_PAUSE_MINUTES: int = 10         # lowered 30→10 — FTD-054 forensics: 30-min pauses chained into 246-min dry spells (1400 LCC_PAUSED skips/session); 10 min breaks the cluster without freezing the engine
     LCC_REDUCE_SIZE_MULT: float = 0.50  # Size multiplier when clustering detected
 
     # Streak Intelligence Engine — hot/cold streak detection

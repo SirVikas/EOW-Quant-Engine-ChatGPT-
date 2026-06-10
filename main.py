@@ -976,7 +976,27 @@ async def on_tick(tick: Tick):
                     "exit_reason": _tm_action.reason or "",
                 }
         elif _tm_action.action == "PARTIAL_TP":
-            _thought(f"[TM] {sym} PARTIAL_TP {_tm_action.partial_qty:.6f} @ {price:.4f} ({_tm_action.reason})", "TRADE")
+            # FTD-PARTIAL-REAL: this branch used to only log — partial_booked was set
+            # but no qty was ever closed, so "PARTIAL_TP" in the thought log was fiction.
+            # Now realize 50% through the PnL calculator and persist the record so
+            # equity, DataLake replay and reports stay consistent.
+            _pt_rec = risk_ctrl.partial_close(sym, price, fraction=0.50)
+            if _pt_rec is not None:
+                _pt_rec.exit_method = "PARTIAL_TP"
+                _pt_rec.exit_reason = _tm_action.reason or ""
+                _pt_rec.origin_pipeline = (
+                    "PAPER_SPEED" if _pt_rec.strategy_id.endswith("_PAPER_SPEED")
+                    else "PRIMARY_STRATEGY"
+                )
+                try:
+                    data_lake.save_trade(asdict(_pt_rec))
+                except Exception as _pt_exc:
+                    logger.warning(f"[TM] {sym} partial-close persist failed: {_pt_exc}")
+                _thought(
+                    f"[TM] {sym} PARTIAL_TP 50% @ {price:.4f} "
+                    f"net={_pt_rec.net_pnl:+.4f}U ({_tm_action.reason})",
+                    "TRADE",
+                )
         elif _tm_action.action in ("TIME_EXIT", "FAST_FAIL"):
             # FTD-037: stale trade or fast-fail — force close by moving SL to current price.
             # Next tick: risk_ctrl.on_price_update fires SL at ~market price.

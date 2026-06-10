@@ -304,8 +304,8 @@ class TestTradeManager:
     def test_no_action_below_be_trigger(self):
         pos = _make_position(entry=100.0, sl=97.0)
         self.mgr.register(pos)
-        action = self.mgr.update("TESTUSDT", current_price=101.5, atr=1.0)
-        # 1.5 / 3.0 = 0.5R — below BE trigger of 1R
+        action = self.mgr.update("TESTUSDT", current_price=100.9, atr=1.0)
+        # 0.9 / 3.0 = 0.3R — below BE trigger of 0.40R
         assert action.action in ("HOLD", "NONE")
 
     def test_move_breakeven_at_1r_long(self):
@@ -384,7 +384,7 @@ class TestTradeManager:
         assert "managed_count" in s
         assert "be_r" in s
         assert "partial_tp_r" in s
-        assert s["phase"] == 4
+        assert s["phase"] == 5
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
