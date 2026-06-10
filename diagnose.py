@@ -119,6 +119,9 @@ if "_error" in s:
     sys.exit(1)
 
 kv("Mode",           s.get("mode"))
+# ⚠ on BYPASS is intentional: calibration mode must not become permanent
+# (PHX-CALIBRATION-PHASE-001 Phase-3 requires returning to GATED)
+kv("Gate Mode",      s.get("gate_mode"), warn=lambda v: v == "BYPASS")
 kv("WS Status",      s.get("ws_status"),
    warn=lambda v: "CONNECTED" not in str(v) and "LIVE" not in str(v))
 kv("Capital",        f"${s.get('capital', 0):.2f}")
