@@ -91,6 +91,37 @@ class RiskController:
         self.graceful_stop:  bool                        = False  # blocks new entries, lets positions run
         self._running        = False
 
+    # ── Hard Limits (FTD-031C SSOT) ─────────────────────────────────────────
+    # These limits are declared immutable in config but were never enforced
+    # anywhere in the trade path. They apply in EVERY mode — BYPASS_ALL_GATES
+    # and PAPER_SPEED bypass quality gates only, never these.
+
+    def _open_notional(self) -> float:
+        total = sum(p.entry_price * p.qty for p in self.positions.values())
+        total += sum(o.limit_price * o.qty for o in self.pending_orders.values())
+        return total
+
+    def _hard_limit_block(self, symbol: str, new_notional: float) -> Optional[str]:
+        """Return a block reason if any immutable hard limit would be violated."""
+        equity = self.scaler.equity
+        floor_eq = cfg.INITIAL_CAPITAL * cfg.MIN_EQUITY_FLOOR
+        if equity <= floor_eq:
+            return f"EQUITY_FLOOR(equity={equity:.2f}≤{floor_eq:.2f})"
+        # Kill switch backstop above the 15% scaler halt — real capital only;
+        # in PAPER the scaler intentionally resets its peak so RL keeps learning.
+        if (cfg.TRADE_MODE == "LIVE"
+                and self.scaler.drawdown_pct / 100.0 >= cfg.KILL_SWITCH_THRESHOLD):
+            self.halted = True
+            return f"KILL_SWITCH(dd={self.scaler.drawdown_pct:.1f}%)"
+        open_count = len(self.positions) + len(self.pending_orders)
+        if open_count >= cfg.TCE_MAX_CONCURRENT:
+            return f"MAX_CONCURRENT({open_count}≥{cfg.TCE_MAX_CONCURRENT})"
+        max_notional = equity * cfg.MAX_LEVERAGE_CAP
+        if self._open_notional() + new_notional > max_notional:
+            return (f"LEVERAGE_CAP(open={self._open_notional():.0f}"
+                    f"+new={new_notional:.0f}>{max_notional:.0f})")
+        return None
+
     # ── Position Lifecycle ──────────────────────────────────────────────────
 
     def open_position(self, pos: OpenPosition, order_type: str = "MARKET") -> bool:
@@ -99,6 +130,10 @@ class RiskController:
             return False
         if pos.symbol in self.positions:
             self._emit("WARNING", pos.symbol, "Duplicate position attempt — rejected.")
+            return False
+        _hard_block = self._hard_limit_block(pos.symbol, pos.entry_price * pos.qty)
+        if _hard_block:
+            self._emit("WARNING", pos.symbol, f"HARD_LIMIT {_hard_block} — position rejected.")
             return False
         pos.peak_price  = pos.entry_price
         if pos.initial_stop_loss == 0.0:
@@ -231,6 +266,10 @@ class RiskController:
             self._emit("WARNING", symbol, "Engine halted — limit order rejected.")
             return False
         if symbol in self.positions or symbol in self.pending_orders:
+            return False
+        _hard_block = self._hard_limit_block(symbol, limit_price * qty)
+        if _hard_block:
+            self._emit("WARNING", symbol, f"HARD_LIMIT {_hard_block} — limit order rejected.")
             return False
         order = PendingLimitOrder(
             order_id=str(uuid.uuid4())[:8],
@@ -419,6 +458,54 @@ class RiskController:
             f"Slip={result.slippage_cost:.4f} Fee={result.fee_entry+result.fee_exit:.4f}"
         )
         return close_tag
+
+    # ── Partial Close ───────────────────────────────────────────────────────
+
+    def partial_close(
+        self, symbol: str, exit_price: float, fraction: float = 0.50
+    ) -> Optional[TradeRecord]:
+        """
+        Realize `fraction` of an open position at `exit_price`, keeping the rest
+        running. Books a real TradeRecord through the PnL calculator and scaler
+        so equity, reports and DataLake replay all stay consistent — the caller
+        must persist the returned record via data_lake.save_trade().
+        """
+        pos = self.positions.get(symbol)
+        if not pos or not (0.0 < fraction < 1.0):
+            return None
+        closed_qty = pos.qty * fraction
+        if closed_qty <= 0:
+            return None
+        closed_risk = pos.initial_risk * fraction
+        record = TradeRecord(
+            trade_id=f"{pos.position_id}-P",
+            symbol=pos.symbol,
+            side=pos.side,
+            entry_price=pos.entry_price,
+            exit_price=exit_price,
+            qty=closed_qty,
+            entry_ts=pos.entry_ts,
+            exit_ts=int(time.time() * 1000),
+            is_short=(pos.side == "SHORT"),
+            strategy_id=pos.strategy_id,
+            regime=pos.regime,
+            mode=cfg.TRADE_MODE,
+            order_type=getattr(pos, "order_type", "MARKET"),
+            stop_loss=pos.initial_stop_loss,
+            take_profit=pos.take_profit,
+            peak_r=round(pos.peak_r, 4),
+            atr_pct=round(pos.atr_pct, 6),
+        )
+        result = self.pnl_calc.calculate(record, initial_risk_usdt=closed_risk)
+        self.scaler.record_trade(result.net_pnl)
+        pos.qty -= closed_qty
+        pos.initial_risk -= closed_risk
+        self._emit(
+            "INFO", symbol,
+            f"PARTIAL_TP {fraction*100:.0f}% qty={closed_qty:.6f} @ {exit_price} | "
+            f"Net={result.net_pnl:+.4f} USDT | remaining qty={pos.qty:.6f}"
+        )
+        return result
 
     # ── MDD Halt ────────────────────────────────────────────────────────────
 
