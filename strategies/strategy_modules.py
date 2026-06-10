@@ -128,8 +128,9 @@ class TrendFollowingStrategy:
         if atr_pct < self.min_atr_pct:
             return None   # stablecoin / too low volatility
 
-        if rsi == 50.0:
-            return None   # RSI sentinel = insufficient candle data (<14 candles)
+        # No RSI-sentinel check here: the min_len guard above already guarantees
+        # rsi_period+2 candles, and a legitimate neutral RSI can equal exactly 50.0
+        # (gains == losses) — the old `rsi == 50.0 → skip` discarded valid signals.
 
         # EMA crossover detection
         bullish_cross = fast_prev < slow_prev and fast_now > slow_now

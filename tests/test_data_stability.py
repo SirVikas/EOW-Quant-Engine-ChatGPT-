@@ -387,7 +387,9 @@ class TestSafeModeController:
     def test_auto_resume_denied_on_low_score(self):
         self.smc.activate("TEST")
         self.smc._last_resume_check = 0.0  # force check now
-        resumed = self.smc.check_auto_resume(current_score=45.0)
+        # Relative to the configured threshold (FTD-REF-055 moved it 75→47→44);
+        # the old hardcoded 45.0 silently flipped from "denied" to "allowed".
+        resumed = self.smc.check_auto_resume(current_score=cfg.SMC_MIN_SCORE_RESUME - 1)
         assert resumed is False
         assert self.smc.is_active is True
 

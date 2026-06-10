@@ -128,3 +128,40 @@ class TestPartialClose:
         assert rc.open_position(_pos()) is True
         assert rc.partial_close("TESTUSDT", exit_price=103.0, fraction=1.0) is None
         assert rc.partial_close("TESTUSDT", exit_price=103.0, fraction=0.0) is None
+
+
+class TestLimitOrderRealism:
+
+    def _submit(self, rc, limit_price=99.0):
+        return rc.submit_limit_order(
+            symbol="TESTUSDT", side="LONG", limit_price=limit_price, qty=1.0,
+            stop_loss=96.0, take_profit=106.0, strategy_id="TEST_STRAT",
+            initial_risk=3.0, regime="TRENDING",
+        )
+
+    def test_chased_order_fills_as_taker(self):
+        rc = _controller(equity=1000.0)
+        assert self._submit(rc, limit_price=99.0) is True
+        # Price stays above the limit → chase triggers after PRICE_CHASE_TICKS
+        for _ in range(cfg.PRICE_CHASE_TICKS):
+            rc.on_price_update("TESTUSDT", 100.0)
+        assert rc.pending_orders["TESTUSDT"].chased is True
+        # Next tick fills at the chased (market) price — must book as MARKET
+        rc.on_price_update("TESTUSDT", 100.0)
+        assert "TESTUSDT" in rc.positions
+        assert rc.positions["TESTUSDT"].order_type == "MARKET"
+
+    def test_unchased_fill_stays_limit(self):
+        rc = _controller(equity=1000.0)
+        assert self._submit(rc, limit_price=99.0) is True
+        rc.on_price_update("TESTUSDT", 98.9)   # price reaches the limit
+        assert rc.positions["TESTUSDT"].order_type == "LIMIT"
+
+    def test_stale_pending_order_expires(self):
+        rc = _controller(equity=1000.0)
+        assert self._submit(rc, limit_price=99.0) is True
+        # Age the order past the TTL, then tick: it must be cancelled, not filled
+        rc.pending_orders["TESTUSDT"].created_ts -= 200_000
+        rc.on_price_update("TESTUSDT", 98.0)
+        assert "TESTUSDT" not in rc.pending_orders
+        assert "TESTUSDT" not in rc.positions

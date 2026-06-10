@@ -26,6 +26,11 @@ from loguru import logger
 
 # ── Aggression Profiles ───────────────────────────────────────────────────────
 # Each level maps to a concrete set of risk parameters applied to cfg at runtime.
+# INVARIANT: atr_mult_tp / atr_mult_sl must stay ≥ cfg.MIN_RR_RATIO (2.0) — the
+# lean gate and RR engine reject every signal below it. The previous profiles
+# (RR 1.5-1.8) silently bricked all signal generation the moment any aggression
+# level was applied. Aggression now scales position size (risk/kelly) and SL
+# tightness, never the RR geometry.
 AGGRESSION_PROFILES: dict[int, dict] = {
     1: {
         "name":              "Conservative",
@@ -34,7 +39,7 @@ AGGRESSION_PROFILES: dict[int, dict] = {
         "max_risk_per_trade": 0.005,
         "kelly_fraction":    0.15,
         "atr_mult_sl":       2.5,
-        "atr_mult_tp":       4.5,
+        "atr_mult_tp":       6.0,   # RR 2.4
     },
     2: {
         "name":              "Balanced",
@@ -42,8 +47,8 @@ AGGRESSION_PROFILES: dict[int, dict] = {
         "description":       "Default engine settings. Optimal risk-adjusted returns. Recommended baseline.",
         "max_risk_per_trade": 0.015,
         "kelly_fraction":    0.25,
-        "atr_mult_sl":       2.0,
-        "atr_mult_tp":       3.0,
+        "atr_mult_sl":       2.5,
+        "atr_mult_tp":       6.0,   # RR 2.4 — mirrors config.py defaults exactly
     },
     3: {
         "name":              "Aggressive",
@@ -51,8 +56,8 @@ AGGRESSION_PROFILES: dict[int, dict] = {
         "description":       "Higher position size. Requires Deployability ≥ 70 and win-rate ≥ 55%.",
         "max_risk_per_trade": 0.025,
         "kelly_fraction":    0.35,
-        "atr_mult_sl":       1.8,
-        "atr_mult_tp":       2.8,
+        "atr_mult_sl":       2.2,
+        "atr_mult_tp":       5.5,   # RR 2.5
     },
     4: {
         "name":              "DHURANDHAR",
@@ -60,8 +65,8 @@ AGGRESSION_PROFILES: dict[int, dict] = {
         "description":       "Maximum aggression. Guardian continuously monitors. Only activate with proven edge and Deployability ≥ 85.",
         "max_risk_per_trade": 0.040,
         "kelly_fraction":    0.50,
-        "atr_mult_sl":       1.5,
-        "atr_mult_tp":       2.5,
+        "atr_mult_sl":       2.0,
+        "atr_mult_tp":       5.0,   # RR 2.5
     },
 }
 

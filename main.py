@@ -774,9 +774,16 @@ async def on_tick(tick: Tick):
             confidence_decay.reset(sym, _trade_strategy)  # fresh start after trade
             # RL: update Q-value for this (regime, hour, strategy) context
             # fee_cost + r_multiple enable multi-factor reward shaping (FTD-RL-EVOLUTION)
+            # FTD-RL-CTX-HOUR: reward must land on the ENTRY-hour context — the same
+            # key should_trade()/confidence_boost() used at decision time. Using the
+            # close hour wrote rewards into a different session bucket whenever the
+            # trade crossed an hour boundary, so decision contexts never converged
+            # (same root cause FTD-LONDON-001 Phase-C.2 fixed for opportunity_ecology).
             rl_engine.update(
                 regime=_trade_regime,
-                utc_hour=__import__("datetime").datetime.utcnow().hour,
+                utc_hour=__import__("datetime").datetime.utcfromtimestamp(
+                    last_trade.entry_ts / 1000
+                ).hour,
                 strategy=_closed_strat_type,
                 net_pnl=last_trade.net_pnl,
                 fee_cost=_trade_cost,
@@ -949,12 +956,18 @@ async def on_tick(tick: Tick):
         _tm_action = trade_manager.update(sym, price, _tm_atr_price)
         if _tm_action.action == "MOVE_BE" and _tm_action.new_sl > 0:
             _pos = risk_ctrl.positions.get(sym)
-            if _pos:
+            # FTD-SL-GUARD: TM compares candidates against its own internal SL copy,
+            # not the live one — risk_ctrl independently arms BE / trails the same
+            # position, so an unconditional write here could drag a live SL back
+            # toward entry. Only ever tighten (LONG: up, SHORT: down).
+            if _pos and ((_pos.side == "LONG" and _tm_action.new_sl > _pos.stop_loss)
+                         or (_pos.side == "SHORT" and _tm_action.new_sl < _pos.stop_loss)):
                 _pos.stop_loss = _tm_action.new_sl
                 _thought(f"[TM] {sym} BE: SL→{_tm_action.new_sl:.4f} ({_tm_action.reason})", "TRADE")
         elif _tm_action.action == "TRAIL_SL" and _tm_action.new_sl > 0:
             _pos = risk_ctrl.positions.get(sym)
-            if _pos:
+            if _pos and ((_pos.side == "LONG" and _tm_action.new_sl > _pos.stop_loss)
+                         or (_pos.side == "SHORT" and _tm_action.new_sl < _pos.stop_loss)):
                 _pos.stop_loss = _tm_action.new_sl
         elif _tm_action.action == "EXTEND_TP" and _tm_action.new_tp > 0:
             # FTD-VTP-001: propagate TP extension to risk_ctrl so the enforcement
@@ -992,6 +1005,32 @@ async def on_tick(tick: Tick):
                     data_lake.save_trade(asdict(_pt_rec))
                 except Exception as _pt_exc:
                     logger.warning(f"[TM] {sym} partial-close persist failed: {_pt_exc}")
+                # FTD-PARTIAL-LEARN: partials bypass the main close-handler, so the
+                # banked profit would be invisible to the bandit and edge stats —
+                # the remainder's exit alone under-reports the trade's outcome.
+                try:
+                    _pt_strat_type = {
+                        "TRENDING":             "TrendFollowing",
+                        "MEAN_REVERTING":       "MeanReversion",
+                        "VOLATILITY_EXPANSION": "VolatilityExpansion",
+                    }.get(_pt_rec.regime, "TrendFollowing")
+                    rl_engine.update(
+                        regime=_pt_rec.regime,
+                        utc_hour=__import__("datetime").datetime.utcfromtimestamp(
+                            _pt_rec.entry_ts / 1000
+                        ).hour,
+                        strategy=_pt_strat_type,
+                        net_pnl=_pt_rec.net_pnl,
+                        fee_cost=_pt_rec.fee_entry + _pt_rec.fee_exit + _pt_rec.slippage_cost,
+                        r_multiple=_pt_rec.r_multiple,
+                    )
+                    edge_engine.record(
+                        regime=_pt_rec.regime, strategy_id=_pt_rec.strategy_id,
+                        net_pnl=_pt_rec.net_pnl, r_mult=_pt_rec.r_multiple,
+                    )
+                    learning_engine.record(regime=_pt_rec.regime, won=_pt_rec.net_pnl > 0)
+                except Exception as _pt_exc:
+                    logger.warning(f"[TM] {sym} partial-close learning feed failed: {_pt_exc}")
                 _thought(
                     f"[TM] {sym} PARTIAL_TP 50% @ {price:.4f} "
                     f"net={_pt_rec.net_pnl:+.4f}U ({_tm_action.reason})",
@@ -1976,6 +2015,12 @@ async def on_tick(tick: Tick):
                 _notional_pre = sizing.qty * sig.entry_price
                 if _notional_pre < cfg.MIN_NOTIONAL_USDT:
                     sizing.qty = cfg.MIN_NOTIONAL_USDT / sig.entry_price
+            # FTD-RISK-SYNC: usdt_risk must track every qty mutation — it is the
+            # R-multiple denominator (RL reward, edge stats, reports) and the value
+            # recorded against the daily risk cap. Leaving it at the scaler's
+            # pre-multiplier value understated R by up to 3× and let the daily cap
+            # account risk that was never actually deployed.
+            sizing.usdt_risk = round(sizing.qty * abs(sig.entry_price - sig.stop_loss), 4)
             # atr_pct already computed above from candle OHLC / regime_det
 
             # FTD-REF-023: realistic cost via execution_engine
@@ -2405,6 +2450,9 @@ async def on_tick(tick: Tick):
                 trade_flow_monitor.record_skip(sym, _dd_result.reason)
                 return
 
+            # FTD-RISK-SYNC: re-sync after the LCC / exploration / EVC qty multipliers
+            # so the allocator budgets against the risk actually being deployed.
+            sizing.usdt_risk = round(sizing.qty * abs(sig.entry_price - sig.stop_loss), 4)
             _alloc = capital_allocator.allocate(
                 trade_score=_alloc_score,  # dynamic: explore uses raw conf, normal uses scorer
                 equity=scaler.equity,
@@ -2531,6 +2579,10 @@ async def on_tick(tick: Tick):
 
             # Apply orchestrator concentration multiplier (folds in upstream_mult + band boost)
             sizing.qty = round(sizing.qty * _cycle.concentration_mult, 8)
+            # FTD-RISK-SYNC: final re-sync — this value becomes the position's
+            # initial_risk (R-multiple denominator for RL reward, edge stats and
+            # reports) and the amount recorded against the daily risk cap.
+            sizing.usdt_risk = round(sizing.qty * abs(sig.entry_price - sig.stop_loss), 4)
             if sizing.qty <= 0:
                 _thought(
                     f"🚫 ZERO_QTY_ORCH {sym}: conc_mult={_cycle.concentration_mult:.4f} "

@@ -229,7 +229,9 @@ class EdgeEngine:
             )
 
         wins   = [t.net_pnl for t in history if t.net_pnl >  0]
-        losses = [abs(t.net_pnl) for t in history if t.net_pnl <= 0]
+        # Strict < 0: exact-zero scratches contributed abs(0)=0 "losses" that
+        # deflated avg_loss and overstated loss frequency in the expectancy calc.
+        losses = [abs(t.net_pnl) for t in history if t.net_pnl < 0]
         r_mults = [t.r_mult for t in history]
 
         win_rate   = len(wins)   / n
