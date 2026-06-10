@@ -4186,6 +4186,9 @@ async def get_status():
         "symbols_watched": len(mdp.symbols),
         "open_positions":  len(risk_ctrl.positions),
         "total_trades":    _all_time_trade_count(),
+        # PHX-CALIBRATION-PHASE-001: calibration (BYPASS) vs normal (GATED) mode
+        # must be externally verifiable — Phase-3 requires returning to GATED.
+        "gate_mode":       "BYPASS" if cfg.BYPASS_ALL_GATES else "GATED",
         "ws_status":   ws_truth_engine.get_ui_label(),   # FTD-REF-026: truth-engine label
         "ts":          int(time.time() * 1000),
         # Phase 4 Profit Engine summary
