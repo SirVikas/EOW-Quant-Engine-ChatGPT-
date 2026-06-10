@@ -2994,6 +2994,79 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     global _boot_status
     _boot_status = await api_loader.run(api_manager=api_manager)
 
+    # ── FTD-CFG-VALIDATE: fail-fast config sanity check ──────────────────────
+    # Guards against the Guardian-profile class of bug: a config combination
+    # that silently bricks signal generation or weakens an "immutable" limit.
+    def _validate_config_at_boot() -> list[str]:
+        problems: list[str] = []
+        for _sess in ("ASIA", "LONDON", "NY", "LATE"):
+            if _sess not in cfg.SESSION_MIN_ATR_PCT:
+                problems.append(f"SESSION_MIN_ATR_PCT missing session '{_sess}'")
+            if _sess not in cfg.SESSION_SIZE_SCALE:
+                problems.append(f"SESSION_SIZE_SCALE missing session '{_sess}'")
+        if cfg.ATR_MULT_SL <= 0 or (cfg.ATR_MULT_TP / cfg.ATR_MULT_SL) < cfg.MIN_RR_RATIO:
+            problems.append(
+                f"raw RR {cfg.ATR_MULT_TP}/{cfg.ATR_MULT_SL}="
+                f"{cfg.ATR_MULT_TP / max(cfg.ATR_MULT_SL, 1e-9):.2f} is below "
+                f"MIN_RR_RATIO={cfg.MIN_RR_RATIO} — every signal would be gate-blocked"
+            )
+        try:
+            from core.guardian import AGGRESSION_PROFILES as _agp
+            for _lvl, _p in _agp.items():
+                if _p["atr_mult_tp"] / _p["atr_mult_sl"] < cfg.MIN_RR_RATIO:
+                    problems.append(
+                        f"guardian profile {_lvl} RR "
+                        f"{_p['atr_mult_tp'] / _p['atr_mult_sl']:.2f} < MIN_RR_RATIO "
+                        f"— applying it would brick signal generation"
+                    )
+        except Exception:
+            pass
+        if not (0.0 < cfg.MIN_EQUITY_FLOOR < 1.0):
+            problems.append(f"MIN_EQUITY_FLOOR={cfg.MIN_EQUITY_FLOOR} must be in (0,1)")
+        if cfg.MAX_LEVERAGE_CAP < 1.0:
+            problems.append(f"MAX_LEVERAGE_CAP={cfg.MAX_LEVERAGE_CAP} must be ≥ 1")
+        if cfg.INITIAL_CAPITAL <= 0:
+            problems.append(f"INITIAL_CAPITAL={cfg.INITIAL_CAPITAL} must be > 0")
+        if not (cfg.DD_SOFT_CUT_AT < cfg.DD_HARD_CUT_AT < cfg.DD_STOP_AT <= cfg.MAX_DRAWDOWN_HALT):
+            problems.append(
+                f"drawdown tiers disordered: soft={cfg.DD_SOFT_CUT_AT} "
+                f"hard={cfg.DD_HARD_CUT_AT} stop={cfg.DD_STOP_AT} "
+                f"halt={cfg.MAX_DRAWDOWN_HALT}"
+            )
+        for _msg in problems:
+            logger.critical(f"[CFG-VALIDATE] ⛔ {_msg}")
+            _thought(f"⛔ CONFIG INVALID: {_msg}", "HALT")
+        if not problems:
+            logger.info("[CFG-VALIDATE] ✅ config sanity check passed")
+        return problems
+
+    _validate_config_at_boot()
+
+    # ── FTD-TASK-SENTINEL: keep critical background loops alive ─────────────
+    # The custom loops below catch exceptions per-iteration, but anything that
+    # escapes (or an unexpected return) used to kill the task silently for the
+    # rest of the session. The supervisor logs, alerts and restarts with backoff.
+    def _supervised_task(name: str, factory):
+        async def _runner():
+            while True:
+                try:
+                    await factory()
+                    logger.critical(
+                        f"[SENTINEL] task {name} returned unexpectedly — restart in 30s"
+                    )
+                except asyncio.CancelledError:
+                    raise
+                except Exception as exc:
+                    logger.critical(
+                        f"[SENTINEL] task {name} crashed: {exc!r} — restart in 30s"
+                    )
+                    try:
+                        _thought(f"⚠️ background task {name} crashed — auto-restarted", "SYSTEM")
+                    except Exception:
+                        pass
+                await asyncio.sleep(30)
+        return asyncio.create_task(_runner(), name=name)
+
     # ── Start all subsystems ──────────────────────────────────────────────────
     tasks = [
         asyncio.create_task(mdp.start()),
@@ -3232,7 +3305,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             except Exception:
                 pass
 
-    tasks.append(asyncio.create_task(_guardian_watch()))
+    tasks.append(_supervised_task("guardian_watch", _guardian_watch))
 
     # ── 8-hour checkpoint: JSON state + QPR report (Phase 3.1 persistence) ───
     async def _periodic_checkpoint():
@@ -3260,7 +3333,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             except Exception as exc:
                 logger.warning(f"[CHECKPOINT] 8h export failed: {exc}")
 
-    tasks.append(asyncio.create_task(_periodic_checkpoint()))
+    tasks.append(_supervised_task("periodic_checkpoint", _periodic_checkpoint))
 
     # ── FTD-030: Autonomous Intelligence Loop ────────────────────────────────
     global _auto_intelligence
@@ -3304,7 +3377,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             except Exception as exc:
                 logger.warning(f"[FTD-030] Auto-intelligence loop error: {exc}")
 
-    tasks.append(asyncio.create_task(_auto_intelligence_loop()))
+    tasks.append(_supervised_task("auto_intelligence", _auto_intelligence_loop))
     logger.info(
         f"[FTD-030] Auto-intelligence loop started | "
         f"interval={cfg.AUTO_INTELLIGENCE_INTERVAL_MIN}min"
@@ -3338,7 +3411,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
                 logger.warning(f"[FTD-053] Orchestrator loop error: {exc}")
             await asyncio.sleep(OBS_TICK_INTERVAL_SECS)
 
-    tasks.append(asyncio.create_task(_obs_orchestrator_loop()))
+    tasks.append(_supervised_task("obs_orchestrator", _obs_orchestrator_loop))
     logger.info(
         f"[FTD-053] Observability orchestrator loop started | "
         f"interval={OBS_TICK_INTERVAL_SECS}s"
@@ -3368,8 +3441,50 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             except Exception as exc:
                 logger.warning(f"[CERT-PIPE] Certification scheduler loop error: {exc}")
 
-    tasks.append(asyncio.create_task(_evidence_orchestration_loop()))
+    tasks.append(_supervised_task("evidence_orchestration", _evidence_orchestration_loop))
     logger.info("[v1.84.0] Evidence orchestration loop started | interval=3600s")
+
+    # ── FTD-STUCK-WATCHDOG: dead-tick position protection ─────────────────────
+    # SL/TP enforcement is tick-driven: if a symbol's stream dies with a position
+    # open, the position sits unmanaged while the market moves. Force-close at
+    # the last known price after 5 minutes of silence.
+    async def _stuck_position_watchdog():
+        _STALE_SEC = 300.0
+        while True:
+            await asyncio.sleep(60)
+            try:
+                now_ms = int(time.time() * 1000)
+                for _wsym in list(risk_ctrl.positions.keys()):
+                    _wtick = mdp.latest_tick(_wsym)
+                    _last_ms = getattr(_wtick, "ts", 0) if _wtick else 0
+                    if _last_ms <= 0:
+                        continue
+                    _age = (now_ms - _last_ms) / 1000.0
+                    if _age < _STALE_SEC:
+                        continue
+                    _wpos = risk_ctrl.positions.get(_wsym)
+                    _wprice = getattr(_wtick, "price", 0.0) or (
+                        _wpos.entry_price if _wpos else 0.0
+                    )
+                    _wrec = risk_ctrl.force_close(_wsym, _wprice, reason="EMERGENCY")
+                    if _wrec is not None:
+                        _wrec.exit_method = "EMERGENCY"
+                        _wrec.exit_reason = f"stuck-position watchdog: no tick for {_age:.0f}s"
+                        try:
+                            data_lake.save_trade(asdict(_wrec))
+                        except Exception:
+                            pass
+                        trade_manager.deregister(_wsym)
+                        _thought(
+                            f"⏱️ WATCHDOG force-close {_wsym} @ {_wprice} — "
+                            f"no tick for {_age:.0f}s",
+                            "HALT",
+                        )
+            except Exception as exc:
+                logger.warning(f"[WATCHDOG] stuck-position check failed: {exc}")
+
+    tasks.append(_supervised_task("stuck_position_watchdog", _stuck_position_watchdog))
+    logger.info("[WATCHDOG] stuck-position watchdog started | stale_after=300s")
 
     # ── FTD-031: Performance Optimization Layer ───────────────────────────────
     if cfg.PERF_ENABLED:
@@ -5110,6 +5225,50 @@ async def get_risk_state():
         "drawdown": dd,
         "module":   "RISK_STATE",
         "phase":    "021",
+    }
+
+
+@app.get("/api/risk-limits")
+async def get_risk_limits():
+    """
+    Hard-limit + risk-budget live status — feeds the dashboard risk panel.
+    Mirrors exactly what RiskController._hard_limit_block enforces:
+    equity floor, portfolio leverage cap, concurrency cap, daily risk budget.
+    """
+    eq = scaler.equity
+    open_notional = sum(p.entry_price * p.qty for p in risk_ctrl.positions.values())
+    pending_notional = sum(o.limit_price * o.qty for o in risk_ctrl.pending_orders.values())
+    total_notional = open_notional + pending_notional
+    floor_eq = cfg.INITIAL_CAPITAL * cfg.MIN_EQUITY_FLOOR
+    alloc = capital_allocator.summary(equity=eq)
+    now_ms = int(time.time() * 1000)
+    return {
+        "equity":                round(eq, 4),
+        "equity_floor":          round(floor_eq, 2),
+        "floor_breached":        eq <= floor_eq,
+        "open_notional":         round(total_notional, 2),
+        "leverage_used_x":       round(total_notional / eq, 3) if eq > 0 else 0.0,
+        "leverage_cap_x":        cfg.MAX_LEVERAGE_CAP,
+        "open_count":            len(risk_ctrl.positions),
+        "pending_count":         len(risk_ctrl.pending_orders),
+        "max_concurrent":        cfg.TCE_MAX_CONCURRENT,
+        "daily_risk_used":       alloc.get("daily_risk_used", 0.0),
+        "daily_risk_cap_usdt":   round(eq * cfg.DAILY_RISK_CAP, 2),
+        "daily_risk_cap_pct":    cfg.DAILY_RISK_CAP * 100,
+        "halted":                risk_ctrl.halted,
+        "graceful_stop":         risk_ctrl.graceful_stop,
+        "pending_orders": [
+            {
+                "symbol":      o.symbol,
+                "side":        o.side,
+                "limit_price": o.limit_price,
+                "qty":         o.qty,
+                "age_sec":     round((now_ms - o.created_ts) / 1000, 1),
+                "chased":      o.chased,
+            }
+            for o in risk_ctrl.pending_orders.values()
+        ],
+        "module": "RISK_LIMITS",
     }
 
 

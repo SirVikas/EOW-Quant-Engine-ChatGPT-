@@ -527,6 +527,24 @@ class RiskController:
         )
         return result
 
+    # ── Force Close (watchdog / operator) ───────────────────────────────────
+
+    def force_close(self, symbol: str, exit_price: float,
+                    reason: str = "EMERGENCY") -> Optional[TradeRecord]:
+        """
+        Close a single position immediately at `exit_price` and return the booked
+        TradeRecord so the caller can persist it (data_lake.save_trade). Used by
+        the stuck-position watchdog when a symbol's tick stream dies — the normal
+        SL/TP enforcement path never fires without ticks.
+        """
+        if symbol not in self.positions:
+            return None
+        before = len(self.pnl_calc.trades)
+        self._close_position(symbol, exit_price, reason)
+        if len(self.pnl_calc.trades) > before:
+            return self.pnl_calc.trades[-1]
+        return None
+
     # ── MDD Halt ────────────────────────────────────────────────────────────
 
     def _check_mdd_halt(self):
