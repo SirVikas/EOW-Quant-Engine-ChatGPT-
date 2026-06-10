@@ -716,6 +716,11 @@ async def on_tick(tick: Tick):
                 _atr_pct_re = getattr(_re_state, "atr_pct", 0.0) or 0.0
             except Exception:
                 pass
+            # A.I.E. + FTD-REA-001: trade direction must be bound BEFORE the
+            # reactive-evolution call below — the old `in dir()` guard at that
+            # call site was always False (assignment used to happen later), so
+            # per-direction learning silently received "" for every trade.
+            _trade_direction = getattr(last_trade, "side", "")
             reactive_evolution_engine.on_trade_closed(
                 symbol=sym,
                 strategy_id=_trade_strategy,
@@ -724,7 +729,7 @@ async def on_tick(tick: Tick):
                 gross_pnl=_gross_pnl_re,
                 fee_total=_fee_total_re,
                 atr_pct=_atr_pct_re,
-                side=_trade_direction if "_trade_direction" in dir() else "",
+                side=_trade_direction,
             )
             # FTD-REF-026: track strategy usage distribution
             _closed_strat_type = {
@@ -734,7 +739,6 @@ async def on_tick(tick: Tick):
             }.get(_trade_regime, "TrendFollowing")
             strategy_engine.record_trade(_closed_strat_type)
             # A.I.E.: feed outcome + direction so engine learns per-strategy and per-direction
-            _trade_direction = getattr(last_trade, "side", "")
             inverse_engine.record(_closed_strat_type, won=last_trade.net_pnl >= 0, direction=_trade_direction)
             # Mandate: trigger genome evolution every 50 trades (not just on timer)
             genome.on_trade_closed()
@@ -910,7 +914,7 @@ async def on_tick(tick: Tick):
             try:
                 record_decision(
                     symbol   = sym,
-                    signal   = _trade_direction if "_trade_direction" in dir() else "UNKNOWN",
+                    signal   = _trade_direction or "UNKNOWN",
                     regime   = _trade_regime,
                     strategy = _trade_strategy,
                     confidence = getattr(last_trade, "confidence", 0.0),

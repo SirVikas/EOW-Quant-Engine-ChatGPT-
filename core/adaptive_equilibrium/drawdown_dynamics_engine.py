@@ -31,19 +31,23 @@ def compute_drawdown_dynamics(trades: List[dict]) -> dict:
         drawdowns = []
         in_dd     = False
         dd_start  = 0.0
+        dd_start_idx = 0
 
         for i, equity in enumerate(cum):
             if equity > peak:
                 if in_dd:
-                    # Recovery — record drawdown magnitude and length
-                    drawdowns.append(abs(dd_start - min(cum[drawdowns_start_idx:i])) if drawdowns else abs(dd_start - equity))
+                    # Recovery — depth is peak minus the trough inside the
+                    # drawdown window. The old first-recovery branch measured
+                    # against the recovery price instead of the trough,
+                    # overstating the first drawdown and skewing avg_drawdown.
+                    drawdowns.append(abs(dd_start - min(cum[dd_start_idx:i])))
                     in_dd = False
                 peak = equity
             elif equity < peak:
                 if not in_dd:
                     in_dd = True
                     dd_start = peak
-                    drawdowns_start_idx = i
+                    dd_start_idx = i
                 dd_val = peak - equity
                 if dd_val > max_dd:
                     max_dd = dd_val

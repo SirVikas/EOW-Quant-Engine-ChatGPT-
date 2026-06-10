@@ -267,6 +267,7 @@ class VolatilitySqueezeEntry:
         # Disabled until a minimum notional / fee_ratio guard is integrated.
         return None
         atr   = _atr(highs, lows, closes, self.atr_period)
+        price = closes[-1]   # was undefined — instant NameError if VSE is ever re-enabled
         if atr <= 0 or price <= 0:
             return None
         if atr / price * 100 < MIN_ATR_PCT:
