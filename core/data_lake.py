@@ -129,6 +129,14 @@ class DataLake:
             )
         return [json.loads(r["data"]) for r in cur.fetchall()]
 
+    def trade_count(self) -> int:
+        """All-time closed-trade total — the single source of truth for counts.
+        Cheaper than db_stats(): one COUNT on trades vs four table scans."""
+        if not self._conn:
+            return 0
+        cur = self._conn.execute("SELECT COUNT(*) as n FROM trades")
+        return cur.fetchone()["n"]
+
     def db_stats(self) -> dict:
         if not self._conn:
             return {}

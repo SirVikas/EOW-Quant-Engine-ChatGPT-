@@ -3105,15 +3105,29 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     #
     await asyncio.sleep(0.5)   # give data_lake.start() a moment to open SQLite
 
-    _snap          = equity_snapshot.load()
-    _replay_equity = cfg.INITIAL_CAPITAL
-    _replay_count  = 0
+    _snap           = equity_snapshot.load()
+    _replay_equity  = cfg.INITIAL_CAPITAL
+    _replay_count   = 0
+    _db_trade_total = 0
+    _replay_partial = False
 
     try:
         _hist = data_lake.get_trades(limit=5000)
         if _hist:
             _replay_count  = pnl_calc.replay_from_history(_hist)
             _replay_equity = pnl_calc.session_stats.get("capital", pnl_calc.capital)
+            # Replay loads at most the newest 5000 trades. Once the lake holds
+            # more, replay equity excludes the dropped trades' PnL and is no
+            # longer comparable to the live-saved snapshot — the gap grows past
+            # the 1% tolerance and would trigger a false SAFE MODE at boot.
+            _db_trade_total = data_lake.trade_count()
+            _replay_partial = _db_trade_total > _replay_count
+            if _replay_partial:
+                _thought(
+                    f"📂 DataLake replay window is partial: {_replay_count} of "
+                    f"{_db_trade_total} trades — snapshot equity is authoritative",
+                    "SYSTEM",
+                )
             # qFTD-010: record replay boundary so streak/AF use session-only trades
             global _boot_replay_count
             _boot_replay_count = _replay_count
@@ -3173,7 +3187,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
 
     # Determine the single authoritative equity value
     if _snap and _replay_count > 0:
-        if equity_snapshot.validate(_snap.equity, _replay_equity):
+        if _replay_partial:
+            # Snapshot is saved from live equity every 30 s and is the only
+            # complete record once replay can't see the full trade history.
+            _final_equity = _snap.equity
+            _restore_src  = (
+                f"snapshot({_snap.equity:.2f}) — replay partial "
+                f"({_replay_count}/{_db_trade_total} trades), validation skipped"
+            )
+        elif equity_snapshot.validate(_snap.equity, _replay_equity):
             _final_equity = _snap.equity
             _restore_src  = (
                 f"snapshot({_snap.equity:.2f}) validated vs replay({_replay_equity:.2f})"
@@ -4118,6 +4140,23 @@ async def get_boot_status():
     }
 
 
+def _all_time_trade_count() -> int:
+    """All-time trade total from the DataLake (single source of truth).
+
+    pnl_calc.trades only holds the boot-replay window (newest 5000) plus the
+    current session, so its length drifts below the true total once the lake
+    exceeds the replay cap — that drift is why the dashboard showed 5000/5007/
+    5030 simultaneously. max() guards the cold-boot race where the SQLite
+    connection isn't open yet (trade_count()=0) but replay already populated
+    pnl_calc.
+    """
+    try:
+        n = data_lake.trade_count()
+    except Exception:
+        n = 0
+    return max(n, len(pnl_calc.trades))
+
+
 @app.get("/api/status")
 async def get_status():
     return {
@@ -4128,7 +4167,7 @@ async def get_status():
         "halted":      risk_ctrl.halted,
         "symbols_watched": len(mdp.symbols),
         "open_positions":  len(risk_ctrl.positions),
-        "total_trades":    len(pnl_calc.trades),
+        "total_trades":    _all_time_trade_count(),
         "ws_status":   ws_truth_engine.get_ui_label(),   # FTD-REF-026: truth-engine label
         "ts":          int(time.time() * 1000),
         # Phase 4 Profit Engine summary
@@ -4151,7 +4190,13 @@ async def get_version():
 
 @app.get("/api/pnl")
 async def get_pnl():
-    return _sanitize(pnl_calc.session_stats)
+    stats = dict(pnl_calc.session_stats)
+    # Headline counts must match /api/status and the Data Lake card; the rate
+    # metrics (WR/PF/Sharpe) are still computed over the replay window, whose
+    # size is preserved in stats_window_trades for forensic traceability.
+    stats["stats_window_trades"] = stats.get("n_trades", 0)
+    stats["total_trades"] = stats["n_trades"] = _all_time_trade_count()
+    return _sanitize(stats)
 
 
 @app.get("/api/market")
