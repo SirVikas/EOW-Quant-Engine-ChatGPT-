@@ -317,6 +317,8 @@ class EntryTruthEngine:
         r = self._last_result
         return {
             "eval_count": self._eval_count,
+            # diagnose.py reads "total_evaluated" — keep both keys in sync
+            "total_evaluated": self._eval_count,
             "last_score": r.score if r else None,
             "last_structure": r.structure_score if r else None,
             "last_regime": r.regime_score if r else None,

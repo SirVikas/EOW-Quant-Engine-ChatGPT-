@@ -221,9 +221,13 @@ class TradeManager:
             # Fixed epsilon ($0.05) was smaller than typical fees ($0.13-$0.23) causing
             # all 210 "BREAKEVEN" exits to log a small loss (avg -$0.07, total -$14.72).
             cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
-            be_price = (pos.entry_price + cost_per_unit
+            # Lock cost + a small profit (0.1R), not just cost: pure-cost BE stops
+            # still filled a few ticks short and booked -$0.01..-$0.05 scratches that
+            # the streak counter and RL reward treated as losses (57% of all exits).
+            profit_lock = cfg.BREAKEVEN_PROFIT_LOCK_R * pos.initial_risk
+            be_price = (pos.entry_price + cost_per_unit + profit_lock
                         if pos.side == "LONG"
-                        else pos.entry_price - cost_per_unit)
+                        else pos.entry_price - cost_per_unit - profit_lock)
             if ((pos.side == "LONG"  and be_price > pos.current_sl) or
                     (pos.side == "SHORT" and be_price < pos.current_sl)):
                 pos.current_sl    = be_price
