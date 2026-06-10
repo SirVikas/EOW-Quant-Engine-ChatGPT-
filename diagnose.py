@@ -526,7 +526,11 @@ if "_error" not in ete:
     kv("ETE Gate Enabled",   ete.get("gate_enabled"), warn=lambda v: v is True)
     kv("Observation Mode",   ete.get("observation_mode"))
     kv("Min Score (future)", ete.get("min_score"))
-    kv("Scores Evaluated (session)", ete.get("total_evaluated") or ete.get("evaluations"))
+    # explicit None-check: "0 or fallback" turned a legitimate 0 into None
+    _sess_eval = ete.get("total_evaluated")
+    if _sess_eval is None:
+        _sess_eval = ete.get("evaluations")
+    kv("Scores Evaluated (session)", _sess_eval)
     # Phase-2 calibration progress — cumulative archive count, survives restarts
     n_arch = ete.get("archive_samples")
     if n_arch is not None:
