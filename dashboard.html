@@ -609,30 +609,37 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 <div class="tab-nav-wrapper">
   <button class="tab-nav-scroll-btn hidden" id="tab-nav-left" onclick="scrollTabNav(-1)" title="Scroll left">&#9664;</button>
   <nav class="tab-nav" id="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('etcc')"     id="tab-btn-etcc">💹 Economic Truth</button>
-    <button class="tab-btn"        onclick="switchTab('overview')" id="tab-btn-overview">⚔ Battle Overview</button>
-    <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">🧠 Strategic Truth</button>
+    <!-- TRADING — live operations first -->
+    <button class="tab-btn active" onclick="switchTab('overview')" id="tab-btn-overview">⚔ Battle Overview</button>
     <button class="tab-btn"        onclick="switchTab('combat')"   id="tab-btn-combat">🎮 Combat Controls</button>
-    <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
     <button class="tab-btn"        onclick="switchTab('perf')"     id="tab-btn-perf">📊 Performance</button>
-    <button class="tab-btn"        onclick="switchTab('lio')"      id="tab-btn-lio">🧬 LIO</button>
-    <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
-    <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
-    <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
-    <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
+    <button class="tab-btn"        onclick="switchTab('etcc')"     id="tab-btn-etcc">💹 Economic Truth</button>
+    <button class="tab-btn"        onclick="switchTab('dbo')"      id="tab-btn-dbo">🧠 Strategic Truth</button>
+    <button class="tab-btn"        onclick="switchTab('report')"   id="tab-btn-report">📋 Intelligence</button>
+    <span class="tab-sep" style="width:1px;background:#CBD5E0;margin:4px 6px;align-self:stretch;flex:0 0 1px;"></span>
+    <!-- LEARNING -->
+    <button class="tab-btn"        onclick="switchTab('lio')"          id="tab-btn-lio">🧬 LIO</button>
     <button class="tab-btn"        onclick="switchTab('truth')"        id="tab-btn-truth">🔬 Truth Engine</button>
+    <button class="tab-btn"        onclick="switchTab('ailmonitor')"   id="tab-btn-ailmonitor">🤖 AIL Monitor</button>
+    <span class="tab-sep" style="width:1px;background:#CBD5E0;margin:4px 6px;align-self:stretch;flex:0 0 1px;"></span>
+    <!-- INSTITUTIONAL / GOVERNANCE -->
+    <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional">🏛 Institutional</button>
+    <button class="tab-btn"        onclick="switchTab('institutional-stack')" id="tab-btn-institutional-stack">🏗 Inst. Stack</button>
     <button class="tab-btn"        onclick="switchTab('nexus')"        id="tab-btn-nexus">🏛 NEXUS</button>
     <button class="tab-btn"        onclick="switchTab('obsx')"         id="tab-btn-obsx">🔭 OBSERVATORY-X</button>
     <button class="tab-btn"        onclick="switchTab('cortex')"       id="tab-btn-cortex">⚖ CORTEX</button>
-    <button class="tab-btn"        onclick="switchTab('institutional')" id="tab-btn-institutional-stack">🏗 Inst. Stack</button>
     <button class="tab-btn"        onclick="switchTab('trust-accuracy')" id="tab-btn-trust-accuracy">🎯 Trust Accuracy</button>
     <button class="tab-btn"        onclick="switchTab('pcao-board')"     id="tab-btn-pcao-board">🗂 PCAO Board</button>
+    <button class="tab-btn"        onclick="switchTab('prp')"          id="tab-btn-prp">🔱 PRP Chain</button>
+    <span class="tab-sep" style="width:1px;background:#CBD5E0;margin:4px 6px;align-self:stretch;flex:0 0 1px;"></span>
+    <!-- TOOLS -->
+    <button class="tab-btn"        onclick="switchTab('apiexplorer')"  id="tab-btn-apiexplorer">🗂 API Explorer</button>
   </nav>
   <button class="tab-nav-scroll-btn" id="tab-nav-right" onclick="scrollTabNav(1)" title="Scroll right">&#9654;</button>
 </div>
 
 <!-- ══ TAB: ECONOMIC TRUTH COMMAND CENTER ══════════════════════════════════ -->
-<div id="tab-etcc" class="tab-panel active">
+<div id="tab-etcc" class="tab-panel">
 <div style="padding:16px 20px;">
 
 <!-- §1 Danger Radar — always first so threat state is immediately visible -->
@@ -793,7 +800,7 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
 </div><!-- /tab-etcc -->
 
 <!-- ══ TAB: OVERVIEW ════════════════════════════════════════════════════════ -->
-<div id="tab-overview" class="tab-panel">
+<div id="tab-overview" class="tab-panel active">
 <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════════ -->
 <div class="main">
 
@@ -960,6 +967,40 @@ body.real-live-mode #mode-strip { background: #FEB2B2 !important; color: #742A2A
         <span class="blink" style="font-size:10px;color:var(--c-teal);font-weight:600;">● LIVE</span>
       </div>
       <div id="thought-log" class="scroll" style="max-height:170px;"></div>
+    </div>
+  </div>
+
+  <!-- ── Hard Limits + Exit Breakdown + Pending Orders ── -->
+  <div class="g3">
+
+    <!-- Hard Limits & Risk Budget -->
+    <div class="card peach">
+      <div class="sec-hdr">🛡 Hard Limits &amp; Risk Budget</div>
+      <div id="risk-limits-body" style="font-size:12px;">
+        <div class="label" style="padding:14px 0;">Waiting for /api/risk-limits…</div>
+      </div>
+    </div>
+
+    <!-- Exit Method Breakdown -->
+    <div class="card lav">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-hdr" style="margin:0;">🚪 Exit Breakdown</div>
+        <span class="tag purple" id="exit-breakdown-total">— trades</span>
+      </div>
+      <div id="exit-breakdown-body" class="scroll" style="max-height:200px;font-size:11.5px;">
+        <div class="label" style="padding:14px 0;">Waiting for exit attribution…</div>
+      </div>
+    </div>
+
+    <!-- Pending Limit Orders -->
+    <div class="card sky">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-hdr" style="margin:0;">📥 Pending Limit Orders</div>
+        <span class="tag blue" id="pending-orders-count">0</span>
+      </div>
+      <div id="pending-orders-list" class="scroll" style="max-height:200px;font-size:11.5px;">
+        <div class="label" style="padding:14px 0;">No pending orders</div>
+      </div>
     </div>
   </div>
 
@@ -5009,15 +5050,11 @@ function loadInstitutionalStackTab() {
   }).catch(() => {});
 }
 
-// Hook into switchTab to lazy-load new tabs
-const _origSwitchTabInst = typeof switchTab === 'function' ? switchTab : null;
-function switchTab(name) {
-  if (_origSwitchTabInst) _origSwitchTabInst(name);
-  if (name === 'obsx')                loadObsxTab();
-  if (name === 'cortex')              loadCortexTab();
-  if (name === 'institutional-stack') loadInstitutionalStackTab();
-  if (name === 'institutional')       loadInstitutionalStackTab(); // alias
-}
+// NOTE: switchTab is defined ONCE in the main script block below. A wrapper
+// re-declaration here used to silently shadow-and-be-shadowed (script blocks
+// execute in order, so the later declaration always won and the lazy-loads in
+// this wrapper never ran) — the institutional-stack lazy-load now lives in the
+// real switchTab.
 
 // Tab nav scroll arrows
 function scrollTabNav(dir) {
@@ -5605,6 +5642,9 @@ function switchTab(name) {
   if (name === 'pcao-board') {
     loadPCAOBoardTab();
   }
+  if (name === 'institutional-stack') {
+    loadInstitutionalStackTab();
+  }
 }
 
 // ── Mode Strip ───────────────────────────────────────────────────────────────
@@ -6157,6 +6197,8 @@ function renderAll() {
   renderGenome();
   renderThoughts();
   renderLake();
+  renderRiskLimits();
+  renderPendingOrders();
   renderModeBadge();
   renderHaltBanner();
   renderModeStrip();
@@ -6459,6 +6501,12 @@ async function pollRest() {
         renderAggression();
         renderGuardianPanel();
       }
+    } catch(e){}
+
+    // Hard limits + risk budget + pending orders (feeds Overview risk row)
+    try {
+      const rlR = await fetch(API+'/api/risk-limits', {signal: AbortSignal.timeout(3000)}).then(r=>r.json());
+      if (rlR) state.riskLimits = rlR;
     } catch(e){}
 
     // Skip Reason live indicator (every poll cycle)
@@ -6827,6 +6875,99 @@ async function pollAnalytics() {
     state.analytics = d;
     if (_activeTab === 'dbo') renderDBO();
   } catch(e) {}
+  // Exit-method breakdown (slow-changing — 15s cadence is enough)
+  try {
+    const xr = await fetch(API+'/api/exit-attribution');
+    const xd = await xr.json();
+    if (xd && xd.breakdown) { state.exitAttribution = xd; renderExitBreakdown(); }
+  } catch(e) {}
+}
+
+// ── Overview risk row: hard limits / exits / pending orders ──────────────────
+function _rlBar(used, cap, warnPct, label, fmtFn) {
+  const pct = cap > 0 ? Math.min(100, used / cap * 100) : 0;
+  const color = pct >= 100 ? 'var(--c-red)' : (pct >= warnPct ? '#D69E2E' : 'var(--c-green)');
+  return `
+    <div style="margin-bottom:9px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+        <span class="label" style="margin:0;">${label}</span>
+        <span style="font-weight:600;">${fmtFn(used)} / ${fmtFn(cap)}</span>
+      </div>
+      <div style="height:7px;border-radius:4px;background:#EDF2F7;overflow:hidden;">
+        <div style="height:100%;width:${pct.toFixed(1)}%;background:${color};border-radius:4px;"></div>
+      </div>
+    </div>`;
+}
+
+function renderRiskLimits() {
+  const body = el('risk-limits-body');
+  const rl = state.riskLimits;
+  if (!body || !rl) return;
+  const usd = v => '$' + Number(v || 0).toFixed(0);
+  const x   = v => Number(v || 0).toFixed(2) + '×';
+  const n   = v => String(Math.round(v || 0));
+  let html = '';
+  html += _rlBar(rl.daily_risk_used, rl.daily_risk_cap_usdt, 75,
+                 `Daily risk budget (${Number(rl.daily_risk_cap_pct||0).toFixed(0)}%/day)`, usd);
+  html += _rlBar(rl.leverage_used_x, rl.leverage_cap_x, 75, 'Portfolio leverage', x);
+  html += _rlBar(rl.open_count + rl.pending_count, rl.max_concurrent, 80,
+                 'Concurrent positions', n);
+  const floorDist = rl.equity - rl.equity_floor;
+  const floorTag = rl.floor_breached
+    ? '<span class="tag red">⛔ FLOOR BREACHED — entries blocked</span>'
+    : `<span class="tag green">✓ ${usd(floorDist)} above floor (${usd(rl.equity_floor)})</span>`;
+  const haltTag = rl.halted
+    ? '<span class="tag red">HALTED</span>'
+    : (rl.graceful_stop ? '<span class="tag" style="background:#FEFCBF;color:#975A16;">GRACEFUL STOP</span>'
+                        : '<span class="tag green">TRADING</span>');
+  html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">${floorTag}${haltTag}</div>`;
+  body.innerHTML = html;
+}
+
+function renderExitBreakdown() {
+  const body = el('exit-breakdown-body');
+  const xa = state.exitAttribution;
+  if (!body || !xa || !xa.breakdown) return;
+  const totalEl = el('exit-breakdown-total');
+  if (totalEl) totalEl.textContent = (xa.total_trades || 0) + ' trades';
+  const rows = Object.values(xa.breakdown)
+    .sort((a, b) => b.count - a.count)
+    .map(m => {
+      const pnlColor = m.total_net_pnl >= 0 ? 'var(--c-green)' : 'var(--c-red)';
+      let tag = '';
+      if (m.exit_method === xa.top_alpha)     tag = ' <span class="tag green" style="font-size:9px;">α source</span>';
+      if (m.exit_method === xa.top_destroyer) tag = ' <span class="tag red" style="font-size:9px;">destroyer</span>';
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed #E2E8F0;">
+          <div><b>${m.exit_method}</b>${tag}<br>
+            <span class="label" style="margin:0;">${m.count}× (${Number(m.share_pct||0).toFixed(1)}%) · WR ${Number(m.win_rate||0).toFixed(0)}% · avg ${Number(m.avg_r||0).toFixed(2)}R</span>
+          </div>
+          <div style="font-weight:700;color:${pnlColor};">${fmtUSD(m.total_net_pnl||0)}</div>
+        </div>`;
+    });
+  body.innerHTML = rows.length ? rows.join('')
+    : '<div class="label" style="padding:14px 0;">No closed trades yet</div>';
+}
+
+function renderPendingOrders() {
+  const body = el('pending-orders-list');
+  const rl = state.riskLimits;
+  if (!body || !rl) return;
+  const cnt = el('pending-orders-count');
+  const orders = rl.pending_orders || [];
+  if (cnt) cnt.textContent = String(orders.length);
+  if (!orders.length) {
+    body.innerHTML = '<div class="label" style="padding:14px 0;">No pending orders</div>';
+    return;
+  }
+  body.innerHTML = orders.map(o => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed #E2E8F0;">
+      <div><b>${o.symbol}</b> <span class="tag ${o.side === 'LONG' ? 'green' : 'red'}" style="font-size:9px;">${o.side}</span>
+        ${o.chased ? '<span class="tag" style="font-size:9px;background:#FEFCBF;color:#975A16;">chasing</span>' : ''}<br>
+        <span class="label" style="margin:0;">limit ${Number(o.limit_price).toFixed(4)} · qty ${Number(o.qty).toFixed(4)}</span>
+      </div>
+      <div class="label" style="margin:0;">${Number(o.age_sec).toFixed(0)}s</div>
+    </div>`).join('');
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
