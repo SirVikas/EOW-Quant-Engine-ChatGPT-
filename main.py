@@ -335,6 +335,13 @@ _pending_exploration_origins: dict[str, dict] = {}
 # risk_ctrl.on_price_update fires the SL-at-price close.
 _pending_exit_attributions: dict[str, dict] = {}
 
+# FTD-PHOENIX-ETE-001: bridge entry-time ETE truth score to close-time AAP recording.
+# Keyed by symbol; written at execution approval, consumed at AttributionSnapshot record.
+# _ete_result is a per-tick local — without this bridge the entry score died with the
+# tick that opened the trade, so Phase-2 truth calibration accumulated zero samples
+# despite thousands of closed trades.
+_pending_ete_results: dict[str, object] = {}
+
 # FTD-DECISION-SNAP: append-only suppression event log
 _supp_log = SuppressionEventLog()
 
@@ -869,6 +876,9 @@ async def on_tick(tick: Tick):
                 utc_hour    = _ctx_utc_hour,
             )
         # FTD-PHOENIX-AAP-001: Alpha Attribution snapshot
+        # Recover the entry-time ETE score: the local _ete_result is None on close
+        # ticks (it is only set on the tick that evaluated the entry).
+        _ete_result = _pending_ete_results.pop(sym, None)
         if cfg.TRUTH_ENGINE_ENABLED and _ete_result is not None:
             _snap_aap = AttributionSnapshot(
                 trade_id=str(getattr(last_trade, 'trade_id', id(last_trade))),
@@ -1298,6 +1308,11 @@ async def on_tick(tick: Tick):
         _session_trades = pnl_calc.trades[_boot_replay_count:]
         _p52_cl  = 0
         for _t in reversed(_session_trades):
+            # Scratch exits (|pnl| ≤ BE epsilon, mostly BE stops) carry no edge
+            # signal: 5 back-to-back -$0.01 scratches were triggering a 30-min
+            # LCC pause (1400 LCC_PAUSED skips/session) and starving the engine.
+            if abs(_t.net_pnl) <= cfg.BREAKEVEN_EPSILON_USDT:
+                continue
             if _t.net_pnl < 0:
                 _p52_cl += 1
             else:
@@ -1319,6 +1334,8 @@ async def on_tick(tick: Tick):
         # ── Phase 6: Streak Intelligence — momentum-aware score adjustment ──
         _p52_cw = 0
         for _t in reversed(_session_trades):
+            # Symmetric scratch skip — a +$0.02 BE exit is not a hot-streak win.
+            if abs(_t.net_pnl) <= cfg.BREAKEVEN_EPSILON_USDT: continue
             if _t.net_pnl > 0: _p52_cw += 1
             else: break
         _streak_result = streak_engine.check(
@@ -1510,6 +1527,10 @@ async def on_tick(tick: Tick):
         _session_trade_count = len(pnl_calc.trades) - _boot_replay_count
         _consecutive_losses = 0
         for _t in reversed(pnl_calc.trades[_boot_replay_count:]):
+            # Scratch exits are excluded — same rule as the _p52_cl counter, so
+            # profit-guard HARD_STOP and LCC see the same streak definition.
+            if abs(_t.net_pnl) <= cfg.BREAKEVEN_EPSILON_USDT:
+                continue
             if _t.net_pnl < 0:
                 _consecutive_losses += 1
             else:
@@ -2623,6 +2644,9 @@ async def on_tick(tick: Tick):
                     _pending_rcaf_signal_ids[sym] = _rcaf_signal_id
                     # FTD-EXPLORE-ATTR: persist RL exploration provenance at approval time
                     _pending_exploration_origins[sym] = _build_eo(_rl_reason)
+                    # FTD-PHOENIX-ETE-001: bridge entry truth score to close-time AAP record
+                    if _ete_result is not None:
+                        _pending_ete_results[sym] = _ete_result
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker
@@ -2686,6 +2710,9 @@ async def on_tick(tick: Tick):
                     _pending_rcaf_signal_ids[sym] = _rcaf_signal_id
                     # FTD-EXPLORE-ATTR: persist RL exploration provenance at approval time
                     _pending_exploration_origins[sym] = _build_eo(_rl_reason)
+                    # FTD-PHOENIX-ETE-001: bridge entry truth score to close-time AAP record
+                    if _ete_result is not None:
+                        _pending_ete_results[sym] = _ete_result
                     _trades_this_hour.append(now_ms)
                     _last_trade_ts[sym] = now_ms
                     trade_frequency.record_trade()   # FTD-REF-023: dry-spell tracker

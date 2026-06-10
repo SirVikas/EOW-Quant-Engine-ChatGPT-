@@ -47,12 +47,14 @@ from __future__ import annotations
 import json
 import math
 import pathlib
+import random
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple
 
 from loguru import logger
 
+from config import cfg
 from core.time.session_definitions import SESSION_BUCKETS_UTC, make_context  # canonical session authority
 from core.persistence.exploration_log import exploration_event_log as _exploration_log  # FTD-EXPLORE-OBSERVABILITY
 
@@ -84,6 +86,10 @@ ENTRY_EV_FLOOR    = -0.30   # minimum expected PnL to allow trade (USDT)
 UCB_EXPLORE_COEFF = 1.5     # base UCB1 coefficient C in C×√(ln(N)/n)
 MIN_VISITS_EXPLORE = 3      # must visit ≥ this many times before blocking
 MAX_CONTEXTS      = 200     # cap on distinct (regime|session|strategy) contexts
+# ε-greedy floor: without it, mature non-toxic contexts (n ≥ 3) whose Q drifted
+# mildly negative were exploited forever (live explore ratio hit 0.00), so the
+# bandit could never re-rank contexts as market conditions changed.
+EXPLORE_EPSILON   = 0.05    # 5% of decisions on non-toxic contexts explore unconditionally
 
 # Regime-aware UCB multipliers — controls exploration intensity per regime type.
 # TRENDING markets have more exploitable structure → slightly more exploration.
@@ -369,6 +375,8 @@ class RLContextualBandit:
         self._floor_raises:   int   = 0   # times score floor raised
         self._toxic_blocks:   int   = 0   # trades blocked via toxic flag
         self._floor_explores: int   = 0   # Rule 4 floor-explore grants (FTD-EXPLORE-FLOOR)
+        self._epsilon_explores: int = 0   # Rule 2.5 ε-greedy grants
+        self._scratch_updates:  int = 0   # closes skipped as fee-noise scratches
         self._init_ts:        float = time.time()
         # Active save path — bound by load_state() when a custom path is given,
         # defaults to the global constant so all auto-saves are consistent.
@@ -513,6 +521,25 @@ class RLContextualBandit:
                 f"wr={state.win_rate:.0%} n={state.n_visits})"
             )
 
+        # Rule 2.5: ε-greedy exploration floor — fires AFTER the toxic block so
+        # known-toxic contexts are never re-entered, but guarantees a trickle of
+        # exploration for everything else regardless of visit count or Q drift.
+        if random.random() < EXPLORE_EPSILON:
+            self._total_allowed    += 1
+            self._explore_trades   += 1
+            self._epsilon_explores += 1
+            try:   # FTD-EXPLORE-OBSERVABILITY: persist for cross-restart attribution
+                _exploration_log.record(
+                    session=_log_sess, context=ctx_key, pipeline=_log_pipe,
+                    q_value=state.q_value, visits=state.n_visits,
+                    rule="RULE2_5_EPSILON_EXPLORE",
+                )
+            except Exception:
+                pass
+            return True, (
+                f"RL_EPSILON_EXPLORE(q={state.q_value:+.3f} n={state.n_visits})"
+            )
+
         # Rule 4: minimum exploration floor — fires BEFORE UCB evaluation.
         # UCB1's bonus is always positive, so mildly-negative contexts pass Rule 3
         # anyway.  Rule 4 intercepts them first to give a distinct diagnostic label
@@ -580,6 +607,17 @@ class RLContextualBandit:
         state   = self._get_or_create(ctx_key)
         now_ms  = int(time.time() * 1000)
 
+        # Scratch exits (|pnl| ≤ BE epsilon) are fee-noise, not context signal.
+        # 57% of closes were BE scratches; letting them drive TD updates dragged
+        # every context toward mildly-negative Q (avg -0.10) and froze the
+        # explore/exploit balance. They are counted but never update Q or visits.
+        if abs(net_pnl) <= cfg.BREAKEVEN_EPSILON_USDT:
+            self._scratch_updates += 1
+            logger.debug(
+                f"[RL-ENGINE] scratch close ignored ctx={ctx_key} pnl={net_pnl:+.4f}"
+            )
+            return
+
         # Step 1: Time decay of stale Q-value
         old_q = _apply_time_decay(state.q_value, state.last_ts, now_ms)
 
@@ -620,7 +658,7 @@ class RLContextualBandit:
             archive_rl_summary(
                 total_contexts=telem.get("total_contexts", 0),
                 total_pulls=self._total_pulls,
-                avg_q=round(sum(s.q_value for s in self._q_table.values()) / max(len(self._q_table), 1), 4),
+                avg_q=round(sum(s.q_value for s in self._table.values()) / max(len(self._table), 1), 4),
                 toxic_count=len(self._toxic_contexts),
                 eco_toxic_count=len(self._eco_toxic_contexts),
                 convergence_state=telem.get("convergence_state", "UNKNOWN"),
@@ -877,6 +915,8 @@ class RLContextualBandit:
                 "explore_trades": self._explore_trades,
                 "exploit_trades": self._exploit_trades,
                 "floor_explores": self._floor_explores,
+                "epsilon_explores": self._epsilon_explores,
+                "scratch_updates_skipped": self._scratch_updates,
                 "toxic_blocks":   self._toxic_blocks,
                 "boost_fires":    self._boost_fires,
                 "floor_lowers":   self._floor_lowers,

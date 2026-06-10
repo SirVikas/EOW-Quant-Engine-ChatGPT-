@@ -83,12 +83,17 @@ def _derive_confidence_direction(avg_q: float) -> str:
 
 
 def _count_consecutive_losses(trades: List[Any]) -> int:
+    from config import cfg
     count = 0
     for trade in reversed(trades):
         pnl = _safe(lambda: float(trade.net_pnl), None)  # noqa: B023
         if pnl is None:
             break
-        if pnl <= 0:
+        # Scratch exits (|pnl| ≤ BE epsilon) are excluded — must match the live
+        # streak counters in main.py or diagnostics disagree with gating behavior.
+        if abs(pnl) <= cfg.BREAKEVEN_EPSILON_USDT:
+            continue
+        if pnl < 0:
             count += 1
         else:
             break

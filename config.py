@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.84.0"
+APP_VERSION = "1.85.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -253,6 +253,10 @@ class EngineConfig(BaseSettings):
     SPEED_EXIT_TRIGGER_R: float = 2.50    # raised 1.50→2.50 — exit on stall only after 2.5R captured; historical avg_win was only 0.83 due to early exits
     SPEED_EXIT_STALL_TICKS: int = 25      # raised 20→25 — more patience; TP=4.0R needs time to be reached
     BREAKEVEN_EPSILON_USDT: float = 0.05  # Net PnL band considered breakeven
+    # BE stop locks cost + 0.1R so armed-BE exits book a small real win instead of a
+    # fee-noise scratch. Scratches were 57% of exits and read as losses by the
+    # win-rate, LCC streak, and RL reward layers, stalling all three at once.
+    BREAKEVEN_PROFIT_LOCK_R: float = 0.10
     # FTD-PHOENIX-ESR-001 Phase 3/6: Trade Duration Protection
     TRADE_MIN_HOLD_FAST_FAIL_SEC: float = 90.0  # FAST_FAIL cannot fire before 90s — eradicates sub-90s loss exits
 

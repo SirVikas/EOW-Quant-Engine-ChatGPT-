@@ -106,6 +106,11 @@ class AutoIntelligenceEngine:
         self._daily_cycles:      int   = 0
         self._day_reset_ts:      float = time.time()
         self._last_run_ts:       float = 0.0
+        # Observability: diagnose.py showed "AI State: None / Last Run: None" with
+        # no way to tell a dead loop from a perpetually-skipped one. These two
+        # fields make every tick outcome visible via summary().
+        self._last_tick_ts:      float = 0.0
+        self._last_skip_reason:  str   = ""
         self._pending_cycle_id:  Optional[str] = None
         self._pending_trades_at: Optional[int] = None   # trade count when correction was applied
 
@@ -153,6 +158,7 @@ class AutoIntelligenceEngine:
         Returns a summary dict (always safe to discard).
         """
         now       = time.time()
+        self._last_tick_ts = now
         n_trades  = self._trades_fn()
 
         # ── Daily counter reset ───────────────────────────────────────────────
@@ -460,6 +466,7 @@ class AutoIntelligenceEngine:
         self._write_report(rec)
 
     def _skip(self, reason: str) -> Dict[str, Any]:
+        self._last_skip_reason = reason
         return {
             "module":  self.MODULE,
             "phase":   self.PHASE,
@@ -479,9 +486,21 @@ class AutoIntelligenceEngine:
 
     def summary(self) -> Dict[str, Any]:
         last = self._history[-1].to_dict() if self._history else {}
+        # Three observable states: loop never ticked (task dead / just booted),
+        # ticking but every cycle gated, or at least one full cycle executed.
+        if self._last_tick_ts == 0.0:
+            state = "LOOP_NOT_TICKING"
+        elif self._last_run_ts == 0.0:
+            state = f"WAITING({self._last_skip_reason or 'no skip recorded'})"
+        else:
+            state = "ACTIVE"
         return {
             "module":         self.MODULE,
             "phase":          self.PHASE,
+            "state":          state,
+            "status":         state,
+            "last_tick_ts":   int(self._last_tick_ts * 1000) if self._last_tick_ts else None,
+            "last_skip_reason": self._last_skip_reason or None,
             "enabled":        self._enabled,
             "interval_min":   self._interval_sec / 60.0,
             "min_trades":     self._min_trades,
