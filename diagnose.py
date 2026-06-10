@@ -567,19 +567,37 @@ else:
 hr("19. ECONOMIC TRUTH — EXPECTANCY")
 et = get_fast("/api/economic-truth/expectancy")
 if "_error" not in et:
+    # Keys must match compute_expectancy_reconstruction() output — the previous
+    # names (expectancy_per_trade, edge_score, ...) never existed in the API
+    # response, so this section printed $0.0000/None regardless of real data.
+    _net_exp   = et.get("overall_net_expectancy")
+    _gross_exp = et.get("overall_gross_expectancy")
     kv("Expectancy ($/trade)",
-       f"${et.get('expectancy_per_trade', et.get('expectancy', 0)):.4f}",
-       warn=lambda v: safe_float(v.strip('$')) < 0)
-    kv("Edge Score",    et.get("edge_score") or et.get("alpha_score"))
-    kv("Fee Drag %",    et.get("fee_drag_pct") or et.get("fee_burden_pct"),
-       warn=lambda v: v and safe_float(str(v).strip('%')) > 25)
-    kv("Breakeven WR",  et.get("breakeven_win_rate") or et.get("breakeven_wr"))
-    regime_exp = et.get("regime_expectancy") or et.get("by_regime") or {}
-    if isinstance(regime_exp, dict) and regime_exp:
+       f"${_net_exp:.4f}" if _net_exp is not None else "n/a (no trades)",
+       warn=lambda v: safe_float(str(v).strip('$')) < 0)
+    kv("Gross Expectancy",
+       f"${_gross_exp:.4f}" if _gross_exp is not None else "n/a")
+    kv("Survivability", et.get("survivability_verdict"),
+       warn=lambda v: str(v) in ("NOT_VIABLE", "FEE_COLLAPSED", "ERROR"))
+    _fee_adj = (((et.get("decomposition") or {}).get("fee_adjusted") or {})
+                .get("OVERALL") or {})
+    _fdr = _fee_adj.get("fee_destruction_ratio")
+    if isinstance(_fdr, (int, float)):
+        kv("Fee Destruction Ratio", f"{_fdr:.1%}",
+           warn=lambda v: safe_float(str(v).strip('%')) > 25)
+    kv("Survivable Regions", et.get("survivable_region_count"))
+    _trend = (et.get("expectancy_decay") or {}).get("trend")
+    if _trend:
+        kv("Expectancy Trend", _trend, warn=lambda v: v == "DEGRADING")
+    _regime_decomp = (et.get("decomposition") or {}).get("regime") or {}
+    if isinstance(_regime_decomp, dict) and _regime_decomp:
         print("  Expectancy by regime:")
-        for reg_name, exp_val in regime_exp.items():
-            flag_ = " ⚠" if safe_float(exp_val) < 0 else " ✓"
-            print(f"    {reg_name:<20} ${safe_float(exp_val):.4f}{flag_}")
+        for reg_name, reg_stats in _regime_decomp.items():
+            _re = (reg_stats or {}).get("net_expectancy")
+            if _re is None:
+                continue
+            flag_ = " ⚠" if _re < 0 else " ✓"
+            print(f"    {reg_name:<20} ${_re:.4f}{flag_}")
 else:
     et2 = get_fast("/api/economic-truth/alpha")
     if "_error" not in et2:
