@@ -400,11 +400,15 @@ if "_error" not in rg:
                 lo   = band_vals.get("long_rsi",  band_vals.get("lo", "?"))
                 hi   = band_vals.get("short_rsi", band_vals.get("hi", "?"))
                 surv = surv_by_regime.get(regime_name, band_vals.get("survival_rate", "?"))
+                # window n distinguishes "all blocked" (n>0, surv=0) from
+                # "regime never evaluated" (n=0, surv=0)
+                n_ev = (rg.get("window_evals") or {}).get(regime_name)
+                surv_txt = f"{surv}" if n_ev is None else f"{surv} (window n={n_ev})"
                 if regime_name in ("TRENDING", "UNKNOWN"):
                     # Unified band: both LONG and SHORT use long_rsi threshold
-                    print(f"  {regime_name:<20} BOTH≤{lo:<6}  (unified band)  survival={surv}")
+                    print(f"  {regime_name:<20} BOTH≤{lo:<6}  (unified band)  survival={surv_txt}")
                 else:
-                    print(f"  {regime_name:<20} LONG≤{lo:<6}  SHORT≥{hi:<6}  survival={surv}")
+                    print(f"  {regime_name:<20} LONG≤{lo:<6}  SHORT≥{hi:<6}  survival={surv_txt}")
             else:
                 print(f"  {regime_name}: {band_vals}")
     kv("Total Evaluated", rg.get("total_evaluated"))

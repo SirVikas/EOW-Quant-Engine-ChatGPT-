@@ -110,8 +110,10 @@ d5 = gov.get_signal(regime="TRENDING", rsi_val=45.0, rsi_prev=46.0,
 check("B08 TR LONG passes", not d5.blocked)
 check("B09 TR LONG side=LONG", d5.side == "LONG", f"side={d5.side}")
 
-# TRENDING SHORT: not above_sma, rsi >= 52
-d6 = gov.get_signal(regime="TRENDING", rsi_val=54.0, rsi_prev=53.0,
+# TRENDING SHORT (schema v2 unified threshold): not above_sma, rsi <= long_band(48)
+# — confirms downtrend momentum; old v1 logic (rsi >= 52) never fired in
+# sustained downtrends and was replaced in the governor.
+d6 = gov.get_signal(regime="TRENDING", rsi_val=45.0, rsi_prev=46.0,
                     above_sma=False, symbol="TEST")
 check("B10 TR SHORT passes", not d6.blocked)
 check("B11 TR SHORT side=SHORT", d6.side == "SHORT")
