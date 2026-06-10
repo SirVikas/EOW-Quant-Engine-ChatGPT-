@@ -21,6 +21,10 @@ _R_RELAX_T2 = 0.35
 _R_RELAX_T3 = 0.60
 _R_FLOOR    = 1.05
 
+# Pending limit orders older than this are cancelled — prevents an endless
+# price-chase loop in trending markets and frees the symbol for new entries.
+_PENDING_ORDER_TTL_MS = 180_000
+
 
 @dataclass
 class PendingLimitOrder:
@@ -37,6 +41,7 @@ class PendingLimitOrder:
     regime:      str
     created_ts:  int
     ticks_open:  int = 0       # how many ticks this order has been waiting
+    chased:      bool = False  # True once price-chase moved it to market — fills as taker
 
 
 @dataclass
@@ -305,11 +310,23 @@ class RiskController:
         pending = self.pending_orders.get(symbol)
         if pending:
             pending.ticks_open += 1
+            # TTL: in a steadily trending market the chase loop can repeat forever
+            # (limit moved to last price, price moves away, chase again). A stale
+            # pending order also blocks all new entries for the symbol.
+            if int(time.time() * 1000) - pending.created_ts > _PENDING_ORDER_TTL_MS:
+                del self.pending_orders[symbol]
+                self._emit(
+                    "INFO", symbol,
+                    f"LIMIT ORDER EXPIRED {pending.side} after "
+                    f"{_PENDING_ORDER_TTL_MS // 1000}s without fill — cancelled."
+                )
+                pending = None
             filled = False
-            if pending.side == "LONG" and price <= pending.limit_price:
-                filled = True
-            elif pending.side == "SHORT" and price >= pending.limit_price:
-                filled = True
+            if pending:
+                if pending.side == "LONG" and price <= pending.limit_price:
+                    filled = True
+                elif pending.side == "SHORT" and price >= pending.limit_price:
+                    filled = True
 
             if filled:
                 pos = OpenPosition(
@@ -326,12 +343,15 @@ class RiskController:
                     regime=pending.regime,
                 )
                 del self.pending_orders[symbol]
-                self.open_position(pos, order_type="LIMIT")
-            elif pending.ticks_open >= cfg.PRICE_CHASE_TICKS:
+                # A chased order crossed the spread — that is a taker fill and must
+                # pay taker fee + slippage; booking it as LIMIT inflated paper PnL.
+                self.open_position(pos, order_type="MARKET" if pending.chased else "LIMIT")
+            elif pending and pending.ticks_open >= cfg.PRICE_CHASE_TICKS:
                 # Price hasn't come to us — chase: move limit to current market
                 old_lp = pending.limit_price
                 pending.limit_price = price
                 pending.ticks_open  = 0
+                pending.chased      = True
                 self._emit(
                     "INFO", symbol,
                     f"PRICE CHASE {pending.side}: limit {old_lp:.4f} → {price:.4f} (market)"

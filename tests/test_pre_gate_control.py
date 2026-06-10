@@ -262,56 +262,37 @@ def test_regime_push_not_called_when_gate_blocked(mock_execution_orchestrator):
 
 def test_signal_not_generated_when_gate_blocked(mock_execution_orchestrator):
     """
-    When gate is blocked, no signal should be generated (strategy never called).
+    qFTD-010: the scan pipeline (signal generation) stays ALWAYS-ON for
+    learning-engine warmup even when the gate is blocked — what must never
+    fire while blocked is EXECUTION (run_cycle). This mirrors the always-on
+    contract already pinned for regime_det.push() above.
     """
     import main as m
     import asyncio
     from core.market_data import Tick, Candle
     import time
 
-    original_generate = None
-    generate_calls = []
-    if hasattr(m, 'get_strategy'):
-        original_get = m.get_strategy
-        def spy_get(*args, **kwargs):
-            result = original_get(*args, **kwargs)
-            # Wrap generate_signal
-            original_gen = result.generate_signal
-            def spy_gen(*a, **kw):
-                generate_calls.append(a)
-                return original_gen(*a, **kw)
-            result.generate_signal = spy_gen
-            return result
-        m.get_strategy = spy_get
-
-    try:
-        tick = Tick(
-            symbol="ETHUSDT", price=3000.0, qty=1.0,
-            bid=2999.0, ask=3001.0, volume_24h=5e8,
-            ts=int(time.time() * 1000),
-        )
-        candle = Candle(
-            symbol="ETHUSDT", interval="1m",
-            open=2990.0, high=3010.0, low=2980.0, close=3000.0,
-            volume=50.0, ts=int(time.time() * 1000) - 90_000,
-            closed=True,
-        )
-        m.mdp.closed_candles["ETHUSDT"] = candle
-        m.mdp.candle_close_buffers["ETHUSDT"].extend([3000.0] * 60)
-        m._last_processed_candle_ts.pop("ETHUSDT", None)
-        m._last_symbol_eval_ms.pop("ETHUSDT", None)
-
-        asyncio.get_event_loop().run_until_complete(m.on_tick(tick))
-    finally:
-        if original_generate is not None:
-            m.get_strategy = original_get
-
-    # With gate blocked, signal generation path is never reached
-    assert generate_calls == [], (
-        f"BUILD REJECTED: strategy.generate_signal() called despite gate block — "
-        f"signal generation must not run in safe mode"
+    tick = Tick(
+        symbol="ETHUSDT", price=3000.0, qty=1.0,
+        bid=2999.0, ask=3001.0, volume_24h=5e8,
+        ts=int(time.time() * 1000),
     )
-    # Also verify pre_gate was called
+    candle = Candle(
+        symbol="ETHUSDT", interval="1m",
+        open=2990.0, high=3010.0, low=2980.0, close=3000.0,
+        volume=50.0, ts=int(time.time() * 1000) - 90_000,
+        closed=True,
+    )
+    m.mdp.closed_candles["ETHUSDT"] = candle
+    m.mdp.candle_close_buffers["ETHUSDT"].extend([3000.0] * 60)
+    m._last_processed_candle_ts.pop("ETHUSDT", None)
+    m._last_symbol_eval_ms.pop("ETHUSDT", None)
+
+    asyncio.get_event_loop().run_until_complete(m.on_tick(tick))
+
+    # Execution must never be reached while the gate is blocked
+    mock_execution_orchestrator.run_cycle.assert_not_called()
+    # And the pre-gate must have been consulted
     mock_execution_orchestrator.gate_check.assert_called()
 
 

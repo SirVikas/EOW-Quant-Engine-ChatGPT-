@@ -194,10 +194,11 @@ class TestLearningEngine:
 
     def test_mid_win_rate_interpolates(self):
         """WR between LOW and HIGH → interpolated weight."""
-        # Exactly 50% win-rate (5 wins, 5 losses) with ≥ MIN_SAMPLES
+        # Win-rate is recency-weighted (FTD-RL-EVOLUTION): 5 wins followed by
+        # 5 losses computes a weighted WR ≈ 0.30, not 0.50. Interleave so the
+        # weighted WR lands mid-band (≈ 0.48 with the newest trade a loss).
         for _ in range(5):
             self.le.record("TRENDING", True)
-        for _ in range(5):
             self.le.record("TRENDING", False)
         w = self.le.get_regime_weight("TRENDING")
         assert WEIGHT_AT_LOW_WR < w < 1.0
