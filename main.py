@@ -3225,6 +3225,24 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     _thought(f"📂 State restored: {_restore_src}", "SYSTEM")
     logger.info(f"[BOOT-STATE] {_restore_src}")
 
+    # ── FTD-PHOENIX-ETE-001: rehydrate AAP from the truth archive ────────────
+    # AAP snapshots were session-only while the archive persisted every record;
+    # calibration reports (/api/truth/calibration, alpha matrix) therefore reset
+    # on every restart — fatal for the multi-session Phase-2 500-sample target.
+    if cfg.TRUTH_ENGINE_ENABLED:
+        try:
+            _arch_snaps = truth_archive.load_all()
+            for _s in _arch_snaps:
+                alpha_attribution_platform.record(_s)
+            if _arch_snaps:
+                _thought(
+                    f"📂 Truth archive rehydrated: {len(_arch_snaps)} "
+                    f"ETE-scored snapshots restored to AAP",
+                    "SYSTEM",
+                )
+        except Exception as _exc:
+            _thought(f"⚠️ Truth archive rehydration failed: {_exc}", "SYSTEM")
+
     # ── Phase 4: Profit Engine boot log ─────────────────────────────────────
     _thought(
         f"⚡ Phase 4 Profit Engine online | "
@@ -13731,10 +13749,16 @@ async def unified_intelligence_export():
 
 @app.get("/api/truth/ete-status")
 async def get_ete_status():
+    # archive_samples is cumulative across restarts (truth_archive.db) — the
+    # Phase-2 calibration progress metric; eval_count is session-scoped.
+    _n_arch = truth_archive.count()
     return {
         "gate_enabled": cfg.ETE_GATE_ENABLED,
         "min_score": cfg.ETE_MIN_SCORE,
         "observation_mode": not cfg.ETE_GATE_ENABLED,
+        "archive_samples": _n_arch,
+        "calibration_target": 500,
+        "calibration_progress_pct": round(min(100.0, _n_arch / 500 * 100), 1),
         **entry_truth_engine.summary(),
     }
 

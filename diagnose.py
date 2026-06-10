@@ -515,7 +515,14 @@ if "_error" not in ete:
     kv("ETE Gate Enabled",   ete.get("gate_enabled"), warn=lambda v: v is True)
     kv("Observation Mode",   ete.get("observation_mode"))
     kv("Min Score (future)", ete.get("min_score"))
-    kv("Scores Evaluated",   ete.get("total_evaluated") or ete.get("evaluations"))
+    kv("Scores Evaluated (session)", ete.get("total_evaluated") or ete.get("evaluations"))
+    # Phase-2 calibration progress — cumulative archive count, survives restarts
+    n_arch = ete.get("archive_samples")
+    if n_arch is not None:
+        tgt = ete.get("calibration_target", 500)
+        kv("ETE Samples (cumulative)",
+           f"{n_arch} / {tgt}  ({min(100.0, n_arch / tgt * 100):.1f}%)",
+           warn=lambda v: n_arch < tgt)
 else:
     print(f"  ETE: {ete.get('_error', 'unavailable')}")
 

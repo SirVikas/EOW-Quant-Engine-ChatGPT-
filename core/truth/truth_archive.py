@@ -88,5 +88,62 @@ class TruthArchive:
             except Exception:
                 return []
 
+    def count(self) -> int:
+        """Cumulative ETE-scored sample count — survives restarts.
+        This is the Phase-2 calibration progress metric (target ≥500)."""
+        with self._lock:
+            try:
+                with sqlite3.connect(ARCHIVE_PATH) as conn:
+                    return conn.execute(
+                        "SELECT COUNT(*) FROM truth_snapshots"
+                    ).fetchone()[0]
+            except Exception:
+                return 0
+
+    def load_all(self, limit: int = 10000) -> List[AttributionSnapshot]:
+        """Rehydrate archived snapshots (oldest first) for boot-time AAP restore.
+        Without this, calibration reports only cover the current session and a
+        multi-session 500-sample calibration would be silently invalid."""
+        with self._lock:
+            try:
+                with sqlite3.connect(ARCHIVE_PATH) as conn:
+                    conn.row_factory = sqlite3.Row
+                    rows = conn.execute(
+                        "SELECT * FROM truth_snapshots ORDER BY created_at ASC LIMIT ?",
+                        (limit,),
+                    ).fetchall()
+            except Exception as e:
+                logger.warning(f"[TRUTH-ARCHIVE] load_all failed: {e}")
+                return []
+        snaps: List[AttributionSnapshot] = []
+        for r in rows:
+            try:
+                snaps.append(AttributionSnapshot(
+                    trade_id=r["trade_id"] or "",
+                    symbol=r["symbol"] or "",
+                    session=r["session"] or "UNKNOWN",
+                    strategy=r["strategy"] or "",
+                    regime=r["regime"] or "UNKNOWN",
+                    entry_truth_score=r["entry_truth_score"] or 0.0,
+                    exit_truth_score=r["exit_truth_score"] or 0.0,
+                    structure_score=r["structure_score"] or 0.0,
+                    regime_score=r["regime_score"] or 0.0,
+                    momentum_score=r["momentum_score"] or 0.0,
+                    volatility_score=r["volatility_score"] or 0.0,
+                    liquidity_score=r["liquidity_score"] or 0.0,
+                    cost_score=r["cost_score"] or 0.0,
+                    net_pnl=r["net_pnl"] or 0.0,
+                    r_multiple=r["r_multiple"] or 0.0,
+                    genome_id=r["genome_id"],
+                    rl_context=r["rl_context"],
+                    ts_entry=r["ts_entry"] or 0.0,
+                    ts_exit=r["ts_exit"] or 0.0,
+                    alpha_sources=json.loads(r["alpha_sources"] or "[]"),
+                    destruction_sources=json.loads(r["destruction_sources"] or "[]"),
+                ))
+            except Exception:
+                continue   # one corrupt row must not abort the whole restore
+        return snaps
+
 
 truth_archive = TruthArchive()
