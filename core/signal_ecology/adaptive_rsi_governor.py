@@ -341,6 +341,11 @@ class AdaptiveRSIGovernor:
                 continue
 
             new_bands = dict(self._bands[regime_key])
+            if new_bands == old_bands:
+                # Bands clamped at floor/ceiling — a no-op pass every 30 s would
+                # flood the 100-slot adapt log and DCEL archive, evicting real
+                # adaptation history within the hour.
+                continue
             entry = {
                 "ts": int(time.time() * 1000),
                 "regime": regime_key,
@@ -418,6 +423,10 @@ class AdaptiveRSIGovernor:
                 k: round(self._survival_rate(k), 4)
                 for k in self._windows
             }
+            # _survival_rate returns 0.0 for an EMPTY window too — without the
+            # window size, "survival=0.0" is indistinguishable from total
+            # starvation in forensic reports.
+            window_evals = {k: len(w) for k, w in self._windows.items()}
             return {
                 "module":              "AdaptiveRSIGovernor",
                 "ftd":                 "057",
@@ -425,6 +434,7 @@ class AdaptiveRSIGovernor:
                 "total_passed":        self._total_passed,
                 "global_survival_rate": round(self.global_survival_rate(), 4),
                 "survival_by_regime":  sr_by_regime,
+                "window_evals":        window_evals,
                 "bands":               bands,
                 "recent_decisions":    list(self._decision_log)[-20:],
                 "adapt_log":           list(self._adapt_log)[-20:],

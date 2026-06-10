@@ -27,7 +27,13 @@ proceeding.
 ## Project Context
 
 - **Stack**: Python / FastAPI / asyncio / loguru / SQLite
-- **Mode**: Paper trading + RL (BYPASS_ALL_GATES=True by default)
+- **Mode**: Paper trading + RL. `BYPASS_ALL_GATES` defaults to **False**
+  (quality-gate stack active since v1.51.3); set the env var
+  `BYPASS_ALL_GATES=True` only for RL-learning/calibration phases where
+  throughput matters more than gate quality (e.g., ETE Phase-2 trade
+  collection). Note: lean-gate Gate 4 (loss-streak ≥6) can deadlock the
+  engine until restart when gates are active, since the streak only resets
+  on a winning trade
 - **Critical globals**: `pnl_calc`, `rl_engine`, `data_lake`, `_thought_log`,
   `_boot_ts`, `trade_flow_monitor`, `genome`, `healer`, `scaler`
 - **Thread model**: Single-process; asyncio event loop + `to_thread()` for
