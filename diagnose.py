@@ -568,6 +568,32 @@ if "_error" not in am and am:
 else:
     print("  Alpha matrix: no data yet (accumulates after first trades)")
 
+# Phase-2 Truth Calibration — decile breakdown + ETE_MIN_SCORE threshold sweep.
+# The sweep answers the Phase-2 question directly: "what would expectancy be
+# if only trades scoring ≥ T had been taken?" (cumulative from above).
+cal = get("/api/truth/calibration")
+if "_error" not in cal and cal.get("total_trades", 0) > 0:
+    deciles = cal.get("calibration", [])
+    print(f"\n  PHASE-2 CALIBRATION — decile detail ({cal['total_trades']} archived trades):")
+    print(f"  {'Decile':<10} {'Trades':>7} {'Avg PnL':>10} {'Win%':>7}")
+    for d_ in deciles:
+        if d_.get("trade_count", 0) > 0:
+            print(f"  {d_.get('decile','?'):<10} {d_.get('trade_count',0):>7} "
+                  f"{d_.get('avg_pnl',0):>10.4f} {d_.get('win_rate',0)*100:>6.1f}%")
+    print(f"\n  ETE_MIN_SCORE THRESHOLD SWEEP (expectancy if only score ≥ T taken):")
+    print(f"  {'T':>4} {'Kept':>6} {'Kept%':>7} {'Exp $/trade':>12} {'Win%':>7}")
+    total_n = sum(d_.get("trade_count", 0) for d_ in deciles)
+    for t_ in range(0, 100, 10):
+        kept = [d_ for d_ in deciles
+                if int(d_["decile"].split("-")[0]) >= t_ and d_.get("trade_count", 0) > 0]
+        n_ = sum(d_["trade_count"] for d_ in kept)
+        if n_ == 0:
+            continue
+        exp_ = sum(d_["avg_pnl"] * d_["trade_count"] for d_ in kept) / n_
+        wr_  = sum(d_["win_rate"] * d_["trade_count"] for d_ in kept) / n_
+        flag = " ✓" if exp_ > 0 else ""
+        print(f"  {t_:>4} {n_:>6} {n_/total_n*100:>6.1f}% {exp_:>12.4f} {wr_*100:>6.1f}%{flag}")
+
 # ── 18. PIPELINE BREAK FORENSICS ─────────────────────────────────────────────
 hr("18. PIPELINE BREAK FORENSICS")
 pb = get("/api/diagnostics/pipeline-break-forensics")
