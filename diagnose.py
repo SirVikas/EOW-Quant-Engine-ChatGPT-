@@ -215,6 +215,36 @@ if isinstance(trades, list) and trades:
     rr = abs(avg_win / avg_loss) if avg_loss else 0
     rr_warn = " ⚠ need > 0.5" if rr < 0.5 else ""
     print(f"  {'Practical R:R':<30} {rr:.2f}{rr_warn}")
+
+    # Exit giveback — quantifies how much peak R the book reaches vs what it
+    # banks. Phase-2 showed entry scores carry no expectancy power (no viable
+    # ETE_MIN_SCORE, no component discriminates dollars), which makes the
+    # exit side the open suspect: BE scratches dominate while peak_r ≈ 0.4-0.7.
+    _gb = [t for t in trades if (t.get("peak_r") or 0) > 0]
+    if _gb:
+        def _exit_family(t):
+            reason = str(t.get("exit_reason") or t.get("exit_method") or "?")
+            if reason.startswith("R="):
+                return "R≥0.8 partial"
+            return reason.split(":")[0].strip()[:14] or "?"
+        fam = {}
+        for t in _gb:
+            d = fam.setdefault(_exit_family(t), {"n": 0, "peak": 0.0, "final": 0.0})
+            d["n"]     += 1
+            d["peak"]  += t.get("peak_r") or 0
+            d["final"] += t.get("r_multiple") or 0
+        print()
+        print("  EXIT GIVEBACK ANALYSIS (R units, current trade window):")
+        print(f"  {'EXIT':<16} {'N':>5} {'AVG_PEAK_R':>11} {'AVG_FINAL_R':>12} {'GIVEBACK_R':>11}")
+        for k, d in sorted(fam.items(), key=lambda x: -x[1]["n"])[:8]:
+            ap, af = d["peak"] / d["n"], d["final"] / d["n"]
+            print(f"  {k:<16} {d['n']:>5} {ap:>11.3f} {af:>12.3f} {ap-af:>11.3f}")
+        _hp = [t for t in _gb
+               if (t.get("peak_r") or 0) >= 0.5 and (t.get("r_multiple") or 0) <= 0]
+        if _hp:
+            _gbr = sum((t.get("peak_r") or 0) - (t.get("r_multiple") or 0) for t in _hp)
+            print(f"  Peaked ≥0.5R but exited ≤0R: {len(_hp)}/{len(_gb)} trades "
+                  f"({len(_hp)/len(_gb)*100:.0f}%)  |  {_gbr:.1f}R total given back ⚠")
     durations = [(t.get("duration_sec") or t.get("hold_seconds") or 0)
                  for t in trades
                  if t.get("duration_sec") or t.get("hold_seconds")]
