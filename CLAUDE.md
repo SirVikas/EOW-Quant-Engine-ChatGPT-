@@ -229,12 +229,28 @@ positive expectancy** — every T from 0–80 keeps expectancy ≈ −$0.07/trad
 not dollars — high-score trades scratch at BE while losses run full size.
 
 **Conclusion**: do NOT set `ETE_GATE_ENABLED=True` on the current score.
-Phase-3 is blocked until the score weighting is recalibrated. Prime suspect:
-the `structure` component (top alpha destroyer: 265 losses scoring <40,
-avg 21.4). The per-component expectancy split (`/api/truth/component-calibration`,
-printed in diagnose.py §17 since v1.88.0) determines whether any single
-component carries gating power the composite dilutes — that data drives the
-reweighting decision.
+
+### Phase-2 Component Split Result (v1.88.0, 535 samples) — reweighting path CLOSED
+
+The per-component expectancy split (`/api/truth/component-calibration`,
+diagnose.py §17) showed **no component carries gating power** — expectancy is
+negative on both sides of the 40-score split for every component:
+
+- `structure` is **INVERTED**: the ≥40 cohort does *worse* (WR 32.9%,
+  −$0.071) than the <40 cohort (WR 41.6%, −$0.069). 86% of trades score <40
+  (avg 21.4) — its "top alpha destroyer" rank was a base-rate artifact.
+- `regime` is **constant**: all 535 trades score ≥40 — zero discrimination.
+- `cost` <40 has WR 4.8% (2/42 wins) but small losses — a near-certain-loss
+  flag without expectancy impact.
+
+**Institutional verdict**: entry-score reweighting cannot produce a viable
+ETE gate; the truth signal is NOT in the entry components. The expectancy
+lever is the EXIT side + fees: gross expectancy is only −$0.02/trade while
+fees add −$0.026, and 46.5% of exits are BE scratches with peak_r ≈ 0.4–0.7
+given back. Chain-B work is redirected to exit-policy truth (giveback
+analysis in diagnose.py §3 since v1.88.1; XTE advisory data is the eventual
+Phase-4 vehicle). Any future ETE gate requires redesigned component features,
+not reweighted ones.
 
 ### Future AI Session Briefing
 Any future session must be able to answer:
