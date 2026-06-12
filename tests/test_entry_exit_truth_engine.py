@@ -466,6 +466,24 @@ class TestAlphaAttributionPlatform(unittest.TestCase):
             self.assertIn("win_rate", decile)
             self.assertIn("trade_count", decile)
 
+    def test_component_calibration_split(self):
+        self.aap.record(make_snapshot("T1", net_pnl=1.0, structure_score=80.0))
+        self.aap.record(make_snapshot("T2", net_pnl=-1.0, structure_score=20.0))
+        result = self.aap.component_calibration(threshold=40.0)
+        self.assertEqual(result["total_trades"], 2)
+        self.assertEqual(len(result["components"]), 6)
+        structure = next(c for c in result["components"] if c["component"] == "structure")
+        self.assertEqual(structure["below"]["trade_count"], 1)
+        self.assertEqual(structure["below"]["win_rate"], 0.0)
+        self.assertEqual(structure["at_or_above"]["trade_count"], 1)
+        self.assertEqual(structure["at_or_above"]["win_rate"], 1.0)
+
+    def test_component_calibration_empty(self):
+        result = AlphaAttributionPlatform().component_calibration()
+        self.assertEqual(result["total_trades"], 0)
+        for c in result["components"]:
+            self.assertEqual(c["below"]["trade_count"], 0)
+
     def test_summary_returns_total_snapshots(self):
         self.aap.record(make_snapshot("T1"))
         s = self.aap.summary()

@@ -216,9 +216,25 @@ without calibration risks blocking valid entries on an uncalibrated threshold.
 | Phase | Name | Gate Condition | Status |
 |-------|------|---------------|--------|
 | 1 | Observation Mode | None — always active | ✅ ACTIVE |
-| 2 | Truth Calibration | 500+ trades collected | ⏳ PENDING |
-| 3 | ETE Entry Governance | Phase-2 complete + ETE_MIN_SCORE set | ⏳ PENDING |
+| 2 | Truth Calibration | 500+ trades collected | ✅ DATA COMPLETE (530 samples, 2026-06-12) — **verdict: NO viable ETE_MIN_SCORE** |
+| 3 | ETE Entry Governance | Phase-2 complete + ETE_MIN_SCORE set | ⛔ BLOCKED — composite score has no expectancy power (see Phase-2 result) |
 | 4 | XTE Autonomous Exit | Phase-3 stable for 200+ live trades | ⏳ PENDING |
+
+### Phase-2 Calibration Result (v1.88.0, 530 archived ETE samples)
+
+The composite-score threshold sweep (diagnose.py §17) found **no threshold with
+positive expectancy** — every T from 0–80 keeps expectancy ≈ −$0.07/trade
+(T=60 is *worse*: −$0.086). Win rate IS monotonic with score (18.8% in the
+40–50 decile → 47.4% at 60–70), so the score predicts win *probability* but
+not dollars — high-score trades scratch at BE while losses run full size.
+
+**Conclusion**: do NOT set `ETE_GATE_ENABLED=True` on the current score.
+Phase-3 is blocked until the score weighting is recalibrated. Prime suspect:
+the `structure` component (top alpha destroyer: 265 losses scoring <40,
+avg 21.4). The per-component expectancy split (`/api/truth/component-calibration`,
+printed in diagnose.py §17 since v1.88.0) determines whether any single
+component carries gating power the composite dilutes — that data drives the
+reweighting decision.
 
 ### Future AI Session Briefing
 Any future session must be able to answer:

@@ -184,6 +184,42 @@ class AlphaAttributionPlatform:
             "total_trades": len(snaps),
         }
 
+    def component_calibration(self, threshold: float = 40.0) -> dict:
+        """Per-component expectancy split: trades where the component scored
+        below vs at/above `threshold`. Answers whether any single component
+        carries gating power that the composite ETE score dilutes — the
+        Phase-2 follow-up question after the composite threshold sweep
+        showed no viable ETE_MIN_SCORE."""
+        with self._lock:
+            snaps = list(self._snapshots)
+
+        def _stats(pnls: List[float]) -> dict:
+            if not pnls:
+                return {"trade_count": 0, "avg_pnl": 0.0, "win_rate": 0.0}
+            return {
+                "trade_count": len(pnls),
+                "avg_pnl": round(sum(pnls) / len(pnls), 4),
+                "win_rate": round(sum(1 for p in pnls if p > 0) / len(pnls), 3),
+            }
+
+        components = ["structure", "regime", "momentum", "volatility", "liquidity", "cost"]
+        result = []
+        for c in components:
+            attr = f"{c}_score"
+            low  = [s.net_pnl for s in snaps if getattr(s, attr) < threshold]
+            high = [s.net_pnl for s in snaps if getattr(s, attr) >= threshold]
+            result.append({
+                "component": c,
+                "below": _stats(low),
+                "at_or_above": _stats(high),
+            })
+
+        return {
+            "threshold": threshold,
+            "components": result,
+            "total_trades": len(snaps),
+        }
+
     def summary(self) -> dict:
         with self._lock:
             n = len(self._snapshots)

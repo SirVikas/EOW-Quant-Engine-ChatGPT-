@@ -594,6 +594,22 @@ if "_error" not in cal and cal.get("total_trades", 0) > 0:
         flag = " ✓" if exp_ > 0 else ""
         print(f"  {t_:>4} {n_:>6} {n_/total_n*100:>6.1f}% {exp_:>12.4f} {wr_*100:>6.1f}%{flag}")
 
+# Component-level split — does any single component carry gating power
+# that the composite score dilutes? (Phase-2 follow-up after the composite
+# sweep showed no viable ETE_MIN_SCORE.)
+cc = get("/api/truth/component-calibration")
+if "_error" not in cc and cc.get("total_trades", 0) > 0:
+    thr_ = cc.get("threshold", 40)
+    print(f"\n  COMPONENT EXPECTANCY SPLIT (score < {thr_:.0f} vs ≥ {thr_:.0f}):")
+    print(f"  {'Component':<12} {'n<':>6} {'Exp<':>9} {'WR<':>6}   "
+          f"{'n≥':>6} {'Exp≥':>9} {'WR≥':>6}")
+    for c_ in cc.get("components", []):
+        lo_, hi_ = c_["below"], c_["at_or_above"]
+        flag = " ✓" if hi_["avg_pnl"] > 0 else ""
+        print(f"  {c_['component']:<12} {lo_['trade_count']:>6} {lo_['avg_pnl']:>9.4f} "
+              f"{lo_['win_rate']*100:>5.1f}%   {hi_['trade_count']:>6} "
+              f"{hi_['avg_pnl']:>9.4f} {hi_['win_rate']*100:>5.1f}%{flag}")
+
 # ── 18. PIPELINE BREAK FORENSICS ─────────────────────────────────────────────
 hr("18. PIPELINE BREAK FORENSICS")
 pb = get("/api/diagnostics/pipeline-break-forensics")

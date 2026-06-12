@@ -13781,6 +13781,10 @@ async def get_alpha_matrix():
 async def get_truth_calibration():
     return alpha_attribution_platform.truth_calibration_report()
 
+@app.get("/api/truth/component-calibration")
+async def get_truth_component_calibration(threshold: float = 40.0):
+    return alpha_attribution_platform.component_calibration(threshold=threshold)
+
 @app.get("/api/truth/recent")
 async def get_truth_recent():
     return truth_archive.recent(50)
