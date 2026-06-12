@@ -384,7 +384,11 @@ class RiskController:
             pos.peak_r = max(pos.peak_r, (pos.peak_price - pos.entry_price) / entry_risk)
             if (not pos.breakeven_armed) and pos.peak_r >= cfg.BREAKEVEN_TRIGGER_R:
                 cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
-                be_sl = pos.entry_price + cost_per_unit
+                # Same lock as trade_manager MOVE_BE: cost alone left armed-BE exits
+                # filling a few ticks short of true breakeven (92 "BE" exits avg
+                # -0.028R instead of the designed +0.1R small win).
+                be_sl = (pos.entry_price + cost_per_unit
+                         + cfg.BREAKEVEN_PROFIT_LOCK_R * entry_risk)
                 if be_sl > pos.stop_loss:
                     pos.stop_loss = be_sl
                 pos.breakeven_armed = True
@@ -412,7 +416,8 @@ class RiskController:
             pos.peak_r = max(pos.peak_r, (pos.entry_price - pos.peak_price) / entry_risk)
             if (not pos.breakeven_armed) and pos.peak_r >= cfg.BREAKEVEN_TRIGGER_R:
                 cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
-                be_sl = pos.entry_price - cost_per_unit
+                be_sl = (pos.entry_price - cost_per_unit
+                         - cfg.BREAKEVEN_PROFIT_LOCK_R * entry_risk)
                 if be_sl < pos.stop_loss:
                     pos.stop_loss = be_sl
                 pos.breakeven_armed = True
