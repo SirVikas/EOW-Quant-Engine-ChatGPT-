@@ -135,6 +135,8 @@ class AlphaAttributionPlatform:
             {
                 "score_bucket": bucket,
                 "avg_pnl": round(sum(pnls) / len(pnls), 4) if pnls else 0.0,
+                "win_rate": round(sum(1 for p in pnls if p > 0) / len(pnls), 3)
+                    if pnls else 0.0,
                 "trade_count": len(pnls),
             }
             for bucket, pnls in score_buckets.items()
