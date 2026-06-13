@@ -13847,6 +13847,12 @@ async def get_exit_coordinator():
     # FTD-094A X1+X2: read-only exit-authority audit + shadow parity stats.
     return exit_coordinator_shadow.summary()
 
+@app.get("/api/governance/lifecycle")
+async def get_learning_lifecycle():
+    # GAP-H1/D1/D2/D3: learning lifecycle governance + campaign/completion status.
+    from core.governance.learning_lifecycle import learning_lifecycle
+    return learning_lifecycle.summary()
+
 @app.get("/api/truth/alpha-matrix")
 async def get_alpha_matrix():
     return alpha_attribution_platform.alpha_discovery_matrix()

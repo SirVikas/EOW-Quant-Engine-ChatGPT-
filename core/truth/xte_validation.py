@@ -162,9 +162,84 @@ def verdict() -> dict:
     }
 
 
+def _read_paths() -> List[dict]:
+    import json
+    import os
+    path = getattr(cfg, "XTE_PATH_ARCHIVE", "reports/xte_observations/xte_paths.jsonl")
+    if not os.path.exists(path):
+        return []
+    out: List[dict] = []
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if line:
+                    try:
+                        out.append(json.loads(line))
+                    except Exception:
+                        continue
+    except Exception:
+        return []
+    return out
+
+
+def path_counterfactual() -> dict:
+    """GAP-C4 — PATH-ACCURATE counterfactual: replay each trade's per-tick path and
+    take the exit at the FIRST tick XTE advised protection (TIGHTEN/SCALE_OUT),
+    versus the realized exit. Requires XTE_OBSERVE_PATH_ENABLED during collection.
+
+    Unlike counterfactual_analysis() (summary-level, upper-bound), this measures
+    the actual R at the advised exit point, so the $ delta is path-accurate, not
+    an estimate.
+    """
+    paths = _read_paths()
+    n = len(paths)
+    if n == 0:
+        return {
+            "samples": 0,
+            "note": "No path data. Set XTE_OBSERVE_PATH_ENABLED=True during collection to enable path-accurate replay.",
+        }
+    rows = xte_observer.read_records()
+    dpr = _dollars_per_r(rows) if rows else 0.0
+    improved = worsened = neutral = no_signal = 0
+    r_delta_total = 0.0
+    for p in paths:
+        actual_r = p.get("exit_r", 0.0) or 0.0
+        cf_r = None
+        for pt in p.get("path", []):
+            if pt.get("advisory") in PROTECT_LABELS:
+                cf_r = pt.get("current_r", 0.0)
+                break
+        if cf_r is None:
+            no_signal += 1
+            continue
+        d = cf_r - actual_r
+        r_delta_total += d
+        if d > 0.01:
+            improved += 1
+        elif d < -0.01:
+            worsened += 1
+        else:
+            neutral += 1
+    evaluated = improved + worsened + neutral
+    return {
+        "samples": n,
+        "evaluated": evaluated,
+        "no_protective_signal": no_signal,
+        "improved": improved,
+        "worsened": worsened,
+        "neutral": neutral,
+        "net_r_delta": round(r_delta_total, 4),
+        "net_usd_delta": round(r_delta_total * dpr, 6),
+        "dollars_per_r": round(dpr, 6),
+        "method": "first-protective-advisory exit vs realized exit (path-accurate)",
+    }
+
+
 def full_report() -> dict:
     return {
         "calibration": calibration_curve(),
         "counterfactual": counterfactual_analysis(),
+        "path_counterfactual": path_counterfactual(),
         "verdict": verdict(),
     }

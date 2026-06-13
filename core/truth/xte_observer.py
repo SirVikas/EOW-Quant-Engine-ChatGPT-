@@ -21,8 +21,10 @@ import json
 import os
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
+
+_PATH_MAX = 400   # GAP-C4: bounded per-trade path length
 
 from loguru import logger
 
@@ -67,6 +69,7 @@ class _Trajectory:
     last_advisory: str = "HOLD"
     advisory_transitions: int = 0
     peak_r_seen: float = 0.0
+    path: List[dict] = field(default_factory=list)   # GAP-C4: per-tick path (bounded)
 
 
 class XTEObserver:
@@ -136,6 +139,14 @@ class XTEObserver:
             traj.last_advisory = label
             traj.last_score = result.score
             traj.peak_r_seen = max(traj.peak_r_seen, peak_r)
+            if getattr(cfg, "XTE_OBSERVE_PATH_ENABLED", False) and len(traj.path) < _PATH_MAX:
+                traj.path.append({
+                    "price": round(float(price), 6),
+                    "current_r": round(cur_r, 4),
+                    "peak_r": round(peak_r, 4),
+                    "score": round(result.score, 1),
+                    "advisory": label,
+                })
         return result
 
     # ── Per-trade finalization (position closed) ──────────────────────────────
@@ -189,10 +200,32 @@ class XTEObserver:
 
         if not self._append(record):
             return None
+        # GAP-C4: persist the per-tick path (separate archive) for path-accurate replay.
+        if traj is not None and traj.path:
+            self._append_path({
+                "ts": record["ts"], "symbol": symbol, "regime": regime,
+                "exit_method": exit_method, "exit_r": round(exit_r, 4),
+                "peak_r": round(peak_r, 4), "won": net_pnl >= 0,
+                "net_pnl": round(net_pnl, 6), "path": traj.path,
+            })
         with self._lock:
             self._closed_count += 1
             self._last_record = record
         return record
+
+    def _append_path(self, record: dict) -> bool:
+        path = getattr(cfg, "XTE_PATH_ARCHIVE", "reports/xte_observations/xte_paths.jsonl")
+        try:
+            with self._lock:
+                d = os.path.dirname(path)
+                if d:
+                    os.makedirs(d, exist_ok=True)
+                with open(path, "a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(record) + "\n")
+            return True
+        except Exception as e:
+            logger.warning(f"[XTE-OBS] path archive append failed: {e}")
+            return False
 
     def _append(self, record: dict) -> bool:
         path = self._archive_path()
