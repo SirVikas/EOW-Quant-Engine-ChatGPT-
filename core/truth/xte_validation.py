@@ -1,0 +1,170 @@
+"""
+XTE Validation & Counterfactual Analysis — FTD-094A follow-on (GAP-6/7/8 closure)
+
+Offline, read-only analysis over the XTE observation archive. Produces:
+  • calibration_curve()       — score bucket → win-rate / exit_r / giveback / expectancy   [GAP-6]
+  • counterfactual_analysis() — XTE advisory vs realized giveback + bounded $ estimate      [GAP-7/8]
+  • verdict()                 — promotion recommendation (needs ≥ MIN_SAMPLES)              [P2]
+  • full_report()             — the three combined
+
+NO execution influence, NO live coupling: operates purely on archived per-trade
+records via xte_observer.read_records().
+
+Honest scope: the archive stores per-trade SUMMARIES (peak_r, exit_r, advisory
+trajectory), not tick-level price paths. A *true* path-replay counterfactual is
+therefore not possible from this data. The economic figure here is an explicitly
+BOUNDED upper estimate under the assumptions stated in counterfactual_analysis().
+A path-accurate counterfactual would require tick-level archival (noted as a
+future enhancement, not delivered here).
+"""
+from __future__ import annotations
+
+from typing import Any, Dict, List
+
+from config import cfg
+from core.truth.xte_observer import xte_observer
+
+MIN_SAMPLES = 500
+PROTECT_LABELS = {"TIGHTEN", "SCALE_OUT", "BREAKEVEN"}
+GIVEBACK_EVENT_PCT = 30.0   # a trade "gave back" if it surrendered >30% of peak_r
+
+
+def _avg(xs: List[float]) -> float:
+    return sum(xs) / len(xs) if xs else 0.0
+
+
+def _dollars_per_r(rows: List[dict]) -> float:
+    # Empirical $/1R from the trades themselves (net_pnl / exit_r where defined).
+    vals = [r["net_pnl"] / r["exit_r"] for r in rows
+            if r.get("exit_r") and abs(r["exit_r"]) > 1e-6]
+    return _avg(vals)
+
+
+def _bucket(score: Any) -> str:
+    if score is None:
+        return "n/a"
+    b = int(float(score) // 10) * 10
+    return f"{b}-{b + 10}"
+
+
+def calibration_curve() -> dict:
+    rows = xte_observer.read_records()
+    n = len(rows)
+    buckets: Dict[str, Dict[str, Any]] = {}
+    for r in rows:
+        key = _bucket(r.get("xte_score_avg"))
+        agg = buckets.setdefault(key, {"n": 0, "wins": 0, "exit_r": [], "giveback": [], "pnl": []})
+        agg["n"] += 1
+        agg["wins"] += 1 if r.get("won") else 0
+        agg["exit_r"].append(r.get("exit_r", 0.0))
+        agg["giveback"].append(r.get("giveback_pct", 0.0))
+        agg["pnl"].append(r.get("net_pnl", 0.0))
+    curve = {
+        k: {
+            "n": v["n"],
+            "win_rate_pct": round(v["wins"] / v["n"] * 100, 1),
+            "avg_exit_r": round(_avg(v["exit_r"]), 4),
+            "avg_giveback_pct": round(_avg(v["giveback"]), 2),
+            "expectancy_usd": round(_avg(v["pnl"]), 6),
+        }
+        for k, v in sorted(buckets.items())
+    }
+    return {"samples": n, "buckets": curve}
+
+
+def counterfactual_analysis() -> dict:
+    """Advisory-alignment + bounded economic estimate.
+
+    Assumption (stated, bounded): on a trade where XTE's final advisory was
+    protective (TIGHTEN/SCALE_OUT/BREAKEVEN) AND the trade then surrendered
+    >GIVEBACK_EVENT_PCT of peak, a protective exit would have locked
+    GIVEBACK_LOCK_FRACTION × peak_r. recoverable_r = max(0, lock×peak_r − exit_r).
+    Summed × empirical $/R = an UPPER BOUND on what heeding XTE could have saved.
+    The opportunity cost of protective advisories on trades that did NOT give back
+    (cutting a runner) is NOT estimable from summary data — reported as a count
+    only, not a dollar figure.
+    """
+    rows = xte_observer.read_records()
+    n = len(rows)
+    lock = float(getattr(cfg, "GIVEBACK_LOCK_FRACTION", 0.5))
+    dpr = _dollars_per_r(rows)
+
+    protect_and_gaveback = 0      # XTE said protect, trade gave back  → XTE correct
+    protect_no_giveback = 0       # XTE said protect, trade held       → potential runner cut
+    hold_and_ran = 0             # XTE said hold, no giveback          → XTE correct
+    hold_and_gaveback = 0        # XTE said hold, trade gave back      → XTE missed
+    recoverable_r_total = 0.0
+
+    for r in rows:
+        protect = (r.get("xte_advisory_last") in PROTECT_LABELS)
+        gave_back = r.get("giveback_pct", 0.0) > GIVEBACK_EVENT_PCT
+        peak_r = r.get("peak_r", 0.0) or 0.0
+        exit_r = r.get("exit_r", 0.0) or 0.0
+        if protect and gave_back:
+            protect_and_gaveback += 1
+            recoverable_r_total += max(0.0, lock * peak_r - exit_r)
+        elif protect and not gave_back:
+            protect_no_giveback += 1
+        elif (not protect) and gave_back:
+            hold_and_gaveback += 1
+        else:
+            hold_and_ran += 1
+
+    flagged = protect_and_gaveback + protect_no_giveback
+    giveback_events = protect_and_gaveback + hold_and_gaveback
+    return {
+        "samples": n,
+        "dollars_per_r": round(dpr, 6),
+        "alignment": {
+            "protect_correct": protect_and_gaveback,
+            "protect_possible_runner_cut": protect_no_giveback,
+            "hold_correct": hold_and_ran,
+            "hold_missed_giveback": hold_and_gaveback,
+            "protect_precision_pct": round(protect_and_gaveback / flagged * 100, 1) if flagged else None,
+            "protect_recall_pct": round(protect_and_gaveback / giveback_events * 100, 1) if giveback_events else None,
+        },
+        "bounded_savings_usd_upper": round(recoverable_r_total * dpr, 6),
+        "bounded_savings_r_upper": round(recoverable_r_total, 4),
+        "assumptions": {
+            "lock_fraction": lock,
+            "giveback_event_pct": GIVEBACK_EVENT_PCT,
+            "note": "Upper bound only; opportunity cost of protective advisories on non-giveback trades is not estimable from summary telemetry (no price path).",
+        },
+    }
+
+
+def verdict() -> dict:
+    rows = xte_observer.read_records()
+    n = len(rows)
+    if n < MIN_SAMPLES:
+        return {
+            "status": "INSUFFICIENT_DATA",
+            "samples": n,
+            "target": MIN_SAMPLES,
+            "progress_pct": round(min(100.0, n / MIN_SAMPLES * 100), 1),
+            "recommendation": "KEEP OBSERVING — enable XTE_OBSERVE_ENABLED and collect more closed trades.",
+        }
+    cf = counterfactual_analysis()
+    prec = cf["alignment"]["protect_precision_pct"] or 0.0
+    saved = cf["bounded_savings_usd_upper"]
+    if saved > 0 and prec >= 50.0:
+        rec = "PROMOTION CANDIDATE — XTE protective advisories align with real giveback; proceed to a path-accurate counterfactual + Exit-Coordinator shadow (blueprint X1→X2) before any acting role."
+        status = "CANDIDATE"
+    else:
+        rec = "REJECT / REDESIGN — XTE advisories do not align with realized giveback; do not advance."
+        status = "REJECT"
+    return {
+        "status": status,
+        "samples": n,
+        "protect_precision_pct": prec,
+        "bounded_savings_usd_upper": saved,
+        "recommendation": rec,
+    }
+
+
+def full_report() -> dict:
+    return {
+        "calibration": calibration_curve(),
+        "counterfactual": counterfactual_analysis(),
+        "verdict": verdict(),
+    }

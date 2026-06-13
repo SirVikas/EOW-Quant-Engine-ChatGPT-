@@ -13820,6 +13820,12 @@ async def get_xte_observation():
     # FTD-094A: read-only XTE observation status + report sections.
     return {"status": xte_observer.summary(), "report": xte_observer.report_sections()}
 
+@app.get("/api/truth/xte/validation")
+async def get_xte_validation():
+    # FTD-094A follow-on: read-only calibration + counterfactual + verdict.
+    from core.truth.xte_validation import full_report as _xte_full_report
+    return _xte_full_report()
+
 @app.get("/api/truth/alpha-matrix")
 async def get_alpha_matrix():
     return alpha_attribution_platform.alpha_discovery_matrix()
