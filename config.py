@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.90.0"
+APP_VERSION = "1.91.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -236,6 +236,14 @@ class EngineConfig(BaseSettings):
     MAKER_FEE: float = 0.0002             # 0.02%
     TAKER_FEE: float = 0.0004             # 0.04%
     SLIPPAGE_EST: float = 0.0003          # 0.03% — realistic Binance futures slippage for major pairs
+    # Economic-viability dial (lean gate 3b). Round-trip cost = 2×taker + 2×slippage
+    # ≈ 0.14%. When the stop sits at ~0.2% the cost eats ~70% of every 1R risked, so
+    # even +0.4R gross winners book net losses (Fee Destruction 150%). Require the
+    # stop to clear MIN_SL_TO_COST_RATIO × round-trip cost so a trade can pay for
+    # itself. THIS IS THE PROFIT-vs-VOLUME DIAL: 3.0 (SL ≥ ~0.42%, cost ≤ 33% of R)
+    # prioritises profitability and cuts the cost-dominated micro-trades; lower it
+    # toward 1.0 to restore maximum trade volume at the cost of expectancy.
+    MIN_SL_TO_COST_RATIO: float = 3.0
     VOL_BASELINE_ATR_PCT: float = 0.20    # Baseline ATR% for dynamic edge premium
     VOL_PREMIUM_MULT: float = 0.05        # Small linear premium on required_r per unit ATR above baseline
     BASE_MIN_R: float = 1.50               # Minimum post-cost R — raised to enforce positive expectancy
