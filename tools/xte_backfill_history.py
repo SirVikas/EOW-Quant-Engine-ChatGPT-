@@ -58,7 +58,7 @@ def _summarize(group):
     import datetime as _dt
     ts = [int(t.get("entry_ts", 0) or 0) for t in group if t.get("entry_ts")]
     def _d(ms):
-        return _dt.datetime.utcfromtimestamp(ms / 1000).strftime("%Y-%m-%d") if ms else "?"
+        return _dt.datetime.fromtimestamp(ms / 1000, _dt.timezone.utc).strftime("%Y-%m-%d") if ms else "?"
     regimes = {}
     for t in group:
         regimes[t.get("regime", "?")] = regimes.get(t.get("regime", "?"), 0) + 1
@@ -117,7 +117,7 @@ def _backfill_one(trade, conn, observer) -> str:
 
     candles = _candles(conn, sym, entry_ts - _WARMUP_MS, exit_ts)
     in_trade = [c for c in candles if c["ts"] >= entry_ts]
-    if len(in_trade) < 2:
+    if len(in_trade) < 1:   # include short trades (the prior <2 excluded 56% — the losers)
         return "skip_candles"
 
     closes, highs, lows, vols = [], [], [], []
@@ -201,10 +201,10 @@ def main() -> int:
         print(f"    final verdict     : INSUFFICIENT_DATA ({v.get('samples')}/{v.get('target')}) — rely on interim above")
     else:
         print(f"    final verdict     : {v.get('status')}")
-        print(f"    +R per trade      : {v.get('avg_r_delta_per_trade')}  (bar >= {v.get('success_criteria',{}).get('min_r_per_trade')})  <-- the honest metric")
+        print(f"    +R per OBSERVED   : {v.get('avg_r_delta_per_observed')}  (bar >= {v.get('success_criteria',{}).get('min_r_per_trade')})  <-- THE honest population metric")
+        print(f"    +R per signaled   : {v.get('avg_r_delta_per_signaled')}  (subset XTE acted on — overstates)")
         print(f"    protect precision : {v.get('protect_precision_pct')}%")
         print(f"    gain concentration: top 5% of trades = {v.get('gain_concentration_top5pct')}% of total gain")
-        print(f"    uplift% (context) : {v.get('economic_uplift_pct')}  (unreliable near breakeven — do NOT headline)")
     pcf = rep["path_counterfactual"]
     print(f"    coverage          : evaluated={pcf.get('evaluated')} improved={pcf.get('improved')} "
           f"worsened={pcf.get('worsened')} no_signal={pcf.get('no_protective_signal')}")

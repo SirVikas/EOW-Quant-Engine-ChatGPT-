@@ -161,11 +161,12 @@ def verdict() -> dict:
     pcf = path_counterfactual()
     prec = cf["alignment"]["protect_precision_pct"] or 0.0
 
-    # Honest primary gate = path-accurate R improvement PER TRADE (not the % vs a
-    # near-breakeven denominator, which explodes). % is reported only as context.
-    avg_r = pcf.get("avg_r_delta_per_trade", 0.0) if pcf.get("evaluated") else 0.0
-    uplift_pct = pcf.get("uplift_pct_vs_realized") if pcf.get("evaluated") else None
-    basis = "path-accurate (R/trade)" if pcf.get("evaluated") else "no-path-data"
+    # Honest primary gate = R improvement averaged over ALL OBSERVED trades
+    # (holds count as 0), NOT just the subset XTE signaled on — that subset is
+    # self-selected toward developed trades and overstates the population effect.
+    avg_signaled = pcf.get("avg_r_delta_per_trade", 0.0) if pcf.get("evaluated") else 0.0
+    avg_r = pcf.get("avg_r_delta_per_observed", 0.0) if pcf.get("evaluated") else 0.0
+    basis = "path-accurate R/observed-trade" if pcf.get("evaluated") else "no-path-data"
 
     min_r = float(getattr(cfg, "XTE_SUCCESS_MIN_R_PER_TRADE", 0.05))
     min_prec = float(getattr(cfg, "XTE_SUCCESS_MIN_PROTECT_PRECISION", 50.0))
@@ -174,26 +175,26 @@ def verdict() -> dict:
     concentration = pcf.get("gain_concentration_top5pct")
     if success:
         status = "CANDIDATE"
-        rec = (f"PROMOTION CANDIDATE — +{avg_r}R/trade >= {min_r}R and protect precision "
-               f"{prec}% >= {min_prec}%. CAVEATS before X3: retrospective backtest; "
-               f"top-5% of trades = {concentration}% of the gain; verify selection bias "
-               "(skipped trades). Confirm on a live/forward slice before any acting role.")
+        rec = (f"PROMOTION CANDIDATE — +{round(avg_r,4)}R/observed-trade >= {min_r}R "
+               f"(+{round(avg_signaled,4)}R on signaled subset), precision {prec}% >= {min_prec}%. "
+               f"CAVEATS before X3: retrospective; top-5% = {concentration}% of gain; "
+               "confirm candle-coverage selection bias is resolved + a forward slice.")
     else:
         status = "REJECT"
-        rec = (f"REJECT / REDESIGN — +{avg_r}R/trade (need >= {min_r}R) or precision {prec}% "
-               f"(need >= {min_prec}%) below the success bar.")
+        rec = (f"REJECT / REDESIGN — +{round(avg_r,4)}R/observed-trade (need >= {min_r}R) or "
+               f"precision {prec}% (need >= {min_prec}%) below the success bar.")
     return {
         "status": status,
         "samples": n,
         "protect_precision_pct": prec,
-        "avg_r_delta_per_trade": avg_r,
-        "economic_uplift_pct": uplift_pct,          # context only; None when unreliable
+        "avg_r_delta_per_observed": round(avg_r, 4),    # primary (population)
+        "avg_r_delta_per_signaled": round(avg_signaled, 4),  # subset (context)
         "economic_basis": basis,
         "gain_concentration_top5pct": concentration,
         "success_criteria": {
             "min_r_per_trade": min_r,
             "min_protect_precision_pct": min_prec,
-            "note": "Primary gate is R/trade (denominator-safe). % vs realized is context only.",
+            "note": "Primary gate = R per OBSERVED trade (population), not per signaled trade.",
         },
         "recommendation": rec,
     }
@@ -265,7 +266,8 @@ def path_counterfactual() -> dict:
             neutral += 1
     evaluated = len(r_deltas)
     net_r = sum(r_deltas)
-    avg_r = net_r / evaluated if evaluated else 0.0
+    avg_r = net_r / evaluated if evaluated else 0.0           # per trade XTE SIGNALED on
+    avg_r_observed = net_r / n if n else 0.0                  # per trade OBSERVED (holds count as 0)
     net_usd = net_r * dpr
     total_realized = sum(r.get("net_pnl", 0.0) for r in rows)
     # gain concentration: share of positive delta from the top 5% of trades
@@ -281,7 +283,8 @@ def path_counterfactual() -> dict:
         "improved": improved,
         "worsened": worsened,
         "neutral": neutral,
-        "avg_r_delta_per_trade": round(avg_r, 4),      # PRIMARY honest metric
+        "avg_r_delta_per_trade": round(avg_r, 4),          # per trade XTE signaled on (subset)
+        "avg_r_delta_per_observed": round(avg_r_observed, 4),  # PRIMARY: per observed trade (population)
         "avg_usd_delta_per_trade": round(net_usd / evaluated, 6) if evaluated else 0.0,
         "net_r_delta": round(net_r, 4),
         "net_usd_delta": round(net_usd, 6),
