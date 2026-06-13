@@ -19,6 +19,7 @@ future enhancement, not delivered here).
 """
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, List
 
 from config import cfg
@@ -27,6 +28,18 @@ from core.truth.xte_observer import xte_observer
 MIN_SAMPLES = 500
 PROTECT_LABELS = {"TIGHTEN", "SCALE_OUT", "BREAKEVEN"}
 GIVEBACK_EVENT_PCT = 30.0   # a trade "gave back" if it surrendered >30% of peak_r
+_Z = 1.96                   # 95% normal-approx confidence
+
+
+def _mean_std(xs: List[float]) -> tuple:
+    n = len(xs)
+    if n == 0:
+        return 0.0, 0.0
+    m = sum(xs) / n
+    if n < 2:
+        return m, 0.0
+    var = sum((x - m) ** 2 for x in xs) / (n - 1)
+    return m, math.sqrt(var)
 
 
 def _avg(xs: List[float]) -> float:
@@ -258,10 +271,86 @@ def path_counterfactual() -> dict:
     }
 
 
+def interim_verdict() -> dict:
+    """Sequential early-stop on REAL data — the time/result balance.
+
+    Lets the campaign terminate before 500 when the evidence is statistically
+    decisive, using 95% normal-approx confidence on (a) protect precision and
+    (b) the per-trade path r-delta. Asymmetric by design: declare EARLY_REJECT
+    sooner (stop wasting time on a loser) than EARLY_CANDIDATE (be sure before
+    promoting). Uses ONLY real archived observations — no synthetic shortcut.
+    """
+    rows = xte_observer.read_records()
+    n = len(rows)
+    min_uplift = float(getattr(cfg, "XTE_SUCCESS_MIN_UPLIFT_PCT", 3.0))
+    min_prec = float(getattr(cfg, "XTE_SUCCESS_MIN_PROTECT_PRECISION", 50.0))
+    rej_n = int(getattr(cfg, "XTE_EARLY_REJECT_MIN_N", 100))
+    cand_n = int(getattr(cfg, "XTE_EARLY_CANDIDATE_MIN_N", 300))
+
+    if n < rej_n:
+        return {"status": "INSUFFICIENT", "n": n, "next_checkpoint": rej_n,
+                "note": f"Need ≥{rej_n} closed trades for the first early-stop check."}
+
+    # precision proportion CI (Wald)
+    cf = counterfactual_analysis()
+    al = cf["alignment"]
+    flagged = al["protect_correct"] + al["protect_possible_runner_cut"]
+    if flagged > 0:
+        p = al["protect_correct"] / flagged
+        pm = _Z * math.sqrt(max(0.0, p * (1 - p) / flagged))
+        prec_lo, prec_hi = (p - pm) * 100, (p + pm) * 100
+    else:
+        prec_lo = prec_hi = None
+
+    # per-trade path r-delta CI
+    deltas = []
+    for pth in _read_paths():
+        ar = pth.get("exit_r", 0.0) or 0.0
+        for pt in pth.get("path", []):
+            if pt.get("advisory") in PROTECT_LABELS:
+                deltas.append((pt.get("current_r", 0.0) or 0.0) - ar)
+                break
+    dm, dsd = _mean_std(deltas)
+    k = len(deltas)
+    dmargin = _Z * dsd / math.sqrt(k) if k > 1 else (abs(dm) if k == 1 else 0.0)
+    d_lo, d_hi = dm - dmargin, dm + dmargin
+
+    pcf = path_counterfactual()
+    total_realized = sum(r.get("net_pnl", 0.0) for r in rows)
+    econ_delta = pcf.get("net_usd_delta", 0.0) if pcf.get("evaluated") else cf["bounded_savings_usd_upper"]
+    uplift_pct = round(econ_delta / abs(total_realized) * 100, 2) if abs(total_realized) > 1e-9 else 0.0
+
+    # decision — reject earlier than accept
+    status, reason = "CONTINUE", f"inconclusive at n={n}; keep collecting"
+    reject = (prec_hi is not None and prec_hi < min_prec) or (k >= 2 and d_hi <= 0.0)
+    if reject:
+        status = "EARLY_REJECT"
+        reason = (f"even optimistically below bar at n={n} "
+                  f"(precision upper CI {round(prec_hi,1) if prec_hi is not None else 'NA'}% vs {min_prec}%, "
+                  f"r-delta upper CI {round(d_hi,3)}) — STOP, do not advance.")
+    elif n >= cand_n and prec_lo is not None and prec_lo >= min_prec and k >= 2 and d_lo > 0.0 and uplift_pct >= min_uplift:
+        status = "EARLY_CANDIDATE"
+        reason = (f"confidently above bar at n={n} (precision lower CI {round(prec_lo,1)}% ≥ {min_prec}%, "
+                  f"r-delta lower CI {round(d_lo,3)} > 0, uplift {uplift_pct}% ≥ {min_uplift}%) — "
+                  "may advance to X3 design; confirm at 500.")
+
+    return {
+        "status": status,
+        "n": n,
+        "checkpoints": {"early_reject_min_n": rej_n, "early_candidate_min_n": cand_n, "final_n": MIN_SAMPLES},
+        "protect_precision_ci_pct": [round(prec_lo, 1), round(prec_hi, 1)] if prec_lo is not None else None,
+        "path_r_delta_ci": [round(d_lo, 3), round(d_hi, 3)] if k else None,
+        "economic_uplift_pct": uplift_pct,
+        "reason": reason,
+        "data_basis": "real" if not any(r.get("simulated") for r in rows[:5]) else "SIMULATED (not proof)",
+    }
+
+
 def full_report() -> dict:
     return {
         "calibration": calibration_curve(),
         "counterfactual": counterfactual_analysis(),
         "path_counterfactual": path_counterfactual(),
+        "interim_verdict": interim_verdict(),
         "verdict": verdict(),
     }

@@ -134,15 +134,22 @@ def main() -> int:
     from core.truth import xte_validation as xv
     rep = xv.full_report()
     v = rep["verdict"]
-    print("\n  ── VERDICT (on SIMULATED data) ──")
-    print(f"    status               : {v.get('status')}")
-    print(f"    samples              : {v.get('samples')}")
-    print(f"    economic_uplift_pct  : {v.get('economic_uplift_pct')}  (bar ≥ {v.get('success_criteria', {}).get('min_uplift_pct')}%)")
-    print(f"    protect_precision_pct: {v.get('protect_precision_pct')}  (bar ≥ {v.get('success_criteria', {}).get('min_protect_precision_pct')}%)")
-    print(f"    economic_basis       : {v.get('economic_basis')}")
+    print("\n  ── FINAL VERDICT (on SIMULATED data) ──")
+    if v.get("status") == "INSUFFICIENT_DATA":
+        print(f"    status               : INSUFFICIENT_DATA ({v.get('samples')}/{v.get('target')}) "
+              "— final verdict needs 500; see INTERIM below.")
+    else:
+        print(f"    status               : {v.get('status')}")
+        print(f"    samples              : {v.get('samples')}")
+        print(f"    economic_uplift_pct  : {v.get('economic_uplift_pct')}  (bar ≥ {v.get('success_criteria', {}).get('min_uplift_pct')}%)")
+        print(f"    protect_precision_pct: {v.get('protect_precision_pct')}  (bar ≥ {v.get('success_criteria', {}).get('min_protect_precision_pct')}%)")
+        print(f"    economic_basis       : {v.get('economic_basis')}")
     pcf = rep["path_counterfactual"]
     print(f"    path: improved={pcf.get('improved')} worsened={pcf.get('worsened')} "
           f"net_r_delta={pcf.get('net_r_delta')} net_usd_delta={pcf.get('net_usd_delta')}")
+    iv = rep["interim_verdict"]
+    print(f"\n  ── INTERIM (early-stop) at n={iv.get('n')} ──")
+    print(f"    status: {iv.get('status')}  |  {iv.get('reason')}")
     print(f"\n    recommendation: {v.get('recommendation')}")
     print("\n  Inspect full report:  GET /api/truth/xte/validation")
     print("  Reset before real run: python tools/xte_simulate_campaign.py --reset --n 0  (or delete the jsonl)\n")
