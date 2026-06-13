@@ -131,10 +131,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="XTE historical backfill (real backtest evidence)")
     ap.add_argument("--db", default="data/eow_lake.db")
     ap.add_argument("--limit", type=int, default=20000)
-    ap.add_argument("--reset", action="store_true")
+    ap.add_argument("--append", action="store_true",
+                    help="append to existing archive (default: RESET — a backfill is a full replay)")
     ap.add_argument("--archive", default="reports/xte_observations/backfill_obs.jsonl")
     ap.add_argument("--paths", default="reports/xte_observations/backfill_paths.jsonl")
     args = ap.parse_args()
+    args.reset = not args.append   # default reset so re-runs never double-count
 
     print("\n  XTE HISTORICAL BACKFILL — real-data backtest (not synthetic)")
     cfg.XTE_OBSERVE_ARCHIVE = args.archive
@@ -176,9 +178,27 @@ def main() -> int:
     pcf = rep["path_counterfactual"]
     print(f"    coverage          : evaluated={pcf.get('evaluated')} improved={pcf.get('improved')} "
           f"worsened={pcf.get('worsened')} no_signal={pcf.get('no_protective_signal')}")
+    rs = rep["robustness_split"]
+    print(f"\n  ── WALK-FORWARD ROBUSTNESS (does it hold across time?) ──")
+    if rs.get("per_segment"):
+        for seg in rs["per_segment"]:
+            print(f"    segment {seg['segment']}: n={seg['n']} +{seg['avg_r_delta_per_trade']}R/trade "
+                  f"{'PASS' if seg['passes_bar'] else 'FAIL'}")
+        print(f"    consistent_across_time: {rs['consistent_across_time']} — {rs['interpretation']}")
+    else:
+        print(f"    {rs.get('note')}")
+
+    # selection-bias visibility
+    total = stats["ok"] + stats["skip_candles"] + stats["skip_fields"] + stats["skip_risk"]
+    cov = round(stats["ok"] / total * 100, 1) if total else 0.0
+    print(f"\n  ── SELECTION BIAS (the main threat) ──")
+    print(f"    candle coverage: {stats['ok']}/{total} trades = {cov}%  "
+          f"({stats['skip_candles']} skipped for no candles)")
+    if cov < 80:
+        print(f"    ⚠  {round(100-cov,1)}% of trades excluded — verdict is on a SUBSET, may not represent all trades.")
+
     print(f"\n    data_basis        : {iv.get('data_basis')}  (records tagged source=historical_backfill)")
-    print("    ⚠  retrospective backtest on the trades WITH candle coverage only — check the\n"
-          "       skipped count above for selection bias before trusting the verdict.")
+    print("    ⚠  retrospective backtest — confirm on a forward/live slice before any acting role (X3).")
     if stats["ok"] == 0:
         print("\n  NOTE: 0 trades backfilled — the lake has trades but no matching candle\n"
               "  windows (or no trades). Real evidence needs both. Check db_stats / candle coverage.")

@@ -382,11 +382,50 @@ def interim_verdict() -> dict:
     }
 
 
+def robustness_split(segments: int = 2) -> dict:
+    """Walk-forward check: split history chronologically (by trade exit_ts) into
+    `segments` and report R/trade + precision per segment. A real signal holds in
+    EVERY segment; a one-regime fluke shows up as a segment that fails. Guards
+    against trusting a single-period backtest before X3."""
+    paths = [p for p in _read_paths() if p.get("exit_ts")]
+    if len(paths) < segments * 20:
+        return {"segments": segments, "note": "insufficient time-stamped path data for a walk-forward split",
+                "n": len(paths)}
+    paths.sort(key=lambda p: p["exit_ts"])
+    min_r = float(getattr(cfg, "XTE_SUCCESS_MIN_R_PER_TRADE", 0.05))
+    size = len(paths) // segments
+    out = []
+    consistent = True
+    for s in range(segments):
+        chunk = paths[s * size:] if s == segments - 1 else paths[s * size:(s + 1) * size]
+        deltas = []
+        for p in chunk:
+            ar = p.get("exit_r", 0.0) or 0.0
+            pts = p.get("path", [])
+            for i, pt in enumerate(pts):
+                if pt.get("advisory") in PROTECT_LABELS:
+                    nxt = pts[i + 1] if i + 1 < len(pts) else pt
+                    deltas.append((nxt.get("current_r", pt.get("current_r", 0.0)) or 0.0) - ar)
+                    break
+        avg_r = round(sum(deltas) / len(deltas), 4) if deltas else 0.0
+        seg_ok = avg_r >= min_r
+        consistent = consistent and seg_ok
+        out.append({"segment": s + 1, "n": len(chunk), "evaluated": len(deltas),
+                    "avg_r_delta_per_trade": avg_r, "passes_bar": seg_ok,
+                    "exit_ts_range": [chunk[0]["exit_ts"], chunk[-1]["exit_ts"]]})
+    return {"segments": segments, "min_r_per_trade": min_r,
+            "consistent_across_time": consistent, "per_segment": out,
+            "interpretation": ("signal holds across all time segments — robust"
+                               if consistent else
+                               "signal FAILS in >=1 segment — likely regime-dependent, NOT robust")}
+
+
 def full_report() -> dict:
     return {
         "calibration": calibration_curve(),
         "counterfactual": counterfactual_analysis(),
         "path_counterfactual": path_counterfactual(),
+        "robustness_split": robustness_split(),
         "interim_verdict": interim_verdict(),
         "verdict": verdict(),
     }

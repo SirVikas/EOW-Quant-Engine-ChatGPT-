@@ -179,6 +179,7 @@ class XTEObserver:
 
         record = {
             "ts": int(time.time() * 1000),
+            "exit_ts": exit_ts,
             "symbol": symbol,
             "regime": regime,
             "duration_s": duration_s,
@@ -206,7 +207,7 @@ class XTEObserver:
         # GAP-C4: persist the per-tick path (separate archive) for path-accurate replay.
         if traj is not None and traj.path:
             self._append_path({
-                "ts": record["ts"], "symbol": symbol, "regime": regime,
+                "ts": record["ts"], "exit_ts": exit_ts, "symbol": symbol, "regime": regime,
                 "exit_method": exit_method, "exit_r": round(exit_r, 4),
                 "peak_r": round(peak_r, 4), "won": net_pnl >= 0,
                 "net_pnl": round(net_pnl, 6), "path": traj.path,
