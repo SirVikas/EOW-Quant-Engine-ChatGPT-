@@ -193,6 +193,30 @@ def main() -> int:
     check("interim reports precision CI", ic["protect_precision_ci_pct"] is not None)
     check("interim reports r-delta CI", ic["path_r_delta_ci"] is not None)
 
+    # ── TEST 8 — walk-forward robustness split (regime-fluke guard) ───────────
+    print("\n── TEST 8 — robustness_split ──")
+    rs_paths = os.path.join(tmp, "rs.jsonl")
+    cfg.XTE_PATH_ARCHIVE = rs_paths
+    cfg.XTE_SUCCESS_MIN_R_PER_TRADE = 0.05
+    # both halves good (early ts + late ts, +0.85R each) → consistent
+    good = ([{"symbol": "T", "exit_ts": 1000 + i, "exit_r": 0.3,
+              "path": [{"current_r": 1.2, "advisory": "TIGHTEN"},
+                       {"current_r": 1.15, "advisory": "TIGHTEN"}]} for i in range(60)]
+            + [{"symbol": "T", "exit_ts": 9000 + i, "exit_r": 0.3,
+                "path": [{"current_r": 1.2, "advisory": "TIGHTEN"},
+                         {"current_r": 1.15, "advisory": "TIGHTEN"}]} for i in range(60)])
+    _write(rs_paths, good)
+    rs = xv.robustness_split(segments=2)
+    check("robustness reports 2 segments", len(rs["per_segment"]) == 2, f"got {rs.get('per_segment')}")
+    check("both halves good → consistent True", rs["consistent_across_time"] is True)
+    # second half flips bad (premature exit 0.1 vs realized 1.4) → not consistent
+    bad_late = [{"symbol": "T", "exit_ts": 9000 + i, "exit_r": 1.4,
+                 "path": [{"current_r": 0.1, "advisory": "TIGHTEN"},
+                          {"current_r": 0.1, "advisory": "TIGHTEN"}]} for i in range(60)]
+    _write(rs_paths, good[:60] + bad_late)
+    rs2 = xv.robustness_split(segments=2)
+    check("one half bad → consistent False", rs2["consistent_across_time"] is False)
+
     print("\n" + "═" * 60)
     if _FAIL == 0:
         print(f"  ALL {_PASS}/{_PASS} CHECKS PASSED ✓")
