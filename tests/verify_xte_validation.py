@@ -130,6 +130,29 @@ def main() -> int:
     check("net_r_delta ~0.9", abs(pc["net_r_delta"] - 0.9) < 1e-6, f"got {pc['net_r_delta']}")
     check("path method is path-accurate", "path-accurate" in pc["method"])
 
+    # ── TEST 6 — economic success criteria gate (GAP-9, n>=500) ──────────────
+    print("\n── TEST 6 — economic success criteria (GAP-9) ──")
+    big = os.path.join(tmp, "big.jsonl")
+    big_paths = os.path.join(tmp, "big_paths.jsonl")
+    cfg.XTE_OBSERVE_ARCHIVE = big
+    cfg.XTE_PATH_ARCHIVE = big_paths
+    rows500 = [_rec(20, "TIGHTEN", peak_r=1.5, exit_r=0.3, net_pnl=0.2,
+                    giveback_pct=80.0, won=True) for _ in range(500)]
+    _write(big, rows500)
+    _write(big_paths, [{"symbol": "T", "exit_r": 0.3, "path": [
+        {"current_r": 1.2, "advisory": "TIGHTEN"}]} for _ in range(500)])
+    cfg.XTE_SUCCESS_MIN_UPLIFT_PCT = 0.0
+    cfg.XTE_SUCCESS_MIN_PROTECT_PRECISION = 0.0
+    vv = xv.verdict()
+    check("n>=500 leaves INSUFFICIENT_DATA", vv["status"] in ("CANDIDATE", "REJECT"), f"got {vv['status']}")
+    check("verdict exposes economic_uplift_pct", "economic_uplift_pct" in vv)
+    check("verdict exposes success_criteria", "success_criteria" in vv)
+    check("economic_basis path-accurate", vv["economic_basis"] == "path-accurate")
+    check("low bar → CANDIDATE", vv["status"] == "CANDIDATE", f"got {vv['status']}")
+    cfg.XTE_SUCCESS_MIN_UPLIFT_PCT = 1000.0
+    vv2 = xv.verdict()
+    check("impossible uplift bar → REJECT", vv2["status"] == "REJECT", f"got {vv2['status']}")
+
     print("\n" + "═" * 60)
     if _FAIL == 0:
         print(f"  ALL {_PASS}/{_PASS} CHECKS PASSED ✓")

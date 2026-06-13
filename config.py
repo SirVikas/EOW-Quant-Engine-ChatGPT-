@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.95.0"
+APP_VERSION = "1.95.1"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -797,6 +797,9 @@ class EngineConfig(BaseSettings):
     # Extra storage; separate from observation so it can be enabled independently.
     XTE_OBSERVE_PATH_ENABLED: bool = Field(default=False, env="XTE_OBSERVE_PATH_ENABLED")
     XTE_PATH_ARCHIVE:         str  = Field(default="reports/xte_observations/xte_paths.jsonl", env="XTE_PATH_ARCHIVE")
+    # GAP-9: explicit economic success criteria — defines "how much uplift is enough".
+    XTE_SUCCESS_MIN_UPLIFT_PCT:        float = Field(default=3.0,  env="XTE_SUCCESS_MIN_UPLIFT_PCT")
+    XTE_SUCCESS_MIN_PROTECT_PRECISION: float = Field(default=50.0, env="XTE_SUCCESS_MIN_PROTECT_PRECISION")
     TRUTH_ENGINE_ENABLED:     bool  = Field(default=True,  env="TRUTH_ENGINE_ENABLED")
 
     model_config = {"env_file": ".env", "extra": "ignore"}
