@@ -81,14 +81,22 @@ def _gen_trade(bias: float) -> tuple[dict, dict]:
     }
     # Path: protective advisory appears near peak_r (so a protective exit would have
     # captured ~peak_r, well above the realized exit_r → path-accurate improvement).
-    path = [{"price": 100.0, "current_r": 0.2, "peak_r": 0.2, "score": 60.0, "advisory": "HOLD"}]
+    # Realistic multi-bar path so the NEXT-bar (no-look-ahead) replay is meaningful:
+    # climb to peak (HOLD), then a protective signal whose NEXT bar still holds the
+    # gain (good) or fired prematurely at a low R (bad), then decay to the exit.
+    def _pt(r, adv):
+        return {"price": round(100 * (1 + r * 0.01), 4), "current_r": round(r, 4),
+                "peak_r": round(peak_r, 4),
+                "score": score if adv in PROTECT else 65.0, "advisory": adv}
+    path = [_pt(0.2, "HOLD"), _pt(peak_r * 0.5, "HOLD"), _pt(peak_r, "HOLD")]
     if protective:
-        # good protect → exit near peak (improves); bad protect → exit early/flat (worsens)
-        cf_r = round(peak_r * 0.9, 4) if good_protect else round(random.uniform(-0.1, 0.3), 4)
-        path.append({"price": 101.0, "current_r": cf_r,
-                     "peak_r": peak_r, "score": score, "advisory": advisory})
-    path.append({"price": 100.5, "current_r": exit_r, "peak_r": peak_r,
-                 "score": score, "advisory": advisory})
+        if good_protect:
+            path.append(_pt(peak_r * 0.95, advisory))   # signal bar (near peak)
+            path.append(_pt(peak_r * 0.90, advisory))   # NEXT bar still high → captured
+        else:
+            path.append(_pt(0.15, advisory))            # premature signal at low R
+            path.append(_pt(0.10, advisory))            # NEXT bar still low
+    path.append(_pt(exit_r, advisory if protective else "HOLD"))   # realized exit
     path_rec = {"ts": ts, "symbol": "SIMUSDT", "regime": regime,
                 "exit_method": "TRAILING_STOP", "exit_r": exit_r, "peak_r": peak_r,
                 "won": won, "net_pnl": net_pnl, "path": path, "simulated": True}
@@ -141,9 +149,10 @@ def main() -> int:
     else:
         print(f"    status               : {v.get('status')}")
         print(f"    samples              : {v.get('samples')}")
-        print(f"    economic_uplift_pct  : {v.get('economic_uplift_pct')}  (bar ≥ {v.get('success_criteria', {}).get('min_uplift_pct')}%)")
-        print(f"    protect_precision_pct: {v.get('protect_precision_pct')}  (bar ≥ {v.get('success_criteria', {}).get('min_protect_precision_pct')}%)")
-        print(f"    economic_basis       : {v.get('economic_basis')}")
+        print(f"    +R per trade         : {v.get('avg_r_delta_per_trade')}  (bar >= {v.get('success_criteria', {}).get('min_r_per_trade')})  <-- honest metric")
+        print(f"    protect_precision_pct: {v.get('protect_precision_pct')}  (bar >= {v.get('success_criteria', {}).get('min_protect_precision_pct')}%)")
+        print(f"    gain concentration   : top 5% trades = {v.get('gain_concentration_top5pct')}% of gain")
+        print(f"    uplift% (context)    : {v.get('economic_uplift_pct')}  (unreliable near breakeven)")
     pcf = rep["path_counterfactual"]
     print(f"    path: improved={pcf.get('improved')} worsened={pcf.get('worsened')} "
           f"net_r_delta={pcf.get('net_r_delta')} net_usd_delta={pcf.get('net_usd_delta')}")

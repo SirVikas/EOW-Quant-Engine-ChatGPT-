@@ -168,9 +168,17 @@ def main() -> int:
     if v.get("status") == "INSUFFICIENT_DATA":
         print(f"    final verdict     : INSUFFICIENT_DATA ({v.get('samples')}/{v.get('target')}) — rely on interim above")
     else:
-        print(f"    final verdict     : {v.get('status')}  uplift={v.get('economic_uplift_pct')}% "
-              f"precision={v.get('protect_precision_pct')}%  basis={v.get('economic_basis')}")
+        print(f"    final verdict     : {v.get('status')}")
+        print(f"    +R per trade      : {v.get('avg_r_delta_per_trade')}  (bar >= {v.get('success_criteria',{}).get('min_r_per_trade')})  <-- the honest metric")
+        print(f"    protect precision : {v.get('protect_precision_pct')}%")
+        print(f"    gain concentration: top 5% of trades = {v.get('gain_concentration_top5pct')}% of total gain")
+        print(f"    uplift% (context) : {v.get('economic_uplift_pct')}  (unreliable near breakeven — do NOT headline)")
+    pcf = rep["path_counterfactual"]
+    print(f"    coverage          : evaluated={pcf.get('evaluated')} improved={pcf.get('improved')} "
+          f"worsened={pcf.get('worsened')} no_signal={pcf.get('no_protective_signal')}")
     print(f"\n    data_basis        : {iv.get('data_basis')}  (records tagged source=historical_backfill)")
+    print("    ⚠  retrospective backtest on the trades WITH candle coverage only — check the\n"
+          "       skipped count above for selection bias before trusting the verdict.")
     if stats["ok"] == 0:
         print("\n  NOTE: 0 trades backfilled — the lake has trades but no matching candle\n"
               "  windows (or no trades). Real evidence needs both. Check db_stats / candle coverage.")
