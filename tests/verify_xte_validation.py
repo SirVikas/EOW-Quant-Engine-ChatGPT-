@@ -153,6 +153,45 @@ def main() -> int:
     vv2 = xv.verdict()
     check("impossible uplift bar → REJECT", vv2["status"] == "REJECT", f"got {vv2['status']}")
 
+    # ── TEST 7 — sequential early-stop interim verdict ───────────────────────
+    print("\n── TEST 7 — interim early-stop verdict ──")
+    cfg.XTE_SUCCESS_MIN_UPLIFT_PCT = 3.0
+    cfg.XTE_SUCCESS_MIN_PROTECT_PRECISION = 50.0
+
+    def _interim_set(n, obs_path, path_path, gave_back):
+        # protective advisory every trade; gave_back drives whether it helps
+        rows = []
+        paths = []
+        for _ in range(n):
+            if gave_back:
+                peak_r, exit_r, gpct, cf_r = 1.5, 0.3, 80.0, 1.35
+            else:
+                peak_r, exit_r, gpct, cf_r = 1.5, 1.35, 10.0, 0.1
+            rows.append(_rec(20, "TIGHTEN", peak_r=peak_r, exit_r=exit_r,
+                             net_pnl=exit_r * 0.5, giveback_pct=gpct, won=exit_r > 0))
+            paths.append({"symbol": "T", "exit_r": exit_r,
+                          "path": [{"current_r": cf_r, "advisory": "TIGHTEN"}]})
+        _write(obs_path, rows)
+        _write(path_path, paths)
+        cfg.XTE_OBSERVE_ARCHIVE = obs_path
+        cfg.XTE_PATH_ARCHIVE = path_path
+
+    # below first checkpoint → INSUFFICIENT
+    _interim_set(50, os.path.join(tmp, "i50.jsonl"), os.path.join(tmp, "i50p.jsonl"), True)
+    check("n=50 → INSUFFICIENT", xv.interim_verdict()["status"] == "INSUFFICIENT")
+
+    # clearly failing at n=120 → EARLY_REJECT
+    _interim_set(120, os.path.join(tmp, "ir.jsonl"), os.path.join(tmp, "irp.jsonl"), False)
+    ir = xv.interim_verdict()
+    check("n=120 failing → EARLY_REJECT", ir["status"] == "EARLY_REJECT", f"got {ir['status']}")
+
+    # clearly winning at n=350 → EARLY_CANDIDATE
+    _interim_set(350, os.path.join(tmp, "ic.jsonl"), os.path.join(tmp, "icp.jsonl"), True)
+    ic = xv.interim_verdict()
+    check("n=350 winning → EARLY_CANDIDATE", ic["status"] == "EARLY_CANDIDATE", f"got {ic['status']}")
+    check("interim reports precision CI", ic["protect_precision_ci_pct"] is not None)
+    check("interim reports r-delta CI", ic["path_r_delta_ci"] is not None)
+
     print("\n" + "═" * 60)
     if _FAIL == 0:
         print(f"  ALL {_PASS}/{_PASS} CHECKS PASSED ✓")
