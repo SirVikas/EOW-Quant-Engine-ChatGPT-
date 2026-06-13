@@ -81,9 +81,9 @@ This removes H-1…H-4 by construction.
 
 | Phase | Scope | Behavior change | Gate |
 |------|------|-----------------|------|
-| **X0 — Observe** | FTD-094A: XTE observation + this map/blueprint | **none** | shipped (flag-off) |
-| **X1 — Audit shim** | Introduce a read-only `ExitDecisionLog` that records every existing SL/TP write (A2–A12) with its source | **none** (logging only) | X0 complete |
-| **X2 — Coordinator (shadow)** | Build `ExitCoordinator` that *recomputes* the resolved SL/TP from all advisors and asserts parity with what the live writers actually did | **none** (parity assert) | X1 data shows write provenance |
+| **X0 — Observe** | FTD-094A: XTE observation + this map/blueprint | **none** | ✅ shipped (flag-off) |
+| **X1 — Audit shim** | read-only audit of every net SL/TP transition with category/provenance | **none** (logging only) | ✅ shipped as `core/exit_coordinator.py` shadow (flag-off). Note: provenance is by *category* via single-seam observation; exact per-writer source tagging remains a later instrumentation step |
+| **X2 — Coordinator (shadow)** | `ExitCoordinatorShadow` validates the unified invariants (I-1 tighten-only, I-2 TP-widen-needs-grant) against live transitions and reports parity | **none** (parity assert) | ✅ shipped (flag-off, `EXIT_COORDINATOR_SHADOW_ENABLED`); endpoint `GET /api/exit/coordinator` |
 | **X3 — Coordinator (authority)** | Flip the live writers to route through the coordinator; RiskController becomes sole executor behind it | behavior-neutral refactor (parity-proven) | X2 parity stable ≥ N trades |
 | **X4 — Advisor admission** | Admit calibrated advisors (e.g. XTE post-Phase-6) into the coordinator's precedence policy | opt-in, per-advisor flag | per-advisor calibration + ADR |
 

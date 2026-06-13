@@ -149,6 +149,7 @@ from core.exit_attribution import resolve_exit_method, compute_exit_attribution_
 from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult              # FTD-PHOENIX-ETE-001
 from core.truth.exit_truth_engine   import exit_truth_engine                           # FTD-PHOENIX-XTE-001
 from core.truth.xte_observer         import xte_observer                                # FTD-094A: observation-only
+from core.exit_coordinator           import exit_coordinator_shadow                      # FTD-094A X1+X2: shadow
 from core.truth.alpha_attribution   import alpha_attribution_platform, AttributionSnapshot  # FTD-PHOENIX-AAP-001
 from core.truth.truth_archive       import truth_archive                               # FTD-PHOENIX-AAP-001
 from core.observatory import (                                                         # OBSERVATORY-X OX-1/2/3/4
@@ -765,6 +766,11 @@ async def on_tick(tick: Tick):
                     xte_observer.on_close(sym, last_trade)
                 except Exception:
                     pass
+            if cfg.EXIT_COORDINATOR_SHADOW_ENABLED:
+                try:
+                    exit_coordinator_shadow.on_close(sym)
+                except Exception:
+                    pass
             # Phase 5: update EV engine, adaptive scorer, and regime memory
             _trade_cost = (getattr(last_trade, "fee_entry", 0.0)
                            + getattr(last_trade, "fee_exit", 0.0)
@@ -1072,6 +1078,16 @@ async def on_tick(tick: Tick):
                     atr_pct=getattr(regime_det.state(sym), "atr_pct", 0.0),
                     atr_ema=reactive_evolution_engine._atr_ema.get(sym, 0.0),
                 )
+            except Exception:
+                pass
+
+    # FTD-094A X1+X2: Exit Coordinator shadow — audit + validate exit transitions.
+    # Observe-only; default-off; never mutates SL/TP/qty.
+    if cfg.EXIT_COORDINATOR_SHADOW_ENABLED:
+        _ec_pos = risk_ctrl.positions.get(sym)
+        if _ec_pos is not None:
+            try:
+                exit_coordinator_shadow.observe(_ec_pos, price)
             except Exception:
                 pass
 
@@ -13819,6 +13835,17 @@ async def get_xte_status():
 async def get_xte_observation():
     # FTD-094A: read-only XTE observation status + report sections.
     return {"status": xte_observer.summary(), "report": xte_observer.report_sections()}
+
+@app.get("/api/truth/xte/validation")
+async def get_xte_validation():
+    # FTD-094A follow-on: read-only calibration + counterfactual + verdict.
+    from core.truth.xte_validation import full_report as _xte_full_report
+    return _xte_full_report()
+
+@app.get("/api/exit/coordinator")
+async def get_exit_coordinator():
+    # FTD-094A X1+X2: read-only exit-authority audit + shadow parity stats.
+    return exit_coordinator_shadow.summary()
 
 @app.get("/api/truth/alpha-matrix")
 async def get_alpha_matrix():
