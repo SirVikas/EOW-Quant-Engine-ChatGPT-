@@ -14,5 +14,9 @@ data/
 # Learning memory runtime artifacts (modified every session)
 reports/learning_memory/pattern_index.json
 
+# FTD-094A runtime artifacts (XTE observation evidence + lifecycle state; never commit)
+reports/xte_observations/
+reports/governance/learning_lifecycle.json
+
 # Claude Code agent worktrees
 .claude/worktrees/
