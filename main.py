@@ -1778,6 +1778,23 @@ async def on_tick(tick: Tick):
                 if _ps_ec_dec.approved and _ps_ec_dec.rsi_side
                 else None
             )
+            # BYPASS/learning mode: the RSI governor is a quality filter, not a risk
+            # gate, but it was the lone gate not honouring BYPASS_ALL_GATES — blocking
+            # ~60% of PAPER_SPEED fallback signals (the dominant no-trade reason) and
+            # starving the engine to ~0 trades. Under BYPASS, re-admit RSI-LEVEL
+            # blocks using the SMA momentum direction (above_sma → LONG else SHORT,
+            # the governor's own directional convention). Toxic-context blocks are
+            # still respected (rsi_blocked is False for those); lean gates 1-3
+            # (SL distance / RR / fee economy) remain the active quality filter.
+            if (_ps_side is None and cfg.BYPASS_ALL_GATES
+                    and _ps_ec_dec.rsi_blocked
+                    and _ps_ec_dec.context_type != "TOXIC"):
+                _ps_side = Signal.LONG if _above_sma else Signal.SHORT
+                _thought(
+                    f"⚡ PAPER_SPEED RSI-bypass {sym}: {_ps_side.value} "
+                    f"(rsi={_rsi_val:.1f} band-blocked, BYPASS re-admit)",
+                    "SIGNAL",
+                )
             _prp002_size_mult = _ps_ec_dec.size_multiplier if _ps_side is not None else 1.0
 
             if _ps_ec_dec.approved:
