@@ -423,11 +423,79 @@ def robustness_split(segments: int = 2) -> dict:
                                "signal FAILS in >=1 segment — likely regime-dependent, NOT robust")}
 
 
+def stratified_audit() -> dict:
+    """Board-requested deeper bias audit (Option 2). Stratifies the path-accurate
+    edge by observed bars (≈ trade duration in 1m candles ≈ XTE eval count — these
+    coincide in the candle reconstruction, so this covers BOTH the duration and
+    observability cuts), and reports each bucket's R/observed-trade plus its
+    CONTRIBUTION to the total edge. Guards against a result that is really driven
+    by one duration class (a deeper selection artifact than per-trade averaging).
+
+    Pass rule (board): edge stays positive across every MAJOR bucket (>=10% of
+    trades) AND is not dominated by a single bucket (no bucket > 60% of total edge).
+    """
+    paths = _read_paths()
+    n = len(paths)
+    if n == 0:
+        return {"note": "no path data"}
+    bands = [("<2 bars", 0, 2), ("2-5 bars", 2, 6), ("5-20 bars", 6, 21), ("20+ bars", 21, 10 ** 9)]
+    agg = {b[0]: {"n": 0, "signaled": 0, "net_r": 0.0} for b in bands}
+    total_net_r = 0.0
+    for p in paths:
+        pts = p.get("path", [])
+        bars = len(pts)
+        band = next(b[0] for b in bands if b[1] <= bars < b[2])
+        ar = p.get("exit_r", 0.0) or 0.0
+        cf_r = None
+        for i, pt in enumerate(pts):
+            if pt.get("advisory") in PROTECT_LABELS:
+                nxt = pts[i + 1] if i + 1 < len(pts) else pt
+                cf_r = nxt.get("current_r", pt.get("current_r", 0.0))
+                break
+        a = agg[band]
+        a["n"] += 1
+        if cf_r is not None:
+            a["signaled"] += 1
+            d = cf_r - ar
+            a["net_r"] += d
+            total_net_r += d
+    min_r = float(getattr(cfg, "XTE_SUCCESS_MIN_R_PER_TRADE", 0.05))
+    buckets = []
+    all_major_positive = True
+    dominated = False
+    for b in bands:
+        a = agg[b[0]]
+        if a["n"] == 0:
+            continue
+        avg_obs = round(a["net_r"] / a["n"], 4)
+        contrib = round(a["net_r"] / total_net_r * 100, 1) if abs(total_net_r) > 1e-9 else None
+        major = a["n"] >= 0.10 * n
+        if major and avg_obs <= 0:
+            all_major_positive = False
+        if contrib is not None and contrib > 60.0:
+            dominated = True
+        buckets.append({"band": b[0], "n": a["n"], "signaled": a["signaled"],
+                        "avg_r_per_observed": avg_obs, "clears_bar": avg_obs >= min_r,
+                        "contribution_pct": contrib, "major": major})
+    broad = all_major_positive and not dominated
+    return {
+        "buckets": buckets,
+        "total_net_r": round(total_net_r, 4),
+        "broad_based": broad,
+        "interpretation": ("BROAD — edge positive across major duration/observability buckets, "
+                           "not dominated by one class → not a duration artifact"
+                           if broad else
+                           "CONCENTRATED — edge fails a major bucket or is dominated by one class "
+                           "→ fragile; do NOT approve X3 on this"),
+    }
+
+
 def full_report() -> dict:
     return {
         "calibration": calibration_curve(),
         "counterfactual": counterfactual_analysis(),
         "path_counterfactual": path_counterfactual(),
+        "stratified_audit": stratified_audit(),
         "robustness_split": robustness_split(),
         "interim_verdict": interim_verdict(),
         "verdict": verdict(),

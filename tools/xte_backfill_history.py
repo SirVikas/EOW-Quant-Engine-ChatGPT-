@@ -208,6 +208,15 @@ def main() -> int:
     pcf = rep["path_counterfactual"]
     print(f"    coverage          : evaluated={pcf.get('evaluated')} improved={pcf.get('improved')} "
           f"worsened={pcf.get('worsened')} no_signal={pcf.get('no_protective_signal')}")
+    sa = rep["stratified_audit"]
+    print(f"\n  ── STRATIFIED BIAS AUDIT (duration / observability) — the X3 gate ──")
+    for b in sa.get("buckets", []):
+        flag = "PASS" if b["clears_bar"] else ("ok>0" if b["avg_r_per_observed"] > 0 else "FAIL<=0")
+        major = " [MAJOR]" if b["major"] else ""
+        print(f"    {b['band']:<9}: n={b['n']:<5} +{b['avg_r_per_observed']}R/obs  "
+              f"contrib={b['contribution_pct']}%  {flag}{major}")
+    print(f"    broad_based: {sa.get('broad_based')} — {sa.get('interpretation')}")
+
     rs = rep["robustness_split"]
     print(f"\n  ── WALK-FORWARD ROBUSTNESS (does it hold across time?) ──")
     if rs.get("per_segment"):
