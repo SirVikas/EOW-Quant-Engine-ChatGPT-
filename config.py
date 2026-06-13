@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.91.3"
+APP_VERSION = "1.92.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -786,6 +786,10 @@ class EngineConfig(BaseSettings):
     ETE_MIN_SCORE:            float = Field(default=45.0,  env="ETE_MIN_SCORE")
     XTE_FORCE_CLOSE_ENABLED:  bool  = Field(default=False, env="XTE_FORCE_CLOSE_ENABLED")
     XTE_ADVISORY_TSL_SCORE:   float = Field(default=35.0,  env="XTE_ADVISORY_TSL_SCORE")
+    # FTD-094A: XTE observation layer — evidence generation only, no execution authority.
+    # Default MUST remain False; flip only for an XTE calibration-collection phase.
+    XTE_OBSERVE_ENABLED:      bool  = Field(default=False, env="XTE_OBSERVE_ENABLED")
+    XTE_OBSERVE_ARCHIVE:      str   = Field(default="reports/xte_observations/xte_observations.jsonl", env="XTE_OBSERVE_ARCHIVE")
     TRUTH_ENGINE_ENABLED:     bool  = Field(default=True,  env="TRUTH_ENGINE_ENABLED")
 
     model_config = {"env_file": ".env", "extra": "ignore"}

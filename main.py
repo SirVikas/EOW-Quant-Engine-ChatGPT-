@@ -148,6 +148,7 @@ from core.learning_memory.trade_memory_bridge  import trade_memory_bridge       
 from core.exit_attribution import resolve_exit_method, compute_exit_attribution_report # FTD-PHOENIX-EXIT-ATTR-001
 from core.truth.entry_truth_engine  import entry_truth_engine, ETEResult              # FTD-PHOENIX-ETE-001
 from core.truth.exit_truth_engine   import exit_truth_engine                           # FTD-PHOENIX-XTE-001
+from core.truth.xte_observer         import xte_observer                                # FTD-094A: observation-only
 from core.truth.alpha_attribution   import alpha_attribution_platform, AttributionSnapshot  # FTD-PHOENIX-AAP-001
 from core.truth.truth_archive       import truth_archive                               # FTD-PHOENIX-AAP-001
 from core.observatory import (                                                         # OBSERVATORY-X OX-1/2/3/4
@@ -757,6 +758,13 @@ async def on_tick(tick: Tick):
                     )
                 except Exception:
                     pass
+            # FTD-094A: XTE observation — finalize one exit-truth record per trade.
+            # Observe-only; default-off; never influences this or any future trade.
+            if cfg.XTE_OBSERVE_ENABLED:
+                try:
+                    xte_observer.on_close(sym, last_trade)
+                except Exception:
+                    pass
             # Phase 5: update EV engine, adaptive scorer, and regime memory
             _trade_cost = (getattr(last_trade, "fee_entry", 0.0)
                            + getattr(last_trade, "fee_exit", 0.0)
@@ -1049,6 +1057,23 @@ async def on_tick(tick: Tick):
                     "exit_method": _tm_action.action,
                     "exit_reason": _tm_action.reason or "",
                 }
+
+    # FTD-094A: XTE observation — score the open position's exit-truth each tick.
+    # Observe-only; default-off; pulls its own buffers; never mutates SL/TP/qty.
+    if cfg.XTE_OBSERVE_ENABLED:
+        _xte_pos = risk_ctrl.positions.get(sym)
+        if _xte_pos is not None:
+            try:
+                xte_observer.observe(
+                    position=_xte_pos,
+                    price=price,
+                    closes=list(mdp.candle_close_buffer(sym)),
+                    volumes=list(mdp.candle_volume_buffer(sym)),
+                    atr_pct=getattr(regime_det.state(sym), "atr_pct", 0.0),
+                    atr_ema=reactive_evolution_engine._atr_ema.get(sym, 0.0),
+                )
+            except Exception:
+                pass
 
     # 2. Get candle data for strategy
     candle = mdp.latest_closed_candle(sym)
@@ -13789,6 +13814,11 @@ async def get_xte_status():
         "advisory_mode": True,
         **exit_truth_engine.summary(),
     }
+
+@app.get("/api/truth/xte/observation")
+async def get_xte_observation():
+    # FTD-094A: read-only XTE observation status + report sections.
+    return {"status": xte_observer.summary(), "report": xte_observer.report_sections()}
 
 @app.get("/api/truth/alpha-matrix")
 async def get_alpha_matrix():
