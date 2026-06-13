@@ -393,6 +393,16 @@ class RiskController:
                     pos.stop_loss = be_sl
                 pos.breakeven_armed = True
 
+            # Peak-proportional profit ratchet — caps giveback on sub-1R winners
+            # the 1.5R price-trail above cannot reach (engages only past ~1.6R peak).
+            if (cfg.GIVEBACK_RATCHET_ENABLED and pos.breakeven_armed
+                    and pos.peak_r >= cfg.GIVEBACK_RATCHET_MIN_R):
+                cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
+                lock_r = cfg.GIVEBACK_LOCK_FRACTION * pos.peak_r
+                ratchet_sl = pos.entry_price + cost_per_unit + lock_r * entry_risk
+                if ratchet_sl > pos.stop_loss:
+                    pos.stop_loss = ratchet_sl
+
             if pos.peak_r >= cfg.SPEED_EXIT_TRIGGER_R and pos.ticks_since_peak >= cfg.SPEED_EXIT_STALL_TICKS:
                 action = "SPEED"
 
@@ -421,6 +431,15 @@ class RiskController:
                 if be_sl < pos.stop_loss:
                     pos.stop_loss = be_sl
                 pos.breakeven_armed = True
+
+            # Peak-proportional profit ratchet (SHORT mirror) — see LONG arm.
+            if (cfg.GIVEBACK_RATCHET_ENABLED and pos.breakeven_armed
+                    and pos.peak_r >= cfg.GIVEBACK_RATCHET_MIN_R):
+                cost_per_unit = pos.entry_price * (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST)
+                lock_r = cfg.GIVEBACK_LOCK_FRACTION * pos.peak_r
+                ratchet_sl = pos.entry_price - cost_per_unit - lock_r * entry_risk
+                if ratchet_sl < pos.stop_loss:
+                    pos.stop_loss = ratchet_sl
 
             if pos.peak_r >= cfg.SPEED_EXIT_TRIGGER_R and pos.ticks_since_peak >= cfg.SPEED_EXIT_STALL_TICKS:
                 action = "SPEED"

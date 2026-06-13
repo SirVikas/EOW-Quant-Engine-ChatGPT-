@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.88.2"
+APP_VERSION = "1.89.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -257,6 +257,18 @@ class EngineConfig(BaseSettings):
     # fee-noise scratch. Scratches were 57% of exits and read as losses by the
     # win-rate, LCC streak, and RL reward layers, stalling all three at once.
     BREAKEVEN_PROFIT_LOCK_R: float = 0.10
+    # Peak-proportional profit ratchet — caps exit giveback on sub-1R winners.
+    # The price-space trail (1.5× initial risk) only lifts the stop above the
+    # +0.10R BE floor once peak_r > ~1.6R, which this strategy never reaches, so
+    # winners peaking ~0.5R gave the entire peak back to the BE floor (91/171
+    # 'BE' exits, avg peak 0.51R → final ~+0.10R). Once peak_r clears
+    # GIVEBACK_RATCHET_MIN_R, lock GIVEBACK_LOCK_FRACTION of the proven peak.
+    # Strictly one-directional (only tightens the stop) so it can never widen
+    # risk or convert a winner into a loss — it only trades rare upside recovery
+    # for reliable capture of the common 0.5R peak.
+    GIVEBACK_RATCHET_ENABLED: bool  = True
+    GIVEBACK_RATCHET_MIN_R:  float = 0.50  # leave the 0.40-0.50R zone room (BE floor only)
+    GIVEBACK_LOCK_FRACTION:  float = 0.50  # lock half of proven peak_r above the trigger
     # FTD-PHOENIX-ESR-001 Phase 3/6: Trade Duration Protection
     TRADE_MIN_HOLD_FAST_FAIL_SEC: float = 90.0  # FAST_FAIL cannot fire before 90s — eradicates sub-90s loss exits
 
