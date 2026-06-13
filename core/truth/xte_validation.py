@@ -271,6 +271,15 @@ def path_counterfactual() -> dict:
     }
 
 
+def _data_basis(rows: List[dict]) -> str:
+    sample = rows[:20]
+    if any(r.get("simulated") for r in sample):
+        return "SIMULATED (not proof)"
+    if any(r.get("source") == "historical_backfill" for r in sample):
+        return "real (historical backtest)"
+    return "real (live)"
+
+
 def interim_verdict() -> dict:
     """Sequential early-stop on REAL data — the time/result balance.
 
@@ -289,6 +298,7 @@ def interim_verdict() -> dict:
 
     if n < rej_n:
         return {"status": "INSUFFICIENT", "n": n, "next_checkpoint": rej_n,
+                "data_basis": _data_basis(rows),
                 "note": f"Need ≥{rej_n} closed trades for the first early-stop check."}
 
     # precision proportion CI (Wald)
@@ -342,7 +352,7 @@ def interim_verdict() -> dict:
         "path_r_delta_ci": [round(d_lo, 3), round(d_hi, 3)] if k else None,
         "economic_uplift_pct": uplift_pct,
         "reason": reason,
-        "data_basis": "real" if not any(r.get("simulated") for r in rows[:5]) else "SIMULATED (not proof)",
+        "data_basis": _data_basis(rows),
     }
 
 
