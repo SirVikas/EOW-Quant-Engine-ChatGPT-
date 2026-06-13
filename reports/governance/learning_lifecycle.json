@@ -1,0 +1,13 @@
+{
+  "XTE": {
+    "stage": "OBSERVE",
+    "sample_target": 500,
+    "source": "core/truth/xte_observer.py",
+    "approvals": [],
+    "manual_samples": 0,
+    "manual_verdict": null,
+    "campaign_complete": false,
+    "campaign_complete_ts": null,
+    "created_ts": 1781348273137
+  }
+}

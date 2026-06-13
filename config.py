@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.94.0"
+APP_VERSION = "1.95.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -793,6 +793,10 @@ class EngineConfig(BaseSettings):
     # FTD-094A blueprint X1+X2: Exit Coordinator SHADOW — observes/validates live
     # exit-authority transitions, no write authority. Default MUST remain False.
     EXIT_COORDINATOR_SHADOW_ENABLED: bool = Field(default=False, env="EXIT_COORDINATOR_SHADOW_ENABLED")
+    # GAP-C4: per-tick path capture for path-accurate counterfactual replay.
+    # Extra storage; separate from observation so it can be enabled independently.
+    XTE_OBSERVE_PATH_ENABLED: bool = Field(default=False, env="XTE_OBSERVE_PATH_ENABLED")
+    XTE_PATH_ARCHIVE:         str  = Field(default="reports/xte_observations/xte_paths.jsonl", env="XTE_PATH_ARCHIVE")
     TRUTH_ENGINE_ENABLED:     bool  = Field(default=True,  env="TRUTH_ENGINE_ENABLED")
 
     model_config = {"env_file": ".env", "extra": "ignore"}

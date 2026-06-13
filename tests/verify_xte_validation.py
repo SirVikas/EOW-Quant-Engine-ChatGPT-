@@ -104,6 +104,32 @@ def main() -> int:
     check("empty archive: 0 samples, no crash", empty["calibration"]["samples"] == 0)
     check("empty archive verdict INSUFFICIENT_DATA", empty["verdict"]["status"] == "INSUFFICIENT_DATA")
 
+    # ── TEST 5 — path-accurate counterfactual (GAP-C4) ───────────────────────
+    print("\n── TEST 5 — path_counterfactual (GAP-C4) ──")
+    pc_empty = xv.path_counterfactual()
+    check("no path data handled gracefully", pc_empty["samples"] == 0 and "note" in pc_empty)
+    cfg.XTE_OBSERVE_ARCHIVE = archive  # restore so dollars_per_r has rows
+    paths_file = os.path.join(tmp, "xte_paths.jsonl")
+    cfg.XTE_PATH_ARCHIVE = paths_file
+    path_rows = [
+        # protective advisory appears at current_r=1.2, realized exit_r=0.3 → improved
+        {"symbol": "T", "exit_r": 0.3, "path": [
+            {"current_r": 0.5, "advisory": "HOLD"},
+            {"current_r": 1.2, "advisory": "TIGHTEN"},
+            {"current_r": 0.3, "advisory": "TIGHTEN"}]},
+        # never advises protect → no_protective_signal
+        {"symbol": "T", "exit_r": 1.5, "path": [
+            {"current_r": 0.5, "advisory": "HOLD"},
+            {"current_r": 1.5, "advisory": "HOLD"}]},
+    ]
+    _write(paths_file, path_rows)
+    pc = xv.path_counterfactual()
+    check("path samples == 2", pc["samples"] == 2, f"got {pc['samples']}")
+    check("one improved (1.2 vs 0.3)", pc["improved"] == 1, f"got {pc['improved']}")
+    check("one no_protective_signal", pc["no_protective_signal"] == 1, f"got {pc['no_protective_signal']}")
+    check("net_r_delta ~0.9", abs(pc["net_r_delta"] - 0.9) < 1e-6, f"got {pc['net_r_delta']}")
+    check("path method is path-accurate", "path-accurate" in pc["method"])
+
     print("\n" + "═" * 60)
     if _FAIL == 0:
         print(f"  ALL {_PASS}/{_PASS} CHECKS PASSED ✓")
