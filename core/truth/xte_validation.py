@@ -160,38 +160,40 @@ def verdict() -> dict:
     cf = counterfactual_analysis()
     pcf = path_counterfactual()
     prec = cf["alignment"]["protect_precision_pct"] or 0.0
-    total_realized = sum(r.get("net_pnl", 0.0) for r in rows)
 
-    # GAP-9: prefer the path-accurate economic delta; fall back to the bounded estimate.
-    if pcf.get("evaluated"):
-        econ_delta, basis = pcf["net_usd_delta"], "path-accurate"
-    else:
-        econ_delta, basis = cf["bounded_savings_usd_upper"], "bounded-upper-estimate"
-    uplift_pct = round(econ_delta / abs(total_realized) * 100, 2) if abs(total_realized) > 1e-9 else 0.0
+    # Honest primary gate = path-accurate R improvement PER TRADE (not the % vs a
+    # near-breakeven denominator, which explodes). % is reported only as context.
+    avg_r = pcf.get("avg_r_delta_per_trade", 0.0) if pcf.get("evaluated") else 0.0
+    uplift_pct = pcf.get("uplift_pct_vs_realized") if pcf.get("evaluated") else None
+    basis = "path-accurate (R/trade)" if pcf.get("evaluated") else "no-path-data"
 
-    min_uplift = float(getattr(cfg, "XTE_SUCCESS_MIN_UPLIFT_PCT", 3.0))
+    min_r = float(getattr(cfg, "XTE_SUCCESS_MIN_R_PER_TRADE", 0.05))
     min_prec = float(getattr(cfg, "XTE_SUCCESS_MIN_PROTECT_PRECISION", 50.0))
-    success = (uplift_pct >= min_uplift) and (prec >= min_prec)
+    success = (avg_r >= min_r) and (prec >= min_prec)
 
+    concentration = pcf.get("gain_concentration_top5pct")
     if success:
         status = "CANDIDATE"
-        rec = (f"PROMOTION CANDIDATE — economic uplift {uplift_pct}% ≥ {min_uplift}% and "
-               f"protect precision {prec}% ≥ {min_prec}%. Advance to Exit-Coordinator shadow "
-               "parity (blueprint X2→X3) + ADR before any acting role.")
+        rec = (f"PROMOTION CANDIDATE — +{avg_r}R/trade >= {min_r}R and protect precision "
+               f"{prec}% >= {min_prec}%. CAVEATS before X3: retrospective backtest; "
+               f"top-5% of trades = {concentration}% of the gain; verify selection bias "
+               "(skipped trades). Confirm on a live/forward slice before any acting role.")
     else:
         status = "REJECT"
-        rec = (f"REJECT / REDESIGN — economic uplift {uplift_pct}% (need ≥{min_uplift}%) or "
-               f"protect precision {prec}% (need ≥{min_prec}%) below the success bar.")
+        rec = (f"REJECT / REDESIGN — +{avg_r}R/trade (need >= {min_r}R) or precision {prec}% "
+               f"(need >= {min_prec}%) below the success bar.")
     return {
         "status": status,
         "samples": n,
         "protect_precision_pct": prec,
-        "economic_uplift_pct": uplift_pct,
+        "avg_r_delta_per_trade": avg_r,
+        "economic_uplift_pct": uplift_pct,          # context only; None when unreliable
         "economic_basis": basis,
+        "gain_concentration_top5pct": concentration,
         "success_criteria": {
-            "min_uplift_pct": min_uplift,
+            "min_r_per_trade": min_r,
             "min_protect_precision_pct": min_prec,
-            "note": "uplift = economic delta / |realized PnL|; path-accurate when path data present.",
+            "note": "Primary gate is R/trade (denominator-safe). % vs realized is context only.",
         },
         "recommendation": rec,
     }
@@ -219,13 +221,16 @@ def _read_paths() -> List[dict]:
 
 
 def path_counterfactual() -> dict:
-    """GAP-C4 — PATH-ACCURATE counterfactual: replay each trade's per-tick path and
-    take the exit at the FIRST tick XTE advised protection (TIGHTEN/SCALE_OUT),
-    versus the realized exit. Requires XTE_OBSERVE_PATH_ENABLED during collection.
+    """GAP-C4 — PATH-ACCURATE counterfactual with honest accounting.
 
-    Unlike counterfactual_analysis() (summary-level, upper-bound), this measures
-    the actual R at the advised exit point, so the $ delta is path-accurate, not
-    an estimate.
+    For each trade: find the FIRST tick XTE advised protection, then exit at the
+    NEXT bar (no same-bar look-ahead — you cannot act on a bar using that same
+    bar's close), and compare that R to the realized exit R.
+
+    Reports per-trade R/$ as the PRIMARY metric. The percent-vs-realized figure is
+    secondary and flagged unreliable when realized PnL is near breakeven (a tiny
+    denominator otherwise explodes the %). Also reports gain concentration so a
+    result driven by a handful of trades is visible.
     """
     paths = _read_paths()
     n = len(paths)
@@ -237,26 +242,38 @@ def path_counterfactual() -> dict:
     rows = xte_observer.read_records()
     dpr = _dollars_per_r(rows) if rows else 0.0
     improved = worsened = neutral = no_signal = 0
-    r_delta_total = 0.0
+    r_deltas: List[float] = []
     for p in paths:
         actual_r = p.get("exit_r", 0.0) or 0.0
+        pts = p.get("path", [])
         cf_r = None
-        for pt in p.get("path", []):
+        for i, pt in enumerate(pts):
             if pt.get("advisory") in PROTECT_LABELS:
-                cf_r = pt.get("current_r", 0.0)
+                nxt = pts[i + 1] if i + 1 < len(pts) else pt   # NEXT-bar exit; fallback if last
+                cf_r = nxt.get("current_r", pt.get("current_r", 0.0))
                 break
         if cf_r is None:
             no_signal += 1
             continue
         d = cf_r - actual_r
-        r_delta_total += d
+        r_deltas.append(d)
         if d > 0.01:
             improved += 1
         elif d < -0.01:
             worsened += 1
         else:
             neutral += 1
-    evaluated = improved + worsened + neutral
+    evaluated = len(r_deltas)
+    net_r = sum(r_deltas)
+    avg_r = net_r / evaluated if evaluated else 0.0
+    net_usd = net_r * dpr
+    total_realized = sum(r.get("net_pnl", 0.0) for r in rows)
+    # gain concentration: share of positive delta from the top 5% of trades
+    gains = sorted((d for d in r_deltas if d > 0), reverse=True)
+    top5 = sum(gains[: max(1, len(gains) // 20)]) if gains else 0.0
+    concentration = round(top5 / net_r * 100, 1) if net_r > 1e-9 else None
+    denom_ok = abs(total_realized) > max(1.0, 0.05 * evaluated)
+    uplift_pct = round(net_usd / abs(total_realized) * 100, 2) if denom_ok else None
     return {
         "samples": n,
         "evaluated": evaluated,
@@ -264,10 +281,17 @@ def path_counterfactual() -> dict:
         "improved": improved,
         "worsened": worsened,
         "neutral": neutral,
-        "net_r_delta": round(r_delta_total, 4),
-        "net_usd_delta": round(r_delta_total * dpr, 6),
+        "avg_r_delta_per_trade": round(avg_r, 4),      # PRIMARY honest metric
+        "avg_usd_delta_per_trade": round(net_usd / evaluated, 6) if evaluated else 0.0,
+        "net_r_delta": round(net_r, 4),
+        "net_usd_delta": round(net_usd, 6),
+        "total_realized_usd": round(total_realized, 4),
+        "uplift_pct_vs_realized": uplift_pct,          # secondary; None if unreliable
+        "denominator_reliable": denom_ok,
+        "gain_concentration_top5pct": concentration,
         "dollars_per_r": round(dpr, 6),
-        "method": "first-protective-advisory exit vs realized exit (path-accurate)",
+        "method": "next-bar exit after first protective advisory (no same-bar look-ahead)",
+        "caveats": "retrospective backtest; % unreliable near breakeven — judge avg_r_delta_per_trade; check concentration + selection bias (skipped trades).",
     }
 
 
@@ -291,7 +315,7 @@ def interim_verdict() -> dict:
     """
     rows = xte_observer.read_records()
     n = len(rows)
-    min_uplift = float(getattr(cfg, "XTE_SUCCESS_MIN_UPLIFT_PCT", 3.0))
+    min_r = float(getattr(cfg, "XTE_SUCCESS_MIN_R_PER_TRADE", 0.05))
     min_prec = float(getattr(cfg, "XTE_SUCCESS_MIN_PROTECT_PRECISION", 50.0))
     rej_n = int(getattr(cfg, "XTE_EARLY_REJECT_MIN_N", 100))
     cand_n = int(getattr(cfg, "XTE_EARLY_CANDIDATE_MIN_N", 300))
@@ -312,13 +336,15 @@ def interim_verdict() -> dict:
     else:
         prec_lo = prec_hi = None
 
-    # per-trade path r-delta CI
+    # per-trade path r-delta CI — NEXT-bar exit (no same-bar look-ahead)
     deltas = []
     for pth in _read_paths():
         ar = pth.get("exit_r", 0.0) or 0.0
-        for pt in pth.get("path", []):
+        pts = pth.get("path", [])
+        for i, pt in enumerate(pts):
             if pt.get("advisory") in PROTECT_LABELS:
-                deltas.append((pt.get("current_r", 0.0) or 0.0) - ar)
+                nxt = pts[i + 1] if i + 1 < len(pts) else pt
+                deltas.append((nxt.get("current_r", pt.get("current_r", 0.0)) or 0.0) - ar)
                 break
     dm, dsd = _mean_std(deltas)
     k = len(deltas)
@@ -326,11 +352,9 @@ def interim_verdict() -> dict:
     d_lo, d_hi = dm - dmargin, dm + dmargin
 
     pcf = path_counterfactual()
-    total_realized = sum(r.get("net_pnl", 0.0) for r in rows)
-    econ_delta = pcf.get("net_usd_delta", 0.0) if pcf.get("evaluated") else cf["bounded_savings_usd_upper"]
-    uplift_pct = round(econ_delta / abs(total_realized) * 100, 2) if abs(total_realized) > 1e-9 else 0.0
+    concentration = pcf.get("gain_concentration_top5pct")
 
-    # decision — reject earlier than accept
+    # decision — reject earlier than accept. Gate on R/trade (denominator-safe).
     status, reason = "CONTINUE", f"inconclusive at n={n}; keep collecting"
     reject = (prec_hi is not None and prec_hi < min_prec) or (k >= 2 and d_hi <= 0.0)
     if reject:
@@ -338,11 +362,11 @@ def interim_verdict() -> dict:
         reason = (f"even optimistically below bar at n={n} "
                   f"(precision upper CI {round(prec_hi,1) if prec_hi is not None else 'NA'}% vs {min_prec}%, "
                   f"r-delta upper CI {round(d_hi,3)}) — STOP, do not advance.")
-    elif n >= cand_n and prec_lo is not None and prec_lo >= min_prec and k >= 2 and d_lo > 0.0 and uplift_pct >= min_uplift:
+    elif n >= cand_n and prec_lo is not None and prec_lo >= min_prec and k >= 2 and d_lo > 0.0 and dm >= min_r:
         status = "EARLY_CANDIDATE"
-        reason = (f"confidently above bar at n={n} (precision lower CI {round(prec_lo,1)}% ≥ {min_prec}%, "
-                  f"r-delta lower CI {round(d_lo,3)} > 0, uplift {uplift_pct}% ≥ {min_uplift}%) — "
-                  "may advance to X3 design; confirm at 500.")
+        reason = (f"confidently above bar at n={n} (precision lower CI {round(prec_lo,1)}% >= {min_prec}%, "
+                  f"+{round(dm,3)}R/trade, r-delta lower CI {round(d_lo,3)} > 0) — may advance to X3 "
+                  f"DESIGN; CAVEATS: retrospective, top-5%={concentration}% of gain, check selection bias.")
 
     return {
         "status": status,
@@ -350,7 +374,9 @@ def interim_verdict() -> dict:
         "checkpoints": {"early_reject_min_n": rej_n, "early_candidate_min_n": cand_n, "final_n": MIN_SAMPLES},
         "protect_precision_ci_pct": [round(prec_lo, 1), round(prec_hi, 1)] if prec_lo is not None else None,
         "path_r_delta_ci": [round(d_lo, 3), round(d_hi, 3)] if k else None,
-        "economic_uplift_pct": uplift_pct,
+        "avg_r_delta_per_trade": round(dm, 4) if k else None,
+        "gain_concentration_top5pct": concentration,
+        "uplift_pct_vs_realized": pcf.get("uplift_pct_vs_realized"),
         "reason": reason,
         "data_basis": _data_basis(rows),
     }

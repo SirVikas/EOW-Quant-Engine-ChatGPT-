@@ -112,11 +112,11 @@ def main() -> int:
     paths_file = os.path.join(tmp, "xte_paths.jsonl")
     cfg.XTE_PATH_ARCHIVE = paths_file
     path_rows = [
-        # protective advisory appears at current_r=1.2, realized exit_r=0.3 → improved
+        # protective at idx1; NEXT bar (idx2=1.15) is the exit → +0.85 vs realized 0.3
         {"symbol": "T", "exit_r": 0.3, "path": [
             {"current_r": 0.5, "advisory": "HOLD"},
             {"current_r": 1.2, "advisory": "TIGHTEN"},
-            {"current_r": 0.3, "advisory": "TIGHTEN"}]},
+            {"current_r": 1.15, "advisory": "TIGHTEN"}]},
         # never advises protect → no_protective_signal
         {"symbol": "T", "exit_r": 1.5, "path": [
             {"current_r": 0.5, "advisory": "HOLD"},
@@ -125,10 +125,11 @@ def main() -> int:
     _write(paths_file, path_rows)
     pc = xv.path_counterfactual()
     check("path samples == 2", pc["samples"] == 2, f"got {pc['samples']}")
-    check("one improved (1.2 vs 0.3)", pc["improved"] == 1, f"got {pc['improved']}")
+    check("one improved (next-bar 1.15 vs 0.3)", pc["improved"] == 1, f"got {pc['improved']}")
     check("one no_protective_signal", pc["no_protective_signal"] == 1, f"got {pc['no_protective_signal']}")
-    check("net_r_delta ~0.9", abs(pc["net_r_delta"] - 0.9) < 1e-6, f"got {pc['net_r_delta']}")
-    check("path method is path-accurate", "path-accurate" in pc["method"])
+    check("net_r_delta ~0.85 (next-bar)", abs(pc["net_r_delta"] - 0.85) < 1e-6, f"got {pc['net_r_delta']}")
+    check("avg_r_delta_per_trade present", "avg_r_delta_per_trade" in pc)
+    check("method is next-bar (no look-ahead)", "next-bar" in pc["method"])
 
     # ── TEST 6 — economic success criteria gate (GAP-9, n>=500) ──────────────
     print("\n── TEST 6 — economic success criteria (GAP-9) ──")
@@ -141,21 +142,21 @@ def main() -> int:
     _write(big, rows500)
     _write(big_paths, [{"symbol": "T", "exit_r": 0.3, "path": [
         {"current_r": 1.2, "advisory": "TIGHTEN"}]} for _ in range(500)])
-    cfg.XTE_SUCCESS_MIN_UPLIFT_PCT = 0.0
+    cfg.XTE_SUCCESS_MIN_R_PER_TRADE = 0.0
     cfg.XTE_SUCCESS_MIN_PROTECT_PRECISION = 0.0
     vv = xv.verdict()
     check("n>=500 leaves INSUFFICIENT_DATA", vv["status"] in ("CANDIDATE", "REJECT"), f"got {vv['status']}")
-    check("verdict exposes economic_uplift_pct", "economic_uplift_pct" in vv)
+    check("verdict exposes avg_r_delta_per_trade", "avg_r_delta_per_trade" in vv)
     check("verdict exposes success_criteria", "success_criteria" in vv)
-    check("economic_basis path-accurate", vv["economic_basis"] == "path-accurate")
-    check("low bar → CANDIDATE", vv["status"] == "CANDIDATE", f"got {vv['status']}")
-    cfg.XTE_SUCCESS_MIN_UPLIFT_PCT = 1000.0
+    check("economic_basis path-accurate (R/trade)", "path-accurate" in vv["economic_basis"])
+    check("low R bar → CANDIDATE", vv["status"] == "CANDIDATE", f"got {vv['status']}")
+    cfg.XTE_SUCCESS_MIN_R_PER_TRADE = 1000.0
     vv2 = xv.verdict()
-    check("impossible uplift bar → REJECT", vv2["status"] == "REJECT", f"got {vv2['status']}")
+    check("impossible R/trade bar → REJECT", vv2["status"] == "REJECT", f"got {vv2['status']}")
 
     # ── TEST 7 — sequential early-stop interim verdict ───────────────────────
     print("\n── TEST 7 — interim early-stop verdict ──")
-    cfg.XTE_SUCCESS_MIN_UPLIFT_PCT = 3.0
+    cfg.XTE_SUCCESS_MIN_R_PER_TRADE = 0.05
     cfg.XTE_SUCCESS_MIN_PROTECT_PRECISION = 50.0
 
     def _interim_set(n, obs_path, path_path, gave_back):

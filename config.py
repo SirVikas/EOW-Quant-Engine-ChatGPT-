@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.97.0"
+APP_VERSION = "1.98.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
@@ -800,6 +800,8 @@ class EngineConfig(BaseSettings):
     # GAP-9: explicit economic success criteria — defines "how much uplift is enough".
     XTE_SUCCESS_MIN_UPLIFT_PCT:        float = Field(default=3.0,  env="XTE_SUCCESS_MIN_UPLIFT_PCT")
     XTE_SUCCESS_MIN_PROTECT_PRECISION: float = Field(default=50.0, env="XTE_SUCCESS_MIN_PROTECT_PRECISION")
+    # Primary, denominator-safe success gate: real R improvement per trade.
+    XTE_SUCCESS_MIN_R_PER_TRADE:       float = Field(default=0.05, env="XTE_SUCCESS_MIN_R_PER_TRADE")
     # Balanced evidence: sequential early-stop so the campaign ends as soon as the
     # verdict is statistically decisive, instead of always waiting for 500.
     XTE_EARLY_REJECT_MIN_N:    int = Field(default=100, env="XTE_EARLY_REJECT_MIN_N")
