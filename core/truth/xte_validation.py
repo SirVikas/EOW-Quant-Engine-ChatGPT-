@@ -145,19 +145,41 @@ def verdict() -> dict:
             "recommendation": "KEEP OBSERVING — enable XTE_OBSERVE_ENABLED and collect more closed trades.",
         }
     cf = counterfactual_analysis()
+    pcf = path_counterfactual()
     prec = cf["alignment"]["protect_precision_pct"] or 0.0
-    saved = cf["bounded_savings_usd_upper"]
-    if saved > 0 and prec >= 50.0:
-        rec = "PROMOTION CANDIDATE — XTE protective advisories align with real giveback; proceed to a path-accurate counterfactual + Exit-Coordinator shadow (blueprint X1→X2) before any acting role."
-        status = "CANDIDATE"
+    total_realized = sum(r.get("net_pnl", 0.0) for r in rows)
+
+    # GAP-9: prefer the path-accurate economic delta; fall back to the bounded estimate.
+    if pcf.get("evaluated"):
+        econ_delta, basis = pcf["net_usd_delta"], "path-accurate"
     else:
-        rec = "REJECT / REDESIGN — XTE advisories do not align with realized giveback; do not advance."
+        econ_delta, basis = cf["bounded_savings_usd_upper"], "bounded-upper-estimate"
+    uplift_pct = round(econ_delta / abs(total_realized) * 100, 2) if abs(total_realized) > 1e-9 else 0.0
+
+    min_uplift = float(getattr(cfg, "XTE_SUCCESS_MIN_UPLIFT_PCT", 3.0))
+    min_prec = float(getattr(cfg, "XTE_SUCCESS_MIN_PROTECT_PRECISION", 50.0))
+    success = (uplift_pct >= min_uplift) and (prec >= min_prec)
+
+    if success:
+        status = "CANDIDATE"
+        rec = (f"PROMOTION CANDIDATE — economic uplift {uplift_pct}% ≥ {min_uplift}% and "
+               f"protect precision {prec}% ≥ {min_prec}%. Advance to Exit-Coordinator shadow "
+               "parity (blueprint X2→X3) + ADR before any acting role.")
+    else:
         status = "REJECT"
+        rec = (f"REJECT / REDESIGN — economic uplift {uplift_pct}% (need ≥{min_uplift}%) or "
+               f"protect precision {prec}% (need ≥{min_prec}%) below the success bar.")
     return {
         "status": status,
         "samples": n,
         "protect_precision_pct": prec,
-        "bounded_savings_usd_upper": saved,
+        "economic_uplift_pct": uplift_pct,
+        "economic_basis": basis,
+        "success_criteria": {
+            "min_uplift_pct": min_uplift,
+            "min_protect_precision_pct": min_prec,
+            "note": "uplift = economic delta / |realized PnL|; path-accurate when path data present.",
+        },
         "recommendation": rec,
     }
 
