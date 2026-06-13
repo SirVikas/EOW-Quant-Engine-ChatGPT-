@@ -150,9 +150,10 @@ class XTEObserver:
         return result
 
     # ── Per-trade finalization (position closed) ──────────────────────────────
-    def on_close(self, symbol: str, trade_record: Any) -> Optional[dict]:
+    def on_close(self, symbol: str, trade_record: Any, tag: str = "") -> Optional[dict]:
         """Build and persist one observation record joining the XTE trajectory to
-        the realized exit outcome. Returns the record (or None if persist fails)."""
+        the realized exit outcome. Returns the record (or None if persist fails).
+        `tag` (optional) stamps record["source"] for provenance (e.g. backfill)."""
         with self._lock:
             traj = self._trajectories.pop(symbol, None)
 
@@ -197,6 +198,8 @@ class XTEObserver:
             "xte_advisory_last": traj.last_advisory if traj else None,
             "xte_advisory_transitions": traj.advisory_transitions if traj else 0,
         }
+        if tag:
+            record["source"] = tag
 
         if not self._append(record):
             return None

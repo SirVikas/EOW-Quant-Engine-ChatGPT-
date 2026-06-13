@@ -21,7 +21,25 @@ decisive**, not on faking it.
 
 ---
 
-## 2. THE TWO LEVERS (both shipped / operational)
+## 2. THE LEVERS (all shipped / operational)
+
+### Lever 0 — Historical backfill (THE unlock for low trade-rate)
+At the live signal rate ~100 trades = ~200 days. Waiting is not viable. So replay
+the trades you ALREADY have: `tools/xte_backfill_history.py` reads historical
+trades + candles from the DataLake (`data/eow_lake.db`) and replays each through
+the exact `exit_truth_engine.evaluate()`, reconstructing the open-position path
+candle-by-candle → **real XTE evidence in minutes, not 200 days.** This is a
+backtest on real market data + real outcomes (tagged `source=historical_backfill`,
+`data_basis="real (historical backtest)"`) — NOT synthetic.
+
+```
+python tools/xte_backfill_history.py            # all lake trades → verdict
+```
+
+Caveats (honest): retrospective (past regimes), 1m-candle path granularity, and
+trades lacking candle windows are skipped. Strong real evidence; a live campaign
+remains the gold-standard final confirmation.
+
 
 ### Lever 1 — Sequential early-stop (NEW, `interim_verdict()`)
 The campaign no longer must reach 500. At rolling checkpoints it returns:
