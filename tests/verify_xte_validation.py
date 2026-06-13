@@ -217,6 +217,31 @@ def main() -> int:
     rs2 = xv.robustness_split(segments=2)
     check("one half bad → consistent False", rs2["consistent_across_time"] is False)
 
+    # ── TEST 9 — stratified bias audit (Option-2 deeper audit) ───────────────
+    print("\n── TEST 9 — stratified_audit ──")
+    sa_paths = os.path.join(tmp, "sa.jsonl")
+    cfg.XTE_PATH_ARCHIVE = sa_paths
+
+    def _path(bars, cf_r, exit_r):
+        p = [{"current_r": 0.1, "advisory": "HOLD"} for _ in range(max(0, bars - 2))]
+        p += [{"current_r": cf_r, "advisory": "TIGHTEN"}, {"current_r": cf_r, "advisory": "TIGHTEN"}]
+        return {"symbol": "T", "exit_ts": 1, "exit_r": exit_r, "peak_r": max(cf_r, exit_r), "path": p[:bars] or p}
+
+    # BROAD: every duration band positive
+    broad = ([_path(1, 0.6, 0.2) for _ in range(40)] + [_path(4, 0.6, 0.2) for _ in range(40)]
+             + [_path(10, 0.6, 0.2) for _ in range(40)] + [_path(25, 0.6, 0.2) for _ in range(40)])
+    _write(sa_paths, broad)
+    sab = xv.stratified_audit()
+    check("broad set → broad_based True", sab["broad_based"] is True, f"got {sab.get('broad_based')}")
+    check("audit reports >=3 buckets", len(sab["buckets"]) >= 3)
+
+    # CONCENTRATED: only 20+ band has edge; a major short band is negative
+    conc = ([_path(1, 0.1, 0.9) for _ in range(120)]   # short band: cf<exit → negative, major
+            + [_path(25, 1.4, 0.2) for _ in range(120)])  # long band: big positive
+    _write(sa_paths, conc)
+    sac = xv.stratified_audit()
+    check("concentrated set → broad_based False", sac["broad_based"] is False, f"got {sac.get('broad_based')}")
+
     print("\n" + "═" * 60)
     if _FAIL == 0:
         print(f"  ALL {_PASS}/{_PASS} CHECKS PASSED ✓")
