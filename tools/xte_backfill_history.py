@@ -47,6 +47,33 @@ def _connect_ro(path: str) -> sqlite3.Connection:
     return conn
 
 
+def _avg(xs):
+    xs = [x for x in xs if x is not None]
+    return round(sum(xs) / len(xs), 4) if xs else 0.0
+
+
+def _summarize(group):
+    if not group:
+        return {"n": 0}
+    import datetime as _dt
+    ts = [int(t.get("entry_ts", 0) or 0) for t in group if t.get("entry_ts")]
+    def _d(ms):
+        return _dt.datetime.utcfromtimestamp(ms / 1000).strftime("%Y-%m-%d") if ms else "?"
+    regimes = {}
+    for t in group:
+        regimes[t.get("regime", "?")] = regimes.get(t.get("regime", "?"), 0) + 1
+    pnls = [float(t.get("net_pnl", 0) or 0) for t in group]
+    return {
+        "n": len(group),
+        "date_range": [_d(min(ts)) if ts else "?", _d(max(ts)) if ts else "?"],
+        "avg_peak_r": _avg([t.get("peak_r") for t in group]),
+        "avg_exit_r": _avg([t.get("r_multiple") for t in group]),
+        "avg_net_pnl": _avg(pnls),
+        "win_rate_pct": round(sum(1 for p in pnls if p >= 0) / len(pnls) * 100, 1),
+        "top_regimes": dict(sorted(regimes.items(), key=lambda kv: -kv[1])[:3]),
+    }
+
+
 def _trades(conn, limit):
     cur = conn.execute("SELECT data FROM trades ORDER BY ts DESC LIMIT ?", (limit,))
     return [json.loads(r["data"]) for r in cur.fetchall()]
@@ -156,8 +183,11 @@ def main() -> int:
     print(f"  loaded {len(trades)} historical trades from {args.db}")
 
     stats = {"ok": 0, "skip_fields": 0, "skip_risk": 0, "skip_candles": 0}
+    kept, skipped = [], []
     for t in trades:
-        stats[_backfill_one(t, conn, xte_observer)] += 1
+        r = _backfill_one(t, conn, xte_observer)
+        stats[r] += 1
+        (kept if r == "ok" else skipped).append(t)
     print(f"  backfilled={stats['ok']}  skipped: "
           f"fields={stats['skip_fields']} risk={stats['skip_risk']} no_candles={stats['skip_candles']}")
 
@@ -194,8 +224,24 @@ def main() -> int:
     print(f"\n  ── SELECTION BIAS (the main threat) ──")
     print(f"    candle coverage: {stats['ok']}/{total} trades = {cov}%  "
           f"({stats['skip_candles']} skipped for no candles)")
+    k_sum, s_sum = _summarize(kept), _summarize(skipped)
+    print(f"    KEPT    : {k_sum}")
+    print(f"    SKIPPED : {s_sum}")
+    # verdict on representativeness
+    if s_sum.get("n"):
+        same_era = k_sum["date_range"] != s_sum["date_range"]
+        pk_gap = abs(k_sum["avg_peak_r"] - s_sum["avg_peak_r"])
+        ex_gap = abs(k_sum["avg_exit_r"] - s_sum["avg_exit_r"])
+        if k_sum["date_range"][0] > s_sum["date_range"][1] or s_sum["date_range"][0] > k_sum["date_range"][1]:
+            print("    → DISJOINT eras: skips are a different time window (likely candle-retention).")
+            print("       Backtest = that recent window only; representative of recent regime, not all history.")
+        elif pk_gap < 0.2 and ex_gap < 0.2:
+            print("    → Kept vs skipped look SIMILAR (peak_r/exit_r) → selection bias likely benign.")
+        else:
+            print(f"    ⚠ Kept vs skipped DIFFER (peak_r Δ={round(pk_gap,2)}, exit_r Δ={round(ex_gap,2)}) "
+                  "→ bias may overstate the result; treat verdict with caution.")
     if cov < 80:
-        print(f"    ⚠  {round(100-cov,1)}% of trades excluded — verdict is on a SUBSET, may not represent all trades.")
+        print(f"    ⚠  {round(100-cov,1)}% of trades excluded — verdict is on a SUBSET.")
 
     print(f"\n    data_basis        : {iv.get('data_basis')}  (records tagged source=historical_backfill)")
     print("    ⚠  retrospective backtest — confirm on a forward/live slice before any acting role (X3).")
