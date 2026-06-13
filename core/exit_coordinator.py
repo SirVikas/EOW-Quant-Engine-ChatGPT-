@@ -55,6 +55,14 @@ class ExitCoordinatorShadow:
         self._transitions = 0
         self._parity_ok = 0
         self._parity_violations = 0
+        self._resolve_parity_ok = 0       # X3-a: resolve() vs live agreement
+        self._resolve_parity_total = 0
+
+    def record_parity(self, match: bool) -> None:
+        with self._lock:
+            self._resolve_parity_total += 1
+            if match:
+                self._resolve_parity_ok += 1
 
     @staticmethod
     def _is_protective(side: str, old_sl: float, new_sl: float) -> bool:
@@ -134,6 +142,9 @@ class ExitCoordinatorShadow:
                 "invariant_ok": self._parity_ok,
                 "invariant_violations": self._parity_violations,
                 "parity_pct": round(self._parity_ok / self._transitions * 100, 1) if self._transitions else None,
+                "resolve_parity_ok": self._resolve_parity_ok,
+                "resolve_parity_total": self._resolve_parity_total,
+                "resolve_parity_pct": round(self._resolve_parity_ok / self._resolve_parity_total * 100, 1) if self._resolve_parity_total else None,
                 "active_positions": len(self._state),
                 "recent_events": [asdict(e) for e in list(self._events)[-25:]],
             }
@@ -145,6 +156,8 @@ class ExitCoordinatorShadow:
             self._transitions = 0
             self._parity_ok = 0
             self._parity_violations = 0
+            self._resolve_parity_ok = 0
+            self._resolve_parity_total = 0
 
 
 def _flag() -> bool:
@@ -153,6 +166,133 @@ def _flag() -> bool:
         return bool(getattr(cfg, "EXIT_COORDINATOR_SHADOW_ENABLED", False))
     except Exception:
         return False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# X3-a — Exit Coordinator ARBITER (pure, non-acting). Builds the single-author
+# machinery: typed intents + a precedence/invariant resolver. Nothing here writes
+# a live SL/TP or closes a position; resolve() is a pure function and the parity
+# harness only logs. Live routing (X3-d) is BLOCKED behind parity + forward + ADR.
+# ─────────────────────────────────────────────────────────────────────────────
+
+_STAGE_ORDER = ["OBSERVE", "VALIDATE", "APPROVE", "ADVISE", "GATE", "AUTHORITY"]
+
+
+def _stage_idx(stage: str) -> int:
+    return _STAGE_ORDER.index(stage) if stage in _STAGE_ORDER else 0
+
+
+@dataclass
+class ExitIntent:
+    source: str            # "emergency" | "risk_rules" | "trade_manager" | "xte"
+    kind: str              # "CLOSE" | "PARTIAL" | "SET_SL" | "SET_TP" | "HOLD"
+    value: float = 0.0     # proposed price (SL/TP) or fraction (PARTIAL)
+    reason: str = ""
+    grant: bool = False    # explicit grant required to WIDEN take-profit (I-2)
+    lifecycle_stage: str = "OBSERVE"   # advisor's stage; gates XTE acting
+
+
+@dataclass
+class ExitDecision:
+    sl: float
+    tp: float
+    close: bool = False
+    partial: Optional[float] = None
+    rationale: list = None
+
+
+def _is_tighten_sl(side: str, cur: float, val: float) -> bool:
+    return val > cur if side == "LONG" else val < cur
+
+
+def _is_widen_tp(side: str, cur: float, val: float) -> bool:
+    return val > cur if side == "LONG" else val < cur
+
+
+def resolve(intents, side, current_sl, current_tp, price=0.0, xte_stage="OBSERVE") -> ExitDecision:
+    """Pure arbiter: one decision from all advisor intents, by precedence
+    (emergency > terminal > partial > protective-SL > TP) under invariants I-1
+    (SL tighten-only) and I-2 (TP widen needs grant). XTE intents are ignored
+    unless its lifecycle stage >= ADVISE. NEVER mutates anything."""
+    rationale = []
+
+    def _r(it, note):
+        return {"source": it.source, "kind": it.kind, "value": it.value, "note": note}
+
+    # Tier 1 — emergency: overrides everything
+    for it in intents:
+        if it.source == "emergency":
+            return ExitDecision(sl=current_sl, tp=current_tp, close=True,
+                                rationale=[_r(it, "emergency override (tier 1)")])
+    # Tier 2 — terminal close
+    for it in intents:
+        if it.kind == "CLOSE":
+            return ExitDecision(sl=current_sl, tp=current_tp, close=True,
+                                rationale=[_r(it, "terminal close (tier 2)")])
+    new_sl, new_tp, partial = current_sl, current_tp, None
+    # Tier 3 — partial
+    for it in intents:
+        if it.kind == "PARTIAL":
+            partial = it.value
+            rationale.append(_r(it, "partial (tier 3)"))
+            break
+    # Tier 4 — protective SL (tighten-only); XTE muted below ADVISE
+    for it in intents:
+        if it.kind != "SET_SL":
+            continue
+        if it.source == "xte" and _stage_idx(it.lifecycle_stage) < _stage_idx("ADVISE"):
+            rationale.append(_r(it, "XTE muted (stage < ADVISE)"))
+            continue
+        if _is_tighten_sl(side, new_sl, it.value):
+            new_sl = it.value
+            rationale.append(_r(it, "protective tighten (tier 4)"))
+        else:
+            rationale.append(_r(it, "REJECTED: would loosen SL (I-1)"))
+    # Tier 5 — TP: widen needs grant
+    for it in intents:
+        if it.kind != "SET_TP":
+            continue
+        if _is_widen_tp(side, current_tp, it.value):
+            if it.grant:
+                new_tp = it.value
+                rationale.append(_r(it, "TP widen (granted, I-2)"))
+            else:
+                rationale.append(_r(it, "REJECTED: TP widen needs grant (I-2)"))
+        else:
+            new_tp = it.value
+            rationale.append(_r(it, "TP tighten (tier 5)"))
+    return ExitDecision(sl=new_sl, tp=new_tp, close=False, partial=partial, rationale=rationale)
+
+
+# Adapter helpers — construct intents from already-computed advisor outputs
+# (no formula re-derivation; X3-b wires these to live producers).
+def risk_rules_intent(proposed_sl, reason="trail/BE/ratchet"):
+    return ExitIntent(source="risk_rules", kind="SET_SL", value=proposed_sl, reason=reason)
+
+
+def trade_manager_intent(action, new_sl=0.0, new_tp=0.0, reason=""):
+    m = {"MOVE_BE": ("SET_SL", new_sl), "TRAIL_SL": ("SET_SL", new_sl),
+         "EXTEND_TP": ("SET_TP", new_tp), "VTP_EXIT": ("CLOSE", 0.0),
+         "TIME_EXIT": ("CLOSE", 0.0), "FAST_FAIL": ("CLOSE", 0.0),
+         "PARTIAL_TP": ("PARTIAL", 0.5)}
+    kind, val = m.get(action, ("HOLD", 0.0))
+    grant = (action == "EXTEND_TP")   # VTP extension is the documented grant path
+    return ExitIntent(source="trade_manager", kind=kind, value=val, reason=reason or action, grant=grant)
+
+
+def xte_intent(advisory_label, proposed_sl, stage="OBSERVE", reason=""):
+    kind = "SET_SL" if advisory_label in ("TIGHTEN", "SCALE_OUT", "BREAKEVEN") else "HOLD"
+    return ExitIntent(source="xte", kind=kind, value=proposed_sl, reason=reason or advisory_label,
+                      lifecycle_stage=stage)
+
+
+def parity_check(decision: ExitDecision, live_sl, live_tp, live_close, eps=1e-6):
+    """Shadow parity: does resolve() agree with what the live writers actually did?
+    Records agreement on the singleton for X3-b's parity proof. Logs only."""
+    match = (abs(decision.sl - live_sl) <= eps and abs(decision.tp - live_tp) <= eps
+             and decision.close == live_close)
+    exit_coordinator_shadow.record_parity(match)
+    return match
 
 
 # Module-level singleton
