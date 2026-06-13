@@ -149,10 +149,10 @@ def main() -> int:
     else:
         print(f"    status               : {v.get('status')}")
         print(f"    samples              : {v.get('samples')}")
-        print(f"    +R per trade         : {v.get('avg_r_delta_per_trade')}  (bar >= {v.get('success_criteria', {}).get('min_r_per_trade')})  <-- honest metric")
+        print(f"    +R per OBSERVED      : {v.get('avg_r_delta_per_observed')}  (bar >= {v.get('success_criteria', {}).get('min_r_per_trade')})  <-- honest population metric")
+        print(f"    +R per signaled      : {v.get('avg_r_delta_per_signaled')}  (subset — overstates)")
         print(f"    protect_precision_pct: {v.get('protect_precision_pct')}  (bar >= {v.get('success_criteria', {}).get('min_protect_precision_pct')}%)")
         print(f"    gain concentration   : top 5% trades = {v.get('gain_concentration_top5pct')}% of gain")
-        print(f"    uplift% (context)    : {v.get('economic_uplift_pct')}  (unreliable near breakeven)")
     pcf = rep["path_counterfactual"]
     print(f"    path: improved={pcf.get('improved')} worsened={pcf.get('worsened')} "
           f"net_r_delta={pcf.get('net_r_delta')} net_usd_delta={pcf.get('net_usd_delta')}")

@@ -146,7 +146,7 @@ def main() -> int:
     cfg.XTE_SUCCESS_MIN_PROTECT_PRECISION = 0.0
     vv = xv.verdict()
     check("n>=500 leaves INSUFFICIENT_DATA", vv["status"] in ("CANDIDATE", "REJECT"), f"got {vv['status']}")
-    check("verdict exposes avg_r_delta_per_trade", "avg_r_delta_per_trade" in vv)
+    check("verdict exposes avg_r_delta_per_observed", "avg_r_delta_per_observed" in vv)
     check("verdict exposes success_criteria", "success_criteria" in vv)
     check("economic_basis path-accurate (R/trade)", "path-accurate" in vv["economic_basis"])
     check("low R bar → CANDIDATE", vv["status"] == "CANDIDATE", f"got {vv['status']}")

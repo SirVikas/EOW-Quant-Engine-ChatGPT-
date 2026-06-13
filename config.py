@@ -9,7 +9,7 @@ import os
 
 # Single source of truth for the application version.
 # Update this when making significant changes — dashboard and all reports read from here.
-APP_VERSION = "1.98.2"
+APP_VERSION = "1.99.0"
 
 # PHOENIX NEXUS — Institutional Intelligence Layer
 PCCP_VERSION = "1.0.0"   # v1.0: PHOENIX Central Control Plane
