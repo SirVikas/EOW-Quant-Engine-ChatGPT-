@@ -64,6 +64,7 @@ class LeanGate:
             f"[LEAN-GATE] activated | "
             f"min_sl={MIN_SL_DIST_PCT}% min_rr={MIN_RR} "
             f"max_fee_ratio={MAX_FEE_RATIO} gate3=ALWAYS_ON "
+            f"min_sl_to_cost={cfg.MIN_SL_TO_COST_RATIO}× "
             f"max_consec_loss={MAX_CONSEC_LOSSES} "
             f"max_daily_dd={MAX_DAILY_DD_PCT}%"
         )
@@ -132,6 +133,22 @@ class LeanGate:
                     rr=rr, sl_dist_pct=sl_dist_pct,
                 )
 
+        # ── Gate 3b: Economic viability — stop must clear realistic round-trip cost ──
+        # Always active (an economic-integrity gate, not a risk gate): a trade whose
+        # stop is smaller than a few × round-trip cost is negative-sum the moment it
+        # opens — even a +0.4R gross winner books a net loss. This is the dominant
+        # loss driver (Fee Destruction 150%); the entry/exit logic is not the culprit.
+        # MIN_SL_TO_COST_RATIO is the profit-vs-volume dial (see config.py).
+        cost_pct = (2 * cfg.TAKER_FEE + 2 * cfg.SLIPPAGE_EST) * 100.0
+        min_viable_sl = cfg.MIN_SL_TO_COST_RATIO * cost_pct
+        if cost_pct > 0 and sl_dist_pct < min_viable_sl:
+            return LeanResult(
+                execute=False,
+                reason=(f"COST_DOMINATED(sl={sl_dist_pct:.3f}%<"
+                        f"{min_viable_sl:.3f}%={cfg.MIN_SL_TO_COST_RATIO:g}×cost)"),
+                rr=rr, sl_dist_pct=sl_dist_pct,
+            )
+
         # ── Gate 4: Loss streak ───────────────────────────────────────────────
         # Bypassed in PAPER/BYPASS mode: virtual losses must not halt learning.
         if not bypass_risk_gates and consecutive_losses >= MAX_CONSEC_LOSSES:
@@ -166,6 +183,7 @@ class LeanGate:
             "min_sl_dist_pct":  MIN_SL_DIST_PCT,
             "min_rr":           MIN_RR,
             "max_fee_ratio":    MAX_FEE_RATIO,
+            "min_sl_to_cost_ratio": cfg.MIN_SL_TO_COST_RATIO,
             "max_consec_losses": MAX_CONSEC_LOSSES,
             "max_daily_dd_pct": MAX_DAILY_DD_PCT,
         }
