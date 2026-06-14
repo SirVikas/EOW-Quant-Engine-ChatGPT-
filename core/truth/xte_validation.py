@@ -29,6 +29,34 @@ MIN_SAMPLES = 500
 PROTECT_LABELS = {"TIGHTEN", "SCALE_OUT", "BREAKEVEN"}
 GIVEBACK_EVENT_PCT = 30.0   # a trade "gave back" if it surrendered >30% of peak_r
 _Z = 1.96                   # 95% normal-approx confidence
+ACTION_DELAY_MS = 60_000    # realistic delay before acting on an advisory (1 min)
+
+
+def _cf_exit_r(pts, actual_r):
+    """R at the realistic exit after the FIRST protective advisory: the first path
+    point at least ACTION_DELAY_MS after the signal (time-based, so tick-dense live
+    paths and candle-sparse backtest paths measure the same thing — no same-instant
+    look-ahead). If the trade ends before one can act, exit = realized (delta 0).
+    Returns cf_r, or None if XTE never signalled."""
+    sig_i = None
+    for i, pt in enumerate(pts):
+        if pt.get("advisory") in PROTECT_LABELS:
+            sig_i = i
+            break
+    if sig_i is None:
+        return None
+    sig_ts = pts[sig_i].get("ts")
+    if sig_ts is None:   # legacy paths without ts → best-effort next element
+        return pts[sig_i + 1].get("current_r", pts[sig_i].get("current_r", 0.0)) if sig_i + 1 < len(pts) else actual_r
+    for pt in pts[sig_i + 1:]:
+        if (pt.get("ts", 0) - sig_ts) >= ACTION_DELAY_MS:
+            return pt.get("current_r", 0.0)
+    return actual_r   # no point a full delay later → could not act → realized
+
+
+def _path_duration_min(pts):
+    ts = [pt.get("ts") for pt in pts if pt.get("ts") is not None]
+    return (max(ts) - min(ts)) / 60_000.0 if len(ts) >= 2 else 0.0
 
 
 def _mean_std(xs: List[float]) -> tuple:
@@ -246,13 +274,7 @@ def path_counterfactual() -> dict:
     r_deltas: List[float] = []
     for p in paths:
         actual_r = p.get("exit_r", 0.0) or 0.0
-        pts = p.get("path", [])
-        cf_r = None
-        for i, pt in enumerate(pts):
-            if pt.get("advisory") in PROTECT_LABELS:
-                nxt = pts[i + 1] if i + 1 < len(pts) else pt   # NEXT-bar exit; fallback if last
-                cf_r = nxt.get("current_r", pt.get("current_r", 0.0))
-                break
+        cf_r = _cf_exit_r(p.get("path", []), actual_r)
         if cf_r is None:
             no_signal += 1
             continue
@@ -293,7 +315,7 @@ def path_counterfactual() -> dict:
         "denominator_reliable": denom_ok,
         "gain_concentration_top5pct": concentration,
         "dollars_per_r": round(dpr, 6),
-        "method": "next-bar exit after first protective advisory (no same-bar look-ahead)",
+        "method": f"exit >= {ACTION_DELAY_MS // 1000}s after first protective advisory (time-based; tick/candle comparable)",
         "caveats": "retrospective backtest; % unreliable near breakeven — judge avg_r_delta_per_trade; check concentration + selection bias (skipped trades).",
     }
 
@@ -339,16 +361,13 @@ def interim_verdict() -> dict:
     else:
         prec_lo = prec_hi = None
 
-    # per-trade path r-delta CI — NEXT-bar exit (no same-bar look-ahead)
+    # per-trade path r-delta CI — time-based exit (>= ACTION_DELAY after signal)
     deltas = []
     for pth in _read_paths():
         ar = pth.get("exit_r", 0.0) or 0.0
-        pts = pth.get("path", [])
-        for i, pt in enumerate(pts):
-            if pt.get("advisory") in PROTECT_LABELS:
-                nxt = pts[i + 1] if i + 1 < len(pts) else pt
-                deltas.append((nxt.get("current_r", pt.get("current_r", 0.0)) or 0.0) - ar)
-                break
+        cf = _cf_exit_r(pth.get("path", []), ar)
+        if cf is not None:
+            deltas.append(cf - ar)
     dm, dsd = _mean_std(deltas)
     k = len(deltas)
     dmargin = _Z * dsd / math.sqrt(k) if k > 1 else (abs(dm) if k == 1 else 0.0)
@@ -404,12 +423,9 @@ def robustness_split(segments: int = 2) -> dict:
         deltas = []
         for p in chunk:
             ar = p.get("exit_r", 0.0) or 0.0
-            pts = p.get("path", [])
-            for i, pt in enumerate(pts):
-                if pt.get("advisory") in PROTECT_LABELS:
-                    nxt = pts[i + 1] if i + 1 < len(pts) else pt
-                    deltas.append((nxt.get("current_r", pt.get("current_r", 0.0)) or 0.0) - ar)
-                    break
+            cf = _cf_exit_r(p.get("path", []), ar)
+            if cf is not None:
+                deltas.append(cf - ar)
         avg_r = round(sum(deltas) / len(deltas), 4) if deltas else 0.0
         seg_ok = avg_r >= min_r
         consistent = consistent and seg_ok
@@ -425,11 +441,10 @@ def robustness_split(segments: int = 2) -> dict:
 
 def stratified_audit() -> dict:
     """Board-requested deeper bias audit (Option 2). Stratifies the path-accurate
-    edge by observed bars (≈ trade duration in 1m candles ≈ XTE eval count — these
-    coincide in the candle reconstruction, so this covers BOTH the duration and
-    observability cuts), and reports each bucket's R/observed-trade plus its
-    CONTRIBUTION to the total edge. Guards against a result that is really driven
-    by one duration class (a deeper selection artifact than per-trade averaging).
+    edge by REAL trade duration in minutes (time-based, so live tick-cadence and
+    backtest candle-cadence paths bucket identically) and reports each bucket's
+    R/observed-trade plus its CONTRIBUTION to the total edge. Guards against a
+    result really driven by one duration class.
 
     Pass rule (board): edge stays positive across every MAJOR bucket (>=10% of
     trades) AND is not dominated by a single bucket (no bucket > 60% of total edge).
@@ -438,20 +453,16 @@ def stratified_audit() -> dict:
     n = len(paths)
     if n == 0:
         return {"note": "no path data"}
-    bands = [("<2 bars", 0, 2), ("2-5 bars", 2, 6), ("5-20 bars", 6, 21), ("20+ bars", 21, 10 ** 9)]
+    # bucket by REAL trade duration in minutes (consistent across tick/candle paths)
+    bands = [("<2 min", 0, 2), ("2-5 min", 2, 5), ("5-20 min", 5, 20), ("20+ min", 20, 10 ** 9)]
     agg = {b[0]: {"n": 0, "signaled": 0, "net_r": 0.0} for b in bands}
     total_net_r = 0.0
     for p in paths:
         pts = p.get("path", [])
-        bars = len(pts)
-        band = next(b[0] for b in bands if b[1] <= bars < b[2])
+        dur = _path_duration_min(pts)
+        band = next(b[0] for b in bands if b[1] <= dur < b[2])
         ar = p.get("exit_r", 0.0) or 0.0
-        cf_r = None
-        for i, pt in enumerate(pts):
-            if pt.get("advisory") in PROTECT_LABELS:
-                nxt = pts[i + 1] if i + 1 < len(pts) else pt
-                cf_r = nxt.get("current_r", pt.get("current_r", 0.0))
-                break
+        cf_r = _cf_exit_r(pts, ar)
         a = agg[band]
         a["n"] += 1
         if cf_r is not None:
