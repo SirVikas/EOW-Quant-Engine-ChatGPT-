@@ -35,10 +35,15 @@ def _report(obs, paths):
     from core.truth import xte_validation as xv
     pcf = xv.path_counterfactual()
     sa = xv.stratified_audit()
+    from core.truth.xte_observer import xte_observer
+    rows = xte_observer.read_records()
+    ts = sorted(r.get("exit_ts") for r in rows if r.get("exit_ts"))
     return {
         "n": pcf.get("samples", 0),
         "avg_r_observed": pcf.get("avg_r_delta_per_observed"),
         "broad_based": sa.get("broad_based"),
+        "buckets": sa.get("buckets", []),
+        "ts_span_days": round((ts[-1] - ts[0]) / 86_400_000, 3) if len(ts) >= 2 else 0.0,
     }
 
 
@@ -56,6 +61,18 @@ def main() -> int:
     print("\n  XTE FORWARD CONFIRMATION CHECK")
     print(f"    backtest : n={bt['n']}  +R/observed={bt['avg_r_observed']}  broad={bt['broad_based']}")
     print(f"    forward  : n={fw['n']}  +R/observed={fw['avg_r_observed']}  broad={fw['broad_based']}")
+
+    # progress + ETA (rate from forward accumulation span)
+    if fw["ts_span_days"] > 0 and fw["n"] >= 2:
+        rate = fw["n"] / fw["ts_span_days"]
+        need300 = max(0, MIN_FORWARD_N - fw["n"])
+        eta300 = round(need300 / rate, 1) if rate > 0 else "?"
+        print(f"    progress : {fw['n']}/{MIN_FORWARD_N}  (~{round(rate,1)} trades/day → "
+              f"~{eta300} days to {MIN_FORWARD_N}, ~{round(max(0,500-fw['n'])/rate,1) if rate>0 else '?'} to 500)")
+    if fw["buckets"]:
+        print("    forward buckets (watch these go broad as n grows):")
+        for b in fw["buckets"]:
+            print(f"      {b['band']:<9} n={b['n']:<4} +{b['avg_r_per_observed']}R/obs  contrib={b['contribution_pct']}%")
 
     fr = fw["avg_r_observed"]
     if fw["n"] < MIN_FORWARD_N:
