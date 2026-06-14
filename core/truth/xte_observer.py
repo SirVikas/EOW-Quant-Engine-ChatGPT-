@@ -95,9 +95,12 @@ class XTEObserver:
         volumes: List[float],
         atr_pct: float,
         atr_ema: float,
+        ts: Optional[int] = None,
     ) -> Optional[Any]:
         """Score one open position. Returns the XTEResult (or None on failure).
-        NEVER mutates `position`."""
+        NEVER mutates `position`. `ts` (ms) stamps the path point — pass the candle
+        ts in backfill; defaults to wall-clock for live ticks — so path timing is
+        comparable across candle-cadence (backtest) and tick-cadence (live)."""
         side = getattr(position, "side", "LONG")
         entry = float(getattr(position, "entry_price", 0.0) or 0.0)
         init_sl = float(
@@ -141,6 +144,7 @@ class XTEObserver:
             traj.peak_r_seen = max(traj.peak_r_seen, peak_r)
             if getattr(cfg, "XTE_OBSERVE_PATH_ENABLED", False) and len(traj.path) < _PATH_MAX:
                 traj.path.append({
+                    "ts": int(ts) if ts is not None else int(time.time() * 1000),
                     "price": round(float(price), 6),
                     "current_r": round(cur_r, 4),
                     "peak_r": round(peak_r, 4),

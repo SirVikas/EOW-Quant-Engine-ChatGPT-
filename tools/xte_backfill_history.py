@@ -138,7 +138,7 @@ def _backfill_one(trade, conn, observer) -> str:
                               peak_r=round(peak_r, 4), entry_ts=entry_ts,
                               regime=trade.get("regime", "UNKNOWN"))
         observer.observe(pos, price=c["close"], closes=closes, volumes=vols,
-                         atr_pct=atr_pct, atr_ema=atr_ema)
+                         atr_pct=atr_pct, atr_ema=atr_ema, ts=c["ts"])
 
     tr = SimpleNamespace(
         symbol=sym, side=side,

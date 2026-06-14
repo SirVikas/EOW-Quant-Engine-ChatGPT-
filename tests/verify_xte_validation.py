@@ -112,24 +112,24 @@ def main() -> int:
     paths_file = os.path.join(tmp, "xte_paths.jsonl")
     cfg.XTE_PATH_ARCHIVE = paths_file
     path_rows = [
-        # protective at idx1; NEXT bar (idx2=1.15) is the exit → +0.85 vs realized 0.3
+        # protective at ts=60s; exit point >=60s later (ts=120s, 1.15) → +0.85 vs realized 0.3
         {"symbol": "T", "exit_r": 0.3, "path": [
-            {"current_r": 0.5, "advisory": "HOLD"},
-            {"current_r": 1.2, "advisory": "TIGHTEN"},
-            {"current_r": 1.15, "advisory": "TIGHTEN"}]},
+            {"ts": 0, "current_r": 0.5, "advisory": "HOLD"},
+            {"ts": 60_000, "current_r": 1.2, "advisory": "TIGHTEN"},
+            {"ts": 120_000, "current_r": 1.15, "advisory": "TIGHTEN"}]},
         # never advises protect → no_protective_signal
         {"symbol": "T", "exit_r": 1.5, "path": [
-            {"current_r": 0.5, "advisory": "HOLD"},
-            {"current_r": 1.5, "advisory": "HOLD"}]},
+            {"ts": 0, "current_r": 0.5, "advisory": "HOLD"},
+            {"ts": 60_000, "current_r": 1.5, "advisory": "HOLD"}]},
     ]
     _write(paths_file, path_rows)
     pc = xv.path_counterfactual()
     check("path samples == 2", pc["samples"] == 2, f"got {pc['samples']}")
-    check("one improved (next-bar 1.15 vs 0.3)", pc["improved"] == 1, f"got {pc['improved']}")
+    check("one improved (delayed 1.15 vs 0.3)", pc["improved"] == 1, f"got {pc['improved']}")
     check("one no_protective_signal", pc["no_protective_signal"] == 1, f"got {pc['no_protective_signal']}")
-    check("net_r_delta ~0.85 (next-bar)", abs(pc["net_r_delta"] - 0.85) < 1e-6, f"got {pc['net_r_delta']}")
+    check("net_r_delta ~0.85 (time-based)", abs(pc["net_r_delta"] - 0.85) < 1e-6, f"got {pc['net_r_delta']}")
     check("avg_r_delta_per_trade present", "avg_r_delta_per_trade" in pc)
-    check("method is next-bar (no look-ahead)", "next-bar" in pc["method"])
+    check("method is time-based", "time-based" in pc["method"])
 
     # ── TEST 6 — economic success criteria gate (GAP-9, n>=500) ──────────────
     print("\n── TEST 6 — economic success criteria (GAP-9) ──")
@@ -141,7 +141,8 @@ def main() -> int:
                     giveback_pct=80.0, won=True) for _ in range(500)]
     _write(big, rows500)
     _write(big_paths, [{"symbol": "T", "exit_r": 0.3, "path": [
-        {"current_r": 1.2, "advisory": "TIGHTEN"}]} for _ in range(500)])
+        {"ts": 0, "current_r": 1.2, "advisory": "TIGHTEN"},
+        {"ts": 60_000, "current_r": 1.2, "advisory": "TIGHTEN"}]} for _ in range(500)])
     cfg.XTE_SUCCESS_MIN_R_PER_TRADE = 0.0
     cfg.XTE_SUCCESS_MIN_PROTECT_PRECISION = 0.0
     vv = xv.verdict()
@@ -171,7 +172,8 @@ def main() -> int:
             rows.append(_rec(20, "TIGHTEN", peak_r=peak_r, exit_r=exit_r,
                              net_pnl=exit_r * 0.5, giveback_pct=gpct, won=exit_r > 0))
             paths.append({"symbol": "T", "exit_r": exit_r,
-                          "path": [{"current_r": cf_r, "advisory": "TIGHTEN"}]})
+                          "path": [{"ts": 0, "current_r": cf_r, "advisory": "TIGHTEN"},
+                                   {"ts": 60_000, "current_r": cf_r, "advisory": "TIGHTEN"}]})
         _write(obs_path, rows)
         _write(path_path, paths)
         cfg.XTE_OBSERVE_ARCHIVE = obs_path
@@ -199,20 +201,18 @@ def main() -> int:
     cfg.XTE_PATH_ARCHIVE = rs_paths
     cfg.XTE_SUCCESS_MIN_R_PER_TRADE = 0.05
     # both halves good (early ts + late ts, +0.85R each) → consistent
-    good = ([{"symbol": "T", "exit_ts": 1000 + i, "exit_r": 0.3,
-              "path": [{"current_r": 1.2, "advisory": "TIGHTEN"},
-                       {"current_r": 1.15, "advisory": "TIGHTEN"}]} for i in range(60)]
-            + [{"symbol": "T", "exit_ts": 9000 + i, "exit_r": 0.3,
-                "path": [{"current_r": 1.2, "advisory": "TIGHTEN"},
-                         {"current_r": 1.15, "advisory": "TIGHTEN"}]} for i in range(60)])
+    _gp = [{"ts": 0, "current_r": 1.2, "advisory": "TIGHTEN"},
+           {"ts": 60_000, "current_r": 1.15, "advisory": "TIGHTEN"}]
+    good = ([{"symbol": "T", "exit_ts": 1000 + i, "exit_r": 0.3, "path": _gp} for i in range(60)]
+            + [{"symbol": "T", "exit_ts": 9000 + i, "exit_r": 0.3, "path": _gp} for i in range(60)])
     _write(rs_paths, good)
     rs = xv.robustness_split(segments=2)
     check("robustness reports 2 segments", len(rs["per_segment"]) == 2, f"got {rs.get('per_segment')}")
     check("both halves good → consistent True", rs["consistent_across_time"] is True)
     # second half flips bad (premature exit 0.1 vs realized 1.4) → not consistent
-    bad_late = [{"symbol": "T", "exit_ts": 9000 + i, "exit_r": 1.4,
-                 "path": [{"current_r": 0.1, "advisory": "TIGHTEN"},
-                          {"current_r": 0.1, "advisory": "TIGHTEN"}]} for i in range(60)]
+    _bp = [{"ts": 0, "current_r": 0.1, "advisory": "TIGHTEN"},
+           {"ts": 60_000, "current_r": 0.1, "advisory": "TIGHTEN"}]
+    bad_late = [{"symbol": "T", "exit_ts": 9000 + i, "exit_r": 1.4, "path": _bp} for i in range(60)]
     _write(rs_paths, good[:60] + bad_late)
     rs2 = xv.robustness_split(segments=2)
     check("one half bad → consistent False", rs2["consistent_across_time"] is False)
@@ -222,12 +222,14 @@ def main() -> int:
     sa_paths = os.path.join(tmp, "sa.jsonl")
     cfg.XTE_PATH_ARCHIVE = sa_paths
 
-    def _path(bars, cf_r, exit_r):
-        p = [{"current_r": 0.1, "advisory": "HOLD"} for _ in range(max(0, bars - 2))]
-        p += [{"current_r": cf_r, "advisory": "TIGHTEN"}, {"current_r": cf_r, "advisory": "TIGHTEN"}]
-        return {"symbol": "T", "exit_ts": 1, "exit_r": exit_r, "peak_r": max(cf_r, exit_r), "path": p[:bars] or p}
+    def _path(dur_min, cf_r, exit_r):
+        # signal at ts=0; exit point at ts=dur_min*60s (>=60s after signal → cf=cf_r)
+        end = int(dur_min * 60_000)
+        return {"symbol": "T", "exit_ts": 1, "exit_r": exit_r, "peak_r": max(cf_r, exit_r),
+                "path": [{"ts": 0, "current_r": 0.1, "advisory": "TIGHTEN"},
+                         {"ts": end, "current_r": cf_r, "advisory": "TIGHTEN"}]}
 
-    # BROAD: every duration band positive
+    # BROAD: every duration band positive (1,4,10,25 min → the four buckets)
     broad = ([_path(1, 0.6, 0.2) for _ in range(40)] + [_path(4, 0.6, 0.2) for _ in range(40)]
              + [_path(10, 0.6, 0.2) for _ in range(40)] + [_path(25, 0.6, 0.2) for _ in range(40)])
     _write(sa_paths, broad)
@@ -235,9 +237,9 @@ def main() -> int:
     check("broad set → broad_based True", sab["broad_based"] is True, f"got {sab.get('broad_based')}")
     check("audit reports >=3 buckets", len(sab["buckets"]) >= 3)
 
-    # CONCENTRATED: only 20+ band has edge; a major short band is negative
-    conc = ([_path(1, 0.1, 0.9) for _ in range(120)]   # short band: cf<exit → negative, major
-            + [_path(25, 1.4, 0.2) for _ in range(120)])  # long band: big positive
+    # CONCENTRATED: a major short band negative, edge only in long band
+    conc = ([_path(1, 0.1, 0.9) for _ in range(120)]   # <2 min: cf<exit → negative, major
+            + [_path(25, 1.4, 0.2) for _ in range(120)])  # 20+ min: big positive
     _write(sa_paths, conc)
     sac = xv.stratified_audit()
     check("concentrated set → broad_based False", sac["broad_based"] is False, f"got {sac.get('broad_based')}")
